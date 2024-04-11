@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+
+<libraries>
+    <library>
+        <location>classes/vendor/deeplcom</location>
+        <name>deepl-php</name>
+        <version>^1.7</version>
+        <license>MIT</license>
+        <licenseversion>2022</licenseversion>
+    </library>
+    <library>
+        <location>classes/vendor/symfony</location>
+        <name>Symfony</name>
+        <version>^7.0</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/nyholm</location>
+        <name>psr7</name>
+        <version>^1.8</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/psr</location>
+        <name>psr</name>
+    </library>
+    <library>
+        <location>classes/vendor/composer</location>
+        <name>Composer</name>
+    </library>
+    <library>
+        <location>classes/vendor/autoload.php</location>
+        <name>Autoload</name>
+    </library>
+    <library>
+        <location>classes/vendor/php-http</location>
+        <name>php-http</name>
+    </library>
+</libraries>

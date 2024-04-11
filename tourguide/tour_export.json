@@ -1,0 +1,233 @@
+{
+  "name": "Course translator guide tour",
+  "description": "Tour to demo the deepler plugin",
+  "pathmatch": "\/local\/deepler\/translate.php?course_id=%",
+  "enabled": "1",
+  "sortorder": "5",
+  "endtourlabel": "",
+  "configdata": "{\"placement\":\"bottom\",\"orphan\":\"0\",\"backdrop\":\"1\",\"reflex\":\"0\",\"filtervalues\":{\"accessdate\":{\"filter_accessdate\":\"tool_usertours_accountcreation\",\"filter_accessdate_range\":0,\"filter_accessdate_enabled\":\"0\"},\"category\":[],\"course\":[],\"courseformat\":[],\"role\":[],\"theme\":[],\"cssselector\":[\"#page-local_deepler-translate\"]},\"majorupdatetime\":1712051397}",
+  "displaystepnumbers": false,
+  "version": "2023100900",
+  "steps": [
+    {
+      "title": "Deepl's advanced settings",
+      "content": "<p>Click here\u00a0to see how you can fine tune the Deepl's behaviour.<\/p>\r\n<p><em>Click now to get a guided tour of the features.<\/em><\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__settings",
+      "sortorder": "0",
+      "configdata": "{\"orphan\":\"1\",\"backdrop\":\"1\",\"reflex\":\"1\",\"placement\":\"top\"}",
+      "files": []
+    },
+    {
+      "title": "Formality management",
+      "content": "<p class=\"mx-auto decoration-primary\/6 w-full max-w-[unset]\">Sets whether the translated text should lean towards formal or informal language. This feature currently only works for target languages <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">DE<\/code> (<strong>German<\/strong>), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">FR<\/code> (<strong>French<\/strong>), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">IT<\/code> (<strong>Italian<\/strong>), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">ES<\/code> (Spanish), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">NL<\/code> (Dutch), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">PL<\/code> (Polish), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">PT-BR<\/code> and <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">PT-PT<\/code> (Portuguese), <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">JA<\/code> (Japanese), and <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">RU<\/code> (Russian). Learn more about the plain\/polite feature for Japanese <a class=\"underline underline-offset-2 text-primary hover:text-primary-700 transition-colors\" href=\"https:\/\/support.deepl.com\/hc\/en-us\/articles\/6306700061852-About-the-plain-polite-feature-in-Japanese\">here<\/a>. Setting this parameter with a target language that does not support formality will fail, unless one of the <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">prefer_...<\/code> options are used. Possible options are:<\/p>\r\n<ul class=\"list-none space-y-2 [&amp;&gt;li]:relative [&amp;&gt;li]:ps-[2.25ch] [&amp;&gt;li&gt;div_div]:mt-0 [&amp;&gt;li&gt;.bullet]:before:bg-dark\/6 [&amp;&gt;li&gt;.bullet]:before:absolute [&amp;&gt;li&gt;.bullet]:before:left-0 [&amp;&gt;li&gt;.bullet]:before:w-[1ch] [&amp;&gt;li&gt;.bullet]:before:h-[1lh] [&amp;&gt;li&gt;.bullet]:before:[mask-repeat:no-repeat] [&amp;&gt;li&gt;.bullet]:before:[mask-position:left] dark:[&amp;&gt;li&gt;.bullet]:before:bg-light\/6 [&amp;&gt;li&gt;.bullet:before]:bullet-circleFilled [&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-circle [&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-dash [&amp;_&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-squareFilled [&amp;_&amp;_&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-square [&amp;_&amp;_&amp;_&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-circleFilled mx-auto decoration-primary\/6 w-full max-w-[unset]\">\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p><code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">default<\/code> (default)<\/p>\r\n<\/div>\r\n<\/li>\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 min-h-[1lh] flip-heading-hash\"><code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">more<\/code> - for a more formal language<\/p>\r\n<\/div>\r\n<\/li>\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 min-h-[1lh] flip-heading-hash\"><code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">less<\/code> - for a more informal language<\/p>\r\n<\/div>\r\n<\/li>\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 min-h-[1lh] flip-heading-hash\"><code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">prefer more<\/code> - for a more formal language if available, otherwise fallback to default formality<\/p>\r\n<\/div>\r\n<\/li>\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 min-h-[1lh] flip-heading-hash\"><code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">prefer less<\/code> - for a more informal language if available, otherwise fallback to default formality<\/p>\r\n<\/div>\r\n<\/li>\r\n<\/ul>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__formality",
+      "sortorder": "1",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\"}",
+      "files": []
+    },
+    {
+      "title": "Manage how sentences are split by line ",
+      "content": "<p class=\"mx-auto decoration-primary\/6 w-full max-w-[unset]\">Sets whether the translation engine should first split the input into sentences. For text translations where <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">tag_handling<\/code> is not set to <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">html<\/code>, the default value is <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">checked<\/code>, meaning the engine splits on punctuation and on newlines.<\/p>\r\n<p class=\"mx-auto decoration-primary\/6 w-full max-w-[unset]\">For text translations where <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">tag handling=html<\/code>, the default value is <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">nonewlines<\/code>, meaning the engine splits on punctuation only, ignoring newlines.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__splitsentences",
+      "sortorder": "2",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Manage formating",
+      "content": "<p class=\"mx-auto decoration-primary\/6 w-full max-w-[unset]\">Sets whether the translation engine should respect the original formatting, even if it would usually correct some aspects.<\/p>\r\n<p class=\"mx-auto decoration-primary\/6 w-full max-w-[unset]\">The formatting aspects affected by this setting include:<\/p>\r\n<ul class=\"list-none space-y-2 [&amp;&gt;li]:relative [&amp;&gt;li]:ps-[2.25ch] [&amp;&gt;li&gt;div_div]:mt-0 [&amp;&gt;li&gt;.bullet]:before:bg-dark\/6 [&amp;&gt;li&gt;.bullet]:before:absolute [&amp;&gt;li&gt;.bullet]:before:left-0 [&amp;&gt;li&gt;.bullet]:before:w-[1ch] [&amp;&gt;li&gt;.bullet]:before:h-[1lh] [&amp;&gt;li&gt;.bullet]:before:[mask-repeat:no-repeat] [&amp;&gt;li&gt;.bullet]:before:[mask-position:left] dark:[&amp;&gt;li&gt;.bullet]:before:bg-light\/6 [&amp;&gt;li&gt;.bullet:before]:bullet-circleFilled [&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-circle [&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-dash [&amp;_&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-squareFilled [&amp;_&amp;_&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-square [&amp;_&amp;_&amp;_&amp;_&amp;_&amp;&gt;li&gt;.bullet:before]:bullet-circleFilled mx-auto decoration-primary\/6 w-full max-w-[unset]\">\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 min-h-[1lh] flip-heading-hash\">Punctuation at the beginning and end of the sentence<\/p>\r\n<\/div>\r\n<\/li>\r\n<li class=\"leading-normal\">\r\n<div class=\"space-y-2 flex flex-col\">\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 min-h-[1lh] flip-heading-hash\">Upper\/lower case at the beginning of the sentence<\/p>\r\n<\/div>\r\n<\/li>\r\n<\/ul>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__preserveformating",
+      "sortorder": "3",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Glossary",
+      "content": "<p>Specify the glossary to use for the translation.\u00a0<\/p>\r\n<p><em>(Glossaries have to be uploaded via the Deepl API. This is not available yet with this plugin. See with your IT).<\/em><\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__glossary",
+      "sortorder": "4",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Contextual information that can influence a translation but is not translated itself.",
+      "content": "<p>This additional context can potentially improve translation quality when translating short, low-context source texts.<\/p>\r\n<p>The <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">context<\/code> parameter is an <strong class=\"font-bold\">alpha feature<\/strong>.<\/p>\r\n<p>So try to add some context if you feel the translated results could be improved, but you should not rely on it.<\/p>",
+      "contentformat": "1",
+      "targettype": "1",
+      "targetvalue": "accessreview",
+      "sortorder": "5",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Tag handling",
+      "content": "<p>Sets which kind of tags should be handled.<\/p>\r\n<p>By default, the translation engine does not take tags into account.<\/p>\r\n<p>By setting the\u00a0<code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">tag handling<\/code> parameter to either <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">xml<\/code> or <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">html<\/code>, the API will process the markup input by extracting the text out of the structure, splitting it into individual sentences, translating them, and placing them back into the respective markup structure.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__tags",
+      "sortorder": "6",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "How outline is detected in XML.",
+      "content": "<p>The automatic detection of the XML structure won't yield best results in all XML files. You can disable this automatic mechanism altogether by setting the <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">outline detection<\/code> parameter to <code>unchecked<\/code> and selecting the tags that should be considered structure tags. This will split sentences using the <code class=\"py-[1px] px-1.5 min-w-[1.625rem] inline-flex justify-center items-center ring-1 ring-inset ring-dark\/1 bg-dark\/[0.06] rounded text-dark\/8 dark:ring-light\/1 dark:bg-light\/1 dark:text-light\/7 text-[.875em] leading-[calc(max(1.20em,1.25rem))]\">splitting tags<\/code> parameter.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__outilinedetection",
+      "sortorder": "7",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Skip translating certain tags' content.",
+      "content": "<p>Comma-separated list of XML or HTML tags that indicate text not to be translated.<\/p>\r\n<p>To ensure that elements in the original text are not altered in translation (e.g. trademarks or product names).<\/p>\r\n<p>Expl: adding \"x\" in the list :<\/p>\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 flip-heading-hash\">Request<code class=\"min-w-full inline-grid [grid-template-columns:auto_1fr] py-2 px-2 [counter-reset:line] whitespace-pre-wrap\"><span class=\"grid [grid-template-columns:subgrid] col-span-2 relative ring-1 ring-transparent hover:ring-dark-4\/5 hover:z-[1] dark:hover:ring-light-4\/4 rounded [&amp;.highlighted:first-child]:rounded-t-md [&amp;.highlighted:first-child&gt;*]:mt-1 [&amp;.highlighted:last-child]:rounded-b-md [&amp;.highlighted:last-child&gt;*]:mb-1 [&amp;:only-child]:hover:ring-transparent [&amp;.highlighted]:rounded-none [&amp;:not(.highlighted)_+_.highlighted]:rounded-t-md [&amp;:not(.highlighted)_+_.highlighted&gt;*]:mt-1 [&amp;.highlighted:has(+:not(.highlighted))]:rounded-b-md [&amp;.highlighted:has(+:not(.highlighted))&gt;*]:mb-1 [&amp;:not(.highlighted)_+_.highlighted:has(+:not(.highlighted))]:rounded-md\"><span class=\"ml-3 block text-sm\">Please open the page &lt;x&gt;Settings&lt;\/x&gt; to configure your system.<\/span><\/span><\/code><\/p>\r\n<div class=\"group\/codeblock grid grid-flow-col max-w-3xl w-full mx-auto decoration-primary\/6 flip-heading-hash\">\u00a0<\/div>\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 flip-heading-hash\">Response<code class=\"min-w-full inline-grid [grid-template-columns:auto_1fr] py-2 px-2 [counter-reset:line] whitespace-pre-wrap\"><span class=\"grid [grid-template-columns:subgrid] col-span-2 relative ring-1 ring-transparent hover:ring-dark-4\/5 hover:z-[1] dark:hover:ring-light-4\/4 rounded [&amp;.highlighted:first-child]:rounded-t-md [&amp;.highlighted:first-child&gt;*]:mt-1 [&amp;.highlighted:last-child]:rounded-b-md [&amp;.highlighted:last-child&gt;*]:mb-1 [&amp;:only-child]:hover:ring-transparent [&amp;.highlighted]:rounded-none [&amp;:not(.highlighted)_+_.highlighted]:rounded-t-md [&amp;:not(.highlighted)_+_.highlighted&gt;*]:mt-1 [&amp;.highlighted:has(+:not(.highlighted))]:rounded-b-md [&amp;.highlighted:has(+:not(.highlighted))&gt;*]:mb-1 [&amp;:not(.highlighted)_+_.highlighted:has(+:not(.highlighted))]:rounded-md\"><span class=\"ml-3 block text-sm\">Bitte \u00f6ffnen Sie die Seite &lt;x&gt;Settings&lt;\/x&gt; um Ihr System zu konfigurieren.<\/span><\/span><\/code><\/p>\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 flip-heading-hash\">In HTML you can also use the <code><strong>translate=\"no\"<\/strong><\/code> attribute :<\/p>\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 flip-heading-hash\"><code>\u00a0 &lt;body&gt;<\/code><br \/><code>\u00a0 \u00a0 &lt;h1&gt;My First Heading&lt;\/h1&gt;<\/code><br \/><code>\u00a0 \u00a0 &lt;p <strong>translate=\"no\"<\/strong>&gt;This will not be translated.&lt;\/p&gt;<\/code><br \/><code>\u00a0 &lt;\/body&gt;<\/code><\/p>\r\n<p class=\"max-w-3xl w-full mx-auto decoration-primary\/6 flip-heading-hash\"><\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__tagsignore",
+      "sortorder": "8",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Tags that should not be considered to split the sentences.",
+      "content": "<p>Comma-separated list of XML or HTML tags which never split sentences.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__tagsnosplitting",
+      "sortorder": "9",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Tag that will split the text into sentences.",
+      "content": "<p>Comma-separated list of XML or HTML tags which always cause splits.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__tagssplitting",
+      "sortorder": "10",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Source lang",
+      "content": "<p>The source lang is the language in which the course was written. It is best practice to keep the same language throughout the whole course.<\/p>\r\n<p><\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#source_lang",
+      "sortorder": "11",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Target language",
+      "content": "<p>The target language is the one you will ask Deepl to return.<\/p>\r\n<p>Obviuosly if you select the same language as the source the translation button is deactivated.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#select-target-language",
+      "sortorder": "12",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Translation status filters",
+      "content": "<p>These filter show\/hide the textual content found in the course.<\/p>\r\n<p><strong>Up to date:<br \/><\/strong><\/p>\r\n<p>These are the content that are already translated and that no change were made in the source.<\/p>\r\n<p>They will appear with the\u00a0<span class=\"badge badge-pill badge-success\">\u00a0<\/span> indicator.\u00a0<\/p>\r\n<p><strong>Needs update:<br \/><\/strong><\/p>\r\n<p>These are the textual contents that were never translated or that were modified after being translated.<\/p>\r\n<p>They appear with the\u00a0<span class=\"badge badge-pill badge-danger\">\u00a0<\/span> indicator when they were never translated.\u00a0<\/p>\r\n<p>They appear with the\u00a0<span class=\"badge badge-pill badge-warning\">\u00a0<\/span> indicator when they were already translated but the source text change since.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler-translate-header-filter",
+      "sortorder": "13",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Select All",
+      "content": "<p>Clicking here selects all visible content to be sent for translation.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler-translate-header-select-all",
+      "sortorder": "14",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Send to Deepl",
+      "content": "<p>Clinkg this button will send all selected texts to Deepl and feed it in the editors.<\/p>\r\n<p>At least one selection is needed to ctivate it.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler-translate-header-saveallbutton",
+      "sortorder": "15",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Translation status bullet icon.",
+      "content": "<p>This indicates the translation status with 3 color code.<\/p>\r\n<p><span class=\"badge badge-pill badge-danger\" title=\"No 'fr' translation yet\">\u00a0<\/span> This text was never translated.<\/p>\r\n<p><span class=\"badge badge-pill badge-warning\" title=\"Needs update\">\u00a0<\/span> This text was translated but there was a change made in the database since.<\/p>\r\n<p><span class=\"badge badge-pill badge-success\" title=\"Up to date\">\u00a0<\/span> This text was already translated and up to date.<\/p>\r\n<p><span class=\"badge badge-pill badge-dark\" title=\"Cannot translate\">\u00a0<\/span> Cannot get the translation status since <em>source<\/em> and <em>target<\/em> lang are the same.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "div.align-items-start:nth-child(2) > div:nth-child(1) > span:nth-child(1)",
+      "sortorder": "16",
+      "configdata": "{\"orphan\":\"1\"}",
+      "files": []
+    },
+    {
+      "title": "Selection checkbox",
+      "content": "<p>To send a content to Deepl to translate you would need to tick that checkbox.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "div.align-items-start:nth-child(2) > div:nth-child(1) > input:nth-child(2)",
+      "sortorder": "17",
+      "configdata": "{\"orphan\":\"1\"}",
+      "files": []
+    },
+    {
+      "title": "Edit source in place.",
+      "content": "<p><span class=\"p-1 btn btn-sm btn-outline-info\"><i class=\"fa fa-pencil\"> <\/i><\/span>\u00a0Clicking on the pencil will jump to the course editor in the Moodle course.<\/p>\r\n<p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "div.row:nth-child(3) > div:nth-child(2) > a:nth-child(1)",
+      "sortorder": "18",
+      "configdata": "{\"orphan\":\"1\"}",
+      "files": []
+    },
+    {
+      "title": "Toggle mutlilang tags",
+      "content": "<p><span class=\"btn btn-sm btn-outline-info\"><i class=\"fa fa-language\"> <\/i><\/span> When translations {mlang} ags are present, this button appears. Click on it to toggle the content and see what was already translated.<\/p>\r\n<p><span class=\"btn btn-sm btn-outline-danger\"><i class=\"fa fa-language\"> <\/i><\/span> If the current selected source language is found in the MLANG tags then this is displayed in red to alert you that the tag will be overriden.<\/p>",
+      "contentformat": "1",
+      "targettype": "1",
+      "targetvalue": "accessreview",
+      "sortorder": "19",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Translation process indicator",
+      "content": "<p>When a text content is not selected and no translation was requested. <i class=\"fa fa-ellipsis-h\"><\/i> is shown.<\/p>\r\n<p><i class=\"fa fa-hourglass-start\"><\/i> is displayed when you selected it and it is waiting for you to press the \"Translate\" button to send it to Deepl.<\/p>\r\n<p><i class=\"fa fa-floppy-o\"><\/i> will display after the text was fed back in the adjacent text editor.<br \/>You can review the translated content, make some changes then press the icon to actually save it in the database. <br \/><br \/><em>Note<\/em> that you can also save to the database in batch by clicking on the save all floating button below. <br \/>Should you want to save all tranlsated text but leave some to review later, you can uncheck it on the left so that it will be skiped when saving all.<\/p>\r\n<p>Once a text is saved this icon will display <i class=\"fa-solid fa-database\"><\/i><\/p>",
+      "contentformat": "1",
+      "targettype": "2",
+      "targetvalue": "",
+      "sortorder": "20",
+      "configdata": "{\"orphan\":\"1\"}",
+      "files": []
+    },
+    {
+      "title": "Save all translations to database.",
+      "content": "<p>When translations are retrieved from Deepl, they are not automatically saved to the database.<\/p>\r\n<p>This to ensure the basics of translation, that a review is made before being stored and automatically dispatched to the public.<\/p>\r\n<p>So you can either save them one by one or by clicking on the save all button.<\/p>\r\n<p>If there are some translations that you do not want save in the batch, just unselect them before clicking \"save all\"<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler-translate-header-saveallbutton",
+      "sortorder": "21",
+      "configdata": "{\"orphan\":\"1\"}",
+      "files": []
+    }
+  ]
+}
