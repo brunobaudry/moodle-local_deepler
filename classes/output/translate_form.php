@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 defined('MOODLE_INTERNAL') || die();
+define('DIV_CLOSE', '</div>');
 global $CFG;
 
 use context_system;
@@ -75,7 +76,8 @@ class translate_form extends moodleform {
         $sectioncount = 1;
         foreach ($coursedata as $section) {
             // Loop section's headers.
-            $mform->addElement('html', "<div class='row bg-light p-2'><h3 class='text-center'>Module $sectioncount</h3></div>");
+            $mform->addElement('html',
+                    "<div class='row bg-light p-2'><h3 class='text-center'>Module $sectioncount</h3>" . DIV_CLOSE);
             foreach ($section['section'] as $s) {
                 $this->get_formrow($mform, $s);
             }
@@ -87,7 +89,7 @@ class translate_form extends moodleform {
         }
 
         // Close form.
-        $mform->addElement('html', '</div>');
+        $mform->addElement('html', DIV_CLOSE);
     }
 
     /**
@@ -145,7 +147,7 @@ class translate_form extends moodleform {
         $mform->addElement('html', '<div class="col-1 px-1">');
         $mform->addElement('html', $bulletstatus);
         $mform->addElement('html', $checkbox);
-        $mform->addElement('html', '</div>');
+        $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
         $editbuttontitle = get_string('t_edit', 'local_deepler');
@@ -187,13 +189,13 @@ class translate_form extends moodleform {
         $rawsourcetext = htmlentities($mlangfilter->filter($item->text));
         $mlangfiltered = $mlangfilter->filter($item->displaytext);
         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
-                data-sourcetext-raw='$rawsourcetext' >$mlangfiltered</div>";
+                data-sourcetext-raw='$rawsourcetext' >$mlangfiltered" . DIV_CLOSE;
         // Collapsible multilang textarea.
         $trimedtext = trim($item->text);
         $multilangtextarea = "<div class='collapse' id='$keyid'>";
         $multilangtextarea .= "<div data-key='$key'
-            data-action='local_deepler/textarea'>$trimedtext</div>";
-        $multilangtextarea .= '</div>';
+            data-action='local_deepler/textarea'>$trimedtext" . DIV_CLOSE;
+        $multilangtextarea .= DIV_CLOSE;
         // Column 2 layout.
         $mform->addElement('html', $sourcetextdiv);
         $mform->addElement('html', $editinplacebutton);
@@ -203,7 +205,7 @@ class translate_form extends moodleform {
         $mform->addElement('html', $multilangtextarea);
 
         // Closing sourcetext div.
-        $mform->addElement('html', '</div>');
+        $mform->addElement('html', DIV_CLOSE);
 
         // Column 3 settings.
         // Translation Input div.
@@ -219,7 +221,7 @@ class translate_form extends moodleform {
         $nowisiwig = "<div
                 class='format-{$item->format} border py-2 px-3'
                 contenteditable='true'
-                data-format='{$item->format}'></div>";
+                data-format='{$item->format}'>" . DIV_CLOSE;
         // Status icon/button.
         $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
                 role='status' aria-disabled='true'><i class='fa'
@@ -227,7 +229,7 @@ class translate_form extends moodleform {
         $saveasothercheckbox =
                 // Status surrounding div.
         $statusdiv = "<div class='col-1 text-center'
-            data-key-validator='$key'>$savetogglebtn</div>";
+            data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
         // Column 3 Layout.
         $mform->addElement('html', $translatededitor);
         // Plain text input.
@@ -238,11 +240,11 @@ class translate_form extends moodleform {
             $mform->setType($key, PARAM_RAW);
         }
         // Closing $translatededitor.
-        $mform->addElement('html', '</div>');
+        $mform->addElement('html', DIV_CLOSE);
         // Adding validator btn.
         $mform->addElement('html', $statusdiv);
         // Close translation item.
-        $mform->addElement('html', '</div>');
+        $mform->addElement('html', DIV_CLOSE);
     }
 
     /**

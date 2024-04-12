@@ -34,6 +34,7 @@ use local_deepler\output\translate_page;
 
 /**
  * Translate Test
+ *
  */
 class translate_test extends advanced_testcase {
 

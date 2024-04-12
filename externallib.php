@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
-require_once("$CFG->libdir/externallib.php");
+require_once($CFG->libdir . '/externallib.php');
 
 /**
  * Local Course Translator Web Service
