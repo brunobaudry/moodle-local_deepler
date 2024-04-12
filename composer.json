@@ -15,6 +15,7 @@
     }
   ],
   "config": {
+    "vendor-dir": "classes/vendor",
     "allow-plugins": {
       "php-http/discovery": true
     }

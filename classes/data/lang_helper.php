@@ -56,7 +56,7 @@ class lang_helper {
     /**
      * @var String
      */
-    private mixed $apikey;
+    protected mixed $apikey;
     /**
      * @var Translator
      */
