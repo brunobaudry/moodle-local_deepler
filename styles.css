@@ -27,6 +27,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate .sticky-offset {
   top: 20px;
 }
+#page-local-deepler-translate #local_deepler-translate-header {
+  z-index: 100 !important;
+}
+#page-local-deepler-translate nav {
+  z-index: 1000 !important;
+}
 #page-local-deepler-translate .local_deepler__saveall-btn {
   margin-left: 97% !important;
   position: sticky !important;

@@ -44,7 +44,7 @@ $string['t_deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['t_contextDeeplPlaceholder'] =
         'Tell the translator (Deepl) about the context, to help it translate in a more contextual way... ';
 $string['t_sourceLang'] = 'Source lang <em>{mlang other}</em>';
-$string['t_select_target_language'] = 'Target language <em>{mlang XX}</em>';
+$string['t_select_target_language'] = 'Target language <em>{mlang {$a}}</em>';
 $string['t_word_count'] = '{$a} words';
 $string['t_char_count'] = '{$a} characters';
 $string['t_word_count_sentence'] =

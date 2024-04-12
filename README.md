@@ -3,16 +3,16 @@
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Course Translator is a local moodle plugin that provides a content translation page for courses and automatic machine translation using the DeepL Pro Translation api. Currently it
+Course Translator is a local moodle plugin that provides a content translation page for courses and automatic machine translation using the ©Deepl Pro Translation api. Currently it
 can translate content two levels deep and is developed for those who want to translate a course all on one page without having to navigate to each module and update
 translations.
 Translation workflow being the following:
 
-0. Fine tune your Deepl's settings.
+0. Fine tune your ©Deepl's settings.
 1. Select the source language.
 2. Select the target language.
 3. Select the fields to translate.
-4. Send to Deepl.
+4. Send to ©Deepl.
 5. Review and or amend automated translations.
 6. Save translations to Moodle's DB.
 
@@ -43,9 +43,9 @@ This plugin will add a ```local_deepler_update_translation``` web service for th
 
 ### Admin
 
-To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.** From this page you can configure DeepL settings, specify wether
-you are using DeepL API Free or Deepl API Pro, and enable/disable the autotranslate feature on the translation page. Visit
-the [DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
+To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.** From this page you can configure ©Deepl settings, specify wether
+you are using ©Deepl API Free or ©Deepl API Pro, and enable/disable the autotranslate feature on the translation page. Visit
+the [©Deepl API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
 ![](pix/admin.png)
@@ -60,7 +60,7 @@ You will be sent to the translation page for the course.
 
 ### Advanced settings
 
-There you can fine tune Deepl's commands.
+There you can fine tune ©Deepl's commands.
 ![](pix/advanced_settings.png)
 
 ### Language selection
@@ -76,10 +76,16 @@ It is important, from a translation standpoint, to **select the source language 
 When first translating your content the plugin will insert ```{mlang other}Your Content...{mlang}``` tags .
 Please checkout the [mlang docs](https://moodle.org/plugins/filter_multilang2) to understand more.
 
+*nb: indeed you cannot select the same target language as the source and vice versa.*
+
 #### Target language
 
 To change the language you want to translate to, choose a language from the **Target language {mlang XX}** dropdown.
 Note: indeed you cannot translate from and to the same language so buttons and checkboxes would be disabled if so.
+
+#### Unsupported
+
+Language that are not suppoted by ©Deepl are checked at each session so if your Moodle instance have unsupported languages, you will not be able to select it.
 
 ### Header
 
@@ -92,13 +98,13 @@ Clicking on the "Status" checkbox will select all visible.
 
 These filter show/hide the textual content found in the course.
 
-Up to date:
+#### Up to date:
 
 These are the content that are already translated and that no change were made in the source.
 
 They will appear with the GREEN DOT indicator.
 
-Needs update:
+#### Needs update:
 
 These are the textual contents that were never translated or that were modified after being translated.
 
@@ -112,16 +118,16 @@ They appear with the ORANGE DOT indicator when they were already translated but 
 
 Each row has a little colored dot to indicate a status:
 
-- Red -> This field was never translated. (no {mlang} tag found)
-- Orange -> This field was translated but there were some updates made in the Database. (Needs a review)
+- Red -> This field was never translated. (no {mlang xx} tag for the xx target language found)
 - Green -> The filed was already translated and up to date (in the target language).
+- Orange -> This field was translated but there were some updates made in the Database. (Needs a review)
 
 ### Translation process
 
 #### Editing the source
 
 It is not possible to edit the source content from this plugin's interface.
-Nevertheless clicking on the PENCIL icon will jump you to the regular place for you to do so.
+Nevertheless, clicking on the PENCIL icon will jump you to the regular place for you to do so.
 
 ![](pix/source_editing.png)
 
@@ -130,24 +136,50 @@ Nevertheless clicking on the PENCIL icon will jump you to the regular place for 
 Clicking on the TRANSLATION icon will toggle the display of multilang tags and all available translations.
 
 ![](pix/multilang_toggle_off.png)
+![](pix/multilang_toggle_on.png)
 
 #### Images and medias.
 
 The plugin will try to fetch and display embeded images.
 When not found it will highlight the alt text in yellow and italicised as seen above.
 
-![](pix/multilang_toggle_on.png)
+![](pix/multilang_toggle_img_off.png)
+![](pix/multilang_toggle_img_on.png)
 
 ### Performing translations
 
 ![](pix/translation_process.png)
 
 1. The text is not selected. No translation will occur. ( ... )
-2. The text is selected but not sent to Deepl yet. (hourglass)
-3. Translation is retrieved from Deepl and filed in the text editor. (floppy)
-    1. Now the translator can review Deepl's work and amend the translation if necessary.
+2. The text is selected but not sent to ©Deepl yet. (hourglass)
+    1. By default, the main source language is selected. It will be stored within {mlang other}* tag.
+    2. You set another language as source if your content had some content written in different lang. It will be stored within {mlang xx}* tag.
+3. Translation is retrieved from ©Deepl and filed in the text editor. (floppy)
+    1. Now the translator can review ©Deepl's work and amend the translation if necessary.
     2. Once happy with the content a click on the floppy button will save the text.
 4. Translation is saved in the database, with the {mlang} filter surrounding it. (DB icon)
+
+_Note* the following process when saving to the database _
+
+The original content **has no MLANG tag** and the source lang is the main:
+
+`{mlang other}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+
+The original content **has no MLANG tag** and the source lang is different from the main:
+
+`{mlang other}SOURCE_CONTENT{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+
+The original content **has already MLANG tag** and the source lang is the main:
+
+`{mlang other}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+
+The original content **has already MLANG tag** and the source lang is different from the main and there were **no {mlang other}**:
+
+`{mlang other}SOURCE_CONTENT{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+
+The original content **has already MLANG tag** and the source lang is different from the main and there were **already a {mlang other**:
+
+`{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
 ### Modules
 
@@ -172,7 +204,7 @@ throughout content that utilize the same language._
 ### Image display
 
 Currently images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
-The Alt attribute is not sent toi Deepl. This should be added in further improvement for better accessibility.
+The Alt attribute is not sent toi ©Deepl. This should be added in further improvement for better accessibility.
 
 ## Compatability
 
@@ -193,9 +225,11 @@ message on the course translation page.
 ## Future (todos)
 
 - Question banks translation.
-- Machine translation API abstraction to use other services than Deepl.
+- Machine translation API abstraction to use other services than ©Deepl.
 - Display images all times.
 - Translations versioning.
+- Import glossaries.
+- Multiple API key setting and user mapping.
 
 ## Submit an issue
 
