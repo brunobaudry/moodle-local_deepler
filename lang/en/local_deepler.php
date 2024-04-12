@@ -27,7 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 // General strings.
-$string['pluginname'] = 'Course Translator';
+$string['pluginname'] = 'Deepl Translator';
 $string['deepler:edittranslations'] = 'Edit Translations';
 $string['edittranslation'] = 'Edit Translation';
 

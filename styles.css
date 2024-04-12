@@ -19,69 +19,69 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#page-local_deepler-translate {
+#page-local-deepler-translate {
   /*    [data-status="local_deepler/tosave"] i:hover {
           color: $black;
       }*/
 }
-#page-local_deepler-translate .sticky-offset {
+#page-local-deepler-translate .sticky-offset {
   top: 20px;
 }
-#page-local_deepler-translate .local_deepler__saveall-btn {
+#page-local-deepler-translate .local_deepler__saveall-btn {
   margin-left: 97% !important;
   position: sticky !important;
   bottom: 80px !important;
 }
-#page-local_deepler-translate #local_deepler__settings {
+#page-local-deepler-translate #local_deepler__settings {
   position: relative;
   top: -4px;
 }
-#page-local_deepler-translate a[aria-expanded=true] .fa-caret-right {
+#page-local-deepler-translate a[aria-expanded=true] .fa-caret-right {
   display: none;
 }
-#page-local_deepler-translate a[aria-expanded=false] .fa-caret-down {
+#page-local-deepler-translate a[aria-expanded=false] .fa-caret-down {
   display: none;
 }
-#page-local_deepler-translate img {
+#page-local-deepler-translate img {
   background-color: yellow !important;
   font-style: italic;
 }
-#page-local_deepler-translate img:before {
+#page-local-deepler-translate img:before {
   content: "pic:" !important;
 }
-#page-local_deepler-translate .local_deepler__form .row.border-bottom:last-child {
+#page-local-deepler-translate .local_deepler__form .row.border-bottom:last-child {
   border-bottom: 0 !important; /* stylelint-disable-next-line */
 }
-#page-local_deepler-translate .local_deepler__source-text iframe {
+#page-local-deepler-translate .local_deepler__source-text iframe {
   max-width: 100%; /* responsive iframes */
 }
-#page-local_deepler-translate .local_deepler__translation iframe {
+#page-local-deepler-translate .local_deepler__translation iframe {
   max-width: 100%; /* responsive iframes */
 }
-#page-local_deepler-translate .local_deepler__translation [data-action="local_deepler/editor"],
-#page-local_deepler-translate .local_deepler__translation [data-fieldtype=editor] {
+#page-local-deepler-translate .local_deepler__translation [data-action="local_deepler/editor"],
+#page-local-deepler-translate .local_deepler__translation [data-fieldtype=editor] {
   width: 100%; /* editor tweaks */
 }
-#page-local_deepler-translate .local_deepler__translation textarea[data-action="local_deepler/editor"] {
+#page-local-deepler-translate .local_deepler__translation textarea[data-action="local_deepler/editor"] {
   width: 100%;
   min-height: 300px;
 }
-#page-local_deepler-translate .local_deepler__translation .form-group.row {
+#page-local-deepler-translate .local_deepler__translation .form-group.row {
   margin-left: 0;
   margin-right: 0;
 }
-#page-local_deepler-translate .local_deepler__translation .col-form-label {
+#page-local-deepler-translate .local_deepler__translation .col-form-label {
   display: none !important;
 }
-#page-local_deepler-translate .local_deepler__error {
+#page-local-deepler-translate .local_deepler__error {
   border: 2px solid #ca3120; /* ui notices */
   border-radius: 6px;
 }
-#page-local_deepler-translate .local_deepler__success {
+#page-local-deepler-translate .local_deepler__success {
   border: 2px solid #357a32;
   border-radius: 6px;
 }
-#page-local_deepler-translate [data-status="local_deepler/success-message"] {
+#page-local-deepler-translate [data-status="local_deepler/success-message"] {
   background: #20c997;
   font-size: 0.6rem;
   text-transform: uppercase;
@@ -92,32 +92,32 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   right: 9px;
   border-radius: 4px;
 }
-#page-local_deepler-translate [data-status="local_deepler/wait"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/wait"] i:before {
   content: "\f141"; /*3 dots ellipse*/
   color: #ced4da;
 }
-#page-local_deepler-translate [data-status="local_deepler/totranslate"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/totranslate"] i:before {
   content: "\f251"; /* Sand icon*/
   color: #0f6cbf;
 }
-#page-local_deepler-translate [data-status="local_deepler/tosave"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/tosave"] i:before {
   content: "\f0c7"; /*floppy (save) icon*/
   color: #0f6cbf;
 }
-#page-local_deepler-translate [data-status="local_deepler/success"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/success"] i:before {
   content: "\f00c"; /*check  icon*/
   color: #357a32;
 }
-#page-local_deepler-translate [data-status="local_deepler/saved"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/saved"] i:before {
   content: "\f1c0"; /*database  icon*/
   color: #357a32;
 }
-#page-local_deepler-translate [data-status="local_deepler/failed"] i:before {
-  content: "\f071"; /*exclamation triangle  icon*/
+#page-local-deepler-translate [data-status="local_deepler/failed"] i:before {
+  content: "\f071"; /*exclamation triangle icon*/
   color: #ca3120;
 }
-#page-local_deepler-translate [data-status="local_deepler/error"] i:before {
-  content: "\f1e2"; /*bomb  icon*/
+#page-local-deepler-translate [data-status="local_deepler/error"] i:before {
+  content: "\f1e2"; /*bomb icon*/
   color: #ca3120;
 }
 

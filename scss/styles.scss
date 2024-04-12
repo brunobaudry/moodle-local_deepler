@@ -49,7 +49,7 @@ $warning: $orange !default;
 $danger: $red !default;
 $secondary: $gray-400 !default;
 
-#page-local_deepler-translate {
+#page-local-deepler-translate {
     .sticky-offset {
         top: 20px;
     }
@@ -172,12 +172,12 @@ $secondary: $gray-400 !default;
     }
 
     [data-status="local_deepler/failed"] i:before {
-        content: '\f071'; /*exclamation triangle  icon*/
+        content: '\f071'; /*exclamation triangle icon*/
         color: $red;
     }
 
     [data-status="local_deepler/error"] i:before {
-        content: '\f1e2'; /*bomb  icon*/
+        content: '\f1e2'; /*bomb icon*/
         color: $red;
     }
 }

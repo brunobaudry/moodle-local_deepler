@@ -3,3 +3,5 @@
 
 # Libraries
 node_modules
+# ide
+.idea

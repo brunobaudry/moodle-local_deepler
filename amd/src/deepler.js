@@ -37,7 +37,6 @@ let usage = {};
 let format = new Intl.NumberFormat();
 
 const registerEventListeners = () => {
-
     document.addEventListener('change', e => {
         window.console.info('change');
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
@@ -139,6 +138,7 @@ export const init = (cfg) => {
                  */
                 window.console.warn(`Transaltion key "${key}" is undefined `,);
             } else {
+                window.console.log(tempTranslations[key]);
                 saveTranslation(key);
             }
         });

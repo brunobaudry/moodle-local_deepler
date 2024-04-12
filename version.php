@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'local_deepler';  // Full name of the plugin (used for diagnostics).
-$plugin->version = 2024040500;                // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version = 2024041100;                // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires = 2020061500;                // Requires Moodle 3.9 LTS.
 $plugin->supported = [401, 404];                // Supported Moodle Versions.
 $plugin->maturity = MATURITY_ALPHA;            // Maturity level.

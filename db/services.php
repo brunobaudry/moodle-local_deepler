@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Local Course Translator
+ * Local Deepler
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
@@ -26,13 +26,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Define edittranslation capability.
-define('LOCAL_COURSETRANSLATOR_CAP', 'local/deepler:edittranslations');
+define('LOCAL_DEEPLER_CAP', 'local/deepler:edittranslations');
 
 // Add services definition.
 $services = [
         'Course Translator' => [
                 'functions' => ['local_deepler_update_translation'],
-                'requiredcapability' => LOCAL_COURSETRANSLATOR_CAP,
+                'requiredcapability' => LOCAL_DEEPLER_CAP,
                 'restrictedusers' => 0,
                 'enabled' => 1,
                 'shortname' => 'CourseTranslator',
@@ -50,7 +50,7 @@ $functions = [
                 'description' => 'Update translation',
                 'type' => 'write',
                 'ajax' => true,
-                'capabilities' => LOCAL_COURSETRANSLATOR_CAP,
+                'capabilities' => LOCAL_DEEPLER_CAP,
         ],
         'local_deepler_get_field' => [
                 'classname' => 'local_deepler_external',
@@ -59,6 +59,6 @@ $functions = [
                 'description' => 'Get field data',
                 'type' => 'read',
                 'ajax' => true,
-                'capabilities' => LOCAL_COURSETRANSLATOR_CAP,
+                'capabilities' => LOCAL_DEEPLER_CAP,
         ],
 ];
