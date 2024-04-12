@@ -4,4 +4,4 @@
 # Libraries
 node_modules
 # ide
-.idea
+.idea/*
