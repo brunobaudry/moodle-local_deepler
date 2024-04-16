@@ -24,6 +24,7 @@
  */
 
 namespace local_deepler;
+defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
 use local_deepler\data\lang_helper;
