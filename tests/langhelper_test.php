@@ -24,7 +24,6 @@
  */
 
 namespace local_deepler;
-defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
 use local_deepler\data\lang_helper;
@@ -37,9 +36,26 @@ require_once(__DIR__ . '/../classes/vendor/autoload.php');
  * @covers \lang_helper
  */
 final class langhelper_test extends advanced_testcase {
+    /**
+     * The object to test.
+     *
+     * @var lang_helper
+     */
     private $langhelper;
+    /**
+     * The API.
+     *
+     * @var \DeepL\Translator
+     */
     protected $translator;
 
+    /**
+     * Set up.
+     *
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
     protected function setUp(): void {
         parent::setUp();
         $this->langhelper = new lang_helper();
@@ -48,6 +64,8 @@ final class langhelper_test extends advanced_testcase {
     }
 
     /**
+     * Tests the values returned as object ready to be transformed .
+     *
      * @covers ::prepareoptionlangs
      * @return void
      */
@@ -66,7 +84,9 @@ final class langhelper_test extends advanced_testcase {
     }
 
     /**
+     * Tests the values returned as object ready to be transformed as HTM dropdown option list.
      * @covers ::preparehtmlotions
+     *
      * @return void
      */
     public function test_preparehtmloptions(): void {
