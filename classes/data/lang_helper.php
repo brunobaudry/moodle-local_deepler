@@ -85,6 +85,8 @@ class lang_helper {
     }
 
     /**
+     * Simple init and checks of exteranl call to Deepl's API.
+     *
      * @param string $key
      * @return bool
      * @throws \DeepL\DeepLException
@@ -104,6 +106,8 @@ class lang_helper {
     }
 
     /**
+     * Set the key string.
+     *
      * @param string $key
      * @return void
      * @throws \dml_exception
@@ -113,6 +117,8 @@ class lang_helper {
     }
 
     /**
+     * Fecthes and set the available languages.
+     *
      * @return void
      * @throws \DeepL\DeepLException
      */
@@ -122,6 +128,9 @@ class lang_helper {
     }
 
     /**
+     * Initialise the Deepl object.
+     * Return a boolean of the cnx status.
+     *
      * @return bool
      * @throws \DeepL\DeepLException
      */
