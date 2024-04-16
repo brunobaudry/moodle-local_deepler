@@ -61,6 +61,7 @@ class translate_page implements renderable, templatable {
      * TODO MDL-0 change this to mustache
      *
      * @var translate_form
+     * TODO MDL-0 change this to mustache.
      */
     private translate_form $mform;
 

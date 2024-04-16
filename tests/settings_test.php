@@ -29,7 +29,7 @@ namespace local_deepler;
 /**
  * Settings Test
  */
-final   class settings_test extends \advanced_testcase {
+final class settings_test extends \advanced_testcase {
     /**
      * Set it up
      *
@@ -95,7 +95,6 @@ final   class settings_test extends \advanced_testcase {
      */
     public function test_db_cnx(): void {
         global $DB;
-        $this->trace_to_cli(__DIR__, 'Directory');
         $course1 = $this->getDataGenerator()->create_course();
         $this->assertIsString($course1->id);
         $this->assertNotNull($DB);
