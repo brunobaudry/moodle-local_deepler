@@ -6,7 +6,8 @@ on:
     branches: # Specify your branches here
       - main # The 'main' branch
       - 'releases/*' # The release branches
-
+php:
+  version: 8.2 # (Applied in CI/CD pipeline)
 jobs:
   qodana:
     runs-on: ubuntu-latest
