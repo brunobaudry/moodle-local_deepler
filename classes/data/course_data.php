@@ -19,7 +19,7 @@ namespace local_deepler\data;
 use core\context;
 
 /**
- * Course Data Processor
+ * Course Data Processor.
  *
  * Processess course data for moodleform. This class is logic heavy.
  *
@@ -43,7 +43,7 @@ class course_data {
     protected $context;
 
     /**
-     * Class Construct
+     * Class Construct.
      *
      * @param \stdClass $course
      * @param string $lang
@@ -67,7 +67,7 @@ class course_data {
     }
 
     /**
-     * Get Course Data via modinfo
+     * Get Course Data via modinfo.
      *
      * @return array
      */
@@ -80,7 +80,7 @@ class course_data {
     }
 
     /**
-     * Prepare multidimentional array to re-arrange textfields to match course presentation
+     * Prepare multidimentional array to re-arrange textfields to match course presentation.
      *
      * @param array $coursedata
      * @param array $sectiondata
@@ -101,7 +101,7 @@ class course_data {
     }
 
     /**
-     * Get Course Data
+     * Get Course Data.
      *
      * @return array
      */
@@ -147,7 +147,7 @@ class course_data {
     }
 
     /**
-     * Get Section Data
+     * Get Section Data.
      *
      * @return array
      */
@@ -186,7 +186,7 @@ class course_data {
     }
 
     /**
-     * Get Activity Data
+     * Get Activity Data.
      *
      * @return array
      */
@@ -283,7 +283,7 @@ class course_data {
     }
 
     /**
-     * Build Data Item
+     * Build Data Item.
      *
      * @param int $id
      * @param string $text
@@ -328,7 +328,7 @@ class course_data {
     }
 
     /**
-     * Stores the translation's statuses
+     * Stores the translation's statuses.
      *
      * @param int $id
      * @param string $table
@@ -368,7 +368,7 @@ class course_data {
     }
 
     /**
-     * Link Builder
+     * Link Builder.
      *
      * @param integer $id
      * @param string $table
@@ -396,7 +396,7 @@ class course_data {
     }
 
     /**
-     * Get the correct context
+     * Get the correct context.
      *
      * @param int $id
      * @param string $table

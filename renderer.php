@@ -19,7 +19,7 @@ namespace local_deepler\output;
 use plugin_renderer_base;
 
 /**
- * Local Course Translator Renderer
+ * Local Course Translator Renderer.
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
@@ -29,7 +29,7 @@ use plugin_renderer_base;
 class renderer extends plugin_renderer_base {
 
     /**
-     * Render Translate Content Page
+     * Render Translate Content Page.
      *
      * @param object $page
      * @return string

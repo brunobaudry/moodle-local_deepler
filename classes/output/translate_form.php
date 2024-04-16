@@ -31,27 +31,27 @@ require_once("$CFG->libdir/form/editor.php");
 require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_cteditor.php");
 
 /**
- * Translate Form Output
+ * Translate Form Output.
  *
- * @todo MDL-0 should use Mustache templating rather than extending a form as communication is done with JS...
  * Provides output class for /local/deepler/translate.php
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * TODO MDL-0 should use Mustache templating rather than extending a form as communication is done with JS.
  */
 class translate_form extends moodleform {
 
     /**
-     * available langs
+     * Available langs.
      *
      * @var lang_helper
      */
     private $langpack;
 
     /**
-     * Define Moodle Form
+     * Define Moodle Form.
      *
      * @return void
      */
@@ -93,7 +93,7 @@ class translate_form extends moodleform {
     }
 
     /**
-     * Generate Form Row
+     * Generate Form Row.
      *
      * @param MoodleQuickForm $mform
      * @param stdClass $item
@@ -269,7 +269,7 @@ class translate_form extends moodleform {
     }
 
     /**
-     * Process data
+     * Process data.
      *
      * @param stdClass $data
      * @return void
@@ -279,7 +279,7 @@ class translate_form extends moodleform {
     }
 
     /**
-     * Specificy Translation Access
+     * Specificy translation Access.
      *
      * @return void
      */

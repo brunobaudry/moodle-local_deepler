@@ -17,18 +17,19 @@
 namespace local_deepler\editor;
 
 /**
- * Translation ATTO Editor
+ * Translation ATTO Editor.
  *
- * Provides a custom editor for translation editing
+ * Provides a custom editor for translation editing.
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * TODO MDL-0 allow user to change default editor.
  */
 class MoodleQuickForm_cteditor extends \MoodleQuickForm_editor {
 
     /**
-     * Course Translation Editor Setup
+     * Course Translation Editor Setup.
      *
      * Intercept options in order to disable autosave, specify toolbar, etc.
      *

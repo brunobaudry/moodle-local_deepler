@@ -33,25 +33,36 @@ require_once(__DIR__ . '/../vendor/autoload.php');
  */
 class lang_helper {
     /**
+     * Api pro endpoint.
+     *
      * @var string
      */
     static protected $deeplpro = 'https://api.deepl.com/v2/translate?';
     /**
+     *  Api free endpoint.
+     *
      * @var string
      */
     static protected $deeplfree = 'https://api-free.deepl.com/v2/translate?';
-    /** @var string */
+    /**
+     * The main source language.
+     *
+     * @var string
+     */
     public mixed $currentlang;
-    /** @var string */
+    /**
+     * The target language.
+     *
+     * @var string
+     */
     public mixed $targetlang;
     /**
+     * Moodle instance's installed languages.
+     *
      * @var array|mixed
      */
     public mixed $langs;
-    /**
-     * @var array|mixed
-     */
-    public mixed $langcodes;
+
     /**
      * @var string
      */
@@ -61,20 +72,25 @@ class lang_helper {
      */
     private mixed $translator;
     /**
+     * Languages available as source in Deepl's API.
+     *
      * @var object
      */
     private mixed $deeplsources;
     /**
+     * Languages available as target in Deepl's API.
+     *
      * @var object
      */
     private mixed $deepltargets;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @throws \coding_exception
      */
     public function __construct() {
+        // Set to dummies values.
         $this->apikey = 'abcd';
         $this->deepltargets = 'en';
         $this->deeplsources = 'en';

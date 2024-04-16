@@ -23,7 +23,7 @@ use stdClass;
 use templatable;
 
 /**
- * Translate Page Output
+ * Translate Page Output.
  *
  * Provides output class for /local/deepler/translate.php
  *
@@ -34,19 +34,19 @@ use templatable;
  */
 class translate_page implements renderable, templatable {
     /**
-     * The course in translation
+     * The course in translation.
      *
      * @var object
      */
     private object $course;
     /**
-     * The data of the course parsed from mod_info
+     * The data of the course parsed from mod_info.
      *
      * @var array
      */
     private array $coursedata;
     /**
-     * The current multilang filter object
+     * The current multilang filter object.
      *
      * @var \filter_multilang2
      */
@@ -56,9 +56,7 @@ class translate_page implements renderable, templatable {
      */
     private mixed $langpacks;
     /**
-     * The form to display the row UI
-     *
-     * TODO MDL-0 change this to mustache
+     * The form to display the row UI.
      *
      * @var translate_form
      * TODO MDL-0 change this to mustache.
@@ -66,7 +64,7 @@ class translate_page implements renderable, templatable {
     private translate_form $mform;
 
     /**
-     * Class Construct
+     * Class Construct.
      *
      * @param \stdClass $course
      * @param array $coursedata
@@ -87,7 +85,7 @@ class translate_page implements renderable, templatable {
     }
 
     /**
-     * Export Data to Template
+     * Export Data to Template.
      *
      * @param renderer_base $output
      * @return object

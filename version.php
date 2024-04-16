@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Local Course Translator
+ * Local Course Translator.
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
@@ -25,11 +25,11 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-$plugin->component = 'local_deepler';  // Full name of the plugin (used for diagnostics).
-$plugin->version = 2024041100;                // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires = 2020061500;                // Requires Moodle 3.9 LTS.
-$plugin->supported = [401, 404];                // Supported Moodle Versions.
-$plugin->maturity = MATURITY_ALPHA;            // Maturity level.
-$plugin->release = 'v0.9.9';                  // Semantic Versioning for CHANGES.md.
+$plugin->component = 'local_deepler'; // Full name of the plugin (used for diagnostics).
+$plugin->version = 2024041100; // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires = 2020061500; // Requires Moodle 3.9 LTS.
+$plugin->supported = [401, 404]; // Supported Moodle Versions.
+$plugin->maturity = MATURITY_ALPHA; // Maturity level.
+$plugin->release = 'v0.9.9'; // Semantic Versioning for CHANGES.md.
 // Dependencies.
 $plugin->dependencies = ['filter_multilang2' => 2020101300];

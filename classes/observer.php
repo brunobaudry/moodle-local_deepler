@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course Translator Observers
+ * Course Translator Observers.
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
@@ -24,16 +24,16 @@
  */
 
 /**
- * Course Translator Observers
+ * Course Translator Observers.
  *
- * Watch for course, course section, and mod updates
+ * Watch for course, course section, and mod updates.
  *
  * @package    local_deepler
  */
 class local_deepler_observer {
 
     /**
-     * Observer for course_updated event
+     * Observer for course_updated event.
      *
      * @param \core\event\course_updated $event
      * @return void
@@ -67,7 +67,7 @@ class local_deepler_observer {
     }
 
     /**
-     * Observer for course_section_updated event
+     * Observer for course_section_updated event.
      *
      * @param \core\event\course_section_updated $event
      * @return void
@@ -101,7 +101,7 @@ class local_deepler_observer {
     }
 
     /**
-     * Observer for course_module_updated event
+     * Observer for course_module_updated event.
      *
      * @param \core\event\course_module_updated $event
      * @return void

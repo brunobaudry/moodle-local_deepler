@@ -21,8 +21,7 @@ use renderer_base;
 use templatable;
 
 /**
- * Translate Page Output
- *
+ * Translate Page Output.
  * Provides output class for /local/deepler/translate.php when error with connecting to the api is found.
  *
  * @package    local_deepler
@@ -31,7 +30,7 @@ use templatable;
  */
 class nodeepl_page implements renderable, templatable {
     /**
-     * Export to Template
+     * Export to Template.
      *
      * @param renderer_base $output
      * @return string

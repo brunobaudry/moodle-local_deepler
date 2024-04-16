@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course Translator extended libs
+ * Course Translator extended libs.
  *
  * @package      local_deepler
  * @copyright    2022 Kaleb Heitzman <kaleb@jamfire.io>
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @copyright    2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +29,7 @@
  * @param object $navigation
  * @param object $course
  * @return void
- * @package      local_deepler
+ * @package local_deepler
  */
 function local_deepler_extend_navigation_course($navigation, $course) {
 

@@ -104,7 +104,7 @@ const registerUI = () => {
     }
 };
 /**
- * Translation Editor UI
+ * Translation Editor UI.
  * @param {Object} cfg JS Config
  */
 export const init = (cfg) => {
@@ -117,7 +117,7 @@ export const init = (cfg) => {
         window.console.info(usage);
     }
     mainEditorType = config.userPrefs;
-    // Setup
+    // Setup.
     registerUI();
     registerEventListeners();
     toggleAutotranslateButton();

@@ -18,7 +18,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/externallib.php');
 
 /**
- * Local Course Translator Web Service
+ * Local Course Translator Web Service.
  *
  * Adds a webservice available via ajax for the Translate Content page.
  *
@@ -30,9 +30,9 @@ require_once($CFG->libdir . '/externallib.php');
 class local_deepler_external extends external_api {
 
     /**
-     * Get field parameters
+     * Get field parameters.
      *
-     * Adds validation parameters for getting db fields
+     * Adds validation parameters for getting db fields.
      *
      * @return external_function_parameters
      */
@@ -50,7 +50,7 @@ class local_deepler_external extends external_api {
     /**
      * Get DB Field
      *
-     * Dynamically get db field to allow simultaenous editing
+     * Dynamically get db field to allow simultaenous editing.
      *
      * @param object $data
      * @return array
@@ -84,8 +84,6 @@ class local_deepler_external extends external_api {
     }
 
     /**
-     * Return Field
-     *
      * Returns field data to the user from web service.
      *
      * @return external_multiple_structure
@@ -96,9 +94,9 @@ class local_deepler_external extends external_api {
     }
 
     /**
-     * Update Translation Parameters
+     * Update Translation Parameters.
      *
-     * Adds validation parameters for translations
+     * Adds validation parameters for translations.
      *
      * @return external_function_parameters
      */
@@ -116,9 +114,9 @@ class local_deepler_external extends external_api {
     }
 
     /**
-     * Update Translation
+     * Update Translation.
      *
-     * Dynamically update table and column name for item submitted
+     * Dynamically update table and column name for item submitted.
      *
      * @param object $data
      * @return array
@@ -163,7 +161,7 @@ class local_deepler_external extends external_api {
     }
 
     /**
-     * Return Translation
+     * Return Translation.
      *
      * Returns updated translation to the user from web service.
      *
