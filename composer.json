@@ -19,5 +19,8 @@
     "allow-plugins": {
       "php-http/discovery": true
     }
+  },
+  "require-dev": {
+    "phpspec/prophecy": "^1.19"
   }
 }

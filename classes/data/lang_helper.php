@@ -41,9 +41,9 @@ class lang_helper {
      * @var string
      */
     static protected $deeplfree = 'https://api-free.deepl.com/v2/translate?';
-    /** @var String */
+    /** @var string */
     public mixed $currentlang;
-    /** @var String */
+    /** @var string */
     public mixed $targetlang;
     /**
      * @var array|mixed
@@ -54,7 +54,7 @@ class lang_helper {
      */
     public mixed $langcodes;
     /**
-     * @var String
+     * @var string
      */
     protected mixed $apikey;
     /**
@@ -76,13 +76,65 @@ class lang_helper {
      * @throws \coding_exception
      */
     public function __construct() {
-        $this->apikey = get_config('local_deepler', 'apikey');
-        $this->translator = new \DeepL\Translator($this->apikey);
-        $this->deeplsources = $this->translator->getSourceLanguages();
-        $this->deepltargets = $this->translator->getTargetLanguages();
-        $this->langs = get_string_manager()->get_list_of_translations();
+        $this->apikey = 'abcd';
+        $this->deepltargets = 'en';
+        $this->deeplsources = 'en';
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', 'en', PARAM_NOTAGS);
+        $this->langs = get_string_manager()->get_list_of_translations();
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function init(string $key): bool {
+        $this->setdeeplapi($key);
+        $initok = $this->inittranslator();
+        if ($initok) {
+            try {
+                $this->setsupportedlanguages();
+            } catch (\DeepL\AuthorizationException $e) {
+                return false;
+            }
+        }
+        return $initok;
+    }
+
+    /**
+     * @param string $key
+     * @return void
+     * @throws \dml_exception
+     */
+    private function setdeeplapi(string $key) {
+        $this->apikey = $key === '' ? get_config('local_deepler', 'apikey') : $key;
+    }
+
+    /**
+     * @return void
+     * @throws \DeepL\DeepLException
+     */
+    private function setsupportedlanguages() {
+        $this->deeplsources = $this->translator->getSourceLanguages();
+        $this->deepltargets = $this->translator->getTargetLanguages();
+    }
+
+    /**
+     * @return bool
+     * @throws \DeepL\DeepLException
+     */
+    private function inittranslator() {
+        if (!isset($this->translator)) {
+            try {
+                $this->translator = new \DeepL\Translator($this->apikey);
+            } catch (\DeepL\AuthorizationException $e) {
+                return false;
+            }
+
+        }
+        return true;
     }
 
     /**
@@ -114,7 +166,7 @@ class lang_helper {
      * @param bool $issource
      * @param bool $verbose
      * @return string
-     * @todo MDL-0000 allow regional languages setup (expl EN-GB)
+     * TODO MDL-0000 allow regional languages setup (expl EN-GB)
      */
     public function preparehtmlotions(bool $issource, bool $verbose = true) {
         $tab = $this->prepareoptionlangs($issource, $verbose);

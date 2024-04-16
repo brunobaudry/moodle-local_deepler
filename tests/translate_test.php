@@ -30,13 +30,14 @@ use advanced_testcase;
 use context_course;
 use filter_multilang2;
 use local_deepler\data\course_data;
+use local_deepler\data\lang_helper;
 use local_deepler\output\translate_page;
 
 /**
  * Translate Test
  *
  */
-class translate_test extends advanced_testcase {
+final class translate_test extends advanced_testcase {
 
     /**
      * Helper to trace
@@ -62,9 +63,8 @@ class translate_test extends advanced_testcase {
     public function test_plugin_config(): void {
         global $CFG;
         $this->assertNotNull(get_config('local_deepler', 'apikey'));
-        $this->assertMatchesRegularExpression('/^0|1$/', get_config('local_deepler', 'useautotranslate'));
-        $this->assertNotEquals('', get_string('supported_languages', 'local_deepler'));
-        $this->assertTrue(strlen(get_string('supported_languages', 'local_deepler')) > 0);
+        $this->assertFalse(get_config('local_deepler', 'apikey') === '');
+        $this->assertMatchesRegularExpression('/^0|1$/', get_config('local_deepler', 'deeplpro'));
         $this->assertNotEquals('', current_language());
         $this->assertTrue(strlen(current_language()) > 0);
     }
@@ -109,8 +109,10 @@ class translate_test extends advanced_testcase {
             $this->assertArrayHasKey('section', $v);
             $this->assertArrayHasKey('activities', $v);
         }
+        $langhelper = new lang_helper();
+        $langhelper->init('abcd');
         $renderable = new translate_page($course, $coursedata->getdata(),
-                new filter_multilang2($context, []));
+                new filter_multilang2($context, []), $langhelper);
         $this->assertNotNull($renderable);
     }
 

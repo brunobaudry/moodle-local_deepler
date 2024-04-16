@@ -39,6 +39,7 @@ global $PAGE;
 global $DB;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 require_once('./classes/output/translate_page.php');
+require_once('./classes/output/nodeepl_page.php');
 require_once('./classes/data/course_data.php');
 require_once('./classes/data/lang_helper.php');
 require_once($CFG->dirroot . '/lib/editorlib.php');
@@ -52,17 +53,6 @@ $context = context_course::instance($courseid);
 $PAGE->set_context($context);
 require_login();
 require_capability('local/deepler:edittranslations', $context);
-// Get Language helper.
-$languagepack = new lang_helper();
-// Set js data.
-$jsconfig = new stdClass();
-$jsconfig = $languagepack->addlangproperties($jsconfig);
-// Prepare course data.
-$jsconfig->courseid = $courseid;
-$jsconfig->debug = $CFG->debug;
-
-$mlangfilter = new filter_multilang2($context, []);
-
 // Set initial page layout.
 $title = get_string('pluginname', 'local_deepler');
 $PAGE->set_url('/local/deepler/translate.php', ['course_id' => $courseid]);
@@ -70,31 +60,46 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 $PAGE->set_course($course);
-
-$defaulteditor = strstr($CFG->texteditors, ',', true);
-$userprefs = get_user_preferences();
-// Get users prefrences to pass the editor's type to js.
-$jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
-
-// Adding page CSS.
-$PAGE->requires->css('/local/deepler/styles.css');
-// Adding page JS.
-$PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
-
+// Get Language helper.
+$languagepack = new lang_helper();
+$initok = $languagepack->init('');
 // Get the renderer.
 $output = $PAGE->get_renderer('local_deepler');
-
+// Adding page CSS.
+$PAGE->requires->css('/local/deepler/styles.css');
 // Output header.
 echo $output->header();
-
 // Course name heading.
+$mlangfilter = new filter_multilang2($context, []);
 echo $output->heading($mlangfilter->filter($course->fullname));
 
-// Output translation grid.
-$coursedata = new course_data($course, $languagepack->targetlang, $context);
+if ($initok) {
+    // Set js data.
+    $jsconfig = new stdClass();
+    $jsconfig = $languagepack->addlangproperties($jsconfig);
+    // Prepare course data.
+    $jsconfig->courseid = $courseid;
+    $jsconfig->debug = $CFG->debug;
 
-// Build the page.
-$renderable = new translate_page($course, $coursedata->getdata(), $mlangfilter, $languagepack);
-echo $output->render($renderable);
-// Output footer.
-echo $output->footer();
+    $defaulteditor = strstr($CFG->texteditors, ',', true);
+    $userprefs = get_user_preferences();
+    // Get users prefrences to pass the editor's type to js.
+    $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
+
+    // Adding page JS.
+    $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
+
+    // Output translation grid.
+    $coursedata = new course_data($course, $languagepack->targetlang, $context);
+
+    // Build the page.
+    $renderable = new translate_page($course, $coursedata->getdata(), $mlangfilter, $languagepack);
+    echo $output->render($renderable);
+    // Output footer.
+    echo $output->footer();
+} else {
+    $renderable = new \local_deepler\output\nodeepl_page();
+    echo $output->render($renderable);
+    // Output footer.
+    echo $output->footer();
+}

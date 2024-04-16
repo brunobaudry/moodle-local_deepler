@@ -29,7 +29,7 @@ namespace local_deepler;
 /**
  * Settings Test
  */
-class settings_test extends \advanced_testcase {
+final   class settings_test extends \advanced_testcase {
     /**
      * Set it up
      *

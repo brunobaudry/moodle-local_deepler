@@ -29,15 +29,15 @@ use core\context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_data {
-    /** @var String */
+    /** @var string */
     protected $dbtable;
     /** @var \stdClass */
     protected $course;
     /** @var \course_modinfo|null */
     protected $modinfo;
-    /** @var String */
+    /** @var string */
     protected $lang;
-    /** @var String */
+    /** @var string */
     protected $contextid;
     /** @var \core\context */
     protected $context;

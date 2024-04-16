@@ -31,7 +31,7 @@ use context_course;
 /**
  * Course test class
  */
-class course_test extends advanced_testcase {
+final class course_test extends advanced_testcase {
     /**
      * Test course creation and context
      *

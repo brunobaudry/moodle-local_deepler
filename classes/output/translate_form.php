@@ -119,21 +119,21 @@ class translate_form extends moodleform {
         // Column 1 settings.
         if ($this->langpack->targetlang === $this->langpack->currentlang) {
             $buttonclass = 'badge-dark';
-            $titlestring = get_string('t_canttranslate', 'local_deepler', $this->langpack->targetlang);
+            $titlestring = get_string('canttranslate', 'local_deepler', $this->langpack->targetlang);
         } else if ($item->tneeded) {
             if (str_contains($item->text, "{mlang " . $this->langpack->targetlang)) {
                 $buttonclass = 'badge-warning';
-                $titlestring = get_string('t_needsupdate', 'local_deepler');
+                $titlestring = get_string('needsupdate', 'local_deepler');
             } else {
                 $buttonclass = 'badge-danger';
-                $titlestring = get_string('t_nevertranslated', 'local_deepler', $this->langpack->targetlang);
+                $titlestring = get_string('nevertranslated', 'local_deepler', $this->langpack->targetlang);
             }
 
         } else {
             $buttonclass = 'badge-success';
-            $titlestring = get_string('t_uptodate', 'local_deepler');
+            $titlestring = get_string('uptodate', 'local_deepler');
         }
-        $titlestring = htmlentities($titlestring);
+        $titlestring = htmlentities($titlestring, ENT_HTML5);
         // Thew little badge showing the status of the translations.
         $bulletstatus = "<span id='previousTranslationStatus' title='$titlestring'
                     class='badge badge-pill $buttonclass'>&nbsp;</span>";
@@ -150,7 +150,7 @@ class translate_form extends moodleform {
         $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
-        $editbuttontitle = get_string('t_edit', 'local_deepler');
+        $editbuttontitle = get_string('editbutton', 'local_deepler');
         $editinplacebutton = "<a class='p-1 btn btn-sm btn-outline-info'
                         id='local_deepler__sourcelink' href='{$item->link}' target='_blank'
                             title='$editbuttontitle'>
@@ -165,9 +165,9 @@ class translate_form extends moodleform {
         $visibilityclass = $alreadyhasmultilang ? '' : 'invisible';
         $badgeclass = $hasotherandsourcetag ? 'danger' : 'info';
         $titlestring = $hasotherandsourcetag ?
-                get_string('t_warningsource', 'local_deepler',
+                get_string('warningsource', 'local_deepler',
                         strtoupper($this->langpack->currentlang)) :
-                get_string('t_viewsource', 'local_deepler');
+                get_string('viewsource', 'local_deepler');
         $mutlilangspantag =
                 "<span
                     title='$titlestring'
@@ -178,7 +178,7 @@ class translate_form extends moodleform {
                     <i class='fa fa-language' aria-hidden='true'></i></span>";
         // Source lang select.
         $sourceoptions = $this->langpack->preparehtmlotions(true, false);
-        $selecttitle = get_string('t_special_source_text', 'local_deepler', strtoupper($this->langpack->currentlang));
+        $selecttitle = get_string('specialsourcetext', 'local_deepler', strtoupper($this->langpack->currentlang));
         $sourceselect =
                 "<select class='form-select' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
                     {$sourceoptions}</select>";
@@ -186,7 +186,7 @@ class translate_form extends moodleform {
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
 
         // Source text textarea.
-        $rawsourcetext = htmlentities($mlangfilter->filter($item->text));
+        $rawsourcetext = htmlentities($mlangfilter->filter($item->text), ENT_HTML5);
         $mlangfiltered = $mlangfilter->filter($item->displaytext);
         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
                 data-sourcetext-raw='$rawsourcetext' >$mlangfiltered" . DIV_CLOSE;

@@ -58,7 +58,8 @@ class translate_page implements renderable, templatable {
     /**
      * The form to display the row UI
      *
-     * @todo MDL-0 change this to mustache
+     * TODO MDL-0 change this to mustache
+     *
      * @var translate_form
      */
     private translate_form $mform;

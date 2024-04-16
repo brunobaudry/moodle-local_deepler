@@ -35,8 +35,8 @@ if (has_capability('moodle/site:config', context_system::instance())) {
     $settings->add(
             new admin_setting_configtext(
                     'local_deepler/apikey',
-                    get_string('apikey', 'local_deepler'),
-                    get_string('apikey_desc', 'local_deepler'),
+                    get_string('apikeytitle', 'local_deepler'),
+                    get_string('apikeytitle_desc', 'local_deepler'),
                     null,
                     PARAM_RAW_TRIMMED,
                     40
@@ -47,8 +47,8 @@ if (has_capability('moodle/site:config', context_system::instance())) {
     $settings->add(
             new admin_setting_configcheckbox(
                     'local_deepler/deeplpro',
-                    get_string('deeplpro', 'local_deepler'),
-                    get_string('deeplpro_desc', 'local_deepler'),
+                    get_string('deeplprotitle', 'local_deepler'),
+                    get_string('deeplprotitle_desc', 'local_deepler'),
                     false
             )
     );
