@@ -20,112 +20,112 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #page-local-deepler-translate {
-  background-color: white; /* test */
+    background-color: white; /* test */
   /*    [data-status="local_deepler/tosave"] i:hover {
           color: $black;
       }*/
 }
 #page-local-deepler-translate .sticky-offset {
-  top: 20px;
+    top: 20px;
 }
 #page-local-deepler-translate #local_deepler-translate-header {
-  z-index: 100 !important;
+    z-index: 100 !important;
 }
 #page-local-deepler-translate nav {
-  z-index: 1000 !important;
+    z-index: 1000 !important;
 }
 #page-local-deepler-translate .local_deepler__saveall-btn {
-  margin-left: 97% !important;
-  position: sticky !important;
-  bottom: 80px !important;
+    margin-left: 97% !important;
+    position: sticky !important;
+    bottom: 80px !important;
 }
 #page-local-deepler-translate #local_deepler__settings {
-  position: relative;
-  top: -4px;
+    position: relative;
+    top: -4px;
 }
 #page-local-deepler-translate a[aria-expanded=true] .fa-caret-right {
-  display: none;
+    display: none;
 }
 #page-local-deepler-translate a[aria-expanded=false] .fa-caret-down {
-  display: none;
+    display: none;
 }
 #page-local-deepler-translate img {
-  background-color: yellow !important;
-  font-style: italic;
+    background-color: yellow !important;
+    font-style: italic;
 }
 #page-local-deepler-translate img:before {
-  content: "pic:" !important;
+    content: "pic:" !important;
 }
 #page-local-deepler-translate .local_deepler__form .row.border-bottom:last-child {
-  border-bottom: 0 !important; /* stylelint-disable-next-line */
+    border-bottom: 0 !important; /* stylelint-disable-next-line */
 }
 #page-local-deepler-translate .local_deepler__source-text iframe {
-  max-width: 100%; /* responsive iframes */
+    max-width: 100%; /* responsive iframes */
 }
 #page-local-deepler-translate .local_deepler__translation iframe {
-  max-width: 100%; /* responsive iframes */
+    max-width: 100%; /* responsive iframes */
 }
 #page-local-deepler-translate .local_deepler__translation [data-action="local_deepler/editor"],
 #page-local-deepler-translate .local_deepler__translation [data-fieldtype=editor] {
-  width: 100%; /* editor tweaks */
+    width: 100%; /* editor tweaks */
 }
 #page-local-deepler-translate .local_deepler__translation textarea[data-action="local_deepler/editor"] {
-  width: 100%;
-  min-height: 300px;
+    width: 100%;
+    min-height: 300px;
 }
 #page-local-deepler-translate .local_deepler__translation .form-group.row {
-  margin-left: 0;
-  margin-right: 0;
+    margin-left: 0;
+    margin-right: 0;
 }
 #page-local-deepler-translate .local_deepler__translation .col-form-label {
-  display: none !important;
+    display: none !important;
 }
 #page-local-deepler-translate .local_deepler__error {
-  border: 2px solid #ca3120; /* ui notices */
-  border-radius: 6px;
+    border: 2px solid #ca3120; /* ui notices */
+    border-radius: 6px;
 }
 #page-local-deepler-translate .local_deepler__success {
-  border: 2px solid #357a32;
-  border-radius: 6px;
+    border: 2px solid #357a32;
+    border-radius: 6px;
 }
 #page-local-deepler-translate [data-status="local_deepler/success-message"] {
-  background: #20c997;
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  padding: 0.25rem 1rem;
-  margin-top: 2rem;
-  top: 12px;
-  bottom: 9px;
-  right: 9px;
-  border-radius: 4px;
+    background: #20c997;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    padding: 0.25rem 1rem;
+    margin-top: 2rem;
+    top: 12px;
+    bottom: 9px;
+    right: 9px;
+    border-radius: 4px;
 }
 #page-local-deepler-translate [data-status="local_deepler/wait"] i:before {
-  content: "\f141"; /*3 dots ellipse*/
-  color: #ced4da;
+    content: "\f141"; /*3 dots ellipse*/
+    color: #ced4da;
 }
 #page-local-deepler-translate [data-status="local_deepler/totranslate"] i:before {
-  content: "\f251"; /* Sand icon*/
-  color: #0f6cbf;
+    content: "\f251"; /* Sand icon*/
+    color: #0f6cbf;
 }
 #page-local-deepler-translate [data-status="local_deepler/tosave"] i:before {
-  content: "\f0c7"; /*floppy (save) icon*/
-  color: #0f6cbf;
+    content: "\f0c7"; /*floppy (save) icon*/
+    color: #0f6cbf;
 }
 #page-local-deepler-translate [data-status="local_deepler/success"] i:before {
-  content: "\f00c"; /*check  icon*/
-  color: #357a32;
+    content: "\f00c"; /*check    icon*/
+    color: #357a32;
 }
 #page-local-deepler-translate [data-status="local_deepler/saved"] i:before {
-  content: "\f1c0"; /*database  icon*/
-  color: #357a32;
+    content: "\f1c0"; /*database    icon*/
+    color: #357a32;
 }
 #page-local-deepler-translate [data-status="local_deepler/failed"] i:before {
-  content: "\f071"; /*exclamation triangle icon*/
-  color: #ca3120;
+    content: "\f071"; /*exclamation triangle icon*/
+    color: #ca3120;
 }
 #page-local-deepler-translate [data-status="local_deepler/error"] i:before {
-  content: "\f1e2"; /*bomb icon*/
-  color: #ca3120;
+    content: "\f1e2"; /*bomb icon*/
+    color: #ca3120;
 }
 
 /*# sourceMappingURL=styles.css.map */
