@@ -20,7 +20,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #page-local-deepler-translate {
-  background-color: white; /** testing indentor **/
+  background-color: white;
   /*    [data-status="local_deepler/tosave"] i:hover {
           color: $black;
       }*/
