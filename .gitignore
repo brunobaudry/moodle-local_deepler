@@ -5,3 +5,4 @@
 node_modules
 # ide
 .idea/*
+indentor.py

@@ -201,6 +201,8 @@ See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User
 At this time, Course Translator does not have the ability to translate advanced usage of mlang in content. For example, this includes the use of multiple mlang tags spread
 throughout content that utilize the same language._
 
+**Note**: Still you can add untranslated content, after a first insertion of mlang tags, before and/or after, the parser should then leave them in place.
+
 ### Image display
 
 Currently images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
