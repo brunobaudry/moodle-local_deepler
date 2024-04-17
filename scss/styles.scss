@@ -50,16 +50,19 @@ $danger: $red !default;
 $secondary: $gray-400 !default;
 
 #page-local-deepler-translate {
-    background-color: white; /* testing indentor */
+    background-color: white; /** testing indentor **/
     .sticky-offset {
         top: 20px;
     }
-    #local_deepler-translate-header{
+
+    #local_deepler-translate-header {
         z-index: 100 !important;
     }
-    nav{
+
+    nav {
         z-index: 1000 !important;
     }
+
     .local_deepler__saveall-btn {
         margin-left: 97% !important;
         position: sticky !important;
