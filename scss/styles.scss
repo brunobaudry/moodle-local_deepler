@@ -160,10 +160,6 @@ $secondary: $gray-400 !default;
         color: $blue;
     }
 
-    /*    [data-status="local_deepler/tosave"] i:hover {
-            color: $black;
-        }*/
-
     [data-status="local_deepler/tosave"] i:before {
         content: '\f0c7'; /*floppy (save) icon*/
         color: $blue;
