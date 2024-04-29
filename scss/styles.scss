@@ -55,17 +55,17 @@ $secondary: $gray-400 !default;
     }
 
     #local_deepler-translate-header {
-        z-index: 100 !important;
+        z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
     }
 
     nav {
-        z-index: 1000 !important;
+        z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
     }
 
     .local_deepler__saveall-btn {
-        margin-left: 97% !important;
-        position: sticky !important;
-        bottom: 80px !important;
+        margin-left: 97% !important; /* stylelint-disable-line declaration-no-important */
+        position: sticky !important; /* stylelint-disable-line declaration-no-important */
+        bottom: 80px !important; /* stylelint-disable-line declaration-no-important */
     }
 
     #local_deepler__settings {
@@ -82,17 +82,17 @@ $secondary: $gray-400 !default;
     }
 
     img {
-        background-color: yellow !important;
+        background-color: yellow !important; /* stylelint-disable-line declaration-no-important */
         font-style: italic;
     }
 
     img:before {
-        content: 'pic:' !important;
+        content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
     }
 
 
     .local_deepler__form .row.border-bottom:last-child {
-        border-bottom: 0 !important; /* stylelint-disable-next-line */
+        border-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
     }
 
 
@@ -123,7 +123,7 @@ $secondary: $gray-400 !default;
         }
 
         .col-form-label {
-            display: none !important;
+            display: none !important; /* stylelint-disable-line declaration-no-important */
         }
     }
 

@@ -23,15 +23,15 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     top: 20px;
 }
 #page-local-deepler-translate #local_deepler-translate-header {
-    z-index: 100 !important;
+    z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate nav {
-    z-index: 1000 !important;
+    z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__saveall-btn {
-    margin-left: 97% !important;
-    position: sticky !important;
-    bottom: 80px !important;
+    margin-left: 97% !important; /* stylelint-disable-line declaration-no-important */
+    position: sticky !important; /* stylelint-disable-line declaration-no-important */
+    bottom: 80px !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate #local_deepler__settings {
     position: relative;
@@ -44,14 +44,14 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     display: none;
 }
 #page-local-deepler-translate img {
-    background-color: yellow !important;
+    background-color: yellow !important; /* stylelint-disable-line declaration-no-important */
     font-style: italic;
 }
 #page-local-deepler-translate img:before {
-    content: "pic:" !important;
+    content: "pic:" !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__form .row.border-bottom:last-child {
-    border-bottom: 0 !important; /* stylelint-disable-next-line */
+    border-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__source-text iframe {
     max-width: 100%; /* responsive iframes */
@@ -72,7 +72,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     margin-right: 0;
 }
 #page-local-deepler-translate .local_deepler__translation .col-form-label {
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__error {
     border: 2px solid #ca3120; /* ui notices */
