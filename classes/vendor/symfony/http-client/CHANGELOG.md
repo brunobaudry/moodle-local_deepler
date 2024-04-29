@@ -1,11 +1,6 @@
 CHANGELOG
 =========
 
-7.0
----
-
- * Remove implementing `Http\Message\RequestFactory` from `HttplugClient`
-
 6.4
 ---
 

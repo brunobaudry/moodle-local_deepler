@@ -4,7 +4,7 @@
   "type": "project",
   "require": {
     "deeplcom/deepl-php": "^1.7",
-    "symfony/http-client": "^7.0",
+    "symfony/http-client": "^v6.4.6",
     "nyholm/psr7": "^1.8"
   },
   "license": "GPL-3.0-or-later",

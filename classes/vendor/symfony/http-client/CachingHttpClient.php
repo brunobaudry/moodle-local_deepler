@@ -136,7 +136,10 @@ class CachingHttpClient implements HttpClientInterface, ResetInterface
         })());
     }
 
-    public function reset(): void
+    /**
+     * @return void
+     */
+    public function reset()
     {
         if ($this->client instanceof ResetInterface) {
             $this->client->reset();

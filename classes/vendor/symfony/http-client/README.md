@@ -6,7 +6,7 @@ The HttpClient component provides powerful methods to fetch HTTP resources synch
 Sponsor
 -------
 
-The HttpClient component for Symfony 7.0 is [backed][1] by [Innovative Web AG][2].
+The HttpClient component for Symfony 6.4 is [backed][1] by [Innovative Web AG][2].
 
 Innovative Web AG (i-web) is a specialist for web, applications and the
 digitalisation of the public sector based in Switzerland. With their i-CMS,

@@ -93,7 +93,10 @@ class ScopingHttpClient implements HttpClientInterface, ResetInterface, LoggerAw
         return $this->client->stream($responses, $timeout);
     }
 
-    public function reset(): void
+    /**
+     * @return void
+     */
+    public function reset()
     {
         if ($this->client instanceof ResetInterface) {
             $this->client->reset();
