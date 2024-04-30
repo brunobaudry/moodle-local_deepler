@@ -32,13 +32,24 @@
  * @package local_deepler
  */
 function local_deepler_extend_navigation_course($navigation, $course) {
-
+    // Do not show in menu if no capability.
+    if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
+        return;
+    }
+    // Do not show in menu if no deepl api key is set.
+    try {
+        $key = get_config('local_deepler', 'apikey');
+        if (trim($key) === '') {
+            return;
+        }
+    } catch (Exception $e) {
+        return;
+    }
     // Get current language.
     $lang = current_language();
 
     // Build a moodle url.
-
-    $url = new moodle_url("/local/deepler/translate.php?course_id=$course->id&lang=$lang");
+    $url = new moodle_url("/local/deepler/translate.php?courseid=$course->id&lang=$lang");
 
     // Get title of translate page for navigation menu.
     $title = get_string('pluginname', 'local_deepler');
@@ -47,7 +58,5 @@ function local_deepler_extend_navigation_course($navigation, $course) {
     $translatecontent = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, $title, 'translate',
             new pix_icon('icon', 'icon', 'local_deepler'));
     // Do not show in menu if no capability.
-    if (has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
-        $navigation->add_node($translatecontent);
-    }
+    $navigation->add_node($translatecontent);
 }

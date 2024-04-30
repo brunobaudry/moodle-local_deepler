@@ -45,7 +45,7 @@ require_once('./classes/data/lang_helper.php');
 require_once($CFG->dirroot . '/lib/editorlib.php');
 
 // Needed vars for processing.
-$courseid = required_param('course_id', PARAM_INT);
+$courseid = required_param('courseid', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
 // Setup page.
