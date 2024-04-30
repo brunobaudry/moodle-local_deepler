@@ -76,8 +76,13 @@ class translate_form extends moodleform {
         $sectioncount = 1;
         foreach ($coursedata as $section) {
             // Loop section's headers.
+            // Get mlangfilter to filter text.
+            $mlangfilter = $this->_customdata['mlangfilter'];
+            $sectiontext = $mlangfilter->filter($section['section'][0]->text);
+            $sectionfield = $section['section'][0]->table . "/" . $section['section'][0]->field;
             $mform->addElement('html',
-                    "<div class='row bg-light p-2'><h3 class='text-center'>Module $sectioncount</h3>" . DIV_CLOSE);
+                    "<div class='row bg-light p-2'><h3 class='text-center'>$sectiontext ($sectionfield) - Module $sectioncount</h3>" .
+                    DIV_CLOSE);
             foreach ($section['section'] as $s) {
                 $this->get_formrow($mform, $s);
             }
@@ -147,6 +152,7 @@ class translate_form extends moodleform {
         $mform->addElement('html', '<div class="col-1 px-1">');
         $mform->addElement('html', $bulletstatus);
         $mform->addElement('html', $checkbox);
+        $mform->addElement('html', "<em>{$item->field}</em>");
         $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
@@ -226,8 +232,7 @@ class translate_form extends moodleform {
         $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
                 role='status' aria-disabled='true'><i class='fa'
                 ></i></span>";
-        $saveasothercheckbox =
-                // Status surrounding div.
+        // Status surrounding div.
         $statusdiv = "<div class='col-1 text-center'
             data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
         // Column 3 Layout.

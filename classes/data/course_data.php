@@ -111,7 +111,7 @@ class course_data {
         $activity = new \stdClass();
         $activity->modname = 'course';
         $activity->id = null;
-        $activity->section = null;;
+        $activity->section = null;
         if ($course->fullname) {
             $data = $this->build_data(
                     $course->id,
