@@ -81,7 +81,7 @@ class translate_form extends moodleform {
             $sectiontext = $mlangfilter->filter($section['section'][0]->text);
             $sectionfield = $section['section'][0]->table . "/" . $section['section'][0]->field;
             $mform->addElement('html',
-                    "<div class='row bg-light p-2'><h3 class='text-center'>$sectiontext ($sectionfield) 
+                    "<div class='row bg-light p-2'><h3 class='text-center'>$sectiontext ($sectionfield)
                     - Module $sectioncount</h3>" . DIV_CLOSE);
             foreach ($section['section'] as $s) {
                 $this->get_formrow($mform, $s);
