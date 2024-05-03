@@ -41,6 +41,12 @@ class course_data {
     protected $contextid;
     /** @var \core\context */
     protected $context;
+    /** @var string[]
+     * List of db columns of type text that are know to be useless to tranlsate.
+     *
+     * @TODO MDL-000 It would be best if put in admin config.
+     */
+    protected $colstoskip;
 
     /**
      * Class Construct.
@@ -64,6 +70,10 @@ class course_data {
         $this->modinfo = $modinfo;
         // Set language.
         $this->lang = $lang;
+        // Set the db fileds to skipp.
+        $this->colstoskip = ['displayoptions', 'parameters', 'outputformat', 'authors', 'changes', 'conditions',
+                'reference', 'allowedqtypes', 'excluderoles', 'questions', 'csstemplate', 'config',
+        ];
     }
 
     /**
@@ -90,7 +100,7 @@ class course_data {
     private function prepare_data(array $coursedata, array $sectiondata, array $activitydata) {
         $tab = ['0' => ['section' => $coursedata, 'activities' => []]];
         foreach ($sectiondata as $k => $v) {
-            $tab[$v->id] = ['section' => [$v], 'activities' => []];
+            $tab[$v->id]['section'][] = $v;
         }
         foreach ($activitydata as $ak => $av) {
             // If the section is not found place it under the course data as general intro.
@@ -186,6 +196,19 @@ class course_data {
     }
 
     /**
+     * Looks at a db collumn and validates that it is of db type text.
+     * And that it is not a know useless to try to tranlsate.
+     *
+     * @param $field
+     * @return bool
+     */
+    private function filterdbfields($field) {
+        return (($field->meta_type === "C" && $field->max_length > 254)
+                        || $field->meta_type === "X")
+                && !in_array($field->name, $this->colstoskip);
+    }
+
+    /**
      * Get Activity Data.
      *
      * @return array
@@ -197,85 +220,23 @@ class course_data {
         foreach ($this->modinfo->instances as $instances) {
             foreach ($instances as $ik => $activity) {
                 $record = $DB->get_record($activity->modname, ['id' => $ik]);
+                // We build an array of all Text fields for this record.
+                $columns = $DB->get_columns($activity->modname);
+                $textcols = array_filter($columns, [$this, 'filterdbfields']);
+                $textcollumnskeys = array_keys($textcols);
 
-                // Standard name.
-                if (isset($record->name) && !empty($record->name)) {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->name,
-                            0,
-                            'name',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
-                }
-
-                // Standard intro.
-                if (isset($record->intro) && !empty($record->intro) && trim(strip_tags($record->intro)) !== "") {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->intro,
-                            $record->introformat,
-                            'intro',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
-                }
-
-                // Standard content.
-                if (isset($record->content) && !empty($record->content) && trim(strip_tags($record->content)) !== "") {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->content,
-                            $record->contentformat,
-                            'content',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
-                }
-                // Standard activity.
-                if (isset($record->activity) && !empty($record->activity) && trim(strip_tags($record->activity)) !== "") {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->activity,
-                            $record->activityformat,
-                            'activity',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
-                }
-
-                if (isset($record->page_after_submit) && !empty($record->page_after_submit)) {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->page_after_submit,
-                            $record->page_after_submitformat,
-                            'page_after_submit',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
-                }
-
-                if (isset($record->instructauthors) && !empty($record->instructauthors)) {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->instructauthors,
-                            $record->instructauthorsformat,
-                            'instructauthors',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
-                }
-
-                if (isset($record->instructreviewers) && !empty($record->instructreviewers)) {
-                    $data = $this->build_data(
-                            $record->id,
-                            $record->instructreviewers,
-                            $record->instructreviewersformat,
-                            'instructreviewers',
-                            $activity
-                    );
-                    array_push($activitydata, $data);
+                // Feed the data array with found text.
+                foreach ($textcollumnskeys as $field) {
+                    if ($record->{$field} !== null && trim($record->{$field}) !== '') {
+                        $data = $this->build_data(
+                                $record->id,
+                                $record->{$field},
+                                isset($record->{$field . 'format'}) ?? 0,
+                                $field,
+                                $activity
+                        );
+                        array_push($activitydata, $data);
+                    }
                 }
             }
         }
@@ -299,7 +260,7 @@ class course_data {
         $cmid = $activity->id;
         $sectionid = $activity->section;
         $record = $this->store_status_db($id, $table, $field);
-        // Build item.
+        // Build item id, tid, displaytext, format, table, field, tneeded, section.
         $item = new \stdClass();
         $item->id = $id;
         $item->tid = $record->id;
@@ -323,6 +284,12 @@ class course_data {
         $item->link = $this->link_builder($id, $table, $cmid);
         $item->tneeded = $record->s_lastmodified >= $record->t_lastmodified;
         $item->section = $sectionid;
+        // Get the activity icon, if it is a real activity/resource.
+        if ($cmid !== null) {
+            include_once($CFG->dirroot . "/mod/$table/lib.php");
+            $item->purpose = call_user_func($table . '_supports', FEATURE_MOD_PURPOSE);
+            $item->iconurl = $this->modinfo->get_cm($cmid)->get_icon_url()->out(false);
+        }
 
         return $item;
     }

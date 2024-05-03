@@ -19,6 +19,20 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#page-local-deepler-translate {
+  /*.local_deepler__sectiondata, .local_deepler__activity {
+      div {
+          em {
+              color: $gray-500;
+          }
+      }
+  }*/
+  /*
+  .local_deepler__form .row.border-bottom:last-child {
+      border-bottom: 0 !important;  stylelint-disable-line declaration-no-important
+  }
+  */
+}
 #page-local-deepler-translate .sticky-offset {
     top: 20px;
 }
@@ -43,15 +57,15 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate a[aria-expanded=false] .fa-caret-down {
     display: none;
 }
-#page-local-deepler-translate img {
+#page-local-deepler-translate .local_deepler__source-text img, #page-local-deepler-translate .local_deepler__translation img {
     background-color: yellow !important; /* stylelint-disable-line declaration-no-important */
     font-style: italic;
 }
 #page-local-deepler-translate img:before {
     content: "pic:" !important; /* stylelint-disable-line declaration-no-important */
 }
-#page-local-deepler-translate .local_deepler__form .row.border-bottom:last-child {
-    border-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
+#page-local-deepler-translate .local_deepler__activity {
+    margin-bottom: 0.4rem;
 }
 #page-local-deepler-translate .local_deepler__source-text iframe {
     max-width: 100%; /* responsive iframes */

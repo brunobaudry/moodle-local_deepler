@@ -93,7 +93,8 @@ if ($initok) {
     $coursedata = new course_data($course, $languagepack->targetlang, $context);
 
     // Build the page.
-    $renderable = new translate_page($course, $coursedata->getdata(), $mlangfilter, $languagepack);
+    $prepareddata = $coursedata->getdata();
+    $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack);
     echo $output->render($renderable);
     // Output footer.
     echo $output->footer();

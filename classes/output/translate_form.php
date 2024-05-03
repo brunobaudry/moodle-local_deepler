@@ -74,23 +74,49 @@ class translate_form extends moodleform {
 
         // Loop through course data to build form.
         $sectioncount = 1;
-        foreach ($coursedata as $section) {
+        foreach ($coursedata as $i => $section) {
             // Loop section's headers.
             // Get mlangfilter to filter text.
             $mlangfilter = $this->_customdata['mlangfilter'];
             $sectiontext = $mlangfilter->filter($section['section'][0]->text);
-            $sectionfield = $section['section'][0]->table . "/" . $section['section'][0]->field;
-            $mform->addElement('html',
-                    "<div class='row bg-light p-2'><h3 class='text-center'>$sectiontext ($sectionfield)
-                    - Module $sectioncount</h3>" . DIV_CLOSE);
+            $sectionfield = $section['section'][0]->table . "__" . $section['section'][0]->field;
+            // Open section container.
+            $mform->addElement('html', "<div class='$sectionfield'>");
+            // Section title.
+            $mform->addElement('html', "<h3 class='row bg-light p-2 text-center'>$sectiontext</h3>");
+            // Section container.
+            $csssectionid = "sectiondata[$i]";
+            $mform->addElement('html', "<div id='$csssectionid' class='local_deepler__sectiondata'>");
+            // Add sections text fields.
             foreach ($section['section'] as $s) {
                 $this->get_formrow($mform, $s);
             }
+            $mform->addElement('html', DIV_CLOSE);
             // Loop section's activites.
+            $tag = ''; // Temporary store the activity id to build and close the div container.
             foreach ($section['activities'] as $a) {
+                // Identify the activity parent to group activities' text fields.
+                $parentactivity = "$a->table[$a->id]";
+                if ($tag !== $parentactivity) {
+                    $closeit = $tag === '' ? '' : DIV_CLOSE;// If initial don't add closing div.
+                    $mform->addElement('html', "$closeit<div id='$parentactivity' class='activity-item local_deepler__activity'>");
+                    if ($a->iconurl !== null) {
+                        $iconclass = $a->purpose ?? '';
+                        $parentdivclasses =
+                                "activity-icon activityiconcontainer smaller $iconclass courseicon align-self-start mr-2";
+                        $imageattributes = "class='activityicon' data-region='activity-icon' alt='' title='{$a->table}'";
+                        $mform->addElement('html',
+                                "<div class='$parentdivclasses'>
+                                <img src='{$a->iconurl}' $imageattributes/>");
+                        $mform->addElement('html', DIV_CLOSE);
+                    }
+                    // Reset the tag.
+                    $tag = $parentactivity;
+                }
                 $this->get_formrow($mform, $a);
             }
-            $sectioncount++;
+            // Only add a second closing div if the section had activities.
+            $mform->addElement('html', ($tag === '' ? '' : DIV_CLOSE) . DIV_CLOSE);
         }
 
         // Close form.
@@ -119,7 +145,7 @@ class translate_form extends moodleform {
 
         // Open translation item.
         $mform->addElement('html',
-                "<div class='$cssclass row align-items-start border-bottom py-2' data-row-id='$key' data-status='$status'>");
+                "<div class='$cssclass row align-items-start py-2' data-row-id='$key' data-status='$status'>");
 
         // Column 1 settings.
         if ($this->langpack->targetlang === $this->langpack->currentlang) {
@@ -152,7 +178,7 @@ class translate_form extends moodleform {
         $mform->addElement('html', '<div class="col-1 px-1">');
         $mform->addElement('html', $bulletstatus);
         $mform->addElement('html', $checkbox);
-        $mform->addElement('html', "<em>{$item->field}</em>");
+        $mform->addElement('html', "<br/><em class='text-secondary'>{$item->field}</em>");
         $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
