@@ -27,6 +27,8 @@ use core\context;
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @TODO MDL-000 It would be best if put in $colstoskip list in admin config.
  */
 class course_data {
     /** @var string */
@@ -43,8 +45,6 @@ class course_data {
     protected $context;
     /** @var string[]
      * List of db columns of type text that are know to be useless to tranlsate.
-     *
-     * @TODO MDL-000 It would be best if put in admin config.
      */
     protected $colstoskip;
 
@@ -196,10 +196,10 @@ class course_data {
     }
 
     /**
-     * Looks at a db collumn and validates that it is of db type text.
-     * And that it is not a know useless to try to tranlsate.
+     * Looks at a db column and validates that it is of db type text.
+     * And that it is not a know useless to try to translate.
      *
-     * @param $field
+     * @param database_column_info $field
      * @return bool
      */
     private function filterdbfields($field) {

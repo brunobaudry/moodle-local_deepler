@@ -77,14 +77,6 @@ $secondary: $gray-400 !default;
         display: none;
     }
 
-    /*.local_deepler__sectiondata, .local_deepler__activity {
-        div {
-            em {
-                color: $gray-500;
-            }
-        }
-    }*/
-
     a[aria-expanded=false] .fa-caret-down {
         display: none;
     }
@@ -98,11 +90,6 @@ $secondary: $gray-400 !default;
         content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
     }
 
-    /*
-    .local_deepler__form .row.border-bottom:last-child {
-        border-bottom: 0 !important;  stylelint-disable-line declaration-no-important
-    }
-    */
     .local_deepler__activity {
         margin-bottom: .4rem;
     }
