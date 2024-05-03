@@ -81,7 +81,8 @@ $secondary: $gray-400 !default;
         display: none;
     }
 
-    .local_deepler__source-text img, .local_deepler__translation img {
+    .local_deepler__source-text img,
+    .local_deepler__translation img {
         background-color: yellow !important; /* stylelint-disable-line declaration-no-important */
         font-style: italic;
     }

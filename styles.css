@@ -43,7 +43,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate a[aria-expanded=false] .fa-caret-down {
     display: none;
 }
-#page-local-deepler-translate .local_deepler__source-text img, #page-local-deepler-translate .local_deepler__translation img {
+#page-local-deepler-translate .local_deepler__source-text img,
+#page-local-deepler-translate .local_deepler__translation img {
     background-color: yellow !important; /* stylelint-disable-line declaration-no-important */
     font-style: italic;
 }
