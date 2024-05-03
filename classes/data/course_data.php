@@ -28,7 +28,7 @@ use core\context;
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @TODO MDL-000 It would be best if put in $colstoskip list in admin config.
+ * TODO MDL-000 It would be best if put in $colstoskip list in admin config.
  */
 class course_data {
     /** @var string */
