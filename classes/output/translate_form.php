@@ -105,10 +105,10 @@ class translate_form extends moodleform {
                         $parentdivclasses =
                                 "activity-icon activityiconcontainer smaller $iconclass courseicon align-self-start mr-2";
                         $imageattributes =
-                                "class='activityicon' data-region='activity-icon' alt='icon for {$a->table}' title='{$a->table}'";
+                                "class='activityicon' data-region='activity-icon' title='{$a->table}'";
                         $mform->addElement('html',
                                 "<div class='$parentdivclasses'>
-                                <img src='{$a->iconurl}' $imageattributes/>");
+                                <img src='{$a->iconurl}' $imageattributes alt='icon for {$a->table}'/>");
                         $mform->addElement('html', DIV_CLOSE);
                     }
                     // Reset the tag.
