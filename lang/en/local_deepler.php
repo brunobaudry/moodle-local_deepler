@@ -52,14 +52,14 @@ $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['saveall'] = 'Save&nbsp;all';
-$string['saveallmodaltitle'] = 'Saving translations to the database';
+$string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status">' .
         '  <span class="sr-only">Saving...</span>\n' .
         '</div>' .
         '<p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>' .
         '<p>If you are impatient, and want to close this window,<br/>make sure all selected transaltion\'s statuses are ' .
         '<i class="fa fa-database" aria-hidden="true"></i></p>';
-$string['saveallexplain'] = 'Batch save to database all selected translations.';
+$string['saveallmodaltitle'] = 'Saving translations to the database';
 $string['seesetting'] = 'Advanced Deepl settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
