@@ -180,56 +180,6 @@
       "files": []
     },
     {
-      "title": "Translation status bullet icon.",
-      "content": "<p>This indicates the translation status with 3 color code.<\/p>\r\n<p><span class=\"badge badge-pill badge-danger\" title=\"No 'fr' translation yet\">\u00a0<\/span> This text was never translated.<\/p>\r\n<p><span class=\"badge badge-pill badge-warning\" title=\"Needs update\">\u00a0<\/span> This text was translated but there was a change made in the database since.<\/p>\r\n<p><span class=\"badge badge-pill badge-success\" title=\"Up to date\">\u00a0<\/span> This text was already translated and up to date.<\/p>\r\n<p><span class=\"badge badge-pill badge-dark\" title=\"Cannot translate\">\u00a0<\/span> Cannot get the translation status since <em>source<\/em> and <em>target<\/em> lang are the same.<\/p>",
-      "contentformat": "1",
-      "targettype": "0",
-      "targetvalue": "#sectiondata[0] #previousTranslationStatus",
-      "sortorder": "17",
-      "configdata": "{}",
-      "files": []
-    },
-    {
-      "title": "Selection checkbox",
-      "content": "<p>To send a content to Deepl to translate you would need to tick that checkbox.<\/p>",
-      "contentformat": "1",
-      "targettype": "0",
-      "targetvalue": "#sectiondata[0] [data-action='local_deepler/checkbox']",
-      "sortorder": "18",
-      "configdata": "{}",
-      "files": []
-    },
-    {
-      "title": "Edit source in place.",
-      "content": "<p><span class=\"p-1 btn btn-sm btn-outline-info\"><i class=\"fa fa-pencil\"> <\/i><\/span>\u00a0Clicking on the pencil will jump to the course editor in the Moodle course.<\/p>\r\n<p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.<\/p>",
-      "contentformat": "1",
-      "targettype": "0",
-      "targetvalue": "#sectiondata[0] #local_deepler__sourcelink",
-      "sortorder": "19",
-      "configdata": "{\"orphan\":\"1\"}",
-      "files": []
-    },
-    {
-      "title": "Toggle mutlilang tags",
-      "content": "<p><span class=\"btn btn-sm btn-outline-info\"><i class=\"fa fa-language\"> <\/i><\/span> When translations {mlang} ags are present, this button appears. Click on it to toggle the content and see what was already translated.<\/p>\r\n<p><span class=\"btn btn-sm btn-outline-danger\"><i class=\"fa fa-language\"> <\/i><\/span> If the current selected source language is found in the MLANG tags then this is displayed in red to alert you that the tag will be overriden.<\/p>",
-      "contentformat": "1",
-      "targettype": "1",
-      "targetvalue": "#sectiondata[0] #toggleMultilang",
-      "sortorder": "20",
-      "configdata": "{}",
-      "files": []
-    },
-    {
-      "title": "Secondary source language",
-      "content": "<p><span class=\"btn btn-sm btn-outline-info\"><i class=\"fa fa-language\"> <\/i><\/span> When translations {mlang} ags are present, this button appears. Click on it to toggle the content and see what was already translated.<\/p>\r\n<p><span class=\"btn btn-sm btn-outline-danger\"><i class=\"fa fa-language\"> <\/i><\/span> If the current selected source language is found in the MLANG tags then this is displayed in red to alert you that the tag will be overriden.<\/p>",
-      "contentformat": "1",
-      "targettype": "1",
-      "targetvalue": "#sectiondata[0] [data-action='ocal_deepler/sourceselect']",
-      "sortorder": "21",
-      "configdata": "{}",
-      "files": []
-    },
-    {
       "title": "Translation process indicator",
       "content": "<p>When a text content is not selected and no translation was requested. <i class=\"fa fa-ellipsis-h\"><\/i> is shown.<\/p>\r\n<p><i class=\"fa fa-hourglass-start\"><\/i> is displayed when you selected it and it is waiting for you to press the \"Translate\" button to send it to Deepl.<\/p>\r\n<p><i class=\"fa fa-floppy-o\"><\/i> will display after the text was fed back in the adjacent text editor.<br \/>You can review the translated content, make some changes then press the icon to actually save it in the database. <br \/><br \/><em>Note<\/em> that you can also save to the database in batch by clicking on the save all floating button below. <br \/>Should you want to save all tranlsated text but leave some to review later, you can uncheck it on the left so that it will be skiped when saving all.<\/p>\r\n<p>Once a text is saved this icon will display <i class=\"fa-solid fa-database\"><\/i><\/p>",
       "contentformat": "1",
