@@ -35,6 +35,8 @@ let targetLang = "";
 let saveAllBtn = {};
 let usage = {};
 let format = new Intl.NumberFormat();
+let saveAllModal = {};
+let batchSaving = 0;
 
 const registerEventListeners = () => {
     document.addEventListener('change', e => {
@@ -79,11 +81,16 @@ const registerEventListeners = () => {
             selected.forEach((e) => {
                 const key = e.dataset.key;
                 if (tempTranslations[key].translation !== "") {
+                    batchSaving++;
                     saveTranslation(key);
                 } else {
                     window.console.warn("not translated " + key);
                 }
             });
+            if (batchSaving > 0) {
+                launchModal();
+                saveAllBtn.hidden = saveAllBtn.disabled = true;
+            }
         }
     });
 
@@ -162,12 +169,29 @@ const showErrorMessageForEditor = (key, message) => {
     errorMsg.innerHTML = message;
     parent.appendChild(errorMsg);
 };
-
+/**
+ * Opens a modal infobox to warn user trunks of fields are saving.
+ * @returns {Promise<void>}
+ */
+const launchModal = async () => {
+    // ...
+    saveAllModal = await Modal.create({
+        title: "Saving translations to the database",
+        body: '<div class="spinner-border text-primary" role="status">' +
+            '  <span class="sr-only">Saving...</span>\n' +
+            '</div>' +
+            '<p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>' +
+            '<p>If you are impatient, and want to close this window,<br/>make sure all selected transaltion\'s statuses are ' +
+            '<i class="fa fa-database" aria-hidden="true"></i></p>',
+    });
+    saveAllModal.show();
+};
 /**
  * Save Translation to Moodle
  * @param  {String} key Data Key
  */
 const saveTranslation = (key) => {
+
     // Get processing vars.
     let editor = tempTranslations[key].editor;
     let text = editor.innerHTML; // We keep the editors text in case translation is edited
@@ -257,6 +281,13 @@ const saveTranslation = (key) => {
                                 // Print response to console log
                                 if (config.debug > 0) {
                                     window.console.info("ws: ", key, data);
+                                }
+                                // If we launche saving by the save all button, manage the modal infobox.
+                                if (saveAllModal.isVisible()) {
+                                    batchSaving--;
+                                    if (batchSaving === 0) {
+                                        saveAllModal.hide();
+                                    }
                                 }
 
                                 // Display success message
