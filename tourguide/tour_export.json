@@ -1,13 +1,13 @@
 {
   "name": "Course translator guide tour",
   "description": "Tour to demo the deepler plugin",
-  "pathmatch": "\/local\/deepler\/translate.php?course_id=%",
+  "pathmatch": "\/local\/deepler\/translate.php?courseid=%",
   "enabled": "1",
   "sortorder": "5",
   "endtourlabel": "",
   "configdata": "{\"placement\":\"bottom\",\"orphan\":\"0\",\"backdrop\":\"1\",\"reflex\":\"0\",\"filtervalues\":{\"accessdate\":{\"filter_accessdate\":\"tool_usertours_accountcreation\",\"filter_accessdate_range\":0,\"filter_accessdate_enabled\":\"0\"},\"category\":[],\"course\":[],\"courseformat\":[],\"role\":[],\"theme\":[],\"cssselector\":[\"#page-local_deepler-translate\"]},\"majorupdatetime\":1712051397}",
   "displaystepnumbers": false,
-  "version": "2023100900",
+  "version": "2024050100",
   "steps": [
     {
       "title": "Deepl's advanced settings",
@@ -160,12 +160,22 @@
       "files": []
     },
     {
+      "title": "Deepl API consumption status",
+      "targetvalue": "#local_deepler-translate-header-usage",
+      "content": "<p>Real time status of the planned and the actual consumption of Deepl's service (for the current month).<\/p>",
+      "contentformat": "1",
+      "targettype": "0",
+      "sortorder": "15",
+      "configdata": "{}",
+      "files": []
+    },
+    {
       "title": "Send to Deepl",
       "content": "<p>Clinkg this button will send all selected texts to Deepl and feed it in the editors.<\/p>\r\n<p>At least one selection is needed to ctivate it.<\/p>",
       "contentformat": "1",
       "targettype": "0",
       "targetvalue": "#local_deepler-translate-header-saveallbutton",
-      "sortorder": "15",
+      "sortorder": "16",
       "configdata": "{}",
       "files": []
     },
@@ -174,9 +184,9 @@
       "content": "<p>This indicates the translation status with 3 color code.<\/p>\r\n<p><span class=\"badge badge-pill badge-danger\" title=\"No 'fr' translation yet\">\u00a0<\/span> This text was never translated.<\/p>\r\n<p><span class=\"badge badge-pill badge-warning\" title=\"Needs update\">\u00a0<\/span> This text was translated but there was a change made in the database since.<\/p>\r\n<p><span class=\"badge badge-pill badge-success\" title=\"Up to date\">\u00a0<\/span> This text was already translated and up to date.<\/p>\r\n<p><span class=\"badge badge-pill badge-dark\" title=\"Cannot translate\">\u00a0<\/span> Cannot get the translation status since <em>source<\/em> and <em>target<\/em> lang are the same.<\/p>",
       "contentformat": "1",
       "targettype": "0",
-      "targetvalue": "div.align-items-start:nth-child(2) > div:nth-child(1) > span:nth-child(1)",
-      "sortorder": "16",
-      "configdata": "{\"orphan\":\"1\"}",
+      "targetvalue": "#sectiondata[0] #previousTranslationStatus",
+      "sortorder": "17",
+      "configdata": "{}",
       "files": []
     },
     {
@@ -184,9 +194,9 @@
       "content": "<p>To send a content to Deepl to translate you would need to tick that checkbox.<\/p>",
       "contentformat": "1",
       "targettype": "0",
-      "targetvalue": "div.align-items-start:nth-child(2) > div:nth-child(1) > input:nth-child(2)",
-      "sortorder": "17",
-      "configdata": "{\"orphan\":\"1\"}",
+      "targetvalue": "#sectiondata[0] [data-action='local_deepler/checkbox']",
+      "sortorder": "18",
+      "configdata": "{}",
       "files": []
     },
     {
@@ -194,8 +204,8 @@
       "content": "<p><span class=\"p-1 btn btn-sm btn-outline-info\"><i class=\"fa fa-pencil\"> <\/i><\/span>\u00a0Clicking on the pencil will jump to the course editor in the Moodle course.<\/p>\r\n<p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.<\/p>",
       "contentformat": "1",
       "targettype": "0",
-      "targetvalue": "div.row:nth-child(3) > div:nth-child(2) > a:nth-child(1)",
-      "sortorder": "18",
+      "targetvalue": "#sectiondata[0] #local_deepler__sourcelink",
+      "sortorder": "19",
       "configdata": "{\"orphan\":\"1\"}",
       "files": []
     },
@@ -204,8 +214,18 @@
       "content": "<p><span class=\"btn btn-sm btn-outline-info\"><i class=\"fa fa-language\"> <\/i><\/span> When translations {mlang} ags are present, this button appears. Click on it to toggle the content and see what was already translated.<\/p>\r\n<p><span class=\"btn btn-sm btn-outline-danger\"><i class=\"fa fa-language\"> <\/i><\/span> If the current selected source language is found in the MLANG tags then this is displayed in red to alert you that the tag will be overriden.<\/p>",
       "contentformat": "1",
       "targettype": "1",
-      "targetvalue": "accessreview",
-      "sortorder": "19",
+      "targetvalue": "#sectiondata[0] #toggleMultilang",
+      "sortorder": "20",
+      "configdata": "{}",
+      "files": []
+    },
+    {
+      "title": "Secondary source language",
+      "content": "<p><span class=\"btn btn-sm btn-outline-info\"><i class=\"fa fa-language\"> <\/i><\/span> When translations {mlang} ags are present, this button appears. Click on it to toggle the content and see what was already translated.<\/p>\r\n<p><span class=\"btn btn-sm btn-outline-danger\"><i class=\"fa fa-language\"> <\/i><\/span> If the current selected source language is found in the MLANG tags then this is displayed in red to alert you that the tag will be overriden.<\/p>",
+      "contentformat": "1",
+      "targettype": "1",
+      "targetvalue": "#sectiondata[0] [data-action='ocal_deepler/sourceselect']",
+      "sortorder": "21",
       "configdata": "{}",
       "files": []
     },
@@ -215,7 +235,7 @@
       "contentformat": "1",
       "targettype": "2",
       "targetvalue": "",
-      "sortorder": "20",
+      "sortorder": "22",
       "configdata": "{\"orphan\":\"1\"}",
       "files": []
     },
@@ -225,7 +245,7 @@
       "contentformat": "1",
       "targettype": "0",
       "targetvalue": "#local_deepler-translate-header-saveallbutton",
-      "sortorder": "21",
+      "sortorder": "23",
       "configdata": "{\"orphan\":\"1\"}",
       "files": []
     }

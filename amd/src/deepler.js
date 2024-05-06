@@ -23,6 +23,8 @@
 import ajax from "core/ajax";
 import Selectors from "./selectors";
 import Modal from 'core/modal';
+import {get_string} from 'core/str';
+
 
 // Initialize the temporary translations dictionary @todo make external class
 let tempTranslations = {};
@@ -40,7 +42,6 @@ let batchSaving = 0;
 
 const registerEventListeners = () => {
     document.addEventListener('change', e => {
-        window.console.info('change');
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
         }
@@ -145,7 +146,6 @@ export const init = (cfg) => {
                  */
                 window.console.warn(`Transaltion key "${key}" is undefined `,);
             } else {
-                window.console.log(tempTranslations[key]);
                 saveTranslation(key);
             }
         });
@@ -176,13 +176,8 @@ const showErrorMessageForEditor = (key, message) => {
 const launchModal = async () => {
     // ...
     saveAllModal = await Modal.create({
-        title: "Saving translations to the database",
-        body: '<div class="spinner-border text-primary" role="status">' +
-            '  <span class="sr-only">Saving...</span>\n' +
-            '</div>' +
-            '<p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>' +
-            '<p>If you are impatient, and want to close this window,<br/>make sure all selected transaltion\'s statuses are ' +
-            '<i class="fa fa-database" aria-hidden="true"></i></p>',
+        title: get_string('saveallmodaltitle', 'local_deepler'),
+        body: get_string('saveallmodalbody', 'local_deepler'),
     });
     saveAllModal.show();
 };
@@ -253,8 +248,8 @@ const saveTranslation = (key) => {
                             let multilangPill = document.querySelector(replaceKey(Selectors.statuses.multilang, key));
                             let prevTransStatus = document.querySelector(replaceKey(Selectors.statuses.prevTransStatus, key));
                             prevTransStatus.classList = "badge badge-pill badge-success";
-                            if (multilangPill.classList.contains("invisible")) {
-                                multilangPill.classList.remove('invisible');
+                            if (multilangPill.classList.contains("disabled")) {
+                                multilangPill.classList.remove('disabled');
                             }
                             setIconStatus(key, Selectors.statuses.saved);
                         });
@@ -283,7 +278,7 @@ const saveTranslation = (key) => {
                                     window.console.info("ws: ", key, data);
                                 }
                                 // If we launche saving by the save all button, manage the modal infobox.
-                                if (saveAllModal.isVisible()) {
+                                if (saveAllModal !== null && saveAllModal.isVisible) {
                                     batchSaving--;
                                     if (batchSaving === 0) {
                                         saveAllModal.hide();
@@ -300,6 +295,9 @@ const saveTranslation = (key) => {
                                         document.querySelector(Selectors.sourcetexts.keys.replace('<KEY>', key))
                                             .innerHTML = text;
                                     }
+                                    // Deselect the checkbox
+                                    document.querySelector(Selectors.editors.multiples.checkBoxesWithKey.replace('<KEY>', key))
+                                        .checked = false;
                                 } else {
                                     // Something went wrong with the data
                                     errorMessage();
@@ -746,7 +744,6 @@ const toggleAutotranslateButton = () => {
  * @param {Event} e Event
  */
 const onToggleMultilang = (e) => {
-    e.classList.toggle("showing");
     let keyid = e.getAttribute('aria-controls');
     let key = keyidToKey(keyid);
     let source = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));

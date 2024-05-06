@@ -52,6 +52,13 @@ $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['saveall'] = 'Save&nbsp;all';
+$string['saveallmodaltitle'] = 'Saving translations to the database';
+$string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status">' .
+        '  <span class="sr-only">Saving...</span>\n' .
+        '</div>' .
+        '<p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>' .
+        '<p>If you are impatient, and want to close this window,<br/>make sure all selected transaltion\'s statuses are ' .
+        '<i class="fa fa-database" aria-hidden="true"></i></p>';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['seesetting'] = 'Advanced Deepl settings';
 $string['selectall'] = 'All';
@@ -68,6 +75,7 @@ $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quo
 $string['translatebutton'] = 'Translate &rarr; {$a}';
 $string['uptodate'] = 'Up to date';
 $string['viewsource'] = 'Check multilingual content.';
+$string['viewsourcedisabled'] = 'No multilingual content yet.';
 $string['warningsource'] =
         'Watch out ! The current source language &quot;{$a}&quot; is already as a multilang tag along side with the fallback tag &quot;OTHER&quot;. Note that both will be merge as the &quot;OTHER&quot; multilang tag.';
 $string['wordcountsentence'] =

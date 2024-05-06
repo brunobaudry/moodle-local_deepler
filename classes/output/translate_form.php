@@ -170,7 +170,7 @@ class translate_form extends moodleform {
         $bulletstatus = "<span id='previousTranslationStatus' title='$titlestring'
                     class='badge badge-pill $buttonclass'>&nbsp;</span>";
         // The checkbox to select items for batch actions.
-        $checkbox = "<input title='$titlestring' type='checkbox' data-key='$key'
+        $checkbox = '<input title="' . $titlestring . '"' . " type='checkbox' data-key='$key'
             class='mx-2'
             data-action='local_deepler/checkbox'
             disabled/>";
@@ -195,19 +195,32 @@ class translate_form extends moodleform {
         // Will be a danger tag if the content has already an OTHER and the TARGET language tag.
         $hasotherandsourcetag = $this->check_field_has_other_and_sourcetag(trim($item->text));
         $alreadyhasmultilang = $this->has_multilang(trim($item->text));
-        $visibilityclass = $alreadyhasmultilang ? '' : 'invisible';
-        $badgeclass = $hasotherandsourcetag ? 'danger' : 'info';
-        $titlestring = $hasotherandsourcetag ?
-                get_string('warningsource', 'local_deepler',
-                        strtoupper($this->langpack->currentlang)) :
-                get_string('viewsource', 'local_deepler');
+        $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
+        $badgeclass = '';
+        $titlestring = '';
+        if ($alreadyhasmultilang) {
+            if ($hasotherandsourcetag) {
+                $badgeclass = 'danger';
+                $titlestring = get_string('warningsource', 'local_deepler',
+                        strtoupper($this->langpack->currentlang));
+            } else {
+                $titlestring = get_string('viewsource', 'local_deepler');
+                $badgeclass = 'info';
+            }
+        } else {
+            $titlestring = get_string('viewsourcedisabled', 'local_deepler');
+            $badgeclass = 'secondary';
+        }
+
         $mutlilangspantag =
                 "<span
                     title='$titlestring'
                     id='toggleMultilang'
                     aria-controls='$keyid'
+                    aria-pressed='false'
+                    data-toggle='button'
                     role='button'
-                    class='ml-1 btn btn-sm btn-outline-$badgeclass $visibilityclass'>
+                    class='ml-1 btn btn-sm btn-outline-$badgeclass $multilangdisabled'>
                     <i class='fa fa-language' aria-hidden='true'></i></span>";
         // Source lang select.
         $sourceoptions = $this->langpack->preparehtmlotions(true, false);
