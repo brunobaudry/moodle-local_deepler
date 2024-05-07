@@ -211,7 +211,6 @@ class translate_form extends moodleform {
             $titlestring = get_string('viewsourcedisabled', 'local_deepler');
             $badgeclass = 'secondary';
         }
-
         $mutlilangspantag =
                 "<span
                     title='$titlestring'
@@ -220,7 +219,8 @@ class translate_form extends moodleform {
                     aria-pressed='false'
                     data-toggle='button'
                     role='button'
-                    class='mx-1 p-2 btn btn-sm btn-outline-$badgeclass $multilangdisabled'>
+                    class='mx-1 p-2 btn btn-sm btn-outline-$badgeclass $multilangdisabled'
+                    >
                     <i class='fa fa-language' aria-hidden='true'></i></span>";
         // Source lang select.
         $sourceoptions = $this->langpack->preparehtmlotions(true, false);

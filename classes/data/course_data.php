@@ -72,7 +72,7 @@ class course_data {
         $this->lang = $lang;
         // Set the db fileds to skipp.
         $this->colstoskip = ['displayoptions', 'parameters', 'outputformat', 'authors', 'changes', 'conditions',
-                'reference', 'allowedqtypes', 'excluderoles', 'questions', 'csstemplate', 'config',
+                'reference', 'allowedqtypes', 'excluderoles', 'questions', 'csstemplate', 'config', 'firstpagetitle',
         ];
     }
 
@@ -212,35 +212,140 @@ class course_data {
      * Get Activity Data.
      *
      * @return array
+     * TODO MDL-000 Parse recursive wiki pages. Though only for no collaborative wikis as built by students.
      */
     private function getactivitydata() {
+        global $CFG;
         global $DB;
         $activitydata = [];
 
         foreach ($this->modinfo->instances as $instances) {
-            foreach ($instances as $ik => $activity) {
-                $record = $DB->get_record($activity->modname, ['id' => $ik]);
-                // We build an array of all Text fields for this record.
-                $columns = $DB->get_columns($activity->modname);
-                $textcols = array_filter($columns, [$this, 'filterdbfields']);
-                $textcollumnskeys = array_keys($textcols);
-
-                // Feed the data array with found text.
-                foreach ($textcollumnskeys as $field) {
-                    if ($record->{$field} !== null && trim($record->{$field}) !== '') {
-                        $data = $this->build_data(
-                                $record->id,
-                                $record->{$field},
-                                isset($record->{$field . 'format'}) ?? 0,
-                                $field,
-                                $activity
-                        );
-                        array_push($activitydata, $data);
-                    }
+            foreach ($instances as $activity) {
+                // Build first level activities.
+                $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $activity->modname);
+                // Build outstanding subcontent.
+                switch ($activity->modname) {
+                    case 'book':
+                        include_once($CFG->dirroot . '/mod/book/locallib.php');
+                        $chapters = book_preload_chapters($activitydbrecord);
+                        foreach ($chapters as $c) {
+                            $this->injectbookchapter($activitydata, $c, $activity->section);
+                        }
+                        break;
+                    case 'wiki':
+                        include_once($CFG->dirroot . '/mod/wiki/locallib.php');
+                        $wikis = wiki_get_subwikis($activitydbrecord->id);
+                        foreach ($wikis as $wid => $wiki) {
+                            $firstpage = wiki_get_first_page($wid);
+                            $this->injectwikipage($activitydata, $firstpage, $activity->section);
+                        }
+                        break;
                 }
             }
         }
         return $activitydata;
+    }
+
+    /**
+     * Special function for book's subchapters.
+     *
+     * @param array $activities
+     * @param mixed $chapter
+     * @param int $section
+     * @return void
+     * @throws \dml_exception
+     */
+    private function injectbookchapter(array &$activities, mixed $chapter, int $section) {
+        global $DB;
+        $activity = new \stdClass();
+        $activity->modname = 'book_chapters';
+        $activity->section = $section;
+        // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
+        $activity->content = '';
+        $titledata = $this->build_data(
+                $chapter->id,
+                $chapter->title,
+                0,
+                'title',
+                $activity
+        );
+        $contentdata = $this->build_data(
+                $chapter->id,
+                $chapter->content,
+                1,
+                'content',
+                $activity
+        );
+        array_push($activities, $titledata);
+        array_push($activities, $contentdata);
+    }
+
+    /**
+     * Special functions for wiki pages.
+     *
+     * @param array $activities
+     * @param mixed $chapter
+     * @param int $section
+     * @return void
+     * @throws \dml_exception
+     */
+    private function injectwikipage(array &$activities, mixed $chapter, int $section) {
+        global $DB;
+        $activity = new \stdClass();
+        $activity->modname = 'wiki_pages';
+        $activity->section = $section;
+        // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
+        $activity->content = '';
+        $titledata = $this->build_data(
+                $chapter->id,
+                $chapter->title,
+                0,
+                'title',
+                $activity
+        );
+        $contentdata = $this->build_data(
+                $chapter->id,
+                $chapter->cachedcontent,
+                1,
+                'cachedcontent',
+                $activity
+        );
+        array_push($activities, $titledata);
+        array_push($activities, $contentdata);
+    }
+
+    /**
+     * Sub function that map the main activity generic types to our activitydata format.
+     *
+     * @param array $activities
+     * @param mixed $activity
+     * @param string $table
+     * @return false|mixed|\stdClass
+     * @throws \dml_exception
+     */
+    private function injectactivitydata(array &$activities, mixed $activity) {
+        global $DB;
+        $activitydbrecord = $DB->get_record($activity->modname, ['id' => $activity->instance]);
+        // We build an array of all Text fields for this record.
+        $columns = $DB->get_columns($activity->modname);
+        // Just get db collumns we need (texts content).
+        $textcols = array_filter($columns, [$this, 'filterdbfields']);
+        $textcollumnskeys = array_keys($textcols);
+
+        // Feed the data array with found text.
+        foreach ($textcollumnskeys as $field) {
+            if ($activitydbrecord->{$field} !== null && trim($activitydbrecord->{$field}) !== '') {
+                $data = $this->build_data(
+                        $activitydbrecord->id,
+                        $activitydbrecord->{$field},
+                        isset($activitydbrecord->{$field . 'format'}) ?? 0,
+                        $field,
+                        $activity
+                );
+                array_push($activities, $data);
+            }
+        }
+        return $activitydbrecord;
     }
 
     /**
@@ -256,18 +361,21 @@ class course_data {
      */
     private function build_data(int $id, string $text, int $format, string $field, mixed $activity) {
         global $DB;
+        // Activity stuff.
         $table = $activity->modname;
         $cmid = $activity->id;
         $sectionid = $activity->section;
-        $record = $this->store_status_db($id, $table, $field);
+        $status = $this->store_status_db($id, $table, $field);
         // Build item id, tid, displaytext, format, table, field, tneeded, section.
         $item = new \stdClass();
+        // Object stuff.
         $item->id = $id;
-        $item->tid = $record->id;
+        $item->tid = $status->id;
         $item->displaytext = $item->text = $text;
         // Additional text to display images.
         if (str_contains($text, '@@PLUGINFILE@@')) {
             if (isset($activity->content) && $activity->content != '') {
+                // When activity->content is set the @@PLUGINFILE@@ inside are as URI.
                 $item->displaytext = $activity->content;
             } else {
                 try {
@@ -282,11 +390,10 @@ class course_data {
         $item->table = $table;
         $item->field = $field;
         $item->link = $this->link_builder($id, $table, $cmid);
-        $item->tneeded = $record->s_lastmodified >= $record->t_lastmodified;
+        $item->tneeded = $status->s_lastmodified >= $status->t_lastmodified;
         $item->section = $sectionid;
         // Get the activity icon, if it is a real activity/resource.
         if ($cmid !== null) {
-            include_once($CFG->dirroot . "/mod/$table/lib.php");
             $item->purpose = call_user_func($table . '_supports', FEATURE_MOD_PURPOSE);
             $item->iconurl = $this->modinfo->get_cm($cmid)->get_icon_url()->out(false);
         }

@@ -196,6 +196,13 @@ See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User
 
 ## WARNING
 
+### Complex structures.
+
+Activities/resources with conplex sub content may not all work.
+Book does, but wiki only the first page.
+We planed to parse recursively the wiki pages but somehow not sure it is worse the effort as wiki content is very dynamic and mainly user ("Student") generated.
+We'll gladly take enhancement request based on usecases, please feel free to raise an issue.
+
 ### Multi mlang xx tags inside a field
 
 At this time, Course Translator does not have the ability to translate advanced usage of mlang in content. For example, this includes the use of multiple mlang tags spread

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] 2024-05-07
+
+### Added
+
+- UI display of activity icons and blocks
+
+### Improvements
+
+- Add modal waiting UI when saving huge courses with multiple activities.
+- Don't show the menu entry at all if no API key is present.
+
+### Fixed
+
+- Topics (Section) names are overidden when they hold a non blank summary.
+- Sub pages activities/resoures was not listed.
+
+### Todo
+
+- Mustache the page header.
+- More tests.
+- Add glossary interface.
+- Add user mapping to API key.
+- Refactor API with ©Deepl PHP libs.
+- Insert usage control (per user).
+- Purge vendor's library of duplicates from Moodle's core vendor.
+- Recurvise subcontent parsing (wikis ...)
+
 ## [0.9.9] 2024-04-16
 
 ### Added
