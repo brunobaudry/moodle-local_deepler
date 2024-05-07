@@ -226,7 +226,7 @@ class translate_form extends moodleform {
         $sourceoptions = $this->langpack->preparehtmlotions(true, false);
         $selecttitle = get_string('specialsourcetext', 'local_deepler', strtoupper($this->langpack->currentlang));
         $sourceselect =
-                "<select class='form-select' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
+                "<select class='form-select custom-select' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
                     {$sourceoptions}</select>";
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
