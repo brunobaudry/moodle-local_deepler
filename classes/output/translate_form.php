@@ -184,7 +184,7 @@ class translate_form extends moodleform {
         // Column 2 settings.
         // Edit button.
         $editbuttontitle = get_string('editbutton', 'local_deepler');
-        $editinplacebutton = "<a class='p-1 btn btn-sm btn-outline-info'
+        $editinplacebutton = "<a class='p-2 btn btn-sm btn-outline-info'
                         id='local_deepler__sourcelink' href='{$item->link}' target='_blank'
                             title='$editbuttontitle'>
                             <i class='fa fa-pencil' aria-hidden='true'></i>
@@ -220,13 +220,13 @@ class translate_form extends moodleform {
                     aria-pressed='false'
                     data-toggle='button'
                     role='button'
-                    class='mx-1 btn btn-sm btn-outline-$badgeclass $multilangdisabled'>
+                    class='mx-1 p-2 btn btn-sm btn-outline-$badgeclass $multilangdisabled'>
                     <i class='fa fa-language' aria-hidden='true'></i></span>";
         // Source lang select.
         $sourceoptions = $this->langpack->preparehtmlotions(true, false);
         $selecttitle = get_string('specialsourcetext', 'local_deepler', strtoupper($this->langpack->currentlang));
         $sourceselect =
-                "<select class='form-select' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
+                "<select class='custom-select' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
                     {$sourceoptions}</select>";
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
