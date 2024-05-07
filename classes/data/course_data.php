@@ -319,7 +319,6 @@ class course_data {
      *
      * @param array $activities
      * @param mixed $activity
-     * @param string $table
      * @return false|mixed|\stdClass
      * @throws \dml_exception
      */

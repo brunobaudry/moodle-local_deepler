@@ -167,8 +167,8 @@ class translate_form extends moodleform {
         }
         $titlestring = htmlentities($titlestring, ENT_HTML5);
         // Thew little badge showing the status of the translations.
-        $bulletstatus = "<span id='previousTranslationStatus' title='$titlestring'
-                    class='badge badge-pill $buttonclass'>&nbsp;</span>";
+        $bulletstatus = '<span id="previousTranslationStatus" title="' . $titlestring .
+                '" class="badge badge-pill ' . $buttonclass . '">&nbsp;</span>';
         // The checkbox to select items for batch actions.
         $checkbox = '<input title="' . $titlestring . '"' . " type='checkbox' data-key='$key'
             class='mx-2'
