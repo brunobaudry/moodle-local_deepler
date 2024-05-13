@@ -79,8 +79,7 @@ class course_data {
         // Set language.
         $this->lang = $lang;
         // Set the db fields to skipp.
-        $this->comoncolstoskip =
-                ['*_displayoptions',];
+        $this->comoncolstoskip = ['*_displayoptions'];
         $this->modcolstoskip =
                 ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
                         'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles', 'studentquiz_reportingemail',
