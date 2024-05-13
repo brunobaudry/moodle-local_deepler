@@ -1,20 +1,19 @@
-# Deepl Translator for Moodle
+# Deepler, Multilang Machine Translator for Moodle
 
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Course Translator is a local moodle plugin that provides a content translation page for courses and automatic machine translation using the ©Deepl Pro Translation api. Currently it
-can translate content two levels deep and is developed for those who want to translate a course all on one page without having to navigate to each module and update
-translations.
+Deepler is a local moodle plugin that provides a content translation page for courses and automatic machine translation using the ©Deepl Pro Translation api.
+It is developed for those who want to translate a course all on one page without having to navigate to each module and update translations.
 Translation workflow being the following:
 
 0. Fine tune your ©Deepl's settings.
-1. Select the source language.
+1. Select the source(s) language(s).
 2. Select the target language.
 3. Select the fields to translate.
 4. Send to ©Deepl.
 5. Review and or amend automated translations.
-6. Save translations to Moodle's DB.
+6. Save translations to Moodle's DB (with the multilang {mlang XX} tags).
 
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
@@ -185,12 +184,16 @@ The original content **has already MLANG tag** and the source lang is different 
 
 ![](pix/modules_activities.png)
 
-To help the translator grasp the content's context the text are displayed in the order of appearance of the course and with a "MODULE" separator corresponding to the activities
-grouping.
+Content's texts fields are displayed in the order of appearance of the course.
+A module (course settings, topics etc.) separator corresponding to the activities grouping is displayed with its title,
+underneath you can see it available for translation.
+
+_Note that: for now, the naming of the instances as well ads the fields are the DB ones,
+it will soon be replaced by the one used in Moodle's course layout for a better usability._
 
 ## User tour (inline tutorial)
 
-You can install a [tour guide](https://github.com/brunobaudry/moodle-local_deepler/blob/main/tourguide/tour_export.json) to simplify your translators's trainings.
+You can install a [tour guide](https://github.com/brunobaudry/moodle-local_deepler/blob/main/tourguide/tour_export.json) to simplify your translators' trainings.
 
 See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
 

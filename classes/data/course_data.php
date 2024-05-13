@@ -70,9 +70,11 @@ class course_data {
         $this->modinfo = $modinfo;
         // Set language.
         $this->lang = $lang;
-        // Set the db fileds to skipp.
+        // Set the db fields to skipp.
         $this->colstoskip = ['displayoptions', 'parameters', 'outputformat', 'authors', 'changes', 'conditions',
                 'reference', 'allowedqtypes', 'excluderoles', 'questions', 'csstemplate', 'config', 'firstpagetitle',
+                'moderatorpass', 'participants', 'guestpassword', 'setting', 'strategy', 'json_content', 'filtered',
+                'linkedwooclapeventslug', 'wooclapeventid', 'metadata'
         ];
     }
 
