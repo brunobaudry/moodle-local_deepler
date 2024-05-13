@@ -44,9 +44,17 @@ class course_data {
     /** @var \core\context */
     protected $context;
     /** @var string[]
-     * List of db columns of type text that are know to be useless to tranlsate.
+     * List of db columns of type text that are know to be useless to tranlsate for a specific mod.
      */
-    protected $colstoskip;
+    protected $modcolstoskip;
+    /** @var string[]
+     * List of common db columns of type text that are know to be useless to tranlsate .
+     */
+    protected $comoncolstoskip;
+    /** @var string[]
+     * List of db columns of type text that the user decides they to be useless to tranlsate.
+     */
+    protected $usercolstoskip;
 
     /**
      * Class Construct.
@@ -71,11 +79,17 @@ class course_data {
         // Set language.
         $this->lang = $lang;
         // Set the db fields to skipp.
-        $this->colstoskip = ['displayoptions', 'parameters', 'outputformat', 'authors', 'changes', 'conditions',
-                'reference', 'allowedqtypes', 'excluderoles', 'questions', 'csstemplate', 'config', 'firstpagetitle',
-                'moderatorpass', 'participants', 'guestpassword', 'setting', 'strategy', 'json_content', 'filtered',
-                'linkedwooclapeventslug', 'wooclapeventid', 'metadata'
-        ];
+        $this->comoncolstoskip =
+                ['*_displayoptions',];
+        $this->modcolstoskip =
+                ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
+                        'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles', 'studentquiz_reportingemail',
+                        'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
+                        'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
+                        'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
+                        'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata',
+                ];
+        $this->usercolstoskip = [];
     }
 
     /**
@@ -198,19 +212,6 @@ class course_data {
     }
 
     /**
-     * Looks at a db column and validates that it is of db type text.
-     * And that it is not a know useless to try to translate.
-     *
-     * @param database_column_info $field
-     * @return bool
-     */
-    private function filterdbfields($field) {
-        return (($field->meta_type === "C" && $field->max_length > 254)
-                        || $field->meta_type === "X")
-                && !in_array($field->name, $this->colstoskip);
-    }
-
-    /**
      * Get Activity Data.
      *
      * @return array
@@ -328,11 +329,19 @@ class course_data {
      */
     private function injectactivitydata(array &$activities, mixed $activity) {
         global $DB;
-        $activitydbrecord = $DB->get_record($activity->modname, ['id' => $activity->instance]);
+        $activitymodname = $activity->modname;
+        $activitydbrecord = $DB->get_record($activitymodname, ['id' => $activity->instance]);
         // We build an array of all Text fields for this record.
-        $columns = $DB->get_columns($activity->modname);
+        $columns = $DB->get_columns($activitymodname);
+
         // Just get db collumns we need (texts content).
-        $textcols = array_filter($columns, [$this, 'filterdbfields']);
+        $textcols = array_filter($columns, function($field) use ($activitymodname) {
+            return (($field->meta_type === "C" && $field->max_length > 254)
+                            || $field->meta_type === "X")
+                    && !in_array('*_' . $field->name, $this->comoncolstoskip)
+                    && !in_array($activitymodname . '_' . $field->name, $this->usercolstoskip)
+                    && !in_array($activitymodname . '_' . $field->name, $this->modcolstoskip);
+        });
         $textcollumnskeys = array_keys($textcols);
 
         // Feed the data array with found text.
