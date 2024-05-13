@@ -18,19 +18,11 @@ namespace local_deepler\data;
 
 defined('MOODLE_INTERNAL') || die();
 
+use DeepL\DeepLException;
 use DeepL\Translator;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-/**
- * Language helper.
- *
- * Stores the source and target languages aswell as preparing arrays of verbose or code options for selects.
- *
- * @package    local_deepler
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class lang_helper {
     /**
      * Api pro endpoint.
@@ -112,7 +104,7 @@ class lang_helper {
         $initok = $this->inittranslator();
         if ($initok) {
             try {
-                $this->setsupportedlanguages();
+                $initok = $initok && $this->setsupportedlanguages();
             } catch (\DeepL\AuthorizationException $e) {
                 return false;
             }
@@ -138,8 +130,13 @@ class lang_helper {
      * @throws \DeepL\DeepLException
      */
     private function setsupportedlanguages() {
-        $this->deeplsources = $this->translator->getSourceLanguages();
-        $this->deepltargets = $this->translator->getTargetLanguages();
+        try {
+            $this->deeplsources = $this->translator->getSourceLanguages();
+            $this->deepltargets = $this->translator->getTargetLanguages();
+        } catch (DeepLException $e) {
+            return false;
+        }
+        return true;
     }
 
     /**

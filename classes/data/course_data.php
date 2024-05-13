@@ -262,6 +262,7 @@ class course_data {
         $activity->section = $section;
         // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
         $activity->content = '';
+        // Book chapters have title and content.
         $titledata = $this->build_data(
                 $chapter->id,
                 $chapter->title,
@@ -296,6 +297,7 @@ class course_data {
         $activity->section = $section;
         // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
         $activity->content = '';
+        // Wiki pages have title and cachedcontent.
         $titledata = $this->build_data(
                 $chapter->id,
                 $chapter->title,
@@ -374,7 +376,7 @@ class course_data {
         // Additional text to display images.
         if (str_contains($text, '@@PLUGINFILE@@')) {
             if (isset($activity->content) && $activity->content != '') {
-                // When activity->content is set the @@PLUGINFILE@@ inside are as URI.
+                // When activity->content is set, the image files are not @@PLUGINFILE@@.
                 $item->displaytext = $activity->content;
             } else {
                 try {
