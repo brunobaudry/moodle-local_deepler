@@ -72,10 +72,10 @@ $string['splitsentencesnonewlines'] = 'splits on punctuation only, ignoring newl
 $string['splittingtags'] = 'Splitting tags';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
-$string['tour_advancedsettings0'] =
+$string['tour_advancedsettings00'] =
         'Click here to see how you can fine tune the Deepl’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
-$string['tour_advancedsettings0title'] = 'Deepl’s advanced settings';
-$string['tour_advancedsettings1formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
+$string['tour_advancedsettings00title'] = 'Deepl’s advanced settings';
+$string['tour_advancedsettings01formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
 This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em>
 (<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese),
 <em>JA</em> (Japanese), and <em>RU</em> (Russian).
@@ -88,35 +88,35 @@ Setting this parameter with a target language that does not support formality wi
 <li><em>less</em> - for a more informal language</li>
 <li><em>prefer more</em> - for a more formal language if available, otherwise fallback to default formality</li>
 <li><em>prefer less</em> - for a more informal language if available, otherwise fallback to default formality</li></ul>';
-$string['tour_advancedsettings1formalitytitle'] = 'Formality management';
-$string['tour_advancedsettings2split'] = '<p>Sets whether the translation engine should first split the input into sentences. 
+$string['tour_advancedsettings01formalitytitle'] = 'Formality management';
+$string['tour_advancedsettings02split'] = '<p>Sets whether the translation engine should first split the input into sentences.
 For text translations where <em>checked</em>, meaning the engine splits on punctuation and on newlines.</p>
 <p>For text translations where <em>nonewlines</em>, meaning the engine splits on punctuation only, ignoring newlines.</p>';
-$string['tour_advancedsettings2splittitle'] = 'Manage how sentences are split by line';
-$string['tour_advancedsettings3formating'] = '<p>Sets whether the translation engine should respect the original formatting,
+$string['tour_advancedsettings02splittitle'] = 'Manage how sentences are split by line';
+$string['tour_advancedsettings03formating'] = '<p>Sets whether the translation engine should respect the original formatting,
 even if it would usually correct some aspects.</p>
 <p>The formatting aspects affected by this setting include:</p>
 <ul><li>Punctuation at the beginning and end of the sentence</li><li>Upper/lower case at the beginning of the sentence</li></ul>';
-$string['tour_advancedsettings3formatingtitle'] = 'Manage formating';
-$string['tour_advancedsettings4glossary'] = '<p>Specify the glossary to use for the translation.</p>
+$string['tour_advancedsettings03formatingtitle'] = 'Manage formating';
+$string['tour_advancedsettings04glossary'] = '<p>Specify the glossary to use for the translation.</p>
 <p><em>(Glossaries have to be uploaded via the Deepl API. This is not available yet with this plugin. See with your IT).</em></p>';
-$string['tour_advancedsettings4glossarytitle'] = 'Glossary';
-$string['tour_advancedsettings5context'] = '<p>This additional context can potentially improve translation quality when translating short,
+$string['tour_advancedsettings04glossarytitle'] = 'Glossary';
+$string['tour_advancedsettings05context'] = '<p>This additional context can potentially improve translation quality when translating short,
 low-context source texts.</p><p>The <em>context</em> parameter is an <strong>alpha feature</strong>.</p>
 <p>So try to add some context if you feel the translated results could be improved, but you should not rely on it.</p>';
-$string['tour_advancedsettings5contexttitle'] =
+$string['tour_advancedsettings05contexttitle'] =
         'Contextual information that can influence a translation but is not translated itself.';
-$string['tour_advancedsettings6tag'] = '<p>Sets which kind of tags should be handled.</p>
+$string['tour_advancedsettings06tag'] = '<p>Sets which kind of tags should be handled.</p>
 <p>By default, the translation engine does not take tags into account.</p>
 <p>By setting the <em>tag handling</em> parameter to either <em>xml</em> or <em>html</em>,
 the API will process the markup input by extracting the text out of the structure, splitting it into individual sentences,
 translating them, and placing them back into the respective markup structure.</p>';
-$string['tour_advancedsettings6tagtitle'] = 'Tag handling';
-$string['tour_advancedsettings7outline'] = '<p>The automatic detection of the XML structure won’t yield best results in all XML files.
+$string['tour_advancedsettings06tagtitle'] = 'Tag handling';
+$string['tour_advancedsettings07outline'] = '<p>The automatic detection of the XML structure won’t yield best results in all XML files.
 You can disable this automatic mechanism altogether by setting the <em>outline detection</em> parameter to <em>unchecked</em>
 and selecting the tags that should be considered structure tags. This will split sentences using the <em>splitting tags</em> parameter.</p>';
-$string['tour_advancedsettings7outlinetitle'] = 'How outline is detected in XML';
-$string['tour_advancedsettings8skiptag'] = '<p>Comma-separated list of XML or HTML tags that indicate text not to be translated.</p>
+$string['tour_advancedsettings07outlinetitle'] = 'How outline is detected in XML';
+$string['tour_advancedsettings08skiptag'] = '<p>Comma-separated list of XML or HTML tags that indicate text not to be translated.</p>
 <p>To ensure that elements in the original text are not altered in translation (e.g. trademarks or product names).</p>
 <p>Expl: adding "x" in the list :</p><p>Request:<em> Please open the page &lt;x&gt;Settings&lt;/x&gt; to configure your system.</em></p>
 <p>Response:<em>Bitte öffnen Sie die Seite &lt;x&gt;Settings&lt;/x&gt; um Ihr System zu konfigurieren.</em></p>
@@ -124,15 +124,15 @@ $string['tour_advancedsettings8skiptag'] = '<p>Comma-separated list of XML or HT
 <p><code>  &lt;body&gt;</code><br /><code>    &lt;h1&gt;My First Heading&lt;/h1&gt;</code><br /><code>    &lt;p
 <strong>translate="no"</strong>&gt;This will not be translated.&lt;/p&gt;</code><br /><code>  &lt;/body&gt;</code></p>
 <p></p>';
-$string['tour_advancedsettings8skiptagtitle'] =
+$string['tour_advancedsettings08skiptagtitle'] =
         'Skip translating certain tags’ content.';
-$string['tour_advancedsettings9splittag'] = '<p>Comma-separated list of XML or HTML tags which never split sentences.</p>';
-$string['tour_advancedsettings9splittagtitle'] =
+$string['tour_advancedsettings09splittag'] = '<p>Comma-separated list of XML or HTML tags which never split sentences.</p>';
+$string['tour_advancedsettings09splittagtitle'] =
         'Tags that should not be considered to split the sentences.';
 $string['tour_advancedsettings10splittag'] = '<p>Comma-separated list of XML or HTML tags which always cause splits.</p>';
 $string['tour_advancedsettings10splittagtitle'] =
         'Tag that will split the text into sentences.';
-$string['tour_advancedsettings11sourcelang'] = '<p>The source lang is the language in which the course was written. 
+$string['tour_advancedsettings11sourcelang'] = '<p>The source lang is the language in which the course was written.
 It is best practice to keep the same language throughout the whole course.</p>';
 $string['tour_advancedsettings11sourcelangtitle'] =
         'Source lang';
@@ -147,7 +147,7 @@ $string['tour_advancedsettings13filters'] = '<p>These filter show/hide the textu
 <p><strong>Needs update:<br /></strong></p>
 <p>These are the textual contents that were never translated or that were modified after being translated.</p>
 <p>They appear with the <span class="badge badge-pill badge-danger"> </span> indicator when they were never translated. </p>
-<p>They appear with the <span class="badge badge-pill badge-warning"> </span> 
+<p>They appear with the <span class="badge badge-pill badge-warning"> </span>
 indicator when they were already translated but the source text change since.</p>';
 $string['tour_advancedsettings13filterstitle'] =
         'Translation status filters';
@@ -184,7 +184,7 @@ $string['tour_advancedsettings19editsourcetitle'] =
 $string['tour_advancedsettings20togglemultilang'] =
         '<p>When translations {mlang} tags are present, this button appears.</p>
 <p><i class="fa fa-language"></i></p>
-<p>Click on it to toggle the content and see what was already translated. If the current selected source language is found in the 
+<p>Click on it to toggle the content and see what was already translated. If the current selected source language is found in the
 MLANG tags then this is displayed in red to alert you that the tag will be overriden.</p>';
 $string['tour_advancedsettings20togglemultilangtitle'] =
         'Toggle mutlilang content.';
