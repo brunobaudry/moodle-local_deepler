@@ -75,12 +75,13 @@ $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quo
 $string['tour_advancedsettings0'] =
         'Click here to see how you can fine tune the Deepl’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
 $string['tour_advancedsettings0title'] = 'Deepl’s advanced settings';
-$string['tour_advancedsettings1formality'] = '<p>Sets whether the translated text should lean towards formal or informal language. 
-This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em> 
-(<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese), <em>JA</em> (Japanese), and <em>RU</em> (Russian). 
+$string['tour_advancedsettings1formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
+This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em>
+(<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese),
+<em>JA</em> (Japanese), and <em>RU</em> (Russian).
 Learn more about the plain\/polite feature for Japanese <a
-href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese">here</a>. 
-Setting this parameter with a target language that does not support formality will fail, unless one of the 
+href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese">here</a>.
+Setting this parameter with a target language that does not support formality will fail, unless one of the&nbsp;
 <em>prefer_...</em> options are used. Possible options are:</p>
 <ul><li><em>default</em> (default)</li>
 <li><em>more</em> - for a more formal language</li>
@@ -92,7 +93,7 @@ $string['tour_advancedsettings2split'] = '<p>Sets whether the translation engine
 For text translations where <em>checked</em>, meaning the engine splits on punctuation and on newlines.</p>
 <p>For text translations where <em>nonewlines</em>, meaning the engine splits on punctuation only, ignoring newlines.</p>';
 $string['tour_advancedsettings2splittitle'] = 'Manage how sentences are split by line';
-$string['tour_advancedsettings3formating'] = '<p>Sets whether the translation engine should respect the original formatting, 
+$string['tour_advancedsettings3formating'] = '<p>Sets whether the translation engine should respect the original formatting,
 even if it would usually correct some aspects.</p>
 <p>The formatting aspects affected by this setting include:</p>
 <ul><li>Punctuation at the beginning and end of the sentence</li><li>Upper/lower case at the beginning of the sentence</li></ul>';
@@ -100,19 +101,19 @@ $string['tour_advancedsettings3formatingtitle'] = 'Manage formating';
 $string['tour_advancedsettings4glossary'] = '<p>Specify the glossary to use for the translation.</p>
 <p><em>(Glossaries have to be uploaded via the Deepl API. This is not available yet with this plugin. See with your IT).</em></p>';
 $string['tour_advancedsettings4glossarytitle'] = 'Glossary';
-$string['tour_advancedsettings5context'] = '<p>This additional context can potentially improve translation quality when translating short, 
+$string['tour_advancedsettings5context'] = '<p>This additional context can potentially improve translation quality when translating short,
 low-context source texts.</p><p>The <em>context</em> parameter is an <strong>alpha feature</strong>.</p>
 <p>So try to add some context if you feel the translated results could be improved, but you should not rely on it.</p>';
 $string['tour_advancedsettings5contexttitle'] =
         'Contextual information that can influence a translation but is not translated itself.';
 $string['tour_advancedsettings6tag'] = '<p>Sets which kind of tags should be handled.</p>
 <p>By default, the translation engine does not take tags into account.</p>
-<p>By setting the <em>tag handling</em> parameter to either <em>xml</em> or <em>html</em>, 
-the API will process the markup input by extracting the text out of the structure, splitting it into individual sentences, 
+<p>By setting the <em>tag handling</em> parameter to either <em>xml</em> or <em>html</em>,
+the API will process the markup input by extracting the text out of the structure, splitting it into individual sentences,
 translating them, and placing them back into the respective markup structure.</p>';
 $string['tour_advancedsettings6tagtitle'] = 'Tag handling';
-$string['tour_advancedsettings7outline'] = '<p>The automatic detection of the XML structure won’t yield best results in all XML files. 
-You can disable this automatic mechanism altogether by setting the <em>outline detection</em> parameter to <em>unchecked</em> 
+$string['tour_advancedsettings7outline'] = '<p>The automatic detection of the XML structure won’t yield best results in all XML files.
+You can disable this automatic mechanism altogether by setting the <em>outline detection</em> parameter to <em>unchecked</em>
 and selecting the tags that should be considered structure tags. This will split sentences using the <em>splitting tags</em> parameter.</p>';
 $string['tour_advancedsettings7outlinetitle'] = 'How outline is detected in XML';
 $string['tour_advancedsettings8skiptag'] = '<p>Comma-separated list of XML or HTML tags that indicate text not to be translated.</p>
@@ -120,7 +121,8 @@ $string['tour_advancedsettings8skiptag'] = '<p>Comma-separated list of XML or HT
 <p>Expl: adding "x" in the list :</p><p>Request:<em> Please open the page &lt;x&gt;Settings&lt;/x&gt; to configure your system.</em></p>
 <p>Response:<em>Bitte öffnen Sie die Seite &lt;x&gt;Settings&lt;/x&gt; um Ihr System zu konfigurieren.</em></p>
 <p>In HTML you can also use the <code><strong>translate="no"</strong></code> attribute :</p>
-<p><code>  &lt;body&gt;</code><br /><code>    &lt;h1&gt;My First Heading&lt;/h1&gt;</code><br /><code>    &lt;p <strong>translate="no"</strong>&gt;This will not be translated.&lt;/p&gt;</code><br /><code>  &lt;/body&gt;</code></p>
+<p><code>  &lt;body&gt;</code><br /><code>    &lt;h1&gt;My First Heading&lt;/h1&gt;</code><br /><code>    &lt;p
+<strong>translate="no"</strong>&gt;This will not be translated.&lt;/p&gt;</code><br /><code>  &lt;/body&gt;</code></p>
 <p></p>';
 $string['tour_advancedsettings8skiptagtitle'] =
         'Skip translating certain tags’ content.';

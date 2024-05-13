@@ -23,6 +23,13 @@ use DeepL\Translator;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
+/**
+ * Helper class to connect to Deepl's API, fetch the available lang combinaisons etc.
+ *
+ * @package local_deepler
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class lang_helper {
     /**
      * Api pro endpoint.
