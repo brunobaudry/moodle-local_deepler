@@ -31,6 +31,7 @@ $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
         'Tell the translator (Deepl) about the context, to help it translate in a more contextual way... ';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
+$string['deepler:edittranslations'] = 'Edit course translations in Deepl Translator';
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'Enable this to use DeepL Pro instead of the free version of DeepL.';
 $string['editbutton'] = 'Edit source in place';
