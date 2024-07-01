@@ -23,8 +23,7 @@
 import ajax from "core/ajax";
 import Selectors from "./selectors";
 import Modal from 'core/modal';
-import {get_string} from 'core/str';
-
+import {get_string as getString} from "core/str";
 
 // Initialize the temporary translations dictionary @todo make external class
 let tempTranslations = {};
@@ -173,11 +172,11 @@ const showErrorMessageForEditor = (key, message) => {
  * Opens a modal infobox to warn user trunks of fields are saving.
  * @returns {Promise<void>}
  */
-const launchModal = async() => {
+const launchModal = async () => {
     // ...
     saveAllModal = await Modal.create({
-        title: get_string('saveallmodaltitle', 'local_deepler'),
-        body: get_string('saveallmodalbody', 'local_deepler'),
+        title: getString('saveallmodaltitle', 'local_deepler'),
+        body: getString('saveallmodalbody', 'local_deepler'),
     });
     saveAllModal.show();
 };
