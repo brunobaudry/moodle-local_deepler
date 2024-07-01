@@ -64,7 +64,7 @@ class course_data {
      * @param context $context
      * @throws \moodle_exception
      */
-    public function __construct(\stdClass $course, string $lang = null, context $context) {
+    public function __construct(\stdClass $course, string $lang, context $context) {
         // Set db table.
         $this->dbtable = 'local_deepler';
         // Store context.
