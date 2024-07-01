@@ -58,7 +58,7 @@ final class langhelper_test extends advanced_testcase {
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    protected function setUp(): void{
+    protected function setUp(): void {
         parent::setUp();
         $this->langhelper = new lang_helper();
         $this->langhelper->init('abcd');
