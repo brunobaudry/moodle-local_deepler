@@ -37,7 +37,7 @@ require_once(__DIR__ . '/../classes/vendor/autoload.php');
  *
  * @covers \lang_helper
  */
-final class langhelper_test extends advanced_testcase{
+final class langhelper_test extends advanced_testcase {
     /**
      * The object to test.
      *
@@ -71,7 +71,7 @@ final class langhelper_test extends advanced_testcase{
      * @covers ::prepareoptionlangs
      * @return void
      */
-    public function test_prepareoptionlangs(): void{
+    public function test_prepareoptionlangs(): void {
         $options = $this->langhelper->prepareoptionlangs(true, true);
 
         $this->assertIsArray($options);
@@ -91,7 +91,7 @@ final class langhelper_test extends advanced_testcase{
      *
      * @return void
      */
-    public function test_preparehtmloptions(): void{
+    public function test_preparehtmloptions(): void {
         $htmloptions = $this->langhelper->preparehtmlotions(true, true);
         $this->assertIsString($htmloptions);
         $this->assertStringContainsString('<option', $htmloptions);
