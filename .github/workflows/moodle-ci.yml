@@ -165,7 +165,7 @@ jobs:
 
       - name: Grunt
         if: ${{ always() }}
-        run: moodle-plugin-ci grunt --force --max-lint-warnings 10
+        run: moodle-plugin-ci grunt --max-lint-warnings 10
 
       - name: PHPUnit tests
         if: ${{ always() }}
