@@ -112,7 +112,7 @@ $secondary: $gray-400 !default;
         }
 
         textarea[data-action="local_deepler/editor"] {
-            width: 100%;
+            width: 100%; /* editor tweaks */
             min-height: 300px;
         }
 
