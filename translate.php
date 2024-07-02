@@ -95,7 +95,7 @@ if ($initok) {
     $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
 
     // Output translation grid.
-    $coursedata = new course_data($course, $languagepack->targetlang, $context);
+    $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
 
     // Build the page.
     $prepareddata = $coursedata->getdata();

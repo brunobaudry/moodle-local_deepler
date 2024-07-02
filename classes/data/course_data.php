@@ -16,8 +16,6 @@
 
 namespace local_deepler\data;
 
-use core\context;
-
 /**
  * Course Data Processor.
  *
@@ -41,7 +39,7 @@ class course_data {
     protected $lang;
     /** @var string */
     protected $contextid;
-    /** @var \core\context */
+    /** @var context_course */
     protected $context;
     /** @var string[]
      * List of db columns of type text that are know to be useless to tranlsate for a specific mod.
@@ -61,18 +59,16 @@ class course_data {
      *
      * @param \stdClass $course
      * @param string $lang
-     * @param context $context
+     * @param int $contextid
      * @throws \moodle_exception
      */
-    public function __construct(\stdClass $course, string $lang, context $context) {
+    public function __construct(\stdClass $course, string $lang, int $contextid) {
         // Set db table.
         $this->dbtable = 'local_deepler';
-        // Store context.
-        $this->context = $context;
         // Set course.
         $this->course = $course;
-        // Get the context.
-        $this->contextid = $this->context->id;
+        // Get the context id.
+        $this->contextid = $contextid;
         // Set modinfo.
         $modinfo = get_fast_modinfo($course);
         $this->modinfo = $modinfo;

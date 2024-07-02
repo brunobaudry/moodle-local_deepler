@@ -99,7 +99,7 @@ final class translate_test extends advanced_testcase {
         $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/data/course_data.php');
         $course = $this->getDataGenerator()->create_course();
         $context = context_course::instance($course->id);
-        $coursedata = new course_data($course, $CFG->lang, $context);
+        $coursedata = new course_data($course, $CFG->lang, $context->id);
         $this->assertNotNull($coursedata);
         $getdata = $coursedata->getdata();
         $this->assertIsArray($getdata);
