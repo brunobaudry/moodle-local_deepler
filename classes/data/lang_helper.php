@@ -85,8 +85,8 @@ class lang_helper {
     private mixed $deepltargets;
     /**
      * Deepl usage bound to the api key.
-     *  
-     * @var Usage 
+     *
+     * @var Usage
      */
     protected Usage $usage;
 
@@ -118,10 +118,9 @@ class lang_helper {
         $initok = $this->inittranslator();
         if ($initok) {
             try {
-                try{
+                try {
                     $this->usage = $this->translator->getUsage();
-                }
-                catch(DeepLException $e){
+                } catch (DeepLException $e){
                     $initok = false;
                 }
                 $initok = $initok && $this->setsupportedlanguages();
@@ -230,9 +229,8 @@ class lang_helper {
         $config->apikey = $this->apikey;
         $config->usage = $this->usage;
         try{
-            $config->limitReached = $config->usage->anyLimitReached();  
-        }
-        catch(DeepLException $e){
+            $config->limitReached = $config->usage->anyLimitReached();
+        } catch (DeepLException $e) {
             $config->limitReached = true;
         }
         $config->lang = $this->targetlang;
