@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use DeepL\DeepLException;
 use DeepL\Translator;
+use Deepl\Usage;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -82,6 +83,12 @@ class lang_helper {
      * @var object
      */
     private mixed $deepltargets;
+    /**
+     * Deepl usage bound to the api key.
+     *  
+     * @var Usage 
+     */
+    protected Usage $usage;
 
     /**
      * Constructor.
@@ -111,6 +118,12 @@ class lang_helper {
         $initok = $this->inittranslator();
         if ($initok) {
             try {
+                try{
+                    $this->usage = $this->translator->getUsage();
+                }
+                catch(DeepLException $e){
+                    $initok = false;
+                }
                 $initok = $initok && $this->setsupportedlanguages();
             } catch (\DeepL\AuthorizationException $e) {
                 return false;
@@ -156,7 +169,7 @@ class lang_helper {
     private function inittranslator() {
         if (!isset($this->translator)) {
             try {
-                $this->translator = new \DeepL\Translator($this->apikey);
+                $this->translator = new \DeepL\Translator($this->apikey, ['send_platform_info' => false]);
             } catch (\DeepL\AuthorizationException $e) {
                 return false;
             }
@@ -169,6 +182,7 @@ class lang_helper {
      *
      * @param bool $issource
      * @param bool $verbose
+
      * @return array
      */
     public function prepareoptionlangs(bool $issource, bool $verbose = true) {
@@ -210,13 +224,17 @@ class lang_helper {
      *
      * @param object $config
      * @return object
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
+     * @throws DeepLException
      */
     public function addlangproperties(object &$config) {
         $config->apikey = $this->apikey;
-        $config->usage = $this->translator->getUsage();
-        $config->limitReached = $config->usage->anyLimitReached();
+        $config->usage = $this->usage;
+        try{
+            $config->limitReached = $config->usage->anyLimitReached();  
+        }
+        catch(DeepLException $e){
+            $config->limitReached = true;
+        }
         $config->lang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplurl = boolval(get_config('local_deepler', 'deeplpro')) ? self::$deeplpro : self::$deeplfree;
