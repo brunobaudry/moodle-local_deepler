@@ -120,7 +120,7 @@ class lang_helper {
             try {
                 try {
                     $this->usage = $this->translator->getUsage();
-                } catch (DeepLException $e){
+                } catch (DeepLException $e) {
                     $initok = false;
                 }
                 $initok = $initok && $this->setsupportedlanguages();
@@ -228,7 +228,7 @@ class lang_helper {
     public function addlangproperties(object &$config) {
         $config->apikey = $this->apikey;
         $config->usage = $this->usage;
-        try{
+        try {
             $config->limitReached = $config->usage->anyLimitReached();
         } catch (DeepLException $e) {
             $config->limitReached = true;
