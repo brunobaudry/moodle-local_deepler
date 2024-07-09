@@ -89,6 +89,12 @@ class lang_helper {
      * @var Usage
      */
     protected Usage $usage;
+    /**
+     * Admiin setting to map sublang code to its main.
+     *
+     * @var bool
+     */
+    protected $allowsublangcodesasmain;
 
     /**
      * Constructor.
@@ -100,6 +106,7 @@ class lang_helper {
         $this->apikey = 'abcd';
         $this->deepltargets = 'en';
         $this->deeplsources = 'en';
+        $this->allowsublangcodesasmain = get_config('local_deepler', 'allowsublangs');
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', 'en', PARAM_NOTAGS);
         $this->langs = get_string_manager()->get_list_of_translations();
@@ -123,7 +130,12 @@ class lang_helper {
                 } catch (DeepLException $e) {
                     $initok = false;
                 }
-                $initok = $initok && $this->setsupportedlanguages();
+                $noissuewithsupportedlanguages = $this->setsupportedlanguages();
+                $initok = $initok && $noissuewithsupportedlanguages;
+                $hasunderscore = strpos($this->currentlang, '_');
+                if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
+                    $this->currentlang = substr($this->currentlang, 0, $hasunderscore);
+                }
             } catch (\DeepL\AuthorizationException $e) {
                 return false;
             }
@@ -148,7 +160,7 @@ class lang_helper {
      * @return void
      * @throws \DeepL\DeepLException
      */
-    private function setsupportedlanguages() {
+    private function setsupportedlanguages(): bool {
         try {
             $this->deeplsources = $this->translator->getSourceLanguages();
             $this->deepltargets = $this->translator->getTargetLanguages();
@@ -181,7 +193,6 @@ class lang_helper {
      *
      * @param bool $issource
      * @param bool $verbose
-
      * @return array
      */
     public function prepareoptionlangs(bool $issource, bool $verbose = true) {
@@ -257,5 +268,14 @@ class lang_helper {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if source language is supported.
+     *
+     * @return bool
+     */
+    public function iscurrentsupported(): bool {
+        return $this->islangsupported($this->currentlang, true, true);
     }
 }

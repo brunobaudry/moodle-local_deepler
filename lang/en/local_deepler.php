@@ -24,6 +24,9 @@
  * @see        https://docs.moodle.org/dev/String_API
  */
 defined('MOODLE_INTERNAL') || die();
+$string['allowsublangs'] = 'Allow sub-languages to be mapped to their main';
+$string['allowsublangs_desc'] = 'If your installation has sub local language, for exemple de_ch, it will be considered as its main '
+        . '(de), else the plugin will display an "source lang unsupported" error page (defaults to true)';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your api key from DeepL to use machine translation.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
@@ -49,6 +52,7 @@ $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
         ':-( Cannot connect to Deepl API. <br/>Check with your admin. Looks like there is a network issue.';
 $string['nonsplittingtags'] = 'Non splitting tags';
+$string['notsupportedsource'] = 'The source language you are in is not supported by Deepl.';
 $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
@@ -177,8 +181,8 @@ $string['tour_advancedsettings18selection'] =
 $string['tour_advancedsettings18selectiontitle'] =
         'Selection checkbox';
 $string['tour_advancedsettings19editsource'] =
-        '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa fa-pencil"> </i></span> 
-Clicking on the pencil will jump to the course editor in the Moodle course.</p>
+        '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa fa-pencil"> </i>
+</span> Clicking on the pencil will jump to the course editor in the Moodle course.</p>
 <p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.</p>';
 $string['tour_advancedsettings19editsourcetitle'] =
         'Edit source in place.';

@@ -47,6 +47,12 @@ you are using ©Deepl API Free or ©Deepl API Pro, and enable/disable the autotr
 the [©Deepl API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
+#### Sub languages (expl: de_ch, en_za etc...)
+
+Currently Deepl doesn't support any. See https://developers.deepl.com/docs/resources/supported-languages.
+The plugin gives you the possiblity to use these sub languages if your moodle install has them as if they were their parent language.
+This setting is ticked by default.
+
 ![](pix/admin.png)
 
 ## Translating

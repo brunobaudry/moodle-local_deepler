@@ -52,4 +52,13 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     false
             )
     );
+    // Allow the sub languages codes, that may not be supported by Deepl to be mapped as the main one (expl de_ch -> de).
+    $settings->add(
+            new admin_setting_configcheckbox(
+                    'local_deepler/allowsublangs',
+                    get_string('allowsublangs', 'local_deepler'),
+                    get_string('allowsublangs_desc', 'local_deepler'),
+                    1
+            )
+    );
 }

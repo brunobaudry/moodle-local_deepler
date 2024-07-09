@@ -14,22 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace local_deepler\output;
+
+use renderable;
+use renderer_base;
+use templatable;
+
 /**
- * Local Course Translator.
+ * Translate Page Output.
+ * Provides output class for /local/deepler/translate.php when error with unsupported source is found.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @see        https://docs.moodle.org/dev/version.php
  */
-
-defined('MOODLE_INTERNAL') || die();
-$plugin->component = 'local_deepler'; // Full name of the plugin (used for diagnostics).
-$plugin->version = 2024070900; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires = 2020061500; // Requires Moodle 3.9 LTS.
-$plugin->supported = [401, 404]; // Supported Moodle Versions.
-$plugin->maturity = MATURITY_ALPHA; // Maturity level.
-$plugin->release = 'v1.0.1'; // Semantic Versioning for CHANGES.md.
-// Dependencies.
-$plugin->dependencies = ['filter_multilang2' => 2020101300];
+class sourcenotsupported_page implements renderable, templatable {
+    /**
+     * Export to Template.
+     *
+     * @param renderer_base $output
+     * @return string
+     */
+    public function export_for_template(renderer_base $output) {
+        return '';
+    }
+}

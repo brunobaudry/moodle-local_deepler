@@ -79,30 +79,38 @@ $mlangfilter = new filter_multilang2($context, []);
 echo $output->heading($mlangfilter->filter($course->fullname));
 
 if ($initok) {
-    // Set js data.
-    $jsconfig = new stdClass();
-    $jsconfig = $languagepack->addlangproperties($jsconfig);
-    // Prepare course data.
-    $jsconfig->courseid = $courseid;
-    $jsconfig->debug = $CFG->debug;
+    if ($languagepack->iscurrentsupported()) {
+        // Set js data.
+        $jsconfig = new stdClass();
+        $jsconfig = $languagepack->addlangproperties($jsconfig);
+        // Prepare course data.
+        $jsconfig->courseid = $courseid;
+        $jsconfig->debug = $CFG->debug;
 
-    $defaulteditor = strstr($CFG->texteditors, ',', true);
-    $userprefs = get_user_preferences();
-    // Get users prefrences to pass the editor's type to js.
-    $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
+        $defaulteditor = strstr($CFG->texteditors, ',', true);
+        $userprefs = get_user_preferences();
+        // Get users prefrences to pass the editor's type to js.
+        $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
 
-    // Adding page JS.
-    $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
+        // Adding page JS.
+        $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
 
-    // Output translation grid.
-    $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
+        // Output translation grid.
+        $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
 
-    // Build the page.
-    $prepareddata = $coursedata->getdata();
-    $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack);
-    echo $output->render($renderable);
-    // Output footer.
-    echo $output->footer();
+        // Build the page.
+        $prepareddata = $coursedata->getdata();
+        $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack);
+        echo $output->render($renderable);
+        // Output footer.
+        echo $output->footer();
+    } else {
+        $renderable = new \local_deepler\output\sourcenotsupported_page();
+        echo $output->render($renderable);
+        // Output footer.
+        echo $output->footer();
+    }
+
 } else {
     $renderable = new \local_deepler\output\nodeepl_page();
     echo $output->render($renderable);
