@@ -234,6 +234,12 @@ Should work with the following editors:
 - Tiny
 - Marklar
 
+It uses the default Moodle JS library and is tested with Boost and Classic.
+So there could be incompatibilities with other themes.
+Known so far :
+
+- [Adaptable](https://moodle.org/plugins/theme_adaptable)  no working for now.
+
 ## How does this plugin differs from Content Translation Manager and Content Translation Filter?
 
 This plugin does not translate every string on your site. It is only meant for translating courses and it uses Moodle's built in multilingual features along with ```{mlang}``` to
