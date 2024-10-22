@@ -29,6 +29,11 @@ never be 100% accurate specially in the context of knowledge transmission where 
 Clone or [download](https://github.com/brunobaudry/moodle-local_deepler/releases) this plugin to ```/moodlewww/local/deepler``` and run through the database
 upgrade process.
 
+### Dependencies
+
+You need a [©Deepl API](https://www.deepl.com/en/pro-api)  Free or Pro account.
+[Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
+
 ## Configuration
 
 ### Permissions
