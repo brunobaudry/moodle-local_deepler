@@ -38,7 +38,25 @@ let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
 let batchSaving = 0;
-
+let log = function () {
+    return;
+};
+let warn = function () {
+    return;
+};
+let info = function () {
+    return;
+};
+let error = function () {
+    return;
+};
+const debug = {
+    NONE: 0,
+    MINIMAL: 5,
+    NORMAL: 15,
+    ALL: 30719,
+    DEVELOPER: 32767
+};
 const registerEventListeners = () => {
     document.addEventListener('change', e => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
@@ -84,7 +102,7 @@ const registerEventListeners = () => {
                     batchSaving++;
                     saveTranslation(key);
                 } else {
-                    window.console.warn("not translated " + key);
+                    warn("not translated " + key);
                 }
             });
             if (batchSaving > 0) {
@@ -103,10 +121,12 @@ const registerUI = () => {
         autotranslateButton = document.querySelector(Selectors.actions.autoTranslateBtn);
         checkboxes = document.querySelectorAll(Selectors.actions.checkBoxes);
         // Initialise status object.
-        checkboxes.forEach((node) => (tempTranslations[node.dataset.key] = {}));
+        checkboxes.forEach((node) => {
+            tempTranslations[node.dataset.key] = {};
+        });
     } catch (e) {
         if (config.debug) {
-            window.console.error(e.message);
+            error(e.message);
         }
     }
 };
@@ -115,14 +135,29 @@ const registerUI = () => {
  * @param {Object} cfg JS Config
  */
 export const init = (cfg) => {
+    log('init');
     config = cfg;
-    config.debug = 0;
     usage = config.usage;
-    if (config.debug > 0) {
-        window.console.info("debugging deepler");
-        window.console.info(config);
-        window.console.info(usage);
+    // Preparing the debugger.
+    if (config.debug === debug.MINIMAL) {
+        error = window.console.error.bind(window.console);
+    } else if (config.debug === debug.NORMAL) {
+        error = window.console.error.bind(window.console);
+        warn = window.console.warn.bind(window.console);
+    } else if (config.debug === debug.ALL) {
+        error = window.console.error.bind(window.console);
+        warn = window.console.warn.bind(window.console);
+        info = window.console.info.bind(window.console);
+    } else if (config.debug === debug.DEVELOPER) {
+        error = window.console.error.bind(window.console);
+        warn = window.console.warn.bind(window.console);
+        info = window.console.info.bind(window.console);
+        log = window.console.log.bind(window.console);
     }
+    info("DEEPLER loaded");
+    log(config);
+    warn("Deepl's usage", usage);
+    error("testing developper level");
     mainEditorType = config.userPrefs;
     // Setup.
     registerUI();
@@ -143,7 +178,7 @@ export const init = (cfg) => {
                 /**
                  * @todo do a UI feedback (disable save )
                  */
-                window.console.warn(`Transaltion key "${key}" is undefined `,);
+                error(`Translation key "${key}" is undefined `);
             } else {
                 saveTranslation(key);
             }
@@ -202,9 +237,7 @@ const saveTranslation = (key) => {
     fielddata.id = parseInt(id);
     fielddata.table = table;
     fielddata.field = field;
-    if (config.debug > 0) {
-        window.console.info(fielddata);
-    }
+    info(fielddata);
     // Get the latest data to parse text against.
     ajax.call([
         {
@@ -233,10 +266,8 @@ const saveTranslation = (key) => {
                     tdata.table = table;
                     tdata.field = field;
                     tdata.text = updatedtext;
-                    if (config.debug > 0) {
-                        window.console.info(updatedtext);
-                        window.console.info(tdata);
-                    }
+                    info(updatedtext);
+                    info(tdata);
                     // Success Message
                     const successMessage = () => {
                         element.classList.add("local_deepler__success");
@@ -254,14 +285,13 @@ const saveTranslation = (key) => {
                         });
                     };
                     // Error Mesage
-                    const errorMessage = (error) => {
-                        window.console.warn(error);
+                    const errorMessage = (err) => {
                         editor.classList.add("local_deepler__error");
                         setIconStatus(key, Selectors.statuses.failed);
-                        const setIndex = error.debuginfo.indexOf("SET") === -1 ? 15 : error.debuginfo.indexOf("SET");
-                        let message = error.message + '<br/>' + error.debuginfo.slice(0, setIndex) + '...';
+                        const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
+                        let message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
                         if (config.debug > 0) {
-                            message = error.debuginfo;
+                            message = err.debuginfo;
                         }
                         showErrorMessageForEditor(key, message);
                     };
@@ -274,10 +304,8 @@ const saveTranslation = (key) => {
                             },
                             done: (data) => {
                                 // Print response to console log
-                                if (config.debug > 0) {
-                                    window.console.info("ws: ", key, data);
-                                }
-                                // If we launche saving by the save all button, manage the modal infobox.
+                                info("ws: ", key, data);
+                                // If we launch saving by the save all button, manage the modal infobox.
                                 if (saveAllModal !== null && saveAllModal.isVisible) {
                                     batchSaving--;
                                     if (batchSaving === 0) {
@@ -303,20 +331,20 @@ const saveTranslation = (key) => {
                                     errorMessage();
                                 }
                             },
-                            fail: (error) => {
+                            fail: (err) => {
                                 // An error occurred
-                                errorMessage(error);
+                                errorMessage(err);
                             },
                         },
                     ]);
                 } else {
                     // Something went wrong with field retrieval
-                    window.console.warn(data);
+                    warn(data);
                 }
             },
-            fail: (error) => {
+            fail: (err) => {
                 // An error occurred
-                window.console.warn(error);
+                error(err);
             },
         },
     ]);
@@ -410,9 +438,7 @@ const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
     return manipulatedText;
 };
 const onItemChecked = (e) => {
-    if (config.debug > 0) {
-        window.console.info("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
-    }
+    log("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
     const key = e.target.getAttribute('data-key');
     if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
         toggleStatus(key, e.target.checked);
@@ -588,9 +614,7 @@ const getTranslation = (key) => {
     formData.append("non_splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value));
     formData.append("splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value));
     formData.append("ignore_tags", toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value));
-    if (config.debug) {
-        window.console.info("Send deepl:", formData);
-    }
+    info("Send deepl:", formData);
     // Update the translation
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
@@ -611,6 +635,9 @@ const getTranslation = (key) => {
                 // Oh no! There has been an error with the request!
                 setIconStatus(key, Selectors.statuses.failed, false);
             }
+        } else if (typeof xhr.readyState !== 'number') {
+            log('ERROR : Some javascript library in your Moodle install are overriding the core functionalities in a wrong way.' +
+                ' xhr.readyState MUST be of type "number"');
         }
     };
     xhr.open("POST", config.deeplurl);
@@ -658,14 +685,14 @@ const findEditor = (key) => {
         let r = null;
         let editorTab = ["atto", "tiny", "marklar", "textarea"];
         if (editorTab.indexOf(mainEditorType) === -1) {
-            window.console.warn('Unsupported editor ' + mainEditorType);
+            warn('Unsupported editor ' + mainEditorType);
         } else {
             // First let's try the current editor.
             try {
                 r = findEditorByType(key, mainEditorType);
             } catch (e) {
                 // Content was edited by another editor.
-                window.console.warn('Editor not found: ' + mainEditorType);
+                log(`Editor not found: ${mainEditorType} for key ${key}`);
             }
         }
         return r;
