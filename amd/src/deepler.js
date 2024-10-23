@@ -38,17 +38,17 @@ let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
 let batchSaving = 0;
-let log = function () {
-    return;
+let log = (...a) => {
+    return a;
 };
-let warn = function () {
-    return;
+let warn = (...a) => {
+    return a;
 };
-let info = function () {
-    return;
+let info = (...a) => {
+    return a;
 };
-let error = function () {
-    return;
+let error = (...a) => {
+    return a;
 };
 const debug = {
     NONE: 0,
