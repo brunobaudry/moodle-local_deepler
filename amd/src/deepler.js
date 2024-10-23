@@ -172,7 +172,7 @@ const showErrorMessageForEditor = (key, message) => {
  * Opens a modal infobox to warn user trunks of fields are saving.
  * @returns {Promise<void>}
  */
-const launchModal = async() => {
+const launchModal = async () => {
     // ...
     saveAllModal = await Modal.create({
         title: getString('saveallmodaltitle', 'local_deepler'),
@@ -255,6 +255,7 @@ const saveTranslation = (key) => {
                     };
                     // Error Mesage
                     const errorMessage = (error) => {
+                        window.console.warn(error);
                         editor.classList.add("local_deepler__error");
                         setIconStatus(key, Selectors.statuses.failed);
                         const setIndex = error.debuginfo.indexOf("SET") === -1 ? 15 : error.debuginfo.indexOf("SET");
