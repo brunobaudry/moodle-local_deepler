@@ -23,6 +23,7 @@
  * @see        https://docs.moodle.org/dev/Events_API
  */
 
+namespace local_deepler;
 /**
  * Course Translator Observers.
  *
