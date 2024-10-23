@@ -21,12 +21,19 @@
         <license>MIT</license>
     </library>
     <library>
+        <location>classes/vendor/sebastian</location>
+        <name>Sebastian</name>
+        <license>BSD3</license>
+    </library>
+    <library>
         <location>classes/vendor/psr</location>
         <name>psr</name>
+        <license>MIT</license>
     </library>
     <library>
         <location>classes/vendor/composer</location>
         <name>Composer</name>
+        <license>MIT</license>
     </library>
     <library>
         <location>classes/vendor/autoload.php</location>
@@ -35,5 +42,26 @@
     <library>
         <location>classes/vendor/php-http</location>
         <name>php-http</name>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/phpdocumentor</location>
+        <name>phpdocumentor</name>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/phpspec</location>
+        <name>phpspec</name>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/phpstan</location>
+        <name>phpstan</name>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/webmozart/assert</location>
+        <name>Assert</name>
+        <license>MIT</license>
     </library>
 </libraries>

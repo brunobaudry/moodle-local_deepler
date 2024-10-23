@@ -16,6 +16,8 @@
 
 namespace local_deepler\data;
 
+use moodle_url;
+
 /**
  * Course Data Processor.
  *
@@ -457,18 +459,19 @@ class course_data {
      * @return string
      */
     private function link_builder($id, $table, $cmid) {
+        global $CFG;
         $link = null;
         $tcmid = $cmid ?? 0;
         switch ($table) {
             case 'course':
-                $link = "/course/edit.php?id={$id}";
+                $link = new moodle_url($CFG->wwwroot . "/course/edit.php", ['id' => $id]);
                 break;
             case 'course_sections':
-                $link = "/course/editsection.php?id={$id}";
+                $link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $id]);
                 break;
             default:
                 if ($cmid !== 0) {
-                    $link = "/course/modedit.php?update={$tcmid}";
+                    $link = new moodle_url($CFG->wwwroot . "/course/modedit.php", ['update' => $tcmid]);
                 }
                 break;
         }

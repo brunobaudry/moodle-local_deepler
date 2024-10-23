@@ -56,6 +56,7 @@ $string['notsupportedsource'] = 'The source language you are in is not supported
 $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
+$string['privacy:metadata'] = 'The Multi-Language Content (v2) Filter plugin does not store any personal data.';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>

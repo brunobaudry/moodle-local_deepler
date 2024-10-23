@@ -16,8 +16,6 @@
 
 namespace local_deepler\data;
 
-defined('MOODLE_INTERNAL') || die();
-
 use DeepL\DeepLException;
 use DeepL\Translator;
 use Deepl\Usage;

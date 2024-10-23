@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\output;
-defined('MOODLE_INTERNAL') || die();
 define('DIV_CLOSE', '</div>');
 global $CFG;
 
@@ -314,22 +313,12 @@ class translate_form extends moodleform {
     }
 
     /**
-     * Process data.
-     *
-     * @param stdClass $data
-     * @return void
-     */
-    public function process(stdClass $data) {
-
-    }
-
-    /**
      * Specificy translation Access.
      *
      * @return void
      */
     public function require_access() {
-        require_capability('local/multilingual:edittranslations', context_system::instance());
+        require_capability('local/deepler:edittranslations', context_system::instance());
     }
 
 }

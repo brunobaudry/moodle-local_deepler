@@ -70,8 +70,6 @@ $languagepack = new lang_helper();
 $initok = $languagepack->init('');
 // Get the renderer.
 $output = $PAGE->get_renderer('local_deepler');
-// Adding page CSS.
-$PAGE->requires->css('/local/deepler/styles.css');
 // Output header.
 echo $output->header();
 // Course name heading.
