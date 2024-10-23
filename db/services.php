@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 // Define edittranslation capability.
 define('LOCAL_DEEPLER_CAP', 'local/deepler:edittranslations');
 
-// Add services definition.
+/*// Add services definition.
 $services = [
         'Course Translator' => [
                 'functions' => ['local_deepler_update_translation'],
@@ -39,23 +39,19 @@ $services = [
                 'downloadfiles' => 0,
                 'uploadfiles' => 0,
         ],
-];
+];*/
 
 // Add functions for webservices.
 $functions = [
         'local_deepler_update_translation' => [
-                'classname' => 'local_deepler_external',
-                'methodname' => 'update_translation',
-                'classpath' => 'local/deepler/externallib.php',
-                'description' => 'Update translation',
+                'classname' => 'local_deepler\external\update_translation',
+                'description' => 'Update translation with new mlang tags',
                 'type' => 'write',
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
         'local_deepler_get_field' => [
-                'classname' => 'local_deepler_external',
-                'methodname' => 'get_field',
-                'classpath' => 'local/deepler/externallib.php',
+                'classname' => 'local_deepler\external\get_field',
                 'description' => 'Get field data',
                 'type' => 'read',
                 'ajax' => true,
