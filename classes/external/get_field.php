@@ -51,7 +51,7 @@ class get_field extends external_api {
     /**
      * Fetch activity field info for further translation text update.
      *
-     * @param $data
+     * @param array $data
      * @return array
      * @throws \core_external\restricted_context_exception
      * @throws \dml_exception

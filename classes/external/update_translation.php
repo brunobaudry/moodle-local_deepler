@@ -53,7 +53,7 @@ class update_translation extends external_api {
     /**
      * Actually performs the DB updates.
      *
-     * @param $data
+     * @param array $data
      * @return array
      * @throws \core_external\restricted_context_exception
      * @throws \dml_exception
