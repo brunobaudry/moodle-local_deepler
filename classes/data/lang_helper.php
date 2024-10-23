@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\data;
+defined('MOODLE_INTERNAL') || die();
 
 use DeepL\DeepLException;
 use DeepL\Translator;

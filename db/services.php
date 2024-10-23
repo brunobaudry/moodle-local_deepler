@@ -19,6 +19,7 @@
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ *             2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/Web_services_API
  */
@@ -27,19 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 // Define edittranslation capability.
 define('LOCAL_DEEPLER_CAP', 'local/deepler:edittranslations');
-
-/*// Add services definition.
-$services = [
-        'Course Translator' => [
-                'functions' => ['local_deepler_update_translation'],
-                'requiredcapability' => LOCAL_DEEPLER_CAP,
-                'restrictedusers' => 0,
-                'enabled' => 1,
-                'shortname' => 'CourseTranslator',
-                'downloadfiles' => 0,
-                'uploadfiles' => 0,
-        ],
-];*/
 
 // Add functions for webservices.
 $functions = [

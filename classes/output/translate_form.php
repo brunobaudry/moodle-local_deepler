@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\output;
+defined('MOODLE_INTERNAL') || die();
 define('DIV_CLOSE', '</div>');
 global $CFG;
 

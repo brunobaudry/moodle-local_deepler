@@ -14,19 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Privacy Subsystem implementation for local_deepler.
- *
- * @package    filter_multilang2
- * @copyright  2018 Andrew Nicols <andrew@nicols.co.uk>,
- *             2024 Bruno Baudry <bruno.baudry@bfh.ch>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace local_deepler\privacy;
 
 use core_privacy\local\metadata\null_provider;
 
+/**
+ * Privacy Subsystem implementation for local_deepler.
+ *
+ * @package    local_deepler
+ * @copyright  2018 Andrew Nicols <andrew@nicols.co.uk>,
+ *             2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class provider implements null_provider {
     /**
      * Privacy Subsystem implementation for local_deepler.
