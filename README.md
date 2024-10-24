@@ -241,9 +241,6 @@ Should work with the following editors:
 
 It uses the default Moodle JS library and is tested with Boost and Classic.
 So there could be incompatibilities with other themes.
-Known so far :
-
-- [Adaptable](https://moodle.org/plugins/theme_adaptable)  no working for now.
 
 ## How does this plugin differs from Content Translation Manager and Content Translation Filter?
 
