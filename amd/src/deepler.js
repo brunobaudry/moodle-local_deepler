@@ -25,6 +25,7 @@ import Selectors from "./selectors";
 import Modal from 'core/modal';
 import {get_string as getString} from "core/str";
 
+
 // Initialize the temporary translations dictionary @todo make external class
 let tempTranslations = {};
 let mainEditorType = '';
@@ -224,7 +225,12 @@ const saveTranslation = (key) => {
     // Get processing vars.
     let editor = tempTranslations[key].editor;
     let text = editor.innerHTML; // We keep the editors text in case translation is edited
+    if (mainEditorType === 'textarea') {
+        text = decodeHTML(text);
+    }
     let sourceText = tempTranslations[key].source;
+    log(text);
+    log(sourceText);
     let element = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
     let id = element.getAttribute("data-id");
     let tid = element.getAttribute("data-tid");
@@ -380,7 +386,7 @@ const getupdatedtext = (fieldtext, translation, source, sourceItemLang) => {
             return langsItems.other + langsItems.source + langsItems.target;
         }
     }
-    // Alreaddy malang tag-s.
+    // Alreaddy mlang tag-s.
     return additionalUpdate(isSourceOther, tagPatterns, langsItems);
 };
 
@@ -449,7 +455,10 @@ const onItemChecked = (e) => {
 };
 const initTempForKey = (key, blank) => {
     // Get the source text
-    const sourceText = document.querySelector(Selectors.sourcetexts.keys.replace("<KEY>", key)).getAttribute("data-sourcetext-raw");
+    const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
+    const sourceTextEncoded = document.querySelector(sourceSelector).getAttribute("data-sourcetext-raw");
+    const sourceText = fromBase64(sourceTextEncoded);
+    // Store the settings.
     const editorSettings = findEditor(key);
     const sourceLang = document.querySelector(Selectors.sourcetexts.sourcelangs.replace("<KEY>", key)).value;
     tempTranslations[key] = {
@@ -615,6 +624,7 @@ const getTranslation = (key) => {
     formData.append("splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value));
     formData.append("ignore_tags", toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value));
     info("Send deepl:", formData);
+
     // Update the translation
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {
@@ -624,6 +634,7 @@ const getTranslation = (key) => {
                 // The request has been completed successfully
                 let data = JSON.parse(xhr.responseText);
                 // Display translation
+                log(data.translations[0].text);
                 tempTranslations[key].editor.innerHTML = data.translations[0].text;
                 // Store the translation in the global object
                 tempTranslations[key].translation = data.translations[0].text;
@@ -864,4 +875,24 @@ const countChars = (val) => {
         "charNumWithSpace": withSpace,
         "charNumWithOutSpace": withOutSpace
     };
+};
+/**
+ * Helper function to decode the PHP base64 encoded source.
+ * @param {string} encoded
+ * @returns {string}
+ */
+const fromBase64 = (encoded) => {
+    const binString = atob(encoded); // Maybe we should import js-base64 instead.
+    const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+    return new TextDecoder().decode(bytes);
+};
+/**
+ * Helper function for the decode html escaped content.
+ * @param {string} encodedStr
+ * @returns {string}
+ */
+const decodeHTML = (encodedStr) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(encodedStr, 'text/html');
+    return doc.documentElement.textContent;
 };
