@@ -29,8 +29,8 @@ namespace local_deepler;
 use advanced_testcase;
 use context_course;
 use filter_multilang2;
-use local_deepler\data\course_data;
-use local_deepler\data\lang_helper;
+use local_deepler\local\data\course_data;
+use local_deepler\local\data\lang_helper;
 use local_deepler\output\translate_page;
 
 /**
@@ -96,7 +96,7 @@ final class translate_test extends advanced_testcase {
     public function test_course_data(): void {
         global $CFG;
         $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/output/translate_page.php');
-        $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/data/course_data.php');
+        $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/local/data/course_data.php');
         $course = $this->getDataGenerator()->create_course();
         $context = context_course::instance($course->id);
         $coursedata = new course_data($course, $CFG->lang, $context->id);

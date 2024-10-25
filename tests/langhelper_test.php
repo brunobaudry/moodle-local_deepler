@@ -28,7 +28,7 @@ namespace local_deepler;
 defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
-use local_deepler\data\lang_helper;
+use local_deepler\local\data\lang_helper;
 
 require_once(__DIR__ . '/../classes/vendor/autoload.php');
 
