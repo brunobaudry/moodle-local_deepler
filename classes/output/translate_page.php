@@ -16,7 +16,7 @@
 
 namespace local_deepler\output;
 
-use local_deepler\data\lang_helper;
+use local_deepler\local\data\lang_helper;
 use renderable;
 use renderer_base;
 use stdClass;

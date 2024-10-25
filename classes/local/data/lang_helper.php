@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_deepler\data;
+namespace local_deepler\local\data;
 defined('MOODLE_INTERNAL') || die();
 
 use DeepL\DeepLException;
 use DeepL\Translator;
 use Deepl\Usage;
 
-require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 /**
  * Helper class to connect to Deepl's API, fetch the available lang combinaisons etc.

@@ -29,8 +29,8 @@
  */
 
 // Get libs.
-use local_deepler\data\course_data;
-use local_deepler\data\lang_helper;
+use local_deepler\local\data\course_data;
+use local_deepler\local\data\lang_helper;
 use local_deepler\output\translate_page;
 
 require_once(__DIR__ . '/../../config.php');
@@ -41,8 +41,8 @@ global $DB;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 require_once('./classes/output/translate_page.php');
 require_once('./classes/output/nodeepl_page.php');
-require_once('./classes/data/course_data.php');
-require_once('./classes/data/lang_helper.php');
+require_once('./classes/local/data/course_data.php');
+require_once('./classes/local/data/lang_helper.php');
 require_once($CFG->dirroot . '/lib/editorlib.php');
 
 // Needed vars for processing.

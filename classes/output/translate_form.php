@@ -20,7 +20,7 @@ define('DIV_CLOSE', '</div>');
 global $CFG;
 
 use context_system;
-use local_deepler\data\lang_helper;
+use local_deepler\local\data\lang_helper;
 use moodleform;
 use MoodleQuickForm;
 use stdClass;
