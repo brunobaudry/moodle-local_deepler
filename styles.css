@@ -51,8 +51,33 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate img:before {
     content: "pic:" !important; /* stylelint-disable-line declaration-no-important */
 }
+#page-local-deepler-translate .local_deepler__form {
+    padding: 0;
+}
+#page-local-deepler-translate .course_sections__name, #page-local-deepler-translate .course__fullname {
+    border: 2px #ced4da solid;
+    padding: 0 16px;
+    margin-top: 4px;
+}
 #page-local-deepler-translate .local_deepler__activity {
     margin-bottom: 0.4rem;
+    border-top: 2px #ced4da solid;
+    border-radius: 0 !important;
+}
+#page-local-deepler-translate .local_deepler__activitydesc, #page-local-deepler-translate .local_deepler__activityfield {
+    color: #ced4da;
+    position: relative;
+}
+#page-local-deepler-translate .local_deepler__activitydesc {
+    top: -16px;
+}
+#page-local-deepler-translate .local_deepler__activitysmalltitle {
+    color: #ced4da;
+    right: 50%;
+    position: absolute;
+}
+#page-local-deepler-translate .local_deepler__activityfield {
+    display: inline-block;
 }
 #page-local-deepler-translate .local_deepler__source-text iframe {
     max-width: 100%; /* responsive iframes */

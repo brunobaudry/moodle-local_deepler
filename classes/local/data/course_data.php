@@ -74,6 +74,7 @@ class course_data {
         // Set modinfo.
         $modinfo = get_fast_modinfo($course);
         $this->modinfo = $modinfo;
+        $plugins = \core_component::get_plugin_types();
         // Set language.
         $this->lang = $lang;
         // Set the db fields to skipp.
@@ -405,6 +406,41 @@ class course_data {
         if ($cmid !== null) {
             $item->purpose = call_user_func($table . '_supports', FEATURE_MOD_PURPOSE);
             $item->iconurl = $this->modinfo->get_cm($cmid)->get_icon_url()->out(false);
+
+        }
+        if ($table !== null) {
+            // Try to find the activity names as well as the field translated in the current lang.
+            $item->translatedtablename = get_string('pluginname', $table);
+            if ($field !== null) {
+                if ($table === 'course') {
+                    $item->translatedfieldname = get_string($field . $table);
+                } else if ($table === 'course_sections') {
+                    if ($field === 'name') {
+                        $item->translatedfieldname = get_string('sectionname');
+                    } else if ($field === 'summary') {
+                        $item->translatedfieldname = get_string('description');
+                    }
+                } else {
+                    $item->translatedfieldname = get_string($table . $field, 'mod_' . $table);
+                    $isnoptfound = strpos($item->translatedfieldname, '[[');
+                    if ($isnoptfound === 0) {
+                        $item->translatedfieldname = get_string($field, 'mod_' . $table);
+                        $isnoptfound = strpos($item->translatedfieldname, '[[');
+                    }
+                    if ($isnoptfound === 0) {
+                        $item->translatedfieldname = get_string($field);
+                        $isnoptfound = strpos($item->translatedfieldname, '[[');
+                    }
+                    if ($isnoptfound === 0 && $field === 'intro') {
+                        $item->translatedfieldname = get_string('description');
+                        $isnoptfound = strpos($item->translatedfieldname, '[[');
+                    }
+                    if ($isnoptfound === 0 && $field === 'name') {
+                        $item->translatedfieldname = get_string('name');
+                    }
+                }
+
+            }
         }
 
         return $item;

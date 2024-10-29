@@ -91,8 +91,39 @@ $secondary: $gray-400 !default;
         content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
     }
 
+    .local_deepler__form {
+        padding: 0;
+    }
+
+    .course_sections__name, .course__fullname {
+        border: 2px $secondary solid;
+        padding: 0 16px;
+        margin-top: 4px;
+    }
+
     .local_deepler__activity {
         margin-bottom: .4rem;
+        border-top: 2px $secondary solid;
+        border-radius: 0 !important;
+    }
+
+    .local_deepler__activitydesc, .local_deepler__activityfield {
+        color: $secondary;
+        position: relative;
+    }
+
+    .local_deepler__activitydesc{
+        top: -16px;
+    }
+
+    .local_deepler__activitysmalltitle {
+        color: $secondary;
+        right: 50%;
+        position: absolute;
+    }
+
+    .local_deepler__activityfield {
+        display: inline-block;
     }
 
     .local_deepler__source-text iframe {
@@ -104,7 +135,6 @@ $secondary: $gray-400 !default;
         iframe {
             max-width: 100%; /* responsive iframes */
         }
-
 
         [data-action="local_deepler/editor"],
         [data-fieldtype="editor"] {
@@ -125,6 +155,7 @@ $secondary: $gray-400 !default;
             display: none !important; /* stylelint-disable-line declaration-no-important */
         }
     }
+
     .local_deepler__error {
         border: 2px solid $red; /* ui notices */
         border-radius: 6px;

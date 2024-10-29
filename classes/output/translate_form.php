@@ -83,7 +83,9 @@ class translate_form extends moodleform {
             // Open section container.
             $mform->addElement('html', "<div class='$sectionfield'>");
             // Section title.
-            $mform->addElement('html', "<h3 class='row bg-light p-2 text-center'>$sectiontext</h3>");
+            $mform->addElement('html',
+                    "<h3 class='row h4 sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
+                    $sectiontext</h3>");
             // Section container.
             $csssectionid = "sectiondata[$i]";
             $mform->addElement('html', "<div id='$csssectionid' class='local_deepler__sectiondata'>");
@@ -97,19 +99,25 @@ class translate_form extends moodleform {
             foreach ($section['activities'] as $a) {
                 // Identify the activity parent to group activities' text fields.
                 $parentactivity = "$a->table[$a->id]";
+                $mlangfiltered = $mlangfilter->filter($a->displaytext);
                 if ($tag !== $parentactivity) {
                     $closeit = $tag === '' ? '' : DIV_CLOSE;// If initial don't add closing div.
-                    $mform->addElement('html', "$closeit<div id='$parentactivity' class='activity-item local_deepler__activity'>");
+                    $mform->addElement('html',
+                            "$closeit<div id='$parentactivity' class='activity-item local_deepler__activity'>");
                     if ($a->iconurl !== null) {
                         $iconclass = $a->purpose ?? '';
                         $parentdivclasses =
                                 "activity-icon activityiconcontainer smaller $iconclass courseicon align-self-start mr-2";
                         $imageattributes =
-                                "class='activityicon' data-region='activity-icon' title='{$a->table}'";
+                                "class='activityicon' data-region='activity-icon' title='{$a->table} {$mlangfiltered}'";
                         $mform->addElement('html',
                                 "<div class='$parentdivclasses'>
                                 <img src='{$a->iconurl}' $imageattributes alt='icon for {$a->table}'/>");
                         $mform->addElement('html', DIV_CLOSE);
+                        // Add the activity name type and index title (Editable below).
+                        $mform->addElement('html',
+                                "<small class='local_deepler__activitydesc'>{$a->translatedtablename} </small>
+                                 <small class='local_deepler__activitysmalltitle'>{$mlangfiltered}</small>");
                     }
                     // Reset the tag.
                     $tag = $parentactivity;
@@ -174,12 +182,12 @@ class translate_form extends moodleform {
             class='mx-2'
             data-action='local_deepler/checkbox'
             disabled/>";
-
         // Column 1 layout.
         $mform->addElement('html', '<div class="col-1 px-1">');
         $mform->addElement('html', $bulletstatus);
         $mform->addElement('html', $checkbox);
-        $mform->addElement('html', "<br/><em class='text-secondary'>{$item->field}</em>");
+        // Add the field names translated.
+        $mform->addElement('html', "<br/><small class='local_deepler__activityfield lh-sm'>{$item->translatedfieldname}</small>");
         $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
