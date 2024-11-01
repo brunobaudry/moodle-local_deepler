@@ -48,9 +48,20 @@ This plugin will add a ```local_deepler_update_translation``` web service for th
 ### Admin
 
 To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.** From this page you can configure ©Deepl settings, specify wether
-you are using ©Deepl API Free or ©Deepl API Pro, and enable/disable the autotranslate feature on the translation page. Visit
+you are using ©Deepl API Free or ©Deepl API Pro. Visit
 the [©Deepl API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
+
+#### Allow sub-languages to be mapped to their main
+
+If your installation has sub local language, for exemple de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
+defaults to true)
+
+#### Default value Escape LaTeX (in the courses translation page "Advanced Settings"
+
+Set to true will check "escape LaTeX formulas, in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
+set here to true).
+Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler's performances,
 
 #### Sub languages (expl: de_ch, en_za etc...)
 
@@ -70,7 +81,21 @@ You will be sent to the translation page for the course.
 
 ### Advanced settings
 
-There you can fine tune ©Deepl's commands.
+#### Deepl API setting
+
+There you can fine tune [©Deepl's commands](https://developers.deepl.com/docs).
+Usually the default as set below should work fine with Moodle activity content.
+*Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
+
+#### Other setting
+
+##### Escape LaTeX
+
+Because Deepl is not very Good at that, iow we experienced that it would behave with inconsistency.
+When this is set, Deepler will seek $$...$$ string, replace by a token, send to Deepl to translate and replace back the LaTeX formulas
+upon return.
+This setting's default in the editor can be set in the plugin [admin page](#admin).
+
 ![](pix/advanced_settings.png)
 
 ### Language selection

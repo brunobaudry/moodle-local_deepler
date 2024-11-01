@@ -33,6 +33,7 @@ export default {
         sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
         showUpdated: '[data-action="local_deepler/show-updated"]',
+        escapeLatex: '[data-id="local_deepler/latexeascape"]',
         toggleMultilang: '#toggleMultilang'
     },
     statuses: {

@@ -24,6 +24,7 @@ import ajax from "core/ajax";
 import Selectors from "./selectors";
 import Modal from 'core/modal';
 import {get_string as getString} from "core/str";
+import {escapeReplacementString, postprocess, preprocess} from "./latextokeniser";
 
 
 // Initialize the temporary translations dictionary @todo make external class
@@ -39,6 +40,7 @@ let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
 let batchSaving = 0;
+let escapeLatex = true;
 let log = (...a) => {
     return a;
 };
@@ -164,6 +166,9 @@ export const init = (cfg) => {
     registerUI();
     registerEventListeners();
     toggleAutotranslateButton();
+    log(Selectors.actions.escapeLatex);
+    escapeLatex = document.querySelector(Selectors.actions.escapeLatex).checked;
+    info(`escapeLatex ${escapeLatex}`);
     const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
@@ -228,7 +233,9 @@ const saveTranslation = (key) => {
     if (mainEditorType === 'textarea') {
         text = decodeHTML(text);
     }
-    let sourceText = tempTranslations[key].source;
+    // Restore the source.
+    let sourceTokenised = tempTranslations[key].source;
+    let sourceText = escapeLatex ? postprocess(sourceTokenised, tempTranslations[key].tokens) : sourceTokenised;
     log(text);
     log(sourceText);
     let element = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
@@ -405,7 +412,7 @@ const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
     const hasTagTarget = manipulatedText.match(targetReg);
     if (hasTagTarget) {
         // Yes replace it.
-        manipulatedText = manipulatedText.replace(targetReg, langsItems.target);
+        manipulatedText = manipulatedText.replace(targetReg, escapeReplacementString(langsItems.target));
     } else {
         // No, add it at the end.
         const lastMlangClosingTagEnd = manipulatedText.lastIndexOf("{mlang}") + "{mlang}".length;
@@ -422,7 +429,7 @@ const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
     const hasTagSource = manipulatedText.match(sourceReg);
     if (isSourceOther) {
         // Whatever was the {mlang other} tag language we need to replace it by this source.
-        manipulatedText = manipulatedText.replace(otherReg, langsItems.other);
+        manipulatedText = manipulatedText.replace(otherReg, escapeReplacementString(langsItems.other));
         if (hasTagSource) {
             // And remove the {mlang source} tag if found.
             manipulatedText.replace(sourceReg, "");
@@ -438,7 +445,7 @@ const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
         }
         if (!hasTagSource) {
             // Add the {mlang source} tag if not found.
-            manipulatedText.replace(sourceReg, langsItems.source);
+            manipulatedText.replace(sourceReg, escapeReplacementString(langsItems.source));
         }
     }
     return manipulatedText;
@@ -458,16 +465,19 @@ const initTempForKey = (key, blank) => {
     const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
     const sourceTextEncoded = document.querySelector(sourceSelector).getAttribute("data-sourcetext-raw");
     const sourceText = fromBase64(sourceTextEncoded);
+    const tokenised = escapeLatex ? preprocess(sourceText) : sourceText;
     // Store the settings.
     const editorSettings = findEditor(key);
     const sourceLang = document.querySelector(Selectors.sourcetexts.sourcelangs.replace("<KEY>", key)).value;
+    // We make sure to initialize the record.
     tempTranslations[key] = {
         'editorType': null,
         'editor': null,
-        'source': sourceText,
-        'sourceLang': sourceLang,
-        'status': Selectors.statuses.wait,
-        'translation': ''
+        'source': '',
+        'sourceLang': '',
+        'status': '',
+        'translation': '',
+        'tokens': []
     };
     if (!blank) {
         if (editorSettings === null || editorSettings.editor === null) {
@@ -478,10 +488,11 @@ const initTempForKey = (key, blank) => {
             tempTranslations[key] = {
                 'editorType': editorSettings.editorType,
                 'editor': editorSettings.editor,
-                'source': sourceText,
+                'source': tokenised.tokenizedText,
                 'sourceLang': sourceLang,
                 'status': Selectors.statuses.wait,
-                'translation': ''
+                'translation': '',
+                'tokens': tokenised.latexExpressions
             };
         }
     }
@@ -633,11 +644,15 @@ const getTranslation = (key) => {
             if (status === 0 || (status >= 200 && status < 400)) {
                 // The request has been completed successfully
                 let data = JSON.parse(xhr.responseText);
-                // Display translation
+                info("From deepl:", data);
+                log(tempTranslations[key]);
                 log(data.translations[0].text);
-                tempTranslations[key].editor.innerHTML = data.translations[0].text;
+                let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens);
+                // Display translation
+                log(tr);
+                tempTranslations[key].editor.innerHTML = tr;
                 // Store the translation in the global object
-                tempTranslations[key].translation = data.translations[0].text;
+                tempTranslations[key].translation = tr;
                 setIconStatus(key, Selectors.statuses.tosave, true);
                 injectImageCss(
                     tempTranslations[key].editorType,

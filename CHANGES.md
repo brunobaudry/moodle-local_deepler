@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] 2024-11-01
+
+### Added
+
+- LaTeX syntax escaping including :
+    - Admin default.
+    - Enabler at page level.
+
+### Fixed
+
+- Complex text (with code and mixed quotes) were breaking the HTML attributes.
+
+### Todo see issue list
+
 ## [1.0.1] 2024-07-09
 
 ### Added

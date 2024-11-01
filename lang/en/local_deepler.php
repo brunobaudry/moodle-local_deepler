@@ -34,6 +34,7 @@ $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
         'Tell the translator (Deepl) about the context, to help it translate in a more contextual way... ';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
+$string['deeplapidoctitle'] = 'Deepl\'s API settings';
 $string['deepler:edittranslations'] = 'Edit course translations in Deepl Translator (capability to)';
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'Enable this to use DeepL Pro instead of the free version of DeepL.';
@@ -47,12 +48,19 @@ $string['formalityprefermore'] = 'prefer more';
 $string['glossaryid'] = 'Glossary id';
 $string['glossaryid_placeholder'] = 'Glossary id should you have one...';
 $string['ignoretags'] = 'Tags to ignore';
+$string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
+$string['latexescapeadmin'] = 'Default value Escape LaTeX
+(in the courses translation page "Advanced Settings"';
+$string['latexescapeadmin_desc'] = 'Set to true will check "escape LaTeX formulas, in the course translation form.
+This will have the effect to enable by default the Non translation of LaTeX formulas in course (when set here to true).
+Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances,';
 $string['needsupdate'] = 'Needs update';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
         ':-( Cannot connect to Deepl API. <br/>Check with your admin. Looks like there is a network issue.';
 $string['nonsplittingtags'] = 'Non splitting tags';
 $string['notsupportedsource'] = 'The source language you are in is not supported by Deepl.';
+$string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
@@ -64,7 +72,7 @@ $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="st
 <p>If you are impatient, and want to close this window,
 <br/>make sure all selected transaltion\'s statuses are <i class="fa fa-database" aria-hidden="true"></i></p>';
 $string['saveallmodaltitle'] = 'Saving translations to the database';
-$string['seesetting'] = 'Advanced Deepl settings';
+$string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
 $string['sourcelang'] = 'Source lang <em>{mlang other}</em>';

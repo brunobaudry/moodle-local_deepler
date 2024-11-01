@@ -62,6 +62,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 </div>
 <div class="container-fluid collapse card bg-primary-light" id="collapseExample">
     <div class="text-right">
+        <h4>{{#str}}deeplapidoctitle,local_deepler{{/str}}</h4>
         <i class="fa fa-question-circle" aria-hidden="true"></i>
         <a href=" https://www.deepl.com/docs-api/translate-text/translate-text" id="local_deepler__moresettings">{{#str}}
             deeplapidoc,local_deepler{{/str}}</a>
@@ -127,7 +128,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                       placeholder="{{#str}}contextdeepl_placeholder,local_deepler{{/str}}"></textarea>
         </div>
     </div>
-    <hr class="hr hr-blurry"/>
+
     <div class="row py-3" id="local_deepler__tags">
         <div class="col-5" id="local_deepler__xmlhtml">
             <div class="d-flex my-switch">
@@ -136,6 +137,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     <input id="tag_handling" class="custom-control-input" type="checkbox" data-id="local_deepler/tag_handling" checked>
                     <label class="custom-control-label" for="tag_handling">&nbsp;HTML</label></div>
             </div>
+
             <div class="custom-control custom-switch mt-3" id="local_deepler__outilinedetection">
                 <input id="outline_detection" class="custom-control-input" type="checkbox" data-id="local_deepler/outline_detection">
                 <label class="custom-control-label" for="outline_detection">{{#str}}outlinedetection,local_deepler{{/str}}</label>
@@ -145,6 +147,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 <textarea class="form-control" id="ignore_tags" data-id="local_deepler/ignore_tags"
                           placeholder="{{#str}}ignoretags,local_deepler{{/str}}"></textarea>
             </div>
+
         </div>
         <div class="col-7 py-3">
             <div class="col" id="local_deepler__tagsnosplitting">
@@ -156,9 +159,24 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                           placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
         </div>
     </div>
+    <hr class="hr hr-blurry"/>
+    <div class="text-right">
+        <h4>{{#str}}othersettingstitle,local_deepler{{/str}}</h4>
+    </div>
+    <div class="row pb-3" id="local_deepler__nondeepl">
+        <div class="col-12" id="local_deepler__othersettings">
+            <div id="local_deepler__latexeascape">
+                <div class="mt-1 custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="latexeascape" data-id="local_deepler/latexeascape" {{escapelatexbydefault}}>
+                    <label class="custom-control-label" for="latexeascape">{{#str}}latexeascape,local_deepler{{/str}}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 <div class="container-fluid">
-    <div class="row py-1" id="local_deepler__sourcetarget">
+    <div class="row py-4" id="local_deepler__sourcetarget">
         <div class="col-3 text-right"><label for="source_lang">{{#str}}sourcelang,local_deepler{{/str}}</label></div>
         <div class="col-2">
             <select class="form-control" id="source_lang"
@@ -168,7 +186,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 {{/langs}}
             </select>
         </div>
-        <div class="col-1 h1 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <div class="col-1 h4 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
         <div class="col-2">
             <select

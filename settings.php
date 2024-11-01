@@ -61,4 +61,13 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     1
             )
     );
+    // Do set if esacping LaTeX tag is default.
+    $settings->add(
+            new admin_setting_configcheckbox(
+                    'local_deepler/latexescapeadmin',
+                    get_string('latexescapeadmin', 'local_deepler'),
+                    get_string('latexescapeadmin_desc', 'local_deepler'),
+                    1
+            )
+    );
 }
