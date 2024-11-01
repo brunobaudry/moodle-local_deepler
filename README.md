@@ -54,6 +54,10 @@ signup for an api key that you can enter into local plugin settings.
 
 #### Allow sub-languages to be mapped to their main
 
+Currently Deepl doesn't support any. See https://developers.deepl.com/docs/resources/supported-languages.
+The plugin gives you the possiblity to use these sub languages if your moodle install has them as if they were their parent language.
+This setting is ticked by default.
+
 If your installation has sub local language, for exemple de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
 defaults to true)
 
@@ -62,12 +66,6 @@ defaults to true)
 Set to true will check "escape LaTeX formulas, in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
 set here to true).
 Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler's performances,
-
-#### Sub languages (expl: de_ch, en_za etc...)
-
-Currently Deepl doesn't support any. See https://developers.deepl.com/docs/resources/supported-languages.
-The plugin gives you the possiblity to use these sub languages if your moodle install has them as if they were their parent language.
-This setting is ticked by default.
 
 ![](pix/admin.png)
 
