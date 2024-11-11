@@ -18,74 +18,72 @@
  * Local Course Translator Strings.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/String_API
  */
 defined('MOODLE_INTERNAL') || die();
-$string['allowsublangs'] = 'Allow sub-languages to be mapped to their main';
+$string['allowsublangs'] = 'Autoriser la mise en correspondance des sous-langues avec leur langue principale';
 $string['allowsublangs_desc'] =
-        'If your installation has sub local language, for exemple de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (defaults to true)';
-$string['apikeytitle'] = 'API Key for DeepL Translate';
-$string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
-$string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
-$string['contextdeepl'] = 'Course context ';
+        'Si votre installation possède une sous-langue locale, par exemple de_ch, elle sera considérée comme sa langue principale (de), sinon le plugin affichera une page d‘erreur « source lang unsupported » (par défaut true).';
+$string['apikeytitle'] = 'Clé de lAPI pour DeepL Translate';
+$string['apikeytitle_desc'] = 'Copiez votre clé API depuis DeepL pour utiliser la traduction automatique.';
+$string['canttranslate'] = 'Impossible de traduire «{$a}» en «{$a}», veuillez sélectionner une autre langue cible.';
+$string['contextdeepl'] = 'Contexte du cours ';
 $string['contextdeepl_placeholder'] =
-        'Tell the translator (Deepl) about the context, to help it translate in a more contextual way... (experimental)';
-$string['deeplapidoc'] = 'see detail on deepl\'s documentation';
-$string['deeplapidoctitle'] = 'Deepl\'s API settings';
-$string['deepler:edittranslations'] = 'Edit course translations in Deepl Translator (capability to)';
-$string['deeplprotitle'] = 'Use DeepL Pro?';
-$string['deeplprotitle_desc'] = 'Enable this to use DeepL Pro instead of the free version of DeepL.';
-$string['editbutton'] = 'Edit source in place';
-$string['formality'] = 'Formality';
-$string['formalitydefault'] = 'default';
-$string['formalityless'] = 'less';
-$string['formalitymore'] = 'more';
-$string['formalitypreferless'] = 'prefer less';
-$string['formalityprefermore'] = 'prefer more';
-$string['glossaryid'] = 'Glossary id';
-$string['glossaryid_placeholder'] = 'Glossary id should you have one...';
-$string['ignoretags'] = 'Tags to ignore';
-$string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
-$string['latexescapeadmin'] = 'Default value Escape LaTeX
-(in the courses translation page "Advanced Settings")';
-$string['latexescapeadmin_desc'] = 'Set to true will check "escape LaTeX formulas", in the course translation form.
-This will have the effect to enable by default the Non translation of LaTeX formulas in courses.
-Uncheck it if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances,';
-$string['needsupdate'] = 'Needs update';
-$string['nevertranslated'] = 'No \'{$a}\' translation yet';
+        'Informer le traducteur (Deepl) du contexte, pour l‘aider à traduire de manière plus contextuelle... (expérimental)';
+$string['deeplapidoc'] = 'voir les détails dans la documentation de Deepl';
+$string['deeplapidoctitle'] = 'Réglages de l‘API de Deepl';
+$string['deepler:edittranslations'] = 'Editer des traductions de cours dans Deepl Translator (capacité à)';
+$string['deeplprotitle'] = 'Utilisez DeepL Pro ?';
+$string['deeplprotitle_desc'] = 'Activez cette option pour utiliser DeepL Pro au lieu de la version gratuite de DeepL.';
+$string['editbutton'] = 'Modifier la source dans le champ d‘origine.';
+$string['formality'] = 'Formalités';
+$string['formalitydefault'] = 'par défaut';
+$string['formalityless'] = 'moins';
+$string['formalitymore'] = 'plus';
+$string['formalitypreferless'] = 'moins, de préférence';
+$string['formalityprefermore'] = 'plus, de préférence';
+$string['glossaryid'] = 'id d‘un glossaire';
+$string['glossaryid_placeholder'] = 'id d‘un glossaire si vous en avez un...';
+$string['ignoretags'] = 'Tags à ignorer';
+$string['latexeascape'] = 'Ignorer LaTeX (ne pas envoyer, à traduire, les formules $$LaTeXFormulas$$)';
+$string['latexescapeadmin'] = 'Réglage par défaut de «Ignorer LaTeX» ("Réglages avancés" de l‘interface traducteur)';
+$string['latexescapeadmin_desc'] = 'La valeur « true » permet de cocher la case « Ignorer les formules LaTeX » dans le formulaire de traduction du cours.
+Cela aura pour effet d‘activer par défaut la non-traduction des formules LaTeX dans les cours (lorsque la valeur est fixée à true).
+Décochez cette case, valeur false, si votre organisation utilise rarement des formules LaTeX dans les cours afin d‘améliorer légèrement les performances de Deepler.';
+$string['needsupdate'] = 'Besoin de mise à jour';
+$string['nevertranslated'] = 'Aucune traduction en «{$a}» pour l‘instant';
 $string['nodeeplpapi'] =
-        ':-( Cannot connect to Deepl API. <br/>Check with your admin. Looks like there is a network issue.';
-$string['nonsplittingtags'] = 'Non splitting tags';
-$string['notsupportedsource'] = 'The source language you are in is not supported by Deepl.';
-$string['othersettingstitle'] = 'Other settings';
-$string['outlinedetection'] = 'XML Outline detection';
+        ':-( Impossible de se connecter à l‘API Deepl. <br/>Vérifiez avec votre administrateur. Il semble qu‘il y ait un problème de réseau.';
+$string['nonsplittingtags'] = 'Balises non fractionnables';
+$string['notsupportedsource'] = 'La langue source que vous utilisez n’est pas prise en charge par Deepl.';
+$string['othersettingstitle'] = 'Autres réglages';
+$string['outlinedetection'] = 'Détection des contours XML';
 $string['pluginname'] = 'Deepl Translator';
-$string['preserveformatting'] = 'Preserve formatting';
-$string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
-$string['saveall'] = 'Save&nbsp;all';
-$string['saveallexplain'] = 'Batch save to database all selected translations.';
-$string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>
-<p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>
-<p>If you are impatient, and want to close this window,
-<br/>make sure all selected translation\'s statuses are <i class="fa fa-database" aria-hidden="true"></i></p>';
+$string['preserveformatting'] = 'Préserver le formatage';
+$string['privacy:metadata'] = 'Le plugin Deepler ne stocke aucune donnée personnelle.';
+$string['saveall'] = 'Enregistrer&nbsp;tous';
+$string['saveallexplain'] = 'Enregistrez par lots, dans la base de données, toutes les traductions sélectionnées.';
+$string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Sauvegarde...</span>\n</div>
+<p>Patience ...<br/>Lorsque tous les champs sont enregistrés dans la base de données,<br/>cette fenêtre se fermera.
+<p>Si vous êtes impatient et que vous souhaitez fermer cette fenêtre,
+<br/>assurez vous que tous les statuts des traductions sélectionnées sont <i class="fa fa-database" aria-hidden="true"></i></p>';
 $string['saveallmodaltitle'] = 'Saving translations to the database';
-$string['seesetting'] = 'Advanced settings';
-$string['selectall'] = 'All';
-$string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
-$string['sourcelang'] = 'Source lang <em>{mlang other}</em>';
-$string['specialsourcetext'] = 'Use a different source than "{$a}"';
-$string['splitsentences'] = 'Split sentences?';
-$string['splitsentences0'] = 'no splitting at all';
-$string['splitsentences1'] = 'splits on punctuation and on newlines';
-$string['splitsentencesnonewlines'] = 'splits on punctuation only, ignoring newlines';
-$string['splittingtags'] = 'Splitting tags';
-$string['taghandling'] = 'Handle tags as : ';
-$string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
+$string['seesetting'] = 'Réglages avancés';
+$string['selectall'] = 'Tout';
+$string['selecttargetlanguage'] = 'Langue cible <em>{mlang {$a}}</em>';
+$string['sourcelang'] = 'Lanuge source <em>{mlang other}</em>';
+$string['specialsourcetext'] = 'Choisir une autre source que "{$a}"';
+$string['splitsentences'] = 'Phrases fractionnées ?';
+$string['splitsentences0'] = 'aucun fractionnement';
+$string['splitsentences1'] = 'Fractionner sur la ponctuation et sur les nouvelles lignes';
+$string['splitsentencesnonewlines'] = 'fractionner en fonction de la ponctuation uniquement, en ignorant les nouvelles lignes';
+$string['splittingtags'] = 'Balises de fractionnement';
+$string['taghandling'] = 'Manipulez les balises comme : ';
+$string['tagsplaceholder'] = 'Listez tous les tags (séparez les tags par une virgule &quot;,&quot;)';
 $string['tour_advancedsettings00'] =
-        'Click here to see how you can fine tune the Deepl’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
+        'Cliquez ici pour voir comment vous pouvez affiner le comportement de Deepl.<br/><br/>Cliquez maintenant pour obtenir une visite guidée des fonctionnalités.';
 $string['tour_advancedsettings00title'] = 'Deepl’s advanced settings';
 $string['tour_advancedsettings01formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
 This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em>
@@ -221,11 +219,12 @@ $string['tour_advancedsettings23saveall'] =
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
-$string['translatebutton'] = 'Translate &rarr; {$a}';
-$string['uptodate'] = 'Up to date';
-$string['viewsource'] = 'Check multilingual content.';
-$string['viewsourcedisabled'] = 'No multilingual content yet.';
+$string['translatebutton'] = 'Traduire &rarr; {$a}';
+$string['uptodate'] = 'Déjà à jour';
+$string['viewsource'] = 'Vérifier le contenu multilingue.';
+$string['viewsourcedisabled'] = 'Pas encore de contenu multilingue.';
 $string['warningsource'] =
-        'Watch out ! The current source language &quot;{$a}&quot; is already as a multilang tag along side with the fallback tag &quot;OTHER&quot;. Note that both will be merge as the &quot;OTHER&quot; multilang tag.';
+        'Attention ! La langue source actuelle &quot;{$a}&quot ; est déjà une balise multilang avec la balise de repli &quot;OTHER&quot ;. Notez que les deux seront fusionnées en tant que balise multi-lang &quot;OTHER&quot ;.
+';
 $string['wordcountsentence'] =
-        'Total <span id="local_deepler__wc">0</span> words, <span id="local_deepler__wosc">0</span> characters (<span id="local_deepler__wsc">0</span> chars including spaces) Deepl\'s usage = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
+        'Total <span id="local_deepler__wc">0</span> mots, <span id="local_deepler__wosc">0</span> caractères (<span id="local_deepler__wsc">0</span> caractères éspaces inclus) Consommation Deepl = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
