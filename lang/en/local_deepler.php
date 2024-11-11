@@ -39,6 +39,7 @@ $string['deepler:edittranslations'] = 'Edit course translations in Deepl Transla
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'Enable this to use DeepL Pro instead of the free version of DeepL.';
 $string['editbutton'] = 'Edit source in place';
+$string['errortoolong'] = '(could be that the text is too long for the field... Check manually in place)';
 $string['formality'] = 'Formality';
 $string['formalitydefault'] = 'default';
 $string['formalityless'] = 'less';
@@ -51,9 +52,9 @@ $string['ignoretags'] = 'Tags to ignore';
 $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
-$string['latexescapeadmin_desc'] = 'Set to true will check "escape LaTeX formulas", in the course translation form.
-This will have the effect to enable by default the Non translation of LaTeX formulas in courses.
-Uncheck it if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances,';
+$string['latexescapeadmin_desc'] = 'Set to true will check "escape LaTeX formulas, in the course translation form.
+This will have the effect to enable by default the Non translation of LaTeX formulas in course (when set here to true).
+Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
 $string['needsupdate'] = 'Needs update';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =

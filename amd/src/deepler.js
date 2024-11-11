@@ -109,6 +109,7 @@ const registerEventListeners = () => {
                 }
             });
             if (batchSaving > 0) {
+                log('batchSaving' + batchSaving);
                 launchModal();
                 saveAllBtn.hidden = saveAllBtn.disabled = true;
             }
@@ -300,13 +301,19 @@ const saveTranslation = (key) => {
                     // Error Mesage
                     const errorMessage = (err) => {
                         editor.classList.add("local_deepler__error");
-                        setIconStatus(key, Selectors.statuses.failed);
-                        const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
-                        let message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
-                        if (config.debug > 0) {
-                            message = err.debuginfo;
-                        }
-                        showErrorMessageForEditor(key, message);
+                        let hintError = '';
+                        // Most of the time DB error will come from translations starting to be too long.
+                        getString('errortoolong', 'local_deepler').then((s) => {
+                            hintError = s;
+                            setIconStatus(key, Selectors.statuses.failed);
+                            let message = err.message + ' ' + hintError;
+                            if (err.debuginfo) {
+                                // When Moodle is set to max debugger display the debuginfo
+                                const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
+                                message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
+                            }
+                            showErrorMessageForEditor(key, message);
+                        });
                     };
                     // Submit the request
                     ajax.call([
@@ -321,6 +328,7 @@ const saveTranslation = (key) => {
                                 // If we launch saving by the save all button, manage the modal infobox.
                                 if (saveAllModal !== null && saveAllModal.isVisible) {
                                     batchSaving--;
+                                    log('batchSaving', batchSaving);
                                     if (batchSaving === 0) {
                                         saveAllModal.hide();
                                     }

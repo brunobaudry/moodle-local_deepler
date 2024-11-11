@@ -41,7 +41,7 @@ class course_data {
     protected $lang;
     /** @var string */
     protected $contextid;
-    /** @var context_course */
+    /** @var \context_course */
     protected $context;
     /** @var string[]
      * List of db columns of type text that are know to be useless to tranlsate for a specific mod.

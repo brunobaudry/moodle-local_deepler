@@ -81,7 +81,7 @@ class translate_form extends moodleform {
             $sectiontext = $mlangfilter->filter($section['section'][0]->text);
             $sectionfield = $section['section'][0]->table . "__" . $section['section'][0]->field;
             // Open section container.
-            $mform->addElement('html', "<div class='$sectionfield'>");
+            $mform->addElement('html', "<div class='$sectionfield section-item'>");
             // Section title.
             $mform->addElement('html',
                     "<h3 class='row h4 sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
@@ -101,9 +101,10 @@ class translate_form extends moodleform {
                 $parentactivity = "$a->table[$a->id]";
                 $mlangfiltered = $mlangfilter->filter($a->displaytext);
                 if ($tag !== $parentactivity) {
+                    $activitydivider = '<div class="divider"><hr/></div>';
                     $closeit = $tag === '' ? '' : DIV_CLOSE;// If initial don't add closing div.
                     $mform->addElement('html',
-                            "$closeit<div id='$parentactivity' class='activity-item local_deepler__activity'>");
+                            "$closeit $activitydivider <div id='$parentactivity' class='activity-item local_deepler__activity'>");
                     if ($a->iconurl !== null) {
                         $iconclass = $a->purpose ?? '';
                         $parentdivclasses =

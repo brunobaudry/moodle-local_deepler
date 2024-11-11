@@ -38,6 +38,7 @@ $string['deepler:edittranslations'] = 'Editer des traductions de cours dans Deep
 $string['deeplprotitle'] = 'Utilisez DeepL Pro ?';
 $string['deeplprotitle_desc'] = 'Activez cette option pour utiliser DeepL Pro au lieu de la version gratuite de DeepL.';
 $string['editbutton'] = 'Modifier la source dans le champ d‘origine.';
+$string['errortoolong'] = '(il se peut que le texte soit trop long pour ce champ... Vérifier manuellement en place)';
 $string['formality'] = 'Formalités';
 $string['formalitydefault'] = 'par défaut';
 $string['formalityless'] = 'moins';
