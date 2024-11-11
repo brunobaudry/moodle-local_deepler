@@ -1,3 +1,19 @@
+name: Releasing in the Plugins directory
+on:
+  push:
+    tags:
+      - v*
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to be released'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   release-at-moodle-org:
     runs-on: ubuntu-latest
