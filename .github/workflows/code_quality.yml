@@ -1,8 +1,4 @@
 name: Qodana
-exclude:
-  - name: All
-    paths:
-      - lang/**
 on:
   workflow_dispatch:
   pull_request:
