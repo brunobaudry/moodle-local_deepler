@@ -63,6 +63,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate .local_deepler__form {
     padding: 0;
 }
+#page-local-deepler-translate .course_sections__name, #page-local-deepler-translate .course__fullname {
+    margin-top: 3rem;
+}
 #page-local-deepler-translate .local_deepler__sectiondata {
     margin-top: 3rem;
 }

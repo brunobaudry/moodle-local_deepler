@@ -95,6 +95,10 @@ $secondary: $gray-400 !default;
         padding: 0;
     }
 
+    .course_sections__name, .course__fullname {
+        margin-top: 3rem;
+    }
+
     .local_deepler__sectiondata {
         margin-top: 3rem;
     }
