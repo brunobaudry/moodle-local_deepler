@@ -1,26 +1,3 @@
-#
-# Whenever a new tag starting with "v" is pushed, add the tagged version
-# to the Moodle Plugins directory at https://moodle.org/plugins
-#
-# revision: 2021070201
-#
-name: Releasing in the Plugins directory
-
-on:
-  push:
-    tags:
-      - v*
-
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to be released'
-        required: true
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
   release-at-moodle-org:
     runs-on: ubuntu-latest
@@ -44,6 +21,7 @@ jobs:
             echo "No tag name has been provided!"
             exit 1
           fi
+          echo "Tag name: ${TAGNAME}"  # Debug statement to print the tag name
           ZIPURL="https://api.github.com/repos/${{ github.repository }}/zipball/${TAGNAME}"
           RESPONSE=$(${CURL} ${ENDPOINT} --data-urlencode "wstoken=${TOKEN}" \
                                          --data-urlencode "wsfunction=${FUNCTION}" \
@@ -56,11 +34,11 @@ jobs:
                                          --data-urlencode "changelogurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/${TAGNAME}" \
                                          --data-urlencode "altdownloadurl=${ZIPURL}")
           echo "::set-output name=response::${RESPONSE}"
-
       - name: Evaluate the response
         id: evaluate-response
         env:
           RESPONSE: ${{ steps.add-version.outputs.response }}
         run: |
+          echo "API Response: ${RESPONSE}"
           jq <<< ${RESPONSE}
           jq --exit-status ".id" <<< ${RESPONSE} > /dev/null
