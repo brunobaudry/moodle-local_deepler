@@ -95,24 +95,24 @@ $secondary: $gray-400 !default;
         padding: 0;
     }
 
-    .course_sections__name, .course__fullname {
-        border: 2px $secondary solid;
-        padding: 0 16px;
-        margin-top: 4px;
+    .local_deepler__sectiondata {
+        margin-top: 3rem;
     }
 
-    .local_deepler__activity {
-        margin-bottom: .4rem;
-        border-top: 2px $secondary solid;
-        border-radius: 0 !important;
-    }
+    /* .local_deepler__activity {
+         margin-bottom: .4rem;
+         border-top: 2px $secondary solid;
+         border-radius: 0 !important;
+     }
+
+     */
 
     .local_deepler__activitydesc, .local_deepler__activityfield {
         color: $secondary;
         position: relative;
     }
 
-    .local_deepler__activitydesc{
+    .local_deepler__activitydesc {
         top: -16px;
     }
 

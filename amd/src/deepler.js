@@ -300,11 +300,13 @@ const saveTranslation = (key) => {
                     };
                     // Error Mesage
                     const errorMessage = (err) => {
+                        window.console.log(err);
                         editor.classList.add("local_deepler__error");
                         setIconStatus(key, Selectors.statuses.failed);
-                        const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
-                        let message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
+                        let message = err.message + ' ' + get_string('errortoolong', 'local_deepler');
                         if (config.debug > 0) {
+                            const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
+                            message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
                             message = err.debuginfo;
                         }
                         showErrorMessageForEditor(key, message);

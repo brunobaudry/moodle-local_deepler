@@ -54,7 +54,6 @@ export function preprocess(text) {
 export function postprocess(text, latexExpressions) {
     latexExpressions.forEach((expr, i) => {
         const token = new RegExp(`__LATEX_${i}__`, 'g');
-        window.console.log(i, expr, token);
         text = text.replace(token, escapeReplacementString(expr));
     });
     return text;
