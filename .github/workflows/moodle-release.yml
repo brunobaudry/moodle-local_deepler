@@ -39,6 +39,7 @@ jobs:
           fi
           echo "Tag name: ${TAGNAME}"  # Debug statement to print the tag name
           ZIPURL="https://api.github.com/repos/${{ github.repository }}/zipball/${TAGNAME}"
+          echo "Zip URL: ${ZIPURL}"  # Debug statement to print the zip URL
           RESPONSE=$(${CURL} ${ENDPOINT} --data-urlencode "wstoken=${TOKEN}" \
                                          --data-urlencode "wsfunction=${FUNCTION}" \
                                          --data-urlencode "moodlewsrestformat=json" \
@@ -49,7 +50,8 @@ jobs:
                                          --data-urlencode "vcstag=${TAGNAME}" \
                                          --data-urlencode "changelogurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/${TAGNAME}" \
                                          --data-urlencode "altdownloadurl=${ZIPURL}")
-          echo "::set-output name=response::${RESPONSE}"
+          echo "API Response: ${RESPONSE}"  # Debug statement to print the API response
+          echo "response=${RESPONSE}" >> $GITHUB_ENV
       - name: Evaluate the response
         id: evaluate-response
         env:
