@@ -109,6 +109,7 @@ const registerEventListeners = () => {
                 }
             });
             if (batchSaving > 0) {
+                log('batchSaving' + batchSaving);
                 launchModal();
                 saveAllBtn.hidden = saveAllBtn.disabled = true;
             }
@@ -321,6 +322,7 @@ const saveTranslation = (key) => {
                                 // If we launch saving by the save all button, manage the modal infobox.
                                 if (saveAllModal !== null && saveAllModal.isVisible) {
                                     batchSaving--;
+                                    log('batchSaving', batchSaving);
                                     if (batchSaving === 0) {
                                         saveAllModal.hide();
                                     }
