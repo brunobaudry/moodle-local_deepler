@@ -410,39 +410,47 @@ class course_data {
         }
         if ($table !== null) {
             // Try to find the activity names as well as the field translated in the current lang.
-            $item->translatedtablename = get_string('pluginname', $table);
-            if ($field !== null) {
-                if ($table === 'course') {
-                    $item->translatedfieldname = get_string($field . $table);
-                } else if ($table === 'course_sections') {
-                    if ($field === 'name') {
-                        $item->translatedfieldname = get_string('sectionname');
-                    } else if ($field === 'summary') {
-                        $item->translatedfieldname = get_string('description');
-                    }
-                } else {
-                    $item->translatedfieldname = get_string($table . $field, 'mod_' . $table);
-                    $isnoptfound = strpos($item->translatedfieldname, '[[');
-                    if ($isnoptfound === 0) {
-                        $item->translatedfieldname = get_string($field, 'mod_' . $table);
-                        $isnoptfound = strpos($item->translatedfieldname, '[[');
-                    }
-                    if ($isnoptfound === 0) {
-                        $item->translatedfieldname = get_string($field);
-                        $isnoptfound = strpos($item->translatedfieldname, '[[');
-                    }
-                    if ($isnoptfound === 0 && $field === 'intro') {
-                        $item->translatedfieldname = get_string('description');
-                        $isnoptfound = strpos($item->translatedfieldname, '[[');
-                    }
-                    if ($isnoptfound === 0 && $field === 'name') {
-                        $item->translatedfieldname = get_string('name');
-                    }
+            if ($table === 'course') {
+                $item->translatedfieldname = get_string($field);
+            } else if ($table === 'course_sections') {
+                if ($field === 'name') {
+                    $item->translatedfieldname = get_string('sectionname');
+                } else if ($field === 'summary') {
+                    $item->translatedfieldname = get_string('description');
                 }
-
+            } else {
+                if ($field === 'intro') {
+                    $item->translatedfieldname = get_string('description');
+                } else if ($field === 'name') {
+                    $item->translatedfieldname = get_string('name');;
+                } else {
+                    $foundString = $table . '_' . $field;
+                    // Try several combining possible to try to fetch wierd unknown string names.
+                    $allcombinaisons = [
+                            ['identifier' => $table . $field, 'component' => 'mod_' . $table],
+                            ['identifier' => $field, 'component' => 'mod_' . $table],
+                            ['identifier' => $field, 'component' => null],
+                            ['identifier' => $table . $field, 'component' => null],
+                            ['identifier' => $field . $table, 'component' => null],
+                            ['identifier' => $field . ' ' . $table, 'component' => null],
+                            ['identifier' => $foundString, 'component' => null],
+                    ];
+                    foreach ($allcombinaisons as $string) {
+                        try {
+                            $foundString = get_string($string['identifier'], $string['component']);
+                            // If the string isn't found.
+                            if (strpos($foundString, '[[') === 0) {
+                                continue;
+                            }
+                            break; // Exit the loop if the string is found.
+                        } catch (Exception $e) {
+                            continue; // Continue to the next string if an exception is caught.
+                        }
+                    }
+                    $item->translatedfieldname = $foundString;
+                }
             }
         }
-
         return $item;
     }
 
