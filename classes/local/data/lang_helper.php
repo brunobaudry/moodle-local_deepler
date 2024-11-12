@@ -94,6 +94,10 @@ class lang_helper {
      * @var Usage
      */
     protected Usage $usage;
+    /**
+     * @var string
+     */
+    private mixed $allowsublangcodesasmain;
 
     /**
      * Constructor.
@@ -105,7 +109,6 @@ class lang_helper {
         $this->apikey = 'abcd';
         $this->deepltargets = 'en';
         $this->deeplsources = 'en';
-
         $this->allowsublangcodesasmain = get_config('local_deepler', 'allowsublangs');
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', 'en', PARAM_NOTAGS);
