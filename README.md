@@ -249,12 +249,14 @@ throughout content that utilize the same language._
 
 ### Image display
 
-Currently images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
+Currently, images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
 The Alt attribute is not sent toi ©Deepl. This should be added in further improvement for better accessibility.
 
 ## Compatability
 
-This plugin has been tested on Moodle 3.11 and Moodle 4.0.
+This plugin has been tested on Moodle 4.1+
+php >= 8.1
+
 Should work with the following editors:
 
 - Plaintext
@@ -279,6 +281,7 @@ message on the course translation page.
 - Translations versioning.
 - Import glossaries.
 - Multiple API key setting and user mapping.
+- Document translation
 
 ## Submit an issue
 
