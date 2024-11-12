@@ -206,9 +206,17 @@ export const init = (cfg) => {
 const showErrorMessageForEditor = (key, message) => {
     let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
     const errorMsg = document.createElement('div');
+    errorMsg.id = 'local_deepler__errormsg';
     errorMsg.classList = ['alert alert-danger'];
     errorMsg.innerHTML = message;
     parent.appendChild(errorMsg);
+};
+const hideErrorMessage = (key) => {
+    let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
+    let alertchild = parent.querySelector('.alert-danger');
+    if (alertchild) {
+        parent.removeChild(alertchild);
+    }
 };
 /**
  * Opens a modal infobox to warn user trunks of fields are saving.
@@ -227,7 +235,7 @@ const launchModal = async () => {
  * @param  {String} key Data Key
  */
 const saveTranslation = (key) => {
-
+    hideErrorMessage(key);
     // Get processing vars.
     let editor = tempTranslations[key].editor;
     let text = editor.innerHTML; // We keep the editors text in case translation is edited

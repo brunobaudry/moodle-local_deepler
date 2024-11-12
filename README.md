@@ -102,7 +102,7 @@ This setting's default in the editor can be set in the plugin [admin page](#admi
 
 #### Source language
 
-The source language will be set to the actual Moodle language selection which will automatically be set to **other**.
+**The source language will be set to the actual Moodle language** selection which will automatically be set to **other**.
 Changing the source language will act as if you'd change moodle's lang.
 It is important, from a translation standpoint, to **select the source language from the language it was initially written** (and to stick with it).
 
