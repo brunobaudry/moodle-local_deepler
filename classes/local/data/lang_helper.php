@@ -89,6 +89,12 @@ class lang_helper {
      */
     private mixed $deepltargets;
     /**
+     * Whether to allow sublanguages as main.
+     *
+     * @var object
+     */
+    private mixed $allowsublangcodesasmain;
+    /**
      * Deepl usage bound to the api key.
      *
      * @var Usage
