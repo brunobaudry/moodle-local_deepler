@@ -253,11 +253,20 @@ class course_data {
     }
 
     /**
-     * Special function for book's subchapters.
+     *
      *
      * @param array $activities
      * @param mixed $chapter
      * @param int $section
+     * @return void
+     * @throws \dml_exception
+     */
+    /**
+     * Special function for book's subchapters.
+     *
+     * @param array $activities
+     * @param mixed $chapter
+     * @param \cm_info $act
      * @return void
      * @throws \dml_exception
      */
@@ -289,11 +298,11 @@ class course_data {
     }
 
     /**
-     * Special functions for wiki pages.
+     * Special function for wiki's subpages.
      *
      * @param array $activities
      * @param mixed $chapter
-     * @param int $section
+     * @param \cm_info $act
      * @return void
      * @throws \dml_exception
      * @todo MDL-0 check differences between collaborative and individual
