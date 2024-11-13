@@ -221,6 +221,7 @@ class course_data {
         $activitydata = [];
 
         foreach ($this->modinfo->instances as $instances) {
+            /** @var \cm_info|mixed $activity */
             foreach ($instances as $activity) {
                 // Build first level activities.
                 $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $activity->modname);
@@ -230,15 +231,19 @@ class course_data {
                         include_once($CFG->dirroot . '/mod/book/locallib.php');
                         $chapters = book_preload_chapters($activitydbrecord);
                         foreach ($chapters as $c) {
-                            $this->injectbookchapter($activitydata, $c, $activity->section);
+                            $this->injectbookchapter($activitydata, $c, $activity);
                         }
                         break;
                     case 'wiki':
                         include_once($CFG->dirroot . '/mod/wiki/locallib.php');
                         $wikis = wiki_get_subwikis($activitydbrecord->id);
+
                         foreach ($wikis as $wid => $wiki) {
-                            $firstpage = wiki_get_first_page($wid);
-                            $this->injectwikipage($activitydata, $firstpage, $activity->section);
+                            $pages = wiki_get_page_list($wid);
+                            foreach ($pages as $p) {
+                                $this->injectwikipage($activitydata, $p, $activity);
+                            }
+
                         }
                         break;
                 }
@@ -256,11 +261,12 @@ class course_data {
      * @return void
      * @throws \dml_exception
      */
-    private function injectbookchapter(array &$activities, mixed $chapter, int $section) {
+    private function injectbookchapter(array &$activities, mixed $chapter, \cm_info $act) {
         global $DB;
         $activity = new \stdClass();
+        $activity->id = $act->id;
         $activity->modname = 'book_chapters';
-        $activity->section = $section;
+        $activity->section = $act->sectionid;
         // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
         $activity->content = '';
         // Book chapters have title and content.
@@ -290,12 +296,14 @@ class course_data {
      * @param int $section
      * @return void
      * @throws \dml_exception
+     * @todo MDL-0 check differences between collaborative and individual
      */
-    private function injectwikipage(array &$activities, mixed $chapter, int $section) {
+    private function injectwikipage(array &$activities, mixed $chapter, \cm_info $act) {
         global $DB;
         $activity = new \stdClass();
+        $activity->id = $act->id;
         $activity->modname = 'wiki_pages';
-        $activity->section = $section;
+        $activity->section = $act->sectionid;
         // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
         $activity->content = '';
         // Wiki pages have title and cachedcontent.
@@ -403,10 +411,12 @@ class course_data {
         $item->tneeded = $status->s_lastmodified >= $status->t_lastmodified;
         $item->section = $sectionid;
         // Get the activity icon, if it is a real activity/resource.
-        if ($cmid !== null) {
+        try {
             $item->purpose = call_user_func($table . '_supports', FEATURE_MOD_PURPOSE);
             $item->iconurl = $this->modinfo->get_cm($cmid)->get_icon_url()->out(false);
-
+        } catch (\TypeError $e) {
+            $item->purpose = null;
+            $item->iconurl = null;
         }
         if ($table !== null) {
             // Try to find the activity names as well as the field translated in the current lang.
@@ -424,7 +434,10 @@ class course_data {
                 } else if ($field === 'name') {
                     $item->translatedfieldname = get_string('name');;
                 } else {
-                    $foundstring = $table . '_' . $field;
+
+                    $foundstring = $field;
+                    $plugroot = explode("_", $table);
+                    $fieldwithoutunderscore = str_replace("_", "", $field);
                     // Try several combining possible to try to fetch wierd unknown string names.
                     $allcombinaisons = [
                             ['identifier' => $table . $field, 'component' => 'mod_' . $table],
@@ -434,20 +447,27 @@ class course_data {
                             ['identifier' => $field . $table, 'component' => null],
                             ['identifier' => $field . ' ' . $table, 'component' => null],
                             ['identifier' => $foundstring, 'component' => null],
+                            ['identifier' => $field, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => $plugroot[1] ?? '' . $field, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => $plugroot[1] ?? '' . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                     ];
                     foreach ($allcombinaisons as $string) {
                         try {
-                            $foundstring = get_string($string['identifier'], $string['component']);
+                            $stringid = $string['identifier'];
+                            $componentid = $string['component'];
+                            $found = get_string($stringid, $componentid);
                             // If the string isn't found.
-                            if (strpos($foundstring, '[[') === 0) {
+                            if (strpos($found, '[[') === 0) {
                                 continue;
                             }
+                            $foundstring = $found;
                             break; // Exit the loop if the string is found.
                         } catch (\moodle_exception $e) {
                             continue; // Continue to the next string if an exception is caught.
                         }
                     }
-                    $item->translatedfieldname = $foundstring;
+                    $item->translatedfieldname = preg_replace('/\[\[|\]\]/', "", $foundstring);
                 }
             }
         }
@@ -514,7 +534,19 @@ class course_data {
                 $link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $id]);
                 break;
             default:
-                if ($cmid !== 0) {
+                if (strpos($table, "_") !== false) {
+                    $split = explode("_", $table);
+                    $params = [];
+                    switch ($split[0]) {
+                        case 'book':
+                            $params = ['cmid' => $tcmid, 'id' => $id];
+                            break;
+                        case 'wiki':
+                            $params = ['pageid' => $id];
+                            break;
+                    }
+                    $link = new moodle_url($CFG->wwwroot . "/mod/{$split[0]}/edit.php", $params);
+                } else if ($tcmid !== 0) {
                     $link = new moodle_url($CFG->wwwroot . "/course/modedit.php", ['update' => $tcmid]);
                 }
                 break;

@@ -732,7 +732,7 @@ const findEditor = (key) => {
             // First let's try the current editor.
             try {
                 r = findEditorByType(key, mainEditorType);
-            } catch (e) {
+            } catch (error) {
                 // Content was edited by another editor.
                 log(`Editor not found: ${mainEditorType} for key ${key}`);
             }
