@@ -24,7 +24,7 @@ import ajax from "core/ajax";
 import Selectors from "./selectors";
 import Modal from 'core/modal';
 import {get_string as getString} from "core/str";
-import {escapeReplacementString, postprocess, preprocess} from "./latextokeniser";
+import {escapeReplacementString, postprocess, preprocess} from "./tokeniser";
 
 
 // Initialize the temporary translations dictionary @todo make external class
@@ -627,6 +627,51 @@ const doAutotranslate = () => {
         });
 };
 /**
+ *
+ * @returns {{}}
+ */
+const prepareAdvancedSettings = () => {
+    let settings = {};
+    settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
+    settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
+    settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
+    settings.preserve_formatting = document.querySelector(Selectors.deepl.preserveFormatting).checked;//
+    settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
+    settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
+    settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
+    settings.non_splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value);
+    settings.splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value);
+    settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
+    settings.target_lang = targetLang.toUpperCase();
+    settings.auth_key = config.apikey;
+    return settings;
+};
+const prepareTranslation = (key) => {
+    return {
+        text: tempTranslations[key].source,
+        source_lang: tempTranslations[key].sourceLang,
+    };
+};
+/**
+ * Prepare the params for XHR call.
+ *
+ * @param {string} key
+ * @param {boolean} url
+ * @returns {URLSearchParams|FormData} Object to use in XHR.
+ */
+const prepareFormData = (key, url = true) => {
+    let formData = url ? new URLSearchParams() : new FormData();
+    Object.entries(prepareAdvancedSettings()).forEach(([k, v]) => {
+        formData.append(k, v);
+    });
+    Object.entries(prepareTranslation(key)).forEach(([k, v]) => {
+        formData.append(k, v);
+    });
+    return formData;
+};
+
+
+/**
  * @todo extract images ALT tags to send for translation
  * Send for Translation to DeepL
  * @param {Integer} key Translation Key
@@ -635,34 +680,21 @@ const getTranslation = (key) => {
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;
     // Build formData
-    let formData = new FormData();
-    formData.append("text", tempTranslations[key].source);
-    formData.append("source_lang", tempTranslations[key].sourceLang);
-    formData.append("target_lang", targetLang.toUpperCase());
-    formData.append("auth_key", config.apikey);
-    formData.append("tag_handling", document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml');//
-    formData.append("context", document.querySelector(Selectors.deepl.context).value ?? null); //
-    formData.append("split_sentences", document.querySelector(Selectors.deepl.splitSentences).value);//
-    formData.append("preserve_formatting", document.querySelector(Selectors.deepl.preserveFormatting).checked);//
-    formData.append("formality", document.querySelector('[name="local_deepler/formality"]:checked').value);
-    formData.append("glossary_id", document.querySelector(Selectors.deepl.glossaryId).value);//
-    formData.append("outline_detection", document.querySelector(Selectors.deepl.outlineDetection).checked);//
-    formData.append("non_splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value));
-    formData.append("splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value));
-    formData.append("ignore_tags", toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value));
+    let formData = prepareFormData(key);
     info("Send deepl:", formData);
 
     // Update the translation
     let xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             const status = xhr.status;
             if (status === 0 || (status >= 200 && status < 400)) {
                 // The request has been completed successfully
-                let data = JSON.parse(xhr.responseText);
+                log(xhr.response);
+                let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
                 info("From deepl:", data);
-                log(tempTranslations[key]);
-                log(data.translations[0].text);
                 let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens);
                 // Display translation
                 log(tr);
