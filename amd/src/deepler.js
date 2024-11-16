@@ -249,7 +249,7 @@ const saveTranslation = (key) => {
     log(sourceText);
     let element = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
     let id = element.getAttribute("data-id");
-    let tid = element.getAttribute("data-tid");
+    let tid = element.getAttribute("data-tid"); // TranslationId.
     let table = element.getAttribute("data-table");
     let field = element.getAttribute("data-field");
 
@@ -316,9 +316,10 @@ const saveTranslation = (key) => {
                             setIconStatus(key, Selectors.statuses.failed);
                             let message = err.message + ' ' + hintError;
                             if (err.debuginfo) {
-                                // When Moodle is set to max debugger display the debuginfo
+                                // When Moodle is set to max debugger display the debuginfo.
                                 const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
-                                message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
+                                // message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
+                                message = err.message + '<br/>' + err.debuginfo + ' ' + setIndex;
                             }
                             showErrorMessageForEditor(key, message);
                         });

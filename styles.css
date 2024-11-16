@@ -60,6 +60,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate .local_deepler__sectiondata {
     margin-top: 3rem;
 }
+#page-local-deepler-translate div[data-table^=question] {
+    background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate div[id^=question] {
+    background-color: #e9ecef !important; /* stylelint-disable-line declaration-no-important */
+}
 #page-local-deepler-translate .local_deepler__activitydesc, #page-local-deepler-translate .local_deepler__activityfield {
     color: #ced4da;
     position: relative;

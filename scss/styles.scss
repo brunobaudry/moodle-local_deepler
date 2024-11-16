@@ -103,6 +103,14 @@ $secondary: $gray-400 !default;
         margin-top: 3rem;
     }
 
+    div[data-table^="question"] {
+        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    div[id^="question"] {
+        background-color: $gray-200 !important; /* stylelint-disable-line declaration-no-important */
+    }
+
     .local_deepler__activitydesc, .local_deepler__activityfield {
         color: $secondary;
         position: relative;

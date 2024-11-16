@@ -382,6 +382,9 @@ class course_data {
 
         // Feed the data array with found text.
         foreach ($textcollumnskeys as $field) {
+            if ($field === 'password') {
+                return;
+            }
             if ($activitydbrecord->{$field} !== null && trim($activitydbrecord->{$field}) !== '') {
                 $data = $this->build_data(
                         $activitydbrecord->id,
@@ -411,7 +414,7 @@ class course_data {
         global $DB;
         // Activity stuff.
         $table = $activity->modname;
-        $cmid = $activity->id;
+        $cmid = $activity->id ?? 0;
         $sectionid = $activity->section;
         $status = $this->store_status_db($id, $table, $field);
         // Build item id, tid, displaytext, format, table, field, tneeded, section.
@@ -464,12 +467,12 @@ class course_data {
                 } else if ($field === 'name') {
                     $item->translatedfieldname = get_string('name');;
                 } else {
-
                     $foundstring = $field;
                     $plugroot = explode("_", $table);
                     $fieldwithoutunderscore = str_replace("_", "", $field);
-                    // Try several combining possible to try to fetch wierd unknown string names.
-                    $allcombinaisons = [
+
+                    // Try several combining possible to try to fetch weird unknown string names.
+                    $allcombinations = [
                             ['identifier' => $table . $field, 'component' => 'mod_' . $table],
                             ['identifier' => $field, 'component' => 'mod_' . $table],
                             ['identifier' => $field, 'component' => null],
@@ -478,27 +481,22 @@ class course_data {
                             ['identifier' => $field . ' ' . $table, 'component' => null],
                             ['identifier' => $foundstring, 'component' => null],
                             ['identifier' => $field, 'component' => 'mod_' . $plugroot[0]],
-                            ['identifier' => $plugroot[1] ?? '' . $field, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => ($plugroot[1] ?? '') . $field, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
-                            ['identifier' => $plugroot[1] ?? '' . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => ($plugroot[1] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                     ];
-                    foreach ($allcombinaisons as $string) {
-                        try {
-                            $stringid = $string['identifier'];
-                            $componentid = $string['component'];
-                            $found = get_string($stringid, $componentid);
-                            // If the string isn't found.
-                            if (strpos($found, '[[') === 0) {
-                                continue;
-                            }
-                            $foundstring = $found;
-                            break; // Exit the loop if the string is found.
-                        } catch (\moodle_exception $e) {
-                            continue; // Continue to the next string if an exception is caught.
+
+                    foreach ($allcombinations as $string) {
+                        $stringid = $string['identifier'];
+                        $componentid = $string['component'];
+                        if (get_string_manager()->string_exists($stringid, $componentid)) {
+                            $foundstring = get_string($stringid, $componentid);
+                            break;
                         }
                     }
-                    $item->translatedfieldname = preg_replace('/\[\[|\]\]/', "", $foundstring);
+                    $item->translatedfieldname = $foundstring;
                 }
+
             }
         }
         return $item;
@@ -680,6 +678,10 @@ class course_data {
                     $activity
             );
         }
+        $qactivity = new \stdClass();
+        $qactivity->id = $act->id;
+        $qactivity->modname = 'question_answers';
+        $qactivity->section = $act->sectionid;
         switch ($question->qtype->name()) {
             case 'multichoice':
                 $rank = 0;
@@ -689,8 +691,8 @@ class course_data {
                             $answer->id,
                             $answer->answer,
                             $answer->answerformat,
-                            'choice',
-                            $activity
+                            'answer',
+                            $qactivity
                     );
                     if (!empty($answer->feedback)) {
                         $activitydata[] = $this->build_data(
@@ -698,82 +700,72 @@ class course_data {
                                 $answer->feedback,
                                 $answer->feedbackformat,
                                 'feedback',
-                                $activity
+                                $qactivity
                         );
                     }
-                    /*                    $data['textfields'][] = [
-                                                'id' => 'quiz_question_answer_' . $answer->id,
-                                                'name' => $cm->name . ' - ' . $question->name . ' (Choice)',
-                                                'content' => $answer->answer
-                                        ];
-                                        if (!empty($answer->feedback)) {
-                                            $data['textfields'][] = [
-                                                    'id' => 'quiz_question_feedback_' . $answer->id,
-                                                    'name' => $cm->name . ' - ' . $question->name . ' (Choice Feedback)',
-                                                    'content' => $answer->feedback
-                                            ];
-                                        }*/
                 }
                 break;
-            case 'truefalse':
-                foreach ($question->answers as $answer) {
-                    $data['textfields'][] = [
-                            'id' => 'quiz_question_answer_' . $answer->id,
-                            'name' => $cm->name . ' - ' . $question->name . ' (' .
-                                    ($answer->answer == 1 ? 'True' : 'False') . ')',
-                            'content' => $answer->answer == 1 ? get_string('true', 'qtype_truefalse') :
-                                    get_string('false', 'qtype_truefalse')
-                    ];
-                    if (!empty($answer->feedback)) {
-                        $data['textfields'][] = [
-                                'id' => 'quiz_question_feedback_' . $answer->id,
-                                'name' => $cm->name . ' - ' . $question->name . ' (' .
-                                        ($answer->answer == 1 ? 'True' : 'False') . ' Feedback)',
-                                'content' => $answer->feedback
-                        ];
-                    }
-                }
-                break;
-            case 'match':
-                foreach ($question->subquestions as $subq) {
-                    $data['textfields'][] = [
-                            'id' => 'quiz_question_subq_' . $subq->id,
-                            'name' => $cm->name . ' - ' . $question->name . ' (Subquestion)',
-                            'content' => $subq->questiontext
-                    ];
-                    $data['textfields'][] = [
-                            'id' => 'quiz_question_subq_answer_' . $subq->id,
-                            'name' => $cm->name . ' - ' . $question->name . ' (Subquestion Answer)',
-                            'content' => $subq->answertext
-                    ];
-                }
-                break;
-            case 'essay':
-                if (!empty($question->graderinfo)) {
-                    $data['textfields'][] = [
-                            'id' => 'quiz_question_graderinfo_' . $question->id,
-                            'name' => $cm->name . ' - ' . $question->name . ' (Grader Info)',
-                            'content' => $question->graderinfo
-                    ];
-                }
-                break;
-            case 'shortanswer':
-            case 'numerical':
-                foreach ($question->answers as $answer) {
-                    $data['textfields'][] = [
-                            'id' => 'quiz_question_answer_' . $answer->id,
-                            'name' => $cm->name . ' - ' . $question->name . ' (Answer)',
-                            'content' => $answer->answer
-                    ];
-                    if (!empty($answer->feedback)) {
-                        $data['textfields'][] = [
-                                'id' => 'quiz_question_feedback_' . $answer->id,
-                                'name' => $cm->name . ' - ' . $question->name . ' (Answer Feedback)',
-                                'content' => $answer->feedback
-                        ];
-                    }
-                }
-                break;
+            /*  case 'truefalse':
+                  if (!empty($question->truefeedback)) {
+                      $activitydata[] = $this->build_data(
+                              $question->id,
+                              $question->truefeedback,
+                              $question->truefeedbackformat,
+                              'truefeedback',
+                              $activity
+                      );
+                  }
+                  if (!empty($question->falsefeedback)) {
+                      $activitydata[] = $this->build_data(
+                              $question->id,
+                              $question->falsefeedback,
+                              $question->falsefeedbackformat,
+                              'falsefeedback',
+                              $activity
+                      );
+                  }
+
+                  break;
+              case 'match':
+                  foreach ($question->subquestions as $subq) {
+                      $data['textfields'][] = [
+                              'id' => 'quiz_question_subq_' . $subq->id,
+                              'name' => $cm->name . ' - ' . $question->name . ' (Subquestion)',
+                              'content' => $subq->questiontext
+                      ];
+                      $data['textfields'][] = [
+                              'id' => 'quiz_question_subq_answer_' . $subq->id,
+                              'name' => $cm->name . ' - ' . $question->name . ' (Subquestion Answer)',
+                              'content' => $subq->answertext
+                      ];
+                  }
+                  break;
+              case 'essay':
+                  if (!empty($question->graderinfo)) {
+                      $data['textfields'][] = [
+                              'id' => 'quiz_question_graderinfo_' . $question->id,
+                              'name' => $cm->name . ' - ' . $question->name . ' (Grader Info)',
+                              'content' => $question->graderinfo
+                      ];
+                  }
+                  break;
+              case 'shortanswer':
+              case 'numerical':
+                  foreach ($question->answers as $answer) {
+                      $data['textfields'][] = [
+                              'id' => 'quiz_question_answer_' . $answer->id,
+                              'name' => $cm->name . ' - ' . $question->name . ' (Answer)',
+                              'content' => $answer->answer
+                      ];
+                      if (!empty($answer->feedback)) {
+                          $data['textfields'][] = [
+                                  'id' => 'quiz_question_feedback_' . $answer->id,
+                                  'name' => $cm->name . ' - ' . $question->name . ' (Answer Feedback)',
+                                  'content' => $answer->feedback
+                          ];
+                      }
+                  }
+                  break;*/
             default:
                 // Log or handle unknown question types
                 debugging('Unhandled question type: ' . $question->qtype->name(), DEBUG_DEVELOPER);

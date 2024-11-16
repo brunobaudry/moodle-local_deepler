@@ -55,6 +55,7 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 $string['latexescapeadmin_desc'] = 'Set to true will check "escape LaTeX formulas, in the course translation form.
 This will have the effect to enable by default the Non translation of LaTeX formulas in course (when set here to true).
 Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+$string['mod_page'] = 'page';
 $string['needsupdate'] = 'Needs update';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
@@ -63,6 +64,7 @@ $string['nonsplittingtags'] = 'Non splitting tags';
 $string['notsupportedsource'] = 'The source language you are in is not supported by Deepl.';
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
+$string['pagecontent'] = 'pagecontent';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
