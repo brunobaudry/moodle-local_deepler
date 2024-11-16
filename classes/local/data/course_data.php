@@ -220,46 +220,56 @@ class course_data {
         global $DB;
         $activitydata = [];
 
-        foreach ($this->modinfo->instances as $instances) {
-            /** @var \cm_info|mixed $activity */
-            foreach ($instances as $activity) {
-                // Build first level activities.
-                $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $activity->modname);
-                // Build outstanding subcontent.
-                switch ($activity->modname) {
-                    case 'book':
-                        include_once($CFG->dirroot . '/mod/book/locallib.php');
-                        $chapters = book_preload_chapters($activitydbrecord);
-                        foreach ($chapters as $c) {
-                            $this->injectbookchapter($activitydata, $c, $activity);
-                        }
-                        break;
-                    case 'wiki':
-                        include_once($CFG->dirroot . '/mod/wiki/locallib.php');
-                        $wikis = wiki_get_subwikis($activitydbrecord->id);
+        /** @var \cm_info|mixed $activity */
+        foreach ($this->modinfo->get_cms() as $activity) {
+            // Build first level activities.
+            $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $activity->modname);
+            // Build outstanding subcontent.
+            switch ($activity->modname) {
+                case 'book':
+                    include_once($CFG->dirroot . '/mod/book/locallib.php');
+                    $chapters = book_preload_chapters($activitydbrecord);
+                    foreach ($chapters as $c) {
+                        $this->injectbookchapter($activitydata, $c, $activity);
+                    }
+                    break;
+                case 'quiz':
+                    // Get quiz questions
+                    $quizsettings = \quiz::create($activity->instance);
+                    $structure = \mod_quiz\structure::create_for_quiz($quizsettings);
+                    $slots = $structure->get_slots();
+                    foreach ($slots as $slot) {
+                        $question = \question_bank::load_question($slot->questionid);
+                        $this->injectquizcontent($activitydata, $question, $activity);
+                    }
+                    break;
+                case 'wiki':
+                    include_once($CFG->dirroot . '/mod/wiki/locallib.php');
+                    $wikis = wiki_get_subwikis($activitydbrecord->id);
 
-                        foreach ($wikis as $wid => $wiki) {
-                            $pages = wiki_get_page_list($wid);
-                            foreach ($pages as $p) {
-                                $this->injectwikipage($activitydata, $p, $activity);
-                            }
-
+                    foreach ($wikis as $wid => $wiki) {
+                        $pages = wiki_get_page_list($wid);
+                        foreach ($pages as $p) {
+                            $this->injectwikipage($activitydata, $p, $activity);
                         }
-                        break;
-                    case 'moodleoverflow':
-                        include_once($CFG->dirroot . '/mod/moodleoverflow/locallib.php');
-                        $discussion = moodleoverflow_get_discussions($activity);
-                        // @todo parse discussions
-                        break;
-                    case 'hotquestion':
-                        include_once($CFG->dirroot . '/mod/hotquestion/locallib.php');
-                        $hq = new \mod_hotquestion($activity->id);
-                        // @todo parse hot questions
-                        $questions = $hq->get_questions();
-                        break;
-                }
+
+                    }
+                    break;
+                case 'moodleoverflow':
+                    include_once($CFG->dirroot . '/mod/moodleoverflow/locallib.php');
+                    $discussion = moodleoverflow_get_discussions($activity);
+                    // @todo parse discussions
+                    break;
+                case 'hotquestion':
+                    include_once($CFG->dirroot . '/mod/hotquestion/locallib.php');
+                    $hq = new \mod_hotquestion($activity->id);
+                    // @todo parse hot questions
+                    $questions = $hq->get_questions();
+                    break;
+
             }
         }
+
         return $activitydata;
     }
 
@@ -632,4 +642,134 @@ class course_data {
                     $tmp['itemid']);
         }
     }
+
+    private function injectquizcontent(array &$activitydata, \question_definition $question, mixed $act) {
+        $activity = new \stdClass();
+        $activity->id = $act->id;
+        $activity->modname = 'question';
+        $activity->section = $act->sectionid;
+        $activitydata[] = $this->build_data(
+                $activity->id,
+                $question->name,
+                0,
+                'name',
+                $activity
+        );
+        $activitydata[] = $this->build_data(
+                $activity->id,
+                $question->questiontext,
+                1,
+                'questiontext',
+                $activity
+        );
+        if (!empty($question->generalfeedback)) {
+            $activitydata[] = $this->build_data(
+                    $activity->id,
+                    $question->generalfeedback,
+                    1,
+                    'generalfeedback',
+                    $activity
+            );
+        }
+        switch ($question->qtype->name()) {
+            case 'multichoice':
+                $rank = 0;
+                foreach ($question->answers as $answer) {
+                    $rank++;
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'choice',
+                            $activity
+                    );
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $activity
+                        );
+                    }
+                    /*                    $data['textfields'][] = [
+                                                'id' => 'quiz_question_answer_' . $answer->id,
+                                                'name' => $cm->name . ' - ' . $question->name . ' (Choice)',
+                                                'content' => $answer->answer
+                                        ];
+                                        if (!empty($answer->feedback)) {
+                                            $data['textfields'][] = [
+                                                    'id' => 'quiz_question_feedback_' . $answer->id,
+                                                    'name' => $cm->name . ' - ' . $question->name . ' (Choice Feedback)',
+                                                    'content' => $answer->feedback
+                                            ];
+                                        }*/
+                }
+                break;
+            case 'truefalse':
+                foreach ($question->answers as $answer) {
+                    $data['textfields'][] = [
+                            'id' => 'quiz_question_answer_' . $answer->id,
+                            'name' => $cm->name . ' - ' . $question->name . ' (' .
+                                    ($answer->answer == 1 ? 'True' : 'False') . ')',
+                            'content' => $answer->answer == 1 ? get_string('true', 'qtype_truefalse') :
+                                    get_string('false', 'qtype_truefalse')
+                    ];
+                    if (!empty($answer->feedback)) {
+                        $data['textfields'][] = [
+                                'id' => 'quiz_question_feedback_' . $answer->id,
+                                'name' => $cm->name . ' - ' . $question->name . ' (' .
+                                        ($answer->answer == 1 ? 'True' : 'False') . ' Feedback)',
+                                'content' => $answer->feedback
+                        ];
+                    }
+                }
+                break;
+            case 'match':
+                foreach ($question->subquestions as $subq) {
+                    $data['textfields'][] = [
+                            'id' => 'quiz_question_subq_' . $subq->id,
+                            'name' => $cm->name . ' - ' . $question->name . ' (Subquestion)',
+                            'content' => $subq->questiontext
+                    ];
+                    $data['textfields'][] = [
+                            'id' => 'quiz_question_subq_answer_' . $subq->id,
+                            'name' => $cm->name . ' - ' . $question->name . ' (Subquestion Answer)',
+                            'content' => $subq->answertext
+                    ];
+                }
+                break;
+            case 'essay':
+                if (!empty($question->graderinfo)) {
+                    $data['textfields'][] = [
+                            'id' => 'quiz_question_graderinfo_' . $question->id,
+                            'name' => $cm->name . ' - ' . $question->name . ' (Grader Info)',
+                            'content' => $question->graderinfo
+                    ];
+                }
+                break;
+            case 'shortanswer':
+            case 'numerical':
+                foreach ($question->answers as $answer) {
+                    $data['textfields'][] = [
+                            'id' => 'quiz_question_answer_' . $answer->id,
+                            'name' => $cm->name . ' - ' . $question->name . ' (Answer)',
+                            'content' => $answer->answer
+                    ];
+                    if (!empty($answer->feedback)) {
+                        $data['textfields'][] = [
+                                'id' => 'quiz_question_feedback_' . $answer->id,
+                                'name' => $cm->name . ' - ' . $question->name . ' (Answer Feedback)',
+                                'content' => $answer->feedback
+                        ];
+                    }
+                }
+                break;
+            default:
+                // Log or handle unknown question types
+                debugging('Unhandled question type: ' . $question->qtype->name(), DEBUG_DEVELOPER);
+                break;
+        }
+    }
+
 }
