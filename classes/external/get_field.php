@@ -70,7 +70,8 @@ class get_field extends external_api {
             self::validate_context($context);
             require_capability('local/deepler:edittranslations', $context);
             // Check detailed activity capabilities.
-            if ($data['table'] !== 'course' && $data['table'] !== 'course_sections') {
+            if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
+                    strpos($data['table'], 'question') === false) {
                 require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
             }
             // Get the original record.
