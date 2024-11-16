@@ -18,43 +18,49 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+/**
+ *
+ * @type {[{regex: RegExp, type: string},{regex: RegExp, type: string}]}
+ */
+const patterns = [
+    {regex: /<pre\b[^>]*>(.*?)<\/pre>/gs, type: 'PRETAG'}, // pre HTML
+    {regex: /\$\$.*?\$\$/g, type: 'LATEX'} // Display math
+];
 
 /**
- * Function to replace LaTeX math with tokens
+ * Function to replace expressions with tokens
  * @param {String} text
- * @returns {Object} {{latexExpressions: *[], tokenizedText}}
+ * @returns {Object} {{expressions: *[], tokenizedText}}
  */
 export function preprocess(text) {
-    const latexExpressions = [];
+    const expressions = [];
     let tokenizedText = text;
 
-    // Patterns for different LaTeX math environments
-    const patterns = [
-        {regex: /\$\$.*?\$\$/g, type: 'display'} // Display math
-    ];
-
-    // Replace each LaTeX math expression with a token
+    // Patterns for different environments
+    // Replace each expression with a token
     patterns.forEach(pattern => {
         tokenizedText = tokenizedText.replace(pattern.regex, match => {
-            const token = `__LATEX_${latexExpressions.length}__`;
-            latexExpressions.push(match);
+            const token = `__${pattern.type}_${expressions.length}__`;
+            expressions.push(match);
             return token;
         });
     });
 
-    return {tokenizedText, latexExpressions: latexExpressions};
+    return {tokenizedText, expressions: expressions};
 }
 
 /**
- * Function to replace tokens with original LaTeX math
+ * Function to replace tokens with original expressions
  * @param {String} text
- * @param {Array} latexExpressions
+ * @param {Array} expressions
  * @returns {String}
  */
-export function postprocess(text, latexExpressions) {
-    latexExpressions.forEach((expr, i) => {
-        const token = new RegExp(`__LATEX_${i}__`, 'g');
-        text = text.replace(token, escapeReplacementString(expr));
+export function postprocess(text, expressions) {
+    expressions.forEach((expr, i) => {
+        patterns.forEach((p) => {
+            const token = new RegExp(`__${p.type}_${i}__`, 'g');
+            text = text.replace(token, escapeReplacementString(expr));
+        });
     });
     return text;
 }
