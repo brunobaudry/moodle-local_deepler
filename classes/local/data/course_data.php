@@ -246,6 +246,17 @@ class course_data {
 
                         }
                         break;
+                    case 'moodleoverflow':
+                        include_once($CFG->dirroot . '/mod/moodleoverflow/locallib.php');
+                        $discussion = moodleoverflow_get_discussions($activity);
+                        // @todo parse discussions
+                        break;
+                    case 'hotquestion':
+                        include_once($CFG->dirroot . '/mod/hotquestion/locallib.php');
+                        $hq = new \mod_hotquestion($activity->id);
+                        // @todo parse hot questions
+                        $questions = $hq->get_questions();
+                        break;
                 }
             }
         }

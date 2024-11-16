@@ -244,6 +244,7 @@ const saveTranslation = (key) => {
     }
     // Restore the source.
     let sourceTokenised = tempTranslations[key].source;
+    log(tempTranslations);
     let sourceText = escapeLatex ? postprocess(sourceTokenised, tempTranslations[key].tokens) : sourceTokenised;
     log(text);
     log(sourceText);
@@ -508,7 +509,7 @@ const initTempForKey = (key, blank) => {
                 'sourceLang': sourceLang,
                 'status': Selectors.statuses.wait,
                 'translation': '',
-                'tokens': tokenised.latexExpressions
+                'tokens': tokenised.expressions
             };
         }
     }
@@ -659,7 +660,12 @@ const getTranslation = (key) => {
             const status = xhr.status;
             if (status === 0 || (status >= 200 && status < 400)) {
                 // The request has been completed successfully
+<<<<<<< Updated upstream
                 let data = JSON.parse(xhr.responseText);
+=======
+                log(tempTranslations);
+                let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
+>>>>>>> Stashed changes
                 info("From deepl:", data);
                 log(tempTranslations[key]);
                 log(data.translations[0].text);
