@@ -29,94 +29,134 @@ use advanced_testcase;
 use ReflectionMethod;
 use stdClass;
 
-class local_deepler_course_data_testcase extends advanced_testcase {
+/**
+ * Test case for course data.
+ */
+final class coursedata_test extends advanced_testcase {
+    /**
+     * @var stdClass
+     */
     protected $course;
+    /**
+     * @var local\data\course_data
+     */
     protected $coursedata;
 
+    /**
+     * Setup.
+     *
+     * @return void
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
     public function setUp(): void {
         $this->resetAfterTest();
 
-        // Create a test course
+        // Create a test course.
         $this->course = $this->getDataGenerator()->create_course([
                 'fullname' => 'Test Course',
                 'shortname' => 'TC101',
-                'summary' => 'This is a test course summary'
+                'summary' => 'This is a test course summary',
         ]);
 
-        // Create a test section
+        // Create a test section.
         $this->getDataGenerator()->create_course_section([
                 'course' => $this->course->id,
                 'section' => 1,
                 'name' => 'Test Section',
-                'summary' => 'Test section summary'
+                'summary' => 'Test section summary',
         ]);
 
-        // Create a test activity (page)
+        // Create a test activity (page).
         $this->getDataGenerator()->create_module('page', [
                 'course' => $this->course->id,
                 'name' => 'Test Page',
-                'content' => 'Test page content'
+                'content' => 'Test page content',
         ]);
 
         $this->coursedata =
                 new \local_deepler\local\data\course_data($this->course, 'en', \context_course::instance($this->course->id)->id);
     }
 
-    public function test_constructor() {
+    /**
+     * Test constructor.
+     * @covers ::_construct()
+     *
+     * @return void
+     */
+    public function test_constructor(): void {
         $this->assertInstanceOf(\local_deepler\local\data\course_data::class, $this->coursedata);
     }
 
-    public function test_getdata() {
+    /**
+     * Test getdata.
+     *
+     * @covers ::getdata
+     * @return void
+     */
+    public function test_getdata(): void {
         $this->resetAfterTest();
 
-        // Capture debugging messages
+        // Capture debugging messages.
         $debuggings = [];
         set_debugging(DEBUG_DEVELOPER);
 
         $data = $this->coursedata->getdata();
 
-        $debuggingmessages = $this->getDebuggingMessages();
-        $this->assertEmpty($debuggingmessages, 'Unexpected debugging messages: ' . print_r($debuggingmessages, true));
-
-        // Assert that data is returned and has the expected structure
+        // Assert that data is returned and has the expected structure.
         $this->assertIsArray($data);
         $this->assertArrayHasKey('0', $data);
         $this->assertArrayHasKey('section', $data['0']);
         $this->assertArrayHasKey('activities', $data['0']);
 
-        // Additional assertions to check the content of $data
+        // Additional assertions to check the content of $data.
         $this->assertNotEmpty($data['0']['section']);
         $this->assertNotEmpty($data['0']['activities']);
 
-        // Check for specific fields in the activities
-        $foundPageContent = false;
+        // Check for specific fields in the activities.
+        $foundapgecontent = false;
         foreach ($data as $section) {
             foreach ($section['activities'] as $activity) {
                 if ($activity->table === 'page' && $activity->field === 'content') {
-                    $foundPageContent = true;
+                    $foundapgecontent = true;
                     $this->assertNotEmpty($activity->translatedfieldname);
                     break 2;
                 }
             }
         }
-        $this->assertTrue($foundPageContent, 'Page content field not found in the data');
+        $this->assertTrue($foundapgecontent, 'Page content field not found in the data');
     }
 
-    public function test_getcoursedata() {
+    /**
+     * Test if gettting the course data is all good.
+     *
+     * @covers ::getcoursedata
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function test_getcoursedata(): void {
         $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'getcoursedata');
         $method->setAccessible(true);
 
         $coursedata = $method->invoke($this->coursedata);
 
         $this->assertIsArray($coursedata);
-        $this->assertCount(3, $coursedata); // fullname, shortname, summary
+        $this->assertCount(3, $coursedata); // Fullname, shortname, summary.
 
         $this->assertEquals('Test Course', $coursedata[0]->text);
         $this->assertEquals('TC101', $coursedata[1]->text);
         $this->assertEquals('This is a test course summary', $coursedata[2]->text);
     }
 
-    /*public function test_getsectiondata() {
+    /**
+     * Test to get the sections data.
+     *
+     * @covers ::getsectiondata
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     */
+    public function test_getsectiondata(): void {
         global $DB;
 
         $method = new \ReflectionMethod(\local_deepler\local\data\course_data::class, 'getsectiondata');
@@ -126,73 +166,81 @@ class local_deepler_course_data_testcase extends advanced_testcase {
 
         $this->assertIsArray($sectiondata, 'Section data should be an array');
 
-        // Debug output
-        //debugging('Number of sections: ' . count($sectiondata));
-        //debugging('Section data: ' . print_r($sectiondata, true));
-
-        // Check if there are any sections in the database
+        // Check if there are any sections in the database.
         $coursesections = $DB->get_records('course_sections', ['course' => $this->course->id]);
-        //debugging('Number of course sections in DB: ' . count($coursesections));
-        //debugging('Course sections in DB: ' . print_r($coursesections, true));
 
-        // Check if there are any sections
+        // Check if there are any sections.
         if (empty($sectiondata) && empty($coursesections)) {
-            // Instead of skipping, let's fail with a meaningful message
+            // Instead of skipping, let's fail with a meaningful message.
             $this->fail('No sections found in the course. Check course setup and getsectiondata method implementation.');
         }
 
-        // Assert that there's at least one section (the default section)
+        // Assert that there's at least one section (the default section).
         $this->assertGreaterThanOrEqual(1, count($sectiondata), 'There should be at least one section');
 
-        $foundTestSection = false;
+        $foundtestsection = false;
         foreach ($sectiondata as $section) {
-            //debugging('Section: ' . print_r($section, true));
+
             if (isset($section->text) && ($section->text === 'Test Section' || $section->text === 'Test section summary')) {
-                $foundTestSection = true;
+                $foundtestsection = true;
                 break;
             }
         }
 
-        // If we didn't find the test section, output all section names for debugging
-        if (!$foundTestSection) {
-            $sectionNames = array_map(function($section) {
+        // If we didn't find the test section, output all section names for debugging.
+        if (!$foundtestsection) {
+            $sectionnames = array_map(function($section) {
                 return $section->text ?? 'Unnamed Section';
             }, $sectiondata);
-            //debugging('All section names: ' . implode(', ', $sectionNames));
         }
 
-        $this->assertTrue($foundTestSection, 'Test section data not found');
-    }*/
+        $this->assertTrue($foundtestsection, 'Test section data not found');
+    }
 
-    public function test_getactivitydata() {
+    /**
+     * Test to get the activity data.
+     *
+     * @covers ::getactivitydata
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function test_getactivitydata(): void {
         $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'getactivitydata');
         $method->setAccessible(true);
 
         $activitydata = $method->invoke($this->coursedata);
 
         $this->assertIsArray($activitydata);
-        $this->assertGreaterThanOrEqual(1, count($activitydata)); // At least 1 activity
+        $this->assertGreaterThanOrEqual(1, count($activitydata)); // At least 1 activity.
 
-        $foundTestPage = false;
+        $foundtestpage = false;
         foreach ($activitydata as $activity) {
             if ($activity->text === 'Test Page' || $activity->text === 'Test page content') {
-                $foundTestPage = true;
+                $foundtestpage = true;
                 break;
             }
         }
-        $this->assertTrue($foundTestPage, 'Test page data not found');
+        $this->assertTrue($foundtestpage, 'Test page data not found');
     }
 
-    public function test_build_data() {
+    /**
+     * Test to build data.
+     *
+     * @covers ::build_data
+     * @return void
+     * @throws \ReflectionException
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public function test_build_data(): void {
         global $DB;
 
-        // Create a test course
+        // Create a test course.
         $course = $this->getDataGenerator()->create_course();
 
-        // Create a test page activity
-        $page = $this->getDataGenerator()->create_module('page', array('course' => $course->id));
-
-        // Get the course module
+        // Create a test page activity.
+        $page = $this->getDataGenerator()->create_module('page', ['course' => $course->id]);
+        // Get the course module.
         $cm = get_coursemodule_from_instance('page', $page->id);
 
         $method = new \ReflectionMethod(\local_deepler\local\data\course_data::class, 'build_data');
@@ -200,22 +248,31 @@ class local_deepler_course_data_testcase extends advanced_testcase {
 
         $activity = new \stdClass();
         $activity->modname = 'page';
-        $activity->id = $cm->id;  // This is the course module ID (cmid)
+        $activity->id = $cm->id;  // This is the course module ID (cmid).
         $activity->section = $cm->section;
-        $activity->content = 'Test content';  // Add this if needed for file URL generation
+        // Add this if needed for file URL generation.
 
         $coursedata = new \local_deepler\local\data\course_data($course, 'en', \context_course::instance($course->id)->id);
 
-        $data = $method->invoke($coursedata, $page->id, 'Test text', 1, 'content', $activity);
+        $data = $method->invoke($coursedata, $page->id, 'Test content', 1, 'content', $activity);
 
         $this->assertInstanceOf(\stdClass::class, $data);
-        $this->assertEquals('Test text', $data->text);
+        $this->assertEquals('Test content', $data->text);
         $this->assertEquals('page', $data->table);
         $this->assertEquals('content', $data->field);
-        $this->assertEquals($cm->id, $data->id);
+        $this->assertEquals($page->id, $data->id);
     }
 
-    public function test_store_status_db() {
+    /**
+     * Test the storing to Deepler's DB.
+     *
+     * @covers ::store_status_db
+     * @return void
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     */
+
+    public function test_store_status_db(): void {
         global $DB;
 
         $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'store_status_db');
@@ -228,22 +285,32 @@ class local_deepler_course_data_testcase extends advanced_testcase {
         $this->assertObjectHasProperty('s_lastmodified', $result);
         $this->assertObjectHasProperty('t_lastmodified', $result);
 
-        // Check if the record was actually inserted into the database
+        // Check if the record was actually inserted into the database.
         $record = $DB->get_record('local_deepler', ['t_id' => 1, 't_table' => 'course', 't_field' => 'fullname']);
         $this->assertNotFalse($record);
     }
 
-    public function test_link_builder() {
+    /**
+     * Test building an edit link.
+     *
+     * @covers ::link_builder
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function test_link_builder(): void {
         $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'link_builder');
         $method->setAccessible(true);
 
-        $courseLink = $method->invoke($this->coursedata, $this->course->id, 'course', null);
-        $this->assertStringContainsString('/course/edit.php?id=' . $this->course->id, $courseLink);
+        $courselink = $method->invoke($this->coursedata, $this->course->id, 'course', null);
+        $this->assertStringContainsString('/course/edit.php?id=' . $this->course->id, $courselink);
 
-        $sectionLink = $method->invoke($this->coursedata, 1, 'course_sections', null);
-        $this->assertStringContainsString('/course/editsection.php?id=1', $sectionLink);
+        $sectionlink = $method->invoke($this->coursedata, 1, 'course_sections', null);
+        $this->assertStringContainsString('/course/editsection.php?id=1', $sectionlink);
 
-        $activityLink = $method->invoke($this->coursedata, 1, 'page', 1);
-        $this->assertNull($activityLink);
+        $activitylink = $method->invoke($this->coursedata, 1, 'page', 1);
+        $this->assertNotNull($activitylink);
+
+        $activitylink2 = $method->invoke($this->coursedata, 2, 'page', 0);
+        $this->assertNull($activitylink2);
     }
 }

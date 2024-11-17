@@ -152,7 +152,7 @@ class translate_form extends moodleform {
         $keyid = "{$item->table}-{$item->id}-{$item->field}";
         // Data status.
         $status = $item->tneeded ? 'needsupdate' : 'updated';
-        // Special cases where the content is a db key (should never be translated)
+        // Special cases where the content is a db key (should never be translated).
         $isdbkey = strpos($item->table, 'wiki_pages') !== false && $item->field === 'title';
 
         // Open translation item.

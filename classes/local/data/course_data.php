@@ -234,7 +234,7 @@ class course_data {
                     }
                     break;
                 case 'quiz':
-                    // Get quiz questions
+                    // Get quiz questions.
                     $quizsettings = \quiz::create($activity->instance);
                     $structure = \mod_quiz\structure::create_for_quiz($quizsettings);
                     $slots = $structure->get_slots();
@@ -263,12 +263,10 @@ class course_data {
                 case 'moodleoverflow':
                     include_once($CFG->dirroot . '/mod/moodleoverflow/locallib.php');
                     $discussion = moodleoverflow_get_discussions($activity);
-                    // @todo parse discussions
                     break;
                 case 'hotquestion':
                     include_once($CFG->dirroot . '/mod/hotquestion/locallib.php');
                     $hq = new \mod_hotquestion($activity->id);
-                    // @todo parse hot questions
                     $questions = $hq->get_questions();
                     break;
 
@@ -445,7 +443,7 @@ class course_data {
         $item->format = intval($format);
         $item->table = $table;
         $item->field = $field;
-        $item->link = $this->link_builder($id, $table, $cmid);
+        $item->link = $this->link_builder($id, $table, $cmid, $activity->parent ?? 0);
         $item->tneeded = $status->s_lastmodified >= $status->t_lastmodified;
         $item->section = $sectionid;
         // Get the activity icon, if it is a real activity/resource.
@@ -553,9 +551,9 @@ class course_data {
      * @param integer $id
      * @param string $table
      * @param integer $cmid
-     * @return string
+     * @return moodle_url|string
      */
-    private function link_builder($id, $table, $cmid) {
+    private function link_builder($id, $table, $cmid, int $parentid = 0) {
         global $CFG;
         $link = null;
         $tcmid = $cmid ?? 0;
@@ -565,6 +563,16 @@ class course_data {
                 break;
             case 'course_sections':
                 $link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $id]);
+                break;
+            case 'quiz' :
+                $link = new moodle_url($CFG->wwwroot . "/course/modedit.php", ['update' => $id]);
+                break;
+            case 'question' :
+                $link = new moodle_url($CFG->wwwroot . "/question/bank/editquestion/question.php", ['id' => $id, 'cmid' => $cmid]);
+                break;
+            case 'question_answers' :
+                $link = new moodle_url($CFG->wwwroot . "/question/bank/editquestion/question.php",
+                        ['id' => $parentid, 'cmid' => $cmid]);
                 break;
             default:
                 if (strpos($table, "_") !== false) {
@@ -655,20 +663,29 @@ class course_data {
         }
     }
 
+    /**
+     * Question and Answers factory.
+     *
+     * @param array $activitydata
+     * @param \question_definition $question
+     * @param mixed $act
+     * @return void
+     * @throws \dml_exception
+     */
     private function injectquizcontent(array &$activitydata, \question_definition $question, mixed $act) {
         $activity = new \stdClass();
         $activity->id = $act->id;
         $activity->modname = 'question';
         $activity->section = $act->sectionid;
         $activitydata[] = $this->build_data(
-                $activity->id,
+                $question->id,
                 $question->name,
                 0,
                 'name',
                 $activity
         );
         $activitydata[] = $this->build_data(
-                $activity->id,
+                $question->id,
                 $question->questiontext,
                 1,
                 'questiontext',
@@ -676,7 +693,7 @@ class course_data {
         );
         if (!empty($question->generalfeedback)) {
             $activitydata[] = $this->build_data(
-                    $activity->id,
+                    $question->id,
                     $question->generalfeedback,
                     1,
                     'generalfeedback',
@@ -687,6 +704,7 @@ class course_data {
         $qactivity->id = $act->id;
         $qactivity->modname = 'question_answers';
         $qactivity->section = $act->sectionid;
+        $qactivity->parent = $question->id;
         switch ($question->qtype->name()) {
             case 'multichoice':
                 $rank = 0;
@@ -710,69 +728,8 @@ class course_data {
                     }
                 }
                 break;
-            /*  case 'truefalse':
-                  if (!empty($question->truefeedback)) {
-                      $activitydata[] = $this->build_data(
-                              $question->id,
-                              $question->truefeedback,
-                              $question->truefeedbackformat,
-                              'truefeedback',
-                              $activity
-                      );
-                  }
-                  if (!empty($question->falsefeedback)) {
-                      $activitydata[] = $this->build_data(
-                              $question->id,
-                              $question->falsefeedback,
-                              $question->falsefeedbackformat,
-                              'falsefeedback',
-                              $activity
-                      );
-                  }
-
-                  break;
-              case 'match':
-                  foreach ($question->subquestions as $subq) {
-                      $data['textfields'][] = [
-                              'id' => 'quiz_question_subq_' . $subq->id,
-                              'name' => $cm->name . ' - ' . $question->name . ' (Subquestion)',
-                              'content' => $subq->questiontext
-                      ];
-                      $data['textfields'][] = [
-                              'id' => 'quiz_question_subq_answer_' . $subq->id,
-                              'name' => $cm->name . ' - ' . $question->name . ' (Subquestion Answer)',
-                              'content' => $subq->answertext
-                      ];
-                  }
-                  break;
-              case 'essay':
-                  if (!empty($question->graderinfo)) {
-                      $data['textfields'][] = [
-                              'id' => 'quiz_question_graderinfo_' . $question->id,
-                              'name' => $cm->name . ' - ' . $question->name . ' (Grader Info)',
-                              'content' => $question->graderinfo
-                      ];
-                  }
-                  break;
-              case 'shortanswer':
-              case 'numerical':
-                  foreach ($question->answers as $answer) {
-                      $data['textfields'][] = [
-                              'id' => 'quiz_question_answer_' . $answer->id,
-                              'name' => $cm->name . ' - ' . $question->name . ' (Answer)',
-                              'content' => $answer->answer
-                      ];
-                      if (!empty($answer->feedback)) {
-                          $data['textfields'][] = [
-                                  'id' => 'quiz_question_feedback_' . $answer->id,
-                                  'name' => $cm->name . ' - ' . $question->name . ' (Answer Feedback)',
-                                  'content' => $answer->feedback
-                          ];
-                      }
-                  }
-                  break;*/
             default:
-                // Log or handle unknown question types
+                // Log or handle unknown question types.
                 debugging('Unhandled question type: ' . $question->qtype->name(), DEBUG_DEVELOPER);
                 break;
         }
