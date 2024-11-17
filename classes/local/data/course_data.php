@@ -546,12 +546,14 @@ class course_data {
     }
 
     /**
-     * Link Builder.
+     * Link Builder to edit in place.
      *
-     * @param integer $id
-     * @param string $table
-     * @param integer $cmid
-     * @return moodle_url|string
+     * @param $id
+     * @param $table
+     * @param $cmid
+     * @param int $parentid
+     * @return moodle_url|null
+     * @throws \moodle_exception
      */
     private function link_builder($id, $table, $cmid, int $parentid = 0) {
         global $CFG;
