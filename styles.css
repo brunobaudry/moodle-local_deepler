@@ -45,7 +45,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }
 #page-local-deepler-translate .local_deepler__source-text img,
 #page-local-deepler-translate .local_deepler__translation img {
-    background-color: #f0ad4e !important; /* stylelint-disable-line declaration-no-important */
+    background-color: #fceedb !important; /* stylelint-disable-line declaration-no-important */
     font-style: italic;
 }
 #page-local-deepler-translate img:before {
@@ -64,7 +64,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate div[id^=question] {
-    background-color: #e9ecef !important; /* stylelint-disable-line declaration-no-important */
+    background-color: #c9f6e9 !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__activitydesc, #page-local-deepler-translate .local_deepler__activityfield {
     color: #ced4da;

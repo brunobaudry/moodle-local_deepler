@@ -221,6 +221,7 @@ $string['tour_advancedsettings23saveall'] =
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
 $string['translatebutton'] = 'Traduire &rarr; {$a}';
+$string['translationdisabled'] = 'La traduction est désactivée parce que ceci est un lien dans la base de données.';
 $string['uptodate'] = 'Déjà à jour';
 $string['viewsource'] = 'Vérifier le contenu multilingue.';
 $string['viewsourcedisabled'] = 'Pas encore de contenu multilingue.';

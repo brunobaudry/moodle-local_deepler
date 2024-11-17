@@ -579,8 +579,13 @@ const showRows = (selector, selected) => {
         let k = item.getAttribute('data-row-id');
         toggleRowVisibility(item, selected);
         // When a row is toggled then we don't want it to be selected and sent from translation.
-        item.querySelector(replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)).checked = allSelected && selected;
-        toggleStatus(k, false);
+        try {
+            item.querySelector(replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)).checked = allSelected && selected;
+            toggleStatus(k, false);
+        } catch (e) {
+            log(`${k} translation is disalbled`);
+        }
+
     });
     toggleAutotranslateButton();
     countWordAndChar();

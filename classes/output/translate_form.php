@@ -154,10 +154,10 @@ class translate_form extends moodleform {
         $status = $item->tneeded ? 'needsupdate' : 'updated';
         // Special cases where the content is a db key (should never be translated).
         $isdbkey = strpos($item->table, 'wiki_pages') !== false && $item->field === 'title';
-
+        $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
         // Open translation item.
         $mform->addElement('html',
-                "<div class='$cssclass row align-items-start py-2' data-row-id='$key' data-status='$status'>");
+                "<div title='$rowtitle' class='$cssclass row align-items-start py-2' data-row-id='$isdbkey$key' data-status='$status'>");
 
         // Column 1 settings.
         if ($this->langpack->targetlang === $this->langpack->currentlang) {
@@ -247,8 +247,9 @@ class translate_form extends moodleform {
         // Source text textarea.
         $rawsourcetext = base64_encode($mlangfilter->filter($item->text));
         $mlangfiltered = $mlangfilter->filter($item->displaytext);
+
         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
-                data-sourcetext-raw='$rawsourcetext' >$mlangfiltered" . DIV_CLOSE;
+                data-sourcetext-raw='$rawsourcetext'>$mlangfiltered" . DIV_CLOSE;
         // Collapsible multilang textarea.
         $trimedtext = trim($item->text);
         $multilangtextarea = "<div class='collapse' id='$keyid'>";
