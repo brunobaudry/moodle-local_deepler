@@ -249,8 +249,13 @@ class course_data {
 
                     foreach ($wikis as $wid => $wiki) {
                         $pages = wiki_get_page_list($wid);
+                        $pagesorphaned = array_map(function($op) {
+                            return $op->id;
+                        }, wiki_get_orphaned_pages($wid));
                         foreach ($pages as $p) {
-                            $this->injectwikipage($activitydata, $p, $activity);
+                            if (!in_array($p->id, $pagesorphaned)) {
+                                $this->injectwikipage($activitydata, $p, $activity);
+                            }
                         }
 
                     }
