@@ -152,6 +152,8 @@ class translate_form extends moodleform {
         $keyid = "{$item->table}-{$item->id}-{$item->field}";
         // Data status.
         $status = $item->tneeded ? 'needsupdate' : 'updated';
+        // Special cases where the content is a db key (should never be translated)
+        $isdbkey = strpos($item->table, 'wiki_pages') !== false && $item->field === 'title';
 
         // Open translation item.
         $mform->addElement('html',
@@ -185,15 +187,18 @@ class translate_form extends moodleform {
             disabled/>";
         // Column 1 layout.
         $mform->addElement('html', '<div class="col-1 px-1">');
-        $mform->addElement('html', $bulletstatus);
-        $mform->addElement('html', $checkbox);
+        if (!$isdbkey) {
+            $mform->addElement('html', $bulletstatus);
+            $mform->addElement('html', $checkbox);
+        }
+
         // Add the field names translated.
         $mform->addElement('html', "<br/><small class='local_deepler__activityfield lh-sm'>{$item->translatedfieldname}</small>");
         $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
         $editbuttontitle = get_string('editbutton', 'local_deepler');
-        $editinplacebutton = "<a class='p-2 btn btn-sm btn-outline-info'
+        $editinplacebutton = $isdbkey ? '<div>&nbsp;</div>' : "<a class='p-2 btn btn-sm btn-outline-info'
                         id='local_deepler__sourcelink' href='{$item->link}' target='_blank'
                             title='$editbuttontitle'>
                             <i class='fa fa-pencil' aria-hidden='true'></i>
@@ -253,17 +258,21 @@ class translate_form extends moodleform {
         // Column 2 layout.
         $mform->addElement('html', $sourcetextdiv);
         $mform->addElement('html', $editinplacebutton);
-        $mform->addElement('html', $mutlilangspantag);
-        $mform->addElement('html', $sourceselect);
+        if (!$isdbkey) {
+            $mform->addElement('html', $mutlilangspantag);
+            $mform->addElement('html', $sourceselect);
+        }
         $mform->addElement('html', $sourcetextarea);
-        $mform->addElement('html', $multilangtextarea);
+        if (!$isdbkey) {
+            $mform->addElement('html', $multilangtextarea);
+        }
 
         // Closing sourcetext div.
         $mform->addElement('html', DIV_CLOSE);
-
-        // Column 3 settings.
-        // Translation Input div.
-        $translatededitor = "<div
+        if (!$isdbkey) {
+            // Column 3 settings.
+            // Translation Input div.
+            $translatededitor = "<div
             class='col-5 px-0 local_deepler__translation'
             data-action='local_deepler/editor'
             data-key='$key'
@@ -271,31 +280,32 @@ class translate_form extends moodleform {
             data-id='{$item->id}'
             data-field='{$item->field}'
             data-tid='{$item->tid}'>";
-        // No wisiwig editor text fields.
-        $nowisiwig = "<div
+            // No wisiwig editor text fields.
+            $nowisiwig = "<div
                 class='format-{$item->format} border py-2 px-3'
                 contenteditable='true'
                 data-format='{$item->format}'>" . DIV_CLOSE;
-        // Status icon/button.
-        $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
+            // Status icon/button.
+            $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
                 role='status' aria-disabled='true'><i class='fa'
                 ></i></span>";
-        // Status surrounding div.
-        $statusdiv = "<div class='col-1 text-center'
+            // Status surrounding div.
+            $statusdiv = "<div class='col-1 text-center'
             data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
-        // Column 3 Layout.
-        $mform->addElement('html', $translatededitor);
-        // Plain text input.
-        if ($item->format === 0) {
-            $mform->addElement('html', $nowisiwig);
-        } else {
-            $mform->addElement('cteditor', $key, $key);
-            $mform->setType($key, PARAM_RAW);
+            // Column 3 Layout.
+            $mform->addElement('html', $translatededitor);
+            // Plain text input.
+            if ($item->format === 0) {
+                $mform->addElement('html', $nowisiwig);
+            } else {
+                $mform->addElement('cteditor', $key, $key);
+                $mform->setType($key, PARAM_RAW);
+            }
+            // Closing $translatededitor.
+            $mform->addElement('html', DIV_CLOSE);
+            // Adding validator btn.
+            $mform->addElement('html', $statusdiv);
         }
-        // Closing $translatededitor.
-        $mform->addElement('html', DIV_CLOSE);
-        // Adding validator btn.
-        $mform->addElement('html', $statusdiv);
         // Close translation item.
         $mform->addElement('html', DIV_CLOSE);
     }
