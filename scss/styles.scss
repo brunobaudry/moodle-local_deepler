@@ -108,11 +108,11 @@ $secondary: $gray-400 !default;
     }
 
     div[id^="question"] {
-        background-color: lighten($teal, 42%) !important; /* stylelint-disable-line declaration-no-important */
+        background-color: #0601010f !important; /* stylelint-disable-line declaration-no-important */
     }
 
     .local_deepler__activitydesc, .local_deepler__activityfield {
-        color: $secondary;
+        color: $gray-700;
         position: relative;
     }
 

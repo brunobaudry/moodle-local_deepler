@@ -64,10 +64,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate div[id^=question] {
-    background-color: #c9f6e9 !important; /* stylelint-disable-line declaration-no-important */
+    background-color: rgba(6, 1, 1, 0.0588235294) !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__activitydesc, #page-local-deepler-translate .local_deepler__activityfield {
-    color: #ced4da;
+    color: #495057;
     position: relative;
 }
 #page-local-deepler-translate .local_deepler__activitydesc {
