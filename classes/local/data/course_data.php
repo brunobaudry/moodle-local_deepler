@@ -219,9 +219,9 @@ class course_data {
         global $CFG;
         global $DB;
         $activitydata = [];
-
+        $cms = $this->modinfo->get_cms();
         /** @var \cm_info|mixed $activity */
-        foreach ($this->modinfo->get_cms() as $activity) {
+        foreach ($cms as $activity) {
             // Build first level activities.
             $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $activity->modname);
             // Build outstanding subcontent.

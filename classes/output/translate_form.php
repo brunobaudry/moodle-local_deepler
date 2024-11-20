@@ -157,7 +157,8 @@ class translate_form extends moodleform {
         $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
         // Open translation item.
         $mform->addElement('html',
-                "<div title='$rowtitle' class='$cssclass row align-items-start py-2' data-row-id='$isdbkey$key' data-status='$status'>");
+                "<div title='$rowtitle' class='$cssclass row align-items-start py-2' data-row-id='$isdbkey$key'
+                    data-status='$status'>");
 
         // Column 1 settings.
         if ($this->langpack->targetlang === $this->langpack->currentlang) {

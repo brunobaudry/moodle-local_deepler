@@ -926,7 +926,8 @@ const countWordAndChar = () => {
  * @return {object}
  */
 const getCount = (key) => {
-    let sourceText = document.querySelector(Selectors.sourcetexts.keys.replace("<KEY>", key)).getAttribute("data-sourcetext-raw");
+    let sourceText = fromBase64(
+        document.querySelector(Selectors.sourcetexts.keys.replace("<KEY>", key)).getAttribute("data-sourcetext-raw"));
     return countChars(sourceText);
 };
 /**
@@ -935,10 +936,10 @@ const getCount = (key) => {
  * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
  */
 const countChars = (val) => {
-    const withSpace = val.length;
-    // Using Regex
-    const withOutSpace = val.replace(/\s+/g, '').length;
-    const wordsCount = val.match(/\S+/g).length;
+    const trimmedVal = val.trim();
+    const withSpace = trimmedVal.length;
+    const withOutSpace = trimmedVal.replace(/\s+/g, '').length;
+    const wordsCount = (trimmedVal.match(/\S+/g) || []).length;
     return {
         "wordCount": wordsCount,
         "charNumWithSpace": withSpace,

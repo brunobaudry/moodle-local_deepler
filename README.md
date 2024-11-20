@@ -17,6 +17,11 @@ Translation workflow being the following:
 
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
+> Note that for DB optimisation textfields maxchar in Moodle are often limited.
+> This is true for titles and other that are meant to be kept small.
+> So by adding MLANG tags and translations you will get an error message when trying to store into DB.
+> To prevent that, the Deepler plugin skips textfields that are smaller than 254 char. (this is hardcoded but will soon be an admin setting).
+
 ## Fork
 
 This is a fork of Jamfire's https://github.com/jamfire/moodle-local_coursetranslator which was left deprecated with https://github.com/jamfire/moodle-filter_autotranslate for
@@ -275,13 +280,13 @@ message on the course translation page.
 
 ## Future (todos)
 
-- Question banks translation.
+- Question translation.
 - Machine translation API abstraction to use other services than ©Deepl.
 - Display images all times.
 - Translations versioning.
 - Import glossaries.
 - Multiple API key setting and user mapping.
-- Document translation
+- Document translation.
 
 ## Submit an issue
 
