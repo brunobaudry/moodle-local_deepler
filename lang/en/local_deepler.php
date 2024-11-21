@@ -67,6 +67,9 @@ $string['outlinedetection'] = 'XML Outline detection';
 $string['pagecontent'] = 'pagecontent';
 $string['pluginname'] = 'Deepl Translator';
 $string['preserveformatting'] = 'Preserve formatting';
+$string['preescape'] = 'Escape PRE html tag ';
+$string['preescapeadmin'] = 'Escape PRE html tag ';
+$string['preescapeadmin_desc'] = '(do not send &lt;pre&gt;...&lt;/pre&gt; to translation)';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
@@ -75,6 +78,11 @@ $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="st
 <p>If you are impatient, and want to close this window,
 <br/>make sure all selected translation\'s statuses are <i class="fa fa-database" aria-hidden="true"></i></p>';
 $string['saveallmodaltitle'] = 'Saving translations to the database';
+$string['scannedfieldsize'] = 'Minimum textfield size';
+$string['scannedfieldsize_desc'] = 'Small text field are often limited in the database. The text content grows quite fast
+ (plus the mlang tags) at each translation steps.
+ After translation, if the text is too big, the DB will through an error. Size this here based on your main language properties and
+ the number on languages your Moodle supports';
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';

@@ -40,7 +40,7 @@ let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
 let batchSaving = 0;
-let escapeLatex = true;
+const escapePatterns = {};
 let log = (...a) => {
     return a;
 };
@@ -60,6 +60,7 @@ const debug = {
     ALL: 30719,
     DEVELOPER: 32767
 };
+
 const registerEventListeners = () => {
     document.addEventListener('change', e => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
@@ -167,9 +168,7 @@ export const init = (cfg) => {
     registerUI();
     registerEventListeners();
     toggleAutotranslateButton();
-    log(Selectors.actions.escapeLatex);
-    escapeLatex = document.querySelector(Selectors.actions.escapeLatex).checked;
-    info(`escapeLatex ${escapeLatex}`);
+
     const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
@@ -244,7 +243,7 @@ const saveTranslation = (key) => {
     }
     // Restore the source.
     let sourceTokenised = tempTranslations[key].source;
-    let sourceText = escapeLatex ? postprocess(sourceTokenised, tempTranslations[key].tokens) : sourceTokenised;
+    let sourceText = postprocess(sourceTokenised, tempTranslations[key].tokens, escapePatterns);
     log(text);
     log(sourceText);
     let element = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
@@ -482,7 +481,7 @@ const initTempForKey = (key, blank) => {
     const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
     const sourceTextEncoded = document.querySelector(sourceSelector).getAttribute("data-sourcetext-raw");
     const sourceText = fromBase64(sourceTextEncoded);
-    const tokenised = escapeLatex ? preprocess(sourceText) : sourceText;
+    const tokenised = preprocess(sourceText, escapePatterns, escapePatterns);
     // Store the settings.
     const editorSettings = findEditor(key);
     const sourceLang = document.querySelector(Selectors.sourcetexts.sourcelangs.replace("<KEY>", key)).value;
@@ -637,7 +636,10 @@ const doAutotranslate = () => {
  * @returns {{}}
  */
 const prepareAdvancedSettings = () => {
+    info('prepareAdvancedSettings');
     let settings = {};
+    escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
+    escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
     settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
     settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
     settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
@@ -670,6 +672,7 @@ const prepareFormData = (key, url = true) => {
     Object.entries(prepareAdvancedSettings()).forEach(([k, v]) => {
         formData.append(k, v);
     });
+    initTempForKey(key, false); // Reset temp translation in case setting changed.
     Object.entries(prepareTranslation(key)).forEach(([k, v]) => {
         formData.append(k, v);
     });
@@ -687,41 +690,48 @@ const getTranslation = (key) => {
     tempTranslations[key].staus = Selectors.statuses.wait;
     // Build formData
     let formData = prepareFormData(key);
-    info("Send deepl:", formData);
+    // log(tempTranslations);
+    if (tempTranslations[key].editor === null) {
+        error(`${key} no editor found :((`);
+    } else {
+        info("Send deepl:", formData);
 
-    // Update the translation
-    let xhr = new XMLHttpRequest();
-    xhr.responseType = 'json';
+        // Update the translation
+        let xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
 
-    xhr.onreadystatechange = () => {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            const status = xhr.status;
-            if (status === 0 || (status >= 200 && status < 400)) {
-                // The request has been completed successfully
-                log(tempTranslations);
-                let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
-                info("From deepl:", data);
-                let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens);
-                // Display translation
-                log(tr);
-                tempTranslations[key].editor.innerHTML = tr;
-                // Store the translation in the global object
-                tempTranslations[key].translation = tr;
-                setIconStatus(key, Selectors.statuses.tosave, true);
-                injectImageCss(
-                    tempTranslations[key].editorType,
-                    tempTranslations[key].editor); // Hack for iframes based editors to highlight missing pictures.
-            } else {
-                // Oh no! There has been an error with the request!
-                setIconStatus(key, Selectors.statuses.failed, false);
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                const status = xhr.status;
+                if (status === 0 || (status >= 200 && status < 400)) {
+                    // The request has been completed successfully
+                    log(tempTranslations);
+                    let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
+                    info("From deepl:", data);
+                    let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens, escapePatterns);
+                    // Display translation
+                    log(tr);
+                    tempTranslations[key].editor.innerHTML = tr;
+                    // Store the translation in the global object
+                    tempTranslations[key].translation = tr;
+                    setIconStatus(key, Selectors.statuses.tosave, true);
+                    injectImageCss(
+                        tempTranslations[key].editorType,
+                        tempTranslations[key].editor); // Hack for iframes based editors to highlight missing pictures.
+                } else {
+                    // Oh no! There has been an error with the request!
+                    setIconStatus(key, Selectors.statuses.failed, false);
+                }
+            } else if (typeof xhr.readyState !== 'number') {
+                // Workaround for the Adaptable theme that did change the return type of xhr.readyState.
+                log('ERROR: Some JS library in your Moodle install are overriding the core functionalities in a wrong way.' +
+                    'xhr.readyState MUST be of type "number"');
             }
-        } else if (typeof xhr.readyState !== 'number') {
-            log('ERROR : Some javascript library in your Moodle install are overriding the core functionalities in a wrong way.' +
-                ' xhr.readyState MUST be of type "number"');
-        }
-    };
-    xhr.open("POST", config.deeplurl);
-    xhr.send(formData);
+        };
+        xhr.open("POST", config.deeplurl);
+        xhr.send(formData);
+    }
+
 };
 /**
  *

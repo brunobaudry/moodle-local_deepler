@@ -34,6 +34,7 @@ export default {
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
         showUpdated: '[data-action="local_deepler/show-updated"]',
         escapeLatex: '[data-id="local_deepler/latexeascape"]',
+        escapePre: '[data-id="local_deepler/preescape"]',
         toggleMultilang: '#toggleMultilang'
     },
     statuses: {

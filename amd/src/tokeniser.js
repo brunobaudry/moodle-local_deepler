@@ -30,20 +30,23 @@ const patterns = [
 /**
  * Function to replace expressions with tokens
  * @param {String} text
+ * @param {Object} escapePatterns
  * @returns {Object} {{expressions: *[], tokenizedText}}
  */
-export function preprocess(text) {
+export function preprocess(text, escapePatterns) {
     const expressions = [];
     let tokenizedText = text;
 
     // Patterns for different environments
     // Replace each expression with a token
     patterns.forEach(pattern => {
-        tokenizedText = tokenizedText.replace(pattern.regex, match => {
-            const token = `__${pattern.type}_${expressions.length}__`;
-            expressions.push(match);
-            return token;
-        });
+        if (escapePatterns[pattern.type]) {
+            tokenizedText = tokenizedText.replace(pattern.regex, match => {
+                const token = `__${pattern.type}_${expressions.length}__`;
+                expressions.push({token: token, expression: match});
+                return token;
+            });
+        }
     });
 
     return {tokenizedText, expressions: expressions};
@@ -56,11 +59,9 @@ export function preprocess(text) {
  * @returns {String}
  */
 export function postprocess(text, expressions) {
-    expressions.forEach((expr, i) => {
-        patterns.forEach((p) => {
-            const token = new RegExp(`__${p.type}_${i}__`, 'g');
-            text = text.replace(token, escapeReplacementString(expr));
-        });
+    expressions.forEach((expr) => {
+        const token = new RegExp(expr.token, 'g');
+        text = text.replace(token, escapeReplacementString(expr.expression));
     });
     return text;
 }

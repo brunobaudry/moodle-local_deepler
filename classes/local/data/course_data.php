@@ -55,6 +55,11 @@ class course_data {
      * List of db columns of type text that the user decides they to be useless to tranlsate.
      */
     protected $usercolstoskip;
+    /**
+     * @var int
+     * Do not scan DB field below that number.
+     */
+    protected $minîmumtextfieldsize;
 
     /**
      * Class Construct.
@@ -65,6 +70,7 @@ class course_data {
      * @throws \moodle_exception
      */
     public function __construct(\stdClass $course, string $lang, int $contextid) {
+        $this->minîmumtextfieldsize = get_config('local_deepler', 'scannedfieldsize');
         // Set db table.
         $this->dbtable = 'local_deepler';
         // Set course.
@@ -375,7 +381,8 @@ class course_data {
 
         // Just get db collumns we need (texts content).
         $textcols = array_filter($columns, function($field) use ($activitymodname) {
-            return (($field->meta_type === "C" && $field->max_length > 254)
+            // Only scan the main text types that are above minîmum text field size.
+            return (($field->meta_type === "C" && $field->max_length > $this->minîmumtextfieldsize)
                             || $field->meta_type === "X")
                     && !in_array('*_' . $field->name, $this->comoncolstoskip)
                     && !in_array($activitymodname . '_' . $field->name, $this->usercolstoskip)
