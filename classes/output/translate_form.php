@@ -245,14 +245,15 @@ class translate_form extends moodleform {
                     {$sourceoptions}</select>";
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
-        // Source text textarea.
+        // Source texts.
         $rawsourcetext = base64_encode($mlangfilter->filter($item->text));
-        $mlangfiltered = $mlangfilter->filter($item->displaytext);
-
-        $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
-                data-sourcetext-raw='$rawsourcetext'>$mlangfiltered" . DIV_CLOSE;
-        // Collapsible multilang textarea.
         $trimedtext = trim($item->text);
+        $rawunfilterdtext = base64_encode($trimedtext);
+        $mlangfiltered = $mlangfilter->filter($item->displaytext);
+        $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
+                data-sourcetext-raw='$rawsourcetext' data-filedtext-raw='$rawunfilterdtext' >$mlangfiltered" . DIV_CLOSE;
+        // Collapsible multilang textarea.
+
         $multilangtextarea = "<div class='collapse' id='$keyid'>";
         $multilangtextarea .= "<div data-key='$key'
             data-action='local_deepler/textarea'>$trimedtext" . DIV_CLOSE;
