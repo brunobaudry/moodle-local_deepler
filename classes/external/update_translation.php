@@ -87,8 +87,8 @@ class update_translation extends external_api {
                 $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
 
                 $response[] = ['t_lastmodified' => $timemodified, 'text' => $data['text'], 'keyid' => $keyid];
-            } catch (\dml_exception $dml_exception) {
-                $response[] = ['t_lastmodified' => -1, 'text' => $dml_exception->debuginfo, 'keyid' => $keyid];
+            } catch (\dml_exception $dmlexception) {
+                $response[] = ['t_lastmodified' => -1, 'text' => $dmlexception->debuginfo, 'keyid' => $keyid];
             }
 
         }

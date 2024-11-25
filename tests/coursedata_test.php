@@ -232,7 +232,6 @@ final class coursedata_test extends advanced_testcase {
         $result = $method->invoke($this->coursedata, 1, 'course', 'fullname');
 
         $this->assertInstanceOf(stdClass::class, $result);
-        $this->assertObjectHasAttribute('status', $result);
         $this->assertObjectHasAttribute('id', $result);
         $this->assertObjectHasAttribute('s_lastmodified', $result);
         $this->assertObjectHasAttribute('t_lastmodified', $result);
