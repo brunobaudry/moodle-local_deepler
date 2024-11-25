@@ -100,20 +100,23 @@ const registerEventListeners = () => {
         }
         if (e.target.closest(Selectors.actions.saveAll)) {
             const selected = document.querySelectorAll(Selectors.statuses.checkedCheckBoxes);
+            const allKeys = Array.from(selected).map((e) => e.dataset.key);
+            log(allKeys);
             selected.forEach((e) => {
                 const key = e.dataset.key;
                 if (tempTranslations[key].translation !== "") {
                     batchSaving++;
-                    saveTranslation(key);
+                    // saveTranslation(key);
                 } else {
                     warn("not translated " + key);
                 }
             });
-            if (batchSaving > 0) {
+            if (batchSaving > 1) {
                 log('batchSaving' + batchSaving);
                 launchModal();
                 saveAllBtn.hidden = saveAllBtn.disabled = true;
             }
+            saveTranslations(allKeys);
         }
     });
 
@@ -172,7 +175,7 @@ export const init = (cfg) => {
     const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
-     * Validaate translation ck
+     * Validate translation ck
      */
     const validators = document.querySelectorAll(Selectors.actions.validatorsBtns);
     validators.forEach((item) => {
@@ -228,6 +231,9 @@ const launchModal = async () => {
         body: getString('saveallmodalbody', 'local_deepler'),
     });
     saveAllModal.show();
+};
+const saveTranslations = (keys) => {
+    return keys;
 };
 /**
  * Save Translation to Moodle

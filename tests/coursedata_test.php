@@ -162,21 +162,23 @@ final class coursedata_test extends advanced_testcase {
         $method = new \ReflectionMethod(\local_deepler\local\data\course_data::class, 'getsectiondata');
         $method->setAccessible(true);
 
-        $sectiondata = $method->invoke($this->coursedata) ?? [];
+        $sectiondata = $method->invoke($this->coursedata);
 
         $this->assertIsArray($sectiondata, 'Section data should be an array');
 
         // Check if there are any sections in the database.
         $coursesections = $DB->get_records('course_sections', ['course' => $this->course->id]);
-
+        $this->assertGreaterThanOrEqual(1, count($coursesections),
+                'There should be at least one section in the course');
         // Check if there are any sections.
-        if (empty($sectiondata) && empty($coursesections)) {
+        if (empty($sectiondata)) {
             // Instead of skipping, let's fail with a meaningful message.
             $this->fail('No sections found in the course. Check course setup and getsectiondata method implementation.');
         }
 
         // Assert that there's at least one section (the default section).
-        $this->assertGreaterThanOrEqual(1, count($sectiondata), 'There should be at least one section');
+        $this->assertGreaterThanOrEqual(1, count($sectiondata),
+                'There should be at least one section in the sectiondata');
 
         $foundtestsection = false;
         foreach ($sectiondata as $section) {
