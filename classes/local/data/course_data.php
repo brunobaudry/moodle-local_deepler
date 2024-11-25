@@ -555,9 +555,9 @@ class course_data {
     /**
      * Link Builder to edit in place.
      *
-     * @param $id
-     * @param $table
-     * @param $cmid
+     * @param int $id
+     * @param string $table
+     * @param int $cmid
      * @param int $parentid
      * @return moodle_url|null
      * @throws \moodle_exception
