@@ -232,9 +232,9 @@ final class coursedata_test extends advanced_testcase {
         $result = $method->invoke($this->coursedata, 1, 'course', 'fullname');
 
         $this->assertInstanceOf(stdClass::class, $result);
-        $this->assertObjectHasAttribute('id', $result);
-        $this->assertObjectHasAttribute('s_lastmodified', $result);
-        $this->assertObjectHasAttribute('t_lastmodified', $result);
+        $this->assertObjectHasProperty('id', $result);
+        $this->assertObjectHasProperty('s_lastmodified', $result);
+        $this->assertObjectHasProperty('t_lastmodified', $result);
 
         // Check if the record was actually inserted into the database.
         $record = $DB->get_record('local_deepler', ['t_id' => 1, 't_table' => 'course', 't_field' => 'fullname']);
