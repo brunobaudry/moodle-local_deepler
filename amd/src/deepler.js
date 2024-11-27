@@ -20,11 +20,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Import libs
+import ajax from 'core/ajax';
 import Selectors from "./selectors";
 import Modal from 'core/modal';
 import {get_string as getString} from "core/str";
 import {escapeReplacementString, postprocess, preprocess} from "./tokeniser";
-import ajax from 'core/ajax';
 
 
 // Initialize the temporary translations dictionary @todo make external class
@@ -133,6 +133,7 @@ const registerUI = () => {
  * @param {Object} cfg JS Config
  */
 export const init = (cfg) => {
+
     log('init');
     config = cfg;
     usage = config.usage;
@@ -157,6 +158,7 @@ export const init = (cfg) => {
     warn("Deepl's usage", usage);
     error("testing developper level");
     mainEditorType = config.userPrefs;
+
     // Setup.
     registerUI();
     registerEventListeners();
@@ -470,6 +472,7 @@ const onItemChecked = (e) => {
     }
 };
 const initTempForKey = (key, blank) => {
+
     // Get the source text
     const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
     const sourceTextEncoded = document.querySelector(sourceSelector).getAttribute("data-sourcetext-raw");
@@ -683,6 +686,7 @@ const prepareFormData = (key, url = true) => {
  * @param {Integer} key Translation Key
  */
 const getTranslation = (key) => {
+    const readystate = XMLHttpRequest.DONE ?? 4;
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;
     // Build formData
@@ -692,14 +696,13 @@ const getTranslation = (key) => {
         error(`${key} no editor found :((`);
     } else {
         info("Send deepl:", formData);
-
         // Update the translation
         let xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
-
         xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.readyState === readystate) {
                 const status = xhr.status;
+                window.console.log('onreadystatechange2', xhr.readyState);
                 if (status === 0 || (status >= 200 && status < 400)) {
                     // The request has been completed successfully
                     log(tempTranslations);
