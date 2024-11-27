@@ -84,7 +84,7 @@ class course_data {
         // Set language.
         $this->lang = $lang;
         // Set the db fields to skipp.
-        $this->comoncolstoskip = ['*_displayoptions'];
+        $this->comoncolstoskip = ['*_displayoptions', '*_stamp'];
         $this->modcolstoskip =
                 ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
                         'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles', 'studentquiz_reportingemail',
@@ -229,7 +229,7 @@ class course_data {
         /** @var \cm_info|mixed $activity */
         foreach ($cms as $activity) {
             // Build first level activities.
-            $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $activity->modname);
+            $activitydbrecord = $this->injectactivitydata($activitydata, $activity);
             // Build outstanding subcontent.
             switch ($activity->modname) {
                 case 'book':
@@ -283,15 +283,6 @@ class course_data {
     }
 
     /**
-     *
-     *
-     * @param array $activities
-     * @param mixed $chapter
-     * @param int $section
-     * @return void
-     * @throws \dml_exception
-     */
-    /**
      * Special function for book's subchapters.
      *
      * @param array $activities
@@ -314,14 +305,16 @@ class course_data {
                 $chapter->title,
                 0,
                 'title',
-                $activity
+                $activity,
+                2
         );
         $contentdata = $this->build_data(
                 $chapter->id,
                 $chapter->content,
                 1,
                 'content',
-                $activity
+                $activity,
+                2
         );
         array_push($activities, $titledata);
         array_push($activities, $contentdata);
@@ -351,17 +344,42 @@ class course_data {
                 $chapter->title,
                 0,
                 'title',
-                $activity
+                $activity,
+                2
         );
         $contentdata = $this->build_data(
                 $chapter->id,
                 $chapter->cachedcontent,
                 1,
                 'cachedcontent',
-                $activity
+                $activity,
+                2
         );
         array_push($activities, $titledata);
         array_push($activities, $contentdata);
+    }
+
+    /**
+     * Helper to list only interesting table fields.
+     *
+     * @param $tablename
+     * @return int[]|string[]
+     */
+    private function filterdbtextfields($tablename) {
+        global $DB;
+        // We build an array of all Text fields for this record.
+        $columns = $DB->get_columns($tablename);
+
+        // Just get db collumns we need (texts content).
+        $textcols = array_filter($columns, function($field) use ($tablename) {
+            // Only scan the main text types that are above minîmum text field size.
+            return (($field->meta_type === "C" && $field->max_length > $this->minîmumtextfieldsize)
+                            || $field->meta_type === "X")
+                    && !in_array('*_' . $field->name, $this->comoncolstoskip)
+                    && !in_array($tablename . '_' . $field->name, $this->usercolstoskip)
+                    && !in_array($tablename . '_' . $field->name, $this->modcolstoskip);
+        });
+        return array_keys($textcols);
     }
 
     /**
@@ -376,32 +394,18 @@ class course_data {
         global $DB;
         $activitymodname = $activity->modname;
         $activitydbrecord = $DB->get_record($activitymodname, ['id' => $activity->instance]);
-        // We build an array of all Text fields for this record.
-        $columns = $DB->get_columns($activitymodname);
-
-        // Just get db collumns we need (texts content).
-        $textcols = array_filter($columns, function($field) use ($activitymodname) {
-            // Only scan the main text types that are above minîmum text field size.
-            return (($field->meta_type === "C" && $field->max_length > $this->minîmumtextfieldsize)
-                            || $field->meta_type === "X")
-                    && !in_array('*_' . $field->name, $this->comoncolstoskip)
-                    && !in_array($activitymodname . '_' . $field->name, $this->usercolstoskip)
-                    && !in_array($activitymodname . '_' . $field->name, $this->modcolstoskip);
-        });
-        $textcollumnskeys = array_keys($textcols);
+        $textcollumnskeys = $this->filterdbtextfields($activitymodname);
 
         // Feed the data array with found text.
         foreach ($textcollumnskeys as $field) {
-            if ($field === 'password') {
-                return;
-            }
             if ($activitydbrecord->{$field} !== null && trim($activitydbrecord->{$field}) !== '') {
                 $data = $this->build_data(
                         $activitydbrecord->id,
                         $activitydbrecord->{$field},
                         isset($activitydbrecord->{$field . 'format'}) ?? 0,
                         $field,
-                        $activity
+                        $activity,
+                        1
                 );
                 array_push($activities, $data);
             }
@@ -420,8 +424,8 @@ class course_data {
      * @return \stdClass
      * @throws \dml_exception
      */
-    private function build_data(int $id, string $text, int $format, string $field, mixed $activity) {
-        global $DB;
+    private function build_data(int $id, string $text, int $format, string $field, mixed $activity, int $level = 0) {
+        global $DB, $OUTPUT;
         // Activity stuff.
         $table = $activity->modname;
         $cmid = $activity->id ?? 0;
@@ -431,6 +435,7 @@ class course_data {
         $item = new \stdClass();
         // Object stuff.
         $item->id = $id;
+        $item->hierarchy = "level$level";
         $item->tid = $status->id;
         $item->displaytext = $item->text = $text;
         // Additional text to display images.
@@ -454,9 +459,19 @@ class course_data {
         $item->tneeded = $status->s_lastmodified >= $status->t_lastmodified;
         $item->section = $sectionid;
         // Get the activity icon, if it is a real activity/resource.
+        $item->purpose = null;
+        $item->iconurl = null;
+
         try {
-            $item->purpose = call_user_func($table . '_supports', FEATURE_MOD_PURPOSE);
-            $item->iconurl = $this->modinfo->get_cm($cmid)->get_icon_url()->out(false);
+            if (isset($activity->qtype)) {
+                $item->iconurl = $OUTPUT->image_url('icon', $activity->qtype);
+                $item->pluginname = get_string('pluginname', $activity->qtype);
+            } else {
+                $item->purpose = call_user_func($table . '_supports', FEATURE_MOD_PURPOSE);
+                $item->iconurl = $this->modinfo->get_cm($cmid)->get_icon_url()->out(false);
+                $item->pluginname = get_string('pluginname', $table);
+            }
+
         } catch (\TypeError $e) {
             $item->purpose = null;
             $item->iconurl = null;
@@ -494,6 +509,8 @@ class course_data {
                             ['identifier' => ($plugroot[1] ?? '') . $field, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => ($plugroot[1] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => $field, 'component' => $table],
+                            ['identifier' => 'pluginname', $table],
                     ];
 
                     foreach ($allcombinations as $string) {
@@ -574,7 +591,7 @@ class course_data {
                 $link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $id]);
                 break;
             case 'quiz' :
-                $link = new moodle_url($CFG->wwwroot . "/course/modedit.php", ['update' => $id]);
+                $link = new moodle_url($CFG->wwwroot . "/course/modedit.php", ['update' => $cmid]);
                 break;
             case 'question' :
                 $link = new moodle_url($CFG->wwwroot . "/question/bank/editquestion/question.php", ['id' => $id, 'cmid' => $cmid]);
@@ -586,16 +603,18 @@ class course_data {
             default:
                 if (strpos($table, "_") !== false) {
                     $split = explode("_", $table);
-                    $params = [];
+                    $params = ['cmid' => $tcmid, 'id' => $id];
+                    $path = "/mod/{$split[0]}/edit.php";
                     switch ($split[0]) {
-                        case 'book':
-                            $params = ['cmid' => $tcmid, 'id' => $id];
+                        case 'qtype':
+                            $params = ['cmid' => $tcmid, 'id' => $parentid];
+                            $path = '/question/bank/editquestion/question.php';
                             break;
                         case 'wiki':
                             $params = ['pageid' => $id];
                             break;
                     }
-                    $link = new moodle_url($CFG->wwwroot . "/mod/{$split[0]}/edit.php", $params);
+                    $link = new moodle_url($CFG->wwwroot . $path, $params);
                 } else if ($tcmid !== 0) {
                     $link = new moodle_url($CFG->wwwroot . "/course/modedit.php", ['update' => $tcmid]);
                 }
@@ -673,6 +692,53 @@ class course_data {
     }
 
     /**
+     * Special wrapper for questions to build data.
+     *
+     * @param array $activities
+     * @param mixed $question
+     * @param mixed $activity
+     * @return false|mixed|\stdClass
+     */
+    private function injectquestiondata(array &$activities, mixed $question, mixed $activity) {
+        global $DB;
+        return $this->injectdatafromtable($activities, 'question', 'id', $question->id, $activity);
+    }
+
+    /**
+     * Special wrapper for questions subs to build data.
+     *
+     * @param array $activities
+     * @param string $table
+     * @param string $idcolname
+     * @param int $id
+     * @param mixed $activity
+     * @return false|mixed|\stdClass
+     * @throws \dml_exception
+     */
+    private function injectdatafromtable(array &$activities, string $table, string $idcolname, int $id, mixed $activity) {
+        global $DB;
+
+        $activitydbrecord = $DB->get_record($table, [$idcolname => $id]);
+        $textcollumnskeys = $this->filterdbtextfields($table);
+
+        // Feed the data array with found text.
+        foreach ($textcollumnskeys as $field) {
+            if ($activitydbrecord->{$field} !== null && trim($activitydbrecord->{$field}) !== '') {
+                $data = $this->build_data(
+                        $activitydbrecord->id,
+                        $activitydbrecord->{$field},
+                        isset($activitydbrecord->{$field . 'format'}) ?? 0,
+                        $field,
+                        $activity,
+                        3
+                );
+                array_push($activities, $data);
+            }
+        }
+        return $activitydbrecord;
+    }
+
+    /**
      * Question and Answers factory.
      *
      * @param array $activitydata
@@ -682,49 +748,52 @@ class course_data {
      * @throws \dml_exception
      */
     private function injectquizcontent(array &$activitydata, \question_definition $question, mixed $act) {
+        global $DB;
+        $dbman = $DB->get_manager(); // Get the database manager.
         $activity = new \stdClass();
         $activity->id = $act->id;
         $activity->modname = 'question';
         $activity->section = $act->sectionid;
-        $activitydata[] = $this->build_data(
-                $question->id,
-                $question->name,
-                0,
-                'name',
-                $activity
-        );
-        $activitydata[] = $this->build_data(
-                $question->id,
-                $question->questiontext,
-                1,
-                'questiontext',
-                $activity
-        );
-        if (!empty($question->generalfeedback)) {
-            $activitydata[] = $this->build_data(
-                    $question->id,
-                    $question->generalfeedback,
-                    1,
-                    'generalfeedback',
-                    $activity
-            );
-        }
+        $pluginname = $question->qtype->plugin_name();
+        $activity->qtype = $pluginname;
+        $this->injectquestiondata($activitydata, $question, $activity);
         $qactivity = new \stdClass();
         $qactivity->id = $act->id;
         $qactivity->modname = 'question_answers';
         $qactivity->section = $act->sectionid;
         $qactivity->parent = $question->id;
-        switch ($question->qtype->name()) {
-            case 'multichoice':
-                $rank = 0;
+        $qidfiledname = $question->qtype->questionid_column_name();
+
+        $optionstablename = '';
+
+        $hasoptions = false;
+        if ($dbman->table_exists($pluginname . '_options')) {
+            $optionstablename = $pluginname . '_options';
+            $hasoptions = true;
+        }
+        switch ($pluginname) {
+            case 'qtype_match':
+                if ($dbman->table_exists($pluginname . '_subquestions')) {
+                    $substablename = $pluginname . '_subquestions';
+                    $qactivity->modname = $substablename;
+                    if ($DB->record_exists($substablename, [$qidfiledname => $question->id])) {
+                        $submatches = $DB->get_records($substablename, [$qidfiledname => $question->id]);
+                        foreach ($submatches as $submatch) {
+                            $this->injectdatafromtable(
+                                    $activitydata, $substablename, 'id', $submatch->id, $qactivity);
+                        }
+
+                    }
+                }
+            case 'qtype_multichoice':
                 foreach ($question->answers as $answer) {
-                    $rank++;
                     $activitydata[] = $this->build_data(
                             $answer->id,
                             $answer->answer,
                             $answer->answerformat,
                             'answer',
-                            $qactivity
+                            $qactivity,
+                            3
                     );
                     if (!empty($answer->feedback)) {
                         $activitydata[] = $this->build_data(
@@ -732,7 +801,8 @@ class course_data {
                                 $answer->feedback,
                                 $answer->feedbackformat,
                                 'feedback',
-                                $qactivity
+                                $qactivity,
+                                3
                         );
                     }
                 }
@@ -741,6 +811,17 @@ class course_data {
                 // Log or handle unknown question types.
                 debugging('Unhandled question type: ' . $question->qtype->name(), DEBUG_DEVELOPER);
                 break;
+        }
+        if ($hasoptions && $DB->record_exists($optionstablename, [$qidfiledname => $question->id])) {
+            $qactivity->modname = $optionstablename;
+            $this->injectdatafromtable($activitydata, $optionstablename, $qidfiledname, $question->id, $qactivity);
+        }
+        if (count($question->hints)) {
+            foreach ($question->hints as $hint) {
+                $qactivity->modname = 'question_hints';
+                $this->injectdatafromtable($activitydata, 'question_hints', 'id', $hint->id, $qactivity);
+            }
+
         }
     }
 

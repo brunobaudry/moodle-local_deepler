@@ -74,7 +74,8 @@ class update_translation extends external_api {
             require_capability('local/deepler:edittranslations', $context);
             // Check detailed activity capabilities.
             if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
-                    strpos($data['table'], 'question') === false) {
+                    strpos($data['table'], 'question') === false &&
+                    strpos($data['table'], 'qtype') === false) {
                 require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
             }
             $dataobject['id'] = $data['id'];

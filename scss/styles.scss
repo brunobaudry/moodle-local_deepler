@@ -103,16 +103,30 @@ $secondary: $gray-400 !default;
         margin-top: 3rem;
     }
 
+    .local_deepler__activitysmalltitle {
+        position: absolute;
+    }
+
+    .local_deepler__selectorbox {
+        margin-top: -1.4rem;
+    }
+
     div[data-table^="question"] {
         background-color: $white !important; /* stylelint-disable-line declaration-no-important */
     }
 
-    div[id^="question"] {
-        background-color: #0601010f !important; /* stylelint-disable-line declaration-no-important */
+    div[id^="question["].local_deepler__activity > :first-child {
+        color: $gray-900 !important; /* stylelint-disable-line declaration-no-important */
+        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
+        margin-bottom: 1rem;
+    }
+
+    .local_deepler__level0 {
+        padding-left: 15px;
     }
 
     .local_deepler__activitydesc, .local_deepler__activityfield {
-        color: $gray-700;
+        color: $gray-600;
         position: relative;
     }
 
@@ -120,11 +134,6 @@ $secondary: $gray-400 !default;
         top: -16px;
     }
 
-    .local_deepler__activitysmalltitle {
-        color: $secondary;
-        right: 50%;
-        position: absolute;
-    }
 
     .local_deepler__activityfield {
         display: inline-block;

@@ -60,23 +60,29 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate .local_deepler__sectiondata {
     margin-top: 3rem;
 }
+#page-local-deepler-translate .local_deepler__activitysmalltitle {
+    position: absolute;
+}
+#page-local-deepler-translate .local_deepler__selectorbox {
+    margin-top: -1.4rem;
+}
 #page-local-deepler-translate div[data-table^=question] {
     background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
 }
-#page-local-deepler-translate div[id^=question] {
-    background-color: rgba(6, 1, 1, 0.0588235294) !important; /* stylelint-disable-line declaration-no-important */
+#page-local-deepler-translate div[id^="question["].local_deepler__activity > :first-child {
+    color: #1d2125 !important; /* stylelint-disable-line declaration-no-important */
+    background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
+    margin-bottom: 1rem;
+}
+#page-local-deepler-translate .local_deepler__level0 {
+    padding-left: 15px;
 }
 #page-local-deepler-translate .local_deepler__activitydesc, #page-local-deepler-translate .local_deepler__activityfield {
-    color: #495057;
+    color: #6a737b;
     position: relative;
 }
 #page-local-deepler-translate .local_deepler__activitydesc {
     top: -16px;
-}
-#page-local-deepler-translate .local_deepler__activitysmalltitle {
-    color: #ced4da;
-    right: 50%;
-    position: absolute;
 }
 #page-local-deepler-translate .local_deepler__activityfield {
     display: inline-block;
