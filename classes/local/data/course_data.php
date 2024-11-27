@@ -362,7 +362,7 @@ class course_data {
     /**
      * Helper to list only interesting table fields.
      *
-     * @param $tablename
+     * @param string $tablename
      * @return int[]|string[]
      */
     private function filterdbtextfields($tablename) {
@@ -414,15 +414,18 @@ class course_data {
     }
 
     /**
-     * Build Data Item.
+     * Build Data Item to be sent to renderer.
      *
      * @param int $id
      * @param string $text
      * @param int $format
      * @param string $field
      * @param mixed $activity
+     * @param int $level
      * @return \stdClass
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     private function build_data(int $id, string $text, int $format, string $field, mixed $activity, int $level = 0) {
         global $DB, $OUTPUT;
