@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] 2024-11-27
+
+### Added
+
+- Core quizzes questions.
+- Improved layout.
+- minimal db field scan is now as admin setting.
+- pre escape setting.
+
+### Fixed
+
+- Edit in place links for book pages and other subs.
+- Advanced settings are now updated upon changes therefore correctly passed to deepl.
+
+### Todo
+
+- Get all the subfields string correct.
+
 ## [1.0.2.5] 2024-11-13
 
 ### Added
