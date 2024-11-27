@@ -133,7 +133,6 @@ const registerUI = () => {
  * @param {Object} cfg JS Config
  */
 export const init = (cfg) => {
-
     log('init');
     config = cfg;
     usage = config.usage;
@@ -158,7 +157,6 @@ export const init = (cfg) => {
     warn("Deepl's usage", usage);
     error("testing developper level");
     mainEditorType = config.userPrefs;
-
     // Setup.
     registerUI();
     registerEventListeners();
@@ -174,13 +172,15 @@ export const init = (cfg) => {
         // Get the stored data and do the saving from editors content
         item.addEventListener('click', (e) => {
             const _this = e.target.closest(Selectors.actions.validatorsBtns);
-            let key = _this.dataset.keyValidator;
+            const key = _this.dataset.keyValidator;
+            const icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+            let currentStatus = icon.getAttribute('data-status');
             if (tempTranslations[key] === null || tempTranslations[key] === undefined) {
                 /**
                  * @todo do a UI feedback (disable save )
                  */
                 error(`Translation key "${key}" is undefined `);
-            } else {
+            } else if (currentStatus === Selectors.statuses.tosave) {
                 saveTranslation(key);
             }
         });
@@ -295,10 +295,15 @@ const handleAjaxUpdateDBResponse = (data) => {
     });
 };
 const saveTranslations = (keys) => {
+
     const data = [];
     keys.forEach((key) => {
-            hideErrorMessage(key);
-            data.push(prepareDbUpdatdeItem(key));
+            const icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+            const currentStatus = icon.getAttribute('data-status');
+            if (currentStatus === Selectors.statuses.tosave) {
+                hideErrorMessage(key);
+                data.push(prepareDbUpdatdeItem(key));
+            }
         }
     );
     ajax.call([
@@ -686,7 +691,7 @@ const prepareFormData = (key, url = true) => {
  * @param {Integer} key Translation Key
  */
 const getTranslation = (key) => {
-    const readystate = XMLHttpRequest.DONE ?? 4;
+    const readystateDone = XMLHttpRequest.DONE ?? 4; // Workaround if undefined when JS is cached, need further investigation.
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;
     // Build formData
@@ -700,9 +705,8 @@ const getTranslation = (key) => {
         let xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
         xhr.onreadystatechange = () => {
-            if (xhr.readyState === readystate) {
+            if (xhr.readyState === readystateDone) {
                 const status = xhr.status;
-                window.console.log('onreadystatechange2', xhr.readyState);
                 if (status === 0 || (status >= 200 && status < 400)) {
                     // The request has been completed successfully
                     log(tempTranslations);
