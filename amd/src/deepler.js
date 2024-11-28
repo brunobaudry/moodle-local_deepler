@@ -945,8 +945,9 @@ const countWordAndChar = () => {
  * @return {object}
  */
 const getCount = (key) => {
-    let sourceText = fromBase64(
-        document.querySelector(Selectors.sourcetexts.keys.replace("<KEY>", key)).getAttribute("data-sourcetext-raw"));
+    const item = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
+    const raw = item.getAttribute("data-sourcetext-raw");
+    let sourceText = fromBase64(raw).replace(/<[^>]*>/g, '');
     return countChars(sourceText);
 };
 /**
