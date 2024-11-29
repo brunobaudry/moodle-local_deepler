@@ -91,12 +91,13 @@ class translate_form extends moodleform {
             $mform->addElement('html', "<div id='$csssectionid' class='local_deepler__sectiondata'>");
             // Add sections text fields.
             foreach ($section['section'] as $s) {
-                $this->get_formrow($mform, $s);
+                $this->get_formrow($mform, $s, "local_deepler__{$s->hierarchy}");
             }
             $mform->addElement('html', DIV_CLOSE);
             // Loop section's activites.
             $tag = ''; // Temporary store the activity id to build and close the div container.
             foreach ($section['activities'] as $a) {
+                $subhierarchy = "local_deepler__{$a->hierarchy}";
                 // Identify the activity parent to group activities' text fields.
                 $parentactivity = "$a->table[$a->id]";
                 $mlangfiltered = $mlangfilter->filter($a->displaytext);
@@ -104,26 +105,29 @@ class translate_form extends moodleform {
                     $activitydivider = '<div class="divider"><hr/></div>';
                     $closeit = $tag === '' ? '' : DIV_CLOSE;// If initial don't add closing div.
                     $mform->addElement('html',
-                            "$closeit $activitydivider <div id='$parentactivity' class='activity-item local_deepler__activity'>");
+                            "$closeit $activitydivider <div id='$parentactivity' class='activity-item local_deepler__activity
+                             $subhierarchy'>");
                     if ($a->iconurl !== null) {
                         $iconclass = $a->purpose ?? '';
                         $parentdivclasses =
                                 "activity-icon activityiconcontainer smaller $iconclass courseicon align-self-start mr-2";
-                        $imageattributes =
-                                "class='activityicon' data-region='activity-icon' title='{$a->table} {$mlangfiltered}'";
+                        $activitydesc = ($a->pluginname ?? '') . ': ' . htmlentities($mlangfiltered);
+                        $imageattributes = "class='activityicon' data-region='activity-icon'";
+                        // Start icon and title row.
+                        $mform->addElement('html', "<div class='row align-items-start py-2 $subhierarchy'>");
+                        // Add icon and plugin name plus the tile reminder.
                         $mform->addElement('html',
-                                "<div class='$parentdivclasses'>
-                                <img src='{$a->iconurl}' $imageattributes alt='icon for {$a->table}'/>");
+                                "<div class='col-12 px-0 mt-0 pt-0'>
+                                    <span class='$parentdivclasses'><img src='{$a->iconurl}' $imageattributes
+                                    alt='icon for {$a->table}'/></span>
+                                    <small class='local_deepler__activitydesc'>$activitydesc</small></div>");
                         $mform->addElement('html', DIV_CLOSE);
-                        // Add the activity name type and index title (Editable below).
-                        $mform->addElement('html',
-                                "<small class='local_deepler__activitydesc'>{$a->translatedtablename} </small>
-                                 <small class='local_deepler__activitysmalltitle'>{$mlangfiltered}</small>");
                     }
                     // Reset the tag.
                     $tag = $parentactivity;
                 }
-                $this->get_formrow($mform, $a);
+
+                $this->get_formrow($mform, $a, $subhierarchy);
             }
             // Only add a second closing div if the section had activities.
             $mform->addElement('html', ($tag === '' ? '' : DIV_CLOSE) . DIV_CLOSE);
@@ -152,10 +156,13 @@ class translate_form extends moodleform {
         $keyid = "{$item->table}-{$item->id}-{$item->field}";
         // Data status.
         $status = $item->tneeded ? 'needsupdate' : 'updated';
-
+        // Special cases where the content is a db key (should never be translated).
+        $isdbkey = strpos($item->table, 'wiki_pages') !== false && $item->field === 'title';
+        $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
         // Open translation item.
         $mform->addElement('html',
-                "<div class='$cssclass row align-items-start py-2' data-row-id='$key' data-status='$status'>");
+                "<div title='$rowtitle' class='$cssclass row align-items-start py-2' data-row-id='$isdbkey$key'
+                    data-status='$status'>");
 
         // Column 1 settings.
         if ($this->langpack->targetlang === $this->langpack->currentlang) {
@@ -184,16 +191,20 @@ class translate_form extends moodleform {
             data-action='local_deepler/checkbox'
             disabled/>";
         // Column 1 layout.
-        $mform->addElement('html', '<div class="col-1 px-1">');
-        $mform->addElement('html', $bulletstatus);
-        $mform->addElement('html', $checkbox);
+        $mform->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
+        $mform->addElement('html', "<small class='local_deepler__activityfield lh-sm'>{$item->translatedfieldname}</small><br/>");
+        if (!$isdbkey) {
+            $mform->addElement('html', $bulletstatus);
+            $mform->addElement('html', $checkbox);
+        }
+
         // Add the field names translated.
-        $mform->addElement('html', "<br/><small class='local_deepler__activityfield lh-sm'>{$item->translatedfieldname}</small>");
+
         $mform->addElement('html', DIV_CLOSE);
         // Column 2 settings.
         // Edit button.
         $editbuttontitle = get_string('editbutton', 'local_deepler');
-        $editinplacebutton = "<a class='p-2 btn btn-sm btn-outline-info'
+        $editinplacebutton = $isdbkey ? '<div>&nbsp;</div>' : "<a class='p-2 btn btn-sm btn-outline-info'
                         id='local_deepler__sourcelink' href='{$item->link}' target='_blank'
                             title='$editbuttontitle'>
                             <i class='fa fa-pencil' aria-hidden='true'></i>
@@ -239,13 +250,15 @@ class translate_form extends moodleform {
                     {$sourceoptions}</select>";
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
-        // Source text textarea.
+        // Source texts.
         $rawsourcetext = base64_encode($mlangfilter->filter($item->text));
+        $trimedtext = trim($item->text);
+        $rawunfilterdtext = base64_encode($trimedtext);
         $mlangfiltered = $mlangfilter->filter($item->displaytext);
         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
-                data-sourcetext-raw='$rawsourcetext' >$mlangfiltered" . DIV_CLOSE;
+                data-sourcetext-raw='$rawsourcetext' data-filedtext-raw='$rawunfilterdtext' >$mlangfiltered" . DIV_CLOSE;
         // Collapsible multilang textarea.
-        $trimedtext = trim($item->text);
+
         $multilangtextarea = "<div class='collapse' id='$keyid'>";
         $multilangtextarea .= "<div data-key='$key'
             data-action='local_deepler/textarea'>$trimedtext" . DIV_CLOSE;
@@ -253,17 +266,21 @@ class translate_form extends moodleform {
         // Column 2 layout.
         $mform->addElement('html', $sourcetextdiv);
         $mform->addElement('html', $editinplacebutton);
-        $mform->addElement('html', $mutlilangspantag);
-        $mform->addElement('html', $sourceselect);
+        if (!$isdbkey) {
+            $mform->addElement('html', $mutlilangspantag);
+            $mform->addElement('html', $sourceselect);
+        }
         $mform->addElement('html', $sourcetextarea);
-        $mform->addElement('html', $multilangtextarea);
+        if (!$isdbkey) {
+            $mform->addElement('html', $multilangtextarea);
+        }
 
         // Closing sourcetext div.
         $mform->addElement('html', DIV_CLOSE);
-
-        // Column 3 settings.
-        // Translation Input div.
-        $translatededitor = "<div
+        if (!$isdbkey) {
+            // Column 3 settings.
+            // Translation Input div.
+            $translatededitor = "<div
             class='col-5 px-0 local_deepler__translation'
             data-action='local_deepler/editor'
             data-key='$key'
@@ -271,31 +288,32 @@ class translate_form extends moodleform {
             data-id='{$item->id}'
             data-field='{$item->field}'
             data-tid='{$item->tid}'>";
-        // No wisiwig editor text fields.
-        $nowisiwig = "<div
+            // No wisiwig editor text fields.
+            $nowisiwig = "<div
                 class='format-{$item->format} border py-2 px-3'
                 contenteditable='true'
                 data-format='{$item->format}'>" . DIV_CLOSE;
-        // Status icon/button.
-        $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
+            // Status icon/button.
+            $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
                 role='status' aria-disabled='true'><i class='fa'
                 ></i></span>";
-        // Status surrounding div.
-        $statusdiv = "<div class='col-1 text-center'
+            // Status surrounding div.
+            $statusdiv = "<div class='col-1 text-center'
             data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
-        // Column 3 Layout.
-        $mform->addElement('html', $translatededitor);
-        // Plain text input.
-        if ($item->format === 0) {
-            $mform->addElement('html', $nowisiwig);
-        } else {
-            $mform->addElement('cteditor', $key, $key);
-            $mform->setType($key, PARAM_RAW);
+            // Column 3 Layout.
+            $mform->addElement('html', $translatededitor);
+            // Plain text input.
+            if ($item->format === 0) {
+                $mform->addElement('html', $nowisiwig);
+            } else {
+                $mform->addElement('cteditor', $key, $key);
+                $mform->setType($key, PARAM_RAW);
+            }
+            // Closing $translatededitor.
+            $mform->addElement('html', DIV_CLOSE);
+            // Adding validator btn.
+            $mform->addElement('html', $statusdiv);
         }
-        // Closing $translatededitor.
-        $mform->addElement('html', DIV_CLOSE);
-        // Adding validator btn.
-        $mform->addElement('html', $statusdiv);
         // Close translation item.
         $mform->addElement('html', DIV_CLOSE);
     }

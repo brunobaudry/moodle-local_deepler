@@ -61,13 +61,33 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     1
             )
     );
-    // Do set if esacping LaTeX tag is default.
+    // Do set if escaping LaTeX tag is default.
     $settings->add(
             new admin_setting_configcheckbox(
                     'local_deepler/latexescapeadmin',
                     get_string('latexescapeadmin', 'local_deepler'),
                     get_string('latexescapeadmin_desc', 'local_deepler'),
+                    true
+            )
+    );
+    // Do set if escaping PRE tag is default.
+    $settings->add(
+            new admin_setting_configcheckbox(
+                    'local_deepler/preescapeadmin',
+                    get_string('preescapeadmin', 'local_deepler'),
+                    get_string('preescapeadmin_desc', 'local_deepler'),
                     1
+            )
+    );
+    // Min size of scanned fields.
+    $settings->add(
+            new admin_setting_configtext(
+                    'local_deepler/scannedfieldsize',
+                    get_string('scannedfieldsize', 'local_deepler'),
+                    get_string('scannedfieldsize_desc', 'local_deepler'),
+                    254,
+                    PARAM_INT,
+                    4
             )
     );
 }

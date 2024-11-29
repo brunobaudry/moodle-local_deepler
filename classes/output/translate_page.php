@@ -108,6 +108,7 @@ class translate_page implements renderable, templatable {
         $data->target_lang = mb_strtoupper($this->langpacks->targetlang);
         $data->mlangfilter = $this->mlangfilter;
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
+        $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
         // Pass data.
         $data->course = $this->course;
         $data->coursedata = $this->coursedata;

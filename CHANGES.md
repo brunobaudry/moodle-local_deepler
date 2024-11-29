@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] 2024-11-28
+
+### Added
+
+- Core quizzes questions.
+- Improved layout.
+- Minimal db field scan is now as admin setting.
+- Pre escape setting.
+- Improved DB calls by
+    - removing field retrieving before saving as this would also overwrite the changes made in editors (if any)
+    - Grouping ajax calls when batch saving.
+
+### Fixed
+
+- Edit in place links for book pages and other subs.
+- Advanced settings are now updated upon changes therefore correctly passed to deepl.
+- Prevent to click the status icon or to batch save if the status is something else than "Save".
+
+### Todo
+
+- Get all the subfields string correct.
+- See the backlog in the [issues](https://github.com/brunobaudry/moodle-local_deepler/issues)
+
 ## [1.0.2.5] 2024-11-13
 
 ### Added

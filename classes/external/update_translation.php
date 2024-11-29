@@ -66,25 +66,32 @@ class update_translation extends external_api {
         $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
         $transaction = $DB->start_delegated_transaction();
         $response = [];
+        purge_all_caches();
         foreach ($params['data'] as $data) {
-            purge_all_caches();
             // Security checks.
             $context = \context_course::instance($data['courseid']);
             self::validate_context($context);
             require_capability('local/deepler:edittranslations', $context);
             // Check detailed activity capabilities.
-            if ($data['table'] !== 'course' && $data['table'] !== 'course_sections') {
+            if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
+                    strpos($data['table'], 'question') === false &&
+                    strpos($data['table'], 'qtype') === false) {
                 require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
             }
             $dataobject['id'] = $data['id'];
             $dataobject[$data['field']] = $data['text'];
-            $DB->update_record($data['table'], (object) $dataobject);
+            $keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
+            try {
+                $DB->update_record($data['table'], (object) $dataobject);
+                // Update t_lastmodified.
+                $timemodified = time();
+                $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
 
-            // Update t_lastmodified.
-            $timemodified = time();
-            $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
+                $response[] = ['t_lastmodified' => $timemodified, 'text' => $data['text'], 'keyid' => $keyid];
+            } catch (\dml_exception $dmlexception) {
+                $response[] = ['t_lastmodified' => -1, 'text' => $dmlexception->debuginfo, 'keyid' => $keyid];
+            }
 
-            $response[] = ['t_lastmodified' => $timemodified, 'text' => $data['text']];
         }
         // Commit the transaction.
         $transaction->allow_commit();
@@ -102,6 +109,7 @@ class update_translation extends external_api {
                 new external_single_structure([
                         't_lastmodified' => new external_value(PARAM_INT, 'Timestamp the field was modified'),
                         'text' => new external_value(PARAM_RAW, 'The updated text content'),
+                        'keyid' => new external_value(PARAM_ALPHANUMEXT, 'the key id of the field updated table-id-field'),
                 ])
         );
     }

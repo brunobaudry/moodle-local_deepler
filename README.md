@@ -3,8 +3,9 @@
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Deepler is a local moodle plugin that provides a content translation page for courses and automatic machine translation using the ©Deepl Pro Translation api.
-It is developed for those who want to translate a course all on one page without having to navigate to each module and update translations.
+Deepler is a local moodle plugin that provides automatic machine translation using the ©Deepl Pro Translation api.
+It is developed for those who want to translate a course all on one page,
+without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
 0. Fine tune your ©Deepl's settings.
@@ -16,13 +17,6 @@ Translation workflow being the following:
 6. Save translations to Moodle's DB (with the multilang {mlang XX} tags).
 
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
-
-## Fork
-
-This is a fork of Jamfire's https://github.com/jamfire/moodle-local_coursetranslator which was left deprecated with https://github.com/jamfire/moodle-filter_autotranslate for
-replacement.
-Though going the filter way is most probably the best way for auto translation, we found useful to improve this one adding the necessary "revision" step as Machine translation will
-never be 100% accurate specially in the context of knowledge transmission where accuracy is mandatory.
 
 ## Installation
 
@@ -61,11 +55,22 @@ This setting is ticked by default.
 If your installation has sub local language, for exemple de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
 defaults to true)
 
-#### Default value Escape LaTeX (in the courses translation page "Advanced Settings"
+#### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
 
-Set to true will check "escape LaTeX formulas, in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
+Set to true will check "escape LaTeX formulas", in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
 set here to true).
 Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler's performances,
+
+#### Default value Escape PRE (in the courses translation page "Advanced Settings")
+
+Do not send <pre>...</pre> to translation by default.
+
+#### Minimum textfield size
+
+Small text field are often limited in the database. The text content grows quite fast (plus the mlang tags) at each translation steps.
+After translation, if the text is too big, the DB will through an error.
+
+Size this here based on your main language properties and the number on languages your Moodle supports
 
 ![](pix/admin.png)
 
@@ -87,7 +92,7 @@ Usually the default as set below should work fine with Moodle activity content.
 
 #### Other setting
 
-##### Escape LaTeX
+##### Escape LaTeX and or PRE tags
 
 Because Deepl is not very Good at that, iow we experienced that it would behave with inconsistency.
 When this is set, Deepler will seek $$...$$ string, replace by a token, send to Deepl to translate and replace back the LaTeX formulas
@@ -173,7 +178,7 @@ Clicking on the TRANSLATION icon will toggle the display of multilang tags and a
 
 #### Images and medias.
 
-The plugin will try to fetch and display embeded images.
+The plugin will try to fetch and display embeded images. (this should be improved soon so that image are displayed in the source)
 When not found it will highlight the alt text in yellow and italicised as seen above.
 
 ![](pix/multilang_toggle_img_off.png)
@@ -235,10 +240,9 @@ See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User
 
 ### Complex structures.
 
-Activities/resources with conplex sub content may not all work.
-Book does, but wiki only the first page.
-We planed to parse recursively the wiki pages but somehow not sure it is worse the effort as wiki content is very dynamic and mainly user ("Student") generated.
-We'll gladly take enhancement request based on usecases, please feel free to raise an issue.
+Activities/resources with complex sub content may not all work.
+We currently plan to support all the core mods and would be happy to add more (send us a PR)
+Book does, wiki too but beware when translating [[links]] as it will break the page link. (this should be fixed in future releas)
 
 ### Multi mlang xx tags inside a field
 
@@ -247,10 +251,10 @@ throughout content that utilize the same language._
 
 **Note**: Still you can add untranslated content, after a first insertion of mlang tags, before and/or after, the parser should then leave them in place.
 
-### Image display
+### Image display and image alt attributes
 
 Currently, images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
-The Alt attribute is not sent toi ©Deepl. This should be added in further improvement for better accessibility.
+The Alt attribute is not sent to ©Deepl. This should be added in further improvement for better accessibility.
 
 ## Compatability
 
@@ -275,13 +279,12 @@ message on the course translation page.
 
 ## Future (todos)
 
-- Question banks translation.
 - Machine translation API abstraction to use other services than ©Deepl.
 - Display images all times.
 - Translations versioning.
 - Import glossaries.
 - Multiple API key setting and user mapping.
-- Document translation
+- Document translation.
 
 ## Submit an issue
 
@@ -294,3 +297,10 @@ See the [CHANGES.md](CHANGES.md) documentation.
 ## Contributing
 
 See the [CONTRIBUTING.md](CONTRIBUTING.md) documentation.
+
+## Fork
+
+This is a fork of Jamfire's https://github.com/jamfire/moodle-local_coursetranslator which was left deprecated with https://github.com/jamfire/moodle-filter_autotranslate for
+replacement.
+Though going the filter way is most probably the best way for auto translation, we found useful to improve this one adding the necessary "revision" step as Machine translation will
+never be 100% accurate specially in the context of knowledge transmission where accuracy is mandatory.

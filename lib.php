@@ -55,8 +55,8 @@ function local_deepler_extend_navigation_course($navigation, $course) {
     $title = get_string('pluginname', 'local_deepler');
 
     // Navigation node.
-    $translatecontent = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, $title, 'translate',
-            new pix_icon('icon', 'icon', 'local_deepler'));
+    $translatecontent = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, $title, 'translate');
     // Do not show in menu if no capability.
     $navigation->add_node($translatecontent);
+    $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
 }

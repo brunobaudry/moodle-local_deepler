@@ -55,6 +55,7 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 $string['latexescapeadmin_desc'] = 'Set to true will check "escape LaTeX formulas, in the course translation form.
 This will have the effect to enable by default the Non translation of LaTeX formulas in course (when set here to true).
 Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+$string['mod_page'] = 'page';
 $string['needsupdate'] = 'Needs update';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
@@ -63,7 +64,11 @@ $string['nonsplittingtags'] = 'Non splitting tags';
 $string['notsupportedsource'] = 'The source language you are in is not supported by Deepl.';
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
+$string['pagecontent'] = 'pagecontent';
 $string['pluginname'] = 'Deepl Translator';
+$string['preescape'] = 'Escape PRE html tag ';
+$string['preescapeadmin'] = 'Escape PRE html tag ';
+$string['preescapeadmin_desc'] = '(do not send &lt;pre&gt;...&lt;/pre&gt; to translation)';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
 $string['saveall'] = 'Save&nbsp;all';
@@ -73,6 +78,11 @@ $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="st
 <p>If you are impatient, and want to close this window,
 <br/>make sure all selected translation\'s statuses are <i class="fa fa-database" aria-hidden="true"></i></p>';
 $string['saveallmodaltitle'] = 'Saving translations to the database';
+$string['scannedfieldsize'] = 'Minimum textfield size';
+$string['scannedfieldsize_desc'] = 'Small text field are often limited in the database. The text content grows quite fast
+ (plus the mlang tags) at each translation steps.
+ After translation, if the text is too big, the DB will through an error. Size this here based on your main language properties and
+ the number on languages your Moodle supports';
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
@@ -223,6 +233,7 @@ $string['tour_advancedsettings23saveall'] =
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
 $string['translatebutton'] = 'Translate &rarr; {$a}';
+$string['translationdisabled'] = 'Translation is disabled because this is used as a link in database';
 $string['uptodate'] = 'Up to date';
 $string['viewsource'] = 'Check multilingual content.';
 $string['viewsourcedisabled'] = 'No multilingual content yet.';

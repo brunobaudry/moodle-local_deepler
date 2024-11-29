@@ -20,11 +20,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Import libs
-import ajax from "core/ajax";
+import ajax from 'core/ajax';
 import Selectors from "./selectors";
 import Modal from 'core/modal';
 import {get_string as getString} from "core/str";
-import {escapeReplacementString, postprocess, preprocess} from "./latextokeniser";
+import {escapeReplacementString, postprocess, preprocess} from "./tokeniser";
 
 
 // Initialize the temporary translations dictionary @todo make external class
@@ -40,7 +40,7 @@ let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
 let batchSaving = 0;
-let escapeLatex = true;
+const escapePatterns = {};
 let log = (...a) => {
     return a;
 };
@@ -60,6 +60,7 @@ const debug = {
     ALL: 30719,
     DEVELOPER: 32767
 };
+
 const registerEventListeners = () => {
     document.addEventListener('change', e => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
@@ -99,19 +100,12 @@ const registerEventListeners = () => {
         }
         if (e.target.closest(Selectors.actions.saveAll)) {
             const selected = document.querySelectorAll(Selectors.statuses.checkedCheckBoxes);
-            selected.forEach((e) => {
-                const key = e.dataset.key;
-                if (tempTranslations[key].translation !== "") {
-                    batchSaving++;
-                    saveTranslation(key);
-                } else {
-                    warn("not translated " + key);
-                }
-            });
-            if (batchSaving > 0) {
-                log('batchSaving' + batchSaving);
+            const allKeys = Array.from(selected).map((e) => e.dataset.key);
+            log(allKeys);
+            if (allKeys.length > 0) {
                 launchModal();
                 saveAllBtn.hidden = saveAllBtn.disabled = true;
+                saveTranslations(allKeys);
             }
         }
     });
@@ -167,26 +161,26 @@ export const init = (cfg) => {
     registerUI();
     registerEventListeners();
     toggleAutotranslateButton();
-    log(Selectors.actions.escapeLatex);
-    escapeLatex = document.querySelector(Selectors.actions.escapeLatex).checked;
-    info(`escapeLatex ${escapeLatex}`);
+
     const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
-     * Validaate translation ck
+     * Validate translation ck
      */
     const validators = document.querySelectorAll(Selectors.actions.validatorsBtns);
     validators.forEach((item) => {
         // Get the stored data and do the saving from editors content
         item.addEventListener('click', (e) => {
             const _this = e.target.closest(Selectors.actions.validatorsBtns);
-            let key = _this.dataset.keyValidator;
+            const key = _this.dataset.keyValidator;
+            const icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+            let currentStatus = icon.getAttribute('data-status');
             if (tempTranslations[key] === null || tempTranslations[key] === undefined) {
                 /**
                  * @todo do a UI feedback (disable save )
                  */
                 error(`Translation key "${key}" is undefined `);
-            } else {
+            } else if (currentStatus === Selectors.statuses.tosave) {
                 saveTranslation(key);
             }
         });
@@ -230,155 +224,161 @@ const launchModal = async () => {
     });
     saveAllModal.show();
 };
-/**
- * Save Translation to Moodle
- * @param  {String} key Data Key
- */
-const saveTranslation = (key) => {
-    hideErrorMessage(key);
-    // Get processing vars.
-    let editor = tempTranslations[key].editor;
-    let text = editor.innerHTML; // We keep the editors text in case translation is edited
+
+const successMessage = (key, element) => {
+    element.classList.add("local_deepler__success");
+    // Add saved indicator
+    setIconStatus(key, Selectors.statuses.success);
+    // Remove success message after a few seconds
+    setTimeout(() => {
+        let multilangPill = document.querySelector(replaceKey(Selectors.statuses.multilang, key));
+        let prevTransStatus = document.querySelector(replaceKey(Selectors.statuses.prevTransStatus, key));
+        prevTransStatus.classList = "badge badge-pill badge-success";
+        if (multilangPill.classList.contains("disabled")) {
+            multilangPill.classList.remove('disabled');
+        }
+        setIconStatus(key, Selectors.statuses.saved);
+    });
+};
+const errorMessage = (key, editor, err) => {
+    editor.classList.add("local_deepler__error");
+    let hintError = '';
+    // Most of the time DB error will come from translations starting to be too long.
+    getString('errortoolong', 'local_deepler').then((s) => {
+        hintError = s;
+        setIconStatus(key, Selectors.statuses.failed);
+        let message = err.message + ' ' + hintError;
+        if (err.debuginfo) {
+            // When Moodle is set to max debugger display the debuginfo.
+            const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
+            // message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
+            message = err.message + '<br/>' + err.debuginfo + ' ' + setIndex;
+        }
+        showErrorMessageForEditor(key, message);
+    });
+};
+const getEditorText = (editor) => {
+    let text = editor.innerHTML;
     if (mainEditorType === 'textarea') {
         text = decodeHTML(text);
     }
-    // Restore the source.
-    let sourceTokenised = tempTranslations[key].source;
-    let sourceText = escapeLatex ? postprocess(sourceTokenised, tempTranslations[key].tokens) : sourceTokenised;
-    log(text);
-    log(sourceText);
-    let element = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
-    let id = element.getAttribute("data-id");
-    let tid = element.getAttribute("data-tid");
-    let table = element.getAttribute("data-table");
-    let field = element.getAttribute("data-field");
+    return text;
+};
 
-    // Get the latest field data
-    let fielddata = {};
-    fielddata.courseid = config.courseid;
-    fielddata.id = parseInt(id);
-    fielddata.table = table;
-    fielddata.field = field;
-    info(fielddata);
-    // Get the latest data to parse text against.
+const getSourceText = (key) => {
+    const sourceTokenised = tempTranslations[key].source;
+    return postprocess(sourceTokenised, tempTranslations[key].tokens);
+};
+const getElementAttributes = (element) => {
+    return {
+        id: parseInt(element.getAttribute("data-id")),
+        tid: element.getAttribute("data-tid"),
+        table: element.getAttribute("data-table"),
+        field: element.getAttribute("data-field")
+    };
+};
+const handleAjaxUpdateDBResponse = (data) => {
+    data.forEach((item) => {
+        log(item, Date(item.t_lastmodified * 1000));
+        const key = keyidToKey(item.keyid);
+        const htmlElement = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
+        const multilangTextarea = document.querySelector(replaceKey(Selectors.editors.multiples.textAreas, key));
+        if (item.t_lastmodified === -1) {
+            errorMessage(key, tempTranslations[key].editor, item.text);
+        } else {
+            successMessage(key, htmlElement);
+            multilangTextarea.innerHTML = item.text;
+            // Deselect the checkbox.
+            document.querySelector(Selectors.editors.multiples.checkBoxesWithKey.replace('<KEY>', key))
+                .checked = false;
+        }
+    });
+};
+const saveTranslations = (keys) => {
+
+    const data = [];
+    keys.forEach((key) => {
+            const icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+            const currentStatus = icon.getAttribute('data-status');
+            if (currentStatus === Selectors.statuses.tosave) {
+                hideErrorMessage(key);
+                data.push(prepareDbUpdatdeItem(key));
+            }
+        }
+    );
     ajax.call([
         {
-            methodname: "local_deepler_get_field",
+            methodname: "local_deepler_update_translation",
             args: {
-                data: [fielddata],
+                data: data,
             },
             done: (data) => {
-                // The latests field text so multiple translators can work at the same time
-                let fieldtext = data[0].text;
-
-                // Field text exists
+                if (saveAllModal !== null && saveAllModal.isVisible) {
+                    saveAllModal.hide();
+                }
                 if (data.length > 0) {
-                    // Updated hidden textarea with updatedtext
-                    let textarea = document.querySelector(
-                        Selectors.editors.multiples.textAreas
-                            .replace("<KEY>", key));
-                    // Get the updated text
-                    let updatedtext = getupdatedtext(fieldtext, text, sourceText, tempTranslations[key].sourceLang);
-
-                    // Build the data object
-                    let tdata = {};
-                    tdata.courseid = config.courseid;
-                    tdata.id = parseInt(id);
-                    tdata.tid = tid;
-                    tdata.table = table;
-                    tdata.field = field;
-                    tdata.text = updatedtext;
-                    info(updatedtext);
-                    info(tdata);
-                    // Success Message
-                    const successMessage = () => {
-                        element.classList.add("local_deepler__success");
-                        // Add saved indicator
-                        setIconStatus(key, Selectors.statuses.success);
-                        // Remove success message after a few seconds
-                        setTimeout(() => {
-                            let multilangPill = document.querySelector(replaceKey(Selectors.statuses.multilang, key));
-                            let prevTransStatus = document.querySelector(replaceKey(Selectors.statuses.prevTransStatus, key));
-                            prevTransStatus.classList = "badge badge-pill badge-success";
-                            if (multilangPill.classList.contains("disabled")) {
-                                multilangPill.classList.remove('disabled');
-                            }
-                            setIconStatus(key, Selectors.statuses.saved);
-                        });
-                    };
-                    // Error Mesage
-                    const errorMessage = (err) => {
-                        editor.classList.add("local_deepler__error");
-                        let hintError = '';
-                        // Most of the time DB error will come from translations starting to be too long.
-                        getString('errortoolong', 'local_deepler').then((s) => {
-                            hintError = s;
-                            setIconStatus(key, Selectors.statuses.failed);
-                            let message = err.message + ' ' + hintError;
-                            if (err.debuginfo) {
-                                // When Moodle is set to max debugger display the debuginfo
-                                const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
-                                message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
-                            }
-                            showErrorMessageForEditor(key, message);
-                        });
-                    };
-                    // Submit the request
-                    ajax.call([
-                        {
-                            methodname: "local_deepler_update_translation",
-                            args: {
-                                data: [tdata],
-                            },
-                            done: (data) => {
-                                // Print response to console log
-                                info("ws: ", key, data);
-                                // If we launch saving by the save all button, manage the modal infobox.
-                                if (saveAllModal !== null && saveAllModal.isVisible) {
-                                    batchSaving--;
-                                    log('batchSaving', batchSaving);
-                                    if (batchSaving === 0) {
-                                        saveAllModal.hide();
-                                    }
-                                }
-
-                                // Display success message
-                                if (data.length > 0) {
-                                    successMessage();
-                                    textarea.innerHTML = data[0].text;
-
-                                    // Update source lang if necessary
-                                    if (config.currentlang === config.lang) {
-                                        document.querySelector(Selectors.sourcetexts.keys.replace('<KEY>', key))
-                                            .innerHTML = text;
-                                    }
-                                    // Deselect the checkbox
-                                    document.querySelector(Selectors.editors.multiples.checkBoxesWithKey.replace('<KEY>', key))
-                                        .checked = false;
-                                } else {
-                                    // Something went wrong with the data
-                                    errorMessage();
-                                }
-                            },
-                            fail: (err) => {
-                                // An error occurred
-                                errorMessage(err);
-                            },
-                        },
-                    ]);
+                    handleAjaxUpdateDBResponse(data);
                 } else {
-                    // Something went wrong with field retrieval
-                    warn(data);
+                    keys.forEach((key) => {
+                        errorMessage(key, tempTranslations[key].editor, 'Something went wrong with the data');
+                    });
                 }
             },
             fail: (err) => {
                 // An error occurred
-                error(err);
+                keys.forEach((key) => {
+                    errorMessage(key, tempTranslations[key].editor, err);
+                });
             },
-        },
+        }
     ]);
 };
-
+const saveTranslation = (key) => {
+    hideErrorMessage(key);
+    ajax.call([
+        {
+            methodname: "local_deepler_update_translation",
+            args: {
+                data: [prepareDbUpdatdeItem(key)],
+            },
+            done: (data) => {
+                if (saveAllModal !== null && saveAllModal.isVisible) {
+                    batchSaving--;
+                    log('batchSaving', batchSaving);
+                    if (batchSaving === 0) {
+                        saveAllModal.hide();
+                    }
+                }
+                if (data.length > 0) {
+                    handleAjaxUpdateDBResponse(data);
+                } else {
+                    errorMessage(key, tempTranslations[key].editor, 'Something went wrong with the data');
+                }
+            },
+            fail: (err) => {
+                // An error occurred
+                errorMessage(key, tempTranslations[key].editor, err);
+            },
+        }
+    ]);
+};
+const prepareDbUpdatdeItem = (key) => {
+    const editor = tempTranslations[key].editor;
+    const textTranslated = getEditorText(editor);
+    const sourceText = getSourceText(key);
+    const fieldText = tempTranslations[key].fieldText;
+    const element = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
+    const {id, tid, field, table} = getElementAttributes(element);
+    const textTosave = getupdatedtext(fieldText, textTranslated, sourceText, tempTranslations[key].sourceLang);
+    return {
+        courseid: config.courseid,
+        id: id,
+        tid: tid,
+        field: field,
+        table: table,
+        text: textTosave
+    };
+};
 /**
  * Update Textarea
  * @param {string} fieldtext Latest text from database including all mlang tag if any.
@@ -477,11 +477,14 @@ const onItemChecked = (e) => {
     }
 };
 const initTempForKey = (key, blank) => {
+
     // Get the source text
     const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
     const sourceTextEncoded = document.querySelector(sourceSelector).getAttribute("data-sourcetext-raw");
+    const multilangRawTextEncoded = document.querySelector(sourceSelector).getAttribute("data-filedtext-raw");
     const sourceText = fromBase64(sourceTextEncoded);
-    const tokenised = escapeLatex ? preprocess(sourceText) : sourceText;
+    const fieldText = fromBase64(multilangRawTextEncoded);
+    const tokenised = preprocess(sourceText, escapePatterns, escapePatterns);
     // Store the settings.
     const editorSettings = findEditor(key);
     const sourceLang = document.querySelector(Selectors.sourcetexts.sourcelangs.replace("<KEY>", key)).value;
@@ -491,6 +494,7 @@ const initTempForKey = (key, blank) => {
         'editor': null,
         'source': '',
         'sourceLang': '',
+        'fieldText': '',
         'status': '',
         'translation': '',
         'tokens': []
@@ -506,9 +510,10 @@ const initTempForKey = (key, blank) => {
                 'editor': editorSettings.editor,
                 'source': tokenised.tokenizedText,
                 'sourceLang': sourceLang,
+                'fieldText': fieldText,
                 'status': Selectors.statuses.wait,
                 'translation': '',
-                'tokens': tokenised.latexExpressions
+                'tokens': tokenised.expressions
             };
         }
     }
@@ -578,8 +583,13 @@ const showRows = (selector, selected) => {
         let k = item.getAttribute('data-row-id');
         toggleRowVisibility(item, selected);
         // When a row is toggled then we don't want it to be selected and sent from translation.
-        item.querySelector(replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)).checked = allSelected && selected;
-        toggleStatus(k, false);
+        try {
+            item.querySelector(replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)).checked = allSelected && selected;
+            toggleStatus(k, false);
+        } catch (e) {
+            log(`${k} translation is disalbled`);
+        }
+
     });
     toggleAutotranslateButton();
     countWordAndChar();
@@ -627,63 +637,105 @@ const doAutotranslate = () => {
         });
 };
 /**
+ *
+ * @returns {{}}
+ */
+const prepareAdvancedSettings = () => {
+    info('prepareAdvancedSettings');
+    let settings = {};
+    escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
+    escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
+    settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
+    settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
+    settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
+    settings.preserve_formatting = document.querySelector(Selectors.deepl.preserveFormatting).checked;//
+    settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
+    settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
+    settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
+    settings.non_splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value);
+    settings.splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value);
+    settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
+    settings.target_lang = targetLang.toUpperCase();
+    settings.auth_key = config.apikey;
+    return settings;
+};
+const prepareTranslation = (key) => {
+    return {
+        text: tempTranslations[key].source,
+        source_lang: tempTranslations[key].sourceLang,
+    };
+};
+/**
+ * Prepare the params for XHR call.
+ *
+ * @param {string} key
+ * @param {boolean} url
+ * @returns {URLSearchParams|FormData} Object to use in XHR.
+ */
+const prepareFormData = (key, url = true) => {
+    let formData = url ? new URLSearchParams() : new FormData();
+    Object.entries(prepareAdvancedSettings()).forEach(([k, v]) => {
+        formData.append(k, v);
+    });
+    initTempForKey(key, false); // Reset temp translation in case setting changed.
+    Object.entries(prepareTranslation(key)).forEach(([k, v]) => {
+        formData.append(k, v);
+    });
+    return formData;
+};
+
+
+/**
  * @todo extract images ALT tags to send for translation
  * Send for Translation to DeepL
  * @param {Integer} key Translation Key
  */
 const getTranslation = (key) => {
+    const readystateDone = XMLHttpRequest.DONE ?? 4; // Workaround if undefined when JS is cached, need further investigation.
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;
     // Build formData
-    let formData = new FormData();
-    formData.append("text", tempTranslations[key].source);
-    formData.append("source_lang", tempTranslations[key].sourceLang);
-    formData.append("target_lang", targetLang.toUpperCase());
-    formData.append("auth_key", config.apikey);
-    formData.append("tag_handling", document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml');//
-    formData.append("context", document.querySelector(Selectors.deepl.context).value ?? null); //
-    formData.append("split_sentences", document.querySelector(Selectors.deepl.splitSentences).value);//
-    formData.append("preserve_formatting", document.querySelector(Selectors.deepl.preserveFormatting).checked);//
-    formData.append("formality", document.querySelector('[name="local_deepler/formality"]:checked').value);
-    formData.append("glossary_id", document.querySelector(Selectors.deepl.glossaryId).value);//
-    formData.append("outline_detection", document.querySelector(Selectors.deepl.outlineDetection).checked);//
-    formData.append("non_splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value));
-    formData.append("splitting_tags", toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value));
-    formData.append("ignore_tags", toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value));
-    info("Send deepl:", formData);
-
-    // Update the translation
-    let xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = () => {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            const status = xhr.status;
-            if (status === 0 || (status >= 200 && status < 400)) {
-                // The request has been completed successfully
-                let data = JSON.parse(xhr.responseText);
-                info("From deepl:", data);
-                log(tempTranslations[key]);
-                log(data.translations[0].text);
-                let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens);
-                // Display translation
-                log(tr);
-                tempTranslations[key].editor.innerHTML = tr;
-                // Store the translation in the global object
-                tempTranslations[key].translation = tr;
-                setIconStatus(key, Selectors.statuses.tosave, true);
-                injectImageCss(
-                    tempTranslations[key].editorType,
-                    tempTranslations[key].editor); // Hack for iframes based editors to highlight missing pictures.
-            } else {
-                // Oh no! There has been an error with the request!
-                setIconStatus(key, Selectors.statuses.failed, false);
+    let formData = prepareFormData(key);
+    // log(tempTranslations);
+    if (tempTranslations[key].editor === null) {
+        error(`${key} no editor found :((`);
+    } else {
+        info("Send deepl:", formData);
+        // Update the translation
+        let xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === readystateDone) {
+                const status = xhr.status;
+                if (status === 0 || (status >= 200 && status < 400)) {
+                    // The request has been completed successfully
+                    log(tempTranslations);
+                    let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
+                    info("From deepl:", data);
+                    let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens, escapePatterns);
+                    // Display translation
+                    log(tr);
+                    tempTranslations[key].editor.innerHTML = tr;
+                    // Store the translation in the global object
+                    tempTranslations[key].translation = tr;
+                    setIconStatus(key, Selectors.statuses.tosave, true);
+                    injectImageCss(
+                        tempTranslations[key].editorType,
+                        tempTranslations[key].editor); // Hack for iframes based editors to highlight missing pictures.
+                } else {
+                    // Oh no! There has been an error with the request!
+                    setIconStatus(key, Selectors.statuses.failed, false);
+                }
+            } else if (typeof xhr.readyState !== 'number') {
+                // Workaround for the Adaptable theme that did change the return type of xhr.readyState.
+                log('ERROR: Some JS library in your Moodle install are overriding the core functionalities in a wrong way.' +
+                    'xhr.readyState MUST be of type "number"');
             }
-        } else if (typeof xhr.readyState !== 'number') {
-            log('ERROR : Some javascript library in your Moodle install are overriding the core functionalities in a wrong way.' +
-                ' xhr.readyState MUST be of type "number"');
-        }
-    };
-    xhr.open("POST", config.deeplurl);
-    xhr.send(formData);
+        };
+        xhr.open("POST", config.deeplurl);
+        xhr.send(formData);
+    }
+
 };
 /**
  *
@@ -847,6 +899,11 @@ const keyidToKey = (k) => {
     let m = k.match(/^(.+)-(.+)-(.+)$/i);
     return `${m[1]}[${m[2]}][${m[3]}]`;
 };
+/*
+const getKeyFromComponents = (id, field, table) => {
+    return `${table}[${id}][${field}]`;
+};
+*/
 /**
  * Launch countWordAndChar
  */
@@ -888,7 +945,9 @@ const countWordAndChar = () => {
  * @return {object}
  */
 const getCount = (key) => {
-    let sourceText = document.querySelector(Selectors.sourcetexts.keys.replace("<KEY>", key)).getAttribute("data-sourcetext-raw");
+    const item = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
+    const raw = item.getAttribute("data-sourcetext-raw");
+    let sourceText = fromBase64(raw).replace(/<[^>]*>/g, '');
     return countChars(sourceText);
 };
 /**
@@ -897,10 +956,10 @@ const getCount = (key) => {
  * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
  */
 const countChars = (val) => {
-    const withSpace = val.length;
-    // Using Regex
-    const withOutSpace = val.replace(/\s+/g, '').length;
-    const wordsCount = val.match(/\S+/g).length;
+    const trimmedVal = val.trim();
+    const withSpace = trimmedVal.length;
+    const withOutSpace = trimmedVal.replace(/\s+/g, '').length;
+    const wordsCount = (trimmedVal.match(/\S+/g) || []).length;
     return {
         "wordCount": wordsCount,
         "charNumWithSpace": withSpace,
