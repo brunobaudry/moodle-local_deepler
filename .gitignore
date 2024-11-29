@@ -1,0 +1,10 @@
+# System Files
+.DS_Store
+
+# Libraries
+node_modules
+# ide
+.idea/*
+indentor.py
+
+Gruntfile.js-

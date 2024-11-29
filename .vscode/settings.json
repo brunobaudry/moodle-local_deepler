@@ -1,0 +1,9 @@
+/*
+Clone https://github.com/moodlehq/moodle-local_codechecker to local/codechecker
+in your Moodle directory in order to enable phpcs
+*/
+{
+    "phpcs.enable": true,
+    "phpcs.executablePath": "../codechecker/phpcs/bin/phpcs",
+    "phpcs.standard": "../codechecker/moodle"
+}
