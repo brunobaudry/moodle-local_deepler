@@ -947,7 +947,7 @@ const countWordAndChar = () => {
 const getCount = (key) => {
     const item = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
     const raw = item.getAttribute("data-sourcetext-raw");
-    let sourceText = fromBase64(raw).replace(/<[^>]*>/g, '');
+    const sourceText = stripHTMLTags(fromBase64(raw));
     return countChars(sourceText);
 };
 /**
@@ -985,4 +985,14 @@ const decodeHTML = (encodedStr) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(encodedStr, 'text/html');
     return doc.documentElement.textContent;
+};
+/**
+ * Helper to remove HTML from strings.
+ *
+ * @param {string} str
+ * @returns {string|string}
+ */
+const stripHTMLTags = (str) => {
+    let doc = new DOMParser().parseFromString(str, 'text/html');
+    return doc.body.textContent || "";
 };
