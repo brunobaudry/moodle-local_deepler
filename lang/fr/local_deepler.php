@@ -31,10 +31,10 @@ $string['apikeytitle_desc'] = 'Copiez votre clé API depuis DeepL pour utiliser 
 $string['canttranslate'] = 'Impossible de traduire «{$a}» en «{$a}», veuillez sélectionner une autre langue cible.';
 $string['contextdeepl'] = 'Contexte du cours ';
 $string['contextdeepl_placeholder'] =
-        'Informer le traducteur (Deepl) du contexte, pour l‘aider à traduire de manière plus contextuelle... (expérimental)';
-$string['deeplapidoc'] = 'voir les détails dans la documentation de Deepl';
-$string['deeplapidoctitle'] = 'Réglages de l‘API de Deepl';
-$string['deepler:edittranslations'] = 'Editer des traductions de cours dans Deepl Translator (capacité à)';
+        'Informer le traducteur (DeepL) du contexte, pour l‘aider à traduire de manière plus contextuelle... (expérimental)';
+$string['deeplapidoc'] = 'voir les détails dans la documentation de DeepL';
+$string['deeplapidoctitle'] = 'Réglages de l‘API de DeepL';
+$string['deepler:edittranslations'] = 'Editer des traductions de cours dans DeepL Translator';
 $string['deeplprotitle'] = 'Utilisez DeepL Pro ?';
 $string['deeplprotitle_desc'] = 'Activez cette option pour utiliser DeepL Pro au lieu de la version gratuite de DeepL.';
 $string['editbutton'] = 'Modifier la source dans le champ d‘origine.';
@@ -56,12 +56,12 @@ Décochez cette case, valeur false, si votre organisation utilise rarement des f
 $string['needsupdate'] = 'Besoin de mise à jour';
 $string['nevertranslated'] = 'Aucune traduction en «{$a}» pour l‘instant';
 $string['nodeeplpapi'] =
-        ':-( Impossible de se connecter à l‘API Deepl. <br/>Vérifiez avec votre administrateur. Il semble qu‘il y ait un problème de réseau.';
+        ':-( Impossible de se connecter à l‘API DeepL. <br/>Vérifiez avec votre administrateur. Il semble qu‘il y ait un problème de réseau.';
 $string['nonsplittingtags'] = 'Balises non fractionnables';
-$string['notsupportedsource'] = 'La langue source que vous utilisez n’est pas prise en charge par Deepl.';
+$string['notsupportedsource'] = 'La langue source que vous utilisez n’est pas prise en charge par DeepL.';
 $string['othersettingstitle'] = 'Autres réglages';
 $string['outlinedetection'] = 'Détection des contours XML';
-$string['pluginname'] = 'Deepl Translator';
+$string['pluginname'] = 'DeepL Translator';
 $string['preescape'] = 'Ignorer tag PRE html ';
 $string['preescapeadmin'] = 'Ignorer tag PRE html ';
 $string['preescapeadmin_desc'] = '(do not send &lt;pre&gt;...&lt;/pre&gt; to translation)';
@@ -87,8 +87,8 @@ $string['splittingtags'] = 'Balises de fractionnement';
 $string['taghandling'] = 'Manipulez les balises comme : ';
 $string['tagsplaceholder'] = 'Listez tous les tags (séparez les tags par une virgule &quot;,&quot;)';
 $string['tour_advancedsettings00'] =
-        'Cliquez ici pour voir comment vous pouvez affiner le comportement de Deepl.<br/><br/>Cliquez maintenant pour obtenir une visite guidée des fonctionnalités.';
-$string['tour_advancedsettings00title'] = 'Deepl’s advanced settings';
+        'Cliquez ici pour voir comment vous pouvez affiner le comportement de DeepL.<br/><br/>Cliquez maintenant pour obtenir une visite guidée des fonctionnalités.';
+$string['tour_advancedsettings00title'] = 'DeepL’s advanced settings';
 $string['tour_advancedsettings01formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
 This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em>
 (<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese),
@@ -113,7 +113,7 @@ even if it would usually correct some aspects.</p>
 <ul><li>Punctuation at the beginning and end of the sentence</li><li>Upper/lower case at the beginning of the sentence</li></ul>';
 $string['tour_advancedsettings03formatingtitle'] = 'Manage formating';
 $string['tour_advancedsettings04glossary'] = '<p>Specify the glossary to use for the translation.</p>
-<p><em>(Glossaries have to be uploaded via the Deepl API. This is not available yet with this plugin. See with your IT).</em></p>';
+<p><em>(Glossaries have to be uploaded via the DeepL API. This is not available yet with this plugin. See with your IT).</em></p>';
 $string['tour_advancedsettings04glossarytitle'] = 'Glossary';
 $string['tour_advancedsettings05context'] = '<p>This additional context can potentially improve translation quality when translating short,
 low-context source texts.</p><p>The <em>context</em> parameter is an <strong>alpha feature</strong>.</p>
@@ -150,7 +150,7 @@ $string['tour_advancedsettings11sourcelang'] = '<p>The source lang is the langua
 It is best practice to keep the same language throughout the whole course.</p>';
 $string['tour_advancedsettings11sourcelangtitle'] =
         'Source lang';
-$string['tour_advancedsettings12targetlang'] = '<p>The target language is the one you will ask Deepl to return.</p>
+$string['tour_advancedsettings12targetlang'] = '<p>The target language is the one you will ask DeepL to return.</p>
 <p>Obviuosly if you select the same language as the source the translation button is deactivated.</p>';
 $string['tour_advancedsettings12targetlangtitle'] =
         'Target language';
@@ -169,14 +169,14 @@ $string['tour_advancedsettings14filters'] = '<p>Clicking here selects all visibl
 $string['tour_advancedsettings14filterstitle'] =
         'Select All';
 $string['tour_advancedsettings15filters'] =
-        '<p>Real time status of the planned and the actual consumption of Deepl’s service (for the current month).</p>';
+        '<p>Real time status of the planned and the actual consumption of DeepL’s service (for the current month).</p>';
 $string['tour_advancedsettings15filterstitle'] =
-        'Deepl API consumption status';
+        'DeepL API consumption status';
 $string['tour_advancedsettings16sendtodeepl'] =
-        '<p>Clinkg this button will send all selected texts to Deepl and feed it in the editors.</p>
+        '<p>Clinkg this button will send all selected texts to DeepL and feed it in the editors.</p>
 <p>At least one selection is needed to ctivate it.</p>';
 $string['tour_advancedsettings16sendtodeepltitle'] =
-        'Send to Deepl';
+        'Send to DeepL';
 $string['tour_advancedsettings17statusbullet'] =
         '<p>This indicates the translation status with 3 color code.</p>
 <p><span class="badge badge-pill badge-danger"> </span> This text was never translated.</p>
@@ -186,7 +186,7 @@ $string['tour_advancedsettings17statusbullet'] =
 $string['tour_advancedsettings17statusbullettitle'] =
         'Translation status bullet icon.';
 $string['tour_advancedsettings18selection'] =
-        '<p>To send a content to Deepl to be translated, you would need to tick that checkbox.</p>';
+        '<p>To send a content to DeepL to be translated, you would need to tick that checkbox.</p>';
 $string['tour_advancedsettings18selectiontitle'] =
         'Selection checkbox';
 $string['tour_advancedsettings19editsource'] =
@@ -208,7 +208,7 @@ $string['tour_advancedsettings21secondsourcetitle'] =
         'Secondary source language.';
 $string['tour_advancedsettings22process'] =
         '<p>When a text content is not selected and no translation was requested. <i class="fa fa-ellipsis-h"></i> is shown.</p>
-<p><i class="fa fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to Deepl.</p>
+<p><i class="fa fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to DeepL.</p>
 <p><i class="fa fa-floppy-o"></i> will display after the text was fed back in the adjacent text editor.<br />
 You can review the translated content, make some changes then press the icon to actually save it in the database. <br /><br />
 <em>Note</em> that you can also save to the database in batch by clicking on the save all floating button below. <br />
@@ -217,7 +217,7 @@ Should you want to save all tranlsated text but leave some to review later, you 
 $string['tour_advancedsettings22processtitle'] =
         'Translation process indicator (far right)';
 $string['tour_advancedsettings23saveall'] =
-        '<p>When translations are retrieved from Deepl, they are not automatically saved to the database.</p>
+        '<p>When translations are retrieved from DeepL, they are not automatically saved to the database.</p>
 <p>This to ensure the basics of translation, that a review is made before being stored and automatically dispatched to the public.</p>
 <p>So you can either save them one by one or by clicking on the save all button.</p>
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
@@ -232,4 +232,4 @@ $string['warningsource'] =
         'Attention ! La langue source actuelle &quot;{$a}&quot ; est déjà une balise multilang avec la balise de repli &quot;OTHER&quot ;. Notez que les deux seront fusionnées en tant que balise multi-lang &quot;OTHER&quot ;.
 ';
 $string['wordcountsentence'] =
-        'Total <span id="local_deepler__wc">0</span> mots, <span id="local_deepler__wosc">0</span> caractères (<span id="local_deepler__wsc">0</span> caractères éspaces inclus) Consommation Deepl = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
+        'Total <span id="local_deepler__wc">0</span> mots, <span id="local_deepler__wosc">0</span> caractères (<span id="local_deepler__wsc">0</span> caractères éspaces inclus) Consommation DeepL = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
