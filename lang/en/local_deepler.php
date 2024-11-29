@@ -55,7 +55,6 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
-$string['mod_page'] = 'page';
 $string['needsupdate'] = 'Needs update';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
@@ -64,7 +63,6 @@ $string['nonsplittingtags'] = 'Non splitting tags';
 $string['notsupportedsource'] = 'The source language you are in is not supported by DeepL.';
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
-$string['pagecontent'] = 'pagecontent';
 $string['pluginname'] = 'DeepL Translator';
 $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
@@ -113,8 +111,8 @@ Setting this parameter with a target language that does not support formality wi
 <li><em>prefer less</em> - for a more informal language if available, otherwise fallback to default formality</li></ul>';
 $string['tour_advancedsettings01formalitytitle'] = 'Formality management';
 $string['tour_advancedsettings02split'] = '<p>Sets whether the translation engine should first split the input into sentences.
-For text translations where <em>checked</em>, meaning the engine splits on punctuation and on newlines.</p>
-<p>For text translations where <em>nonewlines</em>, meaning the engine splits on punctuation only, ignoring newlines.</p>';
+When <em>splits on punctuation and on newlines</em>, the engine splits on punctuation and on newlines.</p>
+<p>When <em>splits on punctuation only, ignoring newlines</em>, the engine splits on punctuation only, ignoring newlines.</p>';
 $string['tour_advancedsettings02splittitle'] = 'Manage how sentences are split by line';
 $string['tour_advancedsettings03formating'] = '<p>Sets whether the translation engine should respect the original formatting,
 even if it would usually correct some aspects.</p>
@@ -153,9 +151,9 @@ $string['tour_advancedsettings09splittag'] = '<p>Comma-separated list of XML or 
 $string['tour_advancedsettings09splittagtitle'] =
         'Tags that should not be considered to split the sentences.';
 $string['tour_advancedsettings101other'] =
-        '<p>He you tell the plugin to avoid translating LaTeX strings ($$...$$) and or PRE HTML Tags.</p>';
+        '<p>Here you tell the plugin to avoid translating LaTeX strings ($$...$$) and or PRE HTML Tags.</p>';
 $string['tour_advancedsettings101othertitle'] =
-        'Enabling LaTex and/or PRE tag escaping';
+        'Enabling LaTeX and/or PRE tag escaping';
 $string['tour_advancedsettings10splittag'] = '<p>Comma-separated list of XML or HTML tags which always cause splits.</p>';
 $string['tour_advancedsettings10splittagtitle'] =
         'Tag that will split the text into sentences.';
@@ -204,7 +202,7 @@ $string['tour_advancedsettings18selectiontitle'] =
         'Selection checkbox';
 $string['tour_advancedsettings19editsource'] =
         '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa fa-pencil"> </i>
-</span> Clicking on the pencil will jump to the course editor in the Moodle course.</p>
+</span> Clicking on the pencil will jump to the editor in the Moodle course.</p>
 <p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.</p>';
 $string['tour_advancedsettings19editsourcetitle'] =
         'Edit source in place.';
