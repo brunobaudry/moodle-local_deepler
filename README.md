@@ -232,7 +232,7 @@ it will soon be replaced by the one used in Moodle's course layout for a better 
 
 ## User tour (inline tutorial)
 
-You can install a [tour guide](https://github.com/brunobaudry/moodle-local_deepler/blob/main/tourguide/tour_export.json) to simplify your translators' trainings.
+You can install the [tour guide](https://github.com/brunobaudry/moodle-local_deepler/blob/main/tourguide/tour_export.json) to simplify your translators' trainings.
 
 See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
 

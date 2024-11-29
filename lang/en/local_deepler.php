@@ -165,7 +165,7 @@ $string['tour_advancedsettings11sourcelangtitle'] =
         'Source lang';
 $string['tour_advancedsettings12targetlang'] = '<p>The target language is the one you will ask DeepL to return.</p>
 <p>Obviuosly if you select the same language as the source the translation button is deactivated.</p>';
-$string['tousr_advancedsettings12targetlangtitle'] =
+$string['tour_advancedsettings12targetlangtitle'] =
         'Target language';
 $string['tour_advancedsettings13filters'] = '<p>These filter show/hide the textual content found in the course.</p>
 <p><strong>Up to date:<br /></strong></p>
