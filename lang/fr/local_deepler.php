@@ -50,9 +50,8 @@ $string['glossaryid_placeholder'] = 'id d‘un glossaire si vous en avez un...';
 $string['ignoretags'] = 'Tags à ignorer';
 $string['latexeascape'] = 'Ignorer LaTeX (ne pas envoyer, à traduire, les formules $$LaTeXFormulas$$)';
 $string['latexescapeadmin'] = 'Réglage par défaut de «Ignorer LaTeX» ("Réglages avancés" de l‘interface traducteur)';
-$string['latexescapeadmin_desc'] = 'La valeur « true » permet de cocher la case « Ignorer les formules LaTeX » dans le formulaire de traduction du cours.
-Cela aura pour effet d‘activer par défaut la non-traduction des formules LaTeX dans les cours (lorsque la valeur est fixée à true).
-Décochez cette case, valeur false, si votre organisation utilise rarement des formules LaTeX dans les cours afin d‘améliorer légèrement les performances de Deepler.';
+$string['latexescapeadmin_desc'] = 'Si l‘option est activée, le plugin activera «escape LaTeX formulas» dans le formulaire de traduction du cours (dans paramètres avancés).
+Désactivez-le globalement ici si votre organisation utilise rarement des formules LaTeX dans les cours pour améliorer légèrement les performances de Deepler.';
 $string['needsupdate'] = 'Besoin de mise à jour';
 $string['nevertranslated'] = 'Aucune traduction en «{$a}» pour l‘instant';
 $string['nodeeplpapi'] =
