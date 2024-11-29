@@ -152,20 +152,20 @@ $string['tour_advancedsettings08skiptagtitle'] =
 $string['tour_advancedsettings09splittag'] = '<p>Comma-separated list of XML or HTML tags which never split sentences.</p>';
 $string['tour_advancedsettings09splittagtitle'] =
         'Tags that should not be considered to split the sentences.';
-$string['tour_advancedsettings10splittag'] = '<p>Comma-separated list of XML or HTML tags which always cause splits.</p>';
-$string['tour_advancedsettings10splittagtitle'] =
-        'Tag that will split the text into sentences.';
 $string['tour_advancedsettings101other'] =
         '<p>He you tell the plugin to avoid translating LaTeX strings ($$...$$) and or PRE HTML Tags.</p>';
 $string['tour_advancedsettings101othertitle'] =
         'Enabling LaTex and/or PRE tag escaping';
+$string['tour_advancedsettings10splittag'] = '<p>Comma-separated list of XML or HTML tags which always cause splits.</p>';
+$string['tour_advancedsettings10splittagtitle'] =
+        'Tag that will split the text into sentences.';
 $string['tour_advancedsettings11sourcelang'] = '<p>The source lang is the language in which the course was written.
 It is best practice to keep the same language throughout the whole course.</p>';
 $string['tour_advancedsettings11sourcelangtitle'] =
         'Source lang';
 $string['tour_advancedsettings12targetlang'] = '<p>The target language is the one you will ask DeepL to return.</p>
 <p>Obviuosly if you select the same language as the source the translation button is deactivated.</p>';
-$string['tour_advancedsettings12targetlangtitle'] =
+$string['tousr_advancedsettings12targetlangtitle'] =
         'Target language';
 $string['tour_advancedsettings13filters'] = '<p>These filter show/hide the textual content found in the course.</p>
 <p><strong>Up to date:<br /></strong></p>
