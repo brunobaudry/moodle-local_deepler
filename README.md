@@ -15,6 +15,7 @@ Translation workflow being the following:
 4. Send to ©Deepl.
 5. Review and or amend automated translations.
 6. Save translations to Moodle's DB (with the multilang {mlang XX} tags).
+7. ...
 
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
