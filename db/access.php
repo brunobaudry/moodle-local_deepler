@@ -32,8 +32,8 @@ defined('MOODLE_INTERNAL') || die();
 $capabilities = [
         'local/deepler:edittranslations' => [
                 'captype' => 'write',
-                'riskbitmaskt' => 'RISK_CONFIG',
-                'contextlevel' => CONTEXT_SYSTEM,
+                'riskbitmask' => 'RISK_XSS',
+                'contextlevel' => CONTEXT_COURSE,
                 'archetypes' => ['manager' => CAP_ALLOW],
         ],
 ];

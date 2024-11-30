@@ -224,7 +224,12 @@ const launchModal = async () => {
     });
     saveAllModal.show();
 };
-
+/**
+ * Displays success message and icon.
+ *
+ * @param {String} key
+ * @param {HTMLElement} element
+ */
 const successMessage = (key, element) => {
     element.classList.add("local_deepler__success");
     // Add saved indicator
@@ -240,6 +245,13 @@ const successMessage = (key, element) => {
         setIconStatus(key, Selectors.statuses.saved);
     });
 };
+/**
+ * Displays error message and icon.
+ *
+ * @param {String} key
+ * @param {HTMLElement} editor
+ * @param {String} err
+ */
 const errorMessage = (key, editor, err) => {
     editor.classList.add("local_deepler__error");
     let hintError = '';
@@ -247,13 +259,9 @@ const errorMessage = (key, editor, err) => {
     getString('errortoolong', 'local_deepler').then((s) => {
         hintError = s;
         setIconStatus(key, Selectors.statuses.failed);
-        let message = err.message + ' ' + hintError;
-        if (err.debuginfo) {
-            // When Moodle is set to max debugger display the debuginfo.
-            const setIndex = err.debuginfo.indexOf("SET") === -1 ? 15 : err.debuginfo.indexOf("SET");
-            // message = err.message + '<br/>' + err.debuginfo.slice(0, setIndex) + '...';
-            message = err.message + '<br/>' + err.debuginfo + ' ' + setIndex;
-        }
+        // Limit the size of the error message if there is a long SQL query in it.
+        const setIndex = err.indexOf("SET") === -1 ? 24 : err.indexOf("SET");
+        let message = err.slice(0, setIndex) + '<br/>' + hintError;
         showErrorMessageForEditor(key, message);
     });
 };
@@ -294,6 +302,11 @@ const handleAjaxUpdateDBResponse = (data) => {
         }
     });
 };
+/**
+ * Save batch translations.
+ *
+ * @param {Array} keys
+ */
 const saveTranslations = (keys) => {
 
     const data = [];
@@ -327,12 +340,17 @@ const saveTranslations = (keys) => {
             fail: (err) => {
                 // An error occurred
                 keys.forEach((key) => {
-                    errorMessage(key, tempTranslations[key].editor, err);
+                    errorMessage(key, tempTranslations[key].editor, err.toString());
                 });
             },
         }
     ]);
 };
+/**
+ * Save single translation.
+ *
+ * @param {string} key
+ */
 const saveTranslation = (key) => {
     hideErrorMessage(key);
     ajax.call([
@@ -357,7 +375,7 @@ const saveTranslation = (key) => {
             },
             fail: (err) => {
                 // An error occurred
-                errorMessage(key, tempTranslations[key].editor, err);
+                errorMessage(key, tempTranslations[key].editor, err.toString());
             },
         }
     ]);
