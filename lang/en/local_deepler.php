@@ -39,6 +39,7 @@ $string['deepler:edittranslations'] = 'Edit course translations in DeepL Transla
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'If enabled use DeepL Pro else the free version of DeepL API.';
 $string['editbutton'] = 'Edit source in place';
+$string['errordbtitle'] = 'Database error';
 $string['errortoolong'] = '(could be that the text is too long for the field... Check manually in place)';
 $string['filters'] = 'Filters';
 $string['formality'] = 'Formality';

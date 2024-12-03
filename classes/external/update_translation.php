@@ -63,42 +63,59 @@ class update_translation extends external_api {
      */
     public static function execute($data) {
         global $CFG, $DB;
-        $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
-        $transaction = $DB->start_delegated_transaction();
         $response = [];
-        purge_all_caches();
-        foreach ($params['data'] as $data) {
-            // Security checks.
-            $context = \context_course::instance($data['courseid']);
-            self::validate_context($context);
-            require_capability('local/deepler:edittranslations', $context);
-            // Check detailed activity capabilities.
-            if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
-                    strpos($data['table'], 'question') === false &&
-                    strpos($data['table'], 'qtype') === false) {
-                require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
+        try {
+            $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
+            $transaction = $DB->start_delegated_transaction();
+
+            purge_all_caches();
+            foreach ($params['data'] as $data) {
+                try {
+                    // Security checks.
+                    $context = \context_course::instance($data['courseid']);
+                    self::validate_context($context);
+                    require_capability('local/deepler:edittranslations', $context);
+                    // Check detailed activity capabilities.
+                    if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
+                            strpos($data['table'], 'question') === false &&
+                            strpos($data['table'], 'qtype') === false) {
+                        require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
+                    }
+                    $dataobject['id'] = $data['id'];
+                    $dataobject[$data['field']] = $data['text'];
+                    $keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
+
+                    $DB->update_record($data['table'], (object) $dataobject);
+                    // Update t_lastmodified.
+                    $timemodified = time();
+                    $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
+                    $response[] = ['t_lastmodified' => $timemodified, 'text' => $data['text'], 'keyid' => $keyid];
+
+                } catch (\core_external\required_capability_exception $capex) {
+                    $response[] = [
+                            'error' => $capex->debuginfo ?? $capex->errorcode,
+                            'keyid' => $keyid,
+                    ];
+                } catch (\core_external\restricted_context_exception $cex) {
+                    $response[] = [
+                            'error' => $cex->debuginfo ?? $cex->errorcode,
+                            'keyid' => $keyid,
+                    ];
+                } catch (\dml_exception $dmlexception) {
+                    $response[] = [
+                            'error' => $dmlexception->debuginfo ?? $dmlexception->errorcode,
+                            'keyid' => $keyid,
+                    ];
+                }
+
             }
-            $dataobject['id'] = $data['id'];
-            $dataobject[$data['field']] = $data['text'];
-            $keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
-            try {
-
-                $DB->update_record($data['table'], (object) $dataobject);
-                // Update t_lastmodified.
-                $timemodified = time();
-                $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
-                $response[] = ['t_lastmodified' => $timemodified, 'text' => $data['text'], 'keyid' => $keyid];
-
-            } catch (\dml_exception $dmlexception) {
-                $response[] = ['t_lastmodified' => -1,
-                        'text' => $dmlexception->debuginfo ?? $dmlexception->errorcode,
-                        'keyid' => $keyid,
-                ];
-            }
-
+            // Commit the transaction.
+            $transaction->allow_commit();
+        } catch (\invalid_parameter_exception $i) {
+            $response[] = ['error' => $i->debuginfo ?? $i->errorcode];
+        } catch (\dml_transaction_exception $tex) {
+            $response[] = ['error' => $tex->debuginfo ?? $tex->errorcode];
         }
-        // Commit the transaction.
-        $transaction->allow_commit();
         return $response;
 
     }
