@@ -21,7 +21,7 @@
  * the webservice.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/Access_API
  */
@@ -32,8 +32,8 @@ defined('MOODLE_INTERNAL') || die();
 $capabilities = [
         'local/deepler:edittranslations' => [
                 'captype' => 'write',
-                'riskbitmaskt' => 'RISK_CONFIG',
-                'contextlevel' => CONTEXT_SYSTEM,
+                'riskbitmask' => RISK_XSS,
+                'contextlevel' => CONTEXT_USER,
                 'archetypes' => ['manager' => CAP_ALLOW],
         ],
 ];

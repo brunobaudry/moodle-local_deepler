@@ -30,7 +30,7 @@ use ReflectionMethod;
 use stdClass;
 
 /**
- * Test case for course data.
+ * Test case for coursedata.
  */
 final class coursedata_test extends advanced_testcase {
     /**
