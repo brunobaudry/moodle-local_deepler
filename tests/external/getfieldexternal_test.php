@@ -34,8 +34,9 @@ final class getfieldexternal_test extends advanced_testcase {
 
     public function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest();
         $this->setAdminUser();
+        $this->resetAfterTest();
+
     }
 
     /**
@@ -54,8 +55,8 @@ final class getfieldexternal_test extends advanced_testcase {
     public function test_execute(): void {
         global $DB, $CFG;
         // Skip this test for Moodle versions lower than 4.0.2.
-        if (version_compare($CFG->release, '4.0.2', '<')) {
-            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+        if (version_compare($CFG->version, '2023042400', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.2 and above.');
             return;
         }
         // Create a test course.
@@ -111,8 +112,8 @@ final class getfieldexternal_test extends advanced_testcase {
     public function test_execute_without_capability(): void {
         global $CFG;
         // Skip this test for Moodle versions lower than 4.0.2.
-        if (version_compare($CFG->release, '4.0.2', '<')) {
-            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+        if (version_compare($CFG->version, '2023042400', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.2 and above.');
             return;
         }
         // Create a test course.
@@ -146,8 +147,8 @@ final class getfieldexternal_test extends advanced_testcase {
     public function test_execute_parameters(): void {
         global $CFG;
         // Skip this test for Moodle versions lower than 4.0.2.
-        if (version_compare($CFG->release, '4.0.2', '<')) {
-            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+        if (version_compare($CFG->version, '2023042400', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.2 and above.');
             return;
         }
         $params = update_translation::execute_parameters();
@@ -163,8 +164,8 @@ final class getfieldexternal_test extends advanced_testcase {
     public function test_execute_returns(): void {
         global $CFG;
         // Skip this test for Moodle versions lower than 4.0.2.
-        if (version_compare($CFG->release, '4.0.2', '<')) {
-            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+        if (version_compare($CFG->version, '2023042400', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.2 and above.');
             return;
         }
         $returns = update_translation::execute_returns();

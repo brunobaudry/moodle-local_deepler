@@ -1,4 +1,4 @@
-@local @local_deepler
+@local @local_deepler @javascript
 Feature: Example feature for local_deepler plugin
   In order to ensure the plugin works correctly
   As a developer
