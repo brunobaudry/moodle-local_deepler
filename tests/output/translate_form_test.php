@@ -98,7 +98,8 @@ final class translate_form_test extends advanced_testcase {
      * @return void
      */
     public function test_get_formrow(): void {
-        global $CFG;
+        global $CFG, $PAGE;
+        $PAGE->set_url(new \moodle_url('/local/deepler/translate.php'));
         // Set up custom data for the form.
         $customdata = [
                 'course' => $this->course,

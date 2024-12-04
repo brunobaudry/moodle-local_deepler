@@ -139,6 +139,8 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_export_for_template(): void {
+        global $PAGE;
+        $PAGE->set_url(new moodle_url('/local/deepler/translate.php'));
         $renderer = $this->getMockBuilder(renderer_base::class)->disableOriginalConstructor()->getMock();
 
         $result = $this->translatepage->export_for_template($renderer);
@@ -179,6 +181,8 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_config_settings(): void {
+        global $PAGE;
+        $PAGE->set_url(new \moodle_url('/local/deepler/translate.php'));
         set_config('latexescapeadmin', 1, 'local_deepler');
         set_config('preescapeadmin', 0, 'local_deepler');
 
