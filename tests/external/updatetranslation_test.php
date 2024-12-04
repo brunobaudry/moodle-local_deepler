@@ -49,6 +49,12 @@ final class updatetranslation_test extends advanced_testcase {
      * @return void
      */
     public function test_execute_parameters(): void {
+        global $CFG;
+        // Skip this test for Moodle versions lower than 4.0.2.
+        if (version_compare($CFG->release, '4.0.2', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+            return;
+        }
         $params = update_translation::execute_parameters();
         $this->assertInstanceOf(\core_external\external_function_parameters::class, $params);
     }
@@ -60,6 +66,12 @@ final class updatetranslation_test extends advanced_testcase {
      * @return void
      */
     public function test_execute_returns(): void {
+        global $CFG;
+        // Skip this test for Moodle versions lower than 4.0.2.
+        if (version_compare($CFG->release, '4.0.2', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+            return;
+        }
         $returns = update_translation::execute_returns();
         $this->assertInstanceOf(\core_external\external_multiple_structure::class, $returns);
     }
@@ -77,8 +89,12 @@ final class updatetranslation_test extends advanced_testcase {
      * @throws \required_capability_exception
      */
     public function test_execute_success(): void {
-        global $DB;
-
+        global $DB, $CFG;
+        // Skip this test for Moodle versions lower than 4.0.2.
+        if (version_compare($CFG->release, '4.0.2', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+            return;
+        }
         // Create a test course.
         $course = $this->getDataGenerator()->create_course();
 
@@ -147,6 +163,12 @@ final class updatetranslation_test extends advanced_testcase {
      * @throws \required_capability_exception
      */
     public function test_execute_without_capability(): void {
+        global $CFG;
+        // Skip this test for Moodle versions lower than 4.0.2.
+        if (version_compare($CFG->release, '4.0.2', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.4 and above.');
+            return;
+        }
         // Create a test course.
         $course = $this->getDataGenerator()->create_course();
 
