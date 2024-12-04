@@ -23,9 +23,10 @@
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 
-namespace local_deepler;
+namespace local_deepler\local\data;
 
 use advanced_testcase;
+use local_deepler\local;
 use ReflectionMethod;
 use stdClass;
 

@@ -111,7 +111,7 @@ class translate_form extends moodleform {
                         $iconclass = $a->purpose ?? '';
                         $parentdivclasses =
                                 "activity-icon activityiconcontainer smaller $iconclass courseicon align-self-start mr-2";
-                        $activitydesc = ($a->pluginname ?? '') . ': ' . htmlentities($mlangfiltered);
+                        $activitydesc = ($a->pluginname ?? '') . ': ' . htmlentities($mlangfiltered ?? '');
                         $imageattributes = "class='activityicon' data-region='activity-icon'";
                         // Start icon and title row.
                         $mform->addElement('html', "<div class='row align-items-start py-2 $subhierarchy'>");
@@ -251,9 +251,9 @@ class translate_form extends moodleform {
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
         // Source texts.
-        $rawsourcetext = base64_encode($mlangfilter->filter($item->text));
+        $rawsourcetext = base64_encode($mlangfilter->filter($item->text) ?? '');
         $trimedtext = trim($item->text);
-        $rawunfilterdtext = base64_encode($trimedtext);
+        $rawunfilterdtext = base64_encode($trimedtext ?? '');
         $mlangfiltered = $mlangfilter->filter($item->displaytext);
         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
                 data-sourcetext-raw='$rawsourcetext' data-filedtext-raw='$rawunfilterdtext' >$mlangfiltered" . DIV_CLOSE;

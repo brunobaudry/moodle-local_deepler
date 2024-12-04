@@ -112,7 +112,7 @@ final class translate_test extends advanced_testcase {
         $langhelper = new lang_helper();
         $langhelper->init('abcd');
         $renderable = new translate_page($course, $coursedata->getdata(),
-                new filter_multilang2($context, []), $langhelper);
+                new filter_multilang2(), $langhelper);
         $this->assertNotNull($renderable);
     }
 
