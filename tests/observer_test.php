@@ -93,7 +93,7 @@ final class observer_test extends advanced_testcase {
         $event = course_section_updated::create([
                         'objectid' => $section->id,
                         'context' => \context_course::instance($course->id),
-                        'other' => ['sectionnum' => $section->sectionnum],
+                        'other' => ['sectionnum' => $section->sectionnum ?? 1],
                 ]
         );
         local_deepler_observer::course_section_updated($event);
