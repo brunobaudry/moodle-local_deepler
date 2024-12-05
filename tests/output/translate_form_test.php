@@ -46,14 +46,13 @@ final class translate_form_test extends advanced_testcase {
      */
     public function setUp(): void {
         parent::setUp();
-
+        $this->resetAfterTest(true);
         $this->course = $this->getDataGenerator()->create_course();
         $this->mlangfilter = $this->createMock(\filter_multilang2::class);
         $this->langhelper = $this->createMock(lang_helper::class);
 
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
-        $this->resetAfterTest();
     }
 
     /**

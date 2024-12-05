@@ -42,7 +42,6 @@ final class moodlequickformcteditor_test extends advanced_testcase {
     public function test_constructor(): void {
         global $CFG;
         require_once($CFG->dirroot . '/lib/form/editor.php');
-        $this->resetAfterTest();
 
         $elementname = 'testelement';
         $elementlabel = 'Test Element';
@@ -81,7 +80,6 @@ final class moodlequickformcteditor_test extends advanced_testcase {
      * @covers \local_deepler\editor\MoodleQuickForm_cteditor::getAttributes()
      */
     public function test_customattributes(): void {
-        $this->resetAfterTest();
 
         $customattributes = ['rows' => 10, 'cols' => 50];
         $editor = new \local_deepler\editor\MoodleQuickForm_cteditor('test_editor', 'Test Editor', $customattributes);

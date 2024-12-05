@@ -59,9 +59,9 @@ final class langhelper_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
+        $this->resetAfterTest(true);
         $this->langhelper = new lang_helper();
         $this->langhelper->init('abcd');
-        $this->resetAfterTest(true);
     }
 
     /**

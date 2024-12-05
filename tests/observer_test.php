@@ -44,7 +44,7 @@ final class observer_test extends advanced_testcase {
      */
     public function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest();
+        $this->resetAfterTest(true);
     }
 
     /**

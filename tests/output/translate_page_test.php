@@ -76,8 +76,7 @@ final class translate_page_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest();
-
+        $this->resetAfterTest(true);
         $this->course = $this->getDataGenerator()->create_course();
         $this->coursedata = [[
                 'section' => [

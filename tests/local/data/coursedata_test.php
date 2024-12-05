@@ -52,8 +52,7 @@ final class coursedata_test extends advanced_testcase {
      */
     public function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest();
-
+        $this->resetAfterTest(true);
         // Create a test course.
         $this->course = $this->getDataGenerator()->create_course([
                 'fullname' => 'Test Course',
