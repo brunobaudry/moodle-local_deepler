@@ -78,6 +78,7 @@ final class updatetranslation_test extends base_external {
      *
      * @dataProvider execute_success_provider
      * @covers       \local_deepler\external\update_translation::execute
+     * @param string $newcoursename
      * @return void
      * @throws \coding_exception
      * @throws \core_external\restricted_context_exception
@@ -147,6 +148,7 @@ final class updatetranslation_test extends base_external {
      *
      * @dataProvider execute_without_capability_provider
      * @covers       \local_deepler\external\update_translation::execute
+     * @param string $newcoursename
      * @return void
      * @throws \core_external\restricted_context_exception
      * @throws \dml_exception

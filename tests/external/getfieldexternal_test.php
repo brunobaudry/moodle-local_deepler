@@ -38,6 +38,7 @@ final class getfieldexternal_test extends base_external {
      *
      * @dataProvider execute_provider
      * @covers       \local_deepler\external\get_field::execute
+     * @param string $field
      * @return void
      * @throws \core_external\restricted_context_exception
      * @throws \dml_exception
@@ -108,6 +109,7 @@ final class getfieldexternal_test extends base_external {
      *
      * @dataProvider execute_without_capability_provider
      * @covers       \local_deepler\external\get_field::execute
+     * @param string $field
      * @return void
      * @throws \core_external\restricted_context_exception
      * @throws \dml_exception
