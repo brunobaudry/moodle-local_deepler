@@ -36,6 +36,7 @@ You need a [©Deepl API](https://www.deepl.com/en/pro-api)  Free or Pro account.
 
 Course Translator will extend Moodle with the ```local/deepler:edittranslations``` capability. Assign the capability to a new Translator role or add it to one of your
 existing roles.
+The context for this capability is set to USER so that you can also assign it to a user directly (provided it will have capabilities to access the course and modules).
 
 ### Webservices
 
