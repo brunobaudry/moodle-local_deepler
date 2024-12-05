@@ -23,14 +23,15 @@
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 
-namespace local_deepler;
+namespace local_deepler\local\data;
 
 use advanced_testcase;
+use local_deepler\local;
 use ReflectionMethod;
 use stdClass;
 
 /**
- * Test case for course data.
+ * Test case for coursedata.
  */
 final class coursedata_test extends advanced_testcase {
     /**
@@ -51,8 +52,7 @@ final class coursedata_test extends advanced_testcase {
      */
     public function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest();
-
+        $this->resetAfterTest(true);
         // Create a test course.
         $this->course = $this->getDataGenerator()->create_course([
                 'fullname' => 'Test Course',

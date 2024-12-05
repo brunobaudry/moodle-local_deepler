@@ -39,7 +39,6 @@ let saveAllBtn = {};
 let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
-let batchSaving = 0;
 const escapePatterns = {};
 let log = (...a) => {
     return a;
@@ -60,7 +59,9 @@ const debug = {
     ALL: 30719,
     DEVELOPER: 32767
 };
-
+/**
+ * Event factory.
+ */
 const registerEventListeners = () => {
     document.addEventListener('change', e => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
@@ -111,6 +112,9 @@ const registerEventListeners = () => {
     });
 
 };
+/**
+ * Get the UIs.
+ */
 const registerUI = () => {
     try {
         saveAllBtn = document.querySelector(Selectors.actions.saveAll);
@@ -197,6 +201,11 @@ export const init = (cfg) => {
     showRows(Selectors.statuses.updated, document.querySelector(Selectors.actions.showUpdated).checked);
     showRows(Selectors.statuses.needsupdate, document.querySelector(Selectors.actions.showNeedUpdate).checked);
 };
+/**
+ * Display error message attached to the item's editor.
+ * @param {String} key
+ * @param {String} message
+ */
 const showErrorMessageForEditor = (key, message) => {
     let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
     const errorMsg = document.createElement('div');
@@ -205,11 +214,16 @@ const showErrorMessageForEditor = (key, message) => {
     errorMsg.innerHTML = message;
     parent.appendChild(errorMsg);
 };
+/**
+ * Hides an item's error message.
+ *
+ * @param {String} key
+ */
 const hideErrorMessage = (key) => {
     let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
-    let alertchild = parent.querySelector('.alert-danger');
-    if (alertchild) {
-        parent.removeChild(alertchild);
+    let alertChild = parent.querySelector('.alert-danger');
+    if (alertChild) {
+        parent.removeChild(alertChild);
     }
 };
 /**
@@ -222,7 +236,7 @@ const launchModal = async () => {
         title: getString('saveallmodaltitle', 'local_deepler'),
         body: getString('saveallmodalbody', 'local_deepler'),
     });
-    saveAllModal.show();
+    await saveAllModal.show();
 };
 /**
  * Displays success message and icon.
@@ -230,7 +244,7 @@ const launchModal = async () => {
  * @param {String} key
  * @param {HTMLElement} element
  */
-const successMessage = (key, element) => {
+const successMessageItem = (key, element) => {
     element.classList.add("local_deepler__success");
     // Add saved indicator
     setIconStatus(key, Selectors.statuses.success);
@@ -250,21 +264,19 @@ const successMessage = (key, element) => {
  *
  * @param {String} key
  * @param {HTMLElement} editor
- * @param {String} err
+ * @param {String} message
  */
-const errorMessage = (key, editor, err) => {
+const errorMessageItem = (key, editor, message) => {
     editor.classList.add("local_deepler__error");
-    let hintError = '';
-    // Most of the time DB error will come from translations starting to be too long.
-    getString('errortoolong', 'local_deepler').then((s) => {
-        hintError = s;
-        setIconStatus(key, Selectors.statuses.failed);
-        // Limit the size of the error message if there is a long SQL query in it.
-        const setIndex = err.indexOf("SET") === -1 ? 24 : err.indexOf("SET");
-        let message = err.slice(0, setIndex) + '<br/>' + hintError;
-        showErrorMessageForEditor(key, message);
-    });
+    setIconStatus(key, Selectors.statuses.failed);
+    showErrorMessageForEditor(key, message);
 };
+/**
+ * Editor's text content.
+ *
+ * @param {HTMLElement} editor
+ * @returns {string}
+ */
 const getEditorText = (editor) => {
     let text = editor.innerHTML;
     if (mainEditorType === 'textarea') {
@@ -272,11 +284,22 @@ const getEditorText = (editor) => {
     }
     return text;
 };
-
+/**
+ * Source text de-tokenised.
+ *
+ * @param {String} key
+ * @returns {String}
+ */
 const getSourceText = (key) => {
     const sourceTokenised = tempTranslations[key].source;
     return postprocess(sourceTokenised, tempTranslations[key].tokens);
 };
+/**
+ * Fetch field coordinates stored in custom attributes.
+ *
+ * @param {HTMLElement} element
+ * @returns {{field: *, id: number, tid: *, table: *}}
+ */
 const getElementAttributes = (element) => {
     return {
         id: parseInt(element.getAttribute("data-id")),
@@ -285,20 +308,46 @@ const getElementAttributes = (element) => {
         field: element.getAttribute("data-field")
     };
 };
+/**
+ * External interface callback.
+ *
+ * @param {Array} data
+ */
 const handleAjaxUpdateDBResponse = (data) => {
     data.forEach((item) => {
-        log(item, Date(item.t_lastmodified * 1000));
-        const key = keyidToKey(item.keyid);
-        const htmlElement = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
-        const multilangTextarea = document.querySelector(replaceKey(Selectors.editors.multiples.textAreas, key));
-        if (item.t_lastmodified === -1) {
-            errorMessage(key, tempTranslations[key].editor, item.text);
+        if (item.keyid === null) {
+            // Display generic error message.
+            getString('errordbtitle', 'local_deepler').then((s) => {
+                Modal.create({
+                    title: s,
+                    body: item.error,
+                    type: 'ALERT',
+                    show: true,
+                    removeOnClose: true,
+                });
+            });
         } else {
-            successMessage(key, htmlElement);
-            multilangTextarea.innerHTML = item.text;
-            // Deselect the checkbox.
-            document.querySelector(Selectors.editors.multiples.checkBoxesWithKey.replace('<KEY>', key))
-                .checked = false;
+            const key = keyidToKey(item.keyid);
+            const htmlElement = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
+            const multilangTextarea = document.querySelector(replaceKey(Selectors.editors.multiples.textAreas, key));
+            if (item.error !== null) {
+                // Display granular error messages.
+                const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
+                if (indexOfSET > -1) {
+                    // Text too long.
+                    getString('errortoolong', 'local_deepler').then((s) => {
+                        errorMessageItem(key, tempTranslations[key].editor, item.error.slice(0, indexOfSET) + '<br/>' + s);
+                    });
+                } else {
+                    errorMessageItem(key, tempTranslations[key].editor, item.error);
+                }
+            } else {
+                successMessageItem(key, htmlElement);
+                multilangTextarea.innerHTML = item.text;
+                // Deselect the checkbox.
+                document.querySelector(Selectors.editors.multiples.checkBoxesWithKey.replace('<KEY>', key))
+                    .checked = false;
+            }
         }
     });
 };
@@ -333,14 +382,14 @@ const saveTranslations = (keys) => {
                     handleAjaxUpdateDBResponse(data);
                 } else {
                     keys.forEach((key) => {
-                        errorMessage(key, tempTranslations[key].editor, 'Something went wrong with the data');
+                        errorMessageItem(key, tempTranslations[key].editor, 'Something went wrong with the data');
                     });
                 }
             },
             fail: (err) => {
                 // An error occurred
                 keys.forEach((key) => {
-                    errorMessage(key, tempTranslations[key].editor, err.toString());
+                    errorMessageItem(key, tempTranslations[key].editor, err.toString());
                 });
             },
         }
@@ -360,26 +409,25 @@ const saveTranslation = (key) => {
                 data: [prepareDbUpdatdeItem(key)],
             },
             done: (data) => {
-                if (saveAllModal !== null && saveAllModal.isVisible) {
-                    batchSaving--;
-                    log('batchSaving', batchSaving);
-                    if (batchSaving === 0) {
-                        saveAllModal.hide();
-                    }
-                }
                 if (data.length > 0) {
                     handleAjaxUpdateDBResponse(data);
                 } else {
-                    errorMessage(key, tempTranslations[key].editor, 'Something went wrong with the data');
+                    errorMessageItem(key, tempTranslations[key].editor, 'Something went wrong with the data');
                 }
             },
             fail: (err) => {
                 // An error occurred
-                errorMessage(key, tempTranslations[key].editor, err.toString());
+                errorMessageItem(key, tempTranslations[key].editor, err.toString());
             },
         }
     ]);
 };
+/**
+ * Compile data to be sent to deepl.
+ *
+ * @param {String} key
+ * @returns {{field: *, id: number, text: string, courseid, tid: *, table: *}}
+ */
 const prepareDbUpdatdeItem = (key) => {
     const editor = tempTranslations[key].editor;
     const textTranslated = getEditorText(editor);
@@ -484,6 +532,10 @@ const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
     }
     return manipulatedText;
 };
+/**
+ * Event listener for selection checkboxes.
+ * @param {Event} e
+ */
 const onItemChecked = (e) => {
     log("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
     const key = e.target.getAttribute('data-key');
@@ -494,6 +546,12 @@ const onItemChecked = (e) => {
         initTempForKey(key, false);
     }
 };
+/**
+ * Initializing object storage before translation.
+ *
+ * @param {String} key
+ * @param {Boolean} blank
+ */
 const initTempForKey = (key, blank) => {
 
     // Get the source text
@@ -536,6 +594,12 @@ const initTempForKey = (key, blank) => {
         }
     }
 };
+/**
+ * Factory to display process' statuses for each item.
+ *
+ * @param {String} key
+ * @param {Boolean} checked
+ */
 const toggleStatus = (key, checked) => {
     const status = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key)).dataset.status;
     switch (status) {
@@ -567,7 +631,14 @@ const toggleStatus = (key, checked) => {
             break;
     }
 };
-const setIconStatus = (key, s = Selectors.statuses.wait, isBtn = false) => {
+/**
+ * Change the item icon status as button.
+ *
+ * @param {String} key
+ * @param {String} status
+ * @param {Boolean} isBtn
+ */
+const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
     let icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
     if (isBtn) {
         if (!icon.classList.contains('btn')) {
@@ -587,10 +658,10 @@ const setIconStatus = (key, s = Selectors.statuses.wait, isBtn = false) => {
         }
     }
     icon.setAttribute('role', isBtn ? 'button' : 'status');
-    icon.setAttribute('data-status', s);
+    icon.setAttribute('data-status', status);
 };
 /**
- * Shows/hides rows
+ * Shows/hides rows.
  * @param {string} selector
  * @param {boolean} selected
  */
@@ -612,6 +683,12 @@ const showRows = (selector, selected) => {
     toggleAutotranslateButton();
     countWordAndChar();
 };
+/**
+ * Row visibility.
+ *
+ * @param {HTMLElement} row
+ * @param {Boolean} checked
+ */
 const toggleRowVisibility = (row, checked) => {
     if (checked) {
         row.classList.remove("d-none");
@@ -620,7 +697,7 @@ const toggleRowVisibility = (row, checked) => {
     }
 };
 /**
- * Event listener to switch target lang
+ * Event listener to switch target lang.
  * @param {Event} e
  */
 const switchTarget = (e) => {
@@ -641,7 +718,7 @@ const switchSource = (e) => {
     window.location = url.toString();
 };
 /**
- * Launch autotranslation
+ * Launch autotranslation.
  */
 const doAutotranslate = () => {
     saveAllBtn.hidden = saveAllBtn.disabled = false;
@@ -655,6 +732,7 @@ const doAutotranslate = () => {
         });
 };
 /**
+ * Compile Advanced settings.
  *
  * @returns {{}}
  */
@@ -677,6 +755,12 @@ const prepareAdvancedSettings = () => {
     settings.auth_key = config.apikey;
     return settings;
 };
+/**
+ * Compile translation to be sent.
+ *
+ * @param {String} key
+ * @returns {{source_lang: (string|*), text}}
+ */
 const prepareTranslation = (key) => {
     return {
         text: tempTranslations[key].source,
@@ -755,12 +839,10 @@ const getTranslation = (key) => {
     }
 
 };
+
 /**
+ * Inject css to highlight ALT text of image not loaded because of @@PLUGINFILE@@.
  *
- * @param {Integer} editorSettings
- * */
-/**
- * Inject css to highlight ALT text of image not loaded because of @@POLUGINFILE@@
  * @param {string} editorType
  * @param {object} editor
  */
@@ -909,7 +991,7 @@ const replaceKey = (s, k) => {
     return s.replace("<KEY>", k);
 };
 /**
- * Transforms a keyid to a key
+ * Transforms a keyid to a key.
  * @param {string} k
  * @returns {`${*}[${*}][${*}]`}
  */
@@ -923,7 +1005,7 @@ const getKeyFromComponents = (id, field, table) => {
 };
 */
 /**
- * Launch countWordAndChar
+ * Launch, display count of Words And Chars.
  */
 const countWordAndChar = () => {
     let wrdsc = 0;
@@ -959,29 +1041,20 @@ const countWordAndChar = () => {
     }
 };
 /**
+ * Compile the needed counts for info.
+ *
  * @param {string} key
- * @return {object}
+ * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
  */
 const getCount = (key) => {
     const item = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
     const raw = item.getAttribute("data-sourcetext-raw");
-    const sourceText = stripHTMLTags(fromBase64(raw));
-    return countChars(sourceText);
-};
-/**
- *
- * @param {String} val
- * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
- */
-const countChars = (val) => {
-    const trimmedVal = val.trim();
-    const withSpace = trimmedVal.length;
-    const withOutSpace = trimmedVal.replace(/\s+/g, '').length;
-    const wordsCount = (trimmedVal.match(/\S+/g) || []).length;
+    // Cleaned sourceText.
+    const trimmedVal = stripHTMLTags(fromBase64(raw)).trim();
     return {
-        "wordCount": wordsCount,
-        "charNumWithSpace": withSpace,
-        "charNumWithOutSpace": withOutSpace
+        "wordCount": (trimmedVal.match(/\S+/g) || []).length,
+        "charNumWithSpace": trimmedVal.length,
+        "charNumWithOutSpace": trimmedVal.replace(/\s+/g, '').length
     };
 };
 /**
