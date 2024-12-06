@@ -20,6 +20,57 @@ Translation workflow being the following:
 
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
+
+## Table Of Content
+
+<!-- toc -->
+
+- [Installation](#installation)
+  * [Dependencies](#dependencies)
+  * [Permissions (Moodle capability)](#permissions-moodle-capability)
+  * [Admin](#admin)
+    + [Allow sub-languages to be mapped to their main](#allow-sub-languages-to-be-mapped-to-their-main)
+    + [Default value Escape LaTeX (in the courses translation page "Advanced Settings")](#default-value-escape-latex-in-the-courses-translation-page-advanced-settings)
+    + [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
+    + [Minimum textfield size](#minimum-textfield-size)
+- [Translating](#translating)
+  * [Advanced settings](#advanced-settings)
+    + [Deepl API setting](#deepl-api-setting)
+    + [Other setting](#other-setting)
+  * [Language selection](#language-selection)
+    + [Source language](#source-language)
+    + [Target language](#target-language)
+    + [Unsupported](#unsupported)
+  * [Header](#header)
+  * [Filters](#filters)
+    + [Up to date:](#up-to-date)
+    + [Needs update:](#needs-update)
+  * [Status indicator](#status-indicator)
+  * [Translation process](#translation-process)
+    + [Editing the source](#editing-the-source)
+    + [Reviewing past translations and multilang's tags](#reviewing-past-translations-and-multilangs-tags)
+    + [Images and medias.](#images-and-medias)
+  * [Performing translations](#performing-translations)
+  * [Modules](#modules)
+- [User tour (inline tutorial)](#user-tour-inline-tutorial)
+- [WARNINGS](#warnings)
+  * [Complex modules/activities structures.](#complex-modulesactivities-structures)
+  * [Multi mlang xx tags inside a field](#multi-mlang-xx-tags-inside-a-field)
+  * [Image display and image alt attributes](#image-display-and-image-alt-attributes)
+- [Compatibility](#compatibility)
+  * [Moodle's versions](#moodles-versions)
+  * [Editors](#editors)
+  * [Coding](#coding)
+  * [Webservices](#webservices)
+- [How does this plugin differs from Content Translation Manager and Content Translation Filter?](#how-does-this-plugin-differs-from-content-translation-manager-and-content-translation-filter)
+- [Future (todos)](#future-todos)
+- [Submit an issue](#submit-an-issue)
+- [Changelog](#changelog)
+- [Contributing](#contributing)
+- [Fork](#fork)
+
+<!-- tocstop -->
+
 ## Installation
 
 Clone or [download](https://github.com/brunobaudry/moodle-local_deepler/releases) this plugin to ```/moodlewww/local/deepler``` and run through the database
@@ -32,15 +83,11 @@ You need a [©Deepl API](https://www.deepl.com/en/pro-api)  Free or Pro account.
 
 ## Configuration
 
-### Permissions
+### Permissions (Moodle capability) 
 
 Course Translator will extend Moodle with the ```local/deepler:edittranslations``` capability. Assign the capability to a new Translator role or add it to one of your
 existing roles.
 The context for this capability is set to USER so that you can also assign it to a user directly (provided it will have capabilities to access the course and modules).
-
-### Webservices
-
-This plugin will add a ```local_deepler_update_translation``` web service for the translation page to perform ajax requests against.
 
 ### Admin
 
@@ -239,9 +286,9 @@ You can install a [tour guide](https://github.com/brunobaudry/moodle-local_deepl
 
 See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
 
-## WARNING
+## WARNINGS
 
-### Complex structures.
+### Complex modules/activities structures.
 
 Activities/resources with complex sub content may not all work.
 We currently plan to support all the core mods and would be happy to add more (send us a PR)
@@ -249,7 +296,7 @@ Book does, wiki too but beware when translating [[links]] as it will break the p
 
 ### Multi mlang xx tags inside a field
 
-At this time, Course Translator does not have the ability to translate advanced usage of mlang in content. For example, this includes the use of multiple mlang tags spread
+At this time, Deepler does not have the ability to translate advanced usage of mlang in content. For example, this includes the use of multiple mlang tags spread
 throughout content that utilize the same language._
 
 **Note**: Still you can add untranslated content, after a first insertion of mlang tags, before and/or after, the parser should then leave them in place.
@@ -259,11 +306,14 @@ throughout content that utilize the same language._
 Currently, images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
 The Alt attribute is not sent to ©Deepl. This should be added in further improvement for better accessibility.
 
-## Compatability
+## Compatibility
+
+### Moodle's versions
 
 This plugin has been tested on Moodle 4.1+
 php >= 8.1
 
+### Editors
 Should work with the following editors:
 
 - Plaintext
@@ -271,12 +321,18 @@ Should work with the following editors:
 - Tiny
 - Marklar
 
+### Coding
+
 It uses the default Moodle JS library and is tested with Boost and Classic.
 So there could be incompatibilities with other themes.
 
+### Webservices
+
+This plugin will add a ```local_deepler_update_translation``` web service for the translation page to perform ajax requests against.
+
 ## How does this plugin differs from Content Translation Manager and Content Translation Filter?
 
-This plugin does not translate every string on your site. It is only meant for translating courses and it uses Moodle's built in multilingual features along with ```{mlang}``` to
+This plugin does not translate every string on your site. It is only meant for translating courses and Questions. It uses Moodle's built-in multilingual features along with ```{mlang}``` to
 translate your content. When you backup and restore courses, your translations will migrate with your content. Updating your source content will provide a "Update Needed" status
 message on the course translation page.
 

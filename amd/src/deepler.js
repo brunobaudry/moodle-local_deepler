@@ -315,7 +315,7 @@ const getElementAttributes = (element) => {
  */
 const handleAjaxUpdateDBResponse = (data) => {
     data.forEach((item) => {
-        if (item.keyid === null) {
+        if (item.keyid === undefined) {
             // Display generic error message.
             getString('errordbtitle', 'local_deepler').then((s) => {
                 Modal.create({
@@ -330,7 +330,7 @@ const handleAjaxUpdateDBResponse = (data) => {
             const key = keyidToKey(item.keyid);
             const htmlElement = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
             const multilangTextarea = document.querySelector(replaceKey(Selectors.editors.multiples.textAreas, key));
-            if (item.error !== null) {
+            if (item.error !== undefined) {
                 // Display granular error messages.
                 const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
                 if (indexOfSET > -1) {

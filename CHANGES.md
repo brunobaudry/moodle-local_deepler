@@ -5,12 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.7] 2024-12-05
+## [1.2.0] 2024-12-05
 
 ### Added
 
-- Improved error reporting when updating fields to db
-- More PHPUnit test coverage
+- Added TOC to the README.md
+
+### Fixed
+
+- The JS displayed a dummy error upon saving to DB, though everything was saved correctly.
 
 ## [1.1.4] 2024-11-30
 
