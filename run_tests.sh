@@ -9,7 +9,7 @@ init_phpunit="php ../../admin/tool/phpunit/cli/init.php"
 output=$($phpunit_cmd 2>&1)
 
 # Check if the output contains the specific message
-if [[ $output == *"Moodle PHPUnit environment was initialised for different version"* ]]; then
+if [[ $output == *"Moodle PHPUnit environment was initialised for different version"* || $output == *"Moodle PHPUnit environment is not initialised, please use:"* ]]; then
     # Run the initialization script
     $init_phpunit
 
