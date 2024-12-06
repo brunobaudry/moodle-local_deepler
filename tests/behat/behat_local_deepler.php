@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -39,7 +38,7 @@ class behat_local_deepler extends behat_base {
      * @When I scroll to the element with css selector :cssselector
      * @param string $cssselector
      */
-    public function i_scroll_to_element_with_css($cssselector):void{
+    public function i_scroll_to_element_with_css($cssselector): void {
         $session = $this->getSession();
         $driver = $session->getDriver();
         $element = $session->getPage()->find('css', $cssselector);
