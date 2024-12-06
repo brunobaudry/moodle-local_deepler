@@ -71,6 +71,10 @@ Translation workflow being the following:
 
 <!-- tocstop -->
 
+## Test pre commit
+
+lalal lal a
+
 ## Installation
 
 Clone or [download](https://github.com/brunobaudry/moodle-local_deepler/releases) this plugin to ```/moodlewww/local/deepler``` and run through the database
