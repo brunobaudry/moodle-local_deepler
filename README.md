@@ -25,8 +25,10 @@ Translation workflow being the following:
 
 <!-- toc -->
 
+- [Test pre commit](#test-pre-commit)
 - [Installation](#installation)
   * [Dependencies](#dependencies)
+- [Configuration](#configuration)
   * [Permissions (Moodle capability)](#permissions-moodle-capability)
   * [Admin](#admin)
     + [Allow sub-languages to be mapped to their main](#allow-sub-languages-to-be-mapped-to-their-main)
@@ -70,10 +72,6 @@ Translation workflow being the following:
 - [Fork](#fork)
 
 <!-- tocstop -->
-
-## Test pre commit
-
-lalal lal a
 
 ## Installation
 
