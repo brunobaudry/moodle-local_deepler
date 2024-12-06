@@ -25,7 +25,7 @@ Translation workflow being the following:
 
 <!-- toc -->
 
-- [TEST](#test)
+- [Toast](#toast)
 - [Installation](#installation)
   * [Dependencies](#dependencies)
 - [Configuration](#configuration)
@@ -73,8 +73,7 @@ Translation workflow being the following:
 
 <!-- tocstop -->
 
-## TEST
-xsdcv
+## Toast
 
 ## Installation
 
