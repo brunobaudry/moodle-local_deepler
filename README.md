@@ -25,7 +25,6 @@ Translation workflow being the following:
 
 <!-- toc -->
 
-- [Test pre commit](#test-pre-commit)
 - [Installation](#installation)
   * [Dependencies](#dependencies)
 - [Configuration](#configuration)
@@ -72,6 +71,8 @@ Translation workflow being the following:
 - [Fork](#fork)
 
 <!-- tocstop -->
+
+## test
 
 ## Installation
 
