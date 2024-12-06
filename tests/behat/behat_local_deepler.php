@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Behat deepler-related helper code.
+ * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
  *
  * @package    local_deepler
  * @category   test
@@ -26,24 +26,9 @@
 
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
-require_once(__DIR__ . '/../../../lib/behat/behat_base.php');
+require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
 class behat_local_deepler extends behat_base {
-    /**
-     * @When I scroll to the element with xpath :xpath
-     */
-    public function i_scroll_to_element($xpath)
-    {
-        $session = $this->getSession();
-        $driver = $session->getDriver();
-        $element = $session->getPage()->find('xpath', $xpath);
-
-        if (null === $element) {
-            throw new \Exception('Element not found');
-        }
-
-        $driver->executeScript('arguments[0].scrollIntoView(true);', [$element->getXpath()]);
-    }
 
     /**
      * @When I scroll to the element with css selector :cssselector
@@ -57,7 +42,6 @@ class behat_local_deepler extends behat_base {
         if (null === $element) {
             throw new \Exception('Element not found');
         }
-
-        $driver->executeScript('arguments[0].scrollIntoView(true);', [$element->getXpath()]);
+        $driver->executeScript("document.querySelector('$cssselector').scrollIntoView(true);");
     }
 }

@@ -1,11 +1,14 @@
 @local @local_deepler @javascript
 Feature: Feature for local_deepler plugin
-  In order to ensure the plugin is installed
+  In order to ensure the plugin admin is loaded
 
   Scenario: Test example scenario
     Given I log in as "admin"
-    When I navigate to "Plugins > Plugins overview" in site administration
-    When I scroll to the element with css selector "tr.plugintypeheader.type-local"
-    Then the following should exist in the "plugins-control-panel" table:
-      | Plugin name   |
-      | local_deepler |
+    When I navigate to "Plugins > DeepL Translator" in site administration
+    Then I should see "DeepL Translator"
+    Then I should see "local_deepler | apikey"
+    Then I should see "local_deepler | deeplpro"
+    Then I should see "local_deepler | allowsublangs"
+    Then I should see "local_deepler | latexescapeadmin"
+    Then I should see "local_deepler | preescapeadmin"
+    Then I should see "local_deepler | scannedfieldsize"
