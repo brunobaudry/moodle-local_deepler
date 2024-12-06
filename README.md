@@ -71,7 +71,7 @@ Translation workflow being the following:
 
 <!-- tocstop -->
 
-## Test pre commit boy
+## Test pre commit
 
 lalal lal a
 
