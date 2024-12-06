@@ -28,13 +28,18 @@
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
+/**
+ * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
+ */
 class behat_local_deepler extends behat_base {
 
     /**
+     * Behat helper for css selector.
+     *
      * @When I scroll to the element with css selector :cssselector
+     * @param string $cssselector
      */
-    public function i_scroll_to_element_with_css($cssselector)
-    {
+    public function i_scroll_to_element_with_css($cssselector):void{
         $session = $this->getSession();
         $driver = $session->getDriver();
         $element = $session->getPage()->find('css', $cssselector);
