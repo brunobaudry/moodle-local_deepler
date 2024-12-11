@@ -5,6 +5,7 @@
 node_modules
 # ide
 .idea/*
+.env
 indentor.py
 
 Gruntfile.js-

@@ -39,9 +39,9 @@ function local_deepler_extend_navigation_course($navigation, $course) {
     // Do not show in menu if no deepl api key is set.
     try {
         $key = get_config('local_deepler', 'apikey');
-        if (trim($key) === '') {
+        /*if (trim($key) === '') {
             return;
-        }
+        }*/
     } catch (Exception $e) {
         return;
     }

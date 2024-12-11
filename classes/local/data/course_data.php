@@ -245,8 +245,14 @@ class course_data {
                     $structure = \mod_quiz\structure::create_for_quiz($quizsettings);
                     $slots = $structure->get_slots();
                     foreach ($slots as $slot) {
-                        $question = \question_bank::load_question($slot->questionid);
-                        $this->injectquizcontent($activitydata, $question, $activity);
+                        try {
+                            $question = \question_bank::load_question($slot->questionid);
+                            $this->injectquizcontent($activitydata, $question, $activity);
+                        } catch (\dml_read_exception $e) {
+                            $this->build_data('load_q_error', $e->getMessage(), 0, 'quiz_querstions', $activity, 3 );
+                        } catch (\moodle_exception $me) {
+                            $this->build_data('load_q_error', $me->getMessage(), 0, 'quiz_querstions', $activity, 3 );
+                        }
                     }
                     break;
                 case 'wiki':

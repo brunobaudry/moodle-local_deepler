@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] 2024-12-05
+
+### Added
+
+- Added TOC to the README.md
+- Removed the 'Use pro or free admin setting', as the php lib does it...
+
+### Fixed
+
+- Display distinct error page for translator when key API not set 
+
 ## [1.2.0] 2024-12-05
 
 ### Added

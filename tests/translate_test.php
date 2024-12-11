@@ -63,8 +63,8 @@ final class translate_test extends advanced_testcase {
     public function test_plugin_config(): void {
         global $CFG;
         $this->assertNotNull(get_config('local_deepler', 'apikey'));
-        $this->assertFalse(get_config('local_deepler', 'apikey') === '');
-        $this->assertMatchesRegularExpression('/^0|1$/', get_config('local_deepler', 'deeplpro'));
+        $this->assertNotNull(get_config('local_deepler', 'apikey'));
+        $this->assertFalse(get_config('local_deepler', 'deeplpro'), 'Deprecated setting deeplpro !');
         $this->assertNotEquals('', current_language());
         $this->assertTrue(strlen(current_language()) > 0);
     }

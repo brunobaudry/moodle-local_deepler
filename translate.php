@@ -65,9 +65,6 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 $PAGE->set_course($course);
-// Get Language helper.
-$languagepack = new lang_helper();
-$initok = $languagepack->init('');
 // Get the renderer.
 $output = $PAGE->get_renderer('local_deepler');
 // Output header.
@@ -75,7 +72,9 @@ echo $output->header();
 // Course name heading.
 $mlangfilter = new filter_multilang2($context, []);
 echo $output->heading($mlangfilter->filter($course->fullname));
-
+// Get Language helper.
+$languagepack = new lang_helper();
+$initok = $languagepack->init('DEFAULT');
 if ($initok) {
     if ($languagepack->iscurrentsupported()) {
         // Set js data.
@@ -109,7 +108,13 @@ if ($initok) {
         echo $output->footer();
     }
 
-} else {
+} else if ($languagepack->isapikeynoset()) {
+    $renderable = new \local_deepler\output\badsettings_page();
+    echo $output->render($renderable);
+    // Output footer.
+    echo $output->footer();
+}
+else {
     $renderable = new \local_deepler\output\nodeepl_page();
     echo $output->render($renderable);
     // Output footer.

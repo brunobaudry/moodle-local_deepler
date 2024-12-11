@@ -25,7 +25,6 @@ Translation workflow being the following:
 
 <!-- toc -->
 
-- [Toast](#toast)
 - [Installation](#installation)
   * [Dependencies](#dependencies)
 - [Configuration](#configuration)
@@ -69,11 +68,10 @@ Translation workflow being the following:
 - [Submit an issue](#submit-an-issue)
 - [Changelog](#changelog)
 - [Contributing](#contributing)
+  * [PHPUNIT](#phpunit)
 - [Fork](#fork)
 
 <!-- tocstop -->
-
-## Toast
 
 ## Installation
 
@@ -117,7 +115,7 @@ Unchecking it here if your organisation rarely uses LaTeX formulas in the course
 
 #### Default value Escape PRE (in the courses translation page "Advanced Settings")
 
-Do not send <pre>...</pre> to translation by default.
+Do not send &lt;pre&gt;...&lt;/pre&gt; to translation by default.
 
 #### Minimum textfield size
 
@@ -360,6 +358,10 @@ See the [CHANGES.md](CHANGES.md) documentation.
 ## Contributing
 
 See the [CONTRIBUTING.md](CONTRIBUTING.md) documentation.
+
+### PHPUNIT
+Some additional PHPUNIT test can run be done provided you have a valid key.
+rename .env-dist to .env and set there your own api. 
 
 ## Fork
 
