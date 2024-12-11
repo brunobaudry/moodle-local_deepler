@@ -5,10 +5,10 @@
     "grunt-contrib-clean": "^2.0.1",
     "grunt-contrib-sass": "^2.0.0",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-load-gruntfile": "^0.0.2"
+    "grunt-load-gruntfile": "^0.0.2",
+    "markdown-toc": "^1.2.0"
   },
   "dependencies": {
-    "caniuse-lite": "^1.0.30001639",
-    "markdown-toc": "^1.2.0"
+    "caniuse-lite": "^1.0.30001639"
   }
 }
