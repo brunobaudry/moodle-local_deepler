@@ -20,6 +20,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+@use "sass:color";
 $white: #fff !default;
 $gray-100: #f8f9fa !default;
 $gray-200: #e9ecef !default;
@@ -83,7 +84,7 @@ $secondary: $gray-400 !default;
 
     .local_deepler__source-text img,
     .local_deepler__translation img {
-        background-color: lighten($orange, 30%) !important; /* stylelint-disable-line declaration-no-important */
+        background-color: color.adjust($orange, $lightness: 30%) !important; /* stylelint-disable-line declaration-no-important */
         font-style: italic;
     }
 
