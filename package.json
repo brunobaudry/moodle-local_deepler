@@ -8,6 +8,7 @@
     "grunt-load-gruntfile": "^0.0.2"
   },
   "dependencies": {
-    "caniuse-lite": "^1.0.30001639"
+    "caniuse-lite": "^1.0.30001639",
+    "markdown-toc": "^1.2.0"
   }
 }
