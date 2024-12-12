@@ -70,7 +70,7 @@ class behat_local_deepler_apitester implements Context {
      * Set the API Token.
      *
      * @Given I set the DeepL api token to :value
-     * @param $value
+     * @param string $value
      * @return void
      */
     public function i_set_the_deepl_token_to($value): void {
@@ -98,7 +98,7 @@ class behat_local_deepler_apitester implements Context {
      * Wrapper for DeepL.
      *
      * @When I post a DeepL request with body:
-     * @param $body
+     * @param string $body
      * @return void
      */
     public function i_post_a_deepl_request_to($body): void {
@@ -134,13 +134,14 @@ class behat_local_deepler_apitester implements Context {
 
         curl_close($ch);
     }
-
     /**
      * Before scenario hook to check for the presence of the API token.
      *
+     * @param \Behat\Behat\Hook\Scope\BeforeScenarioScope $scope
+     * @return void
      * @BeforeScenario
      */
-    public function beforeScenario(BeforeScenarioScope $scope) {
+    public function beforescenario(BeforeScenarioScope $scope) {
         if (empty($_ENV['DEEPL_API_TOKEN'])) {
             throw new PendingException('DEEPL_API_TOKEN is not set. Skipping scenario.');
         }

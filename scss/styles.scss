@@ -96,7 +96,8 @@ $secondary: $gray-400 !default;
         padding: 0;
     }
 
-    .course_sections__name, .course__fullname {
+    .course_sections__name,
+    .course__fullname {
         margin-top: 3rem;
     }
 
@@ -125,7 +126,8 @@ $secondary: $gray-400 !default;
     .local_deepler__level0 {
         padding-left: 15px;
     }
-    .local_deepler__activitydesc, .local_deepler__activityfield {
+    .local_deepler__activitydesc,
+    .local_deepler__activityfield {
         color: $gray-600;
         position: relative;
     }
@@ -133,7 +135,6 @@ $secondary: $gray-400 !default;
     .local_deepler__activitydesc {
         top: -16px;
     }
-
 
     .local_deepler__activityfield {
         display: inline-block;

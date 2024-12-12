@@ -230,8 +230,7 @@ const hideErrorMessage = (key) => {
  * Opens a modal infobox to warn user trunks of fields are saving.
  * @returns {Promise<void>}
  */
-const launchModal = async () => {
-    // ...
+const launchModal = async() => {
     saveAllModal = await Modal.create({
         title: getString('saveallmodaltitle', 'local_deepler'),
         body: getString('saveallmodalbody', 'local_deepler'),
@@ -317,6 +316,7 @@ const handleAjaxUpdateDBResponse = (data) => {
     data.forEach((item) => {
         if (item.keyid === undefined) {
             // Display generic error message.
+            // eslint-disable-next-line promise/always-return
             getString('errordbtitle', 'local_deepler').then((s) => {
                 Modal.create({
                     title: s,
@@ -335,6 +335,7 @@ const handleAjaxUpdateDBResponse = (data) => {
                 const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
                 if (indexOfSET > -1) {
                     // Text too long.
+                    // eslint-disable-next-line promise/always-return
                     getString('errortoolong', 'local_deepler').then((s) => {
                         errorMessageItem(key, tempTranslations[key].editor, item.error.slice(0, indexOfSET) + '<br/>' + s);
                     });
@@ -741,17 +742,27 @@ const prepareAdvancedSettings = () => {
     let settings = {};
     escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
     escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
+    // eslint-disable-next-line camelcase
     settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
     settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
+    // eslint-disable-next-line camelcase
     settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
+    // eslint-disable-next-line camelcase
     settings.preserve_formatting = document.querySelector(Selectors.deepl.preserveFormatting).checked;//
     settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
+    // eslint-disable-next-line camelcase
     settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
+    // eslint-disable-next-line camelcase
     settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
+    // eslint-disable-next-line camelcase
     settings.non_splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value);
+    // eslint-disable-next-line camelcase
     settings.splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value);
+    // eslint-disable-next-line camelcase
     settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
+    // eslint-disable-next-line camelcase
     settings.target_lang = targetLang.toUpperCase();
+    // eslint-disable-next-line camelcase
     settings.auth_key = config.apikey;
     return settings;
 };
@@ -796,21 +807,20 @@ const getTranslation = (key) => {
     const readystateDone = XMLHttpRequest.DONE ?? 4; // Workaround if undefined when JS is cached, need further investigation.
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;
-    // Build formData
+    // Build formData.
     let formData = prepareFormData(key);
-    // log(tempTranslations);
     if (tempTranslations[key].editor === null) {
         error(`${key} no editor found :((`);
     } else {
         info("Send deepl:", formData);
-        // Update the translation
+        // Update the translation.
         let xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
         xhr.onreadystatechange = () => {
             if (xhr.readyState === readystateDone) {
                 const status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
-                    // The request has been completed successfully
+                    // The request has been completed successfully.
                     log(tempTranslations);
                     let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
                     info("From deepl:", data);
@@ -818,7 +828,7 @@ const getTranslation = (key) => {
                     // Display translation
                     log(tr);
                     tempTranslations[key].editor.innerHTML = tr;
-                    // Store the translation in the global object
+                    // Store the translation in the global object.
                     tempTranslations[key].translation = tr;
                     setIconStatus(key, Selectors.statuses.tosave, true);
                     injectImageCss(
@@ -866,10 +876,10 @@ const injectImageCss = (editorType, editor) => {
     }
 };
 /**
- * @todo get the editor from moodle db in the php.
- * Get the editor container based on recieved current user's
- * editor preference.
+ * Get the editor container based on recieved current user's editor preference.
+ *
  * @param {Integer} key Translation Key
+ * @todo MDL-0 get the editor from moodle db in the php.
  */
 const findEditor = (key) => {
     let e = document.querySelector(Selectors.editors.types.basic
@@ -1000,7 +1010,7 @@ const keyidToKey = (k) => {
     return `${m[1]}[${m[2]}][${m[3]}]`;
 };
 /*
-const getKeyFromComponents = (id, field, table) => {
+Const getKeyFromComponents = (id, field, table) => {
     return `${table}[${id}][${field}]`;
 };
 */

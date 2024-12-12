@@ -1,5 +1,5 @@
 @local @local_deepler @javascript
-Feature: Feature for local_deepler plugin
+Feature: Feature for local_deepler plugin main admin page
   In order to ensure the plugin admin is loaded
 
   Scenario: Test example scenario

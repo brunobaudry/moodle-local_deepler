@@ -1,5 +1,5 @@
 @local @local_deepler @javascript
-Feature: Feature for local_deepler plugin
+Feature: Feature for local_deepler plugin in the plugin list overview
   In order to ensure the plugin is installed
 
   Scenario: View plugin in plugin overview

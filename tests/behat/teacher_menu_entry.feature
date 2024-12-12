@@ -1,5 +1,5 @@
 @local @local_deepler @javascript @deepler_menu
-Feature: Check course 'MORE' menu entry
+Feature: Check course 'MORE' menu entry with DeepL Translator
   In order to access plugin functionality
   As a teacher
   I need to see the plugin entry in the course 'MORE' menu
