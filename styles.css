@@ -78,7 +78,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate .local_deepler__level0 {
     padding-left: 15px;
 }
-#page-local-deepler-translate .local_deepler__activitydesc, #page-local-deepler-translate .local_deepler__activityfield {
+#page-local-deepler-translate .local_deepler__activitydesc,
+#page-local-deepler-translate .local_deepler__activityfield {
     color: #6a737b;
     position: relative;
 }
