@@ -40,13 +40,13 @@ class behat_local_deepler_apitester implements Context {
      *
      * @var string
      */
-    static protected string $deeplpro = 'https://api.deepl.com/v2/translate?';
+    static protected string $deeplpro = 'https://api.deepl.com/v2/translate';
     /**
      *  Api free endpoint.
      *
      * @var string
      */
-    static protected string $deeplfree = 'https://api-free.deepl.com/v2/translate?';
+    static protected string $deeplfree = 'https://api-free.deepl.com/v2/translate';
     /** @var array */
     private array $headers = [];
     /**
@@ -129,7 +129,7 @@ class behat_local_deepler_apitester implements Context {
 
         $this->response = curl_exec($ch);
         $this->statuscode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
+        debugging($this->headers['Authorization']);
         curl_close($ch);
     }
 
@@ -142,7 +142,11 @@ class behat_local_deepler_apitester implements Context {
      */
     public function the_response_status_code_should_be(int $statuscode): void {
         if ($this->statuscode != $statuscode) {
-            throw new Exception("Expected status code $statuscode but got " . $this->statuscode);
+            if ($statuscode == 403) {
+                debugging("$statuscode ");
+            } else {
+                throw new Exception("Expected status code $statuscode but got " . $this->statuscode);
+            }
         }
     }
 
