@@ -25,8 +25,6 @@
 require_once(__DIR__ . '/env_loader.php');
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\DebugExtension\Message;
 use Behat\Gherkin\Node\PyStringNode;
 
@@ -133,18 +131,6 @@ class behat_local_deepler_apitester implements Context {
         $this->statuscode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         curl_close($ch);
-    }
-    /**
-     * Before scenario hook to check for the presence of the API token.
-     *
-     * @param \Behat\Behat\Hook\Scope\BeforeScenarioScope $scope
-     * @return void
-     * @BeforeScenario
-     */
-    public function beforescenario(BeforeScenarioScope $scope): void {
-        if (empty($_ENV['DEEPL_API_TOKEN'])) {
-            throw new PendingException('DEEPL_API_TOKEN is not set. Skipping scenario.');
-        }
     }
 
     /**
