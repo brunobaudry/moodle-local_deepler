@@ -385,6 +385,8 @@ Make sure you describe:
 - The current behaviour.
 - The expected behaviour.
 
+Ideal being that you make a full pull request indeed !
+
 #### Pull requests
 See the [CONTRIBUTING.md](CONTRIBUTING.md) default documentation, for how-to with GIT and github and push some code.
 
