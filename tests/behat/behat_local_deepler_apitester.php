@@ -42,21 +42,21 @@ class behat_local_deepler_apitester implements Context {
      *
      * @var string
      */
-    static protected $deeplpro = 'https://api.deepl.com/v2/translate?';
+    static protected string $deeplpro = 'https://api.deepl.com/v2/translate?';
     /**
      *  Api free endpoint.
      *
      * @var string
      */
-    static protected $deeplfree = 'https://api-free.deepl.com/v2/translate?';
+    static protected string $deeplfree = 'https://api-free.deepl.com/v2/translate?';
     /** @var array */
-    private $headers = [];
+    private array $headers = [];
     /**
      * @var string
      */
-    private $response;
+    private string $response;
     /** @var string */
-    private $statuscode;
+    private string $statuscode;
 
     /**
      * feature_context constructor.
@@ -84,11 +84,11 @@ class behat_local_deepler_apitester implements Context {
      * @param string $header The header name.
      * @param string $value The header value.
      */
-    public function i_set_the_header_to($header, $value): void {
+    public function i_set_the_header_to(string $header, string $value): void {
         // Replace placeholders with actual environment variable values.
         $value = preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) {
             $envvar = $matches[1];
-            return isset($_ENV[$envvar]) ? $_ENV[$envvar] : $matches[0];
+            return $_ENV[$envvar] ?? $matches[0];
         }, $value);
         $this->headers[$header] = $value;
         $this->headers['Content-Type'] = 'application/json';
@@ -98,11 +98,11 @@ class behat_local_deepler_apitester implements Context {
      * Wrapper for DeepL.
      *
      * @When I post a DeepL request with body:
-     * @param string $body
+     * @param PyStringNode $body
      * @return void
      */
-    public function i_post_a_deepl_request_to($body): void {
-        $url = substr($this->headers['Authorization'], -3) === ':fx' ? self::$deeplfree : self::$deeplpro;
+    public function i_post_a_deepl_request_to(PyStringNode $body): void {
+        $url = str_ends_with($this->headers['Authorization'], ':fx') ? self::$deeplfree : self::$deeplpro;
         $this->i_send_a_request_to_with_body('POST', $url, $body);
     }
 
@@ -114,7 +114,7 @@ class behat_local_deepler_apitester implements Context {
      * @param string $url The URL to send the request to.
      * @param PyStringNode $body The request body.
      */
-    public function i_send_a_request_to_with_body($method, $url, PyStringNode $body): void {
+    public function i_send_a_request_to_with_body(string $method, string $url, PyStringNode $body): void {
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -141,7 +141,7 @@ class behat_local_deepler_apitester implements Context {
      * @return void
      * @BeforeScenario
      */
-    public function beforescenario(BeforeScenarioScope $scope) {
+    public function beforescenario(BeforeScenarioScope $scope): void {
         if (empty($_ENV['DEEPL_API_TOKEN'])) {
             throw new PendingException('DEEPL_API_TOKEN is not set. Skipping scenario.');
         }
@@ -151,10 +151,10 @@ class behat_local_deepler_apitester implements Context {
      * Verify the response status code.
      *
      * @Then the response status code should be :statusCode
-     * @param int $statusCode The expected status code.
+     * @param int $statuscode The expected status code.
      * @throws \Exception If the status code does not match.
      */
-    public function the_response_status_code_should_be($statuscode): void {
+    public function the_response_status_code_should_be(int $statuscode): void {
         if ($this->statuscode != $statuscode) {
             throw new Exception("Expected status code $statuscode but got " . $this->statuscode);
         }
@@ -167,8 +167,8 @@ class behat_local_deepler_apitester implements Context {
      * @param string $text The text expected in the response.
      * @throws \Exception If the response does not contain the text.
      */
-    public function the_response_should_contain($text): void {
-        if (strpos($this->response, $text) === false) {
+    public function the_response_should_contain(string $text): void {
+        if (!str_contains($this->response, $text)) {
             throw new Exception("Response does not contain expected text: $text");
         }
     }

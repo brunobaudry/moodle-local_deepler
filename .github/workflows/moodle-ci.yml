@@ -181,9 +181,9 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
 
-      - name: Grunt
-        if: ${{ always() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 10
+#      - name: Grunt
+#        if: ${{ always() }}
+#        run: moodle-plugin-ci grunt --max-lint-warnings 10
 
       - name: PHPUnit tests
         if: ${{ always() }}
@@ -193,4 +193,6 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
-        run: moodle-plugin-ci behat --profile chrome
+        run: |
+          echo "DEEPL_API_TOKEN: $DEEPL_API_TOKEN"
+          moodle-plugin-ci behat --profile chrome

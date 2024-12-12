@@ -31,7 +31,7 @@
 class env_loader {
     /**
      * Load environment variables from a .env file.
-     * If file not found will display message a fail gracefully.
+     * If file not found will fail gracefully.
      *
      * @param string $path Path to the .env file.
      */
@@ -42,7 +42,8 @@ class env_loader {
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
-            if (strpos(trim($line), '#') === 0) {
+            // Skip comments.
+            if (str_starts_with(trim($line), '#')) {
                 continue;
             }
 
