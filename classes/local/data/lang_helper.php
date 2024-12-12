@@ -268,7 +268,7 @@ class lang_helper {
         }
         $config->lang = $this->targetlang;
         $config->currentlang = $this->currentlang;
-        $config->deeplurl = Translator::isAuthKeyFreeAccount($this->apikey) ? self::$deeplfree: self::$deeplpro;
+        $config->deeplurl = Translator::isAuthKeyFreeAccount($this->apikey) ? self::$deeplfree : self::$deeplpro;
         return $config;
     }
 
@@ -307,7 +307,7 @@ class lang_helper {
      * @return bool
      */
     public function isapikeynoset(): bool {
-        return $this->apikey==='' || $this->apikey===null || $this->apikey==='DEFAULT';
+        return $this->apikey === '' || $this->apikey === null || $this->apikey === 'DEFAULT';
     }
 
 }

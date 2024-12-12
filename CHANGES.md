@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added TOC to the README.md
 - Removed the 'Use pro or free admin setting', as the php lib does it...
+- If the user has capability show the link in course even if incorrectly set in admin, but with message to instruct admin to do so.
 
 ### Fixed
 

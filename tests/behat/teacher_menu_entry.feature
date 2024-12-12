@@ -23,5 +23,5 @@ Feature: Check course 'MORE' menu entry
     Given I am on the "C1" "course" page
     Then I should see "Course 1"
     And I navigate to "More" in current page administration
-    And I navigate to "DeepL translator" in current page administration
-    Then I should see "DeepL translator"
+    And I navigate to "DeepL Translator" in current page administration
+    Then I should see "DeepL Translator"

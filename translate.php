@@ -113,8 +113,7 @@ if ($initok) {
     echo $output->render($renderable);
     // Output footer.
     echo $output->footer();
-}
-else {
+} else {
     $renderable = new \local_deepler\output\nodeepl_page();
     echo $output->render($renderable);
     // Output footer.

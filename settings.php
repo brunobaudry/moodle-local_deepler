@@ -43,15 +43,6 @@ if (has_capability('moodle/site:config', context_system::instance())) {
             )
     );
 
-    // DeepL Free or Pro?
-/*    $settings->add(
-            new admin_setting_configcheckbox(
-                    'local_deepler/deeplpro',
-                    get_string('deeplprotitle', 'local_deepler'),
-                    get_string('deeplprotitle_desc', 'local_deepler'),
-                    false
-            )
-    );*/
     // Allow the sub languages codes, that may not be supported by Deepl to be mapped as the main one (expl de_ch -> de).
     $settings->add(
             new admin_setting_configcheckbox(

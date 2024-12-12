@@ -42,7 +42,6 @@ class behat_local_deepler extends behat_base {
         $session = $this->getSession();
         $driver = $session->getDriver();
         $element = $session->getPage()->find('css', $cssselector);
-
         if (null === $element) {
             throw new \Exception('Element not found');
         }

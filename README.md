@@ -67,8 +67,13 @@ Translation workflow being the following:
 - [Future (todos)](#future-todos)
 - [Submit an issue](#submit-an-issue)
 - [Changelog](#changelog)
-- [Contributing](#contributing)
-  * [PHPUNIT](#phpunit)
+- [Coding, Debugging and Contributing](#coding-debugging-and-contributing)
+  * [Admin settings.](#admin-settings)
+  * [Contribute to this code base](#contribute-to-this-code-base)
+    + [Adding feature request or reporting defects](#adding-feature-request-or-reporting-defects)
+    + [Pull requests](#pull-requests)
+  * [PHPUNIT and BEHAT](#phpunit-and-behat)
+    + [Github Moodle CI Actions](#github-moodle-ci-actions)
 - [Fork](#fork)
 
 <!-- tocstop -->
@@ -84,6 +89,7 @@ You need a [©Deepl API](https://www.deepl.com/en/pro-api)  Free or Pro account.
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
 ## Configuration
+see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) if you intend to help improving this plugin, or just if you are an admin and want to do some test in a dedicated sandbox.
 
 ### Permissions (Moodle capability) 
 
@@ -328,6 +334,8 @@ Should work with the following editors:
 It uses the default Moodle JS library and is tested with Boost and Classic.
 So there could be incompatibilities with other themes.
 
+see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) if you intend to help improving this plugin or just if your are an admin and want to do some test in a dedicated sandbox.
+
 ### Webservices
 
 This plugin will add a ```local_deepler_update_translation``` web service for the translation page to perform ajax requests against.
@@ -355,13 +363,44 @@ Please [submit issues here.](https://github.com/jamfire/moodle-local_deepler/iss
 
 See the [CHANGES.md](CHANGES.md) documentation.
 
-## Contributing
+## Coding, Debugging and Contributing
 
-See the [CONTRIBUTING.md](CONTRIBUTING.md) documentation.
+### Admin settings.
+This plugin relies on javascript. So if you set test environment with Moodle's debugging features,
+make sure **debugdisplay** (Display debug messages) is set to 'No'.
+This because as  **debugdisplay** breaks the xhtml. So message from elsewhere could break the process.
 
-### PHPUNIT
-Some additional PHPUNIT test can run be done provided you have a valid key.
-rename .env-dist to .env and set there your own api. 
+On the other hand with **debug** (Debug messages) there is already a comprehensive messaging that should inform you what is going wrong with the plugin's process.
+Depending on the level DEVELOPPER, ALL, NORMAL, MINIMAL or NONE, the plugin's debugging messages adapt to it.
+
+Check your browser's dev tools (F12) to see the detailed logs.
+
+### Contribute to this code base
+
+#### Adding feature request or reporting defects
+https://github.com/brunobaudry/moodle-local_deepler/issues
+
+Make sure you describe:
+- Your environment (PHP, Moodle version, database, browser used etc.)
+- The current behaviour.
+- The expected behaviour.
+
+#### Pull requests
+See the [CONTRIBUTING.md](CONTRIBUTING.md) default documentation, for how-to with GIT and github and push some code.
+
+### PHPUNIT and BEHAT
+
+This plugins tries to have descent testing setup.
+
+Some additional PHPUNIT, aswell as BEHAT test can run be done provided you have a valid key.
+rename .env-dist to .env and set there your own api key
+**DEEPL_API_TOKEN=DEFAULT** **DEEPL_API_TOKEN=YOUR_OWN_DEEPL_API_KEY**
+(You can add both a pro or a free key, we recommend that you do the tests with a free one).
+
+#### Github Moodle CI Actions 
+If you intend to test in your forked repo this code with Moodle CI.
+Ensure you also add a **Repository secret** with the **DEEPL_API_TOKEN** (as with the .env)
+(Repo > Settings > Security > Secrets and variable > Actions > New repository secret)
 
 ## Fork
 

@@ -61,7 +61,7 @@ final class langhelper_test extends advanced_testcase {
         parent::setUp();
         $this->resetAfterTest(true);
         $this->langhelper = new lang_helper();
-        $this->langhelper->init(getenv('API_TOKEN'));
+        $this->langhelper->init(getenv('DEEPL_API_TOKEN'));
     }
 
     /**
@@ -97,6 +97,8 @@ final class langhelper_test extends advanced_testcase {
     }
 
     /**
+     * Basic setting tests.
+     *
      * @return void
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
@@ -104,9 +106,9 @@ final class langhelper_test extends advanced_testcase {
     public function test_settings(): void {
 
         $key = '';
-        if($this->langhelper->isapikeynoset()){
+        if ($this->langhelper->isapikeynoset()) {
             $this->makeenv();
-            $key = getenv('API_TOKEN');
+            $key = getenv('DEEPL_API_TOKEN');
         }
         $this->assertIsBool($this->langhelper->init($key));
     }
@@ -118,31 +120,31 @@ final class langhelper_test extends advanced_testcase {
      */
     private function makeenv() {
         global $CFG;
-        // Define the path to the .env file
-        $envFilePath = $CFG->dirroot . '/local/deepler/.env';
+        // Define the path to the .env file.
+        $envfilepath = $CFG->dirroot . '/local/deepler/.env';
 
-        // Check if the .env file exists
-        if (file_exists($envFilePath)) {
-            // Read the .env file line by line
-            $lines = file($envFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        // Check if the .env file exists.
+        if (file_exists($envfilepath)) {
+            // Read the .env file line by line.
+            $lines = file($envfilepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
-                // Skip comments
+                // Skip comments.
                 if (strpos(trim($line), '#') === 0) {
                     continue;
                 }
 
-                // Parse the environment variable
+                // Parse the environment variable.
                 list($name, $value) = explode('=', $line, 2);
                 $name = trim($name);
                 $value = trim($value);
 
-                // Set the environment variable
+                // Set the environment variable.
                 putenv(sprintf('%s=%s', $name, $value));
                 $_ENV[$name] = $value;
                 $_SERVER[$name] = $value;
             }
         } else {
-            $this->assertEquals('DEFAULT', getenv('API_TOKEN'));
+            $this->assertEquals('DEFAULT', getenv('DEEPL_API_TOKEN'));
         }
     }
 }
