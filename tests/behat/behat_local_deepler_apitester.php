@@ -85,8 +85,7 @@ class behat_local_deepler_apitester implements Context {
     public function i_set_the_header_to(string $header, string $value): void {
         // Replace placeholders with actual environment variable values.
         if (preg_match('/\{\{(\w+)\}\}/', $value, $matches)) {
-            $value = getenv($matches[1];
-
+            $value = getenv($matches[1]);
         }
         $value = "DeepL-Auth-Key $value";
         $buffer = ob_get_clean();
