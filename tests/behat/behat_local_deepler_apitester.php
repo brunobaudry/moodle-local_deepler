@@ -84,19 +84,24 @@ class behat_local_deepler_apitester implements Context {
      */
     public function i_set_the_header_to(string $header, string $value): void {
         // Replace placeholders with actual environment variable values.
+        if (preg_match('/\{\{(\w+)\}\}/', $value, $matches)) {
+            $value = getenv($matches[1]);
+        }
         $apitoken = getenv('DEEPL_API_TOKEN');
         $buffer = ob_get_clean();
         echo "\n\r";
         var_dump($_ENV);
         var_dump($apitoken);
+        var_dump($value);
         echo "\n\r";
         ob_start();
         echo $buffer;
-        $value = preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) {
+        /*$value = preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) {
             $envvar = $matches[1];
             return $_ENV[$envvar] ?? $matches[0];
         }, $value);
         echo("Setting header $header to $value"); // Debug statement.
+        */
         $this->headers[$header] = $value;
         $this->headers['Content-Type'] = 'application/json';
     }
