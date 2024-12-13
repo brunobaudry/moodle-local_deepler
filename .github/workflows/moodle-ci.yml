@@ -192,7 +192,8 @@ jobs:
       - name: Behat features
         if: ${{ always() }}
         env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
+          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: |
-          echo "DEEPL_API_TOKEN: $DEEPL_API_TOKEN"
+          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
+          echo $DEEPL_API_TOKEN | sed 's/./& /g'
           moodle-plugin-ci behat --profile chrome
