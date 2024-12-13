@@ -84,6 +84,12 @@ class behat_local_deepler_apitester implements Context {
      */
     public function i_set_the_header_to(string $header, string $value): void {
         // Replace placeholders with actual environment variable values.
+        $buffer = ob_get_clean();
+        echo "\n\n";
+        var_dump($_ENV);
+        echo "\n\n";
+        ob_start();
+        echo $buffer;
         $value = preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) {
             $envvar = $matches[1];
             return $_ENV[$envvar] ?? $matches[0];
