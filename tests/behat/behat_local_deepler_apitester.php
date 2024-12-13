@@ -72,7 +72,7 @@ class behat_local_deepler_apitester implements Context {
      * @return void
      */
     public function i_set_the_deepl_token_to($value): void {
-        $this->i_set_the_header_to('Authorization', "DeepL-Auth-Key $value");
+        $this->i_set_the_header_to('Authorization', "$value");
     }
 
     /**
@@ -85,13 +85,13 @@ class behat_local_deepler_apitester implements Context {
     public function i_set_the_header_to(string $header, string $value): void {
         // Replace placeholders with actual environment variable values.
         if (preg_match('/\{\{(\w+)\}\}/', $value, $matches)) {
-            $value = getenv($matches[1]);
+            $value = getenv($matches[1];
+
         }
-        $apitoken = getenv('DEEPL_API_TOKEN');
+        $value = "DeepL-Auth-Key $value";
         $buffer = ob_get_clean();
         echo "\n\r";
         var_dump($_ENV);
-        var_dump($apitoken);
         var_dump($value);
         echo "\n\r";
         ob_start();
