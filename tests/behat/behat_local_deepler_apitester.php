@@ -88,6 +88,7 @@ class behat_local_deepler_apitester implements Context {
             $envvar = $matches[1];
             return $_ENV[$envvar] ?? $matches[0];
         }, $value);
+        debugging("Setting header $header to $value", DEBUG_DEVELOPER); // Debug statement.
         $this->headers[$header] = $value;
         $this->headers['Content-Type'] = 'application/json';
     }
@@ -114,7 +115,8 @@ class behat_local_deepler_apitester implements Context {
      */
     public function i_send_a_request_to_with_body(string $method, string $url, PyStringNode $body): void {
         $ch = curl_init();
-
+        debugging("Sending $method request to $url with body: " . $body->getRaw(), DEBUG_DEVELOPER); // Debug statement.
+        debugging("Headers: " . json_encode($this->headers), DEBUG_DEVELOPER); // Debug statement.
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -129,7 +131,11 @@ class behat_local_deepler_apitester implements Context {
 
         $this->response = curl_exec($ch);
         $this->statuscode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        debugging($this->headers['Authorization']);
+        if (curl_errno($ch)) {
+            debugging('Curl error: ' . curl_error($ch), DEBUG_DEVELOPER);
+        }
+        debugging("Response: " . $this->response, DEBUG_DEVELOPER); // Debug statement.
+        debugging("Status code: " . $this->statuscode, DEBUG_DEVELOPER); // Debug statement.
         curl_close($ch);
     }
 
@@ -160,6 +166,20 @@ class behat_local_deepler_apitester implements Context {
     public function the_response_should_contain(string $text): void {
         if (!str_contains($this->response, $text)) {
             throw new Exception("Response does not contain expected text: $text");
+        }
+    }
+
+    /**
+     * Before scenario hook to check if the API secret token is set.
+     *
+     * @param BeforeScenarioScope $scope The scenario scope.
+     * @return void
+     * @throws PendingException If the API secret token is not set.
+     */
+    public function before_scenario(BeforeScenarioScope $scope): void {
+        debugging("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN'], DEBUG_DEVELOPER); // Debug statement
+        if (empty($_ENV['API_SECRET_TOKEN'])) {
+            throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');
         }
     }
 }
