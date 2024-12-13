@@ -385,7 +385,7 @@ Make sure you describe:
 - The current behaviour.
 - The expected behaviour.
 
-Pull requests adhering to Moodle's coding guidelines are welcome !
+Pull requests, adhering to [Moodle's coding guidelines](https://moodledev.io/general/development/policies/codingstyle), are welcome !
 
 #### Pull requests
 See the [CONTRIBUTING.md](CONTRIBUTING.md) default documentation, for how-to with GIT and github and push some code.
