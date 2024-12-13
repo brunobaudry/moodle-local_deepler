@@ -84,10 +84,12 @@ class behat_local_deepler_apitester implements Context {
      */
     public function i_set_the_header_to(string $header, string $value): void {
         // Replace placeholders with actual environment variable values.
+        $apitoken = getenv('DEEPL_API_TOKEN');
         $buffer = ob_get_clean();
-        echo "\n\n";
+        echo "\n\r";
         var_dump($_ENV);
-        echo "\n\n";
+        var_dump($apitoken);
+        echo "\n\r";
         ob_start();
         echo $buffer;
         $value = preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) {
@@ -161,16 +163,16 @@ class behat_local_deepler_apitester implements Context {
         if ($this->statuscode != $statuscode) {
             if ($statuscode == 403) {
                 $buffer = ob_get_clean();
-                echo "\n\n";
+                echo "\n\r";
                 echo("403 !!! $statuscode ");
-                echo "\n\n";
+                echo "\n\r";
                 ob_start();
                 echo $buffer;
             } else {
                 $buffer = ob_get_clean();
-                echo "\n\n";
+                echo "\n\r";
                 echo("Expected status code $statuscode but got " . $this->statuscode);
-                echo "\n\n";
+                echo "\n\r";
                 ob_start();
                 echo $buffer;
                 //throw new Exception("Expected status code $statuscode but got " . $this->statuscode);
@@ -189,9 +191,9 @@ class behat_local_deepler_apitester implements Context {
         if (!str_contains($this->response, $text)) {
 
             $buffer = ob_get_clean();
-            echo "\n\n";
+            echo "\n\r";
             echo("Response does not contain expected text: $text");
-            echo "\n\n";
+            echo "\n\r";
             ob_start();
             echo $buffer;
             //throw new Exception("Response does not contain expected text: $text");
@@ -209,9 +211,9 @@ class behat_local_deepler_apitester implements Context {
         echo("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN']); // Debug statement.
         if (empty($_ENV['API_SECRET_TOKEN'])) {
             $buffer = ob_get_clean();
-            echo "\n\n";
+            echo "\n\r";
             echo('API_SECRET_TOKEN is not set. Skipping scenario.');
-            echo "\n\n";
+            echo "\n\r";
             ob_start();
             echo $buffer;
             //throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');
