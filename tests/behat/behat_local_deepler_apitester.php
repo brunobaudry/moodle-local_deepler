@@ -96,12 +96,6 @@ class behat_local_deepler_apitester implements Context {
         echo "\n\r";
         ob_start();
         echo $buffer;
-        /*$value = preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) {
-            $envvar = $matches[1];
-            return $_ENV[$envvar] ?? $matches[0];
-        }, $value);
-        echo("Setting header $header to $value"); // Debug statement.
-        */
         $this->headers[$header] = $value;
         $this->headers['Content-Type'] = 'application/json';
     }
