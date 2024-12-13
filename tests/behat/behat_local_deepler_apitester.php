@@ -88,7 +88,7 @@ class behat_local_deepler_apitester implements Context {
             $envvar = $matches[1];
             return $_ENV[$envvar] ?? $matches[0];
         }, $value);
-        debugging("Setting header $header to $value", DEBUG_DEVELOPER); // Debug statement.
+        echo("Setting header $header to $value"); // Debug statement.
         $this->headers[$header] = $value;
         $this->headers['Content-Type'] = 'application/json';
     }
@@ -115,8 +115,8 @@ class behat_local_deepler_apitester implements Context {
      */
     public function i_send_a_request_to_with_body(string $method, string $url, PyStringNode $body): void {
         $ch = curl_init();
-        debugging("Sending $method request to $url with body: " . $body->getRaw(), DEBUG_DEVELOPER); // Debug statement.
-        debugging("Headers: " . json_encode($this->headers), DEBUG_DEVELOPER); // Debug statement.
+        echo("Sending $method request to $url with body: " . $body->getRaw()); // Debug statement.
+        echo("Headers: " . json_encode($this->headers)); // Debug statement.
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -132,10 +132,10 @@ class behat_local_deepler_apitester implements Context {
         $this->response = curl_exec($ch);
         $this->statuscode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if (curl_errno($ch)) {
-            debugging('Curl error: ' . curl_error($ch), DEBUG_DEVELOPER);
+            echo('Curl error: ' . curl_error($ch));
         }
-        debugging("Response: " . $this->response, DEBUG_DEVELOPER); // Debug statement.
-        debugging("Status code: " . $this->statuscode, DEBUG_DEVELOPER); // Debug statement.
+        echo("Response: " . $this->response); // Debug statement.
+        echo("Status code: " . $this->statuscode); // Debug statement.
         curl_close($ch);
     }
 
@@ -149,7 +149,7 @@ class behat_local_deepler_apitester implements Context {
     public function the_response_status_code_should_be(int $statuscode): void {
         if ($this->statuscode != $statuscode) {
             if ($statuscode == 403) {
-                debugging("$statuscode ");
+                echo("$statuscode ");
             } else {
                 throw new Exception("Expected status code $statuscode but got " . $this->statuscode);
             }
@@ -177,7 +177,7 @@ class behat_local_deepler_apitester implements Context {
      * @throws PendingException If the API secret token is not set.
      */
     public function before_scenario(BeforeScenarioScope $scope): void {
-        debugging("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN'], DEBUG_DEVELOPER); // Debug statement
+        echo("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN']); // Debug statement.
         if (empty($_ENV['API_SECRET_TOKEN'])) {
             throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');
         }
