@@ -284,7 +284,6 @@ class course_data {
 
             }
         }
-
         return $activitydata;
     }
 
@@ -302,7 +301,7 @@ class course_data {
         $activity = new \stdClass();
         $activity->id = $act->id;
         $activity->modname = 'book_chapters';
-        $activity->section = $act->sectionid;
+        $activity->section = $act->get_section_info()->id;
         // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
         $activity->content = '';
         // Book chapters have title and content.

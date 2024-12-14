@@ -26,6 +26,7 @@
 namespace local_deepler\local\data;
 
 use advanced_testcase;
+use context_course;
 use local_deepler\local;
 use ReflectionMethod;
 use stdClass;
@@ -76,7 +77,7 @@ final class coursedata_test extends advanced_testcase {
         ]);
 
         $this->coursedata =
-                new \local_deepler\local\data\course_data($this->course, 'en', \context_course::instance($this->course->id)->id);
+                new course_data($this->course, 'en', context_course::instance($this->course->id)->id);
     }
 
     /**
@@ -86,7 +87,7 @@ final class coursedata_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor(): void {
-        $this->assertInstanceOf(\local_deepler\local\data\course_data::class, $this->coursedata);
+        $this->assertInstanceOf(course_data::class, $this->coursedata);
     }
 
     /**
@@ -136,7 +137,7 @@ final class coursedata_test extends advanced_testcase {
      * @throws \ReflectionException
      */
     public function test_getcoursedata(): void {
-        $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'getcoursedata');
+        $method = new ReflectionMethod(course_data::class, 'getcoursedata');
         $method->setAccessible(true);
 
         $coursedata = $method->invoke($this->coursedata);
@@ -150,6 +151,22 @@ final class coursedata_test extends advanced_testcase {
     }
 
     /**
+     * Test if gettting the section data is all good.
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws \moodle_exception
+     * @covers \local_deepler\local\data\course_data::getsectiondata
+     */
+    public function test_getcoursesectiondata(): void {
+        $method = new ReflectionMethod(course_data::class, 'getactivitydata');
+        $method->setAccessible(true);
+        $sectiondata = $method->invoke($this->coursedata);
+        $this->assertIsArray($sectiondata);
+        $this->assertGreaterThanOrEqual(2, count($sectiondata));
+    }
+
+    /**
      * Test to get the activity data.
      *
      * @covers ::getactivitydata
@@ -157,7 +174,7 @@ final class coursedata_test extends advanced_testcase {
      * @throws \ReflectionException
      */
     public function test_getactivitydata(): void {
-        $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'getactivitydata');
+        $method = new ReflectionMethod(course_data::class, 'getactivitydata');
         $method->setAccessible(true);
 
         $activitydata = $method->invoke($this->coursedata);
@@ -195,7 +212,7 @@ final class coursedata_test extends advanced_testcase {
         // Get the course module.
         $cm = get_coursemodule_from_instance('page', $page->id);
 
-        $method = new \ReflectionMethod(\local_deepler\local\data\course_data::class, 'build_data');
+        $method = new ReflectionMethod(course_data::class, 'build_data');
         $method->setAccessible(true);
 
         $activity = new \stdClass();
@@ -204,7 +221,7 @@ final class coursedata_test extends advanced_testcase {
         $activity->section = $cm->section;
         // Add this if needed for file URL generation.
 
-        $coursedata = new \local_deepler\local\data\course_data($course, 'en', \context_course::instance($course->id)->id);
+        $coursedata = new course_data($course, 'en', context_course::instance($course->id)->id);
 
         $data = $method->invoke($coursedata, $page->id, 'Test content', 1, 'content', $activity);
 
@@ -227,7 +244,7 @@ final class coursedata_test extends advanced_testcase {
     public function test_store_status_db(): void {
         global $DB;
 
-        $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'store_status_db');
+        $method = new ReflectionMethod(course_data::class, 'store_status_db');
         $method->setAccessible(true);
 
         $result = $method->invoke($this->coursedata, 1, 'course', 'fullname');
@@ -250,7 +267,7 @@ final class coursedata_test extends advanced_testcase {
      * @throws \ReflectionException
      */
     public function test_link_builder(): void {
-        $method = new ReflectionMethod(\local_deepler\local\data\course_data::class, 'link_builder');
+        $method = new ReflectionMethod(course_data::class, 'link_builder');
         $method->setAccessible(true);
 
         $courselink = $method->invoke($this->coursedata, $this->course->id, 'course', null);

@@ -88,15 +88,8 @@ class behat_local_deepler_apitester implements Context {
             $value = getenv($matches[1]);
         }
         $value = "DeepL-Auth-Key $value";
-        $buffer = ob_get_clean();
-        echo "\n\r";
-        var_dump($_ENV);
-        var_dump($value);
-        echo "\n\r";
-        ob_start();
-        echo $buffer;
         $this->headers[$header] = $value;
-        $this->headers['Content-Type'] = 'application/json';
+
     }
 
     /**
@@ -121,7 +114,7 @@ class behat_local_deepler_apitester implements Context {
      */
     public function i_send_a_request_to_with_body(string $method, string $url, PyStringNode $body): void {
         $ch = curl_init();
-
+        $this->headers['Content-Type'] = 'application/json';
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -136,17 +129,6 @@ class behat_local_deepler_apitester implements Context {
 
         $this->response = curl_exec($ch);
         $this->statuscode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $buffer = ob_get_clean();
-        if (curl_errno($ch)) {
-            echo('Curl error: ' . curl_error($ch));
-        }
-        $buffer = ob_get_clean();
-        echo("Sending $method request to $url with body: " . $body->getRaw()); // Debug statement.
-        echo("Headers: " . json_encode($this->headers)); // Debug statement.
-        echo("Response: " . $this->response); // Debug statement.
-        echo("Status code: " . $this->statuscode); // Debug statement.
-        ob_start();
-        echo $buffer;
         curl_close($ch);
     }
 
@@ -159,22 +141,13 @@ class behat_local_deepler_apitester implements Context {
      */
     public function the_response_status_code_should_be(int $statuscode): void {
         if ($this->statuscode != $statuscode) {
+            $message = "Expected status code 200, ";
             if ($statuscode == 403) {
-                $buffer = ob_get_clean();
-                echo "\n\r";
-                echo("403 !!! $statuscode ");
-                echo "\n\r";
-                ob_start();
-                echo $buffer;
+                $message .= "got 403, most probably bad api token";
             } else {
-                $buffer = ob_get_clean();
-                echo "\n\r";
-                echo("Expected status code $statuscode but got " . $this->statuscode);
-                echo "\n\r";
-                ob_start();
-                echo $buffer;
-                //throw new Exception("Expected status code $statuscode but got " . $this->statuscode);
+                $message .= "got $statuscode.";
             }
+            throw new Exception($message);
         }
     }
 
@@ -187,14 +160,7 @@ class behat_local_deepler_apitester implements Context {
      */
     public function the_response_should_contain(string $text): void {
         if (!str_contains($this->response, $text)) {
-
-            $buffer = ob_get_clean();
-            echo "\n\r";
-            echo("Response does not contain expected text: $text");
-            echo "\n\r";
-            ob_start();
-            echo $buffer;
-            //throw new Exception("Response does not contain expected text: $text");
+            throw new Exception("Response does not contain expected text: $text");
         }
     }
 
@@ -208,13 +174,7 @@ class behat_local_deepler_apitester implements Context {
     public function before_scenario(BeforeScenarioScope $scope): void {
         echo("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN']); // Debug statement.
         if (empty($_ENV['API_SECRET_TOKEN'])) {
-            $buffer = ob_get_clean();
-            echo "\n\r";
-            echo('API_SECRET_TOKEN is not set. Skipping scenario.');
-            echo "\n\r";
-            ob_start();
-            echo $buffer;
-            //throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');
+            throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');
         }
     }
 }
