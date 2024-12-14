@@ -35,66 +35,66 @@ jobs:
           - php: 8.3
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
-#          - php: 8.2
-#            moodle-branch: MOODLE_405_STABLE
-#            database: pgsql
-#          - php: 8.2
-#            moodle-branch: MOODLE_405_STABLE
-#            database: mariadb
-#          - php: 8.1
-#            moodle-branch: MOODLE_405_STABLE
-#            database: pgsql
-#          - php: 8.1
-#            moodle-branch: MOODLE_405_STABLE
-#            database: mariadb
+          - php: 8.2
+            moodle-branch: MOODLE_405_STABLE
+            database: pgsql
+          - php: 8.2
+            moodle-branch: MOODLE_405_STABLE
+            database: mariadb
+          - php: 8.1
+            moodle-branch: MOODLE_405_STABLE
+            database: pgsql
+          - php: 8.1
+            moodle-branch: MOODLE_405_STABLE
+            database: mariadb
           - php: 8.3
             moodle-branch: MOODLE_404_STABLE
             database: pgsql
           - php: 8.3
             moodle-branch: MOODLE_404_STABLE
             database: mariadb
-#          - php: 8.2
-#            moodle-branch: MOODLE_404_STABLE
-#            database: pgsql
-#          - php: 8.2
-#            moodle-branch: MOODLE_404_STABLE
-#            database: mariadb
-#          - php: 8.1
-#            moodle-branch: MOODLE_404_STABLE
-#            database: pgsql
-#          - php: 8.1
-#            moodle-branch: MOODLE_404_STABLE
-#            database: mariadb
-#          - php: 8.2
-#            moodle-branch: MOODLE_403_STABLE
-#            database: pgsql
-#          - php: 8.2
-#            moodle-branch: MOODLE_403_STABLE
-#            database: mariadb
-#          - php: 8.1
-#            moodle-branch: MOODLE_403_STABLE
-#            database: pgsql
-#          - php: 8.1
-#            moodle-branch: MOODLE_403_STABLE
-#            database: mariadb
-#          - php: 8.2
-#            moodle-branch: MOODLE_402_STABLE
-#            database: pgsql
-#          - php: 8.2
-#            moodle-branch: MOODLE_402_STABLE
-#            database: mariadb
-#          - php: 8.1
-#            moodle-branch: MOODLE_402_STABLE
-#            database: pgsql
-#          - php: 8.1
-#            moodle-branch: MOODLE_402_STABLE
-#            database: mariadb
-#          - php: 8.1
-#            moodle-branch: MOODLE_401_STABLE
-#            database: pgsql
-#          - php: 8.1
-#            moodle-branch: MOODLE_401_STABLE
-#            database: mariadb
+          - php: 8.2
+            moodle-branch: MOODLE_404_STABLE
+            database: pgsql
+          - php: 8.2
+            moodle-branch: MOODLE_404_STABLE
+            database: mariadb
+          - php: 8.1
+            moodle-branch: MOODLE_404_STABLE
+            database: pgsql
+          - php: 8.1
+            moodle-branch: MOODLE_404_STABLE
+            database: mariadb
+          - php: 8.2
+            moodle-branch: MOODLE_403_STABLE
+            database: pgsql
+          - php: 8.2
+            moodle-branch: MOODLE_403_STABLE
+            database: mariadb
+          - php: 8.1
+            moodle-branch: MOODLE_403_STABLE
+            database: pgsql
+          - php: 8.1
+            moodle-branch: MOODLE_403_STABLE
+            database: mariadb
+          - php: 8.2
+            moodle-branch: MOODLE_402_STABLE
+            database: pgsql
+          - php: 8.2
+            moodle-branch: MOODLE_402_STABLE
+            database: mariadb
+          - php: 8.1
+            moodle-branch: MOODLE_402_STABLE
+            database: pgsql
+          - php: 8.1
+            moodle-branch: MOODLE_402_STABLE
+            database: mariadb
+          - php: 8.1
+            moodle-branch: MOODLE_401_STABLE
+            database: pgsql
+          - php: 8.1
+            moodle-branch: MOODLE_401_STABLE
+            database: mariadb
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -128,14 +128,14 @@ jobs:
           CODECHECKER_IGNORE_PATHS: classes/vendor
           PHPDOCCHECKER_IGNORE_PATHS: classes/vendor
 
-#      - name: PHP Lint
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci phplint
-#
-#      - name: PHP Mess Detector
-#        continue-on-error: true # This step will show errors but will not fail
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci phpmd
+      - name: PHP Lint
+        if: ${{ always() }}
+        run: moodle-plugin-ci phplint
+
+      - name: PHP Mess Detector
+        continue-on-error: true # This step will show errors but will not fail
+        if: ${{ always() }}
+        run: moodle-plugin-ci phpmd
 
       - name: Moodle Code Checker
         if: ${{ !cancelled() }}
@@ -145,21 +145,21 @@ jobs:
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci phpdoc
 
-#      - name: Validating
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci validate
-#
-#      - name: Check upgrade savepoints
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci savepoints
-#
-#      - name: Mustache Lint
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci mustache
+      - name: Validating
+        if: ${{ always() }}
+        run: moodle-plugin-ci validate
 
-#      - name: Grunt
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci grunt --max-lint-warnings 10
+      - name: Check upgrade savepoints
+        if: ${{ always() }}
+        run: moodle-plugin-ci savepoints
+
+      - name: Mustache Lint
+        if: ${{ always() }}
+        run: moodle-plugin-ci mustache
+
+      - name: Grunt
+        if: ${{ always() }}
+        run: moodle-plugin-ci grunt --max-lint-warnings 10
 
       - name: PHPUnit tests
         if: ${{ always() }}
@@ -169,6 +169,6 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile firefox --tags="@local_deepler" --auto-rerun 1
+        run: moodle-plugin-ci behat --profile firefox --tags="@local_deepler"
 #          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
 #          echo $DEEPL_API_TOKEN | sed 's/./& /g'

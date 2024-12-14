@@ -196,7 +196,4 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: |
-          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
-          echo $DEEPL_API_TOKEN | sed 's/./& /g'
-          moodle-plugin-ci behat --profile firefox --tags="@local_deepler" --auto-rerun 1
+        run: moodle-plugin-ci behat --profile firefox --tags="@local_deepler" --auto-rerun 1
