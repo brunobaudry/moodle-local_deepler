@@ -318,15 +318,17 @@ const handleAjaxUpdateDBResponse = (data) => {
             // Display generic error message.
             getString('errordbtitle', 'local_deepler')
                 .then((s) => {
-                Modal.create({
-                    title: s,
-                    body: item.error,
-                    type: 'ALERT',
-                    show: true,
-                    removeOnClose: true,
+                    Modal.create({
+                            title: s,
+                            body: item.error,
+                            type: 'ALERT',
+                            show: true,
+                            removeOnClose: true,
+                        }
+                    );
+                    return s;
                 }).catch((error)=>{
-                    error('errordbtitle, could not get Moodle string!!!');
-                });
+                error('errordbtitle, could not get Moodle string!!!');
             });
         } else {
             const key = keyidToKey(item.keyid);
