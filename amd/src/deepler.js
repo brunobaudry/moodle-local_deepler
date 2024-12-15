@@ -337,8 +337,8 @@ const handleAjaxUpdateDBResponse = (data) => {
             if (item.error !== undefined) {
                 // Display granular error messages.
                 const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
+                // Text too long.
                 if (indexOfSET > -1) {
-                    // Text too long.
                     // eslint-disable-next-line promise/always-return
                     getString('errortoolong', 'local_deepler').then((s) => {
                         errorMessageItem(key, tempTranslations[key].editor, item.error.slice(0, indexOfSET) + '<br/>' + s);
@@ -783,6 +783,7 @@ const prepareAdvancedSettings = () => {
 const prepareTranslation = (key) => {
     return {
         text: tempTranslations[key].source,
+        // eslint-disable-next-line camelcase
         source_lang: tempTranslations[key].sourceLang,
     };
 };
