@@ -125,7 +125,8 @@ final class translate_page_test extends advanced_testcase {
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
 
-        $this->translatepage = new translate_page($this->course, $this->coursedata, $this->mlangfilter, $this->langhelper);
+        $this->translatepage = new translate_page($this->course, $this->coursedata, $this->mlangfilter, $this->langhelper,
+                'vtest');
     }
 
     /**

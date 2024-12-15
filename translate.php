@@ -43,6 +43,7 @@ require_once('./classes/output/translate_page.php');
 require_once('./classes/output/nodeepl_page.php');
 require_once('./classes/local/data/course_data.php');
 require_once('./classes/local/data/lang_helper.php');
+require_once(__DIR__ . '/version.php');
 require_once($CFG->dirroot . '/lib/editorlib.php');
 
 // Needed vars for processing.
@@ -83,6 +84,13 @@ if ($initok) {
         // Prepare course data.
         $jsconfig->courseid = $courseid;
         $jsconfig->debug = $CFG->debug;
+        // Pass the strings for status buttons.
+        $jsconfig->statusstrings = new stdClass();
+        $jsconfig->statusstrings->failed = get_string('statusfailed', 'local_deepler');
+        $jsconfig->statusstrings->success = get_string('statussuccess', 'local_deepler');
+        $jsconfig->statusstrings->tosave = get_string('statustosave', 'local_deepler');
+        $jsconfig->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
+        $jsconfig->statusstrings->wait = get_string('statuswait', 'local_deepler');
 
         $defaulteditor = strstr($CFG->texteditors, ',', true);
         $userprefs = get_user_preferences();
@@ -97,7 +105,7 @@ if ($initok) {
 
         // Build the page.
         $prepareddata = $coursedata->getdata();
-        $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack);
+        $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
         echo $output->render($renderable);
         // Output footer.
         echo $output->footer();

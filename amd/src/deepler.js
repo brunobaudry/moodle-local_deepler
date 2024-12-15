@@ -316,14 +316,16 @@ const handleAjaxUpdateDBResponse = (data) => {
     data.forEach((item) => {
         if (item.keyid === undefined) {
             // Display generic error message.
-            // eslint-disable-next-line promise/always-return
-            getString('errordbtitle', 'local_deepler').then((s) => {
+            getString('errordbtitle', 'local_deepler')
+                .then((s) => {
                 Modal.create({
                     title: s,
                     body: item.error,
                     type: 'ALERT',
                     show: true,
                     removeOnClose: true,
+                }).catch((error)=>{
+                    error('errordbtitle, could not get Moodle string!!!');
                 });
             });
         } else {
@@ -338,6 +340,8 @@ const handleAjaxUpdateDBResponse = (data) => {
                     // eslint-disable-next-line promise/always-return
                     getString('errortoolong', 'local_deepler').then((s) => {
                         errorMessageItem(key, tempTranslations[key].editor, item.error.slice(0, indexOfSET) + '<br/>' + s);
+                    }).catch((error)=>{
+                        error('errortoolong, could not get Moodle string!!!');
                     });
                 } else {
                     errorMessageItem(key, tempTranslations[key].editor, item.error);
@@ -660,6 +664,8 @@ const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => 
     }
     icon.setAttribute('role', isBtn ? 'button' : 'status');
     icon.setAttribute('data-status', status);
+    log(config.statusstrings, status, config.statusstrings[status]);
+    icon.setAttribute('title', config.statusstrings[status.replace('local_deepler/', '')]);
 };
 /**
  * Shows/hides rows.
