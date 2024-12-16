@@ -187,7 +187,6 @@ jobs:
 #      - name: Grunt
 #        if: ${{ always() }}
 #        run: moodle-plugin-ci grunt --max-lint-warnings 10
-
       - name: PHPUnit tests
         if: ${{ always() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
@@ -196,4 +195,4 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile firefox --tags="@local_deepler" --auto-rerun 1
+        run: moodle-plugin-ci behat --profile chrome
