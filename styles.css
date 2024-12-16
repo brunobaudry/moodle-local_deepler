@@ -14,7 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*
+/*.local_deepler__translation img
  * @module     local_deepler/deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -43,7 +43,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     background-color: rgb(251.953125, 238.34375, 219.046875) !important; /* stylelint-disable-line declaration-no-important */
     font-style: italic;
 }
-#page-local-deepler-translate img:before {
+#page-local-deepler-translate img::before {
     content: "pic:" !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__form {
@@ -124,31 +124,31 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     right: 9px;
     border-radius: 4px;
 }
-#page-local-deepler-translate [data-status="local_deepler/wait"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/wait"] i::before {
     content: "\f141"; /*3 dots ellipse*/
     color: #ced4da;
 }
-#page-local-deepler-translate [data-status="local_deepler/totranslate"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/totranslate"] i::before {
     content: "\f251"; /* Sand icon*/
     color: #0f6cbf;
 }
-#page-local-deepler-translate [data-status="local_deepler/tosave"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/tosave"] i::before {
     content: "\f0c7"; /*floppy (save) icon*/
     color: #0f6cbf;
 }
-#page-local-deepler-translate [data-status="local_deepler/success"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/success"] i::before {
     content: "\f00c"; /*check    icon*/
     color: #357a32;
 }
-#page-local-deepler-translate [data-status="local_deepler/saved"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/saved"] i::before {
     content: "\f1c0"; /*database    icon*/
     color: #357a32;
 }
-#page-local-deepler-translate [data-status="local_deepler/failed"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/failed"] i::before {
     content: "\f071"; /*exclamation triangle icon*/
     color: #ca3120;
 }
-#page-local-deepler-translate [data-status="local_deepler/error"] i:before {
+#page-local-deepler-translate [data-status="local_deepler/error"] i::before {
     content: "\f1e2"; /*bomb icon*/
     color: #ca3120;
 }
