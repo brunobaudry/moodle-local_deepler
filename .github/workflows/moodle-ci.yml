@@ -166,7 +166,7 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci codechecker --max-warnings 0 . --extensions=php --ignore=node_modules
+        run: moodle-plugin-ci codechecker --max-warnings 0 . --ignore=node_modules
 
       - name: Moodle PHPDoc Checker
         if: ${{ !cancelled() }}
