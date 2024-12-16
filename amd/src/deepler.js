@@ -105,7 +105,7 @@ const registerEventListeners = () => {
             log(allKeys);
             if (allKeys.length > 0) {
                 launchModal();
-                saveAllBtn.hidden = saveAllBtn.disabled = true;
+                saveAllBtn.disabled = true;
                 saveTranslations(allKeys);
             }
         }
@@ -118,6 +118,7 @@ const registerEventListeners = () => {
 const registerUI = () => {
     try {
         saveAllBtn = document.querySelector(Selectors.actions.saveAll);
+
         sourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
         targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
         autotranslateButton = document.querySelector(Selectors.actions.autoTranslateBtn);
@@ -165,7 +166,7 @@ export const init = (cfg) => {
     registerUI();
     registerEventListeners();
     toggleAutotranslateButton();
-
+    saveAllBtn.disabled = true;
     const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
@@ -730,7 +731,7 @@ const switchSource = (e) => {
  * Launch autotranslation.
  */
 const doAutotranslate = () => {
-    saveAllBtn.hidden = saveAllBtn.disabled = false;
+    saveAllBtn.disabled = false;
     document
         .querySelectorAll(Selectors.statuses.checkedCheckBoxes)
         .forEach((ckBox) => {
