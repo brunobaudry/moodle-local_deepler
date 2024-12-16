@@ -1,4 +1,4 @@
-@local @local_deepler @javascript @deepler_menu
+@local @local_deepler @javascript @deepler_menu @local_deepler_notesting
 Feature: Check course 'MORE' menu entry with DeepL Translator
   In order to access plugin functionality
   As a teacher
