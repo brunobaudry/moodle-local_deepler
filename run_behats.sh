@@ -54,7 +54,7 @@ output=$($behat_cmd 2>&1)
 echo "$behat_cmd"
 
 # Check if the --init argument is passed or if the output contains "No scenarios"
-if $init_flag || [[ $output == *"No scenarios"* ]]; then
+if $init_flag || [[ $output == *"No scenarios"* || $output == *"Your behat test site is outdated,"* ]]; then
     # Run the initialization script
     $init_behat
 

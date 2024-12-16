@@ -9,13 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added TOC to the README.md
-- Removed the 'Use pro or free admin setting', as the php lib does it...
+- Removed the 'Use pro or free admin setting', as the php DeepL lib does it.
 - If the user has capability show the link in course even if incorrectly set in admin, but with message to instruct admin to do so.
 
 ### Fixed
 
-- Display distinct error page for translator when key API not set 
+- Display distinct error page for translator when key API not set.
+- Fixed Observers not caught.
+- Fixed section with no activties arry was not set triggering an exception.
+- Fixed access to private cminfo id.
 
 ## [1.2.0] 2024-12-05
 

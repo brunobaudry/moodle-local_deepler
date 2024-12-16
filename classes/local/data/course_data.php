@@ -16,6 +16,7 @@
 
 namespace local_deepler\local\data;
 
+use mod_quiz\quiz_settings;
 use moodle_url;
 
 /**
@@ -121,6 +122,7 @@ class course_data {
         $tab = ['0' => ['section' => $coursedata, 'activities' => []]];
         foreach ($sectiondata as $k => $v) {
             $tab[$v->id]['section'][] = $v;
+            $tab[$v->id]['activities'] = []; // Initialise empty activities array.
         }
         foreach ($activitydata as $ak => $av) {
             // If the section is not found place it under the course data as general intro.
@@ -241,7 +243,7 @@ class course_data {
                     break;
                 case 'quiz':
                     // Get quiz questions.
-                    $quizsettings = \quiz::create($activity->instance);
+                    $quizsettings = quiz_settings::create($activity->instance);
                     $structure = \mod_quiz\structure::create_for_quiz($quizsettings);
                     $slots = $structure->get_slots();
                     foreach ($slots as $slot) {

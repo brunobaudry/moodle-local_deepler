@@ -31,7 +31,7 @@ namespace local_deepler;
  *
  * @package    local_deepler
  */
-class local_deepler_observer {
+class observer {
 
     /**
      * Observer for course_updated event.
