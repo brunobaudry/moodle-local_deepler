@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="MoodlePlugin">
+    <description>Moodle plugin coding standards</description>
+    <exclude-pattern>node_modules/*</exclude-pattern>
+    <rule ref="moodle"/>
+</ruleset>

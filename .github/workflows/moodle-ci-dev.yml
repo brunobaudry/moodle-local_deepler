@@ -139,7 +139,7 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci codechecker --max-warnings 0
+        run: moodle-plugin-ci codechecker --standard=.phpcs.xml.dist --max-warnings 0
 
       - name: Moodle PHPDoc Checker
         if: ${{ !cancelled() }}
