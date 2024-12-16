@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="MoodleLocal">
+    <description>Moodle coding standard</description>
+    <rule ref="moodle"/>
+    <file>.</file>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+</ruleset>
+ø
