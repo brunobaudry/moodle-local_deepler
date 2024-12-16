@@ -36,15 +36,6 @@ function local_deepler_extend_navigation_course($navigation, $course) {
     if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
         return;
     }
-    // Do not show in menu if no deepl api key is set.
-    try {
-        $key = get_config('local_deepler', 'apikey');
-        if (trim($key) === '') {
-            return;
-        }
-    } catch (Exception $e) {
-        return;
-    }
     // Get current language.
     $lang = current_language();
 

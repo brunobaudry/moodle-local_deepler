@@ -15,30 +15,37 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course Translator Observers
- *
- * Watch for course, course section, and mod updates
+ * Environment Loader Class
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ * @copyright  2024 bruno.baudry@bfh.ch
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @see        https://docs.moodle.org/dev/Events_API
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-// Event observer for local_deepler.
-$observers = [
-        [
-                'eventname' => '\core\event\course_updated',
-                'callback' => '\local_deepler\observer::course_updated',
-        ],
-        [
-                'eventname' => '\core\event\course_section_updated',
-                'callback' => '\local_deepler\observer::course_section_updated',
-        ],
-        [
-                'eventname' => '\core\event\course_module_updated',
-                'callback' => '\local_deepler\observer::course_module_updated',
-        ],
-];
+/**
+ * Class env_loader
+ * Loads environment variables from a .env file.
+ *
+ * @package local_myplugin
+ */
+class env_loader {
+    /**
+     * Load environment variables from a .env file.
+     * If file not found will fail gracefully.
+     *
+     * @param string $path Path to the .env file.
+     */
+    public static function load($path): void {
+        if (!file_exists($path)) {
+            return;
+        }
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            // Skip comments.
+            if (str_starts_with(trim($line), '#')) {
+                continue;
+            }
+            putenv(trim($line));
+        }
+    }
+}

@@ -14,12 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*
+
+/*.local_deepler__translation img
  * @module     local_deepler/deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+@use "sass:color";
 $white: #fff !default;
 $gray-100: #f8f9fa !default;
 $gray-200: #e9ecef !default;
@@ -61,33 +63,26 @@ $secondary: $gray-400 !default;
     nav {
         z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
     }
-
-    .local_deepler__saveall-btn {
-        margin-left: 97% !important; /* stylelint-disable-line declaration-no-important */
-        position: sticky !important; /* stylelint-disable-line declaration-no-important */
-        bottom: 80px !important; /* stylelint-disable-line declaration-no-important */
-    }
-
     #local_deepler__settings {
         position: relative;
         top: -4px;
     }
 
-    a[aria-expanded=true] .fa-caret-right {
+    a[aria-expanded="true"] .fa-caret-right {
         display: none;
     }
 
-    a[aria-expanded=false] .fa-caret-down {
+    a[aria-expanded="false"] .fa-caret-down {
         display: none;
     }
 
     .local_deepler__source-text img,
     .local_deepler__translation img {
-        background-color: lighten($orange, 30%) !important; /* stylelint-disable-line declaration-no-important */
+        background-color: color.adjust($orange, $lightness: 30%) !important; /* stylelint-disable-line declaration-no-important */
         font-style: italic;
     }
 
-    img:before {
+    img::before {
         content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
     }
 
@@ -95,7 +90,8 @@ $secondary: $gray-400 !default;
         padding: 0;
     }
 
-    .course_sections__name, .course__fullname {
+    .course_sections__name,
+    .course__fullname {
         margin-top: 3rem;
     }
 
@@ -111,7 +107,7 @@ $secondary: $gray-400 !default;
         margin-top: -1.4rem;
     }
 
-    div[data-table^="question"] {
+    div[data-table^='question'] {
         background-color: $white !important; /* stylelint-disable-line declaration-no-important */
     }
 
@@ -124,7 +120,8 @@ $secondary: $gray-400 !default;
     .local_deepler__level0 {
         padding-left: 15px;
     }
-    .local_deepler__activitydesc, .local_deepler__activityfield {
+    .local_deepler__activitydesc,
+    .local_deepler__activityfield {
         color: $gray-600;
         position: relative;
     }
@@ -132,7 +129,6 @@ $secondary: $gray-400 !default;
     .local_deepler__activitydesc {
         top: -16px;
     }
-
 
     .local_deepler__activityfield {
         display: inline-block;
@@ -190,37 +186,37 @@ $secondary: $gray-400 !default;
         border-radius: 4px;
     }
 
-    [data-status="local_deepler/wait"] i:before {
+    [data-status="local_deepler/wait"] i::before {
         content: '\f141'; /*3 dots ellipse*/
         color: $gray-400;
     }
 
-    [data-status="local_deepler/totranslate"] i:before {
+    [data-status="local_deepler/totranslate"] i::before {
         content: '\f251'; /* Sand icon*/
         color: $blue;
     }
 
-    [data-status="local_deepler/tosave"] i:before {
+    [data-status="local_deepler/tosave"] i::before {
         content: '\f0c7'; /*floppy (save) icon*/
         color: $blue;
     }
 
-    [data-status="local_deepler/success"] i:before {
+    [data-status="local_deepler/success"] i::before {
         content: '\f00c'; /*check  icon*/
         color: $green;
     }
 
-    [data-status="local_deepler/saved"] i:before {
+    [data-status="local_deepler/saved"] i::before {
         content: '\f1c0'; /*database  icon*/
         color: $green;
     }
 
-    [data-status="local_deepler/failed"] i:before {
+    [data-status="local_deepler/failed"] i::before {
         content: '\f071'; /*exclamation triangle icon*/
         color: $red;
     }
 
-    [data-status="local_deepler/error"] i:before {
+    [data-status="local_deepler/error"] i::before {
         content: '\f1e2'; /*bomb icon*/
         color: $red;
     }

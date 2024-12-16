@@ -105,7 +105,7 @@ const registerEventListeners = () => {
             log(allKeys);
             if (allKeys.length > 0) {
                 launchModal();
-                saveAllBtn.hidden = saveAllBtn.disabled = true;
+                saveAllBtn.disabled = true;
                 saveTranslations(allKeys);
             }
         }
@@ -118,6 +118,7 @@ const registerEventListeners = () => {
 const registerUI = () => {
     try {
         saveAllBtn = document.querySelector(Selectors.actions.saveAll);
+
         sourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
         targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
         autotranslateButton = document.querySelector(Selectors.actions.autoTranslateBtn);
@@ -159,13 +160,13 @@ export const init = (cfg) => {
     info("DEEPLER loaded");
     log(config);
     warn("Deepl's usage", usage);
-    error("testing developper level");
+    error("testing developper level (Your Moodle is set with dev debug level to the max)");
     mainEditorType = config.userPrefs;
     // Setup.
     registerUI();
     registerEventListeners();
     toggleAutotranslateButton();
-
+    saveAllBtn.disabled = true;
     const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
@@ -230,8 +231,7 @@ const hideErrorMessage = (key) => {
  * Opens a modal infobox to warn user trunks of fields are saving.
  * @returns {Promise<void>}
  */
-const launchModal = async () => {
-    // ...
+const launchModal = async() => {
     saveAllModal = await Modal.create({
         title: getString('saveallmodaltitle', 'local_deepler'),
         body: getString('saveallmodalbody', 'local_deepler'),
@@ -317,14 +317,19 @@ const handleAjaxUpdateDBResponse = (data) => {
     data.forEach((item) => {
         if (item.keyid === undefined) {
             // Display generic error message.
-            getString('errordbtitle', 'local_deepler').then((s) => {
-                Modal.create({
-                    title: s,
-                    body: item.error,
-                    type: 'ALERT',
-                    show: true,
-                    removeOnClose: true,
-                });
+            getString('errordbtitle', 'local_deepler')
+                .then((s) => {
+                    Modal.create({
+                            title: s,
+                            body: item.error,
+                            type: 'ALERT',
+                            show: true,
+                            removeOnClose: true,
+                        }
+                    );
+                    return s;
+                }).catch((error)=>{
+                error('errordbtitle, could not get Moodle string!!!');
             });
         } else {
             const key = keyidToKey(item.keyid);
@@ -333,10 +338,13 @@ const handleAjaxUpdateDBResponse = (data) => {
             if (item.error !== undefined) {
                 // Display granular error messages.
                 const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
+                // Text too long.
                 if (indexOfSET > -1) {
-                    // Text too long.
+                    // eslint-disable-next-line promise/always-return
                     getString('errortoolong', 'local_deepler').then((s) => {
                         errorMessageItem(key, tempTranslations[key].editor, item.error.slice(0, indexOfSET) + '<br/>' + s);
+                    }).catch((error)=>{
+                        error('errortoolong, could not get Moodle string!!!');
                     });
                 } else {
                     errorMessageItem(key, tempTranslations[key].editor, item.error);
@@ -659,6 +667,8 @@ const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => 
     }
     icon.setAttribute('role', isBtn ? 'button' : 'status');
     icon.setAttribute('data-status', status);
+    log(config.statusstrings, status, config.statusstrings[status]);
+    icon.setAttribute('title', config.statusstrings[status.replace('local_deepler/', '')]);
 };
 /**
  * Shows/hides rows.
@@ -721,7 +731,7 @@ const switchSource = (e) => {
  * Launch autotranslation.
  */
 const doAutotranslate = () => {
-    saveAllBtn.hidden = saveAllBtn.disabled = false;
+    saveAllBtn.disabled = false;
     document
         .querySelectorAll(Selectors.statuses.checkedCheckBoxes)
         .forEach((ckBox) => {
@@ -741,17 +751,27 @@ const prepareAdvancedSettings = () => {
     let settings = {};
     escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
     escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
+    // eslint-disable-next-line camelcase
     settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
     settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
+    // eslint-disable-next-line camelcase
     settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
+    // eslint-disable-next-line camelcase
     settings.preserve_formatting = document.querySelector(Selectors.deepl.preserveFormatting).checked;//
     settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
+    // eslint-disable-next-line camelcase
     settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
+    // eslint-disable-next-line camelcase
     settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
+    // eslint-disable-next-line camelcase
     settings.non_splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value);
+    // eslint-disable-next-line camelcase
     settings.splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value);
+    // eslint-disable-next-line camelcase
     settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
+    // eslint-disable-next-line camelcase
     settings.target_lang = targetLang.toUpperCase();
+    // eslint-disable-next-line camelcase
     settings.auth_key = config.apikey;
     return settings;
 };
@@ -764,6 +784,7 @@ const prepareAdvancedSettings = () => {
 const prepareTranslation = (key) => {
     return {
         text: tempTranslations[key].source,
+        // eslint-disable-next-line camelcase
         source_lang: tempTranslations[key].sourceLang,
     };
 };
@@ -796,21 +817,20 @@ const getTranslation = (key) => {
     const readystateDone = XMLHttpRequest.DONE ?? 4; // Workaround if undefined when JS is cached, need further investigation.
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;
-    // Build formData
+    // Build formData.
     let formData = prepareFormData(key);
-    // log(tempTranslations);
     if (tempTranslations[key].editor === null) {
         error(`${key} no editor found :((`);
     } else {
         info("Send deepl:", formData);
-        // Update the translation
+        // Update the translation.
         let xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
         xhr.onreadystatechange = () => {
             if (xhr.readyState === readystateDone) {
                 const status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
-                    // The request has been completed successfully
+                    // The request has been completed successfully.
                     log(tempTranslations);
                     let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
                     info("From deepl:", data);
@@ -818,7 +838,7 @@ const getTranslation = (key) => {
                     // Display translation
                     log(tr);
                     tempTranslations[key].editor.innerHTML = tr;
-                    // Store the translation in the global object
+                    // Store the translation in the global object.
                     tempTranslations[key].translation = tr;
                     setIconStatus(key, Selectors.statuses.tosave, true);
                     injectImageCss(
@@ -866,10 +886,10 @@ const injectImageCss = (editorType, editor) => {
     }
 };
 /**
- * @todo get the editor from moodle db in the php.
- * Get the editor container based on recieved current user's
- * editor preference.
+ * Get the editor container based on recieved current user's editor preference.
+ *
  * @param {Integer} key Translation Key
+ * @todo MDL-0 get the editor from moodle db in the php.
  */
 const findEditor = (key) => {
     let e = document.querySelector(Selectors.editors.types.basic
@@ -1000,7 +1020,7 @@ const keyidToKey = (k) => {
     return `${m[1]}[${m[2]}][${m[3]}]`;
 };
 /*
-const getKeyFromComponents = (id, field, table) => {
+Const getKeyFromComponents = (id, field, table) => {
     return `${table}[${id}][${field}]`;
 };
 */

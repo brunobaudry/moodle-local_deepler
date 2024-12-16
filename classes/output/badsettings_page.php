@@ -14,31 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace local_deepler\output;
+
+use renderable;
+use renderer_base;
+use templatable;
+
 /**
- * Course Translator Observers
- *
- * Watch for course, course section, and mod updates
+ * Translate Page Output.
+ * Provides output class for /local/deepler/translate.php when error with connecting to the api is found.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @see        https://docs.moodle.org/dev/Events_API
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-// Event observer for local_deepler.
-$observers = [
-        [
-                'eventname' => '\core\event\course_updated',
-                'callback' => '\local_deepler\observer::course_updated',
-        ],
-        [
-                'eventname' => '\core\event\course_section_updated',
-                'callback' => '\local_deepler\observer::course_section_updated',
-        ],
-        [
-                'eventname' => '\core\event\course_module_updated',
-                'callback' => '\local_deepler\observer::course_module_updated',
-        ],
-];
+class badsettings_page implements renderable, templatable {
+    /**
+     * Export to Template.
+     *
+     * @param renderer_base $output
+     * @return string
+     */
+    public function export_for_template(renderer_base $output) {
+        return '';
+    }
+}

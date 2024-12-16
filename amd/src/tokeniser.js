@@ -19,16 +19,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 /**
- *
  * @type {[{regex: RegExp, type: string},{regex: RegExp, type: string}]}
  */
 const patterns = [
-    {regex: /<pre\b[^>]*>(.*?)<\/pre>/gs, type: 'PRETAG'}, // pre HTML
-    {regex: /\$\$.*?\$\$/g, type: 'LATEX'} // Display math
+    {regex: /<pre\b[^>]*>(.*?)<\/pre>/gs, type: 'PRETAG'}, // Pre HTML.
+    {regex: /\$\$.*?\$\$/g, type: 'LATEX'} // Display math.
 ];
 
 /**
- * Function to replace expressions with tokens
+ * Function to replace expressions with tokens.
  * @param {String} text
  * @param {Object} escapePatterns
  * @returns {Object} {{expressions: *[], tokenizedText}}
@@ -37,8 +36,8 @@ export function preprocess(text, escapePatterns) {
     const expressions = [];
     let tokenizedText = text;
 
-    // Patterns for different environments
-    // Replace each expression with a token
+    // Patterns for different environments.
+    // Replace each expression with a token.
     patterns.forEach(pattern => {
         if (escapePatterns[pattern.type]) {
             tokenizedText = tokenizedText.replace(pattern.regex, match => {
@@ -53,7 +52,7 @@ export function preprocess(text, escapePatterns) {
 }
 
 /**
- * Function to replace tokens with original expressions
+ * Function to replace tokens with original expressions.
  * @param {String} text
  * @param {Array} expressions
  * @returns {String}
@@ -67,7 +66,7 @@ export function postprocess(text, expressions) {
 }
 
 /**
- * Escape LaTeX tags
+ * Escape LaTeX tags.
  * @param {String} str
  * @returns {String}
  */

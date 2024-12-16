@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] 2024-12-05
+
+### Added
+
+- Removed the 'Use pro or free admin setting', as the php DeepL lib does it.
+- If the user has capability show the link in course even if incorrectly set in admin, but with message to instruct admin to do so.
+
+### Fixed
+
+- Display distinct error page for translator when key API not set.
+- Fixed Observers not caught.
+- Fixed section with no activties arry was not set triggering an exception.
+- Fixed access to private cminfo id.
+
 ## [1.2.0] 2024-12-05
 
 ### Added

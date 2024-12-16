@@ -29,6 +29,8 @@ $string['allowsublangs_desc'] =
         'If enabled, when your installation has sub local language, for example de_ch, the main language (de) will be considered as source language. This is to prevent "The source language you are in is not supported by DeepL." from the API.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
+$string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API.
+Check with your Moodle admin';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
 $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
@@ -65,6 +67,7 @@ $string['notsupportedsource'] = 'The source language you are in is not supported
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'DeepL Translator';
+$string['pluginversion'] = 'Current version';
 $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
@@ -92,6 +95,11 @@ $string['splitsentences0'] = 'no splitting at all';
 $string['splitsentences1'] = 'splits on punctuation and on newlines';
 $string['splitsentencesnonewlines'] = 'splits on punctuation only, ignoring newlines';
 $string['splittingtags'] = 'Splitting tags';
+$string['statusfailed'] = 'Failed';
+$string['statussuccess'] = 'Succeeded';
+$string['statustosave'] = 'Save this';
+$string['statustotranslate'] = 'Ready to translate';
+$string['statuswait'] = 'Not selected';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
 $string['tour_advancedsettings00'] =
@@ -236,6 +244,7 @@ $string['tour_advancedsettings23saveall'] =
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
 $string['translatebutton'] = 'Translate &rarr; {$a}';
+$string['translateexplain'] = 'Translate all selected rows to {$a}';
 $string['translationdisabled'] = 'Translation is disabled because this is used as a link in database';
 $string['uptodate'] = 'Up to date';
 $string['viewsource'] = 'Check multilingual content.';

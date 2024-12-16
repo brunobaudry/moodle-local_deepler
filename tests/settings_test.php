@@ -71,7 +71,20 @@ final class settings_test extends \advanced_testcase {
         $this->assertFalse(has_capability('moodle/site:config', \context_system::instance()));
         $this->setAdminUser();
         $this->assertTrue(has_capability('moodle/site:config', \context_system::instance()));
-        $this->assertInstanceOf("admin_settingpage", $settings1);
+        // Testing single settings.
+        $expectedsettings = [
+                'apikey',
+            'allowsublangs',
+            'latexescapeadmin',
+            'preescapeadmin',
+            'scannedfieldsize',
+        ];
+        $settingdeepler = get_config('local_deepler');
+        $this->assertIsObject($settingdeepler);
+        foreach ($expectedsettings as $setting) {
+            $this->assertIsString($setting);
+            $this->assertTrue(property_exists($settingdeepler, $setting));
+        }
     }
 
     /**

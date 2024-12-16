@@ -16,6 +16,7 @@
 
 namespace local_deepler\local\data;
 
+use mod_quiz\quiz_settings;
 use moodle_url;
 
 /**
@@ -121,6 +122,7 @@ class course_data {
         $tab = ['0' => ['section' => $coursedata, 'activities' => []]];
         foreach ($sectiondata as $k => $v) {
             $tab[$v->id]['section'][] = $v;
+            $tab[$v->id]['activities'] = []; // Initialise empty activities array.
         }
         foreach ($activitydata as $ak => $av) {
             // If the section is not found place it under the course data as general intro.
@@ -241,12 +243,18 @@ class course_data {
                     break;
                 case 'quiz':
                     // Get quiz questions.
-                    $quizsettings = \quiz::create($activity->instance);
+                    $quizsettings = quiz_settings::create($activity->instance);
                     $structure = \mod_quiz\structure::create_for_quiz($quizsettings);
                     $slots = $structure->get_slots();
                     foreach ($slots as $slot) {
-                        $question = \question_bank::load_question($slot->questionid);
-                        $this->injectquizcontent($activitydata, $question, $activity);
+                        try {
+                            $question = \question_bank::load_question($slot->questionid);
+                            $this->injectquizcontent($activitydata, $question, $activity);
+                        } catch (\dml_read_exception $e) {
+                            $this->build_data('load_q_error', $e->getMessage(), 0, 'quiz_querstions', $activity, 3 );
+                        } catch (\moodle_exception $me) {
+                            $this->build_data('load_q_error', $me->getMessage(), 0, 'quiz_querstions', $activity, 3 );
+                        }
                     }
                     break;
                 case 'wiki':
@@ -278,7 +286,6 @@ class course_data {
 
             }
         }
-
         return $activitydata;
     }
 
@@ -296,7 +303,7 @@ class course_data {
         $activity = new \stdClass();
         $activity->id = $act->id;
         $activity->modname = 'book_chapters';
-        $activity->section = $act->sectionid;
+        $activity->section = $act->get_section_info()->id;
         // Need to make sure the activity content is blank so that it is not replaced in the hacky get_file_url.
         $activity->content = '';
         // Book chapters have title and content.
@@ -503,17 +510,32 @@ class course_data {
                     $allcombinations = [
                             ['identifier' => $table . $field, 'component' => 'mod_' . $table],
                             ['identifier' => $field, 'component' => 'mod_' . $table],
-                            ['identifier' => $field, 'component' => null],
-                            ['identifier' => $table . $field, 'component' => null],
-                            ['identifier' => $field . $table, 'component' => null],
-                            ['identifier' => $field . ' ' . $table, 'component' => null],
-                            ['identifier' => $foundstring, 'component' => null],
+                            ['identifier' => $field, 'component' => 'moodle'],
+                            ['identifier' => $field, 'component' => 'core'],
+                            ['identifier' => $field, 'component' => 'pagetype'],
+                            ['identifier' => $field, 'component' => 'core_plugin'],
+                            ['identifier' => $table . $field, 'component' => 'moodle'],
+                            ['identifier' => $table . $field, 'component' => 'core'],
+                            ['identifier' => $table . $field, 'component' => 'pagetype'],
+                            ['identifier' => $table . $field, 'component' => 'core_plugin'],
+                            ['identifier' => $field . $table, 'component' => 'moodle'],
+                            ['identifier' => $field . $table, 'component' => 'core'],
+                            ['identifier' => $field . $table, 'component' => 'pagetype'],
+                            ['identifier' => $field . $table, 'component' => 'core_plugin'],
+                            ['identifier' => $field . ' ' . $table, 'component' => 'moodle'],
+                            ['identifier' => $field . ' ' . $table, 'component' => 'core'],
+                            ['identifier' => $field . ' ' . $table, 'component' => 'pagetype'],
+                            ['identifier' => $field . ' ' . $table, 'component' => 'core_plugin'],
+                            ['identifier' => $foundstring, 'component' => 'moodle'],
+                            ['identifier' => $foundstring, 'component' => 'core'],
+                            ['identifier' => $foundstring, 'component' => 'pagetype'],
+                            ['identifier' => $foundstring, 'component' => 'core_plugin'],
                             ['identifier' => $field, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => ($plugroot[1] ?? '') . $field, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => ($plugroot[1] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => $field, 'component' => $table],
-                            ['identifier' => 'pluginname', $table],
+                            ['identifier' => 'pluginname', 'component' => $table],
                     ];
 
                     foreach ($allcombinations as $string) {

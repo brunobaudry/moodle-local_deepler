@@ -19,10 +19,13 @@
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/Admin_settings
  */
+
 defined('MOODLE_INTERNAL') || die();
+
 if (has_capability('moodle/site:config', context_system::instance())) {
     global $ADMIN;
     // Create new settings page.
@@ -37,21 +40,12 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     'local_deepler/apikey',
                     get_string('apikeytitle', 'local_deepler'),
                     get_string('apikeytitle_desc', 'local_deepler'),
-                    null,
+                    '',
                     PARAM_RAW_TRIMMED,
                     40
             )
     );
 
-    // DeepL Free or Pro?
-    $settings->add(
-            new admin_setting_configcheckbox(
-                    'local_deepler/deeplpro',
-                    get_string('deeplprotitle', 'local_deepler'),
-                    get_string('deeplprotitle_desc', 'local_deepler'),
-                    false
-            )
-    );
     // Allow the sub languages codes, that may not be supported by Deepl to be mapped as the main one (expl de_ch -> de).
     $settings->add(
             new admin_setting_configcheckbox(
@@ -88,6 +82,15 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     254,
                     PARAM_INT,
                     4
+            )
+    );
+    // Plugin's version.
+    require_once(__DIR__ . '/version.php');
+    $settings->add(
+            new admin_setting_description(
+                    'local_deepler/pluginversion',
+                    get_string('pluginversion', 'local_deepler'),
+                    $plugin->release ?? 'version'
             )
     );
 }

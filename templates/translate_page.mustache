@@ -245,9 +245,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </label>
             </div>
         </div>
-        <div class="col-9 text-center">
+        <div class="col-7 text-center">
                 <span id="local_deepler-translate-header-usage" class="ml-2 p-1 alert">
-                {{! counts }}
                     {{#str}}wordcountsentence,local_deepler{{/str}}
             </span>
         </div>
@@ -255,6 +254,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             <div class="text-center">
                 <button
                         id="local_deepler-translate-header-translatebutton"
+                        title="{{#str}}translateexplain,local_deepler{{/str}}"
                         type="button"
                         class="float-right mr-2 btn btn-primary local_deepler__autotranslate-btn"
                         data-action="local_deepler/autotranslate-btn"
@@ -263,12 +263,25 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </button>
             </div>
         </div>
+        <div class="col-2 pr-2 text-right">
+            <button
+                    id="local_deepler-translate-header-saveallbutton"
+                    title="{{#str}}saveallexplain,local_deepler{{/str}}"
+                    type="button"
+                    class="btn btn-success local_deepler__saveall-btn"
+                    data-action="local_deepler/saveall-btn"
+                    disabled
+            ><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>
+        </div>
     </div>
 </div>
 <div class="course-section">
     {{{mform}}}
 </div>
-<button
+<div id="local_deepler__footer" class="text-center">
+    <small id="local_deepler__version">{{version}}</small>
+</div>
+<!--<button
         id="local_deepler-translate-header-saveallbutton"
         title="{{#str}}saveallexplain,local_deepler{{/str}}"
         type="button"
@@ -276,4 +289,4 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         data-action="local_deepler/saveall-btn"
         disabled
         hidden
-><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>
+><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>-->

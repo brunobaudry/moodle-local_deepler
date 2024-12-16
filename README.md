@@ -3,16 +3,16 @@
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Deepler is a local moodle plugin that provides automatic machine translation using the ©Deepl Pro Translation api.
+Deepler is a local moodle plugin that provides automatic machine translation using the ©DeepL Pro Translation api.
 It is developed for those who want to translate a course all on one page,
 without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
-0. Fine tune your ©Deepl's settings.
+0. Fine tune your ©DeepL's settings.
 1. Select the source(s) language(s).
 2. Select the target language.
 3. Select the fields to translate.
-4. Send to ©Deepl.
+4. Send to ©DeepL.
 5. Review and or amend automated translations.
 6. Save translations to Moodle's DB (with the multilang {mlang XX} tags).
 7. Your course is multilingual.
@@ -21,12 +21,13 @@ Translation workflow being the following:
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
 
-## Table Of Content
+# Table Of Content
 
 <!-- toc -->
 
 - [Installation](#installation)
   * [Dependencies](#dependencies)
+- [Configuration](#configuration)
   * [Permissions (Moodle capability)](#permissions-moodle-capability)
   * [Admin](#admin)
     + [Allow sub-languages to be mapped to their main](#allow-sub-languages-to-be-mapped-to-their-main)
@@ -66,7 +67,13 @@ Translation workflow being the following:
 - [Future (todos)](#future-todos)
 - [Submit an issue](#submit-an-issue)
 - [Changelog](#changelog)
-- [Contributing](#contributing)
+- [Coding, Debugging and Contributing](#coding-debugging-and-contributing)
+  * [Admin settings.](#admin-settings)
+  * [Contribute to this code base](#contribute-to-this-code-base)
+    + [Adding feature request or reporting defects](#adding-feature-request-or-reporting-defects)
+    + [Pull requests](#pull-requests)
+  * [PHPUNIT and BEHAT](#phpunit-and-behat)
+    + [Github Moodle CI Actions](#github-moodle-ci-actions)
 - [Fork](#fork)
 
 <!-- tocstop -->
@@ -78,10 +85,11 @@ upgrade process.
 
 ### Dependencies
 
-You need a [©Deepl API](https://www.deepl.com/en/pro-api)  Free or Pro account.
+You need a [©DeepL API](https://www.deepl.com/en/pro-api)  Free or Pro account.
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
 ## Configuration
+see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) if you intend to help improving this plugin, or just if you are an admin and want to do some test in a dedicated sandbox.
 
 ### Permissions (Moodle capability) 
 
@@ -91,9 +99,9 @@ The context for this capability is set to USER so that you can also assign it to
 
 ### Admin
 
-To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.** From this page you can configure ©Deepl settings, specify wether
-you are using ©Deepl API Free or ©Deepl API Pro. Visit
-the [©Deepl API page](https://developers.deepl.com/docs/getting-started/readme) to
+To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.** From this page you can configure ©DeepL settings, specify wether
+you are using ©DeepL API Free or ©DeepL API Pro. Visit
+the [©DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
 #### Allow sub-languages to be mapped to their main
@@ -113,7 +121,7 @@ Unchecking it here if your organisation rarely uses LaTeX formulas in the course
 
 #### Default value Escape PRE (in the courses translation page "Advanced Settings")
 
-Do not send <pre>...</pre> to translation by default.
+Do not send &lt;pre&gt;...&lt;/pre&gt; to translation by default.
 
 #### Minimum textfield size
 
@@ -136,7 +144,7 @@ You will be sent to the translation page for the course.
 
 #### Deepl API setting
 
-There you can fine tune [©Deepl's commands](https://developers.deepl.com/docs).
+There you can fine tune [©DeepL's commands](https://developers.deepl.com/docs).
 Usually the default as set below should work fine with Moodle activity content.
 *Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
 
@@ -173,7 +181,7 @@ Note: indeed you cannot translate from and to the same language so buttons and c
 
 #### Unsupported
 
-Language that are not suppoted by ©Deepl are checked at each session so if your Moodle instance have unsupported languages, you will not be able to select it.
+Language that are not suppoted by ©DeepL are checked at each session so if your Moodle instance have unsupported languages, you will not be able to select it.
 
 ### Header
 
@@ -239,12 +247,14 @@ When not found it will highlight the alt text in yellow and italicised as seen a
 ![](pix/translation_process.png)
 
 1. The text is not selected. No translation will occur. ( ... )
-2. The text is selected but not sent to ©Deepl yet. (hourglass)
+2. The text is selected but not sent to ©DeepL yet. (hourglass)
     1. By default, the main source language is selected. It will be stored within {mlang other}* tag.
     2. You set another language as source if your content had some content written in different lang. It will be stored within {mlang xx}* tag.
-3. Translation is retrieved from ©Deepl and filed in the text editor. (floppy)
-    1. Now the translator can review ©Deepl's work and amend the translation if necessary.
+3. Translation is retrieved from ©DeepL and filed in the text editor. (floppy)
+    1. Now the translator can review ©DeepL's work and amend the translation if necessary.
     2. Once happy with the content a click on the floppy button will save the text.
+          ![save button](pix/saves.png)
+       (Save all saves all selected translations by batch)
 4. Translation is saved in the database, with the {mlang} filter surrounding it. (DB icon)
 
 _Note* the following process when saving to the database _
@@ -304,7 +314,7 @@ throughout content that utilize the same language._
 ### Image display and image alt attributes
 
 Currently, images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
-The Alt attribute is not sent to ©Deepl. This should be added in further improvement for better accessibility.
+The Alt attribute is not sent to ©DeepL. This should be added in further improvement for better accessibility.
 
 ## Compatibility
 
@@ -326,6 +336,8 @@ Should work with the following editors:
 It uses the default Moodle JS library and is tested with Boost and Classic.
 So there could be incompatibilities with other themes.
 
+see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) if you intend to help improving this plugin or just if your are an admin and want to do some test in a dedicated sandbox.
+
 ### Webservices
 
 This plugin will add a ```local_deepler_update_translation``` web service for the translation page to perform ajax requests against.
@@ -338,7 +350,7 @@ message on the course translation page.
 
 ## Future (todos)
 
-- Machine translation API abstraction to use other services than ©Deepl.
+- Machine translation API abstraction to use other services than ©DeepL.
 - Display images all times.
 - Translations versioning.
 - Import glossaries.
@@ -353,9 +365,46 @@ Please [submit issues here.](https://github.com/jamfire/moodle-local_deepler/iss
 
 See the [CHANGES.md](CHANGES.md) documentation.
 
-## Contributing
+## Coding, Debugging and Contributing
 
-See the [CONTRIBUTING.md](CONTRIBUTING.md) documentation.
+### Admin settings.
+This plugin relies on javascript. So if you set test environment with Moodle's debugging features,
+make sure **debugdisplay** (Display debug messages) is set to 'No'.
+This because as  **debugdisplay** breaks the xhtml. So message from elsewhere could break the process.
+
+On the other hand with **debug** (Debug messages) there is already a comprehensive messaging that should inform you what is going wrong with the plugin's process.
+Depending on the level DEVELOPPER, ALL, NORMAL, MINIMAL or NONE, the plugin's debugging messages adapt to it.
+
+Check your browser's dev tools (F12) to see the detailed logs.
+
+### Contribute to this code base
+
+#### Adding feature request or reporting defects
+https://github.com/brunobaudry/moodle-local_deepler/issues
+
+Make sure you describe:
+- Your environment (PHP, Moodle version, database, browser used etc.)
+- The current behaviour.
+- The expected behaviour.
+
+Pull requests, adhering to [Moodle's coding guidelines](https://moodledev.io/general/development/policies/codingstyle), are welcome !
+
+#### Pull requests
+See the [CONTRIBUTING.md](CONTRIBUTING.md) default documentation, for how-to with GIT and github and push some code.
+
+### PHPUNIT and BEHAT
+
+This plugins tries to have descent testing setup.
+
+Some additional PHPUNIT, aswell as BEHAT test can run be done provided you have a valid key.
+rename .env-dist to .env and set there your own api key
+**DEEPL_API_TOKEN=DEFAULT** **DEEPL_API_TOKEN=YOUR_OWN_DEEPL_API_KEY**
+(You can add both a pro or a free key, we recommend that you do the tests with a free one).
+
+#### Github Moodle CI Actions 
+If you intend to test in your forked repo this code with Moodle CI.
+Ensure you also add a **Repository secret** with the **DEEPL_API_TOKEN** (as with the .env)
+(Repo > Settings > Security > Secrets and variable > Actions > New repository secret)
 
 ## Fork
 

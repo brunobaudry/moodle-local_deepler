@@ -2,9 +2,7 @@ name: Moodle Plugin CI
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-      branches: [ main, dev ]
+    branches: [ dev ]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -79,12 +77,6 @@ jobs:
           - php: 8.1
             moodle-branch: MOODLE_403_STABLE
             database: mariadb
-          #          - php: 8.0
-          #            moodle-branch: MOODLE_403_STABLE
-          #            database: pgsql
-          #          - php: 8.0
-          #            moodle-branch: MOODLE_403_STABLE
-          #            database: mariadb
           - php: 8.2
             moodle-branch: MOODLE_402_STABLE
             database: pgsql
@@ -97,31 +89,12 @@ jobs:
           - php: 8.1
             moodle-branch: MOODLE_402_STABLE
             database: mariadb
-          #          - php: 8.0
-          #            moodle-branch: MOODLE_402_STABLE
-          #            database: pgsql
-          #          - php: 8.0
-          #            moodle-branch: MOODLE_402_STABLE
-          #            database: mariadb
           - php: 8.1
             moodle-branch: MOODLE_401_STABLE
             database: pgsql
           - php: 8.1
             moodle-branch: MOODLE_401_STABLE
             database: mariadb
-    #          - php: 8.0
-    #            moodle-branch: MOODLE_401_STABLE
-    #            database: pgsql
-    #          - php: 8.0
-    #            moodle-branch: MOODLE_401_STABLE
-    #            database: mariadb
-    #          - php: 7.4
-    #            moodle-branch: MOODLE_401_STABLE
-    #            database: pgsql
-    #          - php: 7.4
-    #            moodle-branch: MOODLE_401_STABLE
-    #            database: mariadb
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -166,7 +139,7 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci codechecker --max-warnings 0
+        run: moodle-plugin-ci codechecker --standard=.phpcs.xml.dist --max-warnings 0
 
       - name: Moodle PHPDoc Checker
         if: ${{ !cancelled() }}
@@ -196,4 +169,6 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile firefox --tags="@local_deepler" --auto-rerun 1
+        run: moodle-plugin-ci behat --profile chrome
+#          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
+#          echo $DEEPL_API_TOKEN | sed 's/./& /g'

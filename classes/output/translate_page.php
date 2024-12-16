@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use filter_multilang2;
 use local_deepler\local\data\lang_helper;
 use renderable;
 use renderer_base;
@@ -33,6 +34,10 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class translate_page implements renderable, templatable {
+    /**
+     * @var string
+     */
+    private string $version;
     /**
      * The course in translation.
      *
@@ -70,9 +75,11 @@ class translate_page implements renderable, templatable {
      * @param array $coursedata
      * @param \filter_multilang2 $mlangfilter
      * @param lang_helper $languagepack
-     * @throws \moodle_exception
+     * @param string $version
      */
-    public function __construct(\stdClass $course, array $coursedata, \filter_multilang2 $mlangfilter, lang_helper $languagepack) {
+    public function __construct(stdClass $course, array $coursedata, filter_multilang2 $mlangfilter, lang_helper $languagepack,
+            string $version) {
+        $this->version = $version;
         $this->course = $course;
         $this->coursedata = $coursedata;
         $this->langpacks = $languagepack;
@@ -112,6 +119,7 @@ class translate_page implements renderable, templatable {
         // Pass data.
         $data->course = $this->course;
         $data->coursedata = $this->coursedata;
+        $data->version = $this->version;
         return $data;
     }
 }

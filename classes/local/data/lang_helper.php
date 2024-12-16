@@ -100,6 +100,13 @@ class lang_helper {
      * @var string
      */
     private mixed $allowsublangcodesasmain;
+    /**
+     * Type of DeepL subscrription.
+     *
+     * @var bool
+     */
+    private $keyisfree;
+
 
     /**
      * Constructor.
@@ -127,25 +134,29 @@ class lang_helper {
      */
     public function init(string $key): bool {
         $this->setdeeplapi($key);
-        $initok = $this->inittranslator();
-        if ($initok) {
-            try {
+        if ($this->isapikeynoset()) {
+            return false;
+        } else {
+            $initok = $this->inittranslator();
+            if ($initok) {
                 try {
-                    $this->usage = $this->translator->getUsage();
-                } catch (DeepLException $e) {
-                    $initok = false;
+                    try {
+                        $this->usage = $this->translator->getUsage();
+                    } catch (DeepLException $e) {
+                        $initok = false;
+                    }
+                    $noissuewithsupportedlanguages = $this->setsupportedlanguages();
+                    $initok = $initok && $noissuewithsupportedlanguages;
+                    $hasunderscore = strpos($this->currentlang, '_');
+                    if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
+                        $this->currentlang = substr($this->currentlang, 0, $hasunderscore);
+                    }
+                } catch (\DeepL\AuthorizationException $e) {
+                    return false;
                 }
-                $noissuewithsupportedlanguages = $this->setsupportedlanguages();
-                $initok = $initok && $noissuewithsupportedlanguages;
-                $hasunderscore = strpos($this->currentlang, '_');
-                if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
-                    $this->currentlang = substr($this->currentlang, 0, $hasunderscore);
-                }
-            } catch (\DeepL\AuthorizationException $e) {
-                return false;
             }
+            return $initok;
         }
-        return $initok;
     }
 
     /**
@@ -156,7 +167,13 @@ class lang_helper {
      * @throws \dml_exception
      */
     private function setdeeplapi(string $key) {
-        $this->apikey = $key === '' ? get_config('local_deepler', 'apikey') : $key;
+
+        $configkey = get_config('local_deepler', 'apikey');
+        if ($configkey === '') {
+            $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
+        }
+        $this->apikey = $key === $configkey ? $key : $configkey;
+        $this->keyisfree = Translator::isAuthKeyFreeAccount($this->apikey);
     }
 
     /**
@@ -251,7 +268,7 @@ class lang_helper {
         }
         $config->lang = $this->targetlang;
         $config->currentlang = $this->currentlang;
-        $config->deeplurl = boolval(get_config('local_deepler', 'deeplpro')) ? self::$deeplpro : self::$deeplfree;
+        $config->deeplurl = Translator::isAuthKeyFreeAccount($this->apikey) ? self::$deeplfree : self::$deeplpro;
         return $config;
     }
 
@@ -283,4 +300,14 @@ class lang_helper {
     public function iscurrentsupported(): bool {
         return $this->islangsupported($this->currentlang, true, true);
     }
+
+    /**
+     * If key empty string.
+     *
+     * @return bool
+     */
+    public function isapikeynoset(): bool {
+        return $this->apikey === '' || $this->apikey === null || $this->apikey === 'DEFAULT';
+    }
+
 }
