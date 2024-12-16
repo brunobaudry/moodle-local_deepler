@@ -159,7 +159,7 @@ export const init = (cfg) => {
     info("DEEPLER loaded");
     log(config);
     warn("Deepl's usage", usage);
-    error("testing developper level");
+    error("testing developper level (Your Moodle is set with dev debug level to the max)");
     mainEditorType = config.userPrefs;
     // Setup.
     registerUI();
