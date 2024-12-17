@@ -25,6 +25,7 @@ import Selectors from "./selectors";
 import Modal from 'core/modal';
 import {get_string as getString} from "core/str";
 import {escapeReplacementString, postprocess, preprocess} from "./tokeniser";
+import {Logger} from "./logger";
 
 
 // Initialize the temporary translations dictionary @todo make external class
@@ -40,25 +41,7 @@ let usage = {};
 let format = new Intl.NumberFormat();
 let saveAllModal = {};
 const escapePatterns = {};
-let log = (...a) => {
-    return a;
-};
-let warn = (...a) => {
-    return a;
-};
-let info = (...a) => {
-    return a;
-};
-let error = (...a) => {
-    return a;
-};
-const debug = {
-    NONE: 0,
-    MINIMAL: 5,
-    NORMAL: 15,
-    ALL: 30719,
-    DEVELOPER: 32767
-};
+let logger = {};
 /**
  * Event factory.
  */
@@ -88,7 +71,7 @@ const registerEventListeners = () => {
             if (config.currentlang === config.lang || config.lang === undefined) {
                 Modal.create({
                     title: 'Cannot call deepl',
-                    body: `<p>Both languges are the same {$config.lang}</p>`,
+                    body: `<p>Both languages are the same {$config.lang}</p>`,
                     show: true,
                     removeOnClose: true,
                 });
@@ -102,7 +85,7 @@ const registerEventListeners = () => {
         if (e.target.closest(Selectors.actions.saveAll)) {
             const selected = document.querySelectorAll(Selectors.statuses.checkedCheckBoxes);
             const allKeys = Array.from(selected).map((e) => e.dataset.key);
-            log(allKeys);
+            logger.log(allKeys);
             if (allKeys.length > 0) {
                 launchModal();
                 saveAllBtn.disabled = true;
@@ -118,7 +101,6 @@ const registerEventListeners = () => {
 const registerUI = () => {
     try {
         saveAllBtn = document.querySelector(Selectors.actions.saveAll);
-
         sourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
         targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
         autotranslateButton = document.querySelector(Selectors.actions.autoTranslateBtn);
@@ -129,7 +111,7 @@ const registerUI = () => {
         });
     } catch (e) {
         if (config.debug) {
-            error(e.message);
+            logger.error(e.message);
         }
     }
 };
@@ -138,29 +120,11 @@ const registerUI = () => {
  * @param {Object} cfg JS Config
  */
 export const init = (cfg) => {
-    log('init');
     config = cfg;
     usage = config.usage;
     // Preparing the debugger.
-    if (config.debug === debug.MINIMAL) {
-        error = window.console.error.bind(window.console);
-    } else if (config.debug === debug.NORMAL) {
-        error = window.console.error.bind(window.console);
-        warn = window.console.warn.bind(window.console);
-    } else if (config.debug === debug.ALL) {
-        error = window.console.error.bind(window.console);
-        warn = window.console.warn.bind(window.console);
-        info = window.console.info.bind(window.console);
-    } else if (config.debug === debug.DEVELOPER) {
-        error = window.console.error.bind(window.console);
-        warn = window.console.warn.bind(window.console);
-        info = window.console.info.bind(window.console);
-        log = window.console.log.bind(window.console);
-    }
-    info("DEEPLER loaded");
-    log(config);
-    warn("Deepl's usage", usage);
-    error("testing developper level (Your Moodle is set with dev debug level to the max)");
+    logger = new Logger(config.debug);
+    logger.log('DEEPLER init');
     mainEditorType = config.userPrefs;
     // Setup.
     registerUI();
@@ -184,7 +148,7 @@ export const init = (cfg) => {
                 /**
                  * @todo do a UI feedback (disable save )
                  */
-                error(`Translation key "${key}" is undefined `);
+                logger.error(`Translation key "${key}" is undefined `);
             } else if (currentStatus === Selectors.statuses.tosave) {
                 saveTranslation(key);
             }
@@ -329,7 +293,7 @@ const handleAjaxUpdateDBResponse = (data) => {
                     );
                     return s;
                 }).catch((error)=>{
-                error('errordbtitle, could not get Moodle string!!!');
+                logger.error('errordbtitle, could not get Moodle string!!! ' + error);
             });
         } else {
             const key = keyidToKey(item.keyid);
@@ -344,7 +308,7 @@ const handleAjaxUpdateDBResponse = (data) => {
                     getString('errortoolong', 'local_deepler').then((s) => {
                         errorMessageItem(key, tempTranslations[key].editor, item.error.slice(0, indexOfSET) + '<br/>' + s);
                     }).catch((error)=>{
-                        error('errortoolong, could not get Moodle string!!!');
+                        logger.error('errortoolong, could not get Moodle string!!! ' + error);
                     });
                 } else {
                     errorMessageItem(key, tempTranslations[key].editor, item.error);
@@ -545,7 +509,7 @@ const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
  * @param {Event} e
  */
 const onItemChecked = (e) => {
-    log("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
+    logger.log("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
     const key = e.target.getAttribute('data-key');
     if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
         toggleStatus(key, e.target.checked);
@@ -667,7 +631,7 @@ const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => 
     }
     icon.setAttribute('role', isBtn ? 'button' : 'status');
     icon.setAttribute('data-status', status);
-    log(config.statusstrings, status, config.statusstrings[status]);
+    logger.log(config.statusstrings, status, config.statusstrings[status]);
     icon.setAttribute('title', config.statusstrings[status.replace('local_deepler/', '')]);
 };
 /**
@@ -686,7 +650,7 @@ const showRows = (selector, selected) => {
             item.querySelector(replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)).checked = allSelected && selected;
             toggleStatus(k, false);
         } catch (e) {
-            log(`${k} translation is disalbled`);
+            logger.log(`${k} translation is disalbled`);
         }
 
     });
@@ -747,7 +711,7 @@ const doAutotranslate = () => {
  * @returns {{}}
  */
 const prepareAdvancedSettings = () => {
-    info('prepareAdvancedSettings');
+    logger.info('prepareAdvancedSettings');
     let settings = {};
     escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
     escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
@@ -820,9 +784,9 @@ const getTranslation = (key) => {
     // Build formData.
     let formData = prepareFormData(key);
     if (tempTranslations[key].editor === null) {
-        error(`${key} no editor found :((`);
+        logger.error(`${key} no editor found :((`);
     } else {
-        info("Send deepl:", formData);
+        logger.info("Send deepl:", formData);
         // Update the translation.
         let xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
@@ -831,12 +795,12 @@ const getTranslation = (key) => {
                 const status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
                     // The request has been completed successfully.
-                    log(tempTranslations);
+                    logger.log(tempTranslations);
                     let data = xhr.responseType === 'text' || xhr.responseType === '' ? JSON.parse(xhr.responseText) : xhr.response;
-                    info("From deepl:", data);
+                    logger.info("From deepl:", data);
                     let tr = postprocess(data.translations[0].text, tempTranslations[key].tokens, escapePatterns);
                     // Display translation
-                    log(tr);
+                    logger.log(tr);
                     tempTranslations[key].editor.innerHTML = tr;
                     // Store the translation in the global object.
                     tempTranslations[key].translation = tr;
@@ -850,7 +814,7 @@ const getTranslation = (key) => {
                 }
             } else if (typeof xhr.readyState !== 'number') {
                 // Workaround for the Adaptable theme that did change the return type of xhr.readyState.
-                log('ERROR: Some JS library in your Moodle install are overriding the core functionalities in a wrong way.' +
+                logger.log('ERROR: Some JS library in your Moodle install are overriding the core functionalities in a wrong way.' +
                     'xhr.readyState MUST be of type "number"');
             }
         };
@@ -899,14 +863,14 @@ const findEditor = (key) => {
         let r = null;
         let editorTab = ["atto", "tiny", "marklar", "textarea"];
         if (editorTab.indexOf(mainEditorType) === -1) {
-            warn('Unsupported editor ' + mainEditorType);
+            logger.warn('Unsupported editor ' + mainEditorType);
         } else {
             // First let's try the current editor.
             try {
                 r = findEditorByType(key, mainEditorType);
             } catch (error) {
                 // Content was edited by another editor.
-                log(`Editor not found: ${mainEditorType} for key ${key}`);
+                logger.log(`Editor not found: ${mainEditorType} for key ${key}`);
             }
         }
         return r;

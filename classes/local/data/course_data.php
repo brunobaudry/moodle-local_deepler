@@ -504,6 +504,12 @@ class course_data {
                 } else {
                     $foundstring = $field;
                     $plugroot = explode("_", $table);
+                    if (isset($plugroot[1])) {
+                        if (substr($plugroot[1], -1) === 's') {
+                            $plugroot[2] = substr($plugroot[1], 0, strlen($plugroot[1]) - 1);
+                        }
+                    }
+
                     $fieldwithoutunderscore = str_replace("_", "", $field);
 
                     // Try several combining possible to try to fetch weird unknown string names.
@@ -532,8 +538,10 @@ class course_data {
                             ['identifier' => $foundstring, 'component' => 'core_plugin'],
                             ['identifier' => $field, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => ($plugroot[1] ?? '') . $field, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => ($plugroot[2] ?? '') . $field, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => ($plugroot[1] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
+                            ['identifier' => ($plugroot[2] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
                             ['identifier' => $field, 'component' => $table],
                             ['identifier' => 'pluginname', 'component' => $table],
                     ];
