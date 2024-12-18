@@ -156,6 +156,19 @@ jobs:
 #      - name: Mustache Lint
 #        if: ${{ always() }}
 #        run: moodle-plugin-ci mustache
+      - name: Clean build directory
+        run: rm -rf amd/build/*
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.18.1'
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Run Grunt tasks
+        run: grunt
 
       - name: Grunt
         if: ${{ always() }}
