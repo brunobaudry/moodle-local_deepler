@@ -19,7 +19,7 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// Import libs
+
 define(
     [
         'core/ajax',
@@ -34,8 +34,6 @@ define(
 
         // Destructure the tokeniser functions
         const {escapeReplacementString, postprocess, preprocess} = Tokeniser;
-
-
 // Initialize the temporary translations dictionary @todo make external class
         let tempTranslations = {};
         let mainEditorType = '';
