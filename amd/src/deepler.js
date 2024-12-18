@@ -83,7 +83,8 @@ const registerEventListeners = () => {
             toggleAllCheckboxes(e);
         }
         if (e.target.closest(Selectors.actions.saveAll)) {
-            const selected = document.querySelectorAll(Selectors.statuses.checkedCheckBoxes);
+            // Const selected = document.querySelectorAll(Selectors.statuses.checkedCheckBoxes);
+            const selected = Selectors.statuses.checkedCheckBoxes.queryAll();
             const allKeys = Array.from(selected).map((e) => e.dataset.key);
             logger.log(allKeys);
             if (allKeys.length > 0) {
@@ -100,11 +101,12 @@ const registerEventListeners = () => {
  */
 const registerUI = () => {
     try {
-        saveAllBtn = document.querySelector(Selectors.actions.saveAll);
-        sourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
-        targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
-        autotranslateButton = document.querySelector(Selectors.actions.autoTranslateBtn);
-        checkboxes = document.querySelectorAll(Selectors.actions.checkBoxes);
+        // SaveAllBtn = Selectors.query(Selectors.actions.saveAll);
+        saveAllBtn = Selectors.actions.saveAll.query();
+        sourceLang = Selectors.actions.sourceSwitcher.query().value;
+        targetLang = Selectors.actions.targetSwitcher.query().value;
+        autotranslateButton = Selectors.actions.autoTranslateBtn.query();
+        checkboxes = Selectors.actions.checkBoxes.queryAll();
         // Initialise status object.
         checkboxes.forEach((node) => {
             tempTranslations[node.dataset.key] = {};
@@ -131,18 +133,18 @@ export const init = (cfg) => {
     registerEventListeners();
     toggleAutotranslateButton();
     saveAllBtn.disabled = true;
-    const selectAllBtn = document.querySelector(Selectors.actions.selectAllBtn);
+    const selectAllBtn = Selectors.actions.selectAllBtn.query();
     selectAllBtn.disabled = sourceLang === targetLang;
     /**
      * Validate translation ck
      */
-    const validators = document.querySelectorAll(Selectors.actions.validatorsBtns);
+    const validators = Selectors.actions.validatorsBtns.queryAll();
     validators.forEach((item) => {
         // Get the stored data and do the saving from editors content
         item.addEventListener('click', (e) => {
             const _this = e.target.closest(Selectors.actions.validatorsBtns);
             const key = _this.dataset.keyValidator;
-            const icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+            const icon = Selectors.actions.validatorBtn.queryKey(key);
             let currentStatus = icon.getAttribute('data-status');
             if (tempTranslations[key] === null || tempTranslations[key] === undefined) {
                 /**
@@ -163,8 +165,10 @@ export const init = (cfg) => {
             toggleAutotranslateButton();
         });
     });
-    showRows(Selectors.statuses.updated, document.querySelector(Selectors.actions.showUpdated).checked);
-    showRows(Selectors.statuses.needsupdate, document.querySelector(Selectors.actions.showNeedUpdate).checked);
+    showRows(Selectors.statuses.updated,
+        Selectors.actions.showUpdated.query().checked);
+    showRows(Selectors.statuses.needsupdate,
+        Selectors.actions.showNeedUpdate.query().checked);
 };
 /**
  * Display error message attached to the item's editor.
@@ -172,7 +176,8 @@ export const init = (cfg) => {
  * @param {String} message
  */
 const showErrorMessageForEditor = (key, message) => {
-    let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
+  //  Let parent = Selectors.query(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
+    let parent = Selectors.editors.multiples.editorsWithKey.queryKey(key);
     const errorMsg = document.createElement('div');
     errorMsg.id = 'local_deepler__errormsg';
     errorMsg.classList = ['alert alert-danger'];
@@ -185,7 +190,8 @@ const showErrorMessageForEditor = (key, message) => {
  * @param {String} key
  */
 const hideErrorMessage = (key) => {
-    let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
+    // Let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
+    let parent = Selectors.editors.multiples.editorsWithKey.queryKey(key);
     let alertChild = parent.querySelector('.alert-danger');
     if (alertChild) {
         parent.removeChild(alertChild);
@@ -214,8 +220,8 @@ const successMessageItem = (key, element) => {
     setIconStatus(key, Selectors.statuses.success);
     // Remove success message after a few seconds
     setTimeout(() => {
-        let multilangPill = document.querySelector(replaceKey(Selectors.statuses.multilang, key));
-        let prevTransStatus = document.querySelector(replaceKey(Selectors.statuses.prevTransStatus, key));
+        let multilangPill = Selectors.statuses.multilang.queryKey(key);
+        let prevTransStatus = Selectors.statuses.prevTransStatus.queryKey(key);
         prevTransStatus.classList = "badge badge-pill badge-success";
         if (multilangPill.classList.contains("disabled")) {
             multilangPill.classList.remove('disabled');
@@ -297,8 +303,8 @@ const handleAjaxUpdateDBResponse = (data) => {
             });
         } else {
             const key = keyidToKey(item.keyid);
-            const htmlElement = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
-            const multilangTextarea = document.querySelector(replaceKey(Selectors.editors.multiples.textAreas, key));
+            const htmlElement = Selectors.editors.multiples.editorsWithKey.queryKey(key);
+            const multilangTextarea = Selectors.editors.multiples.textAreas.queryKey(key);
             if (item.error !== undefined) {
                 // Display granular error messages.
                 const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
@@ -317,8 +323,7 @@ const handleAjaxUpdateDBResponse = (data) => {
                 successMessageItem(key, htmlElement);
                 multilangTextarea.innerHTML = item.text;
                 // Deselect the checkbox.
-                document.querySelector(Selectors.editors.multiples.checkBoxesWithKey.replace('<KEY>', key))
-                    .checked = false;
+                Selectors.editors.multiples.checkBoxesWithKey.queryKey(key).checked = false;
             }
         }
     });
@@ -332,7 +337,7 @@ const saveTranslations = (keys) => {
 
     const data = [];
     keys.forEach((key) => {
-            const icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+            const icon = Selectors.actions.validatorBtn.queryKey(key);
             const currentStatus = icon.getAttribute('data-status');
             if (currentStatus === Selectors.statuses.tosave) {
                 hideErrorMessage(key);
@@ -347,6 +352,7 @@ const saveTranslations = (keys) => {
                 data: data,
             },
             done: (data) => {
+                logger.info(data);
                 if (saveAllModal !== null && saveAllModal.isVisible) {
                     saveAllModal.hide();
                 }
@@ -359,6 +365,7 @@ const saveTranslations = (keys) => {
                 }
             },
             fail: (err) => {
+                logger.warn(err);
                 // An error occurred
                 keys.forEach((key) => {
                     errorMessageItem(key, tempTranslations[key].editor, err.toString());
@@ -381,6 +388,7 @@ const saveTranslation = (key) => {
                 data: [prepareDbUpdatdeItem(key)],
             },
             done: (data) => {
+                logger.info(data);
                 if (data.length > 0) {
                     handleAjaxUpdateDBResponse(data);
                 } else {
@@ -388,6 +396,7 @@ const saveTranslation = (key) => {
                 }
             },
             fail: (err) => {
+                logger.warn(err);
                 // An error occurred
                 errorMessageItem(key, tempTranslations[key].editor, err.toString());
             },
@@ -405,7 +414,7 @@ const prepareDbUpdatdeItem = (key) => {
     const textTranslated = getEditorText(editor);
     const sourceText = getSourceText(key);
     const fieldText = tempTranslations[key].fieldText;
-    const element = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
+    const element = Selectors.editors.multiples.editorsWithKey.queryKey(key);
     const {id, tid, field, table} = getElementAttributes(element);
     const textTosave = getupdatedtext(fieldText, textTranslated, sourceText, tempTranslations[key].sourceLang);
     return {
@@ -527,15 +536,18 @@ const onItemChecked = (e) => {
 const initTempForKey = (key, blank) => {
 
     // Get the source text
-    const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
-    const sourceTextEncoded = document.querySelector(sourceSelector).getAttribute("data-sourcetext-raw");
-    const multilangRawTextEncoded = document.querySelector(sourceSelector).getAttribute("data-filedtext-raw");
+    // const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>", key);
+    // const sourceTextEncoded = Selectors.query(sourceSelector).getAttribute("data-sourcetext-raw");
+    // const multilangRawTextEncoded = Selectors.query(sourceSelector).getAttribute("data-filedtext-raw");
+    // const sourceSelector = Selectors.sourcetexts.keys.replace("<KEY>",key);
+    const sourceTextEncoded = Selectors.sourcetexts.keys.queryKey(key).getAttribute("data-sourcetext-raw");
+    const multilangRawTextEncoded = Selectors.sourcetexts.keys.queryKey(key).getAttribute("data-filedtext-raw");
     const sourceText = fromBase64(sourceTextEncoded);
     const fieldText = fromBase64(multilangRawTextEncoded);
     const tokenised = preprocess(sourceText, escapePatterns, escapePatterns);
     // Store the settings.
     const editorSettings = findEditor(key);
-    const sourceLang = document.querySelector(Selectors.sourcetexts.sourcelangs.replace("<KEY>", key)).value;
+    const sourceLang = Selectors.sourcetexts.sourcelangs.queryKey(key).value;
     // We make sure to initialize the record.
     tempTranslations[key] = {
         'editorType': null,
@@ -573,7 +585,7 @@ const initTempForKey = (key, blank) => {
  * @param {Boolean} checked
  */
 const toggleStatus = (key, checked) => {
-    const status = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key)).dataset.status;
+    const status = Selectors.actions.validatorBtn.queryKey(key).dataset.status;
     switch (status) {
         case Selectors.statuses.wait :
             if (checked) {
@@ -607,11 +619,11 @@ const toggleStatus = (key, checked) => {
  * Change the item icon status as button.
  *
  * @param {String} key
- * @param {String} status
+ * @param {SelectorObject} status
  * @param {Boolean} isBtn
  */
 const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
-    let icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
+    let icon = Selectors.actions.validatorBtn.queryKey(key);
     if (isBtn) {
         if (!icon.classList.contains('btn')) {
             icon.classList.add('btn');
@@ -636,18 +648,21 @@ const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => 
 };
 /**
  * Shows/hides rows.
- * @param {string} selector
+ * @param {SelectorObject} selector
  * @param {boolean} selected
  */
 const showRows = (selector, selected) => {
     const items = document.querySelectorAll(selector);
-    const allSelected = document.querySelector(Selectors.actions.selectAllBtn).checked;
+    const allSelected = Selectors.actions.selectAllBtn.query().checked;
     items.forEach((item) => {
         let k = item.getAttribute('data-row-id');
         toggleRowVisibility(item, selected);
         // When a row is toggled then we don't want it to be selected and sent from translation.
         try {
-            item.querySelector(replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)).checked = allSelected && selected;
+            // Item.querySelector(
+            //     Selectors.replaceKey(Selectors.editors.multiples.checkBoxesWithKey, k)
+            // ).checked = allSelected && selected;
+            Selectors.editors.multiples.checkBoxesWithKey.queryKey(k, item).checked = allSelected && selected;
             toggleStatus(k, false);
         } catch (e) {
             logger.log(`${k} translation is disalbled`);
@@ -696,10 +711,10 @@ const switchSource = (e) => {
  */
 const doAutotranslate = () => {
     saveAllBtn.disabled = false;
-    document
-        .querySelectorAll(Selectors.statuses.checkedCheckBoxes)
+    Selectors.statuses.checkedCheckBoxes.queryAll()
         .forEach((ckBox) => {
             let key = ckBox.getAttribute("data-key");
+            initTempForKey(key);
             if (tempTranslations[key].editor !== null) {
                 getTranslation(key);
             }
@@ -713,26 +728,26 @@ const doAutotranslate = () => {
 const prepareAdvancedSettings = () => {
     logger.info('prepareAdvancedSettings');
     let settings = {};
-    escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
-    escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
+    escapePatterns.LATEX = Selectors.actions.escapeLatex.query().checked;
+    escapePatterns.PRETAG = Selectors.actions.escapePre.query().checked;
     // eslint-disable-next-line camelcase
-    settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
-    settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
+    settings.tag_handling = Selectors.deepl.tagHandling.query().checked ? 'html' : 'xml';//
+    settings.context = Selectors.deepl.context.query().value ?? null;//
     // eslint-disable-next-line camelcase
-    settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
+    settings.split_sentences = Selectors.deepl.splitSentences.query().value;//
     // eslint-disable-next-line camelcase
-    settings.preserve_formatting = document.querySelector(Selectors.deepl.preserveFormatting).checked;//
-    settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
+    settings.preserve_formatting = Selectors.deepl.preserveFormatting.query().checked;//
+    settings.formality = '[name="local_deepler/formality"]:checked'.query().value;
     // eslint-disable-next-line camelcase
-    settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
+    settings.glossary_id = Selectors.deepl.glossaryId.query().value;//
     // eslint-disable-next-line camelcase
-    settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
+    settings.outline_detection = Selectors.deepl.outlineDetection.query().checked;//
     // eslint-disable-next-line camelcase
-    settings.non_splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value);
+    settings.non_splitting_tags = toJsonArray(Selectors.deepl.nonSplittingTags.query().value);
     // eslint-disable-next-line camelcase
-    settings.splitting_tags = toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value);
+    settings.splitting_tags = toJsonArray(Selectors.deepl.splittingTags.query().value);
     // eslint-disable-next-line camelcase
-    settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
+    settings.ignore_tags = toJsonArray(Selectors.deepl.ignoreTags.query().value);
     // eslint-disable-next-line camelcase
     settings.target_lang = targetLang.toUpperCase();
     // eslint-disable-next-line camelcase
@@ -929,7 +944,7 @@ const toggleAllCheckboxes = (e) => {
     countWordAndChar();
 };
 const getParentRow = (node) => {
-    return node.closest(replaceKey(Selectors.sourcetexts.parentrow, node.getAttribute('data-key')));
+    return node.closest(Selectors.replaceKey(Selectors.sourcetexts.parentrow, node.getAttribute('data-key')));
 };
 /**
  * Toggle Autotranslate Button
@@ -951,8 +966,8 @@ const toggleAutotranslateButton = () => {
 const onToggleMultilang = (e) => {
     let keyid = e.getAttribute('aria-controls');
     let key = keyidToKey(keyid);
-    let source = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
-    let multilang = document.querySelector(replaceKey(Selectors.sourcetexts.multilangs, keyid));
+    let source = Selectors.querySelectorKey(Selectors.sourcetexts.keys, key);
+    let multilang = Selectors.querySelectorKey(Selectors.sourcetexts.multilangs, keyid);
     source.classList.toggle("show");
     multilang.classList.toggle("show");
 };
@@ -964,15 +979,6 @@ const onToggleMultilang = (e) => {
  */
 const toJsonArray = (s, sep = ",") => {
     return JSON.stringify(s.split(sep));
-};
-/**
- * Simple helper to manage selectors
- * @param {string} s
- * @param {string} k
- * @returns {*}
- */
-const replaceKey = (s, k) => {
-    return s.replace("<KEY>", k);
 };
 /**
  * Transforms a keyid to a key.
@@ -1004,12 +1010,12 @@ const countWordAndChar = () => {
             cwos += results.charNumWithOutSpace;
             cws += results.charNumWithSpace;
         });
-    const wordCount = document.querySelector(Selectors.statuses.wordcount);
-    const charWithSpace = document.querySelector(Selectors.statuses.charNumWithSpace);
-    const charWOSpace = document.querySelector(Selectors.statuses.charNumWithOutSpace);
-    const deeplUseSpan = document.querySelector(Selectors.statuses.deeplUsage);
-    const deeplMaxSpan = document.querySelector(Selectors.statuses.deeplMax);
-    const parent = document.querySelector(Selectors.statuses.deeplStatusContainer);
+    const wordCount = Selectors.statuses.wordcount.query();
+    const charWithSpace = Selectors.statuses.charNumWithSpace.query();
+    const charWOSpace = Selectors.statuses.charNumWithOutSpace.query();
+    const deeplUseSpan = Selectors.statuses.deeplUsage.query();
+    const deeplMaxSpan = Selectors.statuses.deeplMax.query();
+    const parent = Selectors.statuses.deeplStatusContainer.query();
     let current = cwos + usage.character.count;
     wordCount.innerText = wrdsc;
     charWithSpace.innerText = cws;
@@ -1031,7 +1037,7 @@ const countWordAndChar = () => {
  * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
  */
 const getCount = (key) => {
-    const item = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
+    const item = Selectors.querySelectorKey(Selectors.sourcetexts.keys, key);
     const raw = item.getAttribute("data-sourcetext-raw");
     // Cleaned sourceText.
     const trimmedVal = stripHTMLTags(fromBase64(raw)).trim();
