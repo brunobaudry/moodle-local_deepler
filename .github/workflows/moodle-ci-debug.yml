@@ -169,7 +169,12 @@ jobs:
 
       - name: Run Grunt tasks
         run: grunt
-
+        working-directory: ../../Gruntfile.js
+        env:
+          COMPOSER_PROCESS_TIMEOUT: 0
+          COMPOSER_NO_INTERACTION: 1
+          COMPOSER_NO_AUDIT: 1
+          NVM_DIR: /home/runner/.nvm
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
