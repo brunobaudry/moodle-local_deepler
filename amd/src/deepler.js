@@ -383,6 +383,7 @@ const saveTranslations = (keys) => {
                 data: data,
             },
             done: (data) => {
+                info(data);
                 if (saveAllModal !== null && saveAllModal.isVisible) {
                     saveAllModal.hide();
                 }
@@ -395,6 +396,7 @@ const saveTranslations = (keys) => {
                 }
             },
             fail: (err) => {
+                warn(err);
                 // An error occurred
                 keys.forEach((key) => {
                     errorMessageItem(key, tempTranslations[key].editor, err.toString());
@@ -417,6 +419,7 @@ const saveTranslation = (key) => {
                 data: [prepareDbUpdatdeItem(key)],
             },
             done: (data) => {
+                info(data);
                 if (data.length > 0) {
                     handleAjaxUpdateDBResponse(data);
                 } else {
@@ -424,6 +427,7 @@ const saveTranslation = (key) => {
                 }
             },
             fail: (err) => {
+                warn(err);
                 // An error occurred
                 errorMessageItem(key, tempTranslations[key].editor, err.toString());
             },
@@ -667,7 +671,6 @@ const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => 
     }
     icon.setAttribute('role', isBtn ? 'button' : 'status');
     icon.setAttribute('data-status', status);
-    log(config.statusstrings, status, config.statusstrings[status]);
     icon.setAttribute('title', config.statusstrings[status.replace('local_deepler/', '')]);
 };
 /**
@@ -731,11 +734,13 @@ const switchSource = (e) => {
  * Launch autotranslation.
  */
 const doAutotranslate = () => {
+    log('Do auto translate');
     saveAllBtn.disabled = false;
     document
         .querySelectorAll(Selectors.statuses.checkedCheckBoxes)
         .forEach((ckBox) => {
             let key = ckBox.getAttribute("data-key");
+            initTempForKey(key);
             if (tempTranslations[key].editor !== null) {
                 getTranslation(key);
             }
@@ -814,6 +819,7 @@ const prepareFormData = (key, url = true) => {
  * @param {Integer} key Translation Key
  */
 const getTranslation = (key) => {
+    log('getTranslation');
     const readystateDone = XMLHttpRequest.DONE ?? 4; // Workaround if undefined when JS is cached, need further investigation.
     // Initialize global dictionary with this key's editor.
     tempTranslations[key].staus = Selectors.statuses.wait;

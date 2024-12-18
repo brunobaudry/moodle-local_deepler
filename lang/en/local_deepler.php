@@ -96,6 +96,7 @@ $string['splitsentences1'] = 'splits on punctuation and on newlines';
 $string['splitsentencesnonewlines'] = 'splits on punctuation only, ignoring newlines';
 $string['splittingtags'] = 'Splitting tags';
 $string['statusfailed'] = 'Failed';
+$string['statussaved'] = 'Saved';
 $string['statussuccess'] = 'Succeeded';
 $string['statustosave'] = 'Save this';
 $string['statustotranslate'] = 'Ready to translate';
