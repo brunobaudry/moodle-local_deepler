@@ -169,7 +169,7 @@ jobs:
 
       - name: Run Grunt tasks
         run: grunt
-        working-directory: ../../Gruntfile.js
+        working-directory: ./moodle/Gruntfile.js
         env:
           COMPOSER_PROCESS_TIMEOUT: 0
           COMPOSER_NO_INTERACTION: 1
