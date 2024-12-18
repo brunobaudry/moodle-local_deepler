@@ -29,7 +29,7 @@ if (!isset($plugin)) {
     $plugin = new stdClass();
 }
 $plugin->component = 'local_deepler'; // Full name of the plugin (used for diagnostics).
-$plugin->version = 2024121803; // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version = 2024121805; // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires = 2020112800; // Requires Moodle 4.1 LTS.
 $plugin->supported = [401, 405]; // Supported Moodle Versions.
 $plugin->maturity = MATURITY_ALPHA; // Maturity level.
