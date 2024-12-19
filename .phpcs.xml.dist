@@ -1,15 +1,7 @@
 <?xml version="1.0"?>
 <ruleset name="Moodle">
     <description>Moodle coding standards</description>
-    <rule ref="PSR2"/>
-    <rule ref="Generic.WhiteSpace.DisallowTabIndent"/>
-    <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="120"/>
-            <property name="absoluteLineLimit" value="150"/>
-        </properties>
-    </rule>
-    <rule ref="moodle"/>
+    <rule ref="Moodle"/>
     <file>.</file>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
 </ruleset>
