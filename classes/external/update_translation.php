@@ -63,13 +63,20 @@ class update_translation extends external_api {
      */
     public static function execute($data) {
         global $CFG, $DB;
-        $response = [];
+        $responses = [];
         try {
             $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
             $transaction = $DB->start_delegated_transaction();
-
             purge_all_caches();
             foreach ($params['data'] as $data) {
+                $response = [];
+                $dataobject['id'] = $data['id'];
+                $dataobject[$data['field']] = $data['text'];
+                $keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
+                $response['keyid'] = $keyid;
+                $response['t_lastmodified'] = 0;
+                $response['text'] = '';
+                $response['error'] = '';
                 try {
                     // Security checks.
                     $context = \context_course::instance($data['courseid']);
@@ -81,42 +88,30 @@ class update_translation extends external_api {
                             strpos($data['table'], 'qtype') === false) {
                         require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
                     }
-                    $dataobject['id'] = $data['id'];
-                    $dataobject[$data['field']] = $data['text'];
-                    $keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
-
                     $DB->update_record($data['table'], (object) $dataobject);
                     // Update t_lastmodified.
                     $timemodified = time();
                     $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
-                    $response[] = ['t_lastmodified' => $timemodified, 'text' => $data['text'], 'keyid' => $keyid];
+                    $response['t_lastmodified'] = $timemodified;
+                    $response['text'] = $data['text'];
 
                 } catch (\core_external\required_capability_exception $capex) {
-                    $response[] = [
-                            'error' => $capex->debuginfo ?? $capex->errorcode,
-                            'keyid' => $keyid,
-                    ];
+                    $response['error'] = $capex->debuginfo ?? $capex->errorcode;
                 } catch (\core_external\restricted_context_exception $cex) {
-                    $response[] = [
-                            'error' => $cex->debuginfo ?? $cex->errorcode,
-                            'keyid' => $keyid,
-                    ];
+                    $response['error'] = $capex->debuginfo ?? $capex->errorcode;
                 } catch (\dml_exception $dmlexception) {
-                    $response[] = [
-                            'error' => $dmlexception->debuginfo ?? $dmlexception->errorcode,
-                            'keyid' => $keyid,
-                    ];
+                    $response['error'] = $dmlexception->debuginfo ?? $dmlexception->errorcode;
                 }
-
+                $responses[] = $response;
             }
             // Commit the transaction.
             $transaction->allow_commit();
         } catch (\invalid_parameter_exception $i) {
-            $response[] = ['error' => $i->debuginfo ?? $i->errorcode];
+            $responses[] = ['error' => $i->debuginfo ?? $i->errorcode, 'keyid' => '', 't_lastmodified' => 0, 'text' => ''];
         } catch (\dml_transaction_exception $tex) {
-            $response[] = ['error' => $tex->debuginfo ?? $tex->errorcode];
+            $responses[] = ['error' => $tex->debuginfo ?? $tex->errorcode, 'keyid' => '', 't_lastmodified' => 0, 'text' => ''];
         }
-        return $response;
+        return $responses;
 
     }
 
@@ -130,6 +125,7 @@ class update_translation extends external_api {
                 new external_single_structure([
                         't_lastmodified' => new external_value(PARAM_INT, 'Timestamp the field was modified'),
                         'text' => new external_value(PARAM_RAW, 'The updated text content'),
+                        'error' => new external_value(PARAM_RAW, 'An error message if any'),
                         'keyid' => new external_value(PARAM_ALPHANUMEXT, 'the key id of the field updated table-id-field'),
                 ])
         );

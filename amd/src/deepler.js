@@ -15,6 +15,8 @@
 
 /*
  * @module     local_deepler/deepler
+ * @package    local_deepler
+ * @file       amd/src/deepler.js
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -322,7 +324,7 @@ define(
          */
         const handleAjaxUpdateDBResponse = (data) => {
             data.forEach((item) => {
-                if (item.keyid === undefined) {
+                if (item.keyid === '') {
                     // Display generic error message.
                     getString('errordbtitle', 'local_deepler')
                         .then((s) => {
@@ -402,11 +404,28 @@ define(
                             });
                         }
                     },
-                    fail: (err) => {
-                        warn(err);
+                    fail: (jqXHR, status, error) => {
+                        warn(jqXHR, status, error);
+                        if (saveAllModal !== null && saveAllModal.isVisible) {
+                            saveAllModal.hide();
+                        }
+                        getString('errordbtitle', 'local_deepler')
+                            .then((s) => {
+                                Modal.create({
+                                        title: s,
+                                        body: error,
+                                        type: 'ALERT',
+                                        show: true,
+                                        removeOnClose: true,
+                                    }
+                                );
+                                return s;
+                            }).catch((error)=>{
+                            error('errordbtitle, could not get Moodle string!!!');
+                        });
                         // An error occurred
                         keys.forEach((key) => {
-                            errorMessageItem(key, tempTranslations[key].editor, err.toString());
+                            errorMessageItem(key, tempTranslations[key].editor, status + ':' + error.toString());
                         });
                     },
                 }
@@ -434,6 +453,9 @@ define(
                         }
                     },
                     fail: (err) => {
+                        if (saveAllModal !== null && saveAllModal.isVisible) {
+                            saveAllModal.hide();
+                        }
                         warn(err);
                         // An error occurred
                         errorMessageItem(key, tempTranslations[key].editor, err.toString());
