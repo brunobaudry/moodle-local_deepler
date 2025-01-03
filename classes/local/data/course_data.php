@@ -18,6 +18,7 @@ namespace local_deepler\local\data;
 
 use mod_quiz\quiz_settings;
 use moodle_url;
+use stdClass;
 
 /**
  * Course Data Processor.
@@ -70,7 +71,7 @@ class course_data {
      * @param int $contextid
      * @throws \moodle_exception
      */
-    public function __construct(\stdClass $course, string $lang, int $contextid) {
+    public function __construct(stdClass $course, string $lang, int $contextid) {
         $this->minîmumtextfieldsize = get_config('local_deepler', 'scannedfieldsize');
         // Set db table.
         $this->dbtable = 'local_deepler';
@@ -140,7 +141,7 @@ class course_data {
     private function getcoursedata() {
         $coursedata = [];
         $course = $this->modinfo->get_course();
-        $activity = new \stdClass();
+        $activity = new stdClass();
         $activity->modname = 'course';
         $activity->id = null;
         $activity->section = null;
@@ -187,7 +188,7 @@ class course_data {
         global $DB;
         $sections = $this->modinfo->get_section_info_all();
         $sectiondata = [];
-        $activity = new \stdClass();
+        $activity = new stdClass();
         $activity->modname = 'course_sections';
         $activity->id = null;
         $activity->section = null;
@@ -251,9 +252,9 @@ class course_data {
                             $question = \question_bank::load_question($slot->questionid);
                             $this->injectquizcontent($activitydata, $question, $activity);
                         } catch (\dml_read_exception $e) {
-                            $this->build_data('load_q_error', $e->getMessage(), 0, 'quiz_querstions', $activity, 3 );
+                            $this->build_data(-1, $e->getMessage(), 0, 'quiz_questions', $activity, 3);
                         } catch (\moodle_exception $me) {
-                            $this->build_data('load_q_error', $me->getMessage(), 0, 'quiz_querstions', $activity, 3 );
+                            $this->build_data(-1, $me->getMessage(), 0, 'quiz_questions', $activity, 3);
                         }
                     }
                     break;
@@ -300,7 +301,7 @@ class course_data {
      */
     private function injectbookchapter(array &$activities, mixed $chapter, \cm_info $act) {
         global $DB;
-        $activity = new \stdClass();
+        $activity = new stdClass();
         $activity->id = $act->id;
         $activity->modname = 'book_chapters';
         $activity->section = $act->get_section_info()->id;
@@ -339,7 +340,7 @@ class course_data {
      */
     private function injectwikipage(array &$activities, mixed $chapter, \cm_info $act) {
         global $DB;
-        $activity = new \stdClass();
+        $activity = new stdClass();
         $activity->id = $act->id;
         $activity->modname = 'wiki_pages';
         $activity->section = $act->sectionid;
@@ -440,10 +441,11 @@ class course_data {
         $table = $activity->modname;
         $cmid = $activity->id ?? 0;
         $sectionid = $activity->section;
+        // Store the status of the translation.
         $status = $this->store_status_db($id, $table, $field);
-        // Build item id, tid, displaytext, format, table, field, tneeded, section.
-        $item = new \stdClass();
         // Object stuff.
+        // Build item id, tid, displaytext, format, table, field, tneeded, section.
+        $item = new stdClass();
         $item->id = $id;
         $item->hierarchy = "level$level";
         $item->tid = $status->id;
@@ -566,8 +568,8 @@ class course_data {
     private function store_status_db(int $id, string $table, string $field) {
         global $DB;
         // Skip if target lang is undefined.
-        if ($this->lang == null) {
-            $dummy = new \stdClass();
+        if ($this->lang == null || $id === -1) {
+            $dummy = new stdClass();
             $dummy->id = "0";
             $dummy->s_lastmodified = "0";
             $dummy->t_lastmodified = "0";
@@ -775,14 +777,14 @@ class course_data {
     private function injectquizcontent(array &$activitydata, \question_definition $question, mixed $act) {
         global $DB;
         $dbman = $DB->get_manager(); // Get the database manager.
-        $activity = new \stdClass();
+        $activity = new stdClass();
         $activity->id = $act->id;
         $activity->modname = 'question';
         $activity->section = $act->sectionid;
         $pluginname = $question->qtype->plugin_name();
         $activity->qtype = $pluginname;
         $this->injectquestiondata($activitydata, $question, $activity);
-        $qactivity = new \stdClass();
+        $qactivity = new stdClass();
         $qactivity->id = $act->id;
         $qactivity->modname = 'question_answers';
         $qactivity->section = $act->sectionid;

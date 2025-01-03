@@ -193,7 +193,7 @@ class translate_form extends moodleform {
         // Column 1 layout.
         $mform->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
         $mform->addElement('html', "<small class='local_deepler__activityfield lh-sm'>{$item->translatedfieldname}</small><br/>");
-        if (!$isdbkey) {
+        if (!$isdbkey || !$item->id === -1) {
             $mform->addElement('html', $bulletstatus);
             $mform->addElement('html', $checkbox);
         }
