@@ -1,5 +1,4 @@
-name: AutoRelease
-
+name: AutoRelease for GitHub
 on:
   push:
     branches: [ main ]

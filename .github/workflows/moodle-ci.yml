@@ -1,5 +1,4 @@
 name: Moodle Plugin CI
-
 on:
   push:
     branches: [ main ]
