@@ -344,7 +344,7 @@ define(
                     const key = keyidToKey(item.keyid);
                     const htmlElement = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
                     const multilangTextarea = document.querySelector(replaceKey(Selectors.editors.multiples.textAreas, key));
-                    if (item.error !== undefined) {
+                    if (item.error !== undefined && item.error !== '') {
                         // Display granular error messages.
                         const indexOfSET = item.error.indexOf("SET");// Probably a text too long for the field if not -1.
                         // Text too long.
