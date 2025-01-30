@@ -447,8 +447,10 @@ define(
                     done: (data) => {
                         info(data);
                         if (data.length > 0) {
+                            info('ok');
                             handleAjaxUpdateDBResponse(data);
                         } else {
+                            info('nok');
                             errorMessageItem(key, tempTranslations[key].editor, 'Something went wrong with the data');
                         }
                     },
