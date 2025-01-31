@@ -3,7 +3,6 @@ on:
   push:
     tags:
       - v*
-
   workflow_dispatch:
     inputs:
       tag:
@@ -23,7 +22,6 @@ jobs:
       ENDPOINT: https://moodle.org/webservice/rest/server.php
       TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
       FUNCTION: local_plugins_add_version
-
     steps:
       - name: Call the service function
         id: add-version
