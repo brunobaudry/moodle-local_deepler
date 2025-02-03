@@ -27,8 +27,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Define edittranslation capability.
-define('LOCAL_DEEPLER_CAP', 'local/deepler:edittranslations');
-
+if (!defined('LOCAL_DEEPLER_CAP')) {
+    define('LOCAL_DEEPLER_CAP', 'local/deepler:edittranslations');
+}
 // Add functions for webservices.
 $functions = [
         'local_deepler_update_translation' => [
