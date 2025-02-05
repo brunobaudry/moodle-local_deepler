@@ -808,7 +808,6 @@ define(
             settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
             // eslint-disable-next-line camelcase
             settings.target_lang = targetLang.toUpperCase();
-
             return settings;
         };
         /**
