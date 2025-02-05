@@ -80,7 +80,7 @@ if ($initok) {
     if ($languagepack->iscurrentsupported()) {
         // Set js data.
         $jsconfig = new stdClass();
-        $jsconfig = $languagepack->addlangproperties($jsconfig);
+        $jsconfig = $languagepack->prepareconfig($jsconfig);
         // Prepare course data.
         $jsconfig->courseid = $courseid;
         $jsconfig->debug = $CFG->debug;

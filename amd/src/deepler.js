@@ -808,8 +808,7 @@ define(
             settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
             // eslint-disable-next-line camelcase
             settings.target_lang = targetLang.toUpperCase();
-            // eslint-disable-next-line camelcase
-            settings.auth_key = config.apikey;
+
             return settings;
         };
         /**
@@ -829,11 +828,10 @@ define(
          * Prepare the params for XHR call.
          *
          * @param {string} key
-         * @param {boolean} url
-         * @returns {URLSearchParams|FormData} Object to use in XHR.
+         * @returns {FormData} Object to use in XHR.
          */
-        const prepareFormData = (key, url = true) => {
-            let formData = url ? new URLSearchParams() : new FormData();
+        const prepareFormData = (key) => {
+            let formData = new FormData();
             Object.entries(prepareAdvancedSettings()).forEach(([k, v]) => {
                 formData.append(k, v);
             });
@@ -864,6 +862,7 @@ define(
                 info("Send deepl:", formData);
                 // Update the translation.
                 let xhr = new XMLHttpRequest();
+
                 xhr.responseType = 'json';
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState === readystateDone) {
@@ -895,6 +894,7 @@ define(
                             'xhr.readyState MUST be of type "number"');
                     }
                 };
+                xhr.setRequestHeader('Authorization', config.auth);
                 xhr.open("POST", config.deeplurl);
                 xhr.send(formData);
             }

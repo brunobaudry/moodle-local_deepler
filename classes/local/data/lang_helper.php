@@ -257,9 +257,11 @@ class lang_helper {
      * @param object $config
      * @return object
      * @throws DeepLException
+     * @todo MDL-0000 rename this function
      */
-    public function addlangproperties(object &$config) {
+    public function prepareconfig(object &$config) {
         $config->apikey = $this->apikey;
+        $config->auth = "DeepL-Auth-Key {$this->apikey}";
         $config->usage = $this->usage;
         try {
             $config->limitReached = $config->usage->anyLimitReached();
