@@ -160,22 +160,21 @@ jobs:
       - name: Clean build directory
         run: rm -rf amd/build/*
 
-      - name: Install Node.js and npm
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.18.1'
-
-      - name: Install npm dependencies
-        run: npm install
-
-      - name: Run Grunt tasks
-        run: grunt
-        working-directory: moodle/
-        env:
-          COMPOSER_PROCESS_TIMEOUT: 0
-          COMPOSER_NO_INTERACTION: 1
-          COMPOSER_NO_AUDIT: 1
-          NVM_DIR: /home/runner/.nvm
+#      - name: Install Node.js and npm
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: '20.18.2'
+#      - name: Install npm dependencies
+#        run: npm install
+#
+#      - name: Run Grunt tasks
+#        run: grunt
+#        working-directory: moodle/
+#        env:
+#          COMPOSER_PROCESS_TIMEOUT: 0
+#          COMPOSER_NO_INTERACTION: 1
+#          COMPOSER_NO_AUDIT: 1
+#          NVM_DIR: /home/runner/.nvm
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
