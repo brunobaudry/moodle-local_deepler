@@ -111,7 +111,7 @@ class update_translation extends external_api {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    private static function perform_security_checks($data) {
+    private static function perform_security_checks($data): void {
         $context = context_course::instance($data['courseid']);
         self::validate_context($context);
         require_capability('local/deepler:edittranslations', $context);
@@ -129,12 +129,12 @@ class update_translation extends external_api {
      * @param $data
      * @return array
      */
-    private static function initialize_response($data) {
+    private static function initialize_response($data): array {
         return [
                 'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
                 't_lastmodified' => 0,
                 'text' => '',
-                'error' => ''
+                'error' => '',
         ];
     }
 
@@ -146,7 +146,7 @@ class update_translation extends external_api {
      * @param $response
      * @return void
      */
-    private static function update_records($data, $DB, &$response) {
+    private static function update_records($data, $DB, &$response): void {
         $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
         $DB->update_record($data['table'], (object) $dataobject);
 
