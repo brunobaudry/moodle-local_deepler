@@ -16,11 +16,18 @@
 
 namespace local_deepler\external;
 
+use context_course;
+use context_module;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
+use core_external\required_capability_exception;
+use core_external\restricted_context_exception;
+use dml_exception;
+use dml_transaction_exception;
+use invalid_parameter_exception;
 
 /**
  * External service to update multilang2 translations and log a timestamp.
@@ -51,6 +58,91 @@ class update_translation extends external_api {
     }
 
     /**
+     *
+     * @param $data
+     * @return array
+     * @throws \required_capability_exception
+     *
+     * public static function execute($data) {
+     * global $DB;
+     * $responses = [];
+     *
+     * try {
+     * $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
+     * $transaction = $DB->start_delegated_transaction();
+     * purge_all_caches();
+     *
+     * foreach ($params['data'] as $data) {
+     * $responses[] = self::process_single_data($data, $DB);
+     * }
+     *
+     * $transaction->allow_commit();
+     * } catch (Exception $e) {
+     * $responses[] = self::handle_exception($e);
+     * }
+     *
+     * return $responses;
+     * }
+     *
+     * private static function process_single_data($data, $DB) {
+     * $response = self::initialize_response($data);
+     *
+     * try {
+     * self::perform_security_checks($data);
+     * self::update_records($data, $DB, $response);
+     * } catch (Exception $e) {
+     * $response['error'] = $e->debuginfo ?? $e->errorcode;
+     * }
+     *
+     * return $response;
+     * }
+     *
+     * private static function initialize_response($data) {
+     * return [
+     * 'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
+     * 't_lastmodified' => 0,
+     * 'text' => '',
+     * 'error' => ''
+     * ];
+     * }
+     *
+     * private static function perform_security_checks($data) {
+     * $context = context_course::instance($data['courseid']);
+     * self::validate_context($context);
+     * require_capability('local/deepler:edittranslations', $context);
+     *
+     * if (self::requires_activity_capability($data['table'])) {
+     * require_capability('moodle/course:manageactivities', context_module::instance($data['id']));
+     * }
+     * }
+     *
+     * private static function requires_activity_capability($table) {
+     * return $table !== 'course' && $table !== 'course_sections' &&
+     * strpos($table, 'question') === false &&
+     * strpos($table, 'qtype') === false;
+     * }
+     *
+     * private static function update_records($data, $DB, &$response) {
+     * $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
+     * $DB->update_record($data['table'], (object) $dataobject);
+     *
+     * $timemodified = time();
+     * $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
+     *
+     * $response['t_lastmodified'] = $timemodified;
+     * $response['text'] = $data['text'];
+     * }
+     *
+     * private static function handle_exception($e) {
+     * return [
+     * 'error' => $e->debuginfo ?? $e->errorcode,
+     * 'keyid' => '',
+     * 't_lastmodified' => 0,
+     * 'text' => ''
+     * ];
+     * }
+     */
+    /**
      * Actually performs the DB updates.
      *
      * @param array $data
@@ -62,59 +154,83 @@ class update_translation extends external_api {
      * @throws \required_capability_exception
      */
     public static function execute($data) {
-        global $CFG, $DB;
+        global $DB;
         $responses = [];
         try {
             $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
             foreach ($params['data'] as $data) {
-                $response = [];
-                $dataobject['id'] = $data['id'];
-                $dataobject[$data['field']] = $data['text'];
-                $keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
+                $response = self::initialize_response($data);
+                //$dataobject['id'] = $data['id'];
+                //$dataobject[$data['field']] = $data['text'];
+                /*$keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
                 $response['keyid'] = $keyid;
                 $response['t_lastmodified'] = 0;
                 $response['text'] = '';
-                $response['error'] = '';
+                $response['error'] = '';*/
                 try {
                     // Security checks.
-                    $context = \context_course::instance($data['courseid']);
-                    self::validate_context($context);
-                    require_capability('local/deepler:edittranslations', $context);
-                    // Check detailed activity capabilities.
-                    if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
-                            strpos($data['table'], 'question') === false &&
-                            strpos($data['table'], 'qtype') === false) {
-                        require_capability('moodle/course:manageactivities', \context_module::instance($data['id']));
-                    }
-                    $DB->update_record($data['table'], (object) $dataobject);
+                    self::perform_security_checks($data);
+                    self::update_records($data, $DB, $response);
+                    /*$DB->update_record($data['table'], (object) $dataobject);
                     // Update t_lastmodified.
                     $timemodified = time();
                     $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
                     $response['t_lastmodified'] = $timemodified;
-                    $response['text'] = $data['text'];
+                    $response['text'] = $data['text'];*/
 
-                } catch (\core_external\required_capability_exception $capex) {
+                } catch (required_capability_exception $capex) {
                     $response['error'] = $capex->debuginfo ?? $capex->errorcode;
-                } catch (\core_external\restricted_context_exception $cex) {
+                } catch (restricted_context_exception $cex) {
                     $response['error'] = $capex->debuginfo ?? $capex->errorcode;
-                } catch (\dml_exception $dmlexception) {
+                } catch (dml_exception $dmlexception) {
                     $response['error'] = $dmlexception->debuginfo ?? $dmlexception->errorcode;
                 }
                 $responses[] = $response;
             }
             // Commit the transaction.
             $transaction->allow_commit();
-        } catch (\invalid_parameter_exception $i) {
+        } catch (invalid_parameter_exception $i) {
             $responses[] = ['error' => $i->debuginfo ?? $i->errorcode, 'keyid' => '', 't_lastmodified' => 0, 'text' => ''];
-        } catch (\dml_transaction_exception $tex) {
+        } catch (dml_transaction_exception $tex) {
             $responses[] = ['error' => $tex->debuginfo ?? $tex->errorcode, 'keyid' => '', 't_lastmodified' => 0, 'text' => ''];
         }
         return $responses;
 
     }
 
+    private static function perform_security_checks($data) {
+        $context = context_course::instance($data['courseid']);
+        self::validate_context($context);
+        require_capability('local/deepler:edittranslations', $context);
+        // Check detailed activity capabilities.
+        if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
+                strpos($data['table'], 'question') === false &&
+                strpos($data['table'], 'qtype') === false) {
+            require_capability('moodle/course:manageactivities', context_module::instance($data['id']));
+        }
+    }
+
+    private static function initialize_response($data) {
+        return [
+                'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
+                't_lastmodified' => 0,
+                'text' => '',
+                'error' => ''
+        ];
+    }
+
+    private static function update_records($data, $DB, &$response) {
+        $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
+        $DB->update_record($data['table'], (object) $dataobject);
+
+        $timemodified = time();
+        $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
+
+        $response['t_lastmodified'] = $timemodified;
+        $response['text'] = $data['text'];
+    }
     /**
      * Describes what the webservice yields.
      *

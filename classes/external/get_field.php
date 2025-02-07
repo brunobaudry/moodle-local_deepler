@@ -60,7 +60,7 @@ class get_field extends external_api {
      * @throws \required_capability_exception
      */
     public static function execute($data) {
-        global $CFG, $DB;
+        global $DB;
         $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
         $transaction = $DB->start_delegated_transaction();
         $response = [];
