@@ -68,7 +68,7 @@ class update_translation extends external_api {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    public static function execute($data) {
+    public static function execute($data): array {
         global $DB;
         $responses = [];
         try {
@@ -80,12 +80,12 @@ class update_translation extends external_api {
                 try {
                     // Security checks.
                     self::perform_security_checks($data);
-                    self::update_records($data, $DB, $response);
+                    self::update_records($data, $response);
 
                 } catch (required_capability_exception $capex) {
                     $response['error'] = $capex->debuginfo ?? $capex->errorcode;
                 } catch (restricted_context_exception $cex) {
-                    $response['error'] = $capex->debuginfo ?? $capex->errorcode;
+                    $response['error'] = $cex->debuginfo ?? $cex->errorcode;
                 } catch (dml_exception $dmlexception) {
                     $response['error'] = $dmlexception->debuginfo ?? $dmlexception->errorcode;
                 }
@@ -105,13 +105,13 @@ class update_translation extends external_api {
     /**
      * Do the capability checks and skip when no context filter is provided.
      *
-     * @param $data
+     * @param array $data
      * @return void
      * @throws \core_external\restricted_context_exception
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    private static function perform_security_checks($data): void {
+    private static function perform_security_checks(array $data): void {
         $context = context_course::instance($data['courseid']);
         self::validate_context($context);
         require_capability('local/deepler:edittranslations', $context);
@@ -126,10 +126,10 @@ class update_translation extends external_api {
     /**
      * Prepare response object.
      *
-     * @param $data
+     * @param array $data
      * @return array
      */
-    private static function initialize_response($data): array {
+    private static function initialize_response(array $data): array {
         return [
                 'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
                 't_lastmodified' => 0,
@@ -141,12 +141,12 @@ class update_translation extends external_api {
     /**
      * Perform the DB entry and update the response item.
      *
-     * @param $data
-     * @param $DB
-     * @param $response
+     * @param array $data
+     * @param array $response
      * @return void
      */
-    private static function update_records($data, $DB, &$response): void {
+    private static function update_records(array $data, array &$response): void {
+        global $DB;
         $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
         $DB->update_record($data['table'], (object) $dataobject);
 
