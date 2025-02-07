@@ -144,6 +144,7 @@ class update_translation extends external_api {
      * @param array $data
      * @param array $response
      * @return void
+     * @throws \dml_exception
      */
     private static function update_records(array $data, array &$response): void {
         global $DB;
