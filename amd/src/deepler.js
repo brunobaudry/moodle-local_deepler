@@ -28,9 +28,10 @@ define(
         './selectors',
         'core/modal',
         'core/str',
-        './tokeniser'
+        './tokeniser',
+        './translator'
     ],
-    (Ajax, Selectors, Modal, Str, Tokeniser)=>{
+    (Ajax, Selectors, Modal, Str, Tokeniser, Translator)=>{
         // Use getString instead of get_string
         const getString = Str.get_string;
 
@@ -147,6 +148,11 @@ define(
          * @param {Object} cfg JS Config
          */
         const init = (cfg) => {
+            const fd = new FormData();
+            fd.append('test', 'value');
+           Translator.translate(fd, (response)=>{
+ window.console.info(response);
+});
             log('init');
             config = cfg;
             usage = config.usage;
