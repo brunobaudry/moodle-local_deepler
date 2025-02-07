@@ -58,91 +58,6 @@ class update_translation extends external_api {
     }
 
     /**
-     *
-     * @param $data
-     * @return array
-     * @throws \required_capability_exception
-     *
-     * public static function execute($data) {
-     * global $DB;
-     * $responses = [];
-     *
-     * try {
-     * $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
-     * $transaction = $DB->start_delegated_transaction();
-     * purge_all_caches();
-     *
-     * foreach ($params['data'] as $data) {
-     * $responses[] = self::process_single_data($data, $DB);
-     * }
-     *
-     * $transaction->allow_commit();
-     * } catch (Exception $e) {
-     * $responses[] = self::handle_exception($e);
-     * }
-     *
-     * return $responses;
-     * }
-     *
-     * private static function process_single_data($data, $DB) {
-     * $response = self::initialize_response($data);
-     *
-     * try {
-     * self::perform_security_checks($data);
-     * self::update_records($data, $DB, $response);
-     * } catch (Exception $e) {
-     * $response['error'] = $e->debuginfo ?? $e->errorcode;
-     * }
-     *
-     * return $response;
-     * }
-     *
-     * private static function initialize_response($data) {
-     * return [
-     * 'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
-     * 't_lastmodified' => 0,
-     * 'text' => '',
-     * 'error' => ''
-     * ];
-     * }
-     *
-     * private static function perform_security_checks($data) {
-     * $context = context_course::instance($data['courseid']);
-     * self::validate_context($context);
-     * require_capability('local/deepler:edittranslations', $context);
-     *
-     * if (self::requires_activity_capability($data['table'])) {
-     * require_capability('moodle/course:manageactivities', context_module::instance($data['id']));
-     * }
-     * }
-     *
-     * private static function requires_activity_capability($table) {
-     * return $table !== 'course' && $table !== 'course_sections' &&
-     * strpos($table, 'question') === false &&
-     * strpos($table, 'qtype') === false;
-     * }
-     *
-     * private static function update_records($data, $DB, &$response) {
-     * $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
-     * $DB->update_record($data['table'], (object) $dataobject);
-     *
-     * $timemodified = time();
-     * $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
-     *
-     * $response['t_lastmodified'] = $timemodified;
-     * $response['text'] = $data['text'];
-     * }
-     *
-     * private static function handle_exception($e) {
-     * return [
-     * 'error' => $e->debuginfo ?? $e->errorcode,
-     * 'keyid' => '',
-     * 't_lastmodified' => 0,
-     * 'text' => ''
-     * ];
-     * }
-     */
-    /**
      * Actually performs the DB updates.
      *
      * @param array $data
@@ -162,23 +77,10 @@ class update_translation extends external_api {
             purge_all_caches();
             foreach ($params['data'] as $data) {
                 $response = self::initialize_response($data);
-                //$dataobject['id'] = $data['id'];
-                //$dataobject[$data['field']] = $data['text'];
-                /*$keyid = $data['table'] . '-' . $data['id'] . '-' . $data['field'];
-                $response['keyid'] = $keyid;
-                $response['t_lastmodified'] = 0;
-                $response['text'] = '';
-                $response['error'] = '';*/
                 try {
                     // Security checks.
                     self::perform_security_checks($data);
                     self::update_records($data, $DB, $response);
-                    /*$DB->update_record($data['table'], (object) $dataobject);
-                    // Update t_lastmodified.
-                    $timemodified = time();
-                    $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
-                    $response['t_lastmodified'] = $timemodified;
-                    $response['text'] = $data['text'];*/
 
                 } catch (required_capability_exception $capex) {
                     $response['error'] = $capex->debuginfo ?? $capex->errorcode;
@@ -200,6 +102,15 @@ class update_translation extends external_api {
 
     }
 
+    /**
+     * Do the capability checks and skip when no context filter is provided.
+     *
+     * @param $data
+     * @return void
+     * @throws \core_external\restricted_context_exception
+     * @throws \invalid_parameter_exception
+     * @throws \required_capability_exception
+     */
     private static function perform_security_checks($data) {
         $context = context_course::instance($data['courseid']);
         self::validate_context($context);
@@ -212,6 +123,12 @@ class update_translation extends external_api {
         }
     }
 
+    /**
+     * Prepare response object.
+     *
+     * @param $data
+     * @return array
+     */
     private static function initialize_response($data) {
         return [
                 'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
@@ -221,6 +138,14 @@ class update_translation extends external_api {
         ];
     }
 
+    /**
+     * Perform the DB entry and update the response item.
+     *
+     * @param $data
+     * @param $DB
+     * @param $response
+     * @return void
+     */
     private static function update_records($data, $DB, &$response) {
         $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
         $DB->update_record($data['table'], (object) $dataobject);
