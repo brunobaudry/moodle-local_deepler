@@ -15,6 +15,7 @@
 
 /**
  * @module     local_deepler/deepler
+ * @file       amd/src/local/selectors.js
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -94,6 +95,7 @@ export default {
         glossaryId: '[data-id="local_deepler/glossary_id"]',
         tagHandling: '[data-id="local_deepler/tag_handling"]',
         outlineDetection: '[data-id="local_deepler/outline_detection"]',
-        splitSentences: '[name="local_deepler/split_sentences"]:checked'
+        splitSentences: '[name="local_deepler/split_sentences"]:checked',
+        modelType: '[name="local_deepler/modeltype"]:checked'
     }
 };

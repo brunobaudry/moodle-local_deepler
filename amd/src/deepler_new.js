@@ -13,39 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/*
+/**
  * @module     local_deepler/deepler
- * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @file       amd/src/deepler_new.js
+ * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+define(['./local/ui'], (UI) => {
+    const init = (cfg) => {
 
-/**
- *
- * @param {formData} data
- */
-define(['core/ajax'], (Ajax)=>{
-    return {
-        /**
-         *
-         * @param {formData} data
-         * @param {Function} callback
-         */
-         translate: (data, callback)=>{
-             Ajax.call([
-            {
-                methodname: "local_deepler_get_translation",
-                args: {
-                    data: data,
-                },
-                done: (response)=>{
-                    callback(response);
-                },
-                fail: (jqXHR, status, error) => {
-                    window.console.error(jqXHR, status, error);
-                }
-            }
-        ]);
-    }
+        window.addEventListener("DOMContentLoaded", UI.init(cfg));
     };
-}
-);
+    return {
+        init: init
+    };
+});

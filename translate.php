@@ -98,7 +98,7 @@ if ($initok) {
         $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
 
         // Adding page JS.
-        $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
+        $PAGE->requires->js_call_amd('local_deepler/deepler_new', 'init', [$jsconfig]);
 
         // Output translation grid.
         $coursedata = new course_data($course, $languagepack->targetlang, $context->id);

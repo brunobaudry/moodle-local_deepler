@@ -68,6 +68,21 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             deeplapidoc,local_deepler{{/str}}</a>
     </div>
     <div class="row py-3">
+        <div class="col-2" id="local_deepler__modeltype">
+            {{#str}}modeltype,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="prefer_quality_optimized" checked="checked" id="modeltype1" name="local_deepler/modeltype" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype1">{{#str}}modeltpreferqualityoptimized,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="quality_optimized" id="modeltype2" name="local_deepler/modeltype" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype2">{{#str}}modeltypequalityoptimized,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="latency_optimized" id="modeltype3" name="local_deepler/modeltype" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype3">{{#str}}modeltypelatencyoptimized  ,local_deepler{{/str}}</label>
+            </div>
+        </div>
         <div class="col-2" id="local_deepler__formality">
             {{#str}}formality,local_deepler{{/str}}
             <div class="custom-control custom-radio">
@@ -91,7 +106,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 <label class="custom-control-label" for="formality5">{{#str}}formalityprefermore,local_deepler{{/str}}</label>
             </div>
         </div>
-        <div class="col-4">
+        <div class="col-3">
             <div id="local_deepler__splitsentences">
                 {{#str}}splitsentences,local_deepler{{/str}}
                 <div class="custom-control custom-radio">
@@ -117,7 +132,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
             </div>
         </div>
-        <div class="col-6" id="local_deepler__glossarycontext">
+        <div class="col-5" id="local_deepler__glossarycontext">
             <label class="" for="local_deepler__glossary">{{#str}}glossaryid,local_deepler{{/str}}</label>
             <input type="text" class="w-50 form-control mb-2 mr-sm-2" id="local_deepler__glossary"
                    placeholder="{{#str}}glossaryid_placeholder,local_deepler{{/str}}"

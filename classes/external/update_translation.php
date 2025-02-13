@@ -81,7 +81,6 @@ class update_translation extends external_api {
                     // Security checks.
                     self::perform_security_checks($data);
                     self::update_records($data, $response);
-
                 } catch (required_capability_exception $capex) {
                     $response['error'] = $capex->debuginfo ?? $capex->errorcode;
                 } catch (restricted_context_exception $cex) {
