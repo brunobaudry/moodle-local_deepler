@@ -20,9 +20,24 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/ui'], (UI) => {
+define(['./local/ui', 'core/log'], (UI, Log) => {
+    const debug = {
+        NONE: 0, // Level 5 silent.
+        MINIMAL: 5, // Level 3 no trace, debug or info.
+        NORMAL: 15, // Level 2 no trace or debug.
+        ALL: 30719, // Level 1 no trace.
+        DEVELOPER: 32767 // Level 0 all.
+    };
     const init = (cfg) => {
-
+        let level = 5;
+        switch (cfg.debug) {
+            case debug.NONE : level = 5; break;
+            case debug.MINIMAL : level = 3; break;
+            case debug.NORMAL : level = 2; break;
+            case debug.ALL : level = 1; break;
+            case debug.DEVELOPER : level = 0; break;
+        }
+        Log.setConfig({level: level});
         window.addEventListener("DOMContentLoaded", UI.init(cfg));
     };
     return {

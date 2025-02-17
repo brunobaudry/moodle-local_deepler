@@ -19,9 +19,9 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// define(['core/str', 'core/modal', './selectors', './api', './translation', './utils'],
-define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './translation', './utils'],
-    (TinyMCE, Str, Modal, Selectors, Translation, Utils) => {
+
+define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors', './translation', './utils', './customevents'],
+    (Log, TinyMCE, Str, Modal, Selectors, Translation, Utils, Events) => {
     const {getString} = Str;
     let config = {};
     let autotranslateButton = {};
@@ -32,12 +32,19 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
     // let targetLang = "";
     let format = new Intl.NumberFormat();
     let saveAllModal = {};
+    let errordbtitle = '';
+    // Const ON_TARGET_LANG_CHANGE = 'onTargetLangChange';
     /**
      * Event factories.
      */
     const registerEventListeners = () => {
         document.addEventListener('change', handleChangeEvent);
         document.addEventListener('click', handleClickEvent);
+
+        // Translation events.
+        Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
+        Events.on(Translation.ON, onItemTranslated);
+        Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
@@ -111,6 +118,9 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
         if (e.target.closest(Selectors.actions.saveAll)) {
             saveTranslations();
         }
+        if (e.target.closest(Selectors.actions.validatorsBtns)) {
+            saveSingleTranslation(e);
+        }
     };
 
         /**
@@ -123,7 +133,7 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
             return;
         }
         saveAllBtn.disabled = true;
-        launchModal().then(r => Utils.info('SaveAll Modal launched ' + r));
+        launchModal().then(r => Log.info('SaveAll Modal launched ' + r));
         const data = [];
         const keys = Array.from(selectedCheckboxes).map((e) => e.dataset.key);
         keys.forEach((key) => {
@@ -133,7 +143,20 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
                 }
             }
         );
-        Translation.saveTranslations(data, config.userPrefs === 'textarea');
+        Translation.saveTranslations(data, config);
+    };
+        /**
+         * Saving a single translation to DB.
+         * @param {Event} e
+         */
+    const saveSingleTranslation = (e)=> {
+        const key = e.target.closest(Selectors.actions.validatorsBtns).dataset.keyValidator;
+        Log.warn(key);
+        Log.warn(getIconStatus(key));
+        if (getIconStatus(key) === Selectors.statuses.tosave) {
+            hideErrorMessage(key);
+            Translation.saveTranslations([prepareDBitem(key)], config);
+        }
     };
         /**
          *
@@ -157,7 +180,8 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
      * ui.js
      */
     const onItemChecked = (e) => {
-        Utils.log("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
+
+        Log.info("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
         const key = e.target.getAttribute('data-key');
         if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
             toggleStatus(key, e.target.checked);
@@ -174,8 +198,8 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
         try {
             saveAllBtn = document.querySelector(Selectors.actions.saveAll);
             Translation.setMainLangs(
-                domQuery(Selectors.actions.sourceSwitcher).value,
-                domQuery(Selectors.actions.targetSwitcher).value);
+                config.currentlang,
+                config.lang);
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
            // SourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
             // targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
@@ -184,7 +208,7 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
 
         } catch (e) {
             if (config.debug) {
-                Utils.error(e.message);
+                Log.error(e.message);
             }
         }
     };
@@ -223,7 +247,7 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
         }
     };
     /**
-     *Get the tranlsation row status icon.
+     *Get the translation row status icon.
      *
      * @param {string} key
      * @returns {*}
@@ -278,6 +302,14 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
         });
     };
     /**
+     * Event listener for the translations process to dispaly the status.
+     *
+     * @param {string} key
+     */
+    const onItemTranslated = (key) => {
+        setIconStatus(key, Selectors.statuses.tosave, true);
+    };
+    /**
      * Launch autotranslation.
      * ui.js + translation.js (split)
      */
@@ -288,6 +320,7 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
             .forEach((ckBox) => {
                 keys.push(ckBox.getAttribute("data-key"));
             });
+
         Translation.callTranslations(keys);
     };
     /**
@@ -368,7 +401,7 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
                 domQuery(Selectors.editors.multiples.checkBoxesWithKey, k).checked = allSelected && selected;
                 toggleStatus(k, false);
             } catch (e) {
-                Utils.log(`${k} translation is disalbled`);
+                Log.trace(`${k} translation is disalbled`);
             }
 
         });
@@ -402,7 +435,29 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
             parent.removeChild(alertChild);
         }
     };
-
+    /**
+     * Displays success message and icon.
+     *
+     * @param {String} key
+     * @param {HTMLElement} element
+     * ui.js
+     *
+    const successMessageItem = (key, element) => {
+        element.classList.add("local_deepler__success");
+        // Add saved indicator
+        setIconStatus(key, Selectors.statuses.success);
+        // Remove success message after a few seconds
+        setTimeout(() => {
+            let multilangPill = document.querySelector(Utils.replaceKey(Selectors.statuses.multilang, key));
+            let prevTransStatus = document.querySelector(Utils.replaceKey(Selectors.statuses.prevTransStatus, key));
+            prevTransStatus.classList = "badge badge-pill badge-success";
+            if (multilangPill.classList.contains("disabled")) {
+                multilangPill.classList.remove('disabled');
+            }
+            setIconStatus(key, Selectors.statuses.saved);
+        });
+    };
+     */
     /**
      * Display error message attached to the item's editor.
      * @param {String} key
@@ -428,10 +483,25 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
         let searchParams = url.searchParams;
         searchParams.set("target_lang", e.target.value);
         window.location = url.toString();
+
+        // Translation.setMainLangs('', e.target.value);
+        // Events.emit(ON_TARGET_LANG_CHANGE, e.target.value);
+        // DomQuery(Selectors.sourcetexts.targetlang).innerText = e.target.value;
+
+
+    };
+        /**
+         * Event listner for changes of target language.
+         * @param {string} e
+         */
+    const onTagrgetChanged = (e) => {
+        Translation.setMainLangs('', e);
+        saveAllBtn.disabled = true;
+        selectAllBtn.disabled = !Translation.isTranslatable();
     };
     /**
-     * Event listener to switch source lang
-     * Hence reload the page and change the site main lang
+     * Event listener to switch source lang,
+     * Hence reload the page and change the site main lang.
      * @param {Event} e
      * ui.js
      */
@@ -492,14 +562,14 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
                 let r = null;
                 let editorTab = ["atto", "tiny", "marklar", "textarea"];
                 if (editorTab.indexOf(config.userPrefs) === -1) {
-                    Utils.warn('Unsupported editor ' + config.userPrefs);
+                    Log.warn('Unsupported editor ' + config.userPrefs);
                 } else {
                     // First let's try the current editor.
                     try {
                         r = findEditorByType(key, config.userPrefs);
                     } catch (error) {
                         // Content was edited by another editor.
-                        Utils.log(`Editor not found: ${config.userPrefs} for key ${key}`);
+                        Log.trace(`Editor not found: ${config.userPrefs} for key ${key}`);
                     }
                 }
                 return r;
@@ -598,20 +668,22 @@ define(['editor_tiny/editor', 'core/str', 'core/modal', './selectors', './transl
      */
     const init = (cfg) => {
         config = cfg;
-        Utils.registerLoggers(cfg.debug);
-        Utils.info('WTF');
+        // Utils.registerLoggers(cfg.debug);
+        Log.info(cfg);
+        getString('errordbtitle', 'local_deepler')
+            .then((s)=>{
+                errordbtitle = s;
+            })
+            .catch((e)=>{
+                e('errordbtitle, could not get Moodle string!!!');
+            }
+        );
+        Log.info(errordbtitle);
         registerUI();
         registerEventListeners();
         toggleAutotranslateButton();
-        saveAllBtn.disabled = true;
-        selectAllBtn.disabled = Translation.isTranslatable();
-        window.console.log(checkboxes);
-        // Window.console.log(TinyMCE.getAllInstances());
+        onTagrgetChanged(config.lang);
         checkboxes.forEach((node) => {
-            // Window.console.info(node.dataset.key);
-            // const cfg = findEditor(node.dataset.key);
-            // window.console.log(cfg);
-            //  Translation.initTempForKey(node.dataset.key, findEditor(node.dataset.key));
             node.disabled = selectAllBtn.disabled;
         });
         showRows(Selectors.statuses.updated, domQuery(Selectors.actions.showUpdated).checked);

@@ -14,6 +14,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import {showModal} from "../../../../../message/amd/src/message_send_bulk";
+
 /**
  * @module     local_deepler/deepler
  * @file       amd/src/local/translation.js
@@ -21,21 +23,39 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([
-    './api', './utils', './selectors', './ui', './tokeniser', './customevents'],
-    (Api, Utils, Selectors, Ui, Tokeniser, Events) => {
+    'core/log', './api', './utils', './selectors', './ui', './tokeniser', './customevents'],
+    (Log, Api, Utils, Selectors, Ui, Tokeniser, Events) => {
     let tempTranslations = {};
     let escapePatterns = {};
     let mainSourceLang = "";
     let targetLang = "";
     let settings = {};
-    const setMainLangs = (source, target) => {
-        mainSourceLang = source;
-        targetLang = target;
+    const ON_ITEM_TRANSLATED = 'onItemTranslated';
+    const setMainLangs = (source = '', target = '') => {
+        if (source !== '') {
+            mainSourceLang = source;
+        }
+        if (target !== '') {
+            targetLang = target;
+        }
     };
-    const saveTranslations = (keys, maineditorIsTextArea) => {
-        const data = keys.map(item => prepareDbUpdateItem(item, maineditorIsTextArea));
-        Events.on(Api.TR_DB_SUCCESS);
-        Api.updateTranslationsInDb(data);
+    const onTrDbSuccess = (data)=>{
+        Log.debug(data);
+        if (data.length === 0) {
+            Log.error(data);
+            showModal();
+        }
+    };
+    const onTrDbFailed = (status, error) =>{
+            Log.error(status);
+            Log.error(error);
+        };
+    const saveTranslations = (keys, config) => {
+        Log.trace(keys);
+        const data = keys.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
+        Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
+        Events.on(Api.TR_DB_FAILED, onTrDbFailed);
+        Api.updateTranslationsInDb(data, config.userid);
         // Api.callApi("local_deepler_update_translation", {data: data}).done(handleAjaxUpdateDBResponse);
     };
         const prepareDbUpdateItem = (item, maineditorIsTextArea) => {
@@ -232,23 +252,28 @@ define([
      */
     const callTranslations = (keys) => {
         const translations = [];
-        const options = prepareAdvancedSettings(document.querySelector(Selectors.actions.targetSwitcher).value);
+        prepareAdvancedSettings(document.querySelector(Selectors.actions.targetSwitcher).value);
         keys.forEach((key) => {
             // InitTempForKey(key);
             translations.push(prepareTranslation(key));
         });
         Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
         Events.on(Api.DEEPL_FAILED, onTranslateFailed);
-        Api.translate(translations, options);
+        Log.info(translations);
+        Log.info(settings);
+        Api.translate(translations, settings);
     };
 const onTranslateSuccess = (response)=>{
-    response.translations.forEach((tr) => {
+    Log.debug(response);
+    response.forEach((tr) => {
         // @todo emit event.
         let key = tr.key;
-        let translation = Utils.postprocess(tr.text, tempTranslations[key].tokens);
+        let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
         tempTranslations[key].editor.innerHTML = translation;
         tempTranslations[key].translation = translation;
-        Ui.setIconStatus(key, Selectors.statuses.tosave, true);
+        Log.debug(this);
+        Events.emit(ON_ITEM_TRANSLATED, key);
+        // UI.setIconStatus(key, Selectors.statuses.tosave, true);
     });
 };
 const onTranslateFailed = (status, error)=>{
@@ -262,7 +287,7 @@ const onTranslateFailed = (status, error)=>{
      * translation.js ok
      */
     const prepareAdvancedSettings = (targetLang) => {
-        Utils.info('prepareAdvancedSettings');
+        Log.info('prepareAdvancedSettings');
         escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
         escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
         // eslint-disable-next-line camelcase
@@ -299,8 +324,8 @@ const onTranslateFailed = (status, error)=>{
      * @param {string} sourceLang
      */
     const isTranslatable = (sourceLang = '') =>{
-        Utils.info(targetLang, sourceLang, targetLang === (sourceLang === '' ? mainSourceLang : sourceLang));
-        return targetLang === (sourceLang === '' ? mainSourceLang : sourceLang);
+         Log.info(targetLang, sourceLang, targetLang === (sourceLang === '' ? mainSourceLang : sourceLang));
+        return targetLang !== (sourceLang === '' ? mainSourceLang : sourceLang);
     };
         const translated = (key)=>{
             return tempTranslations[key]?.translation?.length > 0;
@@ -310,6 +335,7 @@ const onTranslateFailed = (status, error)=>{
         saveTranslations: saveTranslations,
         initTempForKey: initTempForKey,
         initTemp: initTemp,
+        ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
         /* TempTranslations: tempTranslations,*/
         setMainLangs: setMainLangs,
         isTranslatable: isTranslatable,

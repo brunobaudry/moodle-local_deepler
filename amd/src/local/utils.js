@@ -20,52 +20,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([], () => {
-    const debug = {
-        NONE: 0,
-        MINIMAL: 5,
-        NORMAL: 15,
-        ALL: 30719,
-        DEVELOPER: 32767
-    };
-    let log = (...a) => {
-        return a;
-    };
-    let warn = (...a) => {
-        return a;
-    };
-    let info = (...a) => {
-        return a;
-    };
-    let error = (...a) => {
-        return a;
-    };
-
-
-    /**
-     * Register loggers based on the debug configuration.
-     *
-     * @param {int} debugConfig
-     */
-    const registerLoggers = (debugConfig)=> {
-
-        // Preparing the debugger.
-        error = window.console.error.bind(window.console);
-        if (debugConfig === debug.NORMAL) {
-            error = window.console.error.bind(window.console);
-            warn = window.console.warn.bind(window.console);
-        } else if (debugConfig === debug.ALL) {
-            error = window.console.error.bind(window.console);
-            warn = window.console.warn.bind(window.console);
-            info = window.console.info.bind(window.console);
-        } else if (debugConfig === debug.DEVELOPER) {
-            window.console.log(`Moodle debug level ${debugConfig}`, debugConfig === debug.DEVELOPER);
-            warn = window.console.warn.bind(window.console);
-            info = window.console.info.bind(window.console);
-            log = window.console.log.bind(window.console);
-            window.console.log(`Moodle debug level ${debugConfig}`, debugConfig === debug.DEVELOPER);
-            log(`Moodle debug level ${debugConfig}`, debugConfig === debug.DEVELOPER);
-        }
-    };
     /**
      * Simple helper to manage selectors
      * @param {string} s
@@ -130,11 +84,6 @@ define([], () => {
      * Api to be used by the other modules.
      */
     return {
-        registerLoggers: registerLoggers,
-        info: info,
-        error: error,
-        warn: warn,
-        log: log,
         replaceKey: replaceKey,
         keyidToKey: keyidToKey,
         decodeHTML: decodeHTML,

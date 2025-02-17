@@ -24,7 +24,6 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use core_external\required_capability_exception;
-use core_external\restricted_context_exception;
 use dml_exception;
 use dml_transaction_exception;
 use invalid_parameter_exception;
@@ -54,6 +53,7 @@ class update_translation extends external_api {
                                 'text' => new external_value(PARAM_RAW, 'The new text content with multilang2 translations'),
                         ])
                 ),
+                'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
         ]);
     }
 
@@ -68,25 +68,21 @@ class update_translation extends external_api {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    public static function execute($data): array {
+    public static function execute($data, $userid): array {
         global $DB;
         $responses = [];
         try {
-            $params = self::validate_parameters(self::execute_parameters(), ['data' => $data]);
+            $params = self::validate_parameters(self::execute_parameters(), ['data' => $data, 'userid' => $userid]);
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
-            foreach ($params['data'] as $data) {
-                $response = self::initialize_response($data);
+            foreach ($params['data'] as $d) {
+                $response = self::initialize_response($d);
                 try {
                     // Security checks.
-                    self::perform_security_checks($data);
-                    self::update_records($data, $response);
-                } catch (required_capability_exception $capex) {
-                    $response['error'] = $capex->debuginfo ?? $capex->errorcode;
-                } catch (restricted_context_exception $cex) {
-                    $response['error'] = $cex->debuginfo ?? $cex->errorcode;
+                    self::perform_security_checks($d, $params['userid']);
+                    self::update_records($d, $response);
                 } catch (dml_exception $dmlexception) {
-                    $response['error'] = $dmlexception->debuginfo ?? $dmlexception->errorcode;
+                    $response['error'] = $dmlexception->getMessage();
                 }
                 $responses[] = $response;
             }
@@ -110,15 +106,15 @@ class update_translation extends external_api {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    private static function perform_security_checks(array $data): void {
+    private static function perform_security_checks(array $data, int $userid): void {
         $context = context_course::instance($data['courseid']);
         self::validate_context($context);
-        require_capability('local/deepler:edittranslations', $context);
+        require_capability('local/deepler:edittranslations', $context, $userid);
         // Check detailed activity capabilities.
         if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
                 strpos($data['table'], 'question') === false &&
                 strpos($data['table'], 'qtype') === false) {
-            require_capability('moodle/course:manageactivities', context_module::instance($data['id']));
+            require_capability('moodle/course:manageactivities', context_module::instance($data['id']), $userid);
         }
     }
 

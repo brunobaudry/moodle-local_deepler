@@ -19,7 +19,7 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', './utils', './customevents'], (Ajax, Utils, Events) => {
+define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils, Events) => {
     const callApi = (methodname, args) => {
         return Ajax.call([{
             methodname: methodname,
@@ -30,20 +30,19 @@ define(['core/ajax', './utils', './customevents'], (Ajax, Utils, Events) => {
     const DEEPL_SUCCESS = 'onDeeplUpdateSuccess';
     const TR_DB_FAILED = 'onTranslationUpdateFailed';
     const DEEPL_FAILED = 'onDeeplUpdateFailed';
-    const updateTranslationsInDb = (data) => {
+    const updateTranslationsInDb = (data, userid) => {
         Ajax.call([
             {
                 methodname: "local_deepler_update_translation",
                 args: {
                     data: data,
+                    userid: userid,
                 },
                 done: (response) => {
-                    Events.emit(TR_DB_SUCCESS, response);
-                    // SuccessCallback(response);
+                     Events.emit(TR_DB_SUCCESS, response);
                 },
                 fail: (jqXHR, status, error) => {
-                    Events.emit(TR_DB_FAILED, status, error);
-                    // FailCallback(jqXHR, status, error);
+                     Events.emit(TR_DB_FAILED, status, error);
                 }
             }]
         );
@@ -52,7 +51,7 @@ define(['core/ajax', './utils', './customevents'], (Ajax, Utils, Events) => {
         Ajax.call([{
             methodname: "local_deepler_get_translation",
             args: {
-                data: data, // Array of text, keys, source_lang
+                translations: data, // Array of text, keys, source_lang
                 options: options // Object with DeepL's settings options including target_lang.
             },
             done: (response) => {
@@ -60,6 +59,9 @@ define(['core/ajax', './utils', './customevents'], (Ajax, Utils, Events) => {
                 // SuccessCallback(response);
             },
             fail: (jqXHR, status, error) => {
+                Log.error(jqXHR);
+                Log.error(status);
+                Log.error(error);
                 Events.emit(DEEPL_FAILED, status, error);
                 // FailCallback(jqXHR, status, error);
             }

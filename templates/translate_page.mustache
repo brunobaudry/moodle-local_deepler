@@ -198,17 +198,18 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 </div>
 <div class="container-fluid">
     <div class="row py-4" id="local_deepler__sourcetarget">
-        <div class="col-3 text-right"><label for="source_lang">{{#str}}sourcelang,local_deepler{{/str}}</label></div>
-        <div class="col-2">
+        <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{current_lang}})</h4></div>
+        <!--div class="col-2">
             <select class="form-control" id="source_lang"
                     data-action="local_deepler/source-switcher">
                 {{#langs}}
                     <option value="{{ code }}" {{selected}} {{disabled}}>{{ lang }}</option>
                 {{/langs}}
             </select>
-        </div>
+        </div-->
         <div class="col-1 h4 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
+        <div class="col-2"><h4 id="local_deepler__targetlang">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h4></div>
         <div class="col-2">
             <select
                     id="select-target-language"
@@ -221,7 +222,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 {{/target_langs}}
             </select>
         </div>
-        <div class="col-3"><label for="select-target-language">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</label></div>
+
     </div>
 </div>
 <div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">

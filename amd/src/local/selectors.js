@@ -30,6 +30,7 @@ export default {
         selectAllBtn: '[data-action="local_deepler/select-all"]',
         saveAll: '[data-action="local_deepler/saveall-btn"]',
         autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+        autoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span',
         targetSwitcher: '[data-action="local_deepler/target-switcher"]',
         sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
@@ -82,6 +83,8 @@ export default {
     sourcetexts: {
         keys: '[data-sourcetext-key="<KEY>"]',
         sourcelangs: '[data-key="<KEY>"].local_deepler__source-text select',
+        sourcelang: '#local_deepler__sourcelang strong',
+        targetlang: '#local_deepler__targetlang strong',
         multilangs: '#<KEY>',
         parentrow: '[data-row-id="<KEY>"]'
     },

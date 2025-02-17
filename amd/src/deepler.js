@@ -269,7 +269,7 @@ define(
          *
          * @param {String} key
          * @param {HTMLElement} element
-         * ui.js
+         * ui.js ok
          */
         const successMessageItem = (key, element) => {
             element.classList.add("local_deepler__success");
@@ -292,7 +292,7 @@ define(
          * @param {String} key
          * @param {HTMLElement} editor
          * @param {String} message
-         * ui.js
+         * ui.js ok
          */
         const errorMessageItem = (key, editor, message) => {
             editor.classList.add("local_deepler__error");

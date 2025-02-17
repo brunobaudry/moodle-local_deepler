@@ -38,6 +38,8 @@ require_once(__DIR__ . '/../../config.php');
 global $CFG;
 global $PAGE;
 global $DB;
+global $USER;
+
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 require_once('./classes/output/translate_page.php');
 require_once('./classes/output/nodeepl_page.php');
@@ -81,6 +83,7 @@ if ($initok) {
         // Set js data.
         $jsconfig = new stdClass();
         $jsconfig = $languagepack->prepareconfig($jsconfig);
+        $jsconfig->userid = $USER->id;
         // Prepare course data.
         $jsconfig->courseid = $courseid;
         $jsconfig->debug = $CFG->debug;
