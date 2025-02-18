@@ -20,6 +20,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
 define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors', './translation', './utils', './customevents'],
     (Log, TinyMCE, Str, Modal, Selectors, Translation, Utils, Events) => {
     const {getString} = Str;
@@ -33,7 +34,8 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
     let format = new Intl.NumberFormat();
     let saveAllModal = {};
     let errordbtitle = '';
-    // Const ON_TARGET_LANG_CHANGE = 'onTargetLangChange';
+
+        // Const ON_TARGET_LANG_CHANGE = 'onTargetLangChange';
     /**
      * Event factories.
      */
@@ -43,8 +45,8 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
 
         // Translation events.
         Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
-        Events.on(Translation.ON, onItemTranslated);
-        Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
+        Events.on(Translation.ON_ITEM_NOT_TRANSLATED, onItemNotTranslated);
+        Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
@@ -293,21 +295,34 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
     const getParentRow = (node) => {
         return node.closest(Utils.replaceKey(Selectors.sourcetexts.parentrow, node.getAttribute('data-key')));
     };
-    const showModal = (title, body) => {
+    const showModal = (title, body, type = 'default') => {
         Modal.create({
             title: title,
             body: body,
+            type: type,
             show: true,
             removeOnClose: true,
         });
     };
+        const onTranslationFailed = (data) => {
+            const error = data.error;
+            const status = data.status;
+            showModal(errordbtitle, `${status} ${error}`, 'Alert');
+        };
+        /**
+         * Event listener for failed translations per item.
+         * @param {object} data
+         */
+        const onItemNotTranslated = (data) => {
+            errorMessageItem(data.key, findEditor(data.key), data.error);
+        };
     /**
      * Event listener for the translations process to dispaly the status.
      *
      * @param {string} key
      */
     const onItemTranslated = (key) => {
-        setIconStatus(key, Selectors.statuses.tosave, true);
+        successMessageItem(key, findEditor(key));
     };
     /**
      * Launch autotranslation.
@@ -415,13 +430,15 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
      * @param {HTMLElement} editor
      * @param {String} message
      * ui.js
-     *
+     */
     const errorMessageItem = (key, editor, message) => {
         editor.classList.add("local_deepler__error");
+        // Display granular error messages.
+        const indexOfSET = message.indexOf("SET");// Probably a text too long for the field if not -1.
+        const msg = indexOfSET === -1 ? message : message.substring(0, indexOfSET);
         setIconStatus(key, Selectors.statuses.failed);
-        showErrorMessageForEditor(key, message);
+        showErrorMessageForEditor(key, msg);
     };
-     */
     /**
      * Hides an item's error message.
      *
@@ -441,12 +458,12 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
      * @param {String} key
      * @param {HTMLElement} element
      * ui.js
-     *
+     */
     const successMessageItem = (key, element) => {
         element.classList.add("local_deepler__success");
-        // Add saved indicator
+        // Add saved indicator.
         setIconStatus(key, Selectors.statuses.success);
-        // Remove success message after a few seconds
+        // Remove success message after a few seconds.
         setTimeout(() => {
             let multilangPill = document.querySelector(Utils.replaceKey(Selectors.statuses.multilang, key));
             let prevTransStatus = document.querySelector(Utils.replaceKey(Selectors.statuses.prevTransStatus, key));
@@ -457,13 +474,13 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
             setIconStatus(key, Selectors.statuses.saved);
         });
     };
-     */
+     /**/
     /**
      * Display error message attached to the item's editor.
      * @param {String} key
      * @param {String} message
      * ui.js
-     *
+     */
     const showErrorMessageForEditor = (key, message) => {
         let parent = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         const errorMsg = document.createElement('div');
@@ -472,7 +489,6 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
         errorMsg.innerHTML = message;
         parent.appendChild(errorMsg);
     };
-     */
     /**
      * Event listener to switch target lang.
      * @param {Event} e

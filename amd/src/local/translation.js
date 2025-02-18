@@ -14,8 +14,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import {showModal} from "../../../../../message/amd/src/message_send_bulk";
-
 /**
  * @module     local_deepler/deepler
  * @file       amd/src/local/translation.js
@@ -31,6 +29,8 @@ define([
     let targetLang = "";
     let settings = {};
     const ON_ITEM_TRANSLATED = 'onItemTranslated';
+    const ON_ITEM_NOT_TRANSLATED = 'onItemNotTranslated';
+    const ON_TRANSLATION_FAILED = 'onTranslationFailed';
     const setMainLangs = (source = '', target = '') => {
         if (source !== '') {
             mainSourceLang = source;
@@ -40,16 +40,40 @@ define([
         }
     };
     const onTrDbSuccess = (data)=>{
-        Log.debug(data);
+        Log.trace(data);
         if (data.length === 0) {
             Log.error(data);
-            showModal();
+            Events.emit(ON_TRANSLATION_FAILED, {error: data.error, status: data.status});
+            // ShowModal();
+        } else {
+            data.forEach((item) => {
+                // Ui.setIconStatus(item.key, Selectors.statuses.saved, true);
+                if (item.error === '') {
+                    Events.emit(ON_ITEM_TRANSLATED, item.key);
+                } else {
+                    Events.emit(ON_ITEM_NOT_TRANSLATED, {
+                        key: item.key,
+                        error: item.error
+                    });
+                }
+            });
         }
     };
+    /**
+     * Translation DB failed.
+     * @param {int} status
+     * @param {string} error
+     */
     const onTrDbFailed = (status, error) =>{
-            Log.error(status);
-            Log.error(error);
+        Events.emit(ON_TRANSLATION_FAILED, {error: error, status: status});
+            Log.trace(status);
+            Log.trace(error);
         };
+    /**
+     * Save translations to the DB.
+     * @param {string} keys
+     * @param {object} config
+     */
     const saveTranslations = (keys, config) => {
         Log.trace(keys);
         const data = keys.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
@@ -58,6 +82,12 @@ define([
         Api.updateTranslationsInDb(data, config.userid);
         // Api.callApi("local_deepler_update_translation", {data: data}).done(handleAjaxUpdateDBResponse);
     };
+        /**
+         * Prepare the data to be saved in the DB.
+         * @param {object} item
+         * @param {bool} maineditorIsTextArea
+         * @returns {{courseid, id, tid: *, field, table, text: string}}
+         */
         const prepareDbUpdateItem = (item, maineditorIsTextArea) => {
             const key = item.key;
             const textTosave = getupdatedtext(key, maineditorIsTextArea);
@@ -68,7 +98,8 @@ define([
                 tid: item.tid,
                 field: item.field,
                 table: item.table,
-                text: textTosave
+                text: textTosave,
+                keyid: key
             };
         };
         /**
@@ -336,6 +367,8 @@ const onTranslateFailed = (status, error)=>{
         initTempForKey: initTempForKey,
         initTemp: initTemp,
         ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
+        ON_ITEM_NOT_TRANSLATED: ON_ITEM_NOT_TRANSLATED,
+        ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
         /* TempTranslations: tempTranslations,*/
         setMainLangs: setMainLangs,
         isTranslatable: isTranslatable,

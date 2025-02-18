@@ -51,6 +51,7 @@ class update_translation extends external_api {
                                 'table' => new external_value(PARAM_ALPHANUMEXT, 'The table name'),
                                 'field' => new external_value(PARAM_ALPHANUMEXT, 'The field name'),
                                 'text' => new external_value(PARAM_RAW, 'The new text content with multilang2 translations'),
+                                'keyid' => new external_value(PARAM_ALPHANUMEXT, 'The field ui identifier'),
                         ])
                 ),
                 'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
@@ -126,7 +127,7 @@ class update_translation extends external_api {
      */
     private static function initialize_response(array $data): array {
         return [
-                'keyid' => $data['table'] . '-' . $data['id'] . '-' . $data['field'],
+                'keyid' => $data['keyid'],
                 't_lastmodified' => 0,
                 'text' => '',
                 'error' => '',

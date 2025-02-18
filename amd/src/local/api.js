@@ -39,10 +39,14 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                     userid: userid,
                 },
                 done: (response) => {
-                     Events.emit(TR_DB_SUCCESS, response);
+                    if (response.length === 1 && response[0].error && response[0].keyid === '') {
+                        Events.emit(TR_DB_FAILED, response[0].error);
+                        return;
+                    }
+                    Events.emit(TR_DB_SUCCESS, response);
                 },
                 fail: (jqXHR, status, error) => {
-                     Events.emit(TR_DB_FAILED, status, error);
+                     Events.emit(TR_DB_FAILED, error);
                 }
             }]
         );
