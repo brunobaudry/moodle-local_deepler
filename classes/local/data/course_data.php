@@ -798,6 +798,10 @@ class course_data {
             $optionstablename = $pluginname . '_options';
             $hasoptions = true;
         }
+        if ($dbman->table_exists($pluginname . '_choice')) {
+            $optionstablename = $pluginname . '_choice';
+            $hasoptions = true;
+        }
         switch ($pluginname) {
             case 'qtype_match':
                 if ($dbman->table_exists($pluginname . '_subquestions')) {
@@ -812,6 +816,7 @@ class course_data {
 
                     }
                 }
+                break;
             case 'qtype_multichoice':
                 foreach ($question->answers as $answer) {
                     $activitydata[] = $this->build_data(
@@ -832,6 +837,154 @@ class course_data {
                                 3
                         );
                     }
+                }
+                break;
+            case 'qtype_description':
+            case 'qtype_randomsamatch':
+            case 'qtype_essay':
+            case 'qtype_multianswer':
+                // Break as all the data is in the question table.
+                break;
+            case 'qtype_calculated':
+            case 'qtype_calculatedsimple':
+                foreach ($question->answers as $answer) {
+
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3
+                        );
+                    }
+                }
+                break;
+            case 'qtype_calculatedmulti':
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3
+                    );
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3
+                        );
+                    }
+                }
+                break;
+            case 'qtype_truefalse':
+                if (!empty($question->truefeedback)) {
+                    $activitydata[] = $this->build_data(
+                            $question->trueanswerid,
+                            $question->truefeedback,
+                            $question->truefeedbackformat,
+                            'truefeedback',
+                            $qactivity,
+                            3
+                    );
+                }
+                if (!empty($question->falsefeedback)) {
+                    $activitydata[] = $this->build_data(
+                            $question->falseanswerid,
+                            $question->falsefeedback,
+                            $question->falsefeedbackformat,
+                            'falsefeedback',
+                            $qactivity,
+                            3
+                    );
+                }
+                break;
+            case 'qtype_shortanswer':
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3
+                    );
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3
+                        );
+                    }
+                }
+            case 'qtype_numerical':
+                foreach ($question->answers as $answer) {
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3
+                        );
+                    }
+                }
+                break;
+
+            case 'qtype_ddimageortext' :
+            case 'qtype_ddmarker' :
+                $choices = $DB->get_records("{$pluginname}_drags", ['questionid' => $question->id]);
+                foreach ($choices as $answer) {
+                    if (trim($answer->label) === '') {
+                        continue;
+                    }
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->label,
+                            0,
+                            'label',
+                            $qactivity,
+                            3
+                    );
+                }
+                break;
+            case 'qtype_gapselect':
+            case 'qtype_ddwtos' :
+                $choices = $DB->get_records('question_answers', ['question' => $question->id]);
+                foreach ($choices as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            0,
+                            'answer',
+                            $qactivity,
+                            3
+                    );
+                }
+                break;
+            case 'qtype_ddimageortext' :
+                $choices = $DB->get_records('qtype_ddimageortext_drags', ['questionid' => $question->id]);
+                break;
+            case 'qtype_ordering' :
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3
+                    );
                 }
                 break;
             default:
