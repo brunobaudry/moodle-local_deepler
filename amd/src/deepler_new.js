@@ -20,7 +20,7 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/ui', 'core/log'], (UI, Log) => {
+define(['./local/ui', './local/translation', 'core/log'], (UI, Translation, Log) => {
     const debug = {
         NONE: 0, // Level 5 silent.
         MINIMAL: 5, // Level 3 no trace, debug or info.
@@ -38,6 +38,7 @@ define(['./local/ui', 'core/log'], (UI, Log) => {
             case debug.DEVELOPER : level = 0; break;
         }
         Log.setConfig({level: level});
+        Translation.init(cfg);
         window.addEventListener("DOMContentLoaded", UI.init(cfg));
     };
     return {

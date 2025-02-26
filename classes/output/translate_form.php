@@ -306,7 +306,7 @@ class translate_form extends moodleform {
             if ($item->format === 0) {
                 $mform->addElement('html', $nowisiwig);
             } else {
-                $mform->addElement('cteditor', $key, $key);
+                $mform->addElement('cteditor', $key);
                 $mform->setType($key, PARAM_RAW);
             }
             // Closing $translatededitor.

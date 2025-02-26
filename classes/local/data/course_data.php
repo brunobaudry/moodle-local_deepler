@@ -230,7 +230,7 @@ class course_data {
         $activitydata = [];
         $cms = $this->modinfo->get_cms();
         /** @var \cm_info|mixed $activity */
-        foreach ($cms as $activity) {
+        foreach ($cms as $cmid => $activity) {
             // Build first level activities.
             $activitydbrecord = $this->injectactivitydata($activitydata, $activity);
             // Build outstanding subcontent.
@@ -889,7 +889,7 @@ class course_data {
                             $question->trueanswerid,
                             $question->truefeedback,
                             $question->truefeedbackformat,
-                            'truefeedback',
+                            'feedback',
                             $qactivity,
                             3
                     );
@@ -899,7 +899,7 @@ class course_data {
                             $question->falseanswerid,
                             $question->falsefeedback,
                             $question->falsefeedbackformat,
-                            'falsefeedback',
+                            'feedback',
                             $qactivity,
                             3
                     );
@@ -943,7 +943,8 @@ class course_data {
 
             case 'qtype_ddimageortext' :
             case 'qtype_ddmarker' :
-                $choices = $DB->get_records("{$pluginname}_drags", ['questionid' => $question->id]);
+            $qactivity->modname = "{$pluginname}_drags";
+            $choices = $DB->get_records($qactivity->modname, ['questionid' => $question->id]);
                 foreach ($choices as $answer) {
                     if (trim($answer->label) === '') {
                         continue;

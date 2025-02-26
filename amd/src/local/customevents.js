@@ -24,26 +24,27 @@ define([], () => {
     const events = {};
 
     return {
-        // Register an event handler.
+        // Register an event handler
         on: function(eventName, callback) {
             if (!events[eventName]) {
                 events[eventName] = [];
             }
             if (!events[eventName].includes(callback)) {
-                // Avoid duplication.
+                // Avoid duplication
                 events[eventName].push(callback);
             }
         },
 
-        // Trigger an event.
-        emit: function(eventName, data) {
+        // Trigger an event with multiple parameters
+        emit: function(eventName, ...args) {
             if (events[eventName]) {
                 events[eventName].forEach(function(callback) {
-                    callback(data);
+                    callback(...args);
                 });
             }
         },
-        // Remove an event handler.
+
+        // Remove an event handler
         off: function(eventName, callback) {
             if (events[eventName]) {
                 events[eventName] = events[eventName].filter(function(cb) {

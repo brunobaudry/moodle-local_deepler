@@ -30,28 +30,44 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
     const DEEPL_SUCCESS = 'onDeeplUpdateSuccess';
     const TR_DB_FAILED = 'onTranslationUpdateFailed';
     const DEEPL_FAILED = 'onDeeplUpdateFailed';
-    const updateTranslationsInDb = (data, userid) => {
+    const updateTranslationsInDb = (data, userid, courseid) => {
+        Log.debug(`api.updateTranslationsInDb.33`);
+        Log.debug(data);
+        Log.debug(courseid);
         Ajax.call([
             {
                 methodname: "local_deepler_update_translation",
                 args: {
                     data: data,
                     userid: userid,
+                    courseid: courseid
                 },
                 done: (response) => {
                     if (response.length === 1 && response[0].error && response[0].keyid === '') {
+                        Log.error(`api/updateTranslationsInDb/done:44`);
+                        Log.error(response);
                         Events.emit(TR_DB_FAILED, response[0].error);
                         return;
                     }
                     Events.emit(TR_DB_SUCCESS, response);
                 },
                 fail: (jqXHR, status, error) => {
-                     Events.emit(TR_DB_FAILED, error);
+                    Log.error(`api/updateTranslationsInDb/fail:50`);
+                    Log.error(jqXHR);
+                    Log.error(`api/updateTranslationsInDb/fail:52`);
+                    Log.error(status);
+                    Log.log(`api/updateTranslationsInDb/fail:54`);
+                    Log.error(error);
+                     Events.emit(TR_DB_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
                 }
             }]
         );
     };
     const translate = (data, options) => {
+        Log.debug(`api.translate.57`);
+        Log.debug(data);
+        Log.debug(`api/translate:60`);
+        Log.debug(options);
         Ajax.call([{
             methodname: "local_deepler_get_translation",
             args: {

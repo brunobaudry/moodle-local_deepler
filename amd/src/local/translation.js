@@ -21,16 +21,22 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([
-    'core/log', './api', './utils', './selectors', './ui', './tokeniser', './customevents'],
-    (Log, Api, Utils, Selectors, Ui, Tokeniser, Events) => {
+    'core/log', './api', './utils', './selectors', './tokeniser', './customevents'],
+    (Log, Api, Utils, Selectors, Tokeniser, Events) => {
     let tempTranslations = {};
     let escapePatterns = {};
     let mainSourceLang = "";
     let targetLang = "";
+    let courseid = 0;
+    let userid = 0;
     let settings = {};
     const ON_ITEM_TRANSLATED = 'onItemTranslated';
-    const ON_ITEM_NOT_TRANSLATED = 'onItemNotTranslated';
+    // Const ON_ITEM_NOT_TRANSLATED = 'onItemsNotTranslated';
+    const ON_ITEM_SAVED = 'onItemSaved';
+    const ON_ITEM_NOT_SAVED = 'onItemNotSaved';
     const ON_TRANSLATION_FAILED = 'onTranslationFailed';
+    const ON_TRANSLATION_SUCCESS = 'onTranslationSuccess';
+    const ON_DB_FAILED = 'onTranslationFailed';
     const setMainLangs = (source = '', target = '') => {
         if (source !== '') {
             mainSourceLang = source;
@@ -40,23 +46,25 @@ define([
         }
     };
     const onTrDbSuccess = (data)=>{
-        Log.trace(data);
+        Log.error(`translation/onTrDbSuccess:46`);
+        Log.error(data);
         if (data.length === 0) {
             Log.error(data);
             Events.emit(ON_TRANSLATION_FAILED, {error: data.error, status: data.status});
             // ShowModal();
         } else {
+            const errors = data.filter((item) => item.error !== '');
             data.forEach((item) => {
                 // Ui.setIconStatus(item.key, Selectors.statuses.saved, true);
+                Log.debug(`translation/:54`);
+                Log.debug(item);
                 if (item.error === '') {
-                    Events.emit(ON_ITEM_TRANSLATED, item.key);
+                    Events.emit(ON_ITEM_SAVED, item.keyid, item.text);
                 } else {
-                    Events.emit(ON_ITEM_NOT_TRANSLATED, {
-                        key: item.key,
-                        error: item.error
-                    });
+                    Events.emit(ON_ITEM_NOT_SAVED, item.keyid, item.error);
                 }
             });
+            Events.emit(ON_TRANSLATION_SUCCESS, errors);
         }
     };
     /**
@@ -65,35 +73,39 @@ define([
      * @param {string} error
      */
     const onTrDbFailed = (status, error) =>{
-        Events.emit(ON_TRANSLATION_FAILED, {error: error, status: status});
+            Events.emit(ON_TRANSLATION_FAILED, {error: error, status: status});
             Log.trace(status);
             Log.trace(error);
         };
     /**
      * Save translations to the DB.
-     * @param {string} keys
+     * @param {array} items
      * @param {object} config
      */
-    const saveTranslations = (keys, config) => {
-        Log.trace(keys);
-        const data = keys.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
+    const saveTranslations = (items, config) => {
+        Log.debug(`translation/saveTranslations:84 > items`);
+        Log.debug(items);
+        Log.debug(targetLang);
+        const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
+        Log.debug(`translation/saveTranslations:84 > data`);
+        Log.debug(data);
+        Log.debug(userid);
         Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
         Events.on(Api.TR_DB_FAILED, onTrDbFailed);
-        Api.updateTranslationsInDb(data, config.userid);
+        Api.updateTranslationsInDb(data, userid, courseid);
         // Api.callApi("local_deepler_update_translation", {data: data}).done(handleAjaxUpdateDBResponse);
     };
         /**
          * Prepare the data to be saved in the DB.
          * @param {object} item
          * @param {bool} maineditorIsTextArea
-         * @returns {{courseid, id, tid: *, field, table, text: string}}
+         * @returns {{ id, tid: *, field, table, text: string}}
          */
         const prepareDbUpdateItem = (item, maineditorIsTextArea) => {
             const key = item.key;
             const textTosave = getupdatedtext(key, maineditorIsTextArea);
             item.text = textTosave;
             return {
-                courseid: item.courseid,
                 id: item.id,
                 tid: item.tid,
                 field: item.field,
@@ -111,6 +123,8 @@ define([
          * translation.js
          */
         const getupdatedtext = (key, maineditorIsTextArea) => {
+            Log.debug(`translation/getupdatedtext:125 > targetLang`);
+            Log.debug(targetLang);
             const sourceItemLang = tempTranslations[key].sourceLang;
             const fieldText = tempTranslations[key].fieldText; // Translation
             const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
@@ -283,28 +297,31 @@ define([
      */
     const callTranslations = (keys) => {
         const translations = [];
-        prepareAdvancedSettings(document.querySelector(Selectors.actions.targetSwitcher).value);
+        Log.debug(`translation/callTranslations:300 > targetLang`);
+        Log.debug(targetLang);
+        prepareAdvancedSettings(targetLang);
         keys.forEach((key) => {
-            // InitTempForKey(key);
             translations.push(prepareTranslation(key));
         });
         Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
         Events.on(Api.DEEPL_FAILED, onTranslateFailed);
+        Log.info(`translation/callTranslations:296`);
         Log.info(translations);
+        Log.info(`translation/callTranslations:298`);
         Log.info(settings);
+        Log.info(`translation/callTranslations:300`);
+        Log.info(tempTranslations);
         Api.translate(translations, settings);
     };
 const onTranslateSuccess = (response)=>{
+    Log.debug(`translation/onTranslateSuccess:301`);
     Log.debug(response);
     response.forEach((tr) => {
-        // @todo emit event.
         let key = tr.key;
         let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
         tempTranslations[key].editor.innerHTML = translation;
         tempTranslations[key].translation = translation;
-        Log.debug(this);
         Events.emit(ON_ITEM_TRANSLATED, key);
-        // UI.setIconStatus(key, Selectors.statuses.tosave, true);
     });
 };
 const onTranslateFailed = (status, error)=>{
@@ -318,7 +335,6 @@ const onTranslateFailed = (status, error)=>{
      * translation.js ok
      */
     const prepareAdvancedSettings = (targetLang) => {
-        Log.info('prepareAdvancedSettings');
         escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
         escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
         // eslint-disable-next-line camelcase
@@ -361,14 +377,23 @@ const onTranslateFailed = (status, error)=>{
         const translated = (key)=>{
             return tempTranslations[key]?.translation?.length > 0;
         };
+        const init = (cfg) => {
+            courseid = cfg.courseid;
+            userid = cfg.userid;
+            setMainLangs(cfg.currentlang, cfg.lang);
+        };
         return {
+            init: init,
         callTranslations: callTranslations,
         saveTranslations: saveTranslations,
         initTempForKey: initTempForKey,
         initTemp: initTemp,
         ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
-        ON_ITEM_NOT_TRANSLATED: ON_ITEM_NOT_TRANSLATED,
+        ON_DB_FAILED: ON_DB_FAILED,
+        ON_ITEM_SAVED: ON_ITEM_SAVED,
+        ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
         ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
+        ON_TRANSLATION_SUCCESS: ON_TRANSLATION_SUCCESS,
         /* TempTranslations: tempTranslations,*/
         setMainLangs: setMainLangs,
         isTranslatable: isTranslatable,

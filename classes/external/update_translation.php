@@ -17,7 +17,6 @@
 namespace local_deepler\external;
 
 use context_course;
-use context_module;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -26,7 +25,9 @@ use core_external\external_value;
 use core_external\required_capability_exception;
 use dml_exception;
 use dml_transaction_exception;
+use Exception;
 use invalid_parameter_exception;
+use Throwable;
 
 /**
  * External service to update multilang2 translations and log a timestamp.
@@ -45,16 +46,16 @@ class update_translation extends external_api {
         return new external_function_parameters([
                 'data' => new external_multiple_structure(
                         new external_single_structure([
-                                'courseid' => new external_value(PARAM_INT, 'The course to fetch the field from'),
                                 'id' => new external_value(PARAM_INT, 'The id of the course field'),
                                 'tid' => new external_value(PARAM_INT, 'The id of the activity table'),
                                 'table' => new external_value(PARAM_ALPHANUMEXT, 'The table name'),
                                 'field' => new external_value(PARAM_ALPHANUMEXT, 'The field name'),
                                 'text' => new external_value(PARAM_RAW, 'The new text content with multilang2 translations'),
-                                'keyid' => new external_value(PARAM_ALPHANUMEXT, 'The field ui identifier'),
+                                'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
                         ])
                 ),
                 'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
+                'courseid' => new external_value(PARAM_ALPHANUM, 'the course id'),
         ]);
     }
 
@@ -62,6 +63,7 @@ class update_translation extends external_api {
      * Actually performs the DB updates.
      *
      * @param array $data
+     * @param string $userid
      * @return array
      * @throws \core_external\restricted_context_exception
      * @throws \dml_exception
@@ -69,33 +71,47 @@ class update_translation extends external_api {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    public static function execute($data, $userid): array {
+    public static function execute($data, $userid, $courseid): array {
         global $DB;
         $responses = [];
         try {
-            $params = self::validate_parameters(self::execute_parameters(), ['data' => $data, 'userid' => $userid]);
+            $params = self::validate_parameters(self::execute_parameters(),
+                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid,]);
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
             foreach ($params['data'] as $d) {
                 $response = self::initialize_response($d);
                 try {
                     // Security checks.
-                    self::perform_security_checks($d, $params['userid']);
+                    self::perform_security_checks($d, $params['userid'], $params['courseid']);
                     self::update_records($d, $response);
+                } catch (invalid_parameter_exception $i) {
+                    $response['error'] = "INVALID PARAM " . $i->getMessage();
+                } catch (required_capability_exception $rc) {
+                    $response['error'] = "CAPABILITY " . $rc->getMessage();
+                } catch (restricted_context_exception $rce) {
+                    $response['error'] = "RESTRICTED " . $rce->getMessage();
                 } catch (dml_exception $dmlexception) {
-                    $response['error'] = $dmlexception->getMessage();
+                    $response['error'] = "DML SUB " . $dmlexception->getMessage();
+                } catch (Exception $e) {
+                    $response['error'] = "Unexpected error: " . $e->getMessage();
+                } catch (Throwable $t) {
+                    $response['error'] = "Critical error: " . $t->getMessage();
                 }
+
                 $responses[] = $response;
             }
             // Commit the transaction.
             $transaction->allow_commit();
         } catch (invalid_parameter_exception $i) {
-            $responses[] = ['error' => $i->debuginfo ?? $i->errorcode, 'keyid' => '', 't_lastmodified' => 0, 'text' => ''];
+            $responses[] = ['error' => "INVALID PARAM MAIN " . $i->debuginfo ?? $i->errorcode, 'keyid' => '', 't_lastmodified' => 0,
+                    'text' =>
+                            ''];
         } catch (dml_transaction_exception $tex) {
-            $responses[] = ['error' => $tex->debuginfo ?? $tex->errorcode, 'keyid' => '', 't_lastmodified' => 0, 'text' => ''];
+            $responses[] = ['error' => "DML MAIN " . $tex->debuginfo ?? $tex->errorcode, 'keyid' => '', 't_lastmodified' => 0,
+                    'text' => ''];
         }
         return $responses;
-
     }
 
     /**
@@ -107,16 +123,21 @@ class update_translation extends external_api {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    private static function perform_security_checks(array $data, int $userid): void {
-        $context = context_course::instance($data['courseid']);
+    private static function perform_security_checks(array $data, int $userid, int $courseid): void {
+        $context = context_course::instance($courseid);
         self::validate_context($context);
         require_capability('local/deepler:edittranslations', $context, $userid);
         // Check detailed activity capabilities.
-        if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
+        /*if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
                 strpos($data['table'], 'question') === false &&
                 strpos($data['table'], 'qtype') === false) {
-            require_capability('moodle/course:manageactivities', context_module::instance($data['id']), $userid);
-        }
+            $contextmodule = context_module::instance($data['id']);
+
+            if ($contextmodule->contextlevel == CONTEXT_MODULE) {
+                require_capability('moodle/course:manageactivities', $contextmodule, $userid, false);
+            }
+            //require_capability('moodle/course:manageactivities', context_module::instance($data['id']), $userid);
+        }*/
     }
 
     /**
@@ -164,7 +185,7 @@ class update_translation extends external_api {
                         't_lastmodified' => new external_value(PARAM_INT, 'Timestamp the field was modified'),
                         'text' => new external_value(PARAM_RAW, 'The updated text content'),
                         'error' => new external_value(PARAM_RAW, 'An error message if any'),
-                        'keyid' => new external_value(PARAM_ALPHANUMEXT, 'the key id of the field updated table-id-field'),
+                        'keyid' => new external_value(PARAM_RAW, 'the key id of the field updated table-id-field'),
                 ])
         );
     }

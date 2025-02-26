@@ -83,6 +83,7 @@ export default {
     sourcetexts: {
         keys: '[data-sourcetext-key="<KEY>"]',
         sourcelangs: '[data-key="<KEY>"].local_deepler__source-text select',
+        sourcelangdd: '[data-key="<KEY>"][data-action="local_deepler/sourceselect"]',
         sourcelang: '#local_deepler__sourcelang strong',
         targetlang: '#local_deepler__targetlang strong',
         multilangs: '#<KEY>',
