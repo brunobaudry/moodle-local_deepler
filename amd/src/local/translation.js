@@ -35,8 +35,8 @@ define([
     const ON_ITEM_SAVED = 'onItemSaved';
     const ON_ITEM_NOT_SAVED = 'onItemNotSaved';
     const ON_TRANSLATION_FAILED = 'onTranslationFailed';
-    const ON_TRANSLATION_SUCCESS = 'onTranslationSuccess';
-    const ON_DB_FAILED = 'onTranslationFailed';
+    const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
+    const ON_DB_FAILED = 'onDbFailed';
     const setMainLangs = (source = '', target = '') => {
         if (source !== '') {
             mainSourceLang = source;
@@ -50,7 +50,7 @@ define([
         Log.error(data);
         if (data.length === 0) {
             Log.error(data);
-            Events.emit(ON_TRANSLATION_FAILED, {error: data.error, status: data.status});
+            Events.emit(ON_DB_FAILED, 'no data returned', '');
             // ShowModal();
         } else {
             const errors = data.filter((item) => item.error !== '');
@@ -64,7 +64,7 @@ define([
                     Events.emit(ON_ITEM_NOT_SAVED, item.keyid, item.error);
                 }
             });
-            Events.emit(ON_TRANSLATION_SUCCESS, errors);
+            Events.emit(ON_DB_SAVE_SUCCESS, errors);
         }
     };
     /**
@@ -73,7 +73,7 @@ define([
      * @param {string} error
      */
     const onTrDbFailed = (status, error) =>{
-            Events.emit(ON_TRANSLATION_FAILED, {error: error, status: status});
+            Events.emit(ON_DB_FAILED, error, status);
             Log.trace(status);
             Log.trace(error);
         };
@@ -111,6 +111,7 @@ define([
                 field: item.field,
                 table: item.table,
                 text: textTosave,
+                cmid: item.cmid,
                 keyid: key
             };
         };
@@ -280,16 +281,6 @@ define([
             key: key
         };
     };
-
-    /* Const getTranslation = (key) => {
-        let formData = Utils.prepareFormData(key);
-        Api.translate(formData, (response) => {
-            let tr = Utils.postprocess(response.translations[0].text, tempTranslations[key].tokens);
-            tempTranslations[key].editor.innerHTML = tr;
-            tempTranslations[key].translation = tr;
-            Ui.setIconStatus(key, Selectors.statuses.tosave, true);
-        });
-    };*/
     /**
      * Call the external translation service to translate the selected keys.
      *
@@ -297,7 +288,8 @@ define([
      */
     const callTranslations = (keys) => {
         const translations = [];
-        Log.debug(`translation/callTranslations:300 > targetLang`);
+        const rephrases = [];
+        Log.debug(`translation/callTranslations:291 > targetLang`);
         Log.debug(targetLang);
         prepareAdvancedSettings(targetLang);
         keys.forEach((key) => {
@@ -314,18 +306,22 @@ define([
         Api.translate(translations, settings);
     };
 const onTranslateSuccess = (response)=>{
-    Log.debug(`translation/onTranslateSuccess:301`);
+    Log.debug(`translation/onTranslateSuccess:308`);
     Log.debug(response);
     response.forEach((tr) => {
-        let key = tr.key;
-        let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
-        tempTranslations[key].editor.innerHTML = translation;
-        tempTranslations[key].translation = translation;
-        Events.emit(ON_ITEM_TRANSLATED, key);
+        if (tr.error === '') {
+            let key = tr.key;
+            let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
+            tempTranslations[key].editor.innerHTML = translation;
+            tempTranslations[key].translation = translation;
+            Events.emit(ON_ITEM_TRANSLATED, key);
+        } else {
+            Events.emit(ON_TRANSLATION_FAILED, tr.error);
+        }
     });
 };
 const onTranslateFailed = (status, error)=>{
-    window.console.log(status, error);
+    Events.emit(ON_TRANSLATION_FAILED, status, error);
 };
     /**
      * Compile Advanced settings.
@@ -372,7 +368,8 @@ const onTranslateFailed = (status, error)=>{
      */
     const isTranslatable = (sourceLang = '') =>{
          Log.info(targetLang, sourceLang, targetLang === (sourceLang === '' ? mainSourceLang : sourceLang));
-        return targetLang !== (sourceLang === '' ? mainSourceLang : sourceLang);
+        // Return targetLang !== (sourceLang === '' ? mainSourceLang : sourceLang);
+        return targetLang !== '';
     };
         const translated = (key)=>{
             return tempTranslations[key]?.translation?.length > 0;
@@ -380,7 +377,7 @@ const onTranslateFailed = (status, error)=>{
         const init = (cfg) => {
             courseid = cfg.courseid;
             userid = cfg.userid;
-            setMainLangs(cfg.currentlang, cfg.lang);
+            setMainLangs(cfg.currentlang, cfg.targetlang);
         };
         return {
             init: init,
@@ -393,7 +390,7 @@ const onTranslateFailed = (status, error)=>{
         ON_ITEM_SAVED: ON_ITEM_SAVED,
         ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
         ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
-        ON_TRANSLATION_SUCCESS: ON_TRANSLATION_SUCCESS,
+        ON_TRANSLATION_SUCCESS: ON_DB_SAVE_SUCCESS,
         /* TempTranslations: tempTranslations,*/
         setMainLangs: setMainLangs,
         isTranslatable: isTranslatable,

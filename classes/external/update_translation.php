@@ -17,6 +17,7 @@
 namespace local_deepler\external;
 
 use context_course;
+use context_module;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -50,6 +51,7 @@ class update_translation extends external_api {
                                 'tid' => new external_value(PARAM_INT, 'The id of the activity table'),
                                 'table' => new external_value(PARAM_ALPHANUMEXT, 'The table name'),
                                 'field' => new external_value(PARAM_ALPHANUMEXT, 'The field name'),
+                                'cmid' => new external_value(PARAM_ALPHANUMEXT, 'The course module id'),
                                 'text' => new external_value(PARAM_RAW, 'The new text content with multilang2 translations'),
                                 'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
                         ])
@@ -92,7 +94,7 @@ class update_translation extends external_api {
                 } catch (restricted_context_exception $rce) {
                     $response['error'] = "RESTRICTED " . $rce->getMessage();
                 } catch (dml_exception $dmlexception) {
-                    $response['error'] = "DML SUB " . $dmlexception->getMessage();
+                    $response['error'] = $dmlexception->getMessage();
                 } catch (Exception $e) {
                     $response['error'] = "Unexpected error: " . $e->getMessage();
                 } catch (Throwable $t) {
@@ -128,16 +130,16 @@ class update_translation extends external_api {
         self::validate_context($context);
         require_capability('local/deepler:edittranslations', $context, $userid);
         // Check detailed activity capabilities.
-        /*if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
+        /* if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
                 strpos($data['table'], 'question') === false &&
-                strpos($data['table'], 'qtype') === false) {
-            $contextmodule = context_module::instance($data['id']);
-
+                strpos($data['table'], 'qtype') === false) {*/
+        if ($data['cmid'] != 0) {
+            $contextmodule = context_module::instance($data['cmid']);
             if ($contextmodule->contextlevel == CONTEXT_MODULE) {
-                require_capability('moodle/course:manageactivities', $contextmodule, $userid, false);
+                require_capability('moodle/course:manageactivities', $contextmodule, $userid);
             }
             //require_capability('moodle/course:manageactivities', context_module::instance($data['id']), $userid);
-        }*/
+        }
     }
 
     /**

@@ -49,6 +49,10 @@ class translate_form extends moodleform {
      * @var lang_helper
      */
     private $langpack;
+    /**
+     * @var string
+     */
+    private $sourceoptions;
 
     /**
      * Define Moodle Form.
@@ -62,7 +66,7 @@ class translate_form extends moodleform {
         $course = $this->_customdata['course'];
         $coursedata = $this->_customdata['coursedata'];
         $this->langpack = $this->_customdata['langpack'];
-
+        $this->sourceoptions = $this->langpack->preparehtmlotions(true, false);
         // Start moodle form.
         $mform = $this->_form;
         $mform->disable_form_change_checker();
@@ -152,8 +156,10 @@ class translate_form extends moodleform {
         $mlangfilter = $this->_customdata['mlangfilter'];
 
         // Build a key for js interaction.
-        $key = "$item->table[$item->id][$item->field]";
-        $keyid = "{$item->table}-{$item->id}-{$item->field}";
+        // $key = "$item->table[$item->id][$item->field]";
+        $key = "$item->table[$item->id][$item->field][$item->cmid]";
+        //$keyid = "{$item->table}-{$item->id}-{$item->field}";
+        $keyid = "{$item->table}-{$item->id}-{$item->field}-{$item->cmid}";
         // Data status.
         $status = $item->tneeded ? 'needsupdate' : 'updated';
         // Special cases where the content is a db key (should never be translated).
@@ -163,9 +169,9 @@ class translate_form extends moodleform {
         $mform->addElement('html',
                 "<div title='$rowtitle' class='$cssclass row align-items-start py-2' data-row-id='$isdbkey$key'
                     data-status='$status'>");
-
         // Column 1 settings.
-        if ($this->langpack->targetlang === $this->langpack->currentlang) {
+        $sametargetassource = $this->langpack->isrephrase();
+        if ($sametargetassource) {
             $buttonclass = 'badge-dark';
             $titlestring = get_string('canttranslate', 'local_deepler', $this->langpack->targetlang);
         } else if ($item->tneeded) {
@@ -243,11 +249,11 @@ class translate_form extends moodleform {
                     >
                     <i class='fa fa-language' aria-hidden='true'></i></span>";
         // Source lang select.
-        $sourceoptions = $this->langpack->preparehtmlotions(true, false);
+
         $selecttitle = get_string('specialsourcetext', 'local_deepler', strtoupper($this->langpack->currentlang));
         $sourceselect =
                 "<select class='custom-select' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
-                    {$sourceoptions}</select>";
+                    {$this->sourceoptions}</select>";
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
         // Source texts.
@@ -285,6 +291,7 @@ class translate_form extends moodleform {
             data-action='local_deepler/editor'
             data-key='$key'
             data-table='{$item->table}'
+            data-cmid='{$item->cmid}'
             data-id='{$item->id}'
             data-field='{$item->field}'
             data-tid='{$item->tid}'>";

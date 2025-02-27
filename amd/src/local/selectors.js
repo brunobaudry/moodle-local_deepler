@@ -101,5 +101,8 @@ export default {
         outlineDetection: '[data-id="local_deepler/outline_detection"]',
         splitSentences: '[name="local_deepler/split_sentences"]:checked',
         modelType: '[name="local_deepler/modeltype"]:checked'
-    }
+    },
+    config: {
+        langstrings: '#local_deepler__stringscontainer',
+    },
 };

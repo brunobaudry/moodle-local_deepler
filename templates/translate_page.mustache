@@ -53,6 +53,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "charcountspaces": 25
   }
 }}
+<div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
+    <!-- This is a hidden container for the strings that are used in the JS -->
+</div>
 <div class="text-right">
     <a id="local_deepler__settings"
        role="button" class="link link-underline" data-toggle="collapse"
@@ -198,7 +201,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 </div>
 <div class="container-fluid">
     <div class="row py-4" id="local_deepler__sourcetarget">
-        <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{current_lang}})</h4></div>
+        <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h4></div>
         <!--div class="col-2">
             <select class="form-control" id="source_lang"
                     data-action="local_deepler/source-switcher">
@@ -217,6 +220,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     class="local_deepler__localeswitcher form-control"
                     data-action="local_deepler/target-switcher"
             >
+                {{#notarget}}
+                    <option value="" selected disabled>Select...</option>
+                {{/notarget}}
                 {{#target_langs}}
                     <option value="{{ code }}" {{selected}} {{disabled}}>{{ lang }}</option>
                 {{/target_langs}}

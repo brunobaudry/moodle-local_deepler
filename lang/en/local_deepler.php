@@ -37,6 +37,7 @@ $string['contextdeepl_placeholder'] =
         'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['deeplapidoctitle'] = 'DeepL\'s API settings';
+$string['deeplapiexception'] = 'DeepL\'s API returned an error';
 $string['deepler:edittranslations'] = 'Edit course translations in DeepL Translator';
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'If enabled use DeepL Pro else the free version of DeepL API.';

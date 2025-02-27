@@ -29,8 +29,12 @@
  */
 
 // Get libs.
+use DeepL\AuthorizationException;
+use DeepL\DeepLException;
 use local_deepler\local\data\course_data;
 use local_deepler\local\data\lang_helper;
+use local_deepler\output\badsettings_page;
+use local_deepler\output\nodeepl_page;
 use local_deepler\output\translate_page;
 
 require_once(__DIR__ . '/../../config.php');
@@ -68,6 +72,9 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 $PAGE->set_course($course);
+$current = current_language();
+$languages = get_string_manager()->get_list_of_translations(true);
+$languages2 = get_string_manager()->get_list_of_translations();
 // Get the renderer.
 $output = $PAGE->get_renderer('local_deepler');
 // Output header.
@@ -77,11 +84,67 @@ $mlangfilter = new filter_multilang2($context, []);
 echo $output->heading($mlangfilter->filter($course->fullname));
 // Get Language helper.
 $languagepack = new lang_helper();
-$initok = $languagepack->init('DEFAULT');
+try {
+    $languagepack->initdeepl();
+    // Set js data.
+    $jsconfig = new stdClass();
+    // Adds user ID for security checks in external calls.
+    $jsconfig->userid = $USER->id;
+    // Adds the user's prefered editor to the jsconfig.
+    $defaulteditor = strstr($CFG->texteditors, ',', true);
+    $userprefs = get_user_preferences();
+    $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
+    // Adds course id.
+    $jsconfig->courseid = $courseid;
+    // Add the debug setting for logger.
+    $jsconfig->debug = $CFG->debug;
+    // Adds the language settings strings to the jsconfig.
+    $jsconfig = $languagepack->prepareconfig($jsconfig);
+    // Pass the strings for status buttons.
+    /**
+     * $jsconfig->statusstrings = new stdClass();
+     * $jsconfig->statusstrings->failed = get_string('statusfailed', 'local_deepler');
+     * $jsconfig->statusstrings->success = get_string('statussuccess', 'local_deepler');
+     * $jsconfig->statusstrings->tosave = get_string('statustosave', 'local_deepler');
+     * $jsconfig->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
+     * $jsconfig->statusstrings->wait = get_string('statuswait', 'local_deepler');
+     */
+    // Adding page JS.
+    $PAGE->requires->js_call_amd('local_deepler/deepler_new', 'init', [$jsconfig]);
+
+    // Output translation grid.
+    $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
+
+    // Build the page.
+    $prepareddata = $coursedata->getdata();
+    $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
+    echo $output->render($renderable);
+    // Output footer.
+    echo $output->footer();
+} catch (AuthorizationException $e) {
+    // Deepl could not be initialized.
+
+    $renderable = new badsettings_page();
+    echo $output->render($renderable);
+    // Output footer.
+    echo $output->footer();
+} catch (DeepLException $e) {
+    // Deepl cannot connect.
+    if ($languagepack->isapikeynoset()) {
+        $renderable = new badsettings_page();
+    } else {
+        $renderable = new nodeepl_page();
+    }
+    echo $output->render($renderable);
+    // Output footer.
+    echo $output->footer();
+}
+/*
 if ($initok) {
     if ($languagepack->iscurrentsupported()) {
         // Set js data.
         $jsconfig = new stdClass();
+        // Adds the language strings to the jsconfig.
         $jsconfig = $languagepack->prepareconfig($jsconfig);
         $jsconfig->userid = $USER->id;
         // Prepare course data.
@@ -120,13 +183,14 @@ if ($initok) {
     }
 
 } else if ($languagepack->isapikeynoset()) {
-    $renderable = new \local_deepler\output\badsettings_page();
+    $renderable = new badsettings_page();
     echo $output->render($renderable);
     // Output footer.
     echo $output->footer();
 } else {
-    $renderable = new \local_deepler\output\nodeepl_page();
+    $renderable = new nodeepl_page();
     echo $output->render($renderable);
     // Output footer.
     echo $output->footer();
 }
+*/

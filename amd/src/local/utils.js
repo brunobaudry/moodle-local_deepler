@@ -35,8 +35,8 @@ define([], () => {
      * @returns {`${*}[${*}][${*}]`}
      */
     const keyidToKey = (k) => {
-        let m = k.match(/^(.+)-(.+)-(.+)$/i);
-        return `${m[1]}[${m[2]}][${m[3]}]`;
+        let m = k.match(/^(.+)-(.+)-(.+)-(.+)$/i);
+        return `${m[1]}[${m[2]}][${m[3]}][${m[4]}]`;
     };
     /**
      * Json helper

@@ -21,10 +21,10 @@
  */
 
 
-define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors', './translation', './utils', './customevents'],
-    (Log, TinyMCE, Str, Modal, Selectors, Translation, Utils, Events) => {
-    const {getString} = Str;
+define(['core/log', 'editor_tiny/editor', 'core/modal', './selectors', './translation', './utils', './customevents'],
+    (Log, TinyMCE, Modal, Selectors, Translation, Utils, Events) => {
     let config = {};
+    let langstrings = {};
     let autotranslateButton = {};
     let saveAllBtn = {};
     let selectAllBtn = {};
@@ -35,18 +35,17 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
     let saveAllModal = {};
     let errordbtitle = '';
 
-    const onDBFailed = () => {
-        showModal(errordbtitle, 'DB failed to save translations', 'Alert');
+    const onDBFailed = (error, status) => {
+        showModal(`${errordbtitle} ${status}`, `DB failed to save translations. ${error}`, 'Alert');
     };
-    const onTranslationSuccess = (errors) => {
+    const onDbSavedSuccess = (errors) => {
         if (saveAllModal !== null && saveAllModal.isVisible) {
             saveAllModal.hide();
         }
         if (errors.length > 0) {
-                getString('partialerrorstring', 'local_deepler', errors.length)
-                    .then((s) => {
-                     showModal(errordbtitle, s, 'Alert');
-                    });
+            let s = config.uistrings.errordbpartial;
+            s.replace('{$a}', errors.length);
+            showModal(errordbtitle, s, 'Alert');
         }
     };
         // Const ON_TARGET_LANG_CHANGE = 'onTargetLangChange';
@@ -60,10 +59,10 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
         // Translation events.
         Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
         Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
-        Events.on(Translation.ON_TRANSLATION_SUCCESS, onTranslationSuccess);
+        Events.on(Translation.ON_DB_SAVE_SUCCESS, onDbSavedSuccess);
         Events.on(Translation.ON_DB_FAILED, onDBFailed);
-        Events.on(Translation.ON_ITEM_SAVED, successMessageItem);
-        Events.on(Translation.ON_ITEM_NOT_SAVED, errorMessageItem);
+        Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
+        Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
@@ -72,15 +71,16 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
      */
     const launchModal = async() => {
         saveAllModal = await Modal.create({
-            title: getString('saveallmodaltitle', 'local_deepler'),
-            body: getString('saveallmodalbody', 'local_deepler'),
+            title: config.uistrings.saveallmodaltitle,
+            body: config.uistrings.saveallmodalbody,
         });
         await saveAllModal.show();
     };
-    /**
-     * Event listener for change events.
-     * @param {event} e
-     */
+
+        /**
+         * Event listener for change events.
+         * @param {event} e
+         */
     const handleChangeEvent = (e) => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
@@ -94,8 +94,11 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
         if (e.target.closest(Selectors.actions.showNeedUpdate)) {
             showRows(Selectors.statuses.needsupdate, e.target.checked);
         }
-        if (e.target.closest(Selectors.actions.checkBoxes) || e.target.closest(Selectors.actions.sourceselect)) {
+        if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
+        }
+        if (e.target.closest(Selectors.actions.sourceselect)) {
+            onSourceChange(e);
         }
     };
     /**
@@ -104,6 +107,8 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
      * ui.js ok
      */
     const onToggleMultilang = (e) => {
+        Log.debug(`ui/onToggleMultilang:110 > [${m[3]}]`);
+        Log.debug([${m[3]}]);
         let keyid = e.getAttribute('aria-controls');
         let key = Utils.keyidToKey(keyid);
         let source = domQuery(Selectors.sourcetexts.keys, key);
@@ -121,8 +126,8 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
             onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
         }
         if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
-            if (config.currentlang === config.lang || config.lang === undefined) {
-                showModal('Cannot call deepl', `<p>Both languages are the same ${config.lang}</p>`);
+            if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
+                showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
             } else {
                 doAutotranslate();
             }
@@ -147,15 +152,17 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
          */
     const saveTranslations = () => {
         const selectedCheckboxes = domQueryAll(Selectors.statuses.checkedCheckBoxes);
-
         if (selectedCheckboxes.length === 0) {
             return;
         }
+        // Prepare the UI for the save process.
         saveAllBtn.disabled = true;
         launchModal().then(r => Log.info('SaveAll Modal launched ' + r));
+        // Prepare the data to be saved.
         const data = [];
         const keys = Array.from(selectedCheckboxes).map((e) => e.dataset.key);
         keys.forEach((key) => {
+            // @todo MDL-0000: should not rely on UI (add a flag in temptranslations object) .
                 if (getIconStatus(key) === Selectors.statuses.tosave) {
                     hideErrorMessage(key);
                     data.push(prepareDBitem(key));
@@ -189,7 +196,14 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
             tid: element.getAttribute("data-tid"),
             table: element.getAttribute("data-table"),
             field: element.getAttribute("data-field"),
+            cmid: element.getAttribute("data-cmid"),
         };
+    };
+
+    const onSourceChange = (e) => {
+        // Do check source and target and propose rephrase if PRO.
+        Log.debug(`ui/onSourceChange:203 > e`);
+        Log.debug(e.target.getAttribute('data-key'));
     };
     /**
      * Event listener for selection checkboxes.
@@ -209,7 +223,9 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
     };
     const registerUI = () => {
         try {
-            saveAllBtn = document.querySelector(Selectors.actions.saveAll);
+            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+            errordbtitle = langstrings.uistrings.errordbtitle;
+            saveAllBtn = domQuery(Selectors.actions.saveAll);
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
            // SourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
             // targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
@@ -293,7 +309,7 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
         }
         icon.setAttribute('role', isBtn ? 'button' : 'status');
         icon.setAttribute('data-status', status);
-        icon.setAttribute('title', config.statusstrings[status.replace('local_deepler/', '')]);
+        icon.setAttribute('title', langstrings.statusstrings[status.replace('local_deepler/', '')]);
     };
     /**
      * Fetch the parent row of the translation.
@@ -312,17 +328,16 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
             removeOnClose: true,
         });
     };
-        const onTranslationFailed = (data) => {
-            const error = data.error;
-            const status = data.status;
-            showModal(errordbtitle, `${status} ${error}`, 'Alert');
+        const onTranslationFailed = (error) => {
+            let s = langstrings.uistrings.deeplapiexception;
+            showModal(s, error, 'Alert');
         };
         /**
          * Event listener for failed translations per item.
          * @param {object} data
          *
         const onItemNotTranslated = (data) => {
-            errorMessageItem(data.key, findEditor(data.key), data.error);
+            onErrorMessageItem(data.key, findEditor(data.key), data.error);
         };
          */
     /**
@@ -448,17 +463,21 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
      * @param {string} key
      * @param {string} error
      */
-    const errorMessageItem = (key, error) => {
+    const onErrorMessageItem = (key, error) => {
         Log.warn(`ui/errorMessageItem:440`);
         Log.warn(key);
         Log.warn(error);
         const editor = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         editor.classList.add("local_deepler__error");
-        // Display granular error messages.
-        const indexOfSET = error.indexOf("SET");// Probably a text too long for the field if not -1.
-        const msg = indexOfSET === -1 ? error : error.substring(0, indexOfSET);
         setIconStatus(key, Selectors.statuses.failed);
-        showErrorMessageForEditor(key, msg);
+        // Display granular error messages.
+        const indexOfSET = error.indexOf("Data too long");// Probably a text too long for the field if not -1.
+        if (indexOfSET === -1) {
+            showErrorMessageForEditor(key, error);
+        } else {
+            let s = langstrings.uistrings.errortoolong;
+            showErrorMessageForEditor(key, `${error.substring(0, error.indexOf('WHERE id=?'))} ${s}`);
+        }
     };
     /**
      * Hides an item's error message.
@@ -478,7 +497,7 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
      * @param {String} key
      * @param {string} savedText
      */
-    const successMessageItem = (key, savedText) => {
+    const onSuccessMessageItem = (key, savedText) => {
         Log.debug(`ui/successMessageItem:471 > savedText`);
         Log.debug(savedText);
         domQuery(Selectors.editors.multiples.editorsWithKey, key)
@@ -721,14 +740,6 @@ define(['core/log', 'editor_tiny/editor', 'core/str', 'core/modal', './selectors
         config = cfg;
         // Utils.registerLoggers(cfg.debug);
         Log.info(cfg);
-        getString('errordbtitle', 'local_deepler')
-            .then((s)=>{
-                errordbtitle = s;
-            })
-            .catch((e)=>{
-                e('errordbtitle, could not get Moodle string!!!');
-            }
-        );
         registerUI();
         registerEventListeners();
         toggleAutotranslateButton();

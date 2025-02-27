@@ -82,7 +82,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 Log.error(jqXHR);
                 Log.error(status);
                 Log.error(error);
-                Events.emit(DEEPL_FAILED, status, error);
+                Events.emit(DEEPL_FAILED, status ?? '', error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode);
                 // FailCallback(jqXHR, status, error);
             }
         }]);
