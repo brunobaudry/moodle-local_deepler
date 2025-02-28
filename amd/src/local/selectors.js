@@ -15,6 +15,7 @@
 
 /**
  * @module     local_deepler/deepler
+ * @file       amd/src/local/selectors.js
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,6 +30,7 @@ export default {
         selectAllBtn: '[data-action="local_deepler/select-all"]',
         saveAll: '[data-action="local_deepler/saveall-btn"]',
         autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+        autoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span',
         targetSwitcher: '[data-action="local_deepler/target-switcher"]',
         sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
@@ -81,6 +83,9 @@ export default {
     sourcetexts: {
         keys: '[data-sourcetext-key="<KEY>"]',
         sourcelangs: '[data-key="<KEY>"].local_deepler__source-text select',
+        sourcelangdd: '[data-key="<KEY>"][data-action="local_deepler/sourceselect"]',
+        sourcelang: '#local_deepler__sourcelang strong',
+        targetlang: '#local_deepler__targetlang strong',
         multilangs: '#<KEY>',
         parentrow: '[data-row-id="<KEY>"]'
     },
@@ -94,6 +99,10 @@ export default {
         glossaryId: '[data-id="local_deepler/glossary_id"]',
         tagHandling: '[data-id="local_deepler/tag_handling"]',
         outlineDetection: '[data-id="local_deepler/outline_detection"]',
-        splitSentences: '[name="local_deepler/split_sentences"]:checked'
-    }
+        splitSentences: '[name="local_deepler/split_sentences"]:checked',
+        modelType: '[name="local_deepler/modeltype"]:checked'
+    },
+    config: {
+        langstrings: '#local_deepler__stringscontainer',
+    },
 };

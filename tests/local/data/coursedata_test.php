@@ -223,7 +223,7 @@ final class coursedata_test extends advanced_testcase {
 
         $coursedata = new course_data($course, 'en', context_course::instance($course->id)->id);
 
-        $data = $method->invoke($coursedata, $page->id, 'Test content', 1, 'content', $activity);
+        $data = $method->invoke($coursedata, $page->id, 'Test content', 1, 'content', $activity, 0, $cm->id);
 
         $this->assertInstanceOf(\stdClass::class, $data);
         $this->assertEquals('Test content', $data->text);

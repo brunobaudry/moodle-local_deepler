@@ -3,15 +3,15 @@
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Deepler is a local moodle plugin that provides automatic machine translation using the ©DeepL Pro Translation api.
+Deepler is a local Moodle plugin that provides automatic machine translation using the ©DeepL Pro Translation api.
 It is developed for those who want to translate a course all on one page,
 without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
+1. Set Moodle current language as your source language. 
 0. Fine tune your ©DeepL's settings.
-1. Select the source(s) language(s).
 2. Select the target language.
-3. Select the fields to translate.
+3. Select the fields to translate and if need different source than the current main (Moodle's).
 4. Send to ©DeepL.
 5. Review and or amend automated translations.
 6. Save translations to Moodle's DB (with the multilang {mlang XX} tags).
@@ -107,7 +107,7 @@ signup for an api key that you can enter into local plugin settings.
 #### Allow sub-languages to be mapped to their main
 
 Currently Deepl doesn't support any. See https://developers.deepl.com/docs/resources/supported-languages.
-The plugin gives you the possiblity to use these sub languages if your moodle install has them as if they were their parent language.
+The plugin gives you the possiblity to use these sub languages if your Moodle install has them as if they were their parent language.
 This setting is ticked by default.
 
 If your installation has sub local language, for exemple de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
@@ -165,8 +165,10 @@ This setting's default in the editor can be set in the plugin [admin page](#admi
 
 #### Source language
 
-**The source language will be set to the actual Moodle language** selection which will automatically be set to **other**.
-Changing the source language will act as if you'd change moodle's lang.
+**The source language will be set to the actual Moodle language** selection, which will automatically set it as the **other** fallback language.
+*nb: In a future release you'll be able to assign the **other** fallback language to your choosing for more flexibilty.
+
+To change the source language you'd change Moodle's lang.
 It is important, from a translation standpoint, to **select the source language from the language it was initially written** (and to stick with it).
 
 When first translating your content the plugin will insert ```{mlang other}Your Content...{mlang}``` tags .
@@ -294,7 +296,7 @@ it will soon be replaced by the one used in Moodle's course layout for a better 
 
 You can install a [tour guide](https://github.com/brunobaudry/moodle-local_deepler/blob/main/tourguide/tour_export.json) to simplify your translators' trainings.
 
-See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
+See Moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
 
 ## WARNINGS
 

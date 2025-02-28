@@ -13,9 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/*
+/**
  * @module     local_deepler/deepler
- * @package    local_deepler
  * @file       amd/src/deepler.js
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -25,10 +24,10 @@
 define(
     [
         'core/ajax',
-        './selectors',
+        './local/selectors',
         'core/modal',
         'core/str',
-        './tokeniser'
+        './local/tokeniser'
     ],
     (Ajax, Selectors, Modal, Str, Tokeniser)=>{
         // Use getString instead of get_string
@@ -70,6 +69,7 @@ define(
         };
         /**
          * Event factory.
+         * ui.js ok (refactored)
          */
         const registerEventListeners = () => {
             document.addEventListener('change', e => {
@@ -123,6 +123,7 @@ define(
         };
         /**
          * Get the UIs.
+         * ui.js
          */
         const registerUI = () => {
             try {
@@ -147,9 +148,17 @@ define(
          * @param {Object} cfg JS Config
          */
         const init = (cfg) => {
+            /* Testing the translator
+             const fd = new FormData();
+            fd.append('test', 'value');
+            Translator.translate(fd, (response)=>{
+ window.console.info(response);
+});*/
+            /**
+             *  utils.js ok
+             */
             log('init');
             config = cfg;
-            usage = config.usage;
             // Preparing the debugger.
             if (config.debug === debug.MINIMAL) {
                 error = window.console.error.bind(window.console);
@@ -170,8 +179,13 @@ define(
             log(config);
             warn("Deepl's usage", usage);
             error("testing developper level (Your Moodle is set with dev debug level to the max)");
+            /**
+             * Fin utils.js
+             */
+            usage = config.usage;
             mainEditorType = config.userPrefs;
-            // Setup.
+            // Setup .
+            // ui.js
             registerUI();
             registerEventListeners();
             toggleAutotranslateButton();
@@ -215,6 +229,7 @@ define(
          * Display error message attached to the item's editor.
          * @param {String} key
          * @param {String} message
+         * ui.js ok
          */
         const showErrorMessageForEditor = (key, message) => {
             let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
@@ -228,6 +243,7 @@ define(
          * Hides an item's error message.
          *
          * @param {String} key
+         * ui.js ok
          */
         const hideErrorMessage = (key) => {
             let parent = document.querySelector(Selectors.editors.multiples.editorsWithKey.replace("<KEY>", key));
@@ -239,6 +255,7 @@ define(
         /**
          * Opens a modal infobox to warn user trunks of fields are saving.
          * @returns {Promise<void>}
+         * ui.js ok
          */
         const launchModal = async() => {
             saveAllModal = await Modal.create({
@@ -252,6 +269,7 @@ define(
          *
          * @param {String} key
          * @param {HTMLElement} element
+         * ui.js ok
          */
         const successMessageItem = (key, element) => {
             element.classList.add("local_deepler__success");
@@ -274,6 +292,7 @@ define(
          * @param {String} key
          * @param {HTMLElement} editor
          * @param {String} message
+         * ui.js ok
          */
         const errorMessageItem = (key, editor, message) => {
             editor.classList.add("local_deepler__error");
@@ -285,6 +304,7 @@ define(
          *
          * @param {HTMLElement} editor
          * @returns {string}
+         * translation.js
          */
         const getEditorText = (editor) => {
             let text = editor.innerHTML;
@@ -298,6 +318,7 @@ define(
          *
          * @param {String} key
          * @returns {String}
+         * translation.js
          */
         const getSourceText = (key) => {
             const sourceTokenised = tempTranslations[key].source;
@@ -308,6 +329,7 @@ define(
          *
          * @param {HTMLElement} element
          * @returns {{field: *, id: number, tid: *, table: *}}
+         * ui.js removed
          */
         const getElementAttributes = (element) => {
             return {
@@ -321,6 +343,7 @@ define(
          * External interface callback.
          *
          * @param {Array} data
+         * translation.js
          */
         const handleAjaxUpdateDBResponse = (data) => {
             data.forEach((item) => {
@@ -372,6 +395,7 @@ define(
          * Save batch translations.
          *
          * @param {Array} keys
+         * translation.js
          */
         const saveTranslations = (keys) => {
 
@@ -381,7 +405,7 @@ define(
                     const currentStatus = icon.getAttribute('data-status');
                     if (currentStatus === Selectors.statuses.tosave) {
                         hideErrorMessage(key);
-                        data.push(prepareDbUpdatdeItem(key));
+                        data.push(prepareDbUpdatedItem(key));
                     }
                 }
             );
@@ -435,6 +459,8 @@ define(
          * Save single translation.
          *
          * @param {string} key
+         * @todo remove and replace by saveTranslations([key]);
+         * translation.js
          */
         const saveTranslation = (key) => {
             hideErrorMessage(key);
@@ -442,7 +468,7 @@ define(
                 {
                     methodname: "local_deepler_update_translation",
                     args: {
-                        data: [prepareDbUpdatdeItem(key)],
+                        data: [prepareDbUpdatedItem(key)],
                     },
                     done: (data) => {
                         info(data);
@@ -470,14 +496,15 @@ define(
          *
          * @param {String} key
          * @returns {{field: *, id: number, text: string, courseid, tid: *, table: *}}
+         * translation.js
          */
-        const prepareDbUpdatdeItem = (key) => {
-            const editor = tempTranslations[key].editor;
-            const textTranslated = getEditorText(editor);
-            const sourceText = getSourceText(key);
-            const fieldText = tempTranslations[key].fieldText;
-            const element = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));
-            const {id, tid, field, table} = getElementAttributes(element);
+        const prepareDbUpdatedItem = (key) => {
+            // Const editor = tempTranslations[key].editor;
+            const textTranslated = getEditorText(tempTranslations[key].editor);// Translation
+            const sourceText = getSourceText(key);// Translation
+            const fieldText = tempTranslations[key].fieldText; // Translation
+            const element = document.querySelector(replaceKey(Selectors.editors.multiples.editorsWithKey, key));// Ui
+            const {id, tid, field, table} = getElementAttributes(element);// Ui
             const textTosave = getupdatedtext(fieldText, textTranslated, sourceText, tempTranslations[key].sourceLang);
             return {
                 courseid: config.courseid,
@@ -495,6 +522,7 @@ define(
          * @param {string} source Original text translated from.
          * @param {string} sourceItemLang The source language code
          * @returns {string}
+         * translation.js
          */
         const getupdatedtext = (fieldtext, translation, source, sourceItemLang) => {
             const isFirstTranslation = fieldtext.indexOf("{mlang") === -1;
@@ -529,6 +557,7 @@ define(
          * @param {string} tagPatterns
          * @param {string} langsItems
          * @returns {string} {string}
+         * translation.js
          */
         const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
             let manipulatedText = langsItems.fullContent;
@@ -578,6 +607,7 @@ define(
         /**
          * Event listener for selection checkboxes.
          * @param {Event} e
+         * ui.js ok
          */
         const onItemChecked = (e) => {
             log("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
@@ -594,6 +624,7 @@ define(
          *
          * @param {String} key
          * @param {Boolean} blank
+         * translation.js
          */
         const initTempForKey = (key, blank) => {
 
@@ -642,6 +673,7 @@ define(
          *
          * @param {String} key
          * @param {Boolean} checked
+         * ui.js ok
          */
         const toggleStatus = (key, checked) => {
             const status = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key)).dataset.status;
@@ -680,6 +712,7 @@ define(
          * @param {String} key
          * @param {String} status
          * @param {Boolean} isBtn
+         * ui.js ok
          */
         const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
             let icon = document.querySelector(replaceKey(Selectors.actions.validatorBtn, key));
@@ -708,6 +741,7 @@ define(
          * Shows/hides rows.
          * @param {string} selector
          * @param {boolean} selected
+         * ui.js ok
          */
         const showRows = (selector, selected) => {
             const items = document.querySelectorAll(selector);
@@ -733,6 +767,7 @@ define(
          *
          * @param {HTMLElement} row
          * @param {Boolean} checked
+         * ui.js ok
          */
         const toggleRowVisibility = (row, checked) => {
             if (checked) {
@@ -744,6 +779,7 @@ define(
         /**
          * Event listener to switch target lang.
          * @param {Event} e
+         * ui.js ok
          */
         const switchTarget = (e) => {
             let url = new URL(window.location.href);
@@ -755,6 +791,7 @@ define(
          * Event listener to switch source lang
          * Hence reload the page and change the site main lang
          * @param {Event} e
+         * ui.js ok
          */
         const switchSource = (e) => {
             let url = new URL(window.location.href);
@@ -764,6 +801,7 @@ define(
         };
         /**
          * Launch autotranslation.
+         * ui.js + translation.js (split)
          */
         const doAutotranslate = () => {
             log('Do auto translate');
@@ -772,7 +810,8 @@ define(
                 .querySelectorAll(Selectors.statuses.checkedCheckBoxes)
                 .forEach((ckBox) => {
                     let key = ckBox.getAttribute("data-key");
-                    initTempForKey(key);
+                    initTempForKey(key, false);
+                    // GetTranslations();
                     if (tempTranslations[key].editor !== null) {
                         getTranslation(key);
                     }
@@ -782,6 +821,7 @@ define(
          * Compile Advanced settings.
          *
          * @returns {{}}
+         * translation.js ok
          */
         const prepareAdvancedSettings = () => {
             info('prepareAdvancedSettings');
@@ -808,8 +848,8 @@ define(
             settings.ignore_tags = toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
             // eslint-disable-next-line camelcase
             settings.target_lang = targetLang.toUpperCase();
-            // eslint-disable-next-line camelcase
-            settings.auth_key = config.apikey;
+
+            // Settings.auth_key = config.apikey;
             return settings;
         };
         /**
@@ -817,6 +857,7 @@ define(
          *
          * @param {String} key
          * @returns {{source_lang: (string|*), text}}
+         * translation.js
          */
         const prepareTranslation = (key) => {
             return {
@@ -831,6 +872,7 @@ define(
          * @param {string} key
          * @param {boolean} url
          * @returns {URLSearchParams|FormData} Object to use in XHR.
+         * translation.js
          */
         const prepareFormData = (key, url = true) => {
             let formData = url ? new URLSearchParams() : new FormData();
@@ -849,6 +891,7 @@ define(
          * @todo extract images ALT tags to send for translation
          * Send for Translation to DeepL
          * @param {Integer} key Translation Key
+         * translation.js
          */
         const getTranslation = (key) => {
             log('getTranslation');
@@ -906,6 +949,7 @@ define(
          *
          * @param {string} editorType
          * @param {object} editor
+         * ui.js
          */
         const injectImageCss = (editorType, editor) => {
             // Prepare css to inject in iframe editors
@@ -929,8 +973,9 @@ define(
         /**
          * Get the editor container based on recieved current user's editor preference.
          *
-         * @param {Integer} key Translation Key
+         * @param {string} key Translation Key
          * @todo MDL-0 get the editor from moodle db in the php.
+         * ui.js ok
          */
         const findEditor = (key) => {
             let e = document.querySelector(Selectors.editors.types.basic
@@ -959,6 +1004,7 @@ define(
          * @param {string} key
          * @param {object} editorType
          * @returns {{editor: object, editorType: string}}
+         * ui.js ok
          */
         const findEditorByType = (key, editorType) => {
             let et = 'basic';
@@ -987,6 +1033,7 @@ define(
         /**
          * Toggle checkboxes
          * @param {Event} e Event
+         * ui.js
          */
         const toggleAllCheckboxes = (e) => {
             // Check/uncheck checkboxes
@@ -1005,11 +1052,19 @@ define(
             toggleAutotranslateButton();
             countWordAndChar();
         };
+        /**
+         * Get the parent row of a node.
+         *
+         * @param {Node} node
+         * @returns {*}
+         * ui.js
+         */
         const getParentRow = (node) => {
             return node.closest(replaceKey(Selectors.sourcetexts.parentrow, node.getAttribute('data-key')));
         };
         /**
          * Toggle Autotranslate Button
+         * ui.js
          */
         const toggleAutotranslateButton = () => {
             autotranslateButton.disabled = true;
@@ -1024,6 +1079,7 @@ define(
         /**
          * Multilang button handler
          * @param {Event} e Event
+         * ui.js ok
          */
         const onToggleMultilang = (e) => {
             let keyid = e.getAttribute('aria-controls');
@@ -1038,6 +1094,7 @@ define(
          * @param {string} s
          * @param {string} sep
          * @returns {string}
+         * utils.js ok
          */
         const toJsonArray = (s, sep = ",") => {
             return JSON.stringify(s.split(sep));
@@ -1047,6 +1104,7 @@ define(
          * @param {string} s
          * @param {string} k
          * @returns {*}
+         * utils.js ok
          */
         const replaceKey = (s, k) => {
             return s.replace("<KEY>", k);
@@ -1055,6 +1113,7 @@ define(
          * Transforms a keyid to a key.
          * @param {string} k
          * @returns {`${*}[${*}][${*}]`}
+         * utils.js ok
          */
         const keyidToKey = (k) => {
             let m = k.match(/^(.+)-(.+)-(.+)$/i);
@@ -1067,6 +1126,8 @@ define(
         */
         /**
          * Launch, display count of Words And Chars.
+         *
+         * ui.js ok
          */
         const countWordAndChar = () => {
             let wrdsc = 0;
@@ -1106,6 +1167,7 @@ define(
          *
          * @param {string} key
          * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
+         * ui.js ok
          */
         const getCount = (key) => {
             const item = document.querySelector(replaceKey(Selectors.sourcetexts.keys, key));
@@ -1122,6 +1184,7 @@ define(
          * Helper function to decode the PHP base64 encoded source.
          * @param {string} encoded
          * @returns {string}
+         * utils.js ok
          */
         const fromBase64 = (encoded) => {
             const binString = atob(encoded); // Maybe we should import js-base64 instead.
@@ -1132,6 +1195,7 @@ define(
          * Helper function for the decode html escaped content.
          * @param {string} encodedStr
          * @returns {string}
+         * utils.js ok
          */
         const decodeHTML = (encodedStr) => {
             const parser = new DOMParser();
@@ -1143,6 +1207,7 @@ define(
          *
          * @param {string} str
          * @returns {string|string}
+         * utils.js ok
          */
         const stripHTMLTags = (str) => {
             let doc = new DOMParser().parseFromString(str, 'text/html');

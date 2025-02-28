@@ -53,6 +53,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "charcountspaces": 25
   }
 }}
+<div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
+    <!-- This is a hidden container for the strings that are used in the JS -->
+</div>
 <div class="text-right">
     <a id="local_deepler__settings"
        role="button" class="link link-underline" data-toggle="collapse"
@@ -68,6 +71,21 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             deeplapidoc,local_deepler{{/str}}</a>
     </div>
     <div class="row py-3">
+        <div class="col-2" id="local_deepler__modeltype">
+            {{#str}}modeltype,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="prefer_quality_optimized" checked="checked" id="modeltype1" name="local_deepler/modeltype" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype1">{{#str}}modeltpreferqualityoptimized,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="quality_optimized" id="modeltype2" name="local_deepler/modeltype" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype2">{{#str}}modeltypequalityoptimized,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="latency_optimized" id="modeltype3" name="local_deepler/modeltype" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype3">{{#str}}modeltypelatencyoptimized  ,local_deepler{{/str}}</label>
+            </div>
+        </div>
         <div class="col-2" id="local_deepler__formality">
             {{#str}}formality,local_deepler{{/str}}
             <div class="custom-control custom-radio">
@@ -91,7 +109,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 <label class="custom-control-label" for="formality5">{{#str}}formalityprefermore,local_deepler{{/str}}</label>
             </div>
         </div>
-        <div class="col-4">
+        <div class="col-3">
             <div id="local_deepler__splitsentences">
                 {{#str}}splitsentences,local_deepler{{/str}}
                 <div class="custom-control custom-radio">
@@ -117,7 +135,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
             </div>
         </div>
-        <div class="col-6" id="local_deepler__glossarycontext">
+        <div class="col-5" id="local_deepler__glossarycontext">
             <label class="" for="local_deepler__glossary">{{#str}}glossaryid,local_deepler{{/str}}</label>
             <input type="text" class="w-50 form-control mb-2 mr-sm-2" id="local_deepler__glossary"
                    placeholder="{{#str}}glossaryid_placeholder,local_deepler{{/str}}"
@@ -183,17 +201,18 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 </div>
 <div class="container-fluid">
     <div class="row py-4" id="local_deepler__sourcetarget">
-        <div class="col-3 text-right"><label for="source_lang">{{#str}}sourcelang,local_deepler{{/str}}</label></div>
-        <div class="col-2">
+        <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h4></div>
+        <!--div class="col-2">
             <select class="form-control" id="source_lang"
                     data-action="local_deepler/source-switcher">
                 {{#langs}}
                     <option value="{{ code }}" {{selected}} {{disabled}}>{{ lang }}</option>
                 {{/langs}}
             </select>
-        </div>
+        </div-->
         <div class="col-1 h4 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
+        <div class="col-3"><h4 id="local_deepler__targetlang">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h4></div>
         <div class="col-2">
             <select
                     id="select-target-language"
@@ -201,12 +220,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     class="local_deepler__localeswitcher form-control"
                     data-action="local_deepler/target-switcher"
             >
-                {{#target_langs}}
-                    <option value="{{ code }}" {{selected}} {{disabled}}>{{ lang }}</option>
-                {{/target_langs}}
+                {{#notarget}}
+                    <option value="" selected disabled>Select...</option>
+                {{/notarget}}
+                {{target_langs_htmloptions}}
+                {{#targetlangs}}
+                    <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
+                {{/targetlangs}}
             </select>
         </div>
-        <div class="col-3"><label for="select-target-language">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</label></div>
+
     </div>
 </div>
 <div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">

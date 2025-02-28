@@ -26,10 +26,9 @@
 
 namespace local_deepler\local\data;
 defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
-
-require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 /**
  * Lang helper Test.
@@ -43,12 +42,6 @@ final class langhelper_test extends advanced_testcase {
      * @var lang_helper
      */
     private $langhelper;
-    /**
-     * The API.
-     *
-     * @var \DeepL\Translator
-     */
-    protected $translator;
 
     /**
      * Set up.
@@ -61,7 +54,9 @@ final class langhelper_test extends advanced_testcase {
         parent::setUp();
         $this->resetAfterTest(true);
         $this->langhelper = new lang_helper();
-        $this->langhelper->init(getenv('DEEPL_API_TOKEN'));
+        $this->makeenv();
+        $key = getenv('DEEPL_API_TOKEN');
+        $this->langhelper->initdeepl($key);
     }
 
     /**
@@ -104,13 +99,12 @@ final class langhelper_test extends advanced_testcase {
      * @throws \dml_exception
      */
     public function test_settings(): void {
-
         $key = '';
         if ($this->langhelper->isapikeynoset()) {
             $this->makeenv();
             $key = getenv('DEEPL_API_TOKEN');
         }
-        $this->assertIsBool($this->langhelper->init($key));
+        $this->langhelper->initdeepl();
     }
 
     /**
