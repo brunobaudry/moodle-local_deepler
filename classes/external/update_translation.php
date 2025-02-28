@@ -78,7 +78,7 @@ class update_translation extends external_api {
         $responses = [];
         try {
             $params = self::validate_parameters(self::execute_parameters(),
-                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid,]);
+                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid]);
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
             foreach ($params['data'] as $d) {
@@ -130,15 +130,11 @@ class update_translation extends external_api {
         self::validate_context($context);
         require_capability('local/deepler:edittranslations', $context, $userid);
         // Check detailed activity capabilities.
-        /* if ($data['table'] !== 'course' && $data['table'] !== 'course_sections' &&
-                strpos($data['table'], 'question') === false &&
-                strpos($data['table'], 'qtype') === false) {*/
         if ($data['cmid'] != 0) {
             $contextmodule = context_module::instance($data['cmid']);
             if ($contextmodule->contextlevel == CONTEXT_MODULE) {
                 require_capability('moodle/course:manageactivities', $contextmodule, $userid);
             }
-            //require_capability('moodle/course:manageactivities', context_module::instance($data['id']), $userid);
         }
     }
 

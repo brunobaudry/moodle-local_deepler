@@ -114,6 +114,13 @@ class lang_helper {
         $this->multilangparentlang = get_config('filter_multilang2', 'parentlangbehaviour');
     }
 
+    /**
+     * Initialise the Deepl object.
+     *
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
     public function initdeepl() {
         $this->setdeeplapi();
         $this->inittranslator();
@@ -124,6 +131,11 @@ class lang_helper {
         $this->setcurrentlanguage();
     }
 
+    /**
+     * Set the source language.
+     *
+     * @return void
+     */
     private function setcurrentlanguage() {
         // Moodle format is not the common culture format.
         // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
@@ -182,28 +194,19 @@ class lang_helper {
         $canimprove = !$this->keyisfree && false;
         $tab = [];
         // Get the list of deepl langs that are supported by this moodle instance.
-        $filteredDeepls = $this->findDeeplsformoodle($issource);
-        /** @var  $l \DeepL\Language */
-        foreach ($filteredDeepls as $l) {
-            $lancode = $l->code;
-            $same = $issource ? $this->isrephrase($lancode) : $this->isrephrase('', $lancode);
-            $text = $verbose ? $l->name : $lancode;
+        $filtereddeepls = $this->finddeeplsformoodle($issource);
+        foreach ($filtereddeepls as $l) {
+            $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
+            $text = $verbose ? $l->name : $l->code;
             $text = ($same && $canimprove ? "® " : '') . $text;
+            $disable = $same && !$canimprove;
             if ($issource) {
-                //$issameastaget = $this->isrephrase($lancode);
-                //$selected = strpos($lancode, $this->deeplsourcelang) !== false;
-                $selected = $this->isrephrase($lancode, $this->deeplsourcelang);
-                //$text = ($same && $canimprove ? '® ' : '') . $text;
-                $disable = $same && !$canimprove;
+                $selected = $this->isrephrase($l->code, $this->deeplsourcelang);
             } else {
-                // $issameassource = $this->isrephrase('', $lancode);
-                //$selected = $this->targetlang !== '' && strpos($lancode, $this->targetlang) !== false;
-                $selected = $this->targetlang !== '' && $this->isrephrase($lancode, $this->targetlang);
-                //$text = ($same && $canimprove ? "® " : '') . $text;
-                $disable = $same && !$canimprove;
+                $selected = $this->targetlang !== '' && $this->isrephrase($l->code, $this->targetlang);
             }
             $tab[] = [
-                    'code' => $lancode,
+                    'code' => $l->code,
                     'lang' => $text,
                     'selected' => $selected,
                     'disabled' => $disable,
@@ -236,7 +239,14 @@ class lang_helper {
         }
         return $list;
     }
-    function findDeeplsformoodle(bool $issource) {
+
+    /**
+     * Find the Deepl langs that are supported by this moodle instance.
+     *
+     * @param bool $issource
+     * @return array
+     */
+    private function finddeeplsformoodle(bool $issource) {
         $deepls = $issource ? $this->deeplsources : $this->deepltargets;
         return array_filter($deepls, function($item) {
             foreach ($this->moodlelangs as $code => $langverbose) {
@@ -256,7 +266,6 @@ class lang_helper {
      * @param \stdClass $config
      * @return \stdClass
      * @throws DeepLException
-     * @todo MDL-0000 rename this function
      */
     public function prepareconfig(stdClass &$config) {
         $config->usage = $this->usage;
@@ -269,7 +278,6 @@ class lang_helper {
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
         $config->isfree = $this->keyisfree;
-        //$this->preparestrings($config);
         return $config;
     }
 
@@ -278,7 +286,6 @@ class lang_helper {
      *
      * @return string
      */
-
     public function preparestrings(): string {
         // Status strings for UI icons.
         $config = new stdClass();
@@ -346,7 +353,7 @@ class lang_helper {
     public function isrephrase(string $source = '', string $target = ''): bool {
         $t = $target === '' ? $this->targetlang : $target;
         $s = $source === '' ? $this->deeplsourcelang : $source;
-        return strpos($t, $s) !== false;
+        return str_contains($t, $s);
     }
 
 }

@@ -156,9 +156,7 @@ class translate_form extends moodleform {
         $mlangfilter = $this->_customdata['mlangfilter'];
 
         // Build a key for js interaction.
-        // $key = "$item->table[$item->id][$item->field]";
         $key = "$item->table[$item->id][$item->field][$item->cmid]";
-        //$keyid = "{$item->table}-{$item->id}-{$item->field}";
         $keyid = "{$item->table}-{$item->id}-{$item->field}-{$item->cmid}";
         // Data status.
         $status = $item->tneeded ? 'needsupdate' : 'updated';

@@ -234,7 +234,6 @@ class course_data {
         global $DB;
         $activitydata = [];
         $cms = $this->modinfo->get_cms();
-        /** @var \cm_info|mixed $activity */
         foreach ($cms as $cmid => $activity) {
             // Build first level activities.
             $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $cmid);
@@ -446,7 +445,6 @@ class course_data {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-
     private function build_data(
             int $id,
             string $text,
@@ -458,7 +456,6 @@ class course_data {
         global $DB, $OUTPUT;
         // Activity stuff.
         $table = $activity->modname;
-        //$cmid = $activity->id ?? 0;
         $sectionid = $activity->section;
         // Store the status of the translation.
         $status = $this->store_status_db($id, $table, $field);
@@ -977,26 +974,6 @@ class course_data {
                     }
                 }
                 break;
-
-            case 'qtype_ddimageortext' :
-            case 'qtype_ddmarker' :
-            $qactivity->modname = "{$pluginname}_drags";
-            $choices = $DB->get_records($qactivity->modname, ['questionid' => $question->id]);
-                foreach ($choices as $answer) {
-                    if (trim($answer->label) === '') {
-                        continue;
-                    }
-                    $activitydata[] = $this->build_data(
-                            $answer->id,
-                            $answer->label,
-                            0,
-                            'label',
-                            $qactivity,
-                            3,
-                            $cmid
-                    );
-                }
-                break;
             case 'qtype_gapselect':
             case 'qtype_ddwtos' :
                 $choices = $DB->get_records('question_answers', ['question' => $question->id]);
@@ -1013,7 +990,25 @@ class course_data {
                 }
                 break;
             case 'qtype_ddimageortext' :
-                $choices = $DB->get_records('qtype_ddimageortext_drags', ['questionid' => $question->id]);
+            case 'qtype_ddmarker' :
+                $qactivity->modname = "{$pluginname}_drags";
+                $choices = $DB->get_records($qactivity->modname, ['questionid' => $question->id]);
+                foreach ($choices as $answer) {
+                    if (trim($answer->label) === '') {
+                        continue;
+                    }
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->label,
+                            0,
+                            'label',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                break;
+            case 'qtype_ddimageortext' :
                 break;
             case 'qtype_ordering' :
                 foreach ($question->answers as $answer) {
@@ -1043,8 +1038,6 @@ class course_data {
                 $this->injectdatafromtable($activitydata, 'question_hints', 'id', $hint->id, $qactivity,
                         $cmid);
             }
-
         }
     }
-
 }

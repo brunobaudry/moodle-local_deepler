@@ -100,21 +100,10 @@ try {
     $jsconfig->debug = $CFG->debug;
     // Adds the language settings strings to the jsconfig.
     $jsconfig = $languagepack->prepareconfig($jsconfig);
-    // Pass the strings for status buttons.
-    /**
-     * $jsconfig->statusstrings = new stdClass();
-     * $jsconfig->statusstrings->failed = get_string('statusfailed', 'local_deepler');
-     * $jsconfig->statusstrings->success = get_string('statussuccess', 'local_deepler');
-     * $jsconfig->statusstrings->tosave = get_string('statustosave', 'local_deepler');
-     * $jsconfig->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
-     * $jsconfig->statusstrings->wait = get_string('statuswait', 'local_deepler');
-     */
     // Adding page JS.
     $PAGE->requires->js_call_amd('local_deepler/deepler_new', 'init', [$jsconfig]);
-
     // Output translation grid.
     $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
-
     // Build the page.
     $prepareddata = $coursedata->getdata();
     $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
@@ -139,58 +128,3 @@ try {
     // Output footer.
     echo $output->footer();
 }
-/*
-if ($initok) {
-    if ($languagepack->iscurrentsupported()) {
-        // Set js data.
-        $jsconfig = new stdClass();
-        // Adds the language strings to the jsconfig.
-        $jsconfig = $languagepack->prepareconfig($jsconfig);
-        $jsconfig->userid = $USER->id;
-        // Prepare course data.
-        $jsconfig->courseid = $courseid;
-        $jsconfig->debug = $CFG->debug;
-        // Pass the strings for status buttons.
-        $jsconfig->statusstrings = new stdClass();
-        $jsconfig->statusstrings->failed = get_string('statusfailed', 'local_deepler');
-        $jsconfig->statusstrings->success = get_string('statussuccess', 'local_deepler');
-        $jsconfig->statusstrings->tosave = get_string('statustosave', 'local_deepler');
-        $jsconfig->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
-        $jsconfig->statusstrings->wait = get_string('statuswait', 'local_deepler');
-
-        $defaulteditor = strstr($CFG->texteditors, ',', true);
-        $userprefs = get_user_preferences();
-        // Get users prefrences to pass the editor's type to js.
-        $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
-
-        // Adding page JS.
-        $PAGE->requires->js_call_amd('local_deepler/deepler_new', 'init', [$jsconfig]);
-
-        // Output translation grid.
-        $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
-
-        // Build the page.
-        $prepareddata = $coursedata->getdata();
-        $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
-        echo $output->render($renderable);
-        // Output footer.
-        echo $output->footer();
-    } else {
-        $renderable = new \local_deepler\output\sourcenotsupported_page();
-        echo $output->render($renderable);
-        // Output footer.
-        echo $output->footer();
-    }
-
-} else if ($languagepack->isapikeynoset()) {
-    $renderable = new badsettings_page();
-    echo $output->render($renderable);
-    // Output footer.
-    echo $output->footer();
-} else {
-    $renderable = new nodeepl_page();
-    echo $output->render($renderable);
-    // Output footer.
-    echo $output->footer();
-}
-*/

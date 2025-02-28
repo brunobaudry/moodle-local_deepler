@@ -22,8 +22,8 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
+use DeepL\DeepLClient;
 use DeepL\DeepLException;
-use DeepL\Translator;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -36,6 +36,8 @@ require_once(__DIR__ . '/../vendor/autoload.php');
  */
 class get_translation extends external_api {
     /**
+     * External service to call DeepL's API.
+     *
      * @param $translations
      * @param $options
      * @return array
@@ -45,24 +47,24 @@ class get_translation extends external_api {
      */
     public static function execute($translations, $options) {
         $params = self::validate_parameters(self::execute_parameters(), ['translations' => $translations, 'options' => $options]);
-        $translator = new Translator(get_config('local_deepler', 'apikey'), ['send_platform_info' => false]);
-        $target_lang = $params['options']['target_lang'];
+        $translator = new DeepLClient(get_config('local_deepler', 'apikey'), ['send_platform_info' => false]);
+        $tragetlang = $params['options']['target_lang'];
 
-        $groupedTranslations = [];
+        $groupedtranslations = [];
         foreach ($params['translations'] as $t) {
-            $groupedTranslations[$t['source_lang']][] = $t;
+            $groupedtranslations[$t['source_lang']][] = $t;
         }
 
-        $translated_texts = [];
-        foreach ($groupedTranslations as $source_lang => $translations) {
+        $translatedtexts = [];
+        foreach ($groupedtranslations as $sourcelang => $translations) {
             $texts = array_map(function($t) {
                 return $t['text'];
             }, $translations);
 
             try {
-                $results = $translator->translateText($texts, $source_lang, $target_lang);
+                $results = $translator->translateText($texts, $sourcelang, $tragetlang);
                 foreach ($results as $index => $result) {
-                    $translated_texts[] = [
+                    $translatedtexts[] = [
                             'key' => $translations[$index]['key'],
                             'translated_text' => $result->text,
                             'error' => '',
@@ -81,7 +83,7 @@ class get_translation extends external_api {
                 ]];
             }
         }
-        return $translated_texts;
+        return $translatedtexts;
     }
 
     /**
@@ -136,7 +138,7 @@ class get_translation extends external_api {
                         [
                                 'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
                                 'translated_text' => new external_value(PARAM_RAW, 'translated text'),
-                                'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL)
+                                'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
                         ]
                 )
         );
