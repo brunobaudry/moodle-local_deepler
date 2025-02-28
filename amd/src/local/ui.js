@@ -107,8 +107,6 @@ define(['core/log', 'editor_tiny/editor', 'core/modal', './selectors', './transl
      * ui.js ok
      */
     const onToggleMultilang = (e) => {
-        Log.debug(`ui/onToggleMultilang:110 > [${m[3]}]`);
-        Log.debug([${m[3]}]);
         let keyid = e.getAttribute('aria-controls');
         let key = Utils.keyidToKey(keyid);
         let source = domQuery(Selectors.sourcetexts.keys, key);

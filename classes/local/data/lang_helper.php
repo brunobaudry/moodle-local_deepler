@@ -17,8 +17,8 @@
 namespace local_deepler\local\data;
 defined('MOODLE_INTERNAL') || die();
 
+use DeepL\DeepLClient;
 use DeepL\DeepLException;
-use DeepL\Translator;
 use Deepl\Usage;
 use stdClass;
 
@@ -60,7 +60,7 @@ class lang_helper {
      */
     private string $apikey;
     /**
-     * @var Translator
+     * @var DeepLClient
      */
     private mixed $translator;
     /**
@@ -117,7 +117,7 @@ class lang_helper {
     public function initdeepl() {
         $this->setdeeplapi();
         $this->inittranslator();
-        $this->keyisfree = Translator::isAuthKeyFreeAccount($this->apikey);
+        $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
         $this->usage = $this->translator->getUsage();
         $this->deeplsources = $this->translator->getSourceLanguages();
         $this->deepltargets = $this->translator->getTargetLanguages();
@@ -134,40 +134,6 @@ class lang_helper {
             $this->deeplsourcelang = strtoupper($this->currentlang);
         }
     }
-    /**
-     * Simple init and checks of external call to Deepl's API.
-     *
-     * @param string $key
-     * @return bool
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
-     *
-     * public function init(string $key): bool {
-     * $this->setdeeplapi($key);
-     * if ($this->isapikeynoset()) {
-     * return false;
-     * } else {
-     * $initok = $this->inittranslator();
-     * if ($initok) {
-     * try {
-     * try {
-     * $this->usage = $this->translator->getUsage();
-     * } catch (DeepLException $e) {
-     * $initok = false;
-     * }
-     * $noissuewithsupportedlanguages = $this->setsupportedlanguages();
-     * $initok = $initok && $noissuewithsupportedlanguages;
-     * $hasunderscore = strpos($this->currentlang, '_');
-     * if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
-     * $this->currentlang = substr($this->currentlang, 0, $hasunderscore);
-     * }
-     * } catch (\DeepL\AuthorizationException $e) {
-     * return false;
-     * }
-     * }
-     * return $initok;
-     * }
-     * }*/
 
     /**
      * Set the key string.
@@ -186,24 +152,8 @@ class lang_helper {
     }
 
     /**
-     * Fecthes and set the available languages.
-     *
-     * @return void
-     * @throws \DeepL\DeepLException
-     *
-     * private function setsupportedlanguages(): bool {
-     * try {
-     * $this->deeplsources = $this->translator->getSourceLanguages();
-     * $this->deepltargets = $this->translator->getTargetLanguages();
-     * } catch (DeepLException $e) {
-     * return false;
-     * }
-     * return true;
-     * }
-     */
-    /**
      * Initialise the Deepl object.
-     * Return a boolean of the cnx status.
+     * Return a Boolean of the cnx status.
      *
      * @return bool
      * @throws \DeepL\DeepLException
@@ -211,7 +161,7 @@ class lang_helper {
     private function inittranslator() {
         if (!isset($this->translator)) {
             try {
-                $this->translator = new \DeepL\Translator($this->apikey, ['send_platform_info' => false]);
+                $this->translator = new DeepLClient($this->apikey, ['send_platform_info' => false]);
             } catch (\DeepL\AuthorizationException $e) {
                 return false;
             }
@@ -227,52 +177,39 @@ class lang_helper {
      * @return array
      */
     public function prepareoptionlangs(bool $issource, bool $verbose = true) {
+        // If the key is free, we can't improve the source lang.
+        // TODO MDL-0000 ready for deepl-php-sdk to implement the rephrase, just remove && false.
+        $canimprove = !$this->keyisfree && false;
         $tab = [];
-        //$deeplLangs = $this->translator->getTargetLanguages();
+        // Get the list of deepl langs that are supported by this moodle instance.
         $filteredDeepls = $this->findDeeplsformoodle($issource);
         /** @var  $l \DeepL\Language */
         foreach ($filteredDeepls as $l) {
-            // $k = strtolower($l->code);
-            $small = substr(strtolower($l->code), 0, 2);
-            // if($issource)
-            // $disable = $issource ? $k === $this->targetlang : $k === $this->currentlang;
-
+            $lancode = $l->code;
+            $same = $issource ? $this->isrephrase($lancode) : $this->isrephrase('', $lancode);
+            $text = $verbose ? $l->name : $lancode;
+            $text = ($same && $canimprove ? "® " : '') . $text;
             if ($issource) {
-                $issameastaget = $this->isrephrase($l->code);
-                $selected = strpos($l->code, $this->deeplsourcelang) !== false;
-                $text = ($issameastaget && !$this->keyisfree ? '® ' : '') . $l->code;
-                $disable = $issameastaget && $this->keyisfree;
+                //$issameastaget = $this->isrephrase($lancode);
+                //$selected = strpos($lancode, $this->deeplsourcelang) !== false;
+                $selected = $this->isrephrase($lancode, $this->deeplsourcelang);
+                //$text = ($same && $canimprove ? '® ' : '') . $text;
+                $disable = $same && !$canimprove;
             } else {
-                $issameassource = strpos($l->code, $this->deeplsourcelang) !== false;
-                $selected = strpos($l->code, $this->targetlang) !== false;
-                $text = ($issameassource && !$this->keyisfree ? "® " : '') . $l->name;
-                $disable = $issameassource && $this->keyisfree;
+                // $issameassource = $this->isrephrase('', $lancode);
+                //$selected = $this->targetlang !== '' && strpos($lancode, $this->targetlang) !== false;
+                $selected = $this->targetlang !== '' && $this->isrephrase($lancode, $this->targetlang);
+                //$text = ($same && $canimprove ? "® " : '') . $text;
+                $disable = $same && !$canimprove;
             }
-            //$selected = $issource ? $small === $this->currentlang : $l->code === $this->targetlang;
-            //$text = $verbose ? !$issource && ($small === $this->currentlang) ? 'REPHRASE ' . $l->code : $l->name : $l->code;
-            // $disable = $disable || !$this->islangsupported($k, $issource);
             $tab[] = [
-                    'code' => $l->code,
+                    'code' => $lancode,
                     'lang' => $text,
-                    'selected' => $selected ? 'selected' : '',
-                    'disabled' => $disable ? 'disabled' : '',
+                    'selected' => $selected,
+                    'disabled' => $disable,
             ];
         }
         return $tab;
-    }
-
-    function findDeeplsformoodle(bool $issource) {
-        $deepls = $issource ? $this->deeplsources : $this->deepltargets;
-        return array_filter($deepls, function($item) {
-            foreach ($this->moodlelangs as $code => $langverbose) {
-                $moodle = strtolower(str_replace('_', '', $code));
-                $deepl = strtolower(str_replace('-', '', $item->code));
-                if (stripos($deepl, $moodle) !== false) {
-                    return true;
-                }
-            }
-            return false;
-        });
     }
 
     /**
@@ -287,10 +224,30 @@ class lang_helper {
         $tab = $this->prepareoptionlangs($issource, $verbose);
         $list = '';
         foreach ($tab as $item) {
-            $list .= "<option value='{$item['code']}' {$item['selected']} {$item['disabled']} data-initial-value='{$item['code']}'>
-                    {$item['lang']}</option>";
+            $list .= '<option value="' . $item['code'] . '"';
+            if ($item['selected']) {
+                $list .= ' selected ';
+            }
+            if ($item['disabled']) {
+                $list .= ' disabled ';
+            }
+            $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
+            $list .= $item['lang'] . '</option>';
         }
         return $list;
+    }
+    function findDeeplsformoodle(bool $issource) {
+        $deepls = $issource ? $this->deeplsources : $this->deepltargets;
+        return array_filter($deepls, function($item) {
+            foreach ($this->moodlelangs as $code => $langverbose) {
+                $moodle = strtolower(str_replace('_', '', $code));
+                $deepl = strtolower(str_replace('-', '', $item->code));
+                if (stripos($deepl, $moodle) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     /**
@@ -386,9 +343,10 @@ class lang_helper {
      * @param string $source
      * @return bool
      */
-    public function isrephrase(string $source = '') {
+    public function isrephrase(string $source = '', string $target = ''): bool {
+        $t = $target === '' ? $this->targetlang : $target;
         $s = $source === '' ? $this->deeplsourcelang : $source;
-        return strpos($this->targetlang, $s) !== false;
+        return strpos($t, $s) !== false;
     }
 
 }

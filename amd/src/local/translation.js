@@ -288,7 +288,6 @@ define([
      */
     const callTranslations = (keys) => {
         const translations = [];
-        const rephrases = [];
         Log.debug(`translation/callTranslations:291 > targetLang`);
         Log.debug(targetLang);
         prepareAdvancedSettings(targetLang);

@@ -43,12 +43,6 @@ final class langhelper_test extends advanced_testcase {
      * @var lang_helper
      */
     private $langhelper;
-    /**
-     * The API.
-     *
-     * @var \DeepL\Translator
-     */
-    protected $translator;
 
     /**
      * Set up.
@@ -104,7 +98,6 @@ final class langhelper_test extends advanced_testcase {
      * @throws \dml_exception
      */
     public function test_settings(): void {
-
         $key = '';
         if ($this->langhelper->isapikeynoset()) {
             $this->makeenv();
