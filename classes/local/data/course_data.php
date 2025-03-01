@@ -300,8 +300,11 @@ class course_data {
      * @param array $activities
      * @param mixed $chapter
      * @param \cm_info $act
+     * @param $cmid
      * @return void
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, $cmid) {
         global $DB;
@@ -340,8 +343,11 @@ class course_data {
      * @param array $activities
      * @param mixed $chapter
      * @param \cm_info $act
+     * @param $cmid
      * @return void
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      * @todo MDL-0 check differences between collaborative and individual
      */
     private function injectwikipage(array &$activities, mixed $chapter, cm_info $act, $cmid) {
@@ -403,8 +409,11 @@ class course_data {
      *
      * @param array $activities
      * @param mixed $activity
+     * @param $cmid
      * @return false|mixed|\stdClass
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     private function injectactivitydata(array &$activities, mixed $activity, $cmid) {
         global $DB;
@@ -741,7 +750,9 @@ class course_data {
      * @param array $activities
      * @param mixed $question
      * @param mixed $activity
+     * @param $cmid
      * @return false|mixed|\stdClass
+     * @throws \dml_exception
      */
     private function injectquestiondata(array &$activities, mixed $question, mixed $activity, $cmid) {
         global $DB;
@@ -790,8 +801,12 @@ class course_data {
      * @param array $activitydata
      * @param \question_definition $question
      * @param mixed $act
+     * @param int $cmid
      * @return void
+     * @throws \coding_exception
+     * @throws \ddl_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     private function injectquizcontent(array &$activitydata, question_definition $question, mixed $act, int $cmid) {
         global $DB;

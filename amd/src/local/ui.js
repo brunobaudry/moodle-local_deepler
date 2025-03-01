@@ -155,7 +155,9 @@ define(['core/log', 'editor_tiny/editor', 'core/modal', './selectors', './transl
         }
         // Prepare the UI for the save process.
         saveAllBtn.disabled = true;
-        launchModal().then(r => Log.info('SaveAll Modal launched ' + r));
+        launchModal().then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
+            Log.error(reason);
+        });
         // Prepare the data to be saved.
         const data = [];
         const keys = Array.from(selectedCheckboxes).map((e) => e.dataset.key);

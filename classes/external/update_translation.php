@@ -66,12 +66,8 @@ class update_translation extends external_api {
      *
      * @param array $data
      * @param string $userid
+     * @param $courseid
      * @return array
-     * @throws \core_external\restricted_context_exception
-     * @throws \dml_exception
-     * @throws \dml_transaction_exception
-     * @throws \invalid_parameter_exception
-     * @throws \required_capability_exception
      */
     public static function execute($data, $userid, $courseid): array {
         global $DB;
@@ -120,6 +116,8 @@ class update_translation extends external_api {
      * Do the capability checks and skip when no context filter is provided.
      *
      * @param array $data
+     * @param int $userid
+     * @param int $courseid
      * @return void
      * @throws \core_external\restricted_context_exception
      * @throws \invalid_parameter_exception

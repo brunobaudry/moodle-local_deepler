@@ -62,13 +62,12 @@ define([], () => {
      * Helper function for the decode html escaped content.
      * @param {string} encodedStr
      * @returns {string}
-
      */
     const decodeHTML = (encodedStr) => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(encodedStr, 'text/html');
-            return doc.documentElement.textContent;
-        };
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(encodedStr, 'text/html');
+        return doc.documentElement.textContent;
+    };
     /**
      * Helper to remove HTML from strings.
      *

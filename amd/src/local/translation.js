@@ -277,6 +277,7 @@ define([
     const prepareTranslation = (key) => {
         return {
             text: tempTranslations[key].source,
+            // eslint-disable-next-line camelcase
             source_lang: tempTranslations[key].sourceLang,
             key: key
         };

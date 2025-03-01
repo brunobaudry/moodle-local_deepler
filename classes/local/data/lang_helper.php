@@ -348,6 +348,7 @@ class lang_helper {
      * Check if source is same as target. Might call the rephrase instead.
      *
      * @param string $source
+     * @param string $target
      * @return bool
      */
     public function isrephrase(string $source = '', string $target = ''): bool {

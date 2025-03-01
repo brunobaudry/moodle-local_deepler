@@ -47,7 +47,8 @@ class get_translation extends external_api {
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
-    public static function execute($translations, $options) {
+
+    public static function execute($translations, $options): array {
         // Set the api with env so that it can be unit tested.
         self::setDeeplApi();
         if (empty(self::$apikey)) {
@@ -158,7 +159,7 @@ class get_translation extends external_api {
      * @return void
      * @throws \dml_exception
      */
-    private static function setdeeplapi() {
+    private static function setdeeplapi(): void {
         $configkey = get_config('local_deepler', 'apikey');
         if ($configkey === '') {
             $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
