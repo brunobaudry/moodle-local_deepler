@@ -1,9 +1,10 @@
-define(['core/log'], function(log) {
+define(['core/log'], (log)=> {
     /**
+     * Find tinyMCEs
      *
+     * @returns {*}
      */
-    function checkTinyMCELoaded() {
-
+    const checkTinyMCELoaded = ()=> {
         if (tinymce === undefined || tinymce === null) {
             window.console.log("searching tinymce !!!");
              return;
@@ -17,13 +18,14 @@ define(['core/log'], function(log) {
         return tinymce.editors.every(function(editor) {
             return editor.initialized;
         });
-    }
+    };
 
     /**
+     * Listener.
      *
      * @param {function} callback
      */
-    function waitForTinyMCE(callback) {
+    const waitForTinyMCE = (callback)=> {
         if (checkTinyMCELoaded()) {
             callback();
         } else {
@@ -31,7 +33,7 @@ define(['core/log'], function(log) {
                 waitForTinyMCE(callback);
             }, 100);
         }
-    }
+    };
 
     return {
         init: function() {

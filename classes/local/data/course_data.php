@@ -229,7 +229,7 @@ class course_data {
      * @return array
      * TODO MDL-000 Parse recursive wiki pages. Though only for no collaborative wikis as built by students.
      */
-    private function getactivitydata() {
+    private function getactivitydata(): array {
         global $CFG;
         global $DB;
         $activitydata = [];
@@ -293,20 +293,19 @@ class course_data {
         }
         return $activitydata;
     }
-
     /**
      * Special function for book's subchapters.
      *
      * @param array $activities
      * @param mixed $chapter
      * @param \cm_info $act
-     * @param $cmid
+     * @param int $cmid
      * @return void
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, $cmid) {
+    private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         global $DB;
         $activity = new stdClass();
         $activity->id = $act->id;
@@ -343,14 +342,14 @@ class course_data {
      * @param array $activities
      * @param mixed $chapter
      * @param \cm_info $act
-     * @param $cmid
+     * @param int $cmid
      * @return void
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      * @todo MDL-0 check differences between collaborative and individual
      */
-    private function injectwikipage(array &$activities, mixed $chapter, cm_info $act, $cmid) {
+    private function injectwikipage(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         global $DB;
         $activity = new stdClass();
         $activity->id = $act->id;
@@ -409,13 +408,13 @@ class course_data {
      *
      * @param array $activities
      * @param mixed $activity
-     * @param $cmid
+     * @param int $cmid
      * @return false|mixed|\stdClass
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function injectactivitydata(array &$activities, mixed $activity, $cmid) {
+    private function injectactivitydata(array &$activities, mixed $activity, int $cmid): mixed {
         global $DB;
         $activitymodname = $activity->modname;
         $activitydbrecord = $DB->get_record($activitymodname, ['id' => $activity->instance]);
@@ -632,7 +631,7 @@ class course_data {
      * @return moodle_url|null
      * @throws \moodle_exception
      */
-    private function link_builder($id, $table, $cmid, int $parentid = 0) {
+    private function link_builder(int $id, string $table, int $cmid, int $parentid = 0) {
         global $CFG;
         $link = null;
         $tcmid = $cmid ?? 0;
@@ -685,7 +684,7 @@ class course_data {
      * @param int $cmid
      * @return array
      */
-    private function get_item_contextid($id, $table, $cmid = 0) {
+    private function get_item_contextid(int $id, string $table, int $cmid = 0) {
         $i = 0;
         $iscomp = false;
 
@@ -750,11 +749,11 @@ class course_data {
      * @param array $activities
      * @param mixed $question
      * @param mixed $activity
-     * @param $cmid
+     * @param int $cmid
      * @return false|mixed|\stdClass
      * @throws \dml_exception
      */
-    private function injectquestiondata(array &$activities, mixed $question, mixed $activity, $cmid) {
+    private function injectquestiondata(array &$activities, mixed $question, mixed $activity, int $cmid) {
         global $DB;
         return $this->injectdatafromtable($activities, 'question', 'id', $question->id, $activity, $cmid);
     }

@@ -21,8 +21,20 @@
  */
 
 
-define(['core/log', 'editor_tiny/editor', 'core/modal', './selectors', './translation', './utils', './customevents'],
-    (Log, TinyMCE, Modal, Selectors, Translation, Utils, Events) => {
+define(['core/log',
+        'editor_tiny/editor',
+        'core/modal',
+        './selectors',
+        './translation',
+        './utils',
+        './customevents',
+        './tinychecker'],
+    (Log, TinyMCE,
+     Modal,
+     Selectors,
+     Translation,
+     Utils,
+     Events, TinyChecker) => {
     let config = {};
     let langstrings = {};
     let autotranslateButton = {};
@@ -737,6 +749,8 @@ define(['core/log', 'editor_tiny/editor', 'core/modal', './selectors', './transl
      * @param {*} cfg
      */
     const init = (cfg) => {
+        Translation.init(cfg);
+        TinyChecker.init();
         config = cfg;
         // Utils.registerLoggers(cfg.debug);
         Log.info(cfg);

@@ -47,7 +47,6 @@ class get_translation extends external_api {
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
-
     public static function execute($translations, $options): array {
         // Set the api with env so that it can be unit tested.
         self::setDeeplApi();
