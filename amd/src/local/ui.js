@@ -27,14 +27,13 @@ define(['core/log',
         './selectors',
         './translation',
         './utils',
-        './customevents',
-        './tinychecker'],
+        './customevents'],
     (Log, TinyMCE,
      Modal,
      Selectors,
      Translation,
      Utils,
-     Events, TinyChecker) => {
+     Events) => {
     let config = {};
     let langstrings = {};
     let autotranslateButton = {};
@@ -750,7 +749,6 @@ define(['core/log',
      */
     const init = (cfg) => {
         Translation.init(cfg);
-        TinyChecker.init();
         config = cfg;
         // Utils.registerLoggers(cfg.debug);
         Log.info(cfg);

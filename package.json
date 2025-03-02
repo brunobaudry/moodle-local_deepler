@@ -9,6 +9,7 @@
     "markdown-toc": "^1.2.0"
   },
   "dependencies": {
+    "caniuse-lite": "^1.0.30001701",
     "sass": "^1.83.0"
   }
 }

@@ -66,10 +66,10 @@ class update_translation extends external_api {
      *
      * @param array $data
      * @param string $userid
-     * @param $courseid
+     * @param int $courseid
      * @return array
      */
-    public static function execute($data, $userid, $courseid): array {
+    public static function execute(array $data, string $userid, int $courseid): array {
         global $DB;
         $responses = [];
         try {

@@ -7,12 +7,12 @@ define(['core/log'], (log)=> {
     const checkTinyMCELoaded = ()=> {
         if (tinymce === undefined || tinymce === null) {
             window.console.log("searching tinymce !!!");
-             return;
+             return false;
             }
         window.console.log("tinymce !!!");
         if (tinymce.editors === undefined) {
             window.console.log(tinymce);
-         return;
+         return false;
         }
         window.console.log("tinymce !!!");
         return tinymce.editors.every(function(editor) {

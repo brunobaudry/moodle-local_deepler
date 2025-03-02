@@ -38,11 +38,11 @@ final class coursedata_test extends advanced_testcase {
     /**
      * @var stdClass
      */
-    protected $course;
+    protected stdClass $course;
     /**
      * @var local\data\course_data
      */
-    protected $coursedata;
+    protected course_data $coursedata;
 
     /**
      * Setup.

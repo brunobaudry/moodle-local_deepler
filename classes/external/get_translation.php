@@ -40,14 +40,14 @@ class get_translation extends external_api {
     /**
      * External service to call DeepL's API.
      *
-     * @param $translations
-     * @param $options
+     * @param array $translations
+     * @param object $options
      * @return array
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
-    public static function execute($translations, $options): array {
+    public static function execute(array $translations, object $options): array {
         // Set the api with env so that it can be unit tested.
         self::setDeeplApi();
         if (empty(self::$apikey)) {

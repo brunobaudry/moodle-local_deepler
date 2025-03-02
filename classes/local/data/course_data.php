@@ -631,7 +631,7 @@ class course_data {
      * @return moodle_url|null
      * @throws \moodle_exception
      */
-    private function link_builder(int $id, string $table, int $cmid, int $parentid = 0) {
+    private function link_builder(int $id, string $table, int $cmid = 0, int $parentid = 0) {
         global $CFG;
         $link = null;
         $tcmid = $cmid ?? 0;
@@ -766,8 +766,11 @@ class course_data {
      * @param string $idcolname
      * @param int $id
      * @param mixed $activity
+     * @param int $cmid
      * @return false|mixed|\stdClass
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     private function injectdatafromtable(array &$activities, string $table, string $idcolname, int $id, mixed $activity,
             int $cmid) {
