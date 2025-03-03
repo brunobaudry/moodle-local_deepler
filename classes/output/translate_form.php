@@ -169,7 +169,7 @@ class translate_form extends moodleform {
                     data-status='$status'>");
         // Column 1 settings.
         $sametargetassource = $this->langpack->isrephrase();
-        if ($sametargetassource) {
+        if ($sametargetassource || $this->langpack->targetlang === '') {
             $buttonclass = 'badge-dark';
             $titlestring = get_string('canttranslate', 'local_deepler', $this->langpack->targetlang);
         } else if ($item->tneeded) {

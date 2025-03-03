@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.3.0] 2025-03-03
+
+### Changes
+- No more Deepl api calls are made directly from js, only through Moodle's external api now. The plugin in now only connect to Deepl's api using http POST method. More secured as 
+  the Deepl token was exposed in with GET calls. Plus it will be deprecated ads of friday 
+  14th 2025 by Deepl.
+- JS code refactored in modules for more readability and flexibility.
+- UI changes:
+  - Now you cannot select the main source language. Change Moodle's to set the main source lang.
+  - Improved error reporting.
+
+### Fixed
+- Issues when checking the activity contexts (fed by the tab id instead of the cmid) issue GH-56.
+
+### Todo
+- Check the "enhancement" list https://github.com/brunobaudry/moodle-local_deepler/issues 
+
 ## [1.2.7] 2025-02-03
 
 ### Fixed

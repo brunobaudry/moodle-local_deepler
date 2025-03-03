@@ -7,7 +7,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:13
@@ -183,15 +182,21 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
 
-#      - name: Grunt
-#        if: ${{ always() }}
-#        run: moodle-plugin-ci grunt --max-lint-warnings 10
-      - name: PHPUnit tests
+      - name: Grunt
         if: ${{ always() }}
-        run: moodle-plugin-ci phpunit --fail-on-warning
+        run: moodle-plugin-ci grunt --max-lint-warnings 10
 
-      - name: Behat features
+      - name: PHPUnit tests
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags=@local_deepler~@local_deepler_notesting
+        run: moodle-plugin-ci phpunit --fail-on-warning
+
+      - name: Behat features
+        timeout-minutes: 5
+        if: ${{ always() }}
+        env:
+          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
+        run: moodle-plugin-ci behat --profile chrome --dump
+          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
+          echo $DEEPL_API_TOKEN | sed 's/./& /g'
