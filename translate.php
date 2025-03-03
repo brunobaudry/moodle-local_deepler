@@ -101,7 +101,7 @@ try {
     // Adds the language settings strings to the jsconfig.
     $jsconfig = $languagepack->prepareconfig($jsconfig);
     // Adding page JS.
-    $PAGE->requires->js_call_amd('local_deepler/deepler_new', 'init', [$jsconfig]);
+    $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
     // Output translation grid.
     $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
     // Build the page.
