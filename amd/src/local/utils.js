@@ -20,6 +20,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([], () => {
+    const COOKIE_PREFIX = 'moodle_deepler_glossary_';
     /**
      * Simple helper to manage selectors
      * @param {string} s
@@ -80,9 +81,48 @@ define([], () => {
         return doc.body.textContent || "";
     };
     /**
+     * Cookie setter.
+     *
+     * @param {string} name
+     * @param {object} value
+     * @param {int} hours
+     */
+    const setCookie = (name, value, hours)=>{
+        var expires = "";
+        if (hours) {
+            var date = new Date();
+            date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    };
+    /**
+     * Cookie Getter.
+     *
+     * @param {string} name
+     * @returns {object}
+     */
+   const getCookie = (name) => {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1, c.length);
+            }
+            if (c.indexOf(nameEQ) == 0) {
+                return c.substring(nameEQ.length, c.length);
+            }
+        }
+        return null;
+    };
+    /**
      * Api to be used by the other modules.
      */
     return {
+        COOKIE_PREFIX: COOKIE_PREFIX,
+        getCookie: getCookie,
+        setCookie: setCookie,
         replaceKey: replaceKey,
         keyidToKey: keyidToKey,
         decodeHTML: decodeHTML,

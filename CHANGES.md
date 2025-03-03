@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Issues when checking the activity contexts (fed by the tab id instead of the cmid) issue GH-56.
+- Improved capture of Tiny instances.
 
 ### Todo
 - Check the "enhancement" list https://github.com/brunobaudry/moodle-local_deepler/issues 

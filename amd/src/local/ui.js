@@ -34,6 +34,7 @@ define(['core/log',
      Translation,
      Utils,
      Events) => {
+
     let config = {};
     let langstrings = {};
     let autotranslateButton = {};
@@ -45,6 +46,7 @@ define(['core/log',
     let format = new Intl.NumberFormat();
     let saveAllModal = {};
     let errordbtitle = '';
+    let glossaryId = {};
 
     const onDBFailed = (error, status) => {
         showModal(`${errordbtitle} ${status}`, `DB failed to save translations. ${error}`, 'Alert');
@@ -238,10 +240,13 @@ define(['core/log',
             errordbtitle = langstrings.uistrings.errordbtitle;
             saveAllBtn = domQuery(Selectors.actions.saveAll);
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
-           // SourceLang = document.querySelector(Selectors.actions.sourceSwitcher).value;
-            // targetLang = document.querySelector(Selectors.actions.targetSwitcher).value;
             autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
             checkboxes = domQueryAll(Selectors.actions.checkBoxes);
+            glossaryId = domQuery(Selectors.deepl.glossaryId);
+            const glossaryCookie = Utils.getCookie(Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid);
+            if (glossaryCookie !== null) {
+                glossaryId.value = glossaryCookie;
+            }
 
         } catch (e) {
             if (config.debug) {
@@ -750,12 +755,10 @@ define(['core/log',
     const init = (cfg) => {
         Translation.init(cfg);
         config = cfg;
-        // Utils.registerLoggers(cfg.debug);
         Log.info(cfg);
         registerUI();
         registerEventListeners();
         toggleAutotranslateButton();
-        // OnTagrgetChanged(config.lang);
         saveAllBtn.disabled = true;
         selectAllBtn.disabled = !Translation.isTranslatable();
         checkboxes.forEach((node) => {

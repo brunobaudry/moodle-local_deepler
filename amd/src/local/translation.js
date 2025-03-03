@@ -343,6 +343,9 @@ const onTranslateFailed = (status, error)=>{
         settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
         // eslint-disable-next-line camelcase
         settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
+        if (settings.glossary_id !== '') {
+            Utils.setCookie(Utils.COOKIE_PREFIX + mainSourceLang + targetLang + courseid, settings.glossary_id, 703);
+        }
         // eslint-disable-next-line camelcase
         settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
         // eslint-disable-next-line camelcase
