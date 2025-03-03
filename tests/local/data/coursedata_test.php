@@ -270,10 +270,10 @@ final class coursedata_test extends advanced_testcase {
         $method = new ReflectionMethod(course_data::class, 'link_builder');
         $method->setAccessible(true);
 
-        $courselink = $method->invoke($this->coursedata, $this->course->id, 'course', null);
+        $courselink = $method->invoke($this->coursedata, $this->course->id, 'course', 0);
         $this->assertStringContainsString('/course/edit.php?id=' . $this->course->id, $courselink);
 
-        $sectionlink = $method->invoke($this->coursedata, 1, 'course_sections', null);
+        $sectionlink = $method->invoke($this->coursedata, 1, 'course_sections', 0);
         $this->assertStringContainsString('/course/editsection.php?id=1', $sectionlink);
 
         $activitylink = $method->invoke($this->coursedata, 1, 'page', 1);
