@@ -52,10 +52,8 @@ final class langhelper_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
-        //$this->resetAfterTest(true);
         $this->langhelper = new lang_helper();
         $key = getenv('DEEPL_API_TOKEN');
-        // var_dump($key);
         if ($key === 'DEFAULT') {
             $this->makeenv();
             $key = getenv('DEEPL_API_TOKEN');
