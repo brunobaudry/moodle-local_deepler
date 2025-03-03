@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] 2025-03-03
 
+### Added
+- Glossary ids are now saved in cookies (for 1 month) by course and source-target language pairs. As reported with issue #56.
+
 ### Changes
 - No more Deepl api calls are made directly from js, only through Moodle's external api now. The plugin in now only connect to Deepl's api using http POST method. More secured as 
   the Deepl token was exposed in with GET calls. Plus it will be deprecated ads of friday 
@@ -17,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved error reporting.
 
 ### Fixed
-- Issues when checking the activity contexts (fed by the tab id instead of the cmid) issue GH-56.
+- Issues when checking the activity contexts (fed by the tab id instead of the cmid) issue #54.
 - Improved capture of Tiny instances.
 
 ### Todo

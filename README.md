@@ -146,7 +146,10 @@ You will be sent to the translation page for the course.
 
 There you can fine tune [©DeepL's commands](https://developers.deepl.com/docs).
 Usually the default as set below should work fine with Moodle activity content.
+
+##### Glossaries
 *Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
+DeepL's Glossary ID's are saved by course id + source<7target lang pairs. 
 
 #### Other setting
 
