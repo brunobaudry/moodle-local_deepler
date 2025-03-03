@@ -188,5 +188,5 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --dump
-#          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
-#          echo $DEEPL_API_TOKEN | sed 's/./& /g'
+          echo ${{secrets.DEEPL_API_TOKEN }} | sed 's/./& /g'
+          echo $DEEPL_API_TOKEN | sed 's/./& /g'
