@@ -17,12 +17,12 @@ class Translator
     /**
      * Library version.
      */
-    public const VERSION = '1.7.2';
+    public const VERSION = '1.11.1';
 
     /**
      * Implements all HTTP requests and retries.
      */
-    private $client;
+    protected $client;
 
     /**
      * Construct a Translator object wrapping the DeepL API using your authentication key.
@@ -160,6 +160,8 @@ class Translator
             $options[TranslateTextOptions::FORMALITY] ?? null,
             $options[TranslateTextOptions::GLOSSARY] ?? null
         );
+        // Always send show_billed_characters=1, remove when the API default is changed to true
+        $params["show_billed_characters"] = "1";
         $this->validateAndAppendTexts($params, $texts);
         $this->validateAndAppendTextOptions($params, $options);
 
@@ -187,7 +189,9 @@ class Translator
         foreach ($decoded['translations'] as $textResult) {
             $textField = $textResult['text'];
             $detectedSourceLang = $textResult['detected_source_language'];
-            $textResults[] = new TextResult($textField, $detectedSourceLang);
+            $billedCharacters = $textResult['billed_characters'];
+            $modelTypeUsed = $textResult['model_type_used'] ?? null;
+            $textResults[] = new TextResult($textField, $detectedSourceLang, $billedCharacters, $modelTypeUsed);
         }
         return is_array($texts) ? $textResults : $textResults[0];
     }
@@ -219,9 +223,22 @@ class Translator
             throw new DocumentTranslationException("File already exists at output file path $outputFile");
         }
         try {
-            $handle = $this->uploadDocument($inputFile, $sourceLang, $targetLang, $options);
+            $minifier = null;
+            $willMinify = ($options[TranslateDocumentOptions::ENABLE_DOCUMENT_MINIFICATION] ?? false) &&
+                DocumentMinifier::canMinifyFile($inputFile);
+            $fileToUpload = $inputFile;
+            if ($willMinify) {
+                $minifier = new DocumentMinifier();
+                $minifier->minifyDocument($inputFile, true);
+                $fileToUpload = $minifier->getMinifiedDocFile($inputFile);
+            }
+            $handle = $this->uploadDocument($fileToUpload, $sourceLang, $targetLang, $options);
             $status = $this->waitUntilDocumentTranslationComplete($handle);
             $this->downloadDocument($handle, $outputFile);
+            if ($willMinify) {
+                // Translated minified file is at `$outputFile`. Reinsert media (deminify) before returning
+                $minifier->deminifyDocument($outputFile, $outputFile, true);
+            }
             return $status;
         } catch (DeepLException $error) {
             if (file_exists($outputFile)) {
@@ -593,7 +610,7 @@ class Translator
      * @param string|string[] $texts User-supplied texts to be checked.
      * @throws DeepLException
      */
-    private function validateAndAppendTexts(array &$params, $texts)
+    protected function validateAndAppendTexts(array &$params, $texts)
     {
         if (is_array($texts)) {
             foreach ($texts as $text) {
@@ -655,6 +672,9 @@ class Translator
         if (isset($options[TranslateTextOptions::CONTEXT])) {
             $params[TranslateTextOptions::CONTEXT] = $options[TranslateTextOptions::CONTEXT];
         }
+        if (isset($options[TranslateTextOptions::MODEL_TYPE])) {
+            $params[TranslateTextOptions::MODEL_TYPE] = $options[TranslateTextOptions::MODEL_TYPE];
+        }
         if (isset($options[TranslateTextOptions::NON_SPLITTING_TAGS])) {
             $params[TranslateTextOptions::NON_SPLITTING_TAGS] =
                 $this->joinTagList($options[TranslateTextOptions::NON_SPLITTING_TAGS]);
@@ -673,7 +693,7 @@ class Translator
      * Checks the HTTP status code, and in case of failure, throws an exception with diagnostic information.
      * @throws DeepLException
      */
-    private function checkStatusCode(array $response, bool $inDocumentDownload = false, bool $usingGlossary = false)
+    protected function checkStatusCode(array $response, bool $inDocumentDownload = false, bool $usingGlossary = false)
     {
         list($statusCode, $content) = $response;
 
@@ -742,7 +762,7 @@ class Translator
         $libraryInfoStr = "deepl-php/$libraryVersion";
         try {
             if ($sendPlatformInfo) {
-                $platformStr = php_uname('s r v m');
+                $platformStr = php_uname('s') . ' ' . php_uname('r') . ' ' . php_uname('v') . php_uname('m');
                 $phpVersion = phpversion();
                 $libraryInfoStr .= " ($platformStr) php/$phpVersion";
                 $curlVer = curl_version()['version'];

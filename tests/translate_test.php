@@ -110,7 +110,7 @@ final class translate_test extends advanced_testcase {
             $this->assertArrayHasKey('activities', $v);
         }
         $langhelper = new lang_helper();
-        $langhelper->init('abcd');
+        $langhelper->initdeepl('DEFAULT');
         $renderable = new translate_page($course, $coursedata->getdata(),
                 new filter_multilang2(), $langhelper, 'vtest');
         $this->assertNotNull($renderable);

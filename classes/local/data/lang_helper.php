@@ -17,14 +17,16 @@
 namespace local_deepler\local\data;
 defined('MOODLE_INTERNAL') || die();
 
+use DeepL\DeepLClient;
 use DeepL\DeepLException;
-use DeepL\Translator;
 use Deepl\Usage;
+use stdClass;
 
 require_once(__DIR__ . '/../../vendor/autoload.php');
 
 /**
- * Helper class to connect to Deepl's API, fetch the available lang combinaisons etc.
+ * Helper class to connect to Deepl's API, fetch the available langs etc.
+ * as well as prepare the data for the html selects and AMD.
  *
  * @package local_deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -32,48 +34,33 @@ require_once(__DIR__ . '/../../vendor/autoload.php');
  */
 class lang_helper {
     /**
-     * Api pro endpoint.
+     * The current moodle language.
      *
      * @var string
      */
-    static protected $deeplpro = 'https://api.deepl.com/v2/translate?';
+    public string $currentlang;
     /**
-     *  Api free endpoint.
-     *
-     * @var string
+     * @var string The source language for deepl.
      */
-    static protected $deeplfree = 'https://api-free.deepl.com/v2/translate?';
-    /**
-     * The main source language.
-     *
-     * @var string
-     */
-    public mixed $currentlang;
+    public string $deeplsourcelang;
     /**
      * The target language.
      *
      * @var string
      */
-    public mixed $targetlang;
+    public string $targetlang;
     /**
      * Moodle instance's installed languages.
      *
      * @var array|mixed
      */
-    public mixed $langs;
-    /**
-     * Admin setting to set the default value of LaTeX escaping in advance settings.
-     *
-     * @var bool
-     */
-    public $escapelatexbydefault;
-
+    public mixed $moodlelangs;
     /**
      * @var string
      */
-    protected mixed $apikey;
+    private string $apikey;
     /**
-     * @var Translator
+     * @var DeepLClient
      */
     private mixed $translator;
     /**
@@ -106,7 +93,12 @@ class lang_helper {
      * @var bool
      */
     private $keyisfree;
-
+    /**
+     * Mutlilangv2 parent lang behaviour.
+     *
+     * @var string
+     */
+    private string $multilangparentlang;
 
     /**
      * Constructor.
@@ -115,86 +107,65 @@ class lang_helper {
      */
     public function __construct() {
         // Set to dummies values.
-        $this->apikey = 'abcd';
-        $this->deepltargets = 'en';
-        $this->deeplsources = 'en';
         $this->allowsublangcodesasmain = get_config('local_deepler', 'allowsublangs');
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
-        $this->targetlang = optional_param('target_lang', 'en', PARAM_NOTAGS);
-        $this->langs = get_string_manager()->get_list_of_translations();
+        $this->targetlang = optional_param('target_lang', '', PARAM_NOTAGS);
+        $this->moodlelangs = get_string_manager()->get_list_of_translations();
+        $this->multilangparentlang = get_config('filter_multilang2', 'parentlangbehaviour');
+        $this->deeplsourcelang = '';
+        $this->setcurrentlanguage();
     }
 
     /**
-     * Simple init and checks of exteranl call to Deepl's API.
+     * Initialise the Deepl object.
      *
-     * @param string $key
-     * @return bool
+     * @return void
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public function init(string $key): bool {
-        $this->setdeeplapi($key);
-        if ($this->isapikeynoset()) {
-            return false;
+    public function initdeepl() {
+        $this->setdeeplapi();
+        $this->inittranslator();
+        $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
+        $this->usage = $this->translator->getUsage();
+        $this->deeplsources = $this->translator->getSourceLanguages();
+        $this->deepltargets = $this->translator->getTargetLanguages();
+    }
+
+    /**
+     * Set the source language.
+     *
+     * @return void
+     */
+    private function setcurrentlanguage() {
+        // Moodle format is not the common culture format.
+        // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
+        $hasunderscore = strpos($this->currentlang, '_');
+        if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
+            $this->deeplsourcelang = strtoupper(substr($this->currentlang, 0, $hasunderscore));
         } else {
-            $initok = $this->inittranslator();
-            if ($initok) {
-                try {
-                    try {
-                        $this->usage = $this->translator->getUsage();
-                    } catch (DeepLException $e) {
-                        $initok = false;
-                    }
-                    $noissuewithsupportedlanguages = $this->setsupportedlanguages();
-                    $initok = $initok && $noissuewithsupportedlanguages;
-                    $hasunderscore = strpos($this->currentlang, '_');
-                    if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
-                        $this->currentlang = substr($this->currentlang, 0, $hasunderscore);
-                    }
-                } catch (\DeepL\AuthorizationException $e) {
-                    return false;
-                }
-            }
-            return $initok;
+            $this->deeplsourcelang = strtoupper($this->currentlang);
         }
     }
 
     /**
      * Set the key string.
+     * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @param string $key
      * @return void
      * @throws \dml_exception
      */
-    private function setdeeplapi(string $key) {
-
+    private function setdeeplapi() {
         $configkey = get_config('local_deepler', 'apikey');
         if ($configkey === '') {
-            $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
+            $configkey = getenv('DEEPL_API_TOKEN') ? getenv('DEEPL_API_TOKEN') : '';
         }
-        $this->apikey = $key === $configkey ? $key : $configkey;
-        $this->keyisfree = Translator::isAuthKeyFreeAccount($this->apikey);
-    }
-
-    /**
-     * Fecthes and set the available languages.
-     *
-     * @return void
-     * @throws \DeepL\DeepLException
-     */
-    private function setsupportedlanguages(): bool {
-        try {
-            $this->deeplsources = $this->translator->getSourceLanguages();
-            $this->deepltargets = $this->translator->getTargetLanguages();
-        } catch (DeepLException $e) {
-            return false;
-        }
-        return true;
+        $this->apikey = $configkey;
     }
 
     /**
      * Initialise the Deepl object.
-     * Return a boolean of the cnx status.
+     * Return a Boolean of the cnx status.
      *
      * @return bool
      * @throws \DeepL\DeepLException
@@ -202,7 +173,7 @@ class lang_helper {
     private function inittranslator() {
         if (!isset($this->translator)) {
             try {
-                $this->translator = new \DeepL\Translator($this->apikey, ['send_platform_info' => false]);
+                $this->translator = new DeepLClient($this->apikey, ['send_platform_info' => false]);
             } catch (\DeepL\AuthorizationException $e) {
                 return false;
             }
@@ -218,16 +189,27 @@ class lang_helper {
      * @return array
      */
     public function prepareoptionlangs(bool $issource, bool $verbose = true) {
+        // If the key is free, we can't improve the source lang.
+        // TODO MDL-0000 ready for deepl-php-sdk to implement the rephrase, just remove && false.
+        $canimprove = !$this->keyisfree && false;
         $tab = [];
-        foreach ($this->langs as $k => $l) {
-            $disable = $issource ? $k === $this->targetlang : $k === $this->currentlang;
-            $selected = $issource ? $k === $this->currentlang : $k === $this->targetlang;
-            $disable = $disable || !$this->islangsupported($k, $issource);
+        // Get the list of deepl langs that are supported by this moodle instance.
+        $filtereddeepls = $this->finddeeplsformoodle($issource);
+        foreach ($filtereddeepls as $l) {
+            $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
+            $text = $verbose ? $l->name : $l->code;
+            $text = ($same && $canimprove ? "® " : '') . $text;
+            $disable = $same && !$canimprove;
+            if ($issource) {
+                $selected = $this->isrephrase($l->code, $this->deeplsourcelang);
+            } else {
+                $selected = $this->targetlang !== '' && $this->isrephrase($l->code, $this->targetlang);
+            }
             $tab[] = [
-                    'code' => $k,
-                    'lang' => $verbose ? $l : $k,
-                    'selected' => $selected ? 'selected' : '',
-                    'disabled' => $disable ? 'disabled' : '',
+                    'code' => $l->code,
+                    'lang' => $text,
+                    'selected' => $selected,
+                    'disabled' => $disable,
             ];
         }
         return $tab;
@@ -245,31 +227,83 @@ class lang_helper {
         $tab = $this->prepareoptionlangs($issource, $verbose);
         $list = '';
         foreach ($tab as $item) {
-            $list .= "<option value='{$item['code']}' {$item['selected']} {$item['disabled']} data-initial-value='{$item['code']}'>
-                    {$item['lang']}</option>";
+            $list .= '<option value="' . $item['code'] . '"';
+            if ($item['selected']) {
+                $list .= ' selected ';
+            }
+            if ($item['disabled']) {
+                $list .= ' disabled ';
+            }
+            $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
+            $list .= $item['lang'] . '</option>';
         }
         return $list;
     }
 
     /**
+     * Find the Deepl langs that are supported by this moodle instance.
+     *
+     * @param bool $issource
+     * @return array
+     */
+    private function finddeeplsformoodle(bool $issource) {
+        $deepls = $issource ? $this->deeplsources : $this->deepltargets;
+        return array_filter($deepls, function($item) {
+            foreach ($this->moodlelangs as $code => $langverbose) {
+                $moodle = strtolower(str_replace('_', '', $code));
+                $deepl = strtolower(str_replace('-', '', $item->code));
+                if (stripos($deepl, $moodle) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /**
      * Injects lang attributes to the config object.
      *
-     * @param object $config
-     * @return object
+     * @param \stdClass $config
+     * @return \stdClass
      * @throws DeepLException
      */
-    public function addlangproperties(object &$config) {
-        $config->apikey = $this->apikey;
+    public function prepareconfig(stdClass &$config) {
         $config->usage = $this->usage;
         try {
             $config->limitReached = $config->usage->anyLimitReached();
         } catch (DeepLException $e) {
             $config->limitReached = true;
         }
-        $config->lang = $this->targetlang;
+        $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
-        $config->deeplurl = Translator::isAuthKeyFreeAccount($this->apikey) ? self::$deeplfree : self::$deeplpro;
+        $config->deeplsourcelang = $this->deeplsourcelang;
+        $config->isfree = $this->keyisfree;
         return $config;
+    }
+
+    /**
+     * Prepare the strings for the UI as JSON.
+     *
+     * @return string
+     */
+    public function preparestrings(): string {
+        // Status strings for UI icons.
+        $config = new stdClass();
+        $config->statusstrings = new stdClass();
+        $config->statusstrings->failed = get_string('statusfailed', 'local_deepler');
+        $config->statusstrings->success = get_string('statussuccess', 'local_deepler');
+        $config->statusstrings->tosave = get_string('statustosave', 'local_deepler');
+        $config->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
+        $config->statusstrings->wait = get_string('statuswait', 'local_deepler');
+        // General UI strings.
+        $config->uistrings = new stdClass();
+        $config->uistrings->deeplapiexception = get_string('deeplapiexception', 'local_deepler');
+        $config->uistrings->errordbpartial = get_string('errordbpartial', 'local_deepler');
+        $config->uistrings->errordbtitle = get_string('errordbtitle', 'local_deepler');
+        $config->uistrings->errortoolong = get_string('errortoolong', 'local_deepler');
+        $config->uistrings->saveallmodaltitle = get_string('saveallmodaltitle', 'local_deepler');
+        $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
+        return json_encode($config);
     }
 
     /**
@@ -308,6 +342,19 @@ class lang_helper {
      */
     public function isapikeynoset(): bool {
         return $this->apikey === '' || $this->apikey === null || $this->apikey === 'DEFAULT';
+    }
+
+    /**
+     * Check if source is same as target. Might call the rephrase instead.
+     *
+     * @param string $source
+     * @param string $target
+     * @return bool
+     */
+    public function isrephrase(string $source = '', string $target = ''): bool {
+        $t = $target === '' ? $this->targetlang : $target;
+        $s = $source === '' ? $this->deeplsourcelang : $source;
+        return str_contains($t, $s);
     }
 
 }

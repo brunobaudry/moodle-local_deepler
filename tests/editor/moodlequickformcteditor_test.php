@@ -67,7 +67,7 @@ final class moodlequickformcteditor_test extends advanced_testcase {
         style2 = underline, strike, subscript, superscript
         align = align
         insert = table, clear
-        undo = undo
+        undo = false
         accessibility = accessibilitychecker, accessibilityhelper
         other = html', $options['atto:toolbar']);
         $this->assertFalse($options['autosave']);

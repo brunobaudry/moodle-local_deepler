@@ -37,10 +37,12 @@ $string['contextdeepl_placeholder'] =
         'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['deeplapidoctitle'] = 'DeepL\'s API settings';
+$string['deeplapiexception'] = 'DeepL\'s API returned an error';
 $string['deepler:edittranslations'] = 'Edit course translations in DeepL Translator';
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'If enabled use DeepL Pro else the free version of DeepL API.';
 $string['editbutton'] = 'Edit source in place';
+$string['errordbpartial'] = '{$a} of the fields NOT saved in the database. Check manually in place';
 $string['errordbtitle'] = 'Database error';
 $string['errortoolong'] = '(could be that the text is too long for the field... Check manually in place)';
 $string['filters'] = 'Filters';
@@ -58,6 +60,10 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+$string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
+$string['modeltype'] = 'Model';
+$string['modeltypelatencyoptimized'] = 'latency optimized';
+$string['modeltypequalityoptimized'] = 'quality optimized';
 $string['needsupdate'] = 'Needs update';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
@@ -88,7 +94,8 @@ $string['scannedfieldsize_desc'] = 'Small text field are often limited in the da
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
-$string['sourcelang'] = 'Source lang <em>{mlang other}</em>';
+$string['sourcelang'] =
+        'Source lang <em>{mlang other} </em>';
 $string['specialsourcetext'] = 'Use a different source than "{$a}"';
 $string['splitsentences'] = 'Split sentences?';
 $string['splitsentences0'] = 'no splitting at all';

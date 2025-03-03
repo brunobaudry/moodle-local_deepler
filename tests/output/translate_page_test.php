@@ -87,6 +87,7 @@ final class translate_page_test extends advanced_testcase {
                                 'format' => 0,
                                 'table' => 'course',
                                 'field' => 'fullname',
+                                'cmid' => 0,
                                 'text' => 'Assignment 1',
                                 'link' => new moodle_url('/course/view.php', ['id' => 1]),
                                 'displaytext' => 'Assignment 1',
@@ -106,6 +107,7 @@ final class translate_page_test extends advanced_testcase {
                                 'format' => 1,
                                 'table' => 'forum',
                                 'field' => 'name',
+                                'cmid' => 1,
                                 'text' => 'Forum 1',
                                 'link' => new moodle_url('/course/view.php', ['id' => 1]),
                                 'displaytext' => 'Forum 1',
@@ -119,8 +121,7 @@ final class translate_page_test extends advanced_testcase {
                 ],
         ]];
         $this->mlangfilter = $this->createMock(\filter_multilang2::class);
-        $this->langhelper = $this->createMock(lang_helper::class);
-
+        $this->langhelper = $this->getMockBuilder(lang_helper::class)->enableOriginalConstructor()->getMock();
         $this->langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
@@ -147,10 +148,10 @@ final class translate_page_test extends advanced_testcase {
 
         $this->assertInstanceOf(stdClass::class, $result);
         $this->assertEquals($this->course, $result->course);
-        $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->target_langs);
-        $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->langs);
-        $this->assertEquals('EN', $result->current_lang);
-        $this->assertEquals('FR', $result->target_lang);
+        $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->targetlangs);
+        $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->sourcelangs);
+        $this->assertEquals('en', $result->current_lang);
+        $this->assertEquals('fr', $result->target_lang);
         $this->assertEquals($this->mlangfilter, $result->mlangfilter);
         $this->assertEquals($this->coursedata, $result->coursedata);
 
@@ -185,9 +186,7 @@ final class translate_page_test extends advanced_testcase {
         $PAGE->set_url(new \moodle_url('/local/deepler/translate.php'));
         set_config('latexescapeadmin', 1, 'local_deepler');
         set_config('preescapeadmin', 0, 'local_deepler');
-
         $renderer = $this->getMockBuilder(renderer_base::class)->disableOriginalConstructor()->getMock();
-
         $result = $this->translatepage->export_for_template($renderer);
 
         $this->assertEquals('checked', $result->escapelatexbydefault);

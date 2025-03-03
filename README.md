@@ -3,15 +3,15 @@
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Deepler is a local moodle plugin that provides automatic machine translation using the ©DeepL Pro Translation api.
+Deepler is a local Moodle plugin that provides automatic machine translation using the ©DeepL Pro Translation api.
 It is developed for those who want to translate a course all on one page,
 without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
+1. Set Moodle current language as your source language. 
 0. Fine tune your ©DeepL's settings.
-1. Select the source(s) language(s).
 2. Select the target language.
-3. Select the fields to translate.
+3. Select the fields to translate and if need different source than the current main (Moodle's).
 4. Send to ©DeepL.
 5. Review and or amend automated translations.
 6. Save translations to Moodle's DB (with the multilang {mlang XX} tags).
@@ -107,10 +107,10 @@ signup for an api key that you can enter into local plugin settings.
 #### Allow sub-languages to be mapped to their main
 
 Currently Deepl doesn't support any. See https://developers.deepl.com/docs/resources/supported-languages.
-The plugin gives you the possiblity to use these sub languages if your moodle install has them as if they were their parent language.
+The plugin gives you the possibility to use these sub languages if your Moodle install has them as if they were their parent language.
 This setting is ticked by default.
 
-If your installation has sub local language, for exemple de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
+If your installation has sub local language, for example de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
 defaults to true)
 
 #### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
@@ -146,7 +146,10 @@ You will be sent to the translation page for the course.
 
 There you can fine tune [©DeepL's commands](https://developers.deepl.com/docs).
 Usually the default as set below should work fine with Moodle activity content.
+
+##### Glossaries
 *Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
+DeepL's Glossary ID's are saved by course id + source<7target lang pairs. 
 
 #### Other setting
 
@@ -161,18 +164,23 @@ This setting's default in the editor can be set in the plugin [admin page](#admi
 
 ### Language selection
 
-![](pix/source_target.png)
+
 
 #### Source language
 
-**The source language will be set to the actual Moodle language** selection which will automatically be set to **other**.
-Changing the source language will act as if you'd change moodle's lang.
+
+
+**The source language will be set to the actual Moodle language** selection, which will automatically set it as the **other** fallback language.
+
+*nb: In a future release you'll be able to assign the **other** fallback language to your choosing for more flexibility*.
+
+To change the source language you'd change Moodle's lang.
 It is important, from a translation standpoint, to **select the source language from the language it was initially written** (and to stick with it).
 
 When first translating your content the plugin will insert ```{mlang other}Your Content...{mlang}``` tags .
-Please checkout the [mlang docs](https://moodle.org/plugins/filter_multilang2) to understand more.
+Please checkout the [mlang docs](https://moodle.org/plugins/filter_multilang2) if you are not familiar with Moodle's MLANG concept more.
 
-*nb: indeed you cannot select the same target language as the source and vice versa.*
+![](pix/source_lang.png)
 
 #### Target language
 
@@ -181,7 +189,9 @@ Note: indeed you cannot translate from and to the same language so buttons and c
 
 #### Unsupported
 
-Language that are not suppoted by ©DeepL are checked at each session so if your Moodle instance have unsupported languages, you will not be able to select it.
+Language that are not supported by ©DeepL are checked at each session so if your Moodle instance have unsupported languages, you will not be able to select it.
+
+![](pix/target_lang.png)
 
 ### Header
 
@@ -236,7 +246,7 @@ Clicking on the TRANSLATION icon will toggle the display of multilang tags and a
 
 #### Images and medias.
 
-The plugin will try to fetch and display embeded images. (this should be improved soon so that image are displayed in the source)
+The plugin will try to fetch and display embedded images. (this should be improved soon so that image are displayed in the source)
 When not found it will highlight the alt text in yellow and italicised as seen above.
 
 ![](pix/multilang_toggle_img_off.png)
@@ -294,7 +304,7 @@ it will soon be replaced by the one used in Moodle's course layout for a better 
 
 You can install a [tour guide](https://github.com/brunobaudry/moodle-local_deepler/blob/main/tourguide/tour_export.json) to simplify your translators' trainings.
 
-See moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
+See Moodle's instructions here : [User tours](https://docs.moodle.org/31/en/User_tours)
 
 ## WARNINGS
 
@@ -336,7 +346,8 @@ Should work with the following editors:
 It uses the default Moodle JS library and is tested with Boost and Classic.
 So there could be incompatibilities with other themes.
 
-see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) if you intend to help improving this plugin or just if your are an admin and want to do some test in a dedicated sandbox.
+see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) should you intend to help improving this plugin or just should you be an admin and want to do some 
+test in a dedicated sandbox.
 
 ### Webservices
 
@@ -396,7 +407,7 @@ See the [CONTRIBUTING.md](CONTRIBUTING.md) default documentation, for how-to wit
 
 This plugins tries to have descent testing setup.
 
-Some additional PHPUNIT, aswell as BEHAT test can run be done provided you have a valid key.
+Some additional PHPUNIT, as well as BEHAT test can run be done provided you have a valid key.
 rename .env-dist to .env and set there your own api key
 **DEEPL_API_TOKEN=DEFAULT** **DEEPL_API_TOKEN=YOUR_OWN_DEEPL_API_KEY**
 (You can add both a pro or a free key, we recommend that you do the tests with a free one).
@@ -408,7 +419,9 @@ Ensure you also add a **Repository secret** with the **DEEPL_API_TOKEN** (as wit
 
 ## Fork
 
-This is a fork of Jamfire's https://github.com/jamfire/moodle-local_coursetranslator which was left deprecated with https://github.com/jamfire/moodle-filter_autotranslate for
-replacement.
-Though going the filter way is most probably the best way for auto translation, we found useful to improve this one adding the necessary "revision" step as Machine translation will
-never be 100% accurate specially in the context of knowledge transmission where accuracy is mandatory.
+Originally a fork of Jamfire's https://github.com/jamfire/moodle-local_coursetranslator, this plugin had lots of refactoring and UI changes.
+Should you prefer a fully automated Deepl translation. Checkout Jamfire's replacement plugin :
+
+https://github.com/jamfire/moodle-filter_autotranslate
+It is text filter, most probably the best way for fast auto-translation (populating the result without intervention), we found useful to improve this one adding the necessary 
+"revision" step as Machine translation will never be 100% accurate specially in the context of knowledge transmission where accuracy is mandatory.

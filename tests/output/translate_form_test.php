@@ -134,6 +134,7 @@ final class translate_form_test extends advanced_testcase {
                 'section' => 76,
                 'purpose' => 'collaboration',
                 'translatedfieldname' => 'Name',
+                'cmid' => 1,
         ];
 
         // Call the get_formrow method.

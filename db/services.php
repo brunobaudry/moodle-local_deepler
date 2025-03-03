@@ -46,4 +46,11 @@ $functions = [
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
+        'local_deepler_get_translation' => [
+                'classname' => 'local_deepler\external\get_translation',
+                'description' => 'Get DeepL to translate',
+                'type' => 'read',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
 ];
