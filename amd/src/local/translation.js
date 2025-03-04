@@ -46,8 +46,8 @@ define([
         }
     };
     const onTrDbSuccess = (data)=>{
-        Log.error(`translation/onTrDbSuccess:46`);
-        Log.error(data);
+        Log.info(`translation/onTrDbSuccess:46`);
+        Log.info(data);
         if (data.length === 0) {
             Log.error(data);
             Events.emit(ON_DB_FAILED, 'no data returned', '');
@@ -83,17 +83,10 @@ define([
      * @param {object} config
      */
     const saveTranslations = (items, config) => {
-        Log.debug(`translation/saveTranslations:84 > items`);
-        Log.debug(items);
-        Log.debug(targetLang);
         const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
-        Log.debug(`translation/saveTranslations:84 > data`);
-        Log.debug(data);
-        Log.debug(userid);
         Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
         Events.on(Api.TR_DB_FAILED, onTrDbFailed);
         Api.updateTranslationsInDb(data, userid, courseid);
-        // Api.callApi("local_deepler_update_translation", {data: data}).done(handleAjaxUpdateDBResponse);
     };
         /**
          * Prepare the data to be saved in the DB.
@@ -124,8 +117,6 @@ define([
          * translation.js
          */
         const getupdatedtext = (key, maineditorIsTextArea) => {
-            Log.debug(`translation/getupdatedtext:125 > targetLang`);
-            Log.debug(targetLang);
             const sourceItemLang = tempTranslations[key].sourceLang;
             const fieldText = tempTranslations[key].fieldText; // Translation
             const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
@@ -289,25 +280,17 @@ define([
      */
     const callTranslations = (keys) => {
         const translations = [];
-        Log.debug(`translation/callTranslations:291 > targetLang`);
-        Log.debug(targetLang);
         prepareAdvancedSettings(targetLang);
         keys.forEach((key) => {
             translations.push(prepareTranslation(key));
         });
         Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
         Events.on(Api.DEEPL_FAILED, onTranslateFailed);
-        Log.info(`translation/callTranslations:296`);
-        Log.info(translations);
-        Log.info(`translation/callTranslations:298`);
-        Log.info(settings);
-        Log.info(`translation/callTranslations:300`);
-        Log.info(tempTranslations);
-        Api.translate(translations, settings);
+        Api.translate(translations, settings, Api.APP_VERSION);
     };
 const onTranslateSuccess = (response)=>{
-    Log.debug(`translation/onTranslateSuccess:308`);
-    Log.debug(response);
+    Log.info(`translation/onTranslateSuccess`);
+    Log.info(response);
     response.forEach((tr) => {
         if (tr.error === '') {
             let key = tr.key;
@@ -366,7 +349,7 @@ const onTranslateFailed = (status, error)=>{
     };
     /**
      * Check if the item is translatable.
-     *
+     * @todo MDL-0000 implement in v1.4.0 (return based on local source)
      * @param {string} sourceLang
      */
     const isTranslatable = (sourceLang = '') =>{
@@ -378,6 +361,7 @@ const onTranslateFailed = (status, error)=>{
             return tempTranslations[key]?.translation?.length > 0;
         };
         const init = (cfg) => {
+            Api.APP_VERSION = cfg.version;
             courseid = cfg.courseid;
             userid = cfg.userid;
             setMainLangs(cfg.currentlang, cfg.targetlang);

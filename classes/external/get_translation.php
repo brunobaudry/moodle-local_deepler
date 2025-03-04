@@ -22,6 +22,7 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
+use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 
@@ -37,24 +38,36 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 class get_translation extends external_api {
     /** @var string */
     private static string $apikey;
+
+    /** @var \DeepL\AppInfo */
+    private static AppInfo $appinfo;
+
     /**
      * External service to call DeepL's API.
      *
      * @param array $translations
      * @param array $options
+     * @param string $version
      * @return array
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
-    public static function execute(array $translations, array $options): array {
+    public static function execute(array $translations, array $options, string $version): array {
         // Set the api with env so that it can be unit tested.
-        self::setDeeplApi();
+        self::setDeeplApi($version);
         if (empty(self::$apikey)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
-        $params = self::validate_parameters(self::execute_parameters(), ['translations' => $translations, 'options' => $options]);
-        $translator = new DeepLClient(self::$apikey, ['send_platform_info' => false]);
+        $params = self::validate_parameters(self::execute_parameters(),
+                ['translations' => $translations, 'options' => $options, 'version' => $version]);
+        $translator = new DeepLClient(
+                self::$apikey,
+                [
+                        'send_platform_info' => true,
+                        'app_info' => self::$appinfo,
+                ]
+        );
         $tragetlang = $params['options']['target_lang'];
 
         $groupedtranslations = [];
@@ -131,6 +144,7 @@ class get_translation extends external_api {
                                         'Specifies whether the number of billed characters should be included in the response.'),
                         ]
                 ),
+                'version' => new external_value(PARAM_RAW, 'the plugin version id'),
         ]);
     }
 
@@ -155,15 +169,16 @@ class get_translation extends external_api {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
+     * @param string $version
      * @return void
      * @throws \dml_exception
      */
-    private static function setdeeplapi(): void {
+    private static function setdeeplapi(string $version): void {
+        self::$appinfo = new AppInfo('Moodle-Deepler', $version);
         $configkey = get_config('local_deepler', 'apikey');
         if ($configkey === '') {
             $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
         }
         self::$apikey = $configkey;
     }
-
 }

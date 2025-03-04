@@ -25,7 +25,7 @@ define([], () => {
 
     return {
         // Register an event handler
-        on: function(eventName, callback) {
+        on: (eventName, callback)=> {
             if (!events[eventName]) {
                 events[eventName] = [];
             }
@@ -34,18 +34,16 @@ define([], () => {
                 events[eventName].push(callback);
             }
         },
-
         // Trigger an event with multiple parameters
-        emit: function(eventName, ...args) {
+        emit: (eventName, ...args) =>{
             if (events[eventName]) {
                 events[eventName].forEach(function(callback) {
                     callback(...args);
                 });
             }
         },
-
         // Remove an event handler
-        off: function(eventName, callback) {
+        off: (eventName, callback) =>{
             if (events[eventName]) {
                 events[eventName] = events[eventName].filter(function(cb) {
                     return cb !== callback;

@@ -1,6 +1,6 @@
 {
   "name": "bruno.baudry/deepler",
-  "description": "Moodle plugin to use Deepl autotranslation",
+  "description": "Moodle plugin to use Deepl autotranslation services",
   "type": "project",
   "require": {
     "deeplcom/deepl-php": "^1.7",

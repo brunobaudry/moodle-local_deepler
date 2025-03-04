@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Glossary ids are now saved in cookies (for 1 month) by course and source-target language pairs. As reported with issue #56.
+- More activity filed captured.
 
-### Changes
+### Changed
 - No more Deepl api calls are made directly from js, only through Moodle's external api now. The plugin in now only connect to Deepl's api using http POST method. More secured as 
   the Deepl token was exposed in with GET calls. Plus it will be deprecated ads of friday 
   14th 2025 by Deepl.
@@ -24,7 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved capture of Tiny instances.
 
 ### Todo
-- Check the "enhancement" list https://github.com/brunobaudry/moodle-local_deepler/issues 
+- Check the "enhancement" list https://github.com/brunobaudry/moodle-local_deepler/issues
+- Language Strings UI for all filed names 
 
 ## [1.2.7] 2025-02-03
 

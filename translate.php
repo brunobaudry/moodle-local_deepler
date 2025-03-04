@@ -88,6 +88,7 @@ try {
     $languagepack->initdeepl();
     // Set js data.
     $jsconfig = new stdClass();
+    $jsconfig->version = $plugin->release;
     // Adds user ID for security checks in external calls.
     $jsconfig->userid = $USER->id;
     // Adds the user's prefered editor to the jsconfig.

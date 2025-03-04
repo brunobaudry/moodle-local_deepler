@@ -212,11 +212,15 @@ define(['core/log',
             cmid: element.getAttribute("data-cmid"),
         };
     };
-
+    /**
+     * Listener for individual source change.
+     * @todo MDL-000 implement in v1.4.0
+     *
+     * @param {event} e
+     */
     const onSourceChange = (e) => {
         // Do check source and target and propose rephrase if PRO.
-        Log.debug(`ui/onSourceChange:203 > e`);
-        Log.debug(e.target.getAttribute('data-key'));
+        Log.info(e.target.getAttribute('data-key'));
     };
     /**
      * Event listener for selection checkboxes.
@@ -224,15 +228,12 @@ define(['core/log',
      * ui.js
      */
     const onItemChecked = (e) => {
-        Log.info("SELECTION", e.target.getAttribute('data-key'), e.target.getAttribute('data-action'));
         // Check/uncheck checkboxes changes the charcount and icon status.
         if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
             toggleStatus(e.target.getAttribute('data-key'), e.target.checked);
             countWordAndChar();
         }
-        const editor = findEditor(e.target.getAttribute('data-key'));
-        Log.debug(`ui/onItemChecked:197`);
-        Log.debug(editor);
+
     };
     const registerUI = () => {
         try {
@@ -344,18 +345,14 @@ define(['core/log',
             removeOnClose: true,
         });
     };
-        const onTranslationFailed = (error) => {
-            let s = langstrings.uistrings.deeplapiexception;
-            showModal(s, error, 'Alert');
-        };
-        /**
-         * Event listener for failed translations per item.
-         * @param {object} data
-         *
-        const onItemNotTranslated = (data) => {
-            onErrorMessageItem(data.key, findEditor(data.key), data.error);
-        };
-         */
+    /**
+     * Event Listener when DeepL API call failed.
+     * @param {string} error
+     */
+    const onTranslationFailed = (error) => {
+        let s = langstrings.uistrings.deeplapiexception;
+        showModal(s, error, 'Alert');
+    };
     /**
      * Event listener for the translations process to dispaly the status.
      *
@@ -480,7 +477,7 @@ define(['core/log',
      * @param {string} error
      */
     const onErrorMessageItem = (key, error) => {
-        Log.warn(`ui/errorMessageItem:440`);
+        Log.warn(`ui/errorMessageItem`);
         Log.warn(key);
         Log.warn(error);
         const editor = domQuery(Selectors.editors.multiples.editorsWithKey, key);
@@ -514,8 +511,8 @@ define(['core/log',
      * @param {string} savedText
      */
     const onSuccessMessageItem = (key, savedText) => {
-        Log.debug(`ui/successMessageItem:471 > savedText`);
-        Log.debug(savedText);
+        Log.info(`ui/successMessageItem > savedText`);
+        Log.info(savedText);
         domQuery(Selectors.editors.multiples.editorsWithKey, key)
             .classList.add("local_deepler__success");
         // Add saved indicator.
@@ -530,12 +527,6 @@ define(['core/log',
             let multilangPill = domQuery(Selectors.statuses.multilang, key);
             let prevTransStatus = domQuery(Selectors.statuses.prevTransStatus, key);
             prevTransStatus.classList = "badge badge-pill badge-success";
-
-            Log.debug(`ui/:488 > multilangPill`);
-            Log.debug(multilangPill);
-            Log.debug(`ui/:492 > multilangPill.classList.contains("disabled")`);
-            Log.debug(multilangPill.classList.contains("disabled"));
-
             if (multilangPill.classList.contains("disabled")) {
                 multilangPill.classList.remove('disabled');
             }
@@ -567,28 +558,11 @@ define(['core/log',
         let searchParams = url.searchParams;
         searchParams.set("target_lang", e.target.value);
         window.location = url.toString();
-
-        // Translation.setMainLangs('', e.target.value);
-        // Events.emit(ON_TARGET_LANG_CHANGE, e.target.value);
-        // DomQuery(Selectors.sourcetexts.targetlang).innerText = e.target.value;
-
-
     };
-        /**
-         * Event listner for changes of target language.
-         * @param {string} e
-         *
-    const onTagrgetChanged = (e) => {
-        Translation.setMainLangs('', e);
-        saveAllBtn.disabled = true;
-        selectAllBtn.disabled = !Translation.isTranslatable();
-    };
-         */
     /**
      * Event listener to switch source lang,
      * Hence reload the page and change the site main lang.
      * @param {Event} e
-     * ui.js
      */
     const switchSource = (e) => {
         let url = new URL(window.location.href);
@@ -598,8 +572,6 @@ define(['core/log',
     };
     /**
      * Launch, display count of Words And Chars.
-     *
-     * ui.js
      */
     const countWordAndChar = () => {
         let wrdsc = 0;
@@ -633,82 +605,78 @@ define(['core/log',
             parent.classList.remove('alert-danger');
         }
     };
-        /**
-         * Get the editor container based on recieved current user's editor preference.
-         *
-         * @param {string} key Translation Key
-         * @todo MDL-0 get the editor from moodle db in the php.
-         * ui.js
-         */
-        const findEditor = (key) => {
-            let e = domQuery(Selectors.editors.types.basic, key);
-            let et = 'basic';
-            if (e === null) {
-                let r = null;
-                let editorTab = ["atto", "tiny", "marklar", "textarea"];
-                if (editorTab.indexOf(config.userPrefs) === -1) {
-                    Log.warn('Unsupported editor ' + config.userPrefs);
-                } else {
-                    // First let's try the current editor.
-                    try {
-                        r = findEditorByType(key, config.userPrefs);
-                    } catch (error) {
-                        // Content was edited by another editor.
-                        Log.trace(`Editor not found: ${config.userPrefs} for key ${key}`);
-                    }
-                }
-                return r;
+    /**
+     * Get the editor container based on recieved current user's editor preference.
+     *
+     * @param {string} key Translation Key
+     */
+    const findEditor = (key) => {
+        let e = domQuery(Selectors.editors.types.basic, key);
+        let et = 'basic';
+        if (e === null) {
+            let r = null;
+            let editorTab = ["atto", "tiny", "marklar", "textarea"];
+            if (editorTab.indexOf(config.userPrefs) === -1) {
+                Log.warn('Unsupported editor ' + config.userPrefs);
             } else {
-                return {editor: e, editorType: et};
-            }
-        };
-        /**
-         * @param {string} key
-         * @param {object} editorType
-         * @returns {{editor: object, editorType: string}}
-         * ui.js
-         */
-        const findEditorByType = (key, editorType) => {
-            let et = 'basic';
-            let ed = null;
-            switch (editorType) {
-                case "atto" :
-                    et = 'iframe';
-                    ed = domQuery(Selectors.editors.types.atto, key);
-                    break;
-                case "tiny":
-                    et = 'iframe';
-                    ed = findTinyInstanceByKey(key);
-                    break;
-                case 'marklar':
-                case "textarea" :
-                    ed = domQuery(Selectors.editors.types.other, key);
-                    break;
-            }
-            return {editor: ed, editorType: et};
-        };
-        /**
-         * Finds TinyMCE instance.
-         * @param {string} key
-         * @returns {Node}
-         */
-        const findTinyInstanceByKey = (key)=> {
-            let editor = null;
-            TinyMCE.getAllInstances().every((k, v)=>{
-                if (v.attributes.name.value.indexOf(key) == 0) {
-                    editor = k.getBody();
-                    return false;
+                // First let's try the current editor.
+                try {
+                    r = findEditorByType(key, config.userPrefs);
+                } catch (error) {
+                    // Content was edited by another editor.
+                    Log.trace(`Editor not found: ${config.userPrefs} for key ${key}`);
                 }
-                return true;
-            });
-            return editor;
-        };
+            }
+            return r;
+        } else {
+            return {editor: e, editorType: et};
+        }
+    };
+    /**
+     * @param {string} key
+     * @param {object} editorType
+     * @returns {{editor: object, editorType: string}}
+     */
+    const findEditorByType = (key, editorType) => {
+        let et = 'basic';
+        let ed = null;
+        switch (editorType) {
+            case "atto" :
+                et = 'iframe';
+                ed = domQuery(Selectors.editors.types.atto, key);
+                break;
+            case "tiny":
+                et = 'iframe';
+                ed = findTinyInstanceByKey(key);
+                break;
+            case 'marklar':
+            case "textarea" :
+                ed = domQuery(Selectors.editors.types.other, key);
+                break;
+        }
+        return {editor: ed, editorType: et};
+    };
+    /**
+     * Finds TinyMCE instance.
+     * @param {string} key
+     * @returns {Node}
+     */
+    const findTinyInstanceByKey = (key)=> {
+        let editor = null;
+        TinyMCE.getAllInstances().every((k, v)=>{
+            if (v.attributes.name.value.indexOf(key) == 0) {
+                editor = k.getBody();
+                return false;
+            }
+            return true;
+        });
+        return editor;
+    };
     /**
      * Compile the needed counts for info.
      *
      * @param {string} key
      * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
-     * ui.js
      */
     const getCount = (key) => {
         const item = domQuery(Selectors.sourcetexts.keys, key);
@@ -735,19 +703,19 @@ define(['core/log',
         return el.querySelector(q);
     };
 
-        /**
-         * Shortcut for dom querySelector.
-         *
-         * @param {string} selector
-         * @param {string} key
-         * @param {element} target
-         * @returns {NodeList}
-         */
-        const domQueryAll = (selector, key = '', target = null) => {
-            const el = target ?? document;
-            const q = key === '' ? selector : selector.replace("<KEY>", key);
-            return el.querySelectorAll(q);
-        };
+    /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {element} target
+     * @returns {NodeList}
+     */
+    const domQueryAll = (selector, key = '', target = null) => {
+        const el = target ?? document;
+        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        return el.querySelectorAll(q);
+    };
     /**
      * Event listener to switch source lang.
      * @param {*} cfg
