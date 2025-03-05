@@ -56,7 +56,7 @@ class MoodleQuickForm_cteditor extends MoodleQuickForm_editor {
         style2 = underline, strike, subscript, superscript
         align = align
         insert = table, clear
-        undo = undo
+        undo = false
         accessibility = accessibilitychecker, accessibilityhelper
         other = html';
         $this->_options['autosave'] = false;

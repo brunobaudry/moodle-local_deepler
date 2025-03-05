@@ -38,11 +38,11 @@ final class coursedata_test extends advanced_testcase {
     /**
      * @var stdClass
      */
-    protected $course;
+    protected stdClass $course;
     /**
      * @var local\data\course_data
      */
-    protected $coursedata;
+    protected course_data $coursedata;
 
     /**
      * Setup.
@@ -82,7 +82,8 @@ final class coursedata_test extends advanced_testcase {
 
     /**
      * Test constructor.
-     * @covers ::_construct()
+     *
+     * @covers \local_deepler\local\data\course_data::_construct
      *
      * @return void
      */
@@ -93,7 +94,7 @@ final class coursedata_test extends advanced_testcase {
     /**
      * Test getdata.
      *
-     * @covers ::getdata
+     * @covers \local_deepler\local\data\course_data::getdata
      * @return void
      */
     public function test_getdata(): void {
@@ -132,7 +133,7 @@ final class coursedata_test extends advanced_testcase {
     /**
      * Test if gettting the course data is all good.
      *
-     * @covers ::getcoursedata
+     * @covers \local_deepler\local\data\course_data::getcoursedata
      * @return void
      * @throws \ReflectionException
      */
@@ -155,7 +156,6 @@ final class coursedata_test extends advanced_testcase {
      *
      * @return void
      * @throws \ReflectionException
-     * @throws \moodle_exception
      * @covers \local_deepler\local\data\course_data::getsectiondata
      */
     public function test_getcoursesectiondata(): void {
@@ -169,7 +169,7 @@ final class coursedata_test extends advanced_testcase {
     /**
      * Test to get the activity data.
      *
-     * @covers ::getactivitydata
+     * @covers \local_deepler\local\data\course_data::getactivitydata
      * @return void
      * @throws \ReflectionException
      */
@@ -195,7 +195,7 @@ final class coursedata_test extends advanced_testcase {
     /**
      * Test to build data.
      *
-     * @covers ::build_data
+     * @covers \local_deepler\local\data\course_data::build_data
      * @return void
      * @throws \ReflectionException
      * @throws \coding_exception
@@ -223,7 +223,7 @@ final class coursedata_test extends advanced_testcase {
 
         $coursedata = new course_data($course, 'en', context_course::instance($course->id)->id);
 
-        $data = $method->invoke($coursedata, $page->id, 'Test content', 1, 'content', $activity);
+        $data = $method->invoke($coursedata, $page->id, 'Test content', 1, 'content', $activity, 0, $cm->id);
 
         $this->assertInstanceOf(\stdClass::class, $data);
         $this->assertEquals('Test content', $data->text);
@@ -235,7 +235,7 @@ final class coursedata_test extends advanced_testcase {
     /**
      * Test the storing to Deepler's DB.
      *
-     * @covers ::store_status_db
+     * @covers \local_deepler\local\data\course_data::store_status_db
      * @return void
      * @throws \ReflectionException
      * @throws \dml_exception
@@ -262,7 +262,7 @@ final class coursedata_test extends advanced_testcase {
     /**
      * Test building an edit link.
      *
-     * @covers ::link_builder
+     * @covers \local_deepler\local\data\course_data::link_builder
      * @return void
      * @throws \ReflectionException
      */
@@ -270,10 +270,10 @@ final class coursedata_test extends advanced_testcase {
         $method = new ReflectionMethod(course_data::class, 'link_builder');
         $method->setAccessible(true);
 
-        $courselink = $method->invoke($this->coursedata, $this->course->id, 'course', null);
+        $courselink = $method->invoke($this->coursedata, $this->course->id, 'course', 0);
         $this->assertStringContainsString('/course/edit.php?id=' . $this->course->id, $courselink);
 
-        $sectionlink = $method->invoke($this->coursedata, 1, 'course_sections', null);
+        $sectionlink = $method->invoke($this->coursedata, 1, 'course_sections', 0);
         $this->assertStringContainsString('/course/editsection.php?id=1', $sectionlink);
 
         $activitylink = $method->invoke($this->coursedata, 1, 'page', 1);

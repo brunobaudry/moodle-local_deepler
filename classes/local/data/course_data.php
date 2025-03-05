@@ -16,8 +16,10 @@
 
 namespace local_deepler\local\data;
 
+use cm_info;
 use mod_quiz\quiz_settings;
 use moodle_url;
+use question_definition;
 use stdClass;
 
 /**
@@ -40,7 +42,9 @@ class course_data {
     /** @var \course_modinfo|null */
     protected $modinfo;
     /** @var string */
-    protected $lang;
+    protected $targetlangdeepl;
+    /** @var string */
+    protected $targetlangmoodle;
     /** @var string */
     protected $contextid;
     /** @var \context_course */
@@ -57,11 +61,8 @@ class course_data {
      * List of db columns of type text that the user decides they to be useless to tranlsate.
      */
     protected $usercolstoskip;
-    /**
-     * @var int
-     * Do not scan DB field below that number.
-     */
-    protected $minîmumtextfieldsize;
+    /** @var int Do not scan DB field below that number. */
+    protected $mintxtfieldsize;
 
     /**
      * Class Construct.
@@ -72,7 +73,7 @@ class course_data {
      * @throws \moodle_exception
      */
     public function __construct(stdClass $course, string $lang, int $contextid) {
-        $this->minîmumtextfieldsize = get_config('local_deepler', 'scannedfieldsize');
+        $this->mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
         // Set db table.
         $this->dbtable = 'local_deepler';
         // Set course.
@@ -84,7 +85,8 @@ class course_data {
         $this->modinfo = $modinfo;
         $plugins = \core_component::get_plugin_types();
         // Set language.
-        $this->lang = $lang;
+        $this->targetlangdeepl = $lang;
+        $this->targetlangmoodle = strtolower(substr($lang, 0, 2));
         // Set the db fields to skipp.
         $this->comoncolstoskip = ['*_displayoptions', '*_stamp'];
         $this->modcolstoskip =
@@ -224,22 +226,21 @@ class course_data {
      * @return array
      * TODO MDL-000 Parse recursive wiki pages. Though only for no collaborative wikis as built by students.
      */
-    private function getactivitydata() {
+    private function getactivitydata(): array {
         global $CFG;
         global $DB;
         $activitydata = [];
         $cms = $this->modinfo->get_cms();
-        /** @var \cm_info|mixed $activity */
-        foreach ($cms as $activity) {
+        foreach ($cms as $cmid => $activity) {
             // Build first level activities.
-            $activitydbrecord = $this->injectactivitydata($activitydata, $activity);
+            $activitydbrecord = $this->injectactivitydata($activitydata, $activity, $cmid);
             // Build outstanding subcontent.
             switch ($activity->modname) {
                 case 'book':
                     include_once($CFG->dirroot . '/mod/book/locallib.php');
                     $chapters = book_preload_chapters($activitydbrecord);
                     foreach ($chapters as $c) {
-                        $this->injectbookchapter($activitydata, $c, $activity);
+                        $this->injectbookchapter($activitydata, $c, $activity, $cmid);
                     }
                     break;
                 case 'quiz':
@@ -250,7 +251,7 @@ class course_data {
                     foreach ($slots as $slot) {
                         try {
                             $question = \question_bank::load_question($slot->questionid);
-                            $this->injectquizcontent($activitydata, $question, $activity);
+                            $this->injectquizcontent($activitydata, $question, $activity, $cmid);
                         } catch (\dml_read_exception $e) {
                             $this->build_data(-1, $e->getMessage(), 0, 'quiz_questions', $activity, 3);
                         } catch (\moodle_exception $me) {
@@ -269,7 +270,7 @@ class course_data {
                         }, wiki_get_orphaned_pages($wid));
                         foreach ($pages as $p) {
                             if (!in_array($p->id, $pagesorphaned)) {
-                                $this->injectwikipage($activitydata, $p, $activity);
+                                $this->injectwikipage($activitydata, $p, $activity, $cmid);
                             }
                         }
 
@@ -289,17 +290,19 @@ class course_data {
         }
         return $activitydata;
     }
-
     /**
      * Special function for book's subchapters.
      *
      * @param array $activities
      * @param mixed $chapter
      * @param \cm_info $act
+     * @param int $cmid
      * @return void
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    private function injectbookchapter(array &$activities, mixed $chapter, \cm_info $act) {
+    private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         global $DB;
         $activity = new stdClass();
         $activity->id = $act->id;
@@ -314,7 +317,8 @@ class course_data {
                 0,
                 'title',
                 $activity,
-                2
+                2,
+                $cmid
         );
         $contentdata = $this->build_data(
                 $chapter->id,
@@ -322,7 +326,8 @@ class course_data {
                 1,
                 'content',
                 $activity,
-                2
+                2,
+                $cmid
         );
         array_push($activities, $titledata);
         array_push($activities, $contentdata);
@@ -334,11 +339,14 @@ class course_data {
      * @param array $activities
      * @param mixed $chapter
      * @param \cm_info $act
+     * @param int $cmid
      * @return void
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      * @todo MDL-0 check differences between collaborative and individual
      */
-    private function injectwikipage(array &$activities, mixed $chapter, \cm_info $act) {
+    private function injectwikipage(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         global $DB;
         $activity = new stdClass();
         $activity->id = $act->id;
@@ -353,7 +361,8 @@ class course_data {
                 0,
                 'title',
                 $activity,
-                2
+                2,
+                $cmid
         );
         $contentdata = $this->build_data(
                 $chapter->id,
@@ -361,7 +370,8 @@ class course_data {
                 1,
                 'cachedcontent',
                 $activity,
-                2
+                2,
+                $cmid
         );
         array_push($activities, $titledata);
         array_push($activities, $contentdata);
@@ -381,7 +391,7 @@ class course_data {
         // Just get db collumns we need (texts content).
         $textcols = array_filter($columns, function($field) use ($tablename) {
             // Only scan the main text types that are above minîmum text field size.
-            return (($field->meta_type === "C" && $field->max_length > $this->minîmumtextfieldsize)
+            return (($field->meta_type === "C" && $field->max_length > $this->mintxtfieldsize)
                             || $field->meta_type === "X")
                     && !in_array('*_' . $field->name, $this->comoncolstoskip)
                     && !in_array($tablename . '_' . $field->name, $this->usercolstoskip)
@@ -395,10 +405,13 @@ class course_data {
      *
      * @param array $activities
      * @param mixed $activity
+     * @param int $cmid
      * @return false|mixed|\stdClass
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    private function injectactivitydata(array &$activities, mixed $activity) {
+    private function injectactivitydata(array &$activities, mixed $activity, int $cmid): mixed {
         global $DB;
         $activitymodname = $activity->modname;
         $activitydbrecord = $DB->get_record($activitymodname, ['id' => $activity->instance]);
@@ -413,7 +426,8 @@ class course_data {
                         isset($activitydbrecord->{$field . 'format'}) ?? 0,
                         $field,
                         $activity,
-                        1
+                        1,
+                        $cmid
                 );
                 array_push($activities, $data);
             }
@@ -430,22 +444,30 @@ class course_data {
      * @param string $field
      * @param mixed $activity
      * @param int $level
+     * @param int $cmid
      * @return \stdClass
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function build_data(int $id, string $text, int $format, string $field, mixed $activity, int $level = 0) {
+    private function build_data(
+            int $id,
+            string $text,
+            int $format,
+            string $field,
+            mixed $activity,
+            int $level = 0,
+            int $cmid = 0) {
         global $DB, $OUTPUT;
         // Activity stuff.
         $table = $activity->modname;
-        $cmid = $activity->id ?? 0;
         $sectionid = $activity->section;
         // Store the status of the translation.
         $status = $this->store_status_db($id, $table, $field);
         // Object stuff.
         // Build item id, tid, displaytext, format, table, field, tneeded, section.
         $item = new stdClass();
+        $item->cmid = $cmid;
         $item->id = $id;
         $item->hierarchy = "level$level";
         $item->tid = $status->id;
@@ -568,7 +590,7 @@ class course_data {
     private function store_status_db(int $id, string $table, string $field) {
         global $DB;
         // Skip if target lang is undefined.
-        if ($this->lang == null || $id === -1) {
+        if ($this->targetlangdeepl == null || $id === -1) {
             $dummy = new stdClass();
             $dummy->id = "0";
             $dummy->s_lastmodified = "0";
@@ -578,7 +600,7 @@ class course_data {
         // Build db params.
         $params = [
                 't_id' => $id,
-                't_lang' => $this->lang,
+                't_lang' => $this->targetlangmoodle,
                 't_table' => $table,
                 't_field' => $field,
         ];
@@ -606,7 +628,7 @@ class course_data {
      * @return moodle_url|null
      * @throws \moodle_exception
      */
-    private function link_builder($id, $table, $cmid, int $parentid = 0) {
+    private function link_builder(int $id, string $table, int $cmid = 0, int $parentid = 0) {
         global $CFG;
         $link = null;
         $tcmid = $cmid ?? 0;
@@ -631,7 +653,7 @@ class course_data {
                 if (strpos($table, "_") !== false) {
                     $split = explode("_", $table);
                     $params = ['cmid' => $tcmid, 'id' => $id];
-                    $path = "/mod/{$split[0]}/edit.php";
+                    $path = "/mod/  {$split[0]}/edit.php";
                     switch ($split[0]) {
                         case 'qtype':
                             $params = ['cmid' => $tcmid, 'id' => $parentid];
@@ -659,7 +681,7 @@ class course_data {
      * @param int $cmid
      * @return array
      */
-    private function get_item_contextid($id, $table, $cmid = 0) {
+    private function get_item_contextid(int $id, string $table, int $cmid = 0) {
         $i = 0;
         $iscomp = false;
 
@@ -724,11 +746,13 @@ class course_data {
      * @param array $activities
      * @param mixed $question
      * @param mixed $activity
+     * @param int $cmid
      * @return false|mixed|\stdClass
+     * @throws \dml_exception
      */
-    private function injectquestiondata(array &$activities, mixed $question, mixed $activity) {
+    private function injectquestiondata(array &$activities, mixed $question, mixed $activity, int $cmid) {
         global $DB;
-        return $this->injectdatafromtable($activities, 'question', 'id', $question->id, $activity);
+        return $this->injectdatafromtable($activities, 'question', 'id', $question->id, $activity, $cmid);
     }
 
     /**
@@ -739,10 +763,14 @@ class course_data {
      * @param string $idcolname
      * @param int $id
      * @param mixed $activity
+     * @param int $cmid
      * @return false|mixed|\stdClass
+     * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    private function injectdatafromtable(array &$activities, string $table, string $idcolname, int $id, mixed $activity) {
+    private function injectdatafromtable(array &$activities, string $table, string $idcolname, int $id, mixed $activity,
+            int $cmid) {
         global $DB;
 
         $activitydbrecord = $DB->get_record($table, [$idcolname => $id]);
@@ -757,7 +785,8 @@ class course_data {
                         isset($activitydbrecord->{$field . 'format'}) ?? 0,
                         $field,
                         $activity,
-                        3
+                        3,
+                        $cmid
                 );
                 array_push($activities, $data);
             }
@@ -771,10 +800,14 @@ class course_data {
      * @param array $activitydata
      * @param \question_definition $question
      * @param mixed $act
+     * @param int $cmid
      * @return void
+     * @throws \coding_exception
+     * @throws \ddl_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    private function injectquizcontent(array &$activitydata, \question_definition $question, mixed $act) {
+    private function injectquizcontent(array &$activitydata, question_definition $question, mixed $act, int $cmid) {
         global $DB;
         $dbman = $DB->get_manager(); // Get the database manager.
         $activity = new stdClass();
@@ -783,7 +816,7 @@ class course_data {
         $activity->section = $act->sectionid;
         $pluginname = $question->qtype->plugin_name();
         $activity->qtype = $pluginname;
-        $this->injectquestiondata($activitydata, $question, $activity);
+        $this->injectquestiondata($activitydata, $question, $activity, $cmid);
         $qactivity = new stdClass();
         $qactivity->id = $act->id;
         $qactivity->modname = 'question_answers';
@@ -798,6 +831,10 @@ class course_data {
             $optionstablename = $pluginname . '_options';
             $hasoptions = true;
         }
+        if ($dbman->table_exists($pluginname . '_choice')) {
+            $optionstablename = $pluginname . '_choice';
+            $hasoptions = true;
+        }
         switch ($pluginname) {
             case 'qtype_match':
                 if ($dbman->table_exists($pluginname . '_subquestions')) {
@@ -807,11 +844,17 @@ class course_data {
                         $submatches = $DB->get_records($substablename, [$qidfiledname => $question->id]);
                         foreach ($submatches as $submatch) {
                             $this->injectdatafromtable(
-                                    $activitydata, $substablename, 'id', $submatch->id, $qactivity);
+                                    $activitydata,
+                                    $substablename,
+                                    'id',
+                                    $submatch->id,
+                                    $qactivity,
+                                    $cmid);
                         }
 
                     }
                 }
+                break;
             case 'qtype_multichoice':
                 foreach ($question->answers as $answer) {
                     $activitydata[] = $this->build_data(
@@ -820,7 +863,8 @@ class course_data {
                             $answer->answerformat,
                             'answer',
                             $qactivity,
-                            3
+                            3,
+                            $cmid
                     );
                     if (!empty($answer->feedback)) {
                         $activitydata[] = $this->build_data(
@@ -829,9 +873,168 @@ class course_data {
                                 $answer->feedbackformat,
                                 'feedback',
                                 $qactivity,
-                                3
+                                3,
+                                $cmid
                         );
                     }
+                }
+                break;
+            case 'qtype_description':
+            case 'qtype_randomsamatch':
+            case 'qtype_essay':
+            case 'qtype_multianswer':
+                // Break as all the data is in the question table.
+                break;
+            case 'qtype_calculated':
+            case 'qtype_calculatedsimple':
+                foreach ($question->answers as $answer) {
+
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3,
+                                $cmid
+                        );
+                    }
+                }
+                break;
+            case 'qtype_calculatedmulti':
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3,
+                                $cmid
+                        );
+                    }
+                }
+                break;
+            case 'qtype_truefalse':
+                if (!empty($question->truefeedback)) {
+                    $activitydata[] = $this->build_data(
+                            $question->trueanswerid,
+                            $question->truefeedback,
+                            $question->truefeedbackformat,
+                            'feedback',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                if (!empty($question->falsefeedback)) {
+                    $activitydata[] = $this->build_data(
+                            $question->falseanswerid,
+                            $question->falsefeedback,
+                            $question->falsefeedbackformat,
+                            'feedback',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                break;
+            case 'qtype_shortanswer':
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3,
+                                $cmid
+                        );
+                    }
+                }
+            case 'qtype_numerical':
+                foreach ($question->answers as $answer) {
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = $this->build_data(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3,
+                                $cmid
+                        );
+                    }
+                }
+                break;
+            case 'qtype_gapselect':
+            case 'qtype_ddwtos' :
+                $choices = $DB->get_records('question_answers', ['question' => $question->id]);
+                foreach ($choices as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            0,
+                            'answer',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                break;
+            case 'qtype_ddimageortext' :
+            case 'qtype_ddmarker' :
+                $qactivity->modname = "{$pluginname}_drags";
+                $choices = $DB->get_records($qactivity->modname, ['questionid' => $question->id]);
+                foreach ($choices as $answer) {
+                    if (trim($answer->label) === '') {
+                        continue;
+                    }
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->label,
+                            0,
+                            'label',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                break;
+            case 'qtype_ddimageortext' :
+                break;
+            case 'qtype_ordering' :
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = $this->build_data(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
                 }
                 break;
             default:
@@ -841,15 +1044,14 @@ class course_data {
         }
         if ($hasoptions && $DB->record_exists($optionstablename, [$qidfiledname => $question->id])) {
             $qactivity->modname = $optionstablename;
-            $this->injectdatafromtable($activitydata, $optionstablename, $qidfiledname, $question->id, $qactivity);
+            $this->injectdatafromtable($activitydata, $optionstablename, $qidfiledname, $question->id, $qactivity, $cmid);
         }
         if (count($question->hints)) {
             foreach ($question->hints as $hint) {
                 $qactivity->modname = 'question_hints';
-                $this->injectdatafromtable($activitydata, 'question_hints', 'id', $hint->id, $qactivity);
+                $this->injectdatafromtable($activitydata, 'question_hints', 'id', $hint->id, $qactivity,
+                        $cmid);
             }
-
         }
     }
-
 }

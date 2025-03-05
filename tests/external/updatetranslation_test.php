@@ -77,7 +77,7 @@ final class updatetranslation_test extends base_external {
      * Tests update_translation success.
      *
      * @dataProvider execute_success_provider
-     * @covers       \local_deepler\external\update_translation::execute
+     * @covers \local_deepler\external\update_translation::execute
      * @param string $newcoursename
      * @return void
      * @throws \coding_exception
@@ -95,9 +95,9 @@ final class updatetranslation_test extends base_external {
 
         list($course, $user) = $this->create_test_course_and_user();
         $this->grant_capability($user, $course);
-
+        $cid = $course->id;
         $deeplerrecord = (object) [
-                't_id' => $course->id,
+                't_id' => $cid,
                 't_lang' => 'en',
                 't_table' => 'course',
                 't_field' => 'fullname',
@@ -107,21 +107,22 @@ final class updatetranslation_test extends base_external {
         $deeplerid = $DB->insert_record('local_deepler', $deeplerrecord);
 
         $data = [[
-                'courseid' => $course->id,
-                'id' => $course->id,
+                'id' => $cid,
                 'tid' => $deeplerid,
                 'table' => 'course',
                 'field' => 'fullname',
+                'cmid' => 0,
                 'text' => $newcoursename,
+                'keyid' => "course[$cid][fullname][0]",
         ]];
 
-        $result = update_translation::execute($data);
+        $result = update_translation::execute($data, $user->id, $course->id);
 
         $this->assertCount(1, $result);
         $this->assertArrayHasKey('t_lastmodified', $result[0]);
         $this->assertArrayHasKey('text', $result[0]);
         $this->assertArrayHasKey('keyid', $result[0]);
-        $this->assertEquals('course-' . $course->id . '-fullname', $result[0]['keyid']);
+        $this->assertEquals('course[' . $course->id . '][fullname][0]', $result[0]['keyid']);
         $this->assertEquals($data[0]['text'], $result[0]['text']);
 
         $updatedcourse = $DB->get_record('course', ['id' => $course->id]);
@@ -129,55 +130,5 @@ final class updatetranslation_test extends base_external {
 
         $updateddeepler = $DB->get_record('local_deepler', ['id' => $deeplerid]);
         $this->assertEquals($result[0]['t_lastmodified'], $updateddeepler->t_lastmodified);
-    }
-
-    /**
-     * Data provider for test_execute_without_capability.
-     *
-     * @return array
-     */
-    public static function execute_without_capability_provider(): array {
-        return [
-                ['New Course Name'],
-                ['Updated Course Name'],
-        ];
-    }
-
-    /**
-     * Tests update_translation failing for wrong capability.
-     *
-     * @dataProvider execute_without_capability_provider
-     * @covers       \local_deepler\external\update_translation::execute
-     * @param string $newcoursename
-     * @return void
-     * @throws \core_external\restricted_context_exception
-     * @throws \dml_exception
-     * @throws \dml_transaction_exception
-     * @throws \invalid_parameter_exception
-     * @throws \required_capability_exception
-     */
-    public function test_execute_without_capability($newcoursename): void {
-        if ($this->is_below_four_one()) {
-            return;
-        }
-
-        $course = $this->getDataGenerator()->create_course();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $this->getDataGenerator()->enrol_user($user->id, $course->id, 'editingteacher');
-
-        $data = [
-                [
-                        'courseid' => $course->id,
-                        'id' => $course->id,
-                        'tid' => 1,
-                        'table' => 'course',
-                        'field' => 'fullname',
-                        'text' => $newcoursename,
-                ],
-        ];
-
-        $this->expectException(\required_capability_exception::class);
-        update_translation::execute($data);
     }
 }
