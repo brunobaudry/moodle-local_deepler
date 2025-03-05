@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace local_deepler\external;
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
+
+use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
+
 /**
  * Test cases for update_translations external.
  *
@@ -22,17 +30,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
-
-namespace local_deepler\external;
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
-
-/**
- * Test cases for update_translations external.
- */
 final class updatetranslation_test extends base_external {
-
     /**
      * Tests execute parameters.
      *
@@ -44,7 +42,7 @@ final class updatetranslation_test extends base_external {
             return;
         }
         $params = update_translation::execute_parameters();
-        $this->assertInstanceOf(\core_external\external_function_parameters::class, $params);
+        $this->assertInstanceOf(external_function_parameters::class, $params);
     }
 
     /**
@@ -58,7 +56,7 @@ final class updatetranslation_test extends base_external {
             return;
         }
         $returns = update_translation::execute_returns();
-        $this->assertInstanceOf(\core_external\external_multiple_structure::class, $returns);
+        $this->assertInstanceOf(external_multiple_structure::class, $returns);
     }
 
     /**
@@ -80,14 +78,10 @@ final class updatetranslation_test extends base_external {
      * @covers \local_deepler\external\update_translation::execute
      * @param string $newcoursename
      * @return void
-     * @throws \coding_exception
-     * @throws \core_external\restricted_context_exception
      * @throws \dml_exception
      * @throws \dml_transaction_exception
-     * @throws \invalid_parameter_exception
-     * @throws \required_capability_exception
      */
-    public function test_execute_success($newcoursename): void {
+    public function test_execute_success(string $newcoursename): void {
         global $DB;
         if ($this->is_below_four_one()) {
             return;

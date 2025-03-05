@@ -15,6 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
 
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -34,7 +37,10 @@ final class gettranslation_test extends base_external {
      * @covers \local_deepler\external\get_translation::execute_parameters
      * @return void
      */
-    public function test_executeparameters(): void {
+    public function test_execute_parameters(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
         $params = get_translation::execute_parameters();
         $this->assertInstanceOf(external_function_parameters::class, $params);
     }
@@ -45,6 +51,9 @@ final class gettranslation_test extends base_external {
      * @return void
      */
     public function test_executereturns(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
         $returns = get_translation::execute_returns();
         $this->assertInstanceOf(external_multiple_structure::class, $returns);
     }

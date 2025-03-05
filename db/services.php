@@ -39,13 +39,6 @@ $functions = [
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
-        'local_deepler_get_field' => [
-                'classname' => 'local_deepler\external\get_field',
-                'description' => 'Get field data',
-                'type' => 'read',
-                'ajax' => true,
-                'capabilities' => LOCAL_DEEPLER_CAP,
-        ],
         'local_deepler_get_translation' => [
                 'classname' => 'local_deepler\external\get_translation',
                 'description' => 'Get DeepL to translate',

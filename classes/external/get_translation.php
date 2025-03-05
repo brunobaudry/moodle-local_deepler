@@ -16,6 +16,8 @@
 
 namespace local_deepler\external;
 defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -26,8 +28,6 @@ use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use Exception;
-
-require_once(__DIR__ . '/../vendor/autoload.php');
 
 /**
  * External service to call DeepL's API.
@@ -152,7 +152,7 @@ class get_translation extends external_api {
     /**
      * Return validator.
      *
-     * @return \core_external\external_multiple_structure
+     * @return external_multiple_structure
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
