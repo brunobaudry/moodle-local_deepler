@@ -21,6 +21,7 @@
  */
 define([], () => {
     const COOKIE_PREFIX = 'moodle_deepler_glossary_';
+    const MAX_INPUT_LENGTH = 256;
     /**
      * Simple helper to manage selectors
      * @param {string} s
@@ -32,13 +33,21 @@ define([], () => {
     };
     /**
      * Transforms a keyid to a key.
+     *
      * @param {string} k
-     * @returns {`${*}[${*}][${*}]`}
+     * @returns {string|null}
      */
     const keyidToKey = (k) => {
-        let m = k.match(/^(.+)-(.+)-(.+)-(.+)$/i);
+        if (typeof k !== 'string' || k.length > MAX_INPUT_LENGTH) {
+            return null;
+        }
+        let m = k.match(/^([^-]+)-([^-]+)-([^-]+)-([^-]+)$/i);
+        if (!m) {
+            return null;
+        }
         return `${m[1]}[${m[2]}][${m[3]}][${m[4]}]`;
     };
+
     /**
      * Json helper
      * @param {string} s
