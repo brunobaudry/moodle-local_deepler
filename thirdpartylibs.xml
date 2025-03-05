@@ -18,19 +18,9 @@
         <licenseversion>2022</licenseversion>
     </library>
     <library>
-        <location>classes/vendor/doctrine</location>
-        <name>doctrine</name>
-        <license>MIT</license>
-    </library>
-    <library>
         <location>classes/vendor/nyholm</location>
         <name>psr7</name>
         <version>^1.8</version>
-        <license>MIT</license>
-    </library>
-    <library>
-        <location>classes/vendor/phpdocumentor</location>
-        <name>phpdocumentor</name>
         <license>MIT</license>
     </library>
     <library>
@@ -39,34 +29,14 @@
         <license>MIT</license>
     </library>
     <library>
-        <location>classes/vendor/phpspec</location>
-        <name>phpspec</name>
-        <license>MIT</license>
-    </library>
-    <library>
-        <location>classes/vendor/phpstan</location>
-        <name>phpstan</name>
-        <license>MIT</license>
-    </library>
-    <library>
         <location>classes/vendor/psr</location>
         <name>psr</name>
         <license>MIT</license>
     </library>
     <library>
-        <location>classes/vendor/sebastian</location>
-        <name>Sebastian</name>
-        <license>BSD3</license>
-    </library>
-    <library>
         <location>classes/vendor/symfony</location>
         <name>Symfony</name>
         <version>^7.0</version>
-        <license>MIT</license>
-    </library>
-    <library>
-        <location>classes/vendor/webmozart/assert</location>
-        <name>Assert</name>
         <license>MIT</license>
     </library>
 </libraries>

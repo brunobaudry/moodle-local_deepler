@@ -338,8 +338,12 @@ Should work with the following editors:
 
 - Plaintext
 - Atto
-- Tiny
+- Tiny°
 - Marklar
+
+°Tiny editor has an autosave function by default. This can be annoying/puzzling when you switch languages and see the previous language cached in the textarea.
+Until we find a satisfying way to disable that behaviour from the plugin. As a Moodle admin disabling *AutoSave* from Admin>Plugins>Text-Editors>TinyMCE>General settings.
+
 
 ### Coding
 
