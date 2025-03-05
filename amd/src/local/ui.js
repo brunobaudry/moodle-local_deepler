@@ -122,10 +122,14 @@ define(['core/log',
     const onToggleMultilang = (e) => {
         let keyid = e.getAttribute('aria-controls');
         let key = Utils.keyidToKey(keyid);
-        let source = domQuery(Selectors.sourcetexts.keys, key);
-        let multilang = domQuery(Selectors.sourcetexts.multilangs, keyid);
-        source.classList.toggle("show");
-        multilang.classList.toggle("show");
+        if (key === null) {
+            Log.error(`KEY ${keyid} BAD FORMAT should be TABLE-ID-FIELD-CMID`);
+        } else {
+            let source = domQuery(Selectors.sourcetexts.keys, key);
+            let multilang = domQuery(Selectors.sourcetexts.multilangs, keyid);
+            source.classList.toggle("show");
+            multilang.classList.toggle("show");
+        }
     };
     /**
      * Event listener for click events.

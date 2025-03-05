@@ -25,6 +25,7 @@ use core_external\external_value;
 use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
+use Exception;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 

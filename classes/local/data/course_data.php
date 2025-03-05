@@ -1022,8 +1022,6 @@ class course_data {
                     );
                 }
                 break;
-            case 'qtype_ddimageortext' :
-                break;
             case 'qtype_ordering' :
                 foreach ($question->answers as $answer) {
                     $activitydata[] = $this->build_data(
