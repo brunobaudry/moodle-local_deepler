@@ -38,6 +38,7 @@ define(['./local/ui', './local/translation', 'core/log'], (UI, Translation, Log)
             case debug.DEVELOPER : level = 0; break;
         }
         Log.setConfig({level: level});
+        Log.info(`05.03.2025 : 15:08`);
         window.addEventListener("DOMContentLoaded", UI.init(cfg));
     };
     return {

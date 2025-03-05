@@ -38,21 +38,18 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                     courseid: courseid
                 },
                 done: (response) => {
+                   Log.info(`api/updateTranslationsInDb/done::response`);
+                   Log.info(response);
                     if (response.length === 1 && response[0].error && response[0].keyid === '') {
-                        Log.error(`api/updateTranslationsInDb/done:44`);
-                        Log.error(response);
+                        Log.warn(`api/updateTranslationsInDb/done::response has errors`);
                         Events.emit(TR_DB_FAILED, response[0].error);
                         return;
                     }
                     Events.emit(TR_DB_SUCCESS, response);
                 },
                 fail: (jqXHR, status, error) => {
-                    Log.error(`api/updateTranslationsInDb/fail:50`);
+                    Log.error(`api/updateTranslationsInDb/fail::jqXHR`);
                     Log.error(jqXHR);
-                    Log.error(`api/updateTranslationsInDb/fail:52`);
-                    Log.error(status);
-                    Log.log(`api/updateTranslationsInDb/fail:54`);
-                    Log.error(error);
                      Events.emit(TR_DB_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
                 }
             }]
@@ -64,15 +61,18 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             options: options, // Object with DeepL's settings options including target_lang.
             version: version
         };
-        Log.info(`api/translate:77 > args`);
+        Log.info(`api/translate > args`);
         Log.info(args);
         Ajax.call([{
             methodname: "local_deepler_get_translation",
             args: args,
             done: (response) => {
+                Log.info(`api/translate/done::response`);
+                Log.info(response);
                 Events.emit(DEEPL_SUCCESS, response);
             },
             fail: (jqXHR, status, error) => {
+                Log.error(`api/translate/fail::jqXHR`);
                 Log.error(jqXHR);
                 Events.emit(DEEPL_FAILED, status ?? '', error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode);
             }

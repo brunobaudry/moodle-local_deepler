@@ -289,13 +289,17 @@ define([
         Api.translate(translations, settings, Api.APP_VERSION);
     };
 const onTranslateSuccess = (response)=>{
-    Log.info(`translation/onTranslateSuccess`);
+    Log.info(`translation//onTranslateSuccess::response`);
     Log.info(response);
     response.forEach((tr) => {
         if (tr.error === '') {
             let key = tr.key;
             let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
+            Log.debug(`translation/onTranslateSuccess/each::translation Tokeniser.postprocess`);
+            Log.debug(translation);
             tempTranslations[key].editor.innerHTML = translation;
+            Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
+            Log.debug(tempTranslations[key].editor.innerHTML);
             tempTranslations[key].translation = translation;
             Events.emit(ON_ITEM_TRANSLATED, key);
         } else {
