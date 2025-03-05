@@ -31,7 +31,6 @@ use core_external\external_multiple_structure;
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 final class updatetranslation_test extends base_external {
-
     /**
      * Tests execute parameters.
      *
