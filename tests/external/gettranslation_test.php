@@ -16,6 +16,10 @@
 
 namespace local_deepler\external;
 
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
+
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 

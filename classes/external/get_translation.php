@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
-defined('MOODLE_INTERNAL') || die();
 
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -152,7 +151,7 @@ class get_translation extends external_api {
     /**
      * Return validator.
      *
-     * @return \core_external\external_multiple_structure
+     * @return external_multiple_structure
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
