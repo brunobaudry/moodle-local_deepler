@@ -23,7 +23,6 @@ use context_system;
 use local_deepler\local\data\lang_helper;
 use moodleform;
 use MoodleQuickForm;
-use stdClass;
 
 // Load the files we're going to need.
 
@@ -145,12 +144,12 @@ class translate_form extends moodleform {
      * Generate Form Row.
      *
      * @param MoodleQuickForm $mform
-     * @param stdClass $item
+     * @param mixed $item
      * @param string $cssclass
      * @return void
      * @throws \coding_exception
      */
-    private function get_formrow(MoodleQuickForm $mform, stdClass $item, string $cssclass = "") {
+    private function get_formrow(MoodleQuickForm $mform, mixed $item, string $cssclass = "") {
 
         // Get mlangfilter to filter text.
         $mlangfilter = $this->_customdata['mlangfilter'];

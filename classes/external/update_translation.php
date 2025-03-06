@@ -16,8 +16,6 @@
 
 namespace local_deepler\external;
 
-use context_course;
-use context_module;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -29,6 +27,8 @@ use dml_exception;
 use dml_transaction_exception;
 use Exception;
 use invalid_parameter_exception;
+use local_deepler\local\services\database_updater;
+use local_deepler\local\services\security_checker;
 use Throwable;
 
 /**
@@ -80,61 +80,61 @@ class update_translation extends external_api {
             purge_all_caches();
             foreach ($params['data'] as $d) {
                 $response = self::initialize_response($d);
-                try {
-                    // Security checks.
-                    self::perform_security_checks($d, $params['userid'], $params['courseid']);
-                    self::update_records($d, $response);
-                } catch (invalid_parameter_exception $i) {
-                    $response['error'] = "INVALID PARAM " . $i->getMessage();
-                } catch (required_capability_exception $rc) {
-                    $response['error'] = "CAPABILITY " . $rc->getMessage();
-                } catch (restricted_context_exception $rce) {
-                    $response['error'] = "CONTEXT " . $rce->getMessage();
-                } catch (dml_exception $dmlexception) {
-                    $response['error'] = $dmlexception->getMessage();
-                } catch (Exception $e) {
-                    $response['error'] = "Unexpected error: " . $e->getMessage();
-                } catch (Throwable $t) {
-                    $response['error'] = "Critical error: " . $t->getMessage();
-                }
-
+                $response = self::process_data($d, $params, $response);
                 $responses[] = $response;
             }
             // Commit the transaction.
             $transaction->allow_commit();
         } catch (invalid_parameter_exception $i) {
-            $responses[] = ['error' => "INVALID PARAM MAIN " . $i->debuginfo ?? $i->errorcode, 'keyid' => '', 't_lastmodified' => 0,
-                    'text' =>
-                            ''];
+            $responses[] = self::handle_exception($i, 'INVALID PARAM MAIN');
         } catch (dml_transaction_exception $tex) {
-            $responses[] = ['error' => "DML MAIN " . $tex->debuginfo ?? $tex->errorcode, 'keyid' => '', 't_lastmodified' => 0,
-                    'text' => ''];
+            $responses[] = self::handle_exception($tex, 'DML MAIN');
         }
         return $responses;
     }
-
     /**
-     * Do the capability checks and skip when no context filter is provided.
+     * Process each data item.
      *
      * @param array $data
-     * @param int $userid
-     * @param int $courseid
-     * @return void
-     * @throws \core_external\restricted_context_exception
-     * @throws \invalid_parameter_exception
-     * @throws \required_capability_exception
+     * @param array $params
+     * @param array $response
+     * @return array
      */
-    private static function perform_security_checks(array $data, int $userid, int $courseid): void {
-        $context = context_course::instance($courseid);
-        self::validate_context($context);
-        require_capability('local/deepler:edittranslations', $context, $userid);
-        // Check detailed activity capabilities.
-        if ($data['cmid'] != 0) {
-            $contextmodule = context_module::instance($data['cmid']);
-            require_capability('moodle/course:manageactivities', $contextmodule, $userid);
+    private static function process_data(array $data, array $params, array $response): array {
+        try {
+            security_checker::perform_security_checks($data, $params['userid'], $params['courseid']);
+            database_updater::update_records($data, $response);
+        } catch (invalid_parameter_exception $i) {
+            $response['error'] = "INVALID PARAM " . $i->getMessage();
+        } catch (required_capability_exception $rc) {
+            $response['error'] = "CAPABILITY " . $rc->getMessage();
+        } catch (restricted_context_exception $rce) {
+            $response['error'] = "CONTEXT " . $rce->getMessage();
+        } catch (dml_exception $dmlexception) {
+            $response['error'] = $dmlexception->getMessage();
+        } catch (Exception $e) {
+            $response['error'] = "Unexpected error: " . $e->getMessage();
+        } catch (Throwable $t) {
+            $response['error'] = "Critical error: " . $t->getMessage();
         }
+        return $response;
     }
 
+    /**
+     * Handle exceptions and prepare response.
+     *
+     * @param Exception $exception
+     * @param string $prefix
+     * @return array
+     */
+    private static function handle_exception($exception, string $prefix): array {
+        return [
+                'error' => $prefix . " " . ($exception->debuginfo ?? $exception->errorcode),
+                'keyid' => '',
+                't_lastmodified' => 0,
+                'text' => ''
+        ];
+    }
     /**
      * Prepare response object.
      *
@@ -150,25 +150,6 @@ class update_translation extends external_api {
         ];
     }
 
-    /**
-     * Perform the DB entry and update the response item.
-     *
-     * @param array $data
-     * @param array $response
-     * @return void
-     * @throws \dml_exception
-     */
-    private static function update_records(array $data, array &$response): void {
-        global $DB;
-        $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
-        $DB->update_record($data['table'], (object) $dataobject);
-
-        $timemodified = time();
-        $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
-
-        $response['t_lastmodified'] = $timemodified;
-        $response['text'] = $data['text'];
-    }
     /**
      * Describes what the webservice yields.
      *
