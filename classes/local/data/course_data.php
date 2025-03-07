@@ -150,15 +150,20 @@ class course_data {
     private function getcoursedata() {
         $coursedata = [];
         $course = field::$modinfo->get_course();
-        $activity = new activity('course', 0);
+        $table = 'course';
         if ($course->fullname) {
-            $coursedata[] = new field($course->id, $course->fullname, 0, 'fullname', $activity);
+            $coursedata[] = new field(
+                    $course->id,
+                    $course->fullname,
+                    0,
+                    'fullname',
+                    $table);
         }
         if ($course->shortname) {
-            $coursedata[] = new field($course->id, $course->fullname, 0, 'shortname', $activity);
+            $coursedata[] = new field($course->id, $course->shortname, 0, 'shortname', $table);
         }
         if ($course->summary) {
-            $coursedata[] = new field($course->id, $course->fullname, 0, 'summary', $activity);
+            $coursedata[] = new field($course->id, $course->summary, 0, 'summary', $table);
         }
         return $coursedata;
     }
@@ -172,14 +177,15 @@ class course_data {
         global $DB;
         $sections = field::$modinfo->get_section_info_all();
         $sectiondata = [];
-        $activity = new activity('course_sections', 0);
+        $table = 'course_sections';
+        //$activity = new activity('course_sections', 0);
         foreach ($sections as $sk => $section) {
-            $record = $DB->get_record('course_sections', ['course' => $this->course->id, 'section' => $sk]);
+            $record = $DB->get_record($table, ['course' => $this->course->id, 'section' => $sk]);
             if ($record->name) {
-                $sectiondata[] = new field($record->id, $record->name, 0, 'name', $activity);
+                $sectiondata[] = new field($record->id, $record->name, 0, 'name', $table);
             }
             if ($record->summary) {
-                $sectiondata[] = new field($record->id, $record->summary, $record->summaryformat, 'summary', $activity);
+                $sectiondata[] = new field($record->id, $record->summary, $record->summaryformat, 'summary', $table);
             }
         }
         return $sectiondata;
@@ -220,18 +226,18 @@ class course_data {
                             $this->injectquizcontent($activitydata, $question, $coursemodule, $cmid);
                         } catch (dml_read_exception|moodle_exception $e) {
                             // Useless.
-                            $activitydata[] = new field(
-                                    -1,
-                                    $e->getMessage(), 0, '',
-                                    new activity('quiz_questions',
-                                            $question->id,
-                                            $cmid,
-                                            $coursemodule->sectionid,
-                                            '',
-                                            '',
-                                            new activity('quiz', $cmid, $cmid, $slot->questionid),
-                                            3)
-                            );
+                            //$activitydata[] = new field(
+                            //        -1,
+                            //        $e->getMessage(), 0, '',
+                            //        new activity('quiz_questions',
+                            //                $question->id,
+                            //                $cmid,
+                            //                $coursemodule->sectionid,
+                            //                '',
+                            //                '',
+                            //                new activity('quiz', $cmid, $cmid, $slot->questionid),
+                            //                3)
+                            //);
                         }
                     }
                     break;
@@ -280,9 +286,12 @@ class course_data {
      */
     private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         $activity = new activity('book_chapters', $act->id, $cmid, $act->get_section_info()->id);
+        $table = 'book_chapters';
         // Book chapters have title and content.
-        $activities[] = new field($chapter->id, $chapter->title, 0, 'chapter', $activity, 2, $cmid);
-        $activities[] = new field($chapter->id, $chapter->content, 1, 'content', $activity, 2, $cmid);
+        $activities[] = new field($chapter->id,
+                $chapter->title, 0, 'chapter', $table, $act->get_section_info()->id, $cmid, $cmid);
+        $activities[] = new field($chapter->id,
+                $chapter->content, 1, 'content', $table, $act->get_section_info()->id, $cmid, $cmid);
     }
 
     /**
@@ -302,8 +311,10 @@ class course_data {
         global $DB;
         $activity = new activity('wiki_pages', $act->id, $cmid, $act->sectionid);
         // Wiki pages have title and cachedcontent.
-        $activities[] = new field($chapter->id, $chapter->title, 0, 'title', $activity, 2, $cmid);
-        $activities[] = new field($chapter->id, $chapter->cachedcontent, 1, 'cachedcontent', $activity, 2, $cmid);
+        $activities[] = new field($chapter->id,
+                $chapter->title, 0, 'title', 'wiki_pages', $act->sectionid, $cmid, $cmid);
+        $activities[] = new field($chapter->id,
+                $chapter->cachedcontent, 1, 'cachedcontent', $activity, $act->sectionid, $cmid, $cmid);
     }
 
 
@@ -347,9 +358,11 @@ class course_data {
                         $activitydbrecord->{$field},
                         isset($activitydbrecord->{$field . 'format'}) ?? 0,
                         $field,
-                        $activity,
-                        3,
-                        $activity->cmid
+                        $table,
+                        $activity->section,
+                        $activity->cmid,
+                        0,
+                        $activitydbrecord->content ?? ''
                 );
             }
         }

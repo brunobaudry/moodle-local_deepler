@@ -49,9 +49,12 @@ class field {
      * @param string $text
      * @param int $format
      * @param string $field
-     * @param mixed $activity
-     * @param int $level
+     * @param string $table
+     * @param int $sectionid
      * @param int $cmid
+     * @param int $parentid
+     * @param string $activitycontent
+     * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
@@ -60,26 +63,28 @@ class field {
             string $text,
             int $format,
             string $field,
-            activity $activity,
-            int $level = 0,
-            int $cmid = 0
+            string $table,
+            int $sectionid = 0,
+            int $cmid = 0,
+            int $parentid = 0,
+            string $activitycontent = ''
     ) {
         $this->id = $id;
         $this->field = $field;
-        $this->table = $activity->modname;
+        $this->table = $table;
         $this->format = $format;
-        $this->section = $activity->section;
+        $this->section = $sectionid;
         $this->cmid = $cmid;
-        $this->hierarchy = $level;
+        $this->hierarchy = 0;
         $this->purpose = null;
         $this->iconurl = '';
         $this->translatedfieldname = '';
         $this->tneeded = true;
         //$this->status = null;
-        $this->preparetexts($text, $activity);
+        $this->preparetexts($text, $activitycontent);
         $this->init_db();
         // Prepare link.
-        $this->link_builder($activity->parent?->id ?? 0);
+        $this->link_builder($parentid);
         $this->build_ui($activity);
         $this->search_field_strings();
     }
@@ -91,12 +96,13 @@ class field {
      * @param \local_deepler\local\data\activity $activity
      * @return void
      */
-    private function preparetexts(string $text, activity $activity) {
+    private function preparetexts(string $text, string $activitycontent) {
         $this->displaytext = $this->text = $text;
         if (str_contains($text, '@@PLUGINFILE@@')) {
-            if (isset($activity->content) && $activity->content != '') {
+            //if (isset($activity->content) && $activity->content != '') {
+            if ($activitycontent !== '') {
                 // When activity->content is set, the image files are not @@PLUGINFILE@@.
-                $this->displaytext = $activity->content;
+                $this->displaytext = $activitycontent;
             } else {
                 try {
                     $this->displaytext = $this->get_file_url($text, $this->id, $this->table, $this->field, $this->cmid);
