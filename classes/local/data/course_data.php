@@ -279,7 +279,7 @@ class course_data {
     private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         $activity = new activity('book_chapters', $act->id, $cmid, $act->get_section_info()->id);
         // Book chapters have title and content.
-        $activities[] = new mlangable($chapter->id, $chapter->name, 0, 'chapter', $activity, 2, $cmid);
+        $activities[] = new mlangable($chapter->id, $chapter->title, 0, 'chapter', $activity, 2, $cmid);
         $activities[] = new mlangable($chapter->id, $chapter->content, 1, 'content', $activity, 2, $cmid);
     }
 

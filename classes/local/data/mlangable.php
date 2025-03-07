@@ -72,10 +72,10 @@ class mlangable {
         $this->cmid = $cmid;
         $this->hierarchy = "level$level";
         $this->purpose = null;
-        $this->iconurl = null;
+        //$this->iconurl = null;
         $this->translatedfieldname = '';
         $this->tneeded = true;
-        $this->status = null;
+        //$this->status = null;
         $this->preparetexts($text, $activity);
         $this->init_db();
         // Prepare link.
@@ -246,7 +246,8 @@ class mlangable {
     private function build_ui(activity $activity) {
         global $OUTPUT;
         try {
-            if (isset($activity->qtype)) {
+            if ($activity->qtype !== '') {
+                // Question icons.
                 $this->iconurl = $OUTPUT->image_url('icon', $activity->qtype);
                 $this->pluginname = get_string('pluginname', $activity->qtype);
             } else {
@@ -258,7 +259,7 @@ class mlangable {
         } catch (TypeError $e) {
             // @todo MD-0000 Do something with error message ?.
             $this->purpose = null;
-            $this->iconurl = null;
+            $this->iconurl = new moodle_url('');
         }
     }
 
