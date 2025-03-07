@@ -19,8 +19,8 @@ defined('MOODLE_INTERNAL') || die();
 define('DIV_CLOSE', '</div>');
 global $CFG;
 
+use classes\local\services\lang_helper;
 use context_system;
-use local_deepler\local\data\lang_helper;
 use moodleform;
 use MoodleQuickForm;
 
@@ -100,7 +100,7 @@ class translate_form extends moodleform {
             // Loop section's activites.
             $tag = ''; // Temporary store the activity id to build and close the div container.
             foreach ($section['activities'] as $a) {
-                $subhierarchy = "local_deepler__{$a->hierarchy}";
+                $subhierarchy = "local_deepler__level{$a->hierarchy}";
                 // Identify the activity parent to group activities' text fields.
                 $parentactivity = "$a->table[$a->id]";
                 $mlangfiltered = $mlangfilter->filter($a->displaytext);

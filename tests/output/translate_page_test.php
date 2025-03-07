@@ -29,8 +29,8 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
+use classes\local\services\lang_helper;
 use filter_multilang2\filter;
-use local_deepler\local\data\lang_helper;
 use moodle_url;
 use renderer_base;
 use stdClass;

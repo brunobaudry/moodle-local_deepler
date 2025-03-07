@@ -27,10 +27,10 @@
 namespace local_deepler;
 
 use advanced_testcase;
+use classes\local\services\lang_helper;
 use context_course;
 use filter_multilang2;
 use local_deepler\local\data\course_data;
-use local_deepler\local\data\lang_helper;
 use local_deepler\output\translate_page;
 
 /**

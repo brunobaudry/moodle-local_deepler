@@ -24,11 +24,12 @@
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 
-namespace local_deepler\local\data;
+namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
+use classes\local\services\lang_helper;
 
 /**
  * Lang helper Test.

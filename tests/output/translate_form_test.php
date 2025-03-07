@@ -25,7 +25,7 @@
 namespace local_deepler\output;
 
 use advanced_testcase;
-use local_deepler\local\data\lang_helper;
+use classes\local\services\lang_helper;
 use ReflectionClass;
 
 /**

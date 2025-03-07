@@ -29,10 +29,10 @@
  */
 
 // Get libs.
+use classes\local\services\lang_helper;
 use DeepL\AuthorizationException;
 use DeepL\DeepLException;
 use local_deepler\local\data\course_data;
-use local_deepler\local\data\lang_helper;
 use local_deepler\output\badsettings_page;
 use local_deepler\output\nodeepl_page;
 use local_deepler\output\translate_page;
@@ -48,7 +48,7 @@ require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 require_once('./classes/output/translate_page.php');
 require_once('./classes/output/nodeepl_page.php');
 require_once('./classes/local/data/course_data.php');
-require_once('./classes/local/data/lang_helper.php');
+require_once('./classes/local/services/lang_helper.php');
 require_once(__DIR__ . '/version.php');
 require_once($CFG->dirroot . '/lib/editorlib.php');
 

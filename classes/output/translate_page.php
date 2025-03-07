@@ -16,8 +16,8 @@
 
 namespace local_deepler\output;
 
+use classes\local\services\lang_helper;
 use filter_multilang2;
-use local_deepler\local\data\lang_helper;
 use renderable;
 use renderer_base;
 use stdClass;

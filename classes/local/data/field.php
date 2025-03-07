@@ -23,13 +23,13 @@ use moodle_exception;
 use moodle_url;
 use TypeError;
 
-class mlangable {
+class field {
     public static string $targetlangdeepl = '';
     public static course_modinfo $modinfo;
     public string $text;
     public string $table;
     public string $field;
-    public string $hierarchy;
+    public int $hierarchy;
     public int $id;
     public int $cmid;
     public bool $tneeded; // @todo MDL-000 should be called via status.
@@ -70,7 +70,7 @@ class mlangable {
         $this->format = $format;
         $this->section = $activity->section;
         $this->cmid = $cmid;
-        $this->hierarchy = "level$level";
+        $this->hierarchy = $level;
         $this->purpose = null;
         $this->iconurl = '';
         $this->translatedfieldname = '';

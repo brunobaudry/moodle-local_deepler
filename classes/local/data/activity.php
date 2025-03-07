@@ -24,6 +24,7 @@ class activity {
     public int $id;
     public int $cmid;
     public string $qtype;
+    public int $level;
 
     /**
      * @param string $modname
@@ -42,6 +43,7 @@ class activity {
         $this->id = $id;
         $this->cmid = $cmid;
         $this->parent = $parent;
+        $this->level = $this->parent === null ? 0 : $this->parent->level + 1;
         $this->section = $section;
     }
 

@@ -17,8 +17,10 @@
 namespace local_deepler\local\data;
 
 use cm_info;
+use dml_read_exception;
 use mod_hotquestion;
 use mod_quiz\quiz_settings;
+use moodle_exception;
 use question_definition;
 use stdClass;
 
@@ -81,11 +83,11 @@ class course_data {
         // Get the context id.
         $this->contextid = $contextid;
         // Set modinfo.
-        mlangable::$modinfo = get_fast_modinfo($course);
+        field::$modinfo = get_fast_modinfo($course);
         //$this->modinfo = $modinfo;
         // $plugins = \core_component::get_plugin_types();
         // Set language.
-        mlangable::$targetlangdeepl = $lang;
+        field::$targetlangdeepl = $lang;
         $this->targetlangdeepl = $lang;
         $this->targetlangmoodle = strtolower(substr($lang, 0, 2));
         // Set the db fields to skipp.
@@ -124,13 +126,17 @@ class course_data {
      */
     private function prepare_data(array $coursedata, array $sectiondata, array $activitydata) {
         $tab = ['0' => ['section' => $coursedata, 'activities' => []]];
-        foreach ($sectiondata as $k => $v) {
+        /** @var \local_deepler\local\data\field $v */
+        foreach ($sectiondata as $v) {
+            $v->hierarchy = 1;
             $tab[$v->id]['section'][] = $v;
             $tab[$v->id]['activities'] = []; // Initialise empty activities array.
         }
-        foreach ($activitydata as $ak => $av) {
+        /** @var \local_deepler\local\data\field $av */
+        foreach ($activitydata as $av) {
             // If the section is not found place it under the course data as general intro.
             $sectionid = isset($tab[$av->section]) ? $av->section : "0";
+            $av->hierarchy = 2;
             $tab[$sectionid]['activities'][] = $av;
         }
         return $tab;
@@ -143,16 +149,16 @@ class course_data {
      */
     private function getcoursedata() {
         $coursedata = [];
-        $course = mlangable::$modinfo->get_course();
+        $course = field::$modinfo->get_course();
         $activity = new activity('course', 0);
         if ($course->fullname) {
-            $coursedata[] = new mlangable($course->id, $course->fullname, 0, 'fullname', $activity);
+            $coursedata[] = new field($course->id, $course->fullname, 0, 'fullname', $activity);
         }
         if ($course->shortname) {
-            $coursedata[] = new mlangable($course->id, $course->fullname, 0, 'shortname', $activity);
+            $coursedata[] = new field($course->id, $course->fullname, 0, 'shortname', $activity);
         }
         if ($course->summary) {
-            $coursedata[] = new mlangable($course->id, $course->fullname, 0, 'summary', $activity);
+            $coursedata[] = new field($course->id, $course->fullname, 0, 'summary', $activity);
         }
         return $coursedata;
     }
@@ -164,16 +170,16 @@ class course_data {
      */
     private function getsectiondata() {
         global $DB;
-        $sections = mlangable::$modinfo->get_section_info_all();
+        $sections = field::$modinfo->get_section_info_all();
         $sectiondata = [];
         $activity = new activity('course_sections', 0);
         foreach ($sections as $sk => $section) {
             $record = $DB->get_record('course_sections', ['course' => $this->course->id, 'section' => $sk]);
             if ($record->name) {
-                $sectiondata[] = new mlangable($record->id, $record->name, 0, 'name', $activity);
+                $sectiondata[] = new field($record->id, $record->name, 0, 'name', $activity);
             }
             if ($record->summary) {
-                $sectiondata[] = new mlangable($record->id, $record->summary, $record->summaryformat, 'summary', $activity);
+                $sectiondata[] = new field($record->id, $record->summary, $record->summaryformat, 'summary', $activity);
             }
         }
         return $sectiondata;
@@ -190,7 +196,7 @@ class course_data {
         global $DB;
         $activitydata = [];
         // @todo MDL-000 wrap it as collections of Activity object
-        $cms = mlangable::$modinfo->get_cms();
+        $cms = field::$modinfo->get_cms();
         foreach ($cms as $cmid => $coursemodule) {
             // Build first level activities.
             $activitydbrecord = $this->injectactivitydata($activitydata, $coursemodule, $cmid);
@@ -212,23 +218,19 @@ class course_data {
                         try {
                             $question = \question_bank::load_question($slot->questionid);
                             $this->injectquizcontent($activitydata, $question, $coursemodule, $cmid);
-                        } catch (\dml_read_exception $e) {
+                        } catch (dml_read_exception|moodle_exception $e) {
                             // Useless.
-                            $activitydata[] = new mlangable(
+                            $activitydata[] = new field(
                                     -1,
                                     $e->getMessage(), 0, '',
-                                    new activity('quiz_questions', $question->id, $cmid, $coursemodule->sectionid, '', '',
-                                            $slot->questionid),
-                                    3
-                            );
-                        } catch (\moodle_exception $me) {
-                            // Useless.
-                            $activitydata[] = new mlangable(
-                                    -1,
-                                    $e->getMessage(), 0, '',
-                                    new activity('quiz_questions', $question->id, $cmid, $coursemodule->sectionid, '', '',
-                                            $slot->questionid),
-                                    3
+                                    new activity('quiz_questions',
+                                            $question->id,
+                                            $cmid,
+                                            $coursemodule->sectionid,
+                                            '',
+                                            '',
+                                            new activity('quiz', $cmid, $cmid, $slot->questionid),
+                                            3)
                             );
                         }
                     }
@@ -279,8 +281,8 @@ class course_data {
     private function injectbookchapter(array &$activities, mixed $chapter, cm_info $act, int $cmid) {
         $activity = new activity('book_chapters', $act->id, $cmid, $act->get_section_info()->id);
         // Book chapters have title and content.
-        $activities[] = new mlangable($chapter->id, $chapter->title, 0, 'chapter', $activity, 2, $cmid);
-        $activities[] = new mlangable($chapter->id, $chapter->content, 1, 'content', $activity, 2, $cmid);
+        $activities[] = new field($chapter->id, $chapter->title, 0, 'chapter', $activity, 2, $cmid);
+        $activities[] = new field($chapter->id, $chapter->content, 1, 'content', $activity, 2, $cmid);
     }
 
     /**
@@ -300,8 +302,8 @@ class course_data {
         global $DB;
         $activity = new activity('wiki_pages', $act->id, $cmid, $act->sectionid);
         // Wiki pages have title and cachedcontent.
-        $activities[] = new mlangable($chapter->id, $chapter->title, 0, 'title', $activity, 2, $cmid);
-        $activities[] = new mlangable($chapter->id, $chapter->cachedcontent, 1, 'cachedcontent', $activity, 2, $cmid);
+        $activities[] = new field($chapter->id, $chapter->title, 0, 'title', $activity, 2, $cmid);
+        $activities[] = new field($chapter->id, $chapter->cachedcontent, 1, 'cachedcontent', $activity, 2, $cmid);
     }
 
 
@@ -323,42 +325,15 @@ class course_data {
     }
 
     /**
-     * Special wrapper for questions subs to build data.
-     *
      * @param array $activities
      * @param string $table
      * @param string $idcolname
      * @param int $id
-     * @param mixed $act
-     * @param int $cmid
+     * @param \local_deepler\local\data\activity $activity
      * @return false|mixed|\stdClass
-     * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function injectdatafromtable(array &$activities, string $table, string $idcolname, int $id, mixed $act,
-            int $cmid, string $qtype = '') {
-        global $DB;
-        $activity = new activity($act->modname, $act->id, $cmid, $act->get_section_info()->id, '', $qtype);
-        $activitydbrecord = $DB->get_record($table, [$idcolname => $id]);
-
-        // Feed the data array with found text.
-        foreach ($this->filterdbtextfields($table) as $field) {
-            if ($activitydbrecord->{$field} !== null && trim($activitydbrecord->{$field}) !== '') {
-                $activities[] = new mlangable(
-                        $activitydbrecord->id,
-                        $activitydbrecord->{$field},
-                        isset($activitydbrecord->{$field . 'format'}) ?? 0,
-                        $field,
-                        $activity,
-                        3, // @todo MDL-000 should refactor for dedup with injectactivitydata.
-                        $cmid
-                );
-            }
-        }
-        return $activitydbrecord;
-    }
-
     private function injectitem(array &$activities, string $table, string $idcolname, int $id, activity $activity) {
         global $DB;
         //$activity = new activity($act->modname, $act->id, $cmid, $act->get_section_info()->id,'', $qtype);
@@ -367,7 +342,7 @@ class course_data {
         // Feed the data array with found text.
         foreach ($this->filterdbtextfields($table) as $field) {
             if ($activitydbrecord->{$field} !== null && trim($activitydbrecord->{$field}) !== '') {
-                $activities[] = new mlangable(
+                $activities[] = new field(
                         $activitydbrecord->id,
                         $activitydbrecord->{$field},
                         isset($activitydbrecord->{$field . 'format'}) ?? 0,
@@ -437,7 +412,7 @@ class course_data {
                 break;
             case 'qtype_multichoice':
                 foreach ($question->answers as $answer) {
-                    $activitydata[] = new mlangable($answer->id,
+                    $activitydata[] = new field($answer->id,
                             $answer->answer,
                             $answer->answerformat,
                             'answer',
@@ -445,7 +420,7 @@ class course_data {
                             3,
                             $cmid);
                     if (!empty($answer->feedback)) {
-                        $activitydata[] = new mlangable(
+                        $activitydata[] = new field(
                                 $answer->id,
                                 $answer->feedback,
                                 $answer->feedbackformat,
@@ -468,7 +443,7 @@ class course_data {
                 foreach ($question->answers as $answer) {
 
                     if (!empty($answer->feedback)) {
-                        $activitydata[] = new mlangable(
+                        $activitydata[] = new field(
                                 $answer->id,
                                 $answer->feedback,
                                 $answer->feedbackformat,
@@ -482,7 +457,7 @@ class course_data {
                 break;
             case 'qtype_calculatedmulti':
                 foreach ($question->answers as $answer) {
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $answer->id,
                             $answer->answer,
                             $answer->answerformat,
@@ -492,7 +467,7 @@ class course_data {
                             $cmid
                     );
                     if (!empty($answer->feedback)) {
-                        $activitydata[] = new mlangable(
+                        $activitydata[] = new field(
                                 $answer->id,
                                 $answer->feedback,
                                 $answer->feedbackformat,
@@ -506,7 +481,7 @@ class course_data {
                 break;
             case 'qtype_truefalse':
                 if (!empty($question->truefeedback)) {
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $question->trueanswerid,
                             $question->truefeedback,
                             $question->truefeedbackformat,
@@ -517,7 +492,7 @@ class course_data {
                     );
                 }
                 if (!empty($question->falsefeedback)) {
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $question->falseanswerid,
                             $question->falsefeedback,
                             $question->falsefeedbackformat,
@@ -530,7 +505,7 @@ class course_data {
                 break;
             case 'qtype_shortanswer':
                 foreach ($question->answers as $answer) {
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $answer->id,
                             $answer->answer,
                             $answer->answerformat,
@@ -540,7 +515,7 @@ class course_data {
                             $cmid
                     );
                     if (!empty($answer->feedback)) {
-                        $activitydata[] = new mlangable(
+                        $activitydata[] = new field(
                                 $answer->id,
                                 $answer->feedback,
                                 $answer->feedbackformat,
@@ -554,7 +529,7 @@ class course_data {
             case 'qtype_numerical':
                 foreach ($question->answers as $answer) {
                     if (!empty($answer->feedback)) {
-                        $activitydata[] = new mlangable(
+                        $activitydata[] = new field(
                                 $answer->id,
                                 $answer->feedback,
                                 $answer->feedbackformat,
@@ -570,7 +545,7 @@ class course_data {
             case 'qtype_ddwtos' :
                 $choices = $DB->get_records('question_answers', ['question' => $question->id]);
                 foreach ($choices as $answer) {
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $answer->id,
                             $answer->answer,
                             0,
@@ -589,7 +564,7 @@ class course_data {
                     if (trim($answer->label) === '') {
                         continue;
                     }
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $answer->id,
                             $answer->label,
                             0,
@@ -602,7 +577,7 @@ class course_data {
                 break;
             case 'qtype_ordering' :
                 foreach ($question->answers as $answer) {
-                    $activitydata[] = new mlangable(
+                    $activitydata[] = new field(
                             $answer->id,
                             $answer->answer,
                             $answer->answerformat,
