@@ -402,7 +402,7 @@ class course_data {
         $activity->qtype = $question->qtype->plugin_name();
         $this->injectitem($activitydata, 'question', 'id', $question->id, $activity);
         // @todo MDL-000 pass $activity->qtype in child ?.
-        $qactivity = new activity('question_answers', $act->id, $cmid, $act->sectionid, '', '', $question->id);
+        $qactivity = new activity('question_answers', $act->id, $cmid, $act->sectionid, '', '', $activity);
         $qidfiledname = $question->qtype->questionid_column_name();
 
         $optionstablename = '';

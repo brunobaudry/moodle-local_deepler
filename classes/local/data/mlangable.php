@@ -39,7 +39,7 @@ class mlangable {
     public string $displaytext;
     public string $pluginname;
     public string $translatedfieldname;
-    public moodle_url $iconurl;
+    public string $iconurl;
     public moodle_url $link;
     public mixed $purpose;
     public status $status;
@@ -72,14 +72,14 @@ class mlangable {
         $this->cmid = $cmid;
         $this->hierarchy = "level$level";
         $this->purpose = null;
-        //$this->iconurl = null;
+        $this->iconurl = '';
         $this->translatedfieldname = '';
         $this->tneeded = true;
         //$this->status = null;
         $this->preparetexts($text, $activity);
         $this->init_db();
         // Prepare link.
-        $this->link_builder($activity->parent);
+        $this->link_builder($activity->parent?->id ?? 0);
         $this->build_ui($activity);
         $this->search_field_strings();
     }
@@ -250,16 +250,25 @@ class mlangable {
                 // Question icons.
                 $this->iconurl = $OUTPUT->image_url('icon', $activity->qtype);
                 $this->pluginname = get_string('pluginname', $activity->qtype);
-            } else {
+            } else if ($activity->cmid !== 0) {
+                // Course.
+                if ($activity->parent !== null) {
+                    $this->iconurl = $OUTPUT->image_url('icon', $activity->parent->qtype);
+                } else {
+                    $this->iconurl = self::$modinfo->get_cm($this->cmid)->get_icon_url()->out(false);
+                }
                 $this->purpose = call_user_func($this->table . '_supports', FEATURE_MOD_PURPOSE);
-                $this->iconurl = self::$modinfo->get_cm($this->cmid)->get_icon_url()->out(false);
                 $this->pluginname = get_string('pluginname', $this->table);
+            } else {
+                $this->iconurl = new moodle_url('http://moodle.test/local/deepler/pix/icon.svg');
+                $this->purpose = null;
             }
 
         } catch (TypeError $e) {
+
             // @todo MD-0000 Do something with error message ?.
             $this->purpose = null;
-            $this->iconurl = new moodle_url('');
+            $this->iconurl === '' ? new moodle_url('http://moodle.test/local/deepler/pix/icon.svg') : $this->iconurl;
         }
     }
 

@@ -20,21 +20,22 @@ class activity {
     public string $modname;
     public int $section;
     public string $content;
-    public int $parent;
+    public ?activity $parent;
     public int $id;
     public int $cmid;
     public string $qtype;
 
     /**
      * @param string $modname
-     * @param string $content
      * @param int $id
      * @param int $cmid
      * @param int $section
-     * @param int $parent
+     * @param string $content
+     * @param string $qtype
+     * @param \local_deepler\local\data\activity|null $parent
      */
     public function __construct(string $modname, int $id = 0, int $cmid = 0, int $section = 0, string $content = '',
-            string $qtype = '', int $parent = 0) {
+            string $qtype = '', activity $parent = null) {
         $this->qtype = $qtype;
         $this->modname = $modname;
         $this->content = $content;
