@@ -48,7 +48,7 @@ class course_data {
     /** @var string */
     protected $targetlangmoodle;
     /** @var string */
-    protected $contextid;
+    //protected $contextid;
     /** @var \context_course */
     protected $context;
     /** @var string[]
@@ -74,14 +74,14 @@ class course_data {
      * @param int $contextid
      * @throws \moodle_exception
      */
-    public function __construct(stdClass $course, string $lang, int $contextid) {
+    public function __construct(stdClass $course, string $lang) {
         $this->mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
         // Set db table.
         $this->dbtable = 'local_deepler';
         // Set course.
         $this->course = $course;
         // Get the context id.
-        $this->contextid = $contextid;
+        // $this->contextid = $contextid;
         // Set modinfo.
         field::$modinfo = get_fast_modinfo($course);
         //$this->modinfo = $modinfo;

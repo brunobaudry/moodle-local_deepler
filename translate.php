@@ -32,10 +32,9 @@
 use classes\local\services\lang_helper;
 use DeepL\AuthorizationException;
 use DeepL\DeepLException;
-use local_deepler\local\data\course_data;
+use local_deepler\local\data\course_structure_collector;
 use local_deepler\output\badsettings_page;
 use local_deepler\output\nodeepl_page;
-use local_deepler\output\translate_page;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -104,11 +103,12 @@ try {
     // Adding page JS.
     $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
     // Output translation grid.
-    $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
+    //$coursedata = new course_data($course, $languagepack->targetlang, $context->id);
+    $coursedata = new course_structure_collector($course);
     // Build the page.
-    $prepareddata = $coursedata->getdata();
-    $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
-    echo $output->render($renderable);
+    // $prepareddata = $coursedata->getdata();
+    // $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
+    // echo $output->render($renderable);
     // Output footer.
     echo $output->footer();
 } catch (AuthorizationException $e) {

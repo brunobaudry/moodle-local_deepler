@@ -67,7 +67,8 @@ class field {
             int $sectionid = 0,
             int $cmid = 0,
             int $parentid = 0,
-            string $activitycontent = ''
+            string $activitycontent = '',
+            Parentype $parentype,
     ) {
         $this->id = $id;
         $this->field = $field;
@@ -283,7 +284,7 @@ class field {
      *
      * @return void
      * @throws \coding_exception
-     * @todo MDL-0000 this is sick there shoud be a simple way...
+     * @todo MDL-0000 this is sick there should be a simple way...
      */
     private function search_field_strings(): void {
         if ($this->table !== null) {
@@ -312,6 +313,7 @@ class field {
                             ['identifier' => $this->field, 'component' => 'mod_' . $this->table],
                             ['identifier' => $this->field, 'component' => 'moodle'],
                             ['identifier' => $this->field, 'component' => 'core'],
+                            ['identifier' => $this->field, 'component' => 'question'],
                             ['identifier' => $this->field, 'component' => 'pagetype'],
                             ['identifier' => $this->field, 'component' => 'core_plugin'],
                             ['identifier' => $this->table . $this->field, 'component' => 'moodle'],
@@ -342,7 +344,7 @@ class field {
                         $stringid = $string['identifier'];
                         $componentid = $string['component'];
                         if (get_string_manager()->string_exists($stringid, $componentid)) {
-                            $foundstring = get_string($stringid, $componentid);
+                            $foundstring = get_string($stringid, $componentid, 'x'); //Adding x in case the found has a var.
                             break;
                         }
                     }
@@ -352,4 +354,11 @@ class field {
             }
         }
     }
+}
+
+enum Parentype {
+    case Course;
+    case Section;
+    case Activity;
+    case Question;
 }
