@@ -253,9 +253,9 @@ class course_data {
                             $question = \question_bank::load_question($slot->questionid);
                             $this->injectquizcontent($activitydata, $question, $activity, $cmid);
                         } catch (\dml_read_exception $e) {
-                            $this->build_data(-1, $e->getMessage(), 0, 'quiz_questions', $activity, 3);
+                            $this->build_data(-1, $e->getMessage(), 0, 'quiz_questions', $activity, 3, $cmid);
                         } catch (\moodle_exception $me) {
-                            $this->build_data(-1, $me->getMessage(), 0, 'quiz_questions', $activity, 3);
+                            $this->build_data(-1, $me->getMessage(), 0, 'quiz_questions', $activity, 3, $cmid);
                         }
                     }
                     break;

@@ -99,6 +99,10 @@ class lang_helper {
      * @var string
      */
     private string $multilangparentlang;
+    /** @var array */
+    private array $moodledeeplsources;
+    /** @var array */
+    private array $moodledeepltargets;
 
     /**
      * Constructor.
@@ -113,7 +117,7 @@ class lang_helper {
         $this->moodlelangs = get_string_manager()->get_list_of_translations();
         $this->multilangparentlang = get_config('filter_multilang2', 'parentlangbehaviour');
         $this->deeplsourcelang = '';
-        $this->setcurrentlanguage();
+
     }
 
     /**
@@ -130,6 +134,9 @@ class lang_helper {
         $this->usage = $this->translator->getUsage();
         $this->deeplsources = $this->translator->getSourceLanguages();
         $this->deepltargets = $this->translator->getTargetLanguages();
+        $this->setcurrentlanguage();
+        $this->moodledeeplsources = $this->finddeeplsformoodle(true);
+        $this->moodledeepltargets = $this->finddeeplsformoodle(false);
     }
 
     /**
@@ -194,7 +201,7 @@ class lang_helper {
         $canimprove = !$this->keyisfree && false;
         $tab = [];
         // Get the list of deepl langs that are supported by this moodle instance.
-        $filtereddeepls = $this->finddeeplsformoodle($issource);
+        $filtereddeepls = $issource ? $this->moodledeeplsources : $this->moodledeepltargets;
         foreach ($filtereddeepls as $l) {
             $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
             $text = $verbose ? $l->name : $l->code;
@@ -246,7 +253,7 @@ class lang_helper {
      * @param bool $issource
      * @return array
      */
-    private function finddeeplsformoodle(bool $issource) {
+    private function finddeeplsformoodle(bool $issource): array {
         $deepls = $issource ? $this->deeplsources : $this->deepltargets;
         return array_filter($deepls, function($item) {
             foreach ($this->moodlelangs as $code => $langverbose) {
@@ -277,6 +284,9 @@ class lang_helper {
         $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
+        $config->deeplsourcelangs = implode('|', array_map(function($language) {
+            return $language->code;
+        }, $this->moodledeeplsources));
         $config->isfree = $this->keyisfree;
         return $config;
     }

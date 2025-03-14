@@ -27,6 +27,7 @@ define([
     let escapePatterns = {};
     let mainSourceLang = "";
     let targetLang = "";
+    let availableSourceLangs = [];
     let courseid = 0;
     let userid = 0;
     let settings = {};
@@ -37,7 +38,8 @@ define([
     const ON_TRANSLATION_FAILED = 'onTranslationFailed';
     const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
     const ON_DB_FAILED = 'onDbFailed';
-    const setMainLangs = (source = '', target = '') => {
+    const setMainLangs = (deeplsourcelangs, source = '', target = '') => {
+        availableSourceLangs = deeplsourcelangs.split('|');
         if (source !== '') {
             mainSourceLang = source;
         }
@@ -117,7 +119,8 @@ define([
          * translation.js
          */
         const getupdatedtext = (key, maineditorIsTextArea) => {
-            const sourceItemLang = tempTranslations[key].sourceLang;
+            const sourceItemLang = prepareSourceItemLang(tempTranslations[key].sourceLang);
+            const compatibleTargetLang = prepareSourceItemLang(targetLang);
             const fieldText = tempTranslations[key].fieldText; // Translation
             const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
             const source = getSourceText(key);// Translation
@@ -125,13 +128,13 @@ define([
             const isSourceOther = sourceItemLang === mainSourceLang;
             const tagPatterns = {
                 "other": "({mlang other)(.*?){mlang}",
-                "target": `({mlang ${targetLang}}(.*?){mlang})`,
+                "target": `({mlang ${compatibleTargetLang}}(.*?){mlang})`,
                 "source": `({mlang ${sourceItemLang}}(.*?){mlang})`
             };
             const langsItems = {
                 "fullContent": fieldText,
                 "other": `{mlang other}${source}{mlang}`,
-                "target": `{mlang ${targetLang}}${translation}{mlang}`,
+                "target": `{mlang ${compatibleTargetLang}}${translation}{mlang}`,
                 "source": `{mlang ${sourceItemLang}}${source}{mlang}`
             };
             if (isFirstTranslation) {
@@ -144,6 +147,19 @@ define([
             }
             // Alreaddy mlang tag-s.
             return additionalUpdate(isSourceOther, tagPatterns, langsItems);
+        };
+        /**
+         * Util to
+         *
+         * @param {string} l
+         */
+        const prepareSourceItemLang = (l)=>{
+            let lang = l;
+            // If lang not in the sources keep the root lang.
+            if (availableSourceLangs.indexOf(lang) === -1) {
+                lang = l.split('-', 1).join('');
+            }
+            return lang.toLowerCase();
         };
         /**
          * Update Textarea when there was mlang tags.
@@ -368,7 +384,7 @@ const onTranslateFailed = (status, error)=>{
             Api.APP_VERSION = cfg.version;
             courseid = cfg.courseid;
             userid = cfg.userid;
-            setMainLangs(cfg.currentlang, cfg.targetlang);
+            setMainLangs(cfg.deeplsourcelangs, cfg.currentlang, cfg.targetlang);
         };
         return {
             init: init,
