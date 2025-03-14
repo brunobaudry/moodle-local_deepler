@@ -1,0 +1,2 @@
+// Deprecated since local_deepler v1.3.5
+allowsublangs, local_deepler

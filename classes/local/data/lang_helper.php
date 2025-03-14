@@ -82,12 +82,6 @@ class lang_helper {
      */
     protected Usage $usage;
     /**
-     * Whether to allow sublanguages as main.
-     *
-     * @var string
-     */
-    private mixed $allowsublangcodesasmain;
-    /**
      * Type of DeepL subscrription.
      *
      * @var bool
@@ -99,6 +93,10 @@ class lang_helper {
      * @var string
      */
     private string $multilangparentlang;
+    /** @var array */
+    private array $moodledeeplsources;
+    /** @var array */
+    private array $moodledeepltargets;
 
     /**
      * Constructor.
@@ -107,13 +105,12 @@ class lang_helper {
      */
     public function __construct() {
         // Set to dummies values.
-        $this->allowsublangcodesasmain = get_config('local_deepler', 'allowsublangs');
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', '', PARAM_NOTAGS);
         $this->moodlelangs = get_string_manager()->get_list_of_translations();
         $this->multilangparentlang = get_config('filter_multilang2', 'parentlangbehaviour');
         $this->deeplsourcelang = '';
-        $this->setcurrentlanguage();
+
     }
 
     /**
@@ -130,6 +127,9 @@ class lang_helper {
         $this->usage = $this->translator->getUsage();
         $this->deeplsources = $this->translator->getSourceLanguages();
         $this->deepltargets = $this->translator->getTargetLanguages();
+        $this->setcurrentlanguage();
+        $this->moodledeeplsources = $this->finddeeplsformoodle(true);
+        $this->moodledeepltargets = $this->finddeeplsformoodle(false);
     }
 
     /**
@@ -140,9 +140,9 @@ class lang_helper {
     private function setcurrentlanguage() {
         // Moodle format is not the common culture format.
         // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
-        $hasunderscore = strpos($this->currentlang, '_');
-        if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
-            $this->deeplsourcelang = strtoupper(substr($this->currentlang, 0, $hasunderscore));
+        $whereisunderscore = strpos($this->currentlang, '_');
+        if ($whereisunderscore && !$this->iscurrentsupported()) {
+            $this->deeplsourcelang = strtoupper(substr($this->currentlang, 0, $whereisunderscore));
         } else {
             $this->deeplsourcelang = strtoupper($this->currentlang);
         }
@@ -194,7 +194,7 @@ class lang_helper {
         $canimprove = !$this->keyisfree && false;
         $tab = [];
         // Get the list of deepl langs that are supported by this moodle instance.
-        $filtereddeepls = $this->finddeeplsformoodle($issource);
+        $filtereddeepls = $issource ? $this->moodledeeplsources : $this->moodledeepltargets;
         foreach ($filtereddeepls as $l) {
             $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
             $text = $verbose ? $l->name : $l->code;
@@ -246,7 +246,7 @@ class lang_helper {
      * @param bool $issource
      * @return array
      */
-    private function finddeeplsformoodle(bool $issource) {
+    private function finddeeplsformoodle(bool $issource): array {
         $deepls = $issource ? $this->deeplsources : $this->deepltargets;
         return array_filter($deepls, function($item) {
             foreach ($this->moodlelangs as $code => $langverbose) {
@@ -277,6 +277,9 @@ class lang_helper {
         $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
+        $config->deeplsourcelangs = implode('|', array_map(function($language) {
+            return $language->code;
+        }, $this->moodledeeplsources));
         $config->isfree = $this->keyisfree;
         return $config;
     }

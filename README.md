@@ -30,7 +30,6 @@ Translation workflow being the following:
 - [Configuration](#configuration)
   * [Permissions (Moodle capability)](#permissions-moodle-capability)
   * [Admin](#admin)
-    + [Allow sub-languages to be mapped to their main](#allow-sub-languages-to-be-mapped-to-their-main)
     + [Default value Escape LaTeX (in the courses translation page "Advanced Settings")](#default-value-escape-latex-in-the-courses-translation-page-advanced-settings)
     + [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
     + [Minimum textfield size](#minimum-textfield-size)
@@ -39,6 +38,7 @@ Translation workflow being the following:
     + [Deepl API setting](#deepl-api-setting)
     + [Other setting](#other-setting)
   * [Language selection](#language-selection)
+    + [Deepl language list vs Moodle's](#deepl-language-list-vs-moodles)
     + [Source language](#source-language)
     + [Target language](#target-language)
     + [Unsupported](#unsupported)
@@ -104,15 +104,6 @@ you are using ©DeepL API Free or ©DeepL API Pro. Visit
 the [©DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
-#### Allow sub-languages to be mapped to their main
-
-Currently Deepl doesn't support any. See https://developers.deepl.com/docs/resources/supported-languages.
-The plugin gives you the possibility to use these sub languages if your Moodle install has them as if they were their parent language.
-This setting is ticked by default.
-
-If your installation has sub local language, for example de_ch, it will be considered as its main (de), else the plugin will display an "source lang unsupported" error page (
-defaults to true)
-
 #### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
 
 Set to true will check "escape LaTeX formulas", in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
@@ -164,11 +155,36 @@ This setting's default in the editor can be set in the plugin [admin page](#admi
 
 ### Language selection
 
+#### Deepl language list vs Moodle's
 
+Deepl API language portfolio differs from Moodle language packs.
+
+Currently Deepl doesn't support sub language for source lanagues.
+See https://developers.deepl.com/docs/resources/supported-languages.
+
+But forces sub languages for targets with :
+- EN-GB - English (British)
+- EN-US - English (American)
+- PT-BR - Portuguese (Brazilian)
+- PT-PT - Portuguese (all Portuguese variants excluding Brazilian Portuguese)
+- ZH-HANS - Chinese (simplified)
+- ZH-HANT - Chinese (traditional)
+
+If your installation has sub local language, for example de_ch, it will be considered as its main (de).
+
+So the plugin behaviour is the following :
+The proposed source languages will main languages of your Moodle instance lang list.
+The proposed targets will be all you available languages if they have a main Deepl compatible main language and the matching sub languages.
+But will then save it as the main language in the DB.
+
+For example if you have a EN package you will be able to choose either EN-GB or EN-US as your target language, but it will save it as {mlang en}
+
+Make sure you set the correct multilangv2 setting for that matter. 
+
+_It would make sense to allow you, from the interface, to map to which sub language you wish to save your translation.
+Let us know if this is a real need by submitting a GITHUB issue._
 
 #### Source language
-
-
 
 **The source language will be set to the actual Moodle language** selection, which will automatically set it as the **other** fallback language.
 

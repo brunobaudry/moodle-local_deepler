@@ -74,7 +74,6 @@ final class settings_test extends \advanced_testcase {
         // Testing single settings.
         $expectedsettings = [
                 'apikey',
-            'allowsublangs',
             'latexescapeadmin',
             'preescapeadmin',
             'scannedfieldsize',

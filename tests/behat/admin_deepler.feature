@@ -7,7 +7,6 @@ Feature: Feature for local_deepler plugin main admin page
     When I navigate to "Plugins > DeepL Translator" in site administration
     Then I should see "DeepL Translator"
     Then I should see "local_deepler | apikey"
-    Then I should see "local_deepler | allowsublangs"
     Then I should see "local_deepler | latexescapeadmin"
     Then I should see "local_deepler | preescapeadmin"
     Then I should see "local_deepler | scannedfieldsize"
