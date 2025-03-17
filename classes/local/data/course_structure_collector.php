@@ -18,6 +18,7 @@
 namespace local_deepler\local\data;
 
 use core_courseformat\base;
+use course_modinfo;
 use stdClass;
 
 /**
@@ -38,43 +39,42 @@ class course_structure_collector {
     private stdClass $course;
     /** @var \core_courseformat\base */
     private base $courseformat;
+    private course_modinfo $courseinfo;
 
     public function __construct(stdClass $course) {
         global $DB;
+        module::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
         $this->sections = [];
         $this->course = $course;
         $this->courseformat = course_get_format($course); // Get the course format for default string.
-        $courseinfo = get_fast_modinfo($course);
+        $this->courseinfo = get_fast_modinfo($course);
+        $coursefileds = $this->getcoursefields();
+        $this->getsections();
+        foreach ($this->sections as $section) {
+            $f = $section->getsectionfields();
+            $f;
+        }
 
         //$coursesectionsinfo = $courseinfo->get_section_info_all();
-        foreach ($courseinfo->get_section_info_all() as $section_info) {
-            $this->sections[$section_info->sectionnum] = new section($section_info, $this->courseformat);
-        }
+
         //$class = get_class($coursesectionsinfo);
         // ($courseinfo);
         // var_dump($this->sections);
         //var_dump($coursesectionsinfo['26']);
     }
 
-    public function getcoursefileds(): array {
-        $cf = [];
+    public function getcoursefields(): array {
+        $info = $this->courseinfo->get_course();
         $table = 'course';
-        $coursedetails = $this->course->get_course();
-        if ($coursedetails->fullname) {
-            $cf[] = new field(
-                    $this->course->id,
-                    $this->course->fullname,
-                    0,
-                    'fullname',
-                    $table);
+        $collumns = ['fullname', 'shortname', 'summary'];
+
+        return field::getfields($info, $table, $collumns);
+    }
+
+    public function getsections() {
+        foreach ($this->courseinfo->get_section_info_all() as $section_info) {
+            $this->sections[$section_info->sectionnum] = new section($section_info, $this->courseformat);
         }
-        if ($coursedetails->shortname) {
-            $cf[] = new field($coursedetails->id, $coursedetails->shortname, 0, 'shortname', $table);
-        }
-        if ($this->course->summary) {
-            $cf[] = new field($coursedetails->id, $coursedetails->summary, 1, 'summary', $table);
-        }
-        return $cf;
     }
 
     public function getformat(): base {

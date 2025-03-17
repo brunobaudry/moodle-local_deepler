@@ -51,3 +51,42 @@ function local_deepler_extend_navigation_course($navigation, $course) {
     $navigation->add_node($translatecontent);
     $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
 }
+
+/**
+ * File handling
+ *
+ * @param $course
+ * @param $cm
+ * @param $context
+ * @param $filearea
+ * @param $args
+ * @param $forcedownload
+ * @param $options
+ * @return false|void
+ * @throws \coding_exception
+ */
+function local_deepler_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options) {
+    // Context validation.
+    if ($context->contextlevel != CONTEXT_BLOCK && $context->contextlevel != CONTEXT_SYSTEM) {
+        return false;
+    }
+    // File area whitelist.
+    $valid_areas = ['custom_docs', 'user_uploads'];
+    if (!in_array($filearea, $valid_areas)) {
+        return false;
+    }
+    // Security checks.
+    if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
+        return false;
+    }
+    $itemid = array_shift($args);
+    $filename = array_pop($args);
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+
+    $fs = get_file_storage();
+    if (!$file = $fs->get_file($context->id, 'local_deepler', $filearea, $itemid, $filepath, $filename)) {
+        return false;
+    }
+
+    send_stored_file($file, 86400, 0, $forcedownload, $options);
+}

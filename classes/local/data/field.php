@@ -16,25 +16,36 @@
 
 namespace local_deepler\local\data;
 
+use cm_info;
 use context_course;
 use context_module;
 use course_modinfo;
-use moodle_exception;
 use moodle_url;
 use TypeError;
 
 class field {
     public static string $targetlangdeepl = '';
     public static course_modinfo $modinfo;
+    static public int $mintxtfieldsize = 254;
+    static private array $comoncolstoskip = ['*_displayoptions', '*_stamp'];
+    static private array $modcolstoskip =
+            ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
+                    'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles', 'studentquiz_reportingemail',
+                    'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
+                    'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
+                    'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
+                    'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata',
+            ];
+    static private array $usercolstoskip = [];
+
+    static private array $filteredtablefields = [];
     public string $text;
     public string $table;
     public string $field;
-    public int $hierarchy;
     public int $id;
     public int $cmid;
     public bool $tneeded; // @todo MDL-000 should be called via status.
     public int $format;
-    public int $section;
     public int $tid;
     public string $displaytext;
     public string $pluginname;
@@ -50,10 +61,7 @@ class field {
      * @param int $format
      * @param string $field
      * @param string $table
-     * @param int $sectionid
      * @param int $cmid
-     * @param int $parentid
-     * @param string $activitycontent
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
@@ -64,29 +72,23 @@ class field {
             int $format,
             string $field,
             string $table,
-            int $sectionid = 0,
-            int $cmid = 0,
-            int $parentid = 0,
-            string $activitycontent = '',
-            Parentype $parentype,
+            int $cmid = -1
     ) {
         $this->id = $id;
         $this->field = $field;
         $this->table = $table;
         $this->format = $format;
-        $this->section = $sectionid;
         $this->cmid = $cmid;
-        $this->hierarchy = 0;
         $this->purpose = null;
         $this->iconurl = '';
         $this->translatedfieldname = '';
         $this->tneeded = true;
         //$this->status = null;
-        $this->preparetexts($text, $activitycontent);
+        $this->preparetexts($text);
         $this->init_db();
         // Prepare link.
-        $this->link_builder($parentid);
-        $this->build_ui($activity);
+        //$this->link_builder($parentid);
+        //$this->build_ui($activity);
         $this->search_field_strings();
     }
 
@@ -94,24 +96,13 @@ class field {
      * Building the text attributes.
      *
      * @param string $text
-     * @param \local_deepler\local\data\activity $activity
+     * @param string $activitycontent
      * @return void
      */
-    private function preparetexts(string $text, string $activitycontent) {
+    private function preparetexts(string $text) {
         $this->displaytext = $this->text = $text;
         if (str_contains($text, '@@PLUGINFILE@@')) {
-            //if (isset($activity->content) && $activity->content != '') {
-            if ($activitycontent !== '') {
-                // When activity->content is set, the image files are not @@PLUGINFILE@@.
-                $this->displaytext = $activitycontent;
-            } else {
-                try {
-                    $this->displaytext = $this->get_file_url($text, $this->id, $this->table, $this->field, $this->cmid);
-                } catch (moodle_exception $e) {
-                    // Image not found leave the plugin file empty.
-                    $this->displaytext = $this->text = $text;
-                }
-            }
+            $this->displaytext = $this->resolve_pluginfiles($text, $this->table, $this->id, $this->cmid);
         }
     }
 
@@ -125,35 +116,35 @@ class field {
      * @param int $cmid
      * @return array|string|string[]
      * @throws \dml_exception
-     */
-    private function get_file_url(string $text, int $itemid, string $table, string $field, int $cmid) {
-        global $DB;
-        $tmp = $this->get_item_contextid($itemid, $table, $cmid);
-        switch ($table) {
-            case 'course_sections' :
-                $select =
-                        'component = "course" AND itemid =' . $itemid . ' AND filename != "." AND filearea = "section"';
-                $params = [];
-                break;
-            default :
-                $select =
-                        'contextid = :contextid AND component = :component AND filename != "." AND ' .
-                        $DB->sql_like('filearea', ':field');
-                $params = ['contextid' => $tmp['contextid'], 'component' => $tmp['component'],
-                        'field' => '%' . $DB->sql_like_escape($field) . '%'];
-                break;
-        }
-
-        $result = $DB->get_recordset_select('files', $select, $params);
-        if ($result->valid()) {
-            $itemid = ($field == 'intro' || $field == 'summary') && $table != 'course_sections' ? '' : $result->current()->itemid;
-            return file_rewrite_pluginfile_urls($text, 'pluginfile.php', $result->current()->contextid,
-                    $result->current()->component, $result->current()->filearea, $itemid);
-        } else {
-            return file_rewrite_pluginfile_urls($text, 'pluginfile.php', $tmp['contextid'], $tmp['component'], $field,
-                    $tmp['itemid']);
-        }
-    }
+     *
+     * private function get_file_url(string $text, int $itemid, string $table, string $field, int $cmid) {
+     * global $DB;
+     * $tmp = $this->get_item_contextid($itemid, $table, $cmid);
+     * switch ($table) {
+     * case 'course_sections' :
+     * $select =
+     * 'component = "course" AND itemid =' . $itemid . ' AND filename != "." AND filearea = "section"';
+     * $params = [];
+     * break;
+     * default :
+     * $select =
+     * 'contextid = :contextid AND component = :component AND filename != "." AND ' .
+     * $DB->sql_like('filearea', ':field');
+     * $params = ['contextid' => $tmp['contextid'], 'component' => $tmp['component'],
+     * 'field' => '%' . $DB->sql_like_escape($field) . '%'];
+     * break;
+     * }
+     *
+     * $result = $DB->get_recordset_select('files', $select, $params);
+     * if ($result->valid()) {
+     * $itemid = ($field == 'intro' || $field == 'summary') && $table != 'course_sections' ? '' : $result->current()->itemid;
+     * return file_rewrite_pluginfile_urls($text, 'pluginfile.php', $result->current()->contextid,
+     * $result->current()->component, $result->current()->filearea, $itemid);
+     * } else {
+     * return file_rewrite_pluginfile_urls($text, 'pluginfile.php', $tmp['contextid'], $tmp['component'], $field,
+     * $tmp['itemid']);
+     * }
+     * }*/
 
     /**
      * Get the correct context.
@@ -162,25 +153,25 @@ class field {
      * @param string $table
      * @param int $cmid
      * @return array
-     */
-    private function get_item_contextid(int $id, string $table, int $cmid = 0) {
-        $i = 0;
-        $iscomp = false;
-
-        switch ($table) {
-            case 'course':
-                $i = context_course::instance($id)->id;
-                break;
-            case 'course_sections':
-                $i = context_module::instance($id)->id;
-                break;
-            default :
-                $i = context_module::instance($cmid)->id;
-                $iscomp = true;
-                break;
-        }
-        return ['contextid' => $i, 'component' => $iscomp ? 'mod_' . $table : $table, 'itemid' => $iscomp ? $cmid : ''];
-    }
+     *
+     * private function get_item_contextid(int $id, string $table, int $cmid = 0) {
+     * $i = 0;
+     * $iscomp = false;
+     *
+     * switch ($table) {
+     * case 'course':
+     * $i = context_course::instance($id)->id;
+     * break;
+     * case 'course_sections':
+     * $i = context_module::instance($id)->id;
+     * break;
+     * default :
+     * $i = context_module::instance($cmid)->id;
+     * $iscomp = true;
+     * break;
+     * }
+     * return ['contextid' => $i, 'component' => $iscomp ? 'mod_' . $table : $table, 'itemid' => $iscomp ? $cmid : ''];
+     * }*/
 
     /**
      * Stores the translation's statuses.
@@ -189,7 +180,6 @@ class field {
      * @throws \dml_exception
      */
     private function init_db() {
-        global $DB;
         $this->status = new status($this->id, $this->table, $this->field, self::$targetlangdeepl);
         // Skip if target lang is undefined.
         if ($this->status->isready()) {
@@ -303,62 +293,233 @@ class field {
                 } else if ($this->field === 'name') {
                     $this->translatedfieldname = get_string('name');
                 } else {
-                    $foundstring = $this->field;
-                    $plugroot = explode("_", $this->table);
-                    $fieldwithoutunderscore = str_replace("_", "", $this->field);
-
-                    // Try several combining possible to try to fetch weird unknown string names.
-                    $allcombinations = [
-                            ['identifier' => $this->table . $this->field, 'component' => 'mod_' . $this->table],
-                            ['identifier' => $this->field, 'component' => 'mod_' . $this->table],
-                            ['identifier' => $this->field, 'component' => 'moodle'],
-                            ['identifier' => $this->field, 'component' => 'core'],
-                            ['identifier' => $this->field, 'component' => 'question'],
-                            ['identifier' => $this->field, 'component' => 'pagetype'],
-                            ['identifier' => $this->field, 'component' => 'core_plugin'],
-                            ['identifier' => $this->table . $this->field, 'component' => 'moodle'],
-                            ['identifier' => $this->table . $this->field, 'component' => 'core'],
-                            ['identifier' => $this->table . $this->field, 'component' => 'pagetype'],
-                            ['identifier' => $this->table . $this->field, 'component' => 'core_plugin'],
-                            ['identifier' => $this->field . $this->table, 'component' => 'moodle'],
-                            ['identifier' => $this->field . $this->table, 'component' => 'core'],
-                            ['identifier' => $this->field . $this->table, 'component' => 'pagetype'],
-                            ['identifier' => $this->field . $this->table, 'component' => 'core_plugin'],
-                            ['identifier' => $this->field . ' ' . $this->table, 'component' => 'moodle'],
-                            ['identifier' => $this->field . ' ' . $this->table, 'component' => 'core'],
-                            ['identifier' => $this->field . ' ' . $this->table, 'component' => 'pagetype'],
-                            ['identifier' => $this->field . ' ' . $this->table, 'component' => 'core_plugin'],
-                            ['identifier' => $foundstring, 'component' => 'moodle'],
-                            ['identifier' => $foundstring, 'component' => 'core'],
-                            ['identifier' => $foundstring, 'component' => 'pagetype'],
-                            ['identifier' => $foundstring, 'component' => 'core_plugin'],
-                            ['identifier' => $this->field, 'component' => 'mod_' . $plugroot[0]],
-                            ['identifier' => ($plugroot[1] ?? '') . $this->field, 'component' => 'mod_' . $plugroot[0]],
-                            ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
-                            ['identifier' => ($plugroot[1] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
-                            ['identifier' => $this->field, 'component' => $this->table],
-                            ['identifier' => 'pluginname', 'component' => $this->table],
-                    ];
-
-                    foreach ($allcombinations as $string) {
-                        $stringid = $string['identifier'];
-                        $componentid = $string['component'];
-                        if (get_string_manager()->string_exists($stringid, $componentid)) {
-                            $foundstring = get_string($stringid, $componentid, 'x'); //Adding x in case the found has a var.
-                            break;
-                        }
-                    }
-                    $this->translatedfieldname = $foundstring;
+                    // One should be better than the other.
+                    $this->translatedfieldname = $this->findoutstandingold();
+                    $this->translatedfieldname = $this->findoutstanding();
                 }
-
             }
         }
     }
-}
 
-enum Parentype {
-    case Course;
-    case Section;
-    case Activity;
-    case Question;
+    /**
+     * @return string
+     * @throws \coding_exception
+     *
+     * public function findoutstandingold(): string {
+     * $foundstring = $this->field;
+     * $plugroot = explode("_", $this->table);
+     * $fieldwithoutunderscore = str_replace("_", "", $this->field);
+     *
+     * // Try several combining possible to try to fetch weird unknown string names.
+     * $allcombinations = [
+     * ['identifier' => $this->table . $this->field, 'component' => 'mod_' . $this->table],
+     * ['identifier' => $this->field, 'component' => 'mod_' . $this->table],
+     * ['identifier' => $this->field, 'component' => 'moodle'],
+     * ['identifier' => $this->field, 'component' => 'core'],
+     * ['identifier' => $this->field, 'component' => 'question'],
+     * ['identifier' => $this->field, 'component' => 'pagetype'],
+     * ['identifier' => $this->field, 'component' => 'core_plugin'],
+     * ['identifier' => $this->table . $this->field, 'component' => 'moodle'],
+     * ['identifier' => $this->table . $this->field, 'component' => 'core'],
+     * ['identifier' => $this->table . $this->field, 'component' => 'pagetype'],
+     * ['identifier' => $this->table . $this->field, 'component' => 'core_plugin'],
+     * ['identifier' => $this->field . $this->table, 'component' => 'moodle'],
+     * ['identifier' => $this->field . $this->table, 'component' => 'core'],
+     * ['identifier' => $this->field . $this->table, 'component' => 'pagetype'],
+     * ['identifier' => $this->field . $this->table, 'component' => 'core_plugin'],
+     * ['identifier' => $this->field . ' ' . $this->table, 'component' => 'moodle'],
+     * ['identifier' => $this->field . ' ' . $this->table, 'component' => 'core'],
+     * ['identifier' => $this->field . ' ' . $this->table, 'component' => 'pagetype'],
+     * ['identifier' => $this->field . ' ' . $this->table, 'component' => 'core_plugin'],
+     * ['identifier' => $foundstring, 'component' => 'moodle'],
+     * ['identifier' => $foundstring, 'component' => 'core'],
+     * ['identifier' => $foundstring, 'component' => 'pagetype'],
+     * ['identifier' => $foundstring, 'component' => 'core_plugin'],
+     * ['identifier' => $this->field, 'component' => 'mod_' . $plugroot[0]],
+     * ['identifier' => ($plugroot[1] ?? '') . $this->field, 'component' => 'mod_' . $plugroot[0]],
+     * ['identifier' => $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
+     * ['identifier' => ($plugroot[1] ?? '') . $fieldwithoutunderscore, 'component' => 'mod_' . $plugroot[0]],
+     * ['identifier' => $this->field, 'component' => $this->table],
+     * ['identifier' => 'pluginname', 'component' => $this->table],
+     * ];
+     *
+     * foreach ($allcombinations as $string) {
+     * $stringid = $string['identifier'];
+     * $componentid = $string['component'];
+     * if (get_string_manager()->string_exists($stringid, $componentid)) {
+     * $foundstring = get_string($stringid, $componentid, 'x'); //Adding x in case the found has a var.
+     * break;
+     * }
+     * }
+     * return $foundstring;
+     * }*/
+
+    public function findoutstanding(): string {
+        $foundstring = $this->field;
+
+        // Extract plugin component from table name
+        $tableparts = explode('_', $this->table, 2);
+        $plugincomponent = isset($tableparts[1]) ? 'mod_' . $tableparts[0] : '';
+
+        $candidates = [
+            // Highest priority: Direct field name in plugin component.
+                ['identifier' => $this->field, 'component' => $plugincomponent],
+
+            // Standard Moodle core strings.
+                ['identifier' => $this->field, 'component' => 'core'],
+                ['identifier' => $this->field, 'component' => 'moodle'],
+
+            // Common field patterns.
+                ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent],
+                ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'],
+
+            // Field type specific (for data activity modules).
+                ['identifier' => $this->field, 'component' => 'datafield_' . $this->field],
+
+            // Legacy patterns.
+                ['identifier' => $this->table . $this->field, 'component' => $plugincomponent]
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (empty($candidate['component'])) {
+                continue;
+            }
+
+            if (get_string_manager()->string_exists($candidate['identifier'], $candidate['component'])) {
+                return get_string($candidate['identifier'], $candidate['component']);
+            }
+        }
+
+        return $foundstring;
+    }
+
+    /**
+     * Unified file URL resolver with context-aware processing.
+     *
+     * @param string $text Content containing @@PLUGINFILE@@ references
+     * @param string $table Entity type (course|course_sections|mod_name)
+     * @param int $itemid Entity ID from specified table
+     * @param string $filearea File area identifier
+     * @param int $cmid Course module ID (for activities)
+     * @return string Processed text with valid URLs
+     */
+    public function resolve_pluginfiles(string $text, string $table, int $itemid,
+            string $filearea, int $cmid = 0) {
+        $contextinfo = $this->get_context_info($table, $itemid, $cmid);
+        $fs = get_file_storage();
+
+        try {
+            $files = $fs->get_area_files(
+                    $contextinfo['contextid'],
+                    $contextinfo['component'],
+                    $filearea,
+                    $contextinfo['itemid'],
+                    'filename, filepath',
+                    false
+            );
+
+            foreach ($files as $file) {
+                $url = moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename()
+                );
+
+                $text = str_replace(
+                        '@@PLUGINFILE@@/' . $file->get_filename(),
+                        $url->out(),
+                        $text
+                );
+            }
+        } catch (Exception $e) {
+            debugging('File processing error: ' . $e->getMessage());
+        }
+
+        return $text;
+    }
+
+    /**
+     * Context resolution optimized for Moodle's hierarchy.
+     *
+     * @param string $table
+     * @param int $itemid
+     * @param int $cmid
+     * @return array
+     */
+    private function get_context_info(string $table, int $itemid, int $cmid = 0): array {
+        switch ($table) {
+            case 'course':
+                $context = context_course::instance($itemid);
+                return [
+                        'contextid' => $context->id,
+                        'component' => 'course',
+                        'itemid' => $itemid
+                ];
+
+            case 'course_sections':
+                $context = context_course::instance(
+                        get_field_sql("SELECT course FROM {course_sections} WHERE id = ?", [$itemid])
+                );
+                return [
+                        'contextid' => $context->id,
+                        'component' => 'course',
+                        'itemid' => $itemid
+                ];
+
+            default: // Activity modules
+                $context = context_module::instance($cmid);
+                return [
+                        'contextid' => $context->id,
+                        'component' => 'mod_' . $table,
+                        'itemid' => $cmid
+                ];
+        }
+    }
+
+    static public function filterdbtextfields($tablename) {
+        if (!isset(self::$filteredtablefields[$tablename])) {
+            global $DB;
+            // We build an array of all Text fields for this record.
+            $columns = $DB->get_columns($tablename);
+            // Just get db collumns we need (texts content).
+            $textcols = array_filter($columns, function($field) use ($tablename) {
+                // Only scan the main text types that are above minîmum text field size.
+                return (($field->meta_type === "C" && $field->max_length > self::$mintxtfieldsize)
+                                || $field->meta_type === "X")
+                        && !in_array('*_' . $field->name, self::$comoncolstoskip)
+                        && !in_array($tablename . '_' . $field->name, self::$usercolstoskip)
+                        && !in_array($tablename . '_' . $field->name, self::$modcolstoskip);
+            });
+            self::$filteredtablefields[$tablename] = array_keys($textcols);
+        }
+        return self::$filteredtablefields[$tablename];
+    }
+
+    static public function getfields(mixed $info, string $table, array $collumns, $cmid): array {
+        $infos = [];
+
+        foreach ($collumns as $collumn) {
+            $fieldtextformat = "{$collumn}format";
+            if ($info->{$collumn} !== null && $info->{$collumn} !== '') {
+                $infos[] = new field(
+                        $info->id,
+                        $info->{$collumn},
+                        $info->{$fieldtextformat} ?? 0,
+                        $collumn,
+                        $table,
+                        $cmid
+                );
+            }
+        }
+        return $infos;
+    }
+
+    static public function getfieldsfrominfo(cm_info $cm_info) {
+        $mod = $cm_info->modname;
+        return self::getfields($cm_info, $mod, self::filterdbtextfields($cm_info->modname), $cm_info->id);
+    }
+
 }

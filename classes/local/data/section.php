@@ -42,10 +42,7 @@ class section {
     public function __construct(section_info $section_info, base $courseformat) {
         $this->si = $section_info;
         $this->courseformat = $courseformat;
-        foreach ($this->si->get_sequence_cm_infos() as $cmid => $coursemodule) {
-            $this->modules[$cmid] = new module($coursemodule);
-        }
-        $this->cms = $this->si->get_sequence_cm_infos();
+        $this->getmodules();
     }
 
     public function isvisible(): bool {
@@ -64,11 +61,19 @@ class section {
         return $this->si->sectionnum;
     }
 
-    public function getfields(): array {
-        $fs = [];
-        if ($this->si->name !== null && $this->si->name !== '') {
-            $fs[] = new field();
+    public function getsectionfields(): array {
+        $infos = [];
+        $table = 'course_sections';
+        $collumns = ['name', 'summary'];
+        return field::getfields($infos, $table, $collumns);
+    }
+
+    /**
+     * @return void
+     */
+    public function getmodules(): void {
+        foreach ($this->si->get_sequence_cm_infos() as $cmid => $coursemodule) {
+            $this->modules[$cmid] = new module($coursemodule);
         }
-        return $fs;
     }
 }
