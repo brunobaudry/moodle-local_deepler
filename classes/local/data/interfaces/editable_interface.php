@@ -14,25 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_deepler\local\data\subs;
-global $CFG;
-
-include_once($CFG->dirroot . '/mod/moodleoverflow/locallib.php');
+namespace local_deepler\local\data\interfaces;
 
 /**
- * Subclass of moodleoverflow as it has chapters (subs).
+ * Interface object that can be edited in moodle.
  *
- * @package    'local_deepler';
+ * @package    local_deepler
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @todo MDL-0000 implent moodleoverflow_get_discussions
  */
-class moodleoverflow {
-    private mixed $oveflow;
-    private $discussions;
-
-    public function __construct($overflow) {
-        $this->oveflow = $overflow;
-        // $this->discussions = moodleoverflow_get_discussions($this->overflow);
-    }
+interface editable_interface {
+    /**
+     * Get the link to edit the object.
+     *
+     * @return string
+     */
+    public function getlink(): string;
 }

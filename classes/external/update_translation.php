@@ -132,7 +132,7 @@ class update_translation extends external_api {
                 'error' => $prefix . " " . ($exception->debuginfo ?? $exception->errorcode),
                 'keyid' => '',
                 't_lastmodified' => 0,
-                'text' => ''
+                'text' => '',
         ];
     }
     /**

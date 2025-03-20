@@ -32,9 +32,11 @@
 use classes\local\services\lang_helper;
 use DeepL\AuthorizationException;
 use DeepL\DeepLException;
-use local_deepler\local\data\course_structure_collector;
+use local_deepler\local\data\course;
+use local_deepler\local\data\field;
 use local_deepler\output\badsettings_page;
 use local_deepler\output\nodeepl_page;
+use local_deepler\output\translate_page;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -84,6 +86,7 @@ echo $output->heading($mlangfilter->filter($course->fullname));
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
+    field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
     $languagepack->initdeepl();
     // Set js data.
     $jsconfig = new stdClass();
@@ -104,11 +107,11 @@ try {
     $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
     // Output translation grid.
     //$coursedata = new course_data($course, $languagepack->targetlang, $context->id);
-    $coursedata = new course_structure_collector($course);
+    $coursedata = new course($course);
     // Build the page.
     // $prepareddata = $coursedata->getdata();
-    // $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
-    // echo $output->render($renderable);
+    $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release);
+    echo $output->render($renderable);
     // Output footer.
     echo $output->footer();
 } catch (AuthorizationException $e) {

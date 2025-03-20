@@ -71,8 +71,8 @@ function local_deepler_pluginfile($course, $cm, $context, $filearea, $args, $for
         return false;
     }
     // File area whitelist.
-    $valid_areas = ['custom_docs', 'user_uploads'];
-    if (!in_array($filearea, $valid_areas)) {
+    $validareas = ['custom_docs', 'user_uploads'];
+    if (!in_array($filearea, $validareas)) {
         return false;
     }
     // Security checks.

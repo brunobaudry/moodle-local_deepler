@@ -18,6 +18,7 @@ namespace local_deepler\output;
 
 use classes\local\services\lang_helper;
 use filter_multilang2;
+use local_deepler\local\data\course;
 use renderable;
 use renderer_base;
 use stdClass;
@@ -39,23 +40,17 @@ class translate_page implements renderable, templatable {
      */
     private string $version;
     /**
-     * The course in translation.
-     *
-     * @var object
-     */
-    private object $course;
-    /**
      * The data of the course parsed from mod_info.
      *
-     * @var array
+     * @var \local_deepler\local\data\course
      */
-    private array $coursedata;
+    private course $coursedata;
     /**
      * The current multilang filter object.
      *
      * @var \filter_multilang2
      */
-    private object $mlangfilter;
+    private filter_multilang2 $mlangfilter;
     /**
      * @var array|mixed
      */
@@ -63,29 +58,27 @@ class translate_page implements renderable, templatable {
     /**
      * The form to display the row UI.
      *
-     * @var translate_form
-     * TODO MDL-0 change this to mustache.
+     * @var translateform
      */
-    private translate_form $mform;
+    private translateform $mform;
 
     /**
      * Class Construct.
      *
-     * @param \stdClass $course
-     * @param array $coursedata
+     * @param \local_deepler\local\data\course $coursedata
      * @param \filter_multilang2 $mlangfilter
      * @param lang_helper $languagepack
      * @param string $version
      */
-    public function __construct(stdClass $course, array $coursedata, filter_multilang2 $mlangfilter, lang_helper $languagepack,
+    public function __construct(course $coursedata, filter_multilang2 $mlangfilter, lang_helper $languagepack,
             string $version) {
         $this->version = $version;
-        $this->course = $course;
+        // $this->course = $course;
         $this->coursedata = $coursedata;
         $this->langpacks = $languagepack;
         $this->mlangfilter = $mlangfilter;
         // Moodle Form.
-        $mform = new translate_form(null, ['course' => $course, 'coursedata' => $coursedata, 'mlangfilter' => $mlangfilter,
+        $mform = new translateform(null, ['coursedata' => $coursedata, 'mlangfilter' => $mlangfilter,
                 'langpack' => $languagepack,
         ]);
         $this->mform = $mform;
@@ -100,7 +93,7 @@ class translate_page implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $data = new stdClass();
         // Data for mustache template.
-        $data->course = $this->course;
+        //$data->course = $this->course;
         $data->langstrings = $this->langpacks->preparestrings();
         $data->targethtmloptions = $this->langpacks->preparehtmlotions(false, true);
         $data->targetlangs = $this->langpacks->prepareoptionlangs(false, true);
@@ -121,8 +114,8 @@ class translate_page implements renderable, templatable {
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
         // Pass data.
-        $data->course = $this->course;
-        $data->coursedata = $this->coursedata;
+        // $data->course = $this->course;
+        // $data->coursedata = $this->coursedata;
         $data->version = $this->version;
         return $data;
     }

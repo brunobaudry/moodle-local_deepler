@@ -14,25 +14,37 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_deepler\local\data\subs;
-global $CFG;
-
-include_once($CFG->dirroot . '/mod/moodleoverflow/locallib.php');
-
 /**
- * Subclass of moodleoverflow as it has chapters (subs).
+ * Interface object that have icons, purpose and common naming.
  *
- * @package    'local_deepler';
+ * @package    local_deepler
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @todo MDL-0000 implent moodleoverflow_get_discussions
  */
-class moodleoverflow {
-    private mixed $oveflow;
-    private $discussions;
 
-    public function __construct($overflow) {
-        $this->oveflow = $overflow;
-        // $this->discussions = moodleoverflow_get_discussions($this->overflow);
-    }
+namespace local_deepler\local\data\interfaces;
+/**
+ * Interface iconic_interface
+ */
+interface iconic_interface {
+    /**
+     * Get the icon to be displayed.
+     *
+     * @return string
+     */
+    public function geticon(): string;
+
+    /**
+     * Get the purpose of the object.
+     *
+     * @return string
+     */
+    public function getpurpose(): string;
+
+    /**
+     * Get the plugin name.
+     *
+     * @return string
+     */
+    public function getpluginname(): string;
 }

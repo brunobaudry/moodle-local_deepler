@@ -16,37 +16,150 @@
 
 namespace local_deepler\local\data\subs;
 
-use Exception;
+use local_deepler\local\data\field;
 use mod_quiz\quiz_settings;
 use mod_quiz\structure;
 use question_bank;
 
+/**
+ * Subclass for quiz with sub questions.
+ *
+ * @package    local_deepler
+ * @copyright  2025  <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quiz {
+    /** @var array */
     private array $questions;
+    /**
+     * @var \mod_quiz\quiz_settings
+     */
+    private quiz_settings $quizsettings;
+    /**
+     * @var \mod_quiz\structure
+     */
+    private structure $structure;
 
+    /**
+     * Constructor.
+     *
+     * @param $quiz
+     * @throws \dml_exception
+     */
     public function __construct($quiz) {
-        $quizsettings = quiz_settings::create($quiz->instance);
-        $structure = structure::create_for_quiz($quizsettings);
-        $slots = $structure->get_slots();
+        $this->quizsettings = quiz_settings::create($quiz->instance);
+        $this->structure = structure::create_for_quiz($this->quizsettings);
+        $slots = $this->structure->get_slots();
         $this->questions = [];
         foreach ($slots as $slot) {
-            $this->questions[] = question_bank::load_question($slot->questionid);
+            if ($slot->qtype === 'random') {
+                $this->fetchrandomquestions($slot->id);
+            } else {
+                $this->questions[] = question_bank::load_question($slot->questionid);
+            }
         }
     }
 
-    public function getfields() {
-        $fields = [];
+    /**
+     * Get the child fields.
+     *
+     * @return array
+     */
+    public function getchilds(): array {
+        $childs = [];
         /** @var \question_definition $question */
         foreach ($this->questions as $question) {
-            $class = "local_deepler\local\data\subs\questions\{$question->qtype}";
-            try {
-                $q = new $class($question);
-                $fields[] = $q->getfields();
-            } catch (Exception $e) {
-                debugging($e->getMessage());
-                //return [];
+            $params = [
+                    'question' => $question,
+                    'cmid' => $this->quizsettings->get_cmid(),
+            ];
+            $name = $question->qtype->plugin_name();
+            $class = "questions\\{$name}";
+
+            switch ($name) {
+                case 'qtype_shortanswer':
+                case 'qtype_calculatedmulti':
+                case 'qtype_multichoice':
+                    $class = 'questions\qtype_multi';
+                    break;
+                case 'qtype_numerical':
+                case 'qtype_calculated':
+                case 'qtype_calculatedsimple':
+                    $class = 'questions\qtype_calculated';
+                    break;
+                case 'qtype_ddwtos':
+                    $class = 'questions\qtype_gapselect'; // Same as qtype_gapselect obviously.
+                    break;
+                case 'qtype_ddmarker':
+                    $class = 'questions\qtype_ddimageortext'; // Same as qtype_ddimageortext obviously.
+                    break;
             }
+
+            $item = field::createclassfromstring($class, $params);
+            if ($item === null) {
+                // Case 'qtype_description'.
+                // Case 'qtype_randomsamatch'.
+                // Case 'qtype_essay'.
+                // Case 'qtype_multianswer'.
+                // Other cases.
+                $item = field::createclassfromstring('questions\qtype_basic', $params);
+            }
+            $childs[] = $item;
         }
-        return $fields;
+        return $childs;
+    }
+
+    /**
+     * Special method to fetch random questions.
+     *
+     * @param int $slotid
+     * @return void
+     * @throws \dml_exception
+     */
+    public function fetchrandomquestions(int $slotid): void {
+        global $DB;
+        // Retrieve category and filter parameters.
+        $reference = $DB->get_record('question_set_references', [
+                'component' => 'mod_quiz',
+                'questionarea' => 'slot',
+                'itemid' => $slotid,
+        ], '*', MUST_EXIST);
+        // Decode filter condition.
+        $filter = json_decode($reference->filtercondition);
+        // Initialize category information.
+        $categoryconfig = [
+                'primary_category' => null,
+                'includesubcategories' => false,
+        ];
+
+        // Modern format detection.
+        if (isset($filter->filter->category)) {
+            $categoryconfig['primary_category'] = (int) $filter->filter->category->values[0];
+            $categoryconfig['includesubcategories'] =
+                    (bool) ($filter->filter->category->filteroptions->includesubcategories ?? false);
+        } else if (isset($filter->cat)) {
+            // Legacy format fallback.
+            $categories = array_map('intval', explode(',', $filter->cat));
+            $categoryconfig['primary_category'] = $categories[0];
+            $categoryconfig['includesubcategories'] = (bool) ($filter->includesubcategories ?? false);
+        }
+        // Output structure matches modern API.
+        $result = [
+                'questioncategoryid' => $categoryconfig['primary_category'],
+                'includesubcategories' => $categoryconfig['includesubcategories'],
+                'tags' => $filter->tags ?? [],
+        ];
+
+        // Get all short-answer questions in target category.
+        $finder = question_bank::get_finder();
+        $questions = $finder->get_questions_from_categories(
+                $result['questioncategoryid'],
+                $result['includesubcategories'],
+                $result['tags']);
+
+        // Load full question objects.
+        foreach ($questions as $question) {
+            $this->questions[] = question_bank::load_question($question);
+        }
     }
 }

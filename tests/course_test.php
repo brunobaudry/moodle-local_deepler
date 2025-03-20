@@ -76,7 +76,6 @@ final class course_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
-
         $this->resetAfterTest(true);
     }
 }

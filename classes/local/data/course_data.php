@@ -393,153 +393,43 @@ class course_data {
         $qactivity = new activity('question_answers', $act->id, $cmid, $act->sectionid, '', '', $activity);
         $qidfiledname = $question->qtype->questionid_column_name();
 
-        $optionstablename = '';
 
-        $hasoptions = false;
-        if ($dbmanager->table_exists($activity->qtype . '_options')) {
-            $optionstablename = $activity->qtype . '_options';
-            $hasoptions = true;
-        }
-        if ($dbmanager->table_exists($activity->qtype . '_choice')) {
-            $optionstablename = $activity->qtype . '_choice';
-            $hasoptions = true;
-        }
         switch ($activity->qtype) {
-            case 'qtype_match':
-                if ($dbmanager->table_exists($activity->qtype . '_subquestions')) {
-                    $substablename = $activity->qtype . '_subquestions';
-                    $qactivity->modname = $substablename;
-                    if ($DB->record_exists($substablename, [$qidfiledname => $question->id])) {
-                        $submatches = $DB->get_records($substablename, [$qidfiledname => $question->id]);
-                        foreach ($submatches as $submatch) {
-                            $this->injectitem(
-                                    $activitydata,
-                                    $substablename,
-                                    'id',
-                                    $submatch->id,
-                                    $qactivity);
-                        }
-
-                    }
-                }
-                break;
-            case 'qtype_multichoice':
-                foreach ($question->answers as $answer) {
-                    $activitydata[] = new field($answer->id,
-                            $answer->answer,
-                            $answer->answerformat,
-                            'answer',
-                            $qactivity,
-                            3,
-                            $cmid);
-                    if (!empty($answer->feedback)) {
-                        $activitydata[] = new field(
-                                $answer->id,
-                                $answer->feedback,
-                                $answer->feedbackformat,
-                                'feedback',
-                                $qactivity,
-                                3,
-                                $cmid
-                        );
-                    }
-                }
-                break;
             case 'qtype_description':
             case 'qtype_randomsamatch':
             case 'qtype_essay':
             case 'qtype_multianswer':
                 // Break as all the data is in the question table.
                 break;
+            case 'qtype_shortanswer':
+            case 'qtype_calculatedmulti':
+            case 'qtype_multichoice':
+                foreach ($question->answers as $answer) {
+                    $activitydata[] = new field(
+                            $answer->id,
+                            $answer->answer,
+                            $answer->answerformat,
+                            'answer',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                    if (!empty($answer->feedback)) {
+                        $activitydata[] = new field(
+                                $answer->id,
+                                $answer->feedback,
+                                $answer->feedbackformat,
+                                'feedback',
+                                $qactivity,
+                                3,
+                                $cmid
+                        );
+                    }
+                }
+                break;
+            case 'qtype_numerical':
             case 'qtype_calculated':
             case 'qtype_calculatedsimple':
-                foreach ($question->answers as $answer) {
-
-                    if (!empty($answer->feedback)) {
-                        $activitydata[] = new field(
-                                $answer->id,
-                                $answer->feedback,
-                                $answer->feedbackformat,
-                                'feedback',
-                                $qactivity,
-                                3,
-                                $cmid
-                        );
-                    }
-                }
-                break;
-            case 'qtype_calculatedmulti':
-                foreach ($question->answers as $answer) {
-                    $activitydata[] = new field(
-                            $answer->id,
-                            $answer->answer,
-                            $answer->answerformat,
-                            'answer',
-                            $qactivity,
-                            3,
-                            $cmid
-                    );
-                    if (!empty($answer->feedback)) {
-                        $activitydata[] = new field(
-                                $answer->id,
-                                $answer->feedback,
-                                $answer->feedbackformat,
-                                'feedback',
-                                $qactivity,
-                                3,
-                                $cmid
-                        );
-                    }
-                }
-                break;
-            case 'qtype_truefalse':
-                if (!empty($question->truefeedback)) {
-                    $activitydata[] = new field(
-                            $question->trueanswerid,
-                            $question->truefeedback,
-                            $question->truefeedbackformat,
-                            'feedback',
-                            $qactivity,
-                            3,
-                            $cmid
-                    );
-                }
-                if (!empty($question->falsefeedback)) {
-                    $activitydata[] = new field(
-                            $question->falseanswerid,
-                            $question->falsefeedback,
-                            $question->falsefeedbackformat,
-                            'feedback',
-                            $qactivity,
-                            3,
-                            $cmid
-                    );
-                }
-                break;
-            case 'qtype_shortanswer':
-                foreach ($question->answers as $answer) {
-                    $activitydata[] = new field(
-                            $answer->id,
-                            $answer->answer,
-                            $answer->answerformat,
-                            'answer',
-                            $qactivity,
-                            3,
-                            $cmid
-                    );
-                    if (!empty($answer->feedback)) {
-                        $activitydata[] = new field(
-                                $answer->id,
-                                $answer->feedback,
-                                $answer->feedbackformat,
-                                'feedback',
-                                $qactivity,
-                                3,
-                                $cmid
-                        );
-                    }
-                }
-            case 'qtype_numerical':
                 foreach ($question->answers as $answer) {
                     if (!empty($answer->feedback)) {
                         $activitydata[] = new field(
@@ -588,6 +478,49 @@ class course_data {
                     );
                 }
                 break;
+            case 'qtype_match':
+                if ($dbmanager->table_exists($activity->qtype . '_subquestions')) {
+                    $substablename = $activity->qtype . '_subquestions';
+                    $qactivity->modname = $substablename;
+                    if ($DB->record_exists($substablename, [$qidfiledname => $question->id])) {
+                        $submatches = $DB->get_records($substablename, [$qidfiledname => $question->id]);
+                        foreach ($submatches as $submatch) {
+                            $this->injectitem(
+                                    $activitydata,
+                                    $substablename,
+                                    'id',
+                                    $submatch->id,
+                                    $qactivity);
+                        }
+
+                    }
+                }
+                break;
+            case 'qtype_truefalse':
+                if (!empty($question->truefeedback)) {
+                    $activitydata[] = new field(
+                            $question->trueanswerid,
+                            $question->truefeedback,
+                            $question->truefeedbackformat,
+                            'feedback',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                if (!empty($question->falsefeedback)) {
+                    $activitydata[] = new field(
+                            $question->falseanswerid,
+                            $question->falsefeedback,
+                            $question->falsefeedbackformat,
+                            'feedback',
+                            $qactivity,
+                            3,
+                            $cmid
+                    );
+                }
+                break;
+
             case 'qtype_ordering' :
                 foreach ($question->answers as $answer) {
                     $activitydata[] = new field(
@@ -605,6 +538,16 @@ class course_data {
                 // Log or handle unknown question types.
                 debugging('Unhandled question type: ' . $question->qtype->name(), DEBUG_DEVELOPER);
                 break;
+        }
+        $optionstablename = '';
+        $hasoptions = false;
+        if ($dbmanager->table_exists($activity->qtype . '_options')) {
+            $optionstablename = $activity->qtype . '_options';
+            $hasoptions = true;
+        }
+        if ($dbmanager->table_exists($activity->qtype . '_choice')) {
+            $optionstablename = $activity->qtype . '_choice';
+            $hasoptions = true;
         }
         if ($hasoptions && $DB->record_exists($optionstablename, [$qidfiledname => $question->id])) {
             $qactivity->modname = $optionstablename;

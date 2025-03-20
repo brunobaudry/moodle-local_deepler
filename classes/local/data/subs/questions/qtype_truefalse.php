@@ -14,51 +14,45 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_deepler\local\data\subs;
-defined('MOODLE_INTERNAL') || die();
+namespace local_deepler\local\data\subs\questions;
 
 use local_deepler\local\data\field;
-use stdClass;
-
-global $CFG;
-require_once($CFG->dirroot . '/mod/book/locallib.php');
 
 /**
- * Subclass of book as it has chapters (subs).
+ * True/False question type wrapper.
  *
  * @package    local_deepler
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class book {
-    /** @var array array of id=>chapter */
-    private array $chapters;
-    /** @var \stdClass book db record */
-    private stdClass $book;
-
-    /**
-     * Book wrapper constructor.
-     *
-     * @param \stdClass $book
-     */
-    public function __construct(stdClass $book) {
-        $this->book = $book;
-        $this->chapters = book_preload_chapters($book);
-    }
-
+class qtype_truefalse extends qbase {
     /**
      * Get the fields to be translated.
      *
      * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    public function getfields() {
+    protected function getsubs(): array {
         $fields = [];
-        $table = 'book_chapters';
-        foreach ($this->chapters as $c) {
-            $fields[] = new field($c->id,
-                    $c->title, 0, 'chapter', $table, $this->book->id);
-            $fields[] = new field($c->id,
-                    $c->content, 1, 'content', $table, $this->book->id);
+        if (!empty($this->question->truefeedback)) {
+            $fields[] = new field(
+                    $this->question->trueanswerid,
+                    $this->question->truefeedback,
+                    $this->question->truefeedbackformat,
+                    'feedback',
+                    'question_answers'
+            );
+        }
+        if (!empty($question->falsefeedback)) {
+            $fields[] = new field(
+                    $this->question->falseanswerid,
+                    $this->question->falsefeedback,
+                    $this->question->falsefeedbackformat,
+                    'feedback',
+                    'question_answers'
+            );
         }
         return $fields;
     }

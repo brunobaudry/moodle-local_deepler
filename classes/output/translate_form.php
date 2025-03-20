@@ -62,7 +62,8 @@ class translate_form extends moodleform {
         global $CFG;
 
         // Get course data.
-        $course = $this->_customdata['course'];
+        // $course = $this->_customdata['course'];
+        /** @var \local_deepler\local\data\course $coursedata */
         $coursedata = $this->_customdata['coursedata'];
         $this->langpack = $this->_customdata['langpack'];
         $this->sourceoptions = $this->langpack->preparehtmlotions(true, false);
@@ -153,7 +154,6 @@ class translate_form extends moodleform {
 
         // Get mlangfilter to filter text.
         $mlangfilter = $this->_customdata['mlangfilter'];
-
         // Build a key for js interaction.
         $key = "$item->table[$item->id][$item->field][$item->cmid]";
         $keyid = "{$item->table}-{$item->id}-{$item->field}-{$item->cmid}";

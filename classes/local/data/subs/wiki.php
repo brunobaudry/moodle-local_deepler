@@ -15,24 +15,42 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data\subs;
+defined('MOODLE_INTERNAL') || die();
 global $CFG;
-include_once($CFG->dirroot . '/mod/wiki/locallib.php');
+require_once($CFG->dirroot . '/mod/wiki/locallib.php');
 
 use local_deepler\local\data\field;
 use stdClass;
 
+/**
+ * Subclass of wiki as it has sub wikis (subs).
+ *
+ * @package    local_deepler
+ * @copyright  2025  <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class wiki {
     /** @var \stdClass wiki db */
     private stdClass $wiki;
     /** @var array  wiki_subwikis */
     private array $wikis;
 
+    /**
+     * Constructor.
+     *
+     * @param \stdClass $wiki
+     */
     public function __construct(stdClass $wiki) {
         $this->wiki = $wiki;
         $this->wikis = wiki_get_subwikis($this->wiki->id);
     }
 
-    public function getfields() {
+    /**
+     * Get fields.
+     *
+     * @return array
+     */
+    public function getfields(): array {
         $fields = [];
         foreach ($this->wikis as $wid => $wiki) {
             $pages = wiki_get_page_list($wid);
@@ -48,5 +66,6 @@ class wiki {
                 }
             }
         }
+        return $fields;
     }
 }

@@ -14,14 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_deepler\local\data;
+namespace local_deepler\local\data\subs\questions;
 
-use cm_info;
-
-class cmodule {
-    private cm_info $cm;
-
-    public function __construct(cm_info $cminfo) {
-        $this->cm = $cminfo;
+/**
+ * Basic question type.
+ *
+ * @package    local_deepler
+ * @copyright  2025  <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class qtype_basic extends qbase {
+    /**
+     * Get the fields to be translated.
+     *
+     * @return array
+     */
+    protected function getsubs(): array {
+        return [];
     }
 }

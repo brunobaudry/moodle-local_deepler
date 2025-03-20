@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,8 +16,8 @@
 
 namespace local_deepler\local\data;
 
-use core_courseformat\base;
-use course_modinfo;
+use local_deepler\local\data\interfaces\editable_interface;
+use local_deepler\local\data\interfaces\iconic_interface;
 use stdClass;
 
 /**
@@ -31,54 +30,67 @@ use stdClass;
  *
  */
 class course_structure_collector {
-    /** @var section[] of sections titles (and id / order) for display */
-    private array $sections;
     /**
-     * @var \stdClass
+     * @var course
      */
-    private stdClass $course;
-    /** @var \core_courseformat\base */
-    private base $courseformat;
-    private course_modinfo $courseinfo;
+    private course $course;
+    /**
+     * @var array
+     */
+    private array $modules;
 
+    /**
+     * Constructor.
+     *
+     * @param \stdClass $course course object coming from db call.
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
     public function __construct(stdClass $course) {
-        global $DB;
-        module::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
-        $this->sections = [];
-        $this->course = $course;
-        $this->courseformat = course_get_format($course); // Get the course format for default string.
-        $this->courseinfo = get_fast_modinfo($course);
-        $coursefileds = $this->getcoursefields();
-        $this->getsections();
-        foreach ($this->sections as $section) {
-            $f = $section->getsectionfields();
-            $f;
+        // Set the default filed size for the text fields.
+        field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
+        // Load the course object.
+        $this->course = new course($course);
+        $this->modules = [];
+
+        echo "<a href='{$this->course->getlink()}'>{$this->course->getlink()}</a>";
+        $coursefileds = $this->course->getfields();
+        foreach ($this->course->getsections() as $section) {
+            $section->getfields();
+            $modules = $section->getmodules();
+
+            echo '<br/>******<br/>';
+            echo "<h2>{$section->getsectionname()}</h2>";
+            echo "<a href='{$section->getlink()}'>{$section->getlink()}</a>";
+            if ($modules) {
+                foreach ($modules as $module) {
+                    //$m = $module->getmainfields();
+                    $subs = $module->getfields();
+                    $this->modules[] = $module;
+                    echo '<br/>######<br/>';
+                    echo "<a href='{$module->getlink()}'>{$module->getlink()}</a>";
+                    echo '<br/>';
+                    echo "<p class='{$module->getpurpose()}'><img src='{$module->geticon()}'> {$module->getpluginname()}</p>";
+                    echo '<br/>';
+
+                    if ($module->haschilds()) {
+                        echo '<br/>###### CHILDS #####<br/>';
+                        foreach ($module->getchilds() as $child) {
+
+                            echo '<br/>######<br/>';
+                            if ($child instanceof iconic_interface) {
+                                $icon = $child->geticon();
+                                echo "<p class='{$child->getpurpose()}'><img src='$icon'> {$child->getpluginname()}</p>";
+                            }
+                            if ($child instanceof editable_interface) {
+                                echo "<a href='{$child->getlink()}'>{$child->getlink()}</a>";
+                                echo '<br/>';
+                            }
+                            $subs = array_merge($subs, $child->getfields());
+                        }
+                    }
+                }
+            }
         }
-
-        //$coursesectionsinfo = $courseinfo->get_section_info_all();
-
-        //$class = get_class($coursesectionsinfo);
-        // ($courseinfo);
-        // var_dump($this->sections);
-        //var_dump($coursesectionsinfo['26']);
     }
-
-    public function getcoursefields(): array {
-        $info = $this->courseinfo->get_course();
-        $table = 'course';
-        $collumns = ['fullname', 'shortname', 'summary'];
-
-        return field::getfields($info, $table, $collumns);
-    }
-
-    public function getsections() {
-        foreach ($this->courseinfo->get_section_info_all() as $section_info) {
-            $this->sections[$section_info->sectionnum] = new section($section_info, $this->courseformat);
-        }
-    }
-
-    public function getformat(): base {
-        return $this->courseformat;
-    }
-
 }
