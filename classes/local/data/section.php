@@ -19,6 +19,7 @@ namespace local_deepler\local\data;
 use core_courseformat\base;
 use local_deepler\local\data\interfaces\editable_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
+use local_deepler\local\data\interfaces\visibility_interface;
 use moodle_url;
 use section_info;
 
@@ -29,7 +30,7 @@ use section_info;
  * @copyright  2025 bruno.baudry@bfh.ch
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class section implements translatable_interface, editable_interface {
+class section implements translatable_interface, editable_interface, visibility_interface {
     /** @var \section_info */
     private section_info $si;
     /** @var \core_courseformat\base */
@@ -81,7 +82,9 @@ class section implements translatable_interface, editable_interface {
         if ($defaultname === '') {
             $defaultname = $this->courseformat->get_default_section_name($this->si);
         }
-        return $defaultname;
+        // Return the default name if the section name is empty.
+        // As get_default_section_name can return null, we need to check if it is not null.
+        return $defaultname ?? '';
     }
 
     /**
@@ -102,7 +105,7 @@ class section implements translatable_interface, editable_interface {
         $infos = [];
         $table = 'course_sections';
         $collumns = ['name', 'summary'];
-        return field::getfieldsfromcolumns($infos, $table, $collumns);
+        return field::getfieldsfromcolumns($this->si, $table, $collumns);
     }
 
     /**

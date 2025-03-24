@@ -22,12 +22,14 @@ global $CFG;
 use classes\local\services\lang_helper;
 use core_filters\text_filter;
 use local_deepler\local\data\field;
+use local_deepler\local\data\interfaces\iconic_interface;
+use local_deepler\local\data\interfaces\visibility_interface;
+use local_deepler\local\data\module;
 use local_deepler\local\data\section;
 use moodleform;
 use MoodleQuickForm;
 
 // Load the files we're going to need.
-
 require_once("$CFG->libdir/form/editor.php");
 require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_cteditor.php");
 
@@ -37,9 +39,8 @@ require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_ctedito
  * Provides output class for /local/deepler/translate.php
  *
  * @package    local_deepler
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * TODO MDL-0 should use Mustache templating rather than extending a form as communication is done with JS.
  */
 class translateform extends moodleform {
 
@@ -58,84 +59,303 @@ class translateform extends moodleform {
      */
     private text_filter $mlangfilter;
 
+
+
+    /**
+     * Define Moodle Form.
+     *
+     * @return void
+     */
+    public function definition(): void {
+        global $CFG;
+
+        // Get course data.
+        /** @var \local_deepler\local\data\course $coursedata */
+        $coursedata = $this->_customdata['coursedata'];
+        $this->langpack = $this->_customdata['langpack'];
+        // Get mlangfilter to filter text.
+        $this->mlangfilter = $this->_customdata['mlangfilter'];
+        // Get source options.
+        $this->sourceoptions = $this->langpack->preparehtmlotions(true, false);
+        // Start moodle form.
+        $this->_form->disable_form_change_checker();
+        MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
+                '\local_deepler\editor\MoodleQuickForm_cteditor');
+        // Open Form local_deepler__form.
+        $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
+        // Create course settings section.
+        $this->makecoursesetting($this->makeheader(get_string('settings'), $coursedata->getlink(), 3), $coursedata->getfields());
+        // Create sections.
+        $this->makesections($coursedata->getsections());
+        // Close form.
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * Course first section
+     *
+     * @param string $header
+     * @param array $settingfields
+     * @return void
+     * @throws \coding_exception
+     */
+    function makecoursesetting(string $header, array $settingfields): void {
+        // Open section container for the course settings course__settings section-item.
+        $this->_form->addElement('html', "<div class='section-item'>");
+        // open header div.
+        $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
+        $this->_form->addElement('html', $header);
+        $this->_form->addElement('html', DIV_CLOSE); // Close header div.
+        $this->makesettings($settingfields, 0);
+        // Close section container for the course settings course__settings section-item.
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * First section of the form for course's settings.
+     *
+     * @param array $settingfields
+     * @param string $index
+     * @return void
+     * @throws \coding_exception
+     */
+    public function makesettings(array $settingfields, string $index): void {
+        // Open course settings section.
+        $this->_form->addElement('html', "<div id='sectiondata[$index]' class='local_deepler__sectiondata'>");
+        /** @var field $field */
+        foreach ($settingfields as $field) {
+            $this->makefieldrow($field);
+        }
+        // Close course settings section.
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * Create a section
+     *
+     * @param \local_deepler\local\data\section $section
+     * @return void
+     * @throws \coding_exception
+     */
+    private function makesection(section $section) {
+        $sectionsettingsfields = $section->getfields();
+        $sectionmodules = $section->getmodules();
+        if (!empty($sectionmodules) || !empty($sectionsettingsfields)) {
+            // Open section container for the course settings course__settings section-item.
+            $this->_form->addElement('html',
+                    "<div id='local_deepler__section{$section->getid()}' class='section-item {$this->getitemvisibilityclass($section)}'>");
+            $this->buildhiddenftomstudent();
+            // open header div.
+            $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
+            $this->_form->addElement('html',
+                    $this->makeheader($this->mlangfilter->filter($section->getsectionname()), $section->getlink(), 3));
+            $this->_form->addElement('html', DIV_CLOSE); // Close header div.
+            // Section fields.
+            $this->makesettings($sectionsettingsfields, $section->getorder());
+            // Section's modules.
+            $this->makemodules($sectionmodules);
+            // Close section container for the course settings course__settings section-item.
+            $this->_form->addElement('html', DIV_CLOSE);
+            // Close section container for the course settings course__settings section-item.
+        }
+    }
+
+    /**
+     * Create sections.
+     *
+     * @param array $sections
+     * @return void
+     * @throws \coding_exception
+     */
+    private function makesections(array $sections) {
+        foreach ($sections as $section) {
+            $this->makesection($section);
+        }
+    }
+
+    /**
+     * Make modules.
+     *
+     * @param array $sectionmodules
+     * @return void
+     */
+    private function makemodules(array $sectionmodules): void {
+        /** @var \local_deepler\local\data\module $module */
+        foreach ($sectionmodules as $module) {
+            $this->_form->addElement('html', '<div class="divider"><hr/></div>');
+            $this->makemodule($module);
+        }
+    }
+
+    /**
+     * Make single module.
+     *
+     * @param \local_deepler\local\data\module $module
+     * @return void
+     * @throws \coding_exception
+     */
+    private function makemodule(module $module): void {
+
+        $this->_form->addElement('html',
+                "<div id='{$module->getpluginname()}' 
+                    class='activity-item local_deepler__activity py-2 {$this->getitemvisibilityclass($module)}'>");
+        $this->buildhiddenftomstudent();
+        $icon = $this->makeicon($module, "class='activityicon' data-region='activity-icon'");
+        $header = $this->makeheader($this->makeActivityDesc($module), $module->getlink(), 4, $icon);
+        $this->_form->addElement('html', $header);
+        $fileds = $module->getfields();
+        $childs = $module->getchilds();
+        // Basic common fields.
+        if (!empty($fileds)) {
+            /** @var field $field */
+            foreach ($fileds as $field) {
+                $this->makefieldrow($field);
+            }
+        }
+        // Childs (like book pages or quiz questions).
+        if (!empty($childs)) {
+            /** @var \local_deepler\local\data\interfaces\translatable_interface $child */
+            foreach ($childs as $child) {
+                $interfaces = class_implements($child);
+                $isiconic = in_array('local_deepler\local\data\interfaces\iconic_interface', $interfaces);
+                $iseditable = in_array('local_deepler\local\data\interfaces\editable_interface', $interfaces);
+                // Open section container for the course settings course__settings section-item.
+                $this->_form->addElement('html', "<div class='section-item'>");
+                if ($isiconic && $iseditable) {
+                    // Open header div.
+                    /** @var \local_deepler\local\data\interfaces\iconic_interface|\local_deepler\local\data\interfaces\editable_interface $child */
+                    $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
+                    // Add a header for the child.
+                    $this->_form->addElement('html',
+                            $this->makeheader($this->makeActivityDesc($child), $child->getlink(), 5, $this->makeicon($child)));
+
+                    $this->_form->addElement('html', DIV_CLOSE);
+                }
+                /** @var field $field */
+                foreach ($child->getfields() as $f) {
+                    $this->makefieldrow($f);
+                }
+                // Close section container.
+                $this->_form->addElement('html', DIV_CLOSE);
+            }
+        }
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * Build icon the Moodle way.
+     *
+     * @param \local_deepler\local\data\interfaces\iconic_interface $item
+     * @param string $imageattributes
+     * @return string
+     */
+    private function makeicon(iconic_interface $item, string $imageattributes = ''): string {
+        return "<span class='activity-icon activityiconcontainer smaller {$item->getpurpose()} courseicon align-self-start mr-2'>
+                                    <img src='{$item->geticon()}' $imageattributes
+                                    alt='icon for {$item->getpluginname()}'/></span>";
+    }
+
+    /**
+     * Write a header for the section, module or sub.
+     *
+     * @param string $title
+     * @param string $link
+     * @param int $level
+     * @param string $icon
+     * @return string
+     * @throws \coding_exception
+     */
+    private function makeheader(string $title, string $link, int $level, string $icon = ''): string {
+        $class = "h$level sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2";
+        return "<span id='$title' class='$class'>$icon $title {$this->makeeditbutton($link)}</span>";
+    }
+
     /**
      * Create an edit in place button for each item.
      *
      * @param string $link
-     * @param bool $outlined
      * @return string
      * @throws \coding_exception
      */
-    function makeeditbutton(string $link, bool $outlined = false): string {
+    private function makeeditbutton(string $link): string {
         // Edit button.
-        $class = $outlined ? 'btn-outline-info btn btn-sm' : '';
         $editbuttontitle = get_string('editbutton', 'local_deepler');
-        $editinplacebutton = "<a class='small p-2 $class'
-                        id='local_deepler__sourcelink' href='{$link}' target='_blank'
-                            title='$editbuttontitle'>
-                            <i class='fa fa-pencil' aria-hidden='true'></i>
-                        </a>";
-        return $editinplacebutton;
+        return "<a 
+                    class='small p-2' 
+                    id='local_deepler__sourcelink' 
+                    href='{$link}' 
+                    target='_blank'
+                    title='$editbuttontitle'>
+                    <i class='icon fa fa-pen fa-fw' aria-hidden='true'></i>
+                    </a>";
     }
+
     /**
-     * Granular row creation.
+     * Build the header line.
      *
-     * @param \MoodleQuickForm $mform
+     * @param editable_interface | iconic_interface $item
+     * @return string
+     */
+    public function makeActivityDesc(iconic_interface|editable_interface $item): string {
+        return $item->getpluginname() . ': ' . $this->mlangfilter->filter($item->getfields()[0]->get_text());
+    }
+
+    /**
+     * Prepare and display the translation return text editor and the status button.
+     *
+     * @param string $key
      * @param \local_deepler\local\data\field $field
+     * @return void
+     */
+    private function fieldrowcolumn3(string $key, field $field): void {
+        // Column 3 settings.
+        $translatededitor = "<div
+            class='col-5 px-0 local_deepler__translation'
+            data-action='local_deepler/editor'
+            data-key='$key'
+            data-table='{$field->get_table()}'
+            data-cmid='{$field->get_cmid()}'
+            data-id='{$field->get_id()}'
+            data-field='{$field->get_tablefield()}'
+            data-tid='{$field->get_tid()}'>"; // Translation Input div.
+
+        $fieldformat = $field->get_format();
+        $nowisiwig = "<div
+                class='format-{$fieldformat} border py-2 px-3'
+                contenteditable='true'
+                data-format='{$fieldformat}'>" . DIV_CLOSE; // No wisiwig editor text fields.
+
+        // Column 3 Layout.
+        $this->_form->addElement('html', $translatededitor); // Open $translatededitor.
+        if ($fieldformat === 0) { // Plain text input.
+            $this->_form->addElement('html', $nowisiwig);
+        } else {
+            $this->_form->addElement('cteditor', $key);
+            $this->_form->setType($key, PARAM_RAW);
+        }
+        $this->_form->addElement('html', DIV_CLOSE); // Closing $translatededitor.
+        // Status button.
+        $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
+                role='status' aria-disabled='true'><i class='fa'
+                ></i></span>";  // Status icon/button.
+        // Status surrounding div.
+        $statusdiv = "<div class='col-1 text-center' data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
+        $this->_form->addElement('html', $statusdiv);// Adding validator btn.
+    }
+
+    /**
+     * Build the middle column of the translation form that includes source text and source lang selector.
+     *
+     * @param \local_deepler\local\data\field $field
+     * @param string $keyid
+     * @param string $key
+     * @param bool $isdbkey
      * @return void
      * @throws \coding_exception
      */
-    private function makefieldrow(MoodleQuickForm $mform, field $field) {
-        $cssclass = '';
-        $key = $field->getkey();
-        $keyid = $field->getkeyid();
-        $alreadyhasmultilang = $field->has_multilang();
+    public function fieldrowcolumn2(field $field, string $keyid, string $key, bool $isdbkey): void {
         $hasotherandsourcetag = $field->check_field_has_other_and_sourcetag($this->langpack->currentlang);
-        $tneeded = $field->get_status()->istranslationneeded();
-        $status = $tneeded ? 'needsupdate' : 'updated';
-        // Hacky Special cases where the content is a db key (should never be translated).
-        $isdbkey = str_contains($field->get_table(), 'wiki_pages') && $field->get_tablefield() === 'title';
-        $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
-        // Open translation item.
-        $mform->addElement('html',
-                "<div title='$rowtitle' class='$cssclass row align-items-start py-2' data-row-id='$isdbkey$key'
-                    data-status='$status'>");
-        $sametargetassource = $this->langpack->isrephrase();
-        if ($sametargetassource || $this->langpack->targetlang === '') {
-            $buttonclass = 'badge-dark';
-            $titlestring = get_string('canttranslate', 'local_deepler', $this->langpack->targetlang);
-        } else if ($tneeded) {
-            if (str_contains($field->get_text(), "{mlang " . $this->langpack->targetlang)) {
-                $buttonclass = 'badge-warning';
-                $titlestring = get_string('needsupdate', 'local_deepler');
-            } else {
-                $buttonclass = 'badge-danger';
-                $titlestring = get_string('nevertranslated', 'local_deepler', $this->langpack->targetlang);
-            }
-
-        } else {
-            $buttonclass = 'badge-success';
-            $titlestring = get_string('uptodate', 'local_deepler');
-        }
-        $titlestring = htmlentities($titlestring, ENT_HTML5);
-        // Thew little badge showing the status of the translations.
-        $bulletstatus = '<span id="previousTranslationStatus" title="' . $titlestring .
-                '" class="badge badge-pill ' . $buttonclass . '">&nbsp;</span>';
-        // The checkbox to select items for batch actions.
-        $checkbox = '<input title="' . $titlestring . '"' . " type='checkbox' data-key='$key'
-            class='mx-2'
-            data-action='local_deepler/checkbox'
-            disabled/>";
-        // Column 1 layout.
-        $mform->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
-        $mform->addElement('html', "<small class='local_deepler__activityfield lh-sm'>
-            {$field->get_translatedfieldname()}</small><br/>");
-        if (!$isdbkey) {
-            $mform->addElement('html', $bulletstatus);
-            $mform->addElement('html', $checkbox);
-        }
-        $mform->addElement('html', DIV_CLOSE);
-        // Column 2 settings.
+        $alreadyhasmultilang = $field->has_multilang();
         $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
         if ($alreadyhasmultilang) {
             if ($hasotherandsourcetag) {
@@ -170,172 +390,133 @@ class translateform extends moodleform {
         // Source Text.
         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
         // Source texts.
-        $rawsourcetext = base64_encode($this->mlangfilter->filter($item->text) ?? '');
-        $trimedtext = trim($field->get_text());
+        $fieldtext = $field->get_text();
+        $rawsourcetext = base64_encode($this->mlangfilter->filter($fieldtext) ?? '');
+        $trimedtext = trim($fieldtext);
         $rawunfilterdtext = base64_encode($trimedtext);
         $mlangfiltered = $this->mlangfilter->filter($field->get_displaytext());
         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
                 data-sourcetext-raw='$rawsourcetext' data-filedtext-raw='$rawunfilterdtext' >$mlangfiltered" . DIV_CLOSE;
         // Collapsible multilang textarea.
-
         $multilangtextarea = "<div class='collapse' id='$keyid'>";
         $multilangtextarea .= "<div data-key='$key'
             data-action='local_deepler/textarea'>$trimedtext" . DIV_CLOSE;
         $multilangtextarea .= DIV_CLOSE;
         // Column 2 layout.
-        $mform->addElement('html', $sourcetextdiv);
-        //$mform->addElement('html', $editinplacebutton);
+        $this->_form->addElement('html', $sourcetextdiv);
         if (!$isdbkey) {
-            $mform->addElement('html', $mutlilangspantag);
-            $mform->addElement('html', $sourceselect);
+            $this->_form->addElement('html', $mutlilangspantag);
+            $this->_form->addElement('html', $sourceselect);
         }
-        $mform->addElement('html', $sourcetextarea);
+        $this->_form->addElement('html', $sourcetextarea);
         if (!$isdbkey) {
-            $mform->addElement('html', $multilangtextarea);
+            $this->_form->addElement('html', $multilangtextarea);
         }
 
         // Closing sourcetext div.
-        $mform->addElement('html', DIV_CLOSE);
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * Build the first column of the translation form that includes the checkbox and the status badge.
+     *
+     * @param \local_deepler\local\data\field $field
+     * @param string $key
+     * @param bool $isdbkey
+     * @return void
+     * @throws \coding_exception
+     */
+    public function fieldrowcolumn1(field $field, string $key, bool $isdbkey): void {
+        $cssclass = '';
+        $tneeded = $field->get_status()->istranslationneeded();
+        $status = $tneeded ? 'needsupdate' : 'updated';
+        $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
+
+        $sametargetassource = $this->langpack->isrephrase();
+        if ($sametargetassource || $this->langpack->targetlang === '') {
+            $buttonclass = 'badge-dark';
+            $titlestring = get_string('canttranslate', 'local_deepler', $this->langpack->targetlang);
+        } else if ($tneeded) {
+            if (str_contains($field->get_text(), "{mlang " . $this->langpack->targetlang)) {
+                $buttonclass = 'badge-warning';
+                $titlestring = get_string('needsupdate', 'local_deepler');
+            } else {
+                $buttonclass = 'badge-danger';
+                $titlestring = get_string('nevertranslated', 'local_deepler', $this->langpack->targetlang);
+            }
+
+        } else {
+            $buttonclass = 'badge-success';
+            $titlestring = get_string('uptodate', 'local_deepler');
+        }
+        $titlestring = htmlentities($titlestring, ENT_HTML5);
+        // Thew little badge showing the status of the translations.
+        $bulletstatus = '<span id="previousTranslationStatus" title="' . $titlestring .
+                '" class="badge badge-pill ' . $buttonclass . '">&nbsp;</span>';
+        // The checkbox to select items for batch actions.
+        $checkbox = '<input title="' . $titlestring . '"' . " type='checkbox' data-key='$key'
+            class='mx-2'
+            data-action='local_deepler/checkbox'
+            disabled/>";
+        // Open translation item.
+        $this->_form->addElement('html',
+                "<div title='$rowtitle' class='$cssclass d-flex align-items-start py-2' data-row-id='$isdbkey$key'
+                    data-status='$status'>");
+        // Column 1 layout.
+        $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
+        $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>
+            {$field->get_translatedfieldname()}</small><br/>");
+        if (!$isdbkey) {
+            $this->_form->addElement('html', $bulletstatus);
+            $this->_form->addElement('html', $checkbox);
+        }
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * Granular row creation.
+     *
+     * @param \local_deepler\local\data\field $field
+     * @return void
+     * @throws \coding_exception
+     */
+    private function makefieldrow(field $field) {
+
+        $key = $field->getkey();
+        $keyid = $field->getkeyid();
+
+        // Hacky Special cases where the content is a db key (should never be translated).
+        $isdbkey = str_contains($field->get_table(), 'wiki_pages') && $field->get_tablefield() === 'title';
+        $this->fieldrowcolumn1($field, $key, $isdbkey);
+
+        // Column 2 settings.
+        $this->fieldrowcolumn2($field, $keyid, $key, $isdbkey);
 
         if (!$isdbkey) {
-            // Column 3 settings.
-            // Translation Input div.
-            $translatededitor = "<div
-            class='col-5 px-0 local_deepler__translation'
-            data-action='local_deepler/editor'
-            data-key='$key'
-            data-table='{$field->get_table()}'
-            data-cmid='{$field->get_cmid()}'
-            data-id='{$field->get_id()}'
-            data-field='{$field->get_tablefield()}'
-            data-tid='{$field->get_tid()}'>";
-            // No wisiwig editor text fields.
-            $fieldformat = $field->get_format();
-            $nowisiwig = "<div
-                class='format-{$fieldformat} border py-2 px-3'
-                contenteditable='true'
-                data-format='{$fieldformat}'>" . DIV_CLOSE;
-            // Status icon/button.
-            $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
-                role='status' aria-disabled='true'><i class='fa'
-                ></i></span>";
-            // Status surrounding div.
-            $statusdiv = "<div class='col-1 text-center'
-            data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
-            // Column 3 Layout.
-            $mform->addElement('html', $translatededitor);
-            // Plain text input.
-            if ($fieldformat === 0) {
-                $mform->addElement('html', $nowisiwig);
-            } else {
-                $mform->addElement('cteditor', $key);
-                $mform->setType($key, PARAM_RAW);
-            }
-            // Closing $translatededitor.
-            $mform->addElement('html', DIV_CLOSE);
-            // Adding validator btn.
-            $mform->addElement('html', $statusdiv);
+            $this->fieldrowcolumn3($key, $field);
         }
         // Close translation item.
-        $mform->addElement('html', DIV_CLOSE);
+        $this->_form->addElement('html', DIV_CLOSE);
 
     }
+
     /**
-     * Define Moodle Form.
+     * Write the visibility class for the item for js filtering.
      *
-     * @return void
+     * @param \local_deepler\local\data\interfaces\visibility_interface $item
+     * @return string
      */
-    public function definition(): void {
-        global $CFG;
-
-        // Get course data.
-        // $course = $this->_customdata['course'];
-        /** @var \local_deepler\local\data\course $coursedata */
-        $coursedata = $this->_customdata['coursedata'];
-        $this->langpack = $this->_customdata['langpack'];
-        // Get mlangfilter to filter text.
-        $this->mlangfilter = $this->_customdata['mlangfilter'];
-        // Get source options.
-        $this->sourceoptions = $this->langpack->preparehtmlotions(true, false);
-        // Start moodle form.
-        $mform = $this->_form;
-        $mform->disable_form_change_checker();
-        MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
-                '\local_deepler\editor\MoodleQuickForm_cteditor');
-        // Open Form local_deepler__form.
-        $mform->addElement('html', '<div class="container-fluid local_deepler__form">');
-        // Create course settings section.
-        $this->makecoursesetting($mform, $coursedata->getfields(), $coursedata->getlink());
-        // Create sections.
-        $this->makesections($mform, $coursedata->getsections());
-        $sectioncount = 1;
-
-        // Close form.
-        $mform->addElement('html', DIV_CLOSE);
+    public function getitemvisibilityclass(visibility_interface $item): string {
+        return 'local_deepler' . ($item->isvisible() ? 'visible' : 'invisible');
     }
 
     /**
-     * Course first section
-     *
-     * @param \MoodleQuickForm $mform
-     * @param array $settingfields
-     * @param string $link
      * @return void
      * @throws \coding_exception
      */
-    function makecoursesetting(MoodleQuickForm $mform, array $settingfields, string $link) {
-        // Open section container for the course settings course__settings section-item.
-        $mform->addElement('html', "<div class='local_deepler_course__settings section-item'>");
-        $this->makesettings($mform, $settingfields, $link, get_string('settings'), 0);
-        // Close section container for the course settings course__settings section-item.
-        $mform->addElement('html', DIV_CLOSE);
-    }
-
-    /**
-     * First section of the form for course's settings.
-     *
-     * @param \MoodleQuickForm $mform
-     * @param array $settingfields
-     * @param string $link
-     * @param string $title
-     * @param string $index
-     * @return void
-     * @throws \coding_exception
-     */
-    public function makesettings(MoodleQuickForm $mform, array $settingfields, string $link, string $title,
-            string $index): void {
-        // Course settings title.
-        $mform->addElement('html',
-                "<span class='row h3 sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
-                $title {$this->makeeditbutton($link)}</span>");
-        // Open course settings section.
-        $mform->addElement('html', "<div id='sectiondata[$index]' class='local_deepler__sectiondata'>");
-        /** @var field $field */
-        foreach ($settingfields as $field) {
-            $this->makefieldrow($mform, $field);
-        }
-        // Close course settings section.
-        $mform->addElement('html', DIV_CLOSE);
-    }
-
-    private function makesection(MoodleQuickForm $mform, section $section) {
-        $sectionid = $section->getid();
-        $isvisible = $section->isvisible();
-        $sectionorder = $section->getorder();
-        $sectionname = $this->mlangfilter->filter($section->getsectionname());
-        $mform->addElement('html', "<div class='local_deepler_course__settings section-item'>");
-        // Open section container for the course settings course__settings section-item.
-        $this->makesettings($mform, $section->getfields(), $section->getlink(), $sectionname, $sectionorder);
-        // Close section container for the course settings course__settings section-item.
-        $mform->addElement('html', DIV_CLOSE);
-
-        // Close section container for the course settings course__settings section-item.
-
-    }
-
-    private function makesections(MoodleQuickForm $mform, array $sections) {
-        foreach ($sections as $section) {
-            $this->makesection($mform, $section);
-        }
+    public function buildhiddenftomstudent(): void {
+        $hiddenfromstudents = get_string('hiddenfromstudents');
+        $this->_form->addElement('html',
+                "<small class='badge rounded-pill bg-secondary text-dark' data-action='local_deepler__hiddenfromstudents'><i class='fa fa-eye-slash' aria-hidden='true'></i>&nbsp;<small>$hiddenfromstudents</small></small>");
     }
 }

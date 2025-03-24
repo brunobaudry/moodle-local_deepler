@@ -264,7 +264,7 @@ class field {
         if ($this->status->isready()) {
             $this->status->getupdate();
         }
-        $this->tid = $this->status->id;
+        $this->tid = $this->status->get_id();
         $this->tneeded = $this->status->istranslationneeded();
     }
 
@@ -312,6 +312,7 @@ class field {
                 ['identifier' => $this->field, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
                 ['identifier' => $this->field, 'component' => 'core'], // Standard Moodle core strings.
                 ['identifier' => $this->field, 'component' => 'moodle'], // Standard Moodle core strings.
+                ['identifier' => $this->field, 'component' => $this->table], // Standard Moodle core strings.
                 ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent], // Common field patterns.
                 ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'], // Common field patterns.
                 ['identifier' => $this->field, 'component' => 'datafield_' . $this->field], // Field type specific (data activity).

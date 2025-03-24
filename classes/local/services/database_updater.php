@@ -40,7 +40,7 @@ class database_updater {
         $timemodified = time();
         $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
 
-        $response['t_lastmodified'] = $timemodified;
+        $response['t_lastmodified'] = $timemodified; // Translation last modified time.
         $response['text'] = $data['text'];
     }
 }

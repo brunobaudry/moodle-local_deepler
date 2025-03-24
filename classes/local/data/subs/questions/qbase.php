@@ -88,16 +88,19 @@ abstract class qbase implements translatable_interface, editable_interface, icon
         $fields = [];
         if ($this->dbmanager->table_exists($this->qtype . '_options')) {
             $columns = field::filterdbtextfields($this->qtype . '_options');
-            $fields[] = field::getfieldsfromcolumns($this->question, $this->qtype . '_options', $columns);
+            $optionsfields[] = field::getfieldsfromcolumns($this->question, $this->qtype . '_options', $columns);
+            array_merge($fields, $optionsfields);
         }
         if ($this->dbmanager->table_exists($this->qtype . '_choice')) {
             $columns = field::filterdbtextfields($this->qtype . '_choice');
-            $fields[] = field::getfieldsfromcolumns($this->question, $this->qtype . '_choice', $columns);
+            $choicesfields[] = field::getfieldsfromcolumns($this->question, $this->qtype . '_choice', $columns);
+            array_merge($fields, $choicesfields);
         }
         if (count($this->question->hints)) {
             foreach ($this->question->hints as $hint) {
                 $columns = field::filterdbtextfields('question_hints');
-                $fields[] = field::getfieldsfromcolumns($this->question, 'question_hints', $columns);
+                $hintfields[] = field::getfieldsfromcolumns($this->question, 'question_hints', $columns);
+                array_merge($fields, $hintfields);
             }
         }
         return $fields;

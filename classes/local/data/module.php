@@ -21,6 +21,7 @@ use lang_string;
 use local_deepler\local\data\interfaces\editable_interface;
 use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
+use local_deepler\local\data\interfaces\visibility_interface;
 use moodle_url;
 
 /**
@@ -30,7 +31,7 @@ use moodle_url;
  * @copyright 2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class module implements translatable_interface, editable_interface, iconic_interface {
+class module implements translatable_interface, editable_interface, iconic_interface, visibility_interface {
     /** @var \cm_info */
     private cm_info $cm;
     /** @var string */

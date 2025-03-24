@@ -28,7 +28,7 @@ class status {
      */
     public static string $dtable = 'local_deepler';
     /** @var int */
-    public int $id;
+    private int $id;
     /** @var int Table ID. */
     private int $t_id;
     /** @var string */
@@ -37,10 +37,10 @@ class status {
     private string $t_table;
     /** @var string */
     private string $t_field; // Table's field we want to inject mlangs.
-    /** @var string */
-    private string $t_lastmodified; // Last update timestamp.
-    /** @var string */
-    private string $s_lastmodified; // Initial timestamp.
+    /** @var int */
+    private int $t_lastmodified; // Last modified time of translation.
+    /** @var int */
+    private int $s_lastmodified; // Last modified time of source text.
 
     /**
      * Build a translation status object.
@@ -56,8 +56,8 @@ class status {
         $this->t_lang = $lang;
         $this->t_table = $table;
         $this->t_field = $field;
-        $this->t_lastmodified = '0';
-        $this->s_lastmodified = '0';
+        $this->t_lastmodified = 0;
+        $this->s_lastmodified = 0;
     }
 
     /**
@@ -90,7 +90,7 @@ class status {
     private function getbasicparams(): array {
         return [
                 't_id' => $this->t_id,
-                't_lang' => $this->lang,
+                't_lang' => $this->t_lang,
                 't_table' => $this->t_table,
                 't_field' => $this->t_field,
         ];
@@ -122,5 +122,14 @@ class status {
      */
     public function isready(): bool {
         return $this->t_lang !== '';
+    }
+
+    /**
+     * Getters for the status id.
+     *
+     * @return int
+     */
+    public function get_id(): int {
+        return $this->id;
     }
 }

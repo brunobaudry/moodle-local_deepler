@@ -104,6 +104,7 @@ class quiz {
                 // Other cases.
                 $item = field::createclassfromstring('questions\qtype_basic', $params);
             }
+            $childfields = $item->getfields();
             $childs[] = $item;
         }
         return $childs;
