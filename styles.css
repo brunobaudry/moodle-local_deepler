@@ -48,10 +48,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }
 #page-local-deepler-translate .local_deepler__form {
     padding: 0;
-  /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__form .d-none {
-    display: none !important;
+    display: none !important; /* stylelint-disable-line declaration-no-important */
 }
 #page-local-deepler-translate .local_deepler__form .local_deeplervisible > [data-action=local_deepler__hiddenfromstudents] {
     display: none;

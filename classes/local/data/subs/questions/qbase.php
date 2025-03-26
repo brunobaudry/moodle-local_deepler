@@ -85,23 +85,25 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      * @return array
      */
     private function getoptions(): array {
+
         $fields = [];
         if ($this->dbmanager->table_exists($this->qtype . '_options')) {
             $columns = field::filterdbtextfields($this->qtype . '_options');
-            $optionsfields[] = field::getfieldsfromcolumns($this->question, $this->qtype . '_options', $columns);
-            array_merge($fields, $optionsfields);
+            $optionsfields = field::getfieldsfromcolumns($this->question, $this->qtype . '_options', $columns);
+            $fields = array_merge($fields, $optionsfields);
         }
         if ($this->dbmanager->table_exists($this->qtype . '_choice')) {
             $columns = field::filterdbtextfields($this->qtype . '_choice');
-            $choicesfields[] = field::getfieldsfromcolumns($this->question, $this->qtype . '_choice', $columns);
-            array_merge($fields, $choicesfields);
+            $choicesfields = field::getfieldsfromcolumns($this->question, $this->qtype . '_choice', $columns);
+            $fields = array_merge($fields, $choicesfields);
         }
         if (count($this->question->hints)) {
             foreach ($this->question->hints as $hint) {
                 $columns = field::filterdbtextfields('question_hints');
-                $hintfields[] = field::getfieldsfromcolumns($hint, 'question_hints', $columns);
-                array_merge($fields, $hintfields);
+                $hfields = field::getfieldsfromcolumns($hint, 'question_hints', $columns);
+                $fields = array_merge($fields, $hfields);
             }
+
         }
         return $fields;
     }

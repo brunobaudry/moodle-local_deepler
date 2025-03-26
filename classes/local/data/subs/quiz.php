@@ -75,7 +75,7 @@ class quiz {
                     'cmid' => $this->quizsettings->get_cmid(),
             ];
             $name = $question->qtype->plugin_name();
-            $class = $this->findClass($name);
+            $class = $this->findclass($name);
 
             $item = field::createclassfromstring($class, $params);
             if ($item === null) {
@@ -151,7 +151,7 @@ class quiz {
      * @param string $name
      * @return string
      */
-    private function findClass(string $name): string {
+    private function findclass(string $name): string {
         $class = "questions\\{$name}";
 
         switch ($name) {

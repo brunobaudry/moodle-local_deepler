@@ -88,7 +88,9 @@ $secondary: $gray-400 !default;
 
     .local_deepler__form {
         padding: 0;
-        .d-none { display:none !important; } /* stylelint-disable-line declaration-no-important */
+        .d-none {
+            display:none !important; /* stylelint-disable-line declaration-no-important */
+        }
         .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
             display: none;
         }

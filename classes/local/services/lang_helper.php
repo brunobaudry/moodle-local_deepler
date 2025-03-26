@@ -50,9 +50,7 @@ class lang_helper {
      */
     public string $targetlang;
     /**
-     * Moodle instance's installed languages.
-     *
-     * @var array|mixed
+     * @var array|mixed Moodle instance's installed languages.
      */
     public mixed $moodlelangs;
     /**
@@ -353,6 +351,8 @@ class lang_helper {
     }
 
     /**
+     * Sub function to list the options.
+     *
      * @param bool $issource
      * @param mixed $l
      * @param bool $verbose
