@@ -51,7 +51,8 @@ class field {
                     'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata', 'filetypelist',
             ];
     /**
-     * @var array customs columns to skip. @todo MDL-000 should be in a config.
+     * @TODO MDL-0000 should be in a config.
+     * @var array customs columns to skip.
      */
     static private array $usercolstoskip = [];
     /**
@@ -69,7 +70,9 @@ class field {
     private int $id;
     /** @var int */
     private int $cmid;
-    /** @var bool @TODO MDL-000 should be called via status. */
+    /**
+     * @var bool
+     */
     private bool $tneeded;
     /** @var int */
     private int $format;

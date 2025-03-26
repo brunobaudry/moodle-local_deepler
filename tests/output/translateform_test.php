@@ -53,48 +53,12 @@ final class translateform_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $this->course = $this->getDataGenerator()->create_course();
         $this->mlangfilter = $this->createMock(filter_multilang2::class);
-        $this->makeenv();
         $this->langhelper = $this->createMock(lang_helper::class);
         $this->langhelper->method('preparehtmlotions')->willReturn(
                 '<option value="en">en</option><option value="fr">en</option>');
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
         $this->langhelper->initdeepl();
-    }
-
-    /**
-     * Helper for running test without network.
-     *
-     * @return void
-     */
-    private function makeenv() {
-        global $CFG;
-        // Define the path to the .env file.
-        $envfilepath = $CFG->dirroot . '/local/deepler/.env';
-
-        // Check if the .env file exists.
-        if (file_exists($envfilepath)) {
-            // Read the .env file line by line.
-            $lines = file($envfilepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                // Skip comments.
-                if (strpos(trim($line), '#') === 0) {
-                    continue;
-                }
-
-                // Parse the environment variable.
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim($value);
-
-                // Set the environment variable.
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        } else {
-            $this->assertEquals('DEFAULT', getenv('DEEPL_API_TOKEN'));
-        }
     }
 
     /**

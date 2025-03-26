@@ -29,10 +29,12 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
+use filter_multilang2;
 use filter_multilang2\filter;
 use local_deepler\local\data\course;
 use local_deepler\local\services\lang_helper;
 use moodle_url;
+use PHPUnit\Framework\MockObject\MockObject;
 use renderer_base;
 use stdClass;
 
@@ -50,22 +52,12 @@ final class translate_page_test extends advanced_testcase {
     /**
      * @var course
      */
-    private $course;
-
-    /**
-     * @var array
-     */
-    private $coursedata;
+    private course $course;
 
     /**
      * @var \filter_multilang2|\PHPUnit\Framework\MockObject\MockObject
      */
-    private $mlangfilter;
-
-    /**
-     * @var lang_helper|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $langhelper;
+    private filter_multilang2|MockObject $mlangfilter;
 
     /**
      * Set up the test case.
@@ -80,17 +72,16 @@ final class translate_page_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
-        $this->mlangfilter = $this->createMock(\filter_multilang2::class);
-        $this->langhelper = $this->createMock(lang_helper::class);
-        $this->makeenv();
-        $this->langhelper->initdeepl();
-        $this->langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
-        $this->langhelper->method('preparehtmlotions')->willReturn(
+        $this->mlangfilter = $this->createMock(filter_multilang2::class);
+        $langhelper = $this->createMock(lang_helper::class);
+        $langhelper->initdeepl();
+        $langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
+        $langhelper->method('preparehtmlotions')->willReturn(
                 '<option value="en">en</option><option value="fr">en</option>');
-        $this->langhelper->currentlang = 'en';
-        $this->langhelper->targetlang = 'fr';
+        $langhelper->currentlang = 'en';
+        $langhelper->targetlang = 'fr';
 
-        $this->translatepage = new translate_page($this->course, $this->mlangfilter, $this->langhelper, 'v1.3.5');
+        $this->translatepage = new translate_page($this->course, $this->mlangfilter, $langhelper, 'v1.3.5');
     }
 
     /**
@@ -153,40 +144,5 @@ final class translate_page_test extends advanced_testcase {
 
         $this->assertEquals('checked', $result->escapelatexbydefault);
         $this->assertEquals('', $result->escapeprebydefault);
-    }
-
-    /**
-     * Helper for running test without network.
-     *
-     * @return void
-     */
-    private function makeenv() {
-        global $CFG;
-        // Define the path to the .env file.
-        $envfilepath = $CFG->dirroot . '/local/deepler/.env';
-
-        // Check if the .env file exists.
-        if (file_exists($envfilepath)) {
-            // Read the .env file line by line.
-            $lines = file($envfilepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                // Skip comments.
-                if (strpos(trim($line), '#') === 0) {
-                    continue;
-                }
-
-                // Parse the environment variable.
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim($value);
-
-                // Set the environment variable.
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        } else {
-            $this->assertEquals('DEFAULT', getenv('DEEPL_API_TOKEN'));
-        }
     }
 }
