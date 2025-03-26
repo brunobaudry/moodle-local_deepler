@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace classes\local\services;
+namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 
 use DeepL\DeepLClient;
@@ -42,7 +42,7 @@ class lang_helper {
     /**
      * @var string The source language for deepl.
      */
-    public string $deeplsourcelang;
+    private string $deeplsourcelang;
     /**
      * The target language.
      *
@@ -355,6 +355,15 @@ class lang_helper {
         $t = $target === '' ? $this->targetlang : $target;
         $s = $source === '' ? $this->deeplsourcelang : $source;
         return str_contains($t, $s);
+    }
+
+    /**
+     * Getter for deeplsourcelang.
+     *
+     * @return string
+     */
+    public function get_deeplsourcelang(): string {
+        return $this->deeplsourcelang;
     }
 
 }

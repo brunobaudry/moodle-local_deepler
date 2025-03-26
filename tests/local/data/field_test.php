@@ -40,8 +40,9 @@ final class field_test extends advanced_testcase {
      * @covers ::get_table
      * @covers ::get_text
      * @covers ::get_format
+     * @return void
      */
-    public function test_constructor_and_getters() {
+    public function test_constructor_and_getters(): void {
         $field = new field(1, 'Sample text', 1, 'shortname', 'course', 2);
 
         $this->assertEquals(1, $field->get_id());
@@ -57,8 +58,9 @@ final class field_test extends advanced_testcase {
      *
      * @covers ::getkey
      * @covers ::getkeyid
+     * @return void
      */
-    public function test_key_generation() {
+    public function test_key_generation(): void {
         $field = new field(1, 'Sample text', 1, 'shortname', 'course', 2);
 
         $this->assertEquals('course[1][shortname][2]', $field->getkey());
@@ -69,8 +71,9 @@ final class field_test extends advanced_testcase {
      * Test the check_field_has_other_and_sourcetag method.
      *
      * @covers ::check_field_has_other_and_sourcetag
+     * @return void
      */
-    public function test_check_field_has_other_and_sourcetag() {
+    public function test_check_field_has_other_and_sourcetag(): void {
         $field1 = new field(1, '{mlang other}Other{mlang}{mlang en}English{mlang}', 1, 'shortname', 'course');
         $field2 = new field(2, 'Regular text', 1, 'name', 'course');
 
@@ -82,8 +85,9 @@ final class field_test extends advanced_testcase {
      * Test the has_multilang method.
      *
      * @covers ::has_multilang
+     * @return void
      */
-    public function test_has_multilang() {
+    public function test_has_multilang(): void {
         $field1 = new field(1, '{mlang en}English{mlang}', 1, 'shortname', 'course');
         $field2 = new field(2, 'Regular text', 1, 'name', 'course');
 
@@ -95,42 +99,38 @@ final class field_test extends advanced_testcase {
      * Test the filterdbtextfields static method.
      *
      * @covers ::filterdbtextfields
+     * @return void
      */
-    public function test_filterdbtextfields() {
+    public function test_filterdbtextfields(): void {
         global $DB;
 
-        // Mock the $DB->get_columns() method
-        $DB = $this->getMockBuilder(stdClass::class)
-                ->addMethods(['get_columns'])
-                ->getMock();
+        // Mock the $DB->get_columns() method.
+        $DB = $this->getMockBuilder(stdClass::class)->addMethods(['get_columns'])->getMock();
 
-        $mockColumns = [
+        $mockcolumns = [
                 'id' => (object) [
                         'name' => 'id',
                         'meta_type' => 'R',
-                        'max_length' => 10
+                        'max_length' => 10,
                 ],
                 'name' => (object) [
                         'name' => 'name',
                         'meta_type' => 'C',
-                        'max_length' => 255
+                        'max_length' => 255,
                 ],
                 'description' => (object) [
                         'name' => 'description',
                         'meta_type' => 'X',
-                        'max_length' => -1
+                        'max_length' => -1,
                 ],
                 'smalltext' => (object) [
                         'name' => 'smalltext',
                         'meta_type' => 'C',
-                        'max_length' => 50
+                        'max_length' => 50,
                 ],
         ];
 
-        $DB->expects($this->once())
-                ->method('get_columns')
-                ->with('testtable')
-                ->willReturn($mockColumns);
+        $DB->expects($this->once())->method('get_columns')->with('testtable')->willReturn($mockcolumns);
 
         $result = field::filterdbtextfields('testtable');
 
@@ -141,8 +141,9 @@ final class field_test extends advanced_testcase {
      * Test the getfieldsfromcolumns static method.
      *
      * @covers ::getfieldsfromcolumns
+     * @return void
      */
-    public function test_getfieldsfromcolumns() {
+    public function test_getfieldsfromcolumns(): void {
         $info = (object) [
                 'id' => 1,
                 'name' => 'Test Name',

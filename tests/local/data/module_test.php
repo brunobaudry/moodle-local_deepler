@@ -35,7 +35,14 @@ final class module_test extends advanced_testcase {
     /** @var \cm_info */
     protected cm_info $cm2;
 
+    /**
+     * Test setup.
+     *
+     * @return void
+     * @throws \moodle_exception
+     */
     public function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
@@ -48,8 +55,9 @@ final class module_test extends advanced_testcase {
      * Test the constructor of the module class.
      *
      * @covers \local_deepler\local\data\module::__construct
+     * @return void
      */
-    public function test_constructor() {
+    public function test_constructor(): void {
         $this->resetAfterTest(true);
 
         $module = new module($this->cm);
@@ -65,8 +73,9 @@ final class module_test extends advanced_testcase {
      *
      * @covers \local_deepler\local\data\module::getlink
      * @covers \local_deepler\local\data\module::buildlink
+     * @return void
      */
-    public function test_buildlink() {
+    public function test_buildlink(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
         $modulereflexion = new ReflectionClass($module);
@@ -80,8 +89,9 @@ final class module_test extends advanced_testcase {
      * Test the isvisible method.
      *
      * @covers \local_deepler\local\data\module::isvisible
+     * @return void
      */
-    public function test_isvisible() {
+    public function test_isvisible(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 
@@ -92,8 +102,9 @@ final class module_test extends advanced_testcase {
      * Test the getchilds method.
      *
      * @covers \local_deepler\local\data\module::getchilds
+     * @return void
      */
-    public function test_getchilds() {
+    public function test_getchilds(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 
@@ -105,8 +116,9 @@ final class module_test extends advanced_testcase {
      * Test the haschilds method.
      *
      * @covers \local_deepler\local\data\module::haschilds
+     * @return void
      */
-    public function test_haschilds() {
+    public function test_haschilds(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 
@@ -117,8 +129,9 @@ final class module_test extends advanced_testcase {
      * Test the geticon method.
      *
      * @covers \local_deepler\local\data\module::geticon
+     * @return void
      */
-    public function test_geticon() {
+    public function test_geticon(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 
@@ -129,8 +142,9 @@ final class module_test extends advanced_testcase {
      * Test the getpurpose method.
      *
      * @covers \local_deepler\local\data\module::getpurpose
+     * @return void
      */
-    public function test_getpurpose() {
+    public function test_getpurpose(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 
@@ -141,8 +155,9 @@ final class module_test extends advanced_testcase {
      * Test the getpluginname method.
      *
      * @covers \local_deepler\local\data\module::getpluginname
+     * @return void
      */
-    public function test_getpluginname() {
+    public function test_getpluginname(): void {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 

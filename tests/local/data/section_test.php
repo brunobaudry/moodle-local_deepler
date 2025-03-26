@@ -39,9 +39,13 @@ final class section_test extends advanced_testcase {
     protected base $courseformat;
 
     /**
+     * Setup function for the tests.
+     *
+     * @return void
      * @throws \moodle_exception
      */
     public function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $section =
@@ -56,8 +60,9 @@ final class section_test extends advanced_testcase {
      * Test the constructor.
      *
      * @covers ::__construct
+     * @return void
      */
-    public function test_constructor() {
+    public function test_constructor(): void {
         $this->resetAfterTest(true);
 
         $section = new section($this->sectioninfos[0], $this->courseformat);
@@ -69,8 +74,9 @@ final class section_test extends advanced_testcase {
      * Test isvisible method.
      *
      * @covers ::isvisible
+     * @return void
      */
-    public function test_isvisible() {
+    public function test_isvisible(): void {
         $this->resetAfterTest(true);
 
         $section = new section($this->sectioninfos[0], $this->courseformat);
@@ -82,9 +88,10 @@ final class section_test extends advanced_testcase {
      * Test getsectionname method.
      *
      * @covers ::getsectionname
+     * @return void
      * @todo MDL-0000 find a way to test this method with proper name.
      */
-    public function test_getsectionname() {
+    public function test_getsectionname(): void {
         $this->resetAfterTest(true);
 
         $section = new section($this->sectioninfos[1], $this->courseformat);
@@ -96,8 +103,9 @@ final class section_test extends advanced_testcase {
      * Test getorder method.
      *
      * @covers ::getorder
+     * @return void
      */
-    public function test_getorder() {
+    public function test_getorder(): void {
         $this->resetAfterTest(true);
 
         $section = new section($this->sectioninfos[0], $this->courseformat);
@@ -111,8 +119,9 @@ final class section_test extends advanced_testcase {
      * Test getfields method.
      *
      * @covers ::getfields
+     * @return void
      */
-    public function test_getfields() {
+    public function test_getfields(): void {
         $this->resetAfterTest(true);
 
         $section = new section($this->sectioninfos[0], $this->courseformat);
@@ -125,8 +134,9 @@ final class section_test extends advanced_testcase {
      * Test getmodules method.
      *
      * @covers ::getmodules
+     * @return void
      */
-    public function test_getmodules() {
+    public function test_getmodules(): void {
         $this->resetAfterTest(true);
 
         $section = new section($this->sectioninfos[0], $this->courseformat);
@@ -139,8 +149,9 @@ final class section_test extends advanced_testcase {
      * Test getlink method.
      *
      * @covers ::getlink
+     * @return void
      */
-    public function test_getlink() {
+    public function test_getlink(): void {
         $this->resetAfterTest(true);
 
         global $CFG;
@@ -156,8 +167,9 @@ final class section_test extends advanced_testcase {
      * Test getid method.
      *
      * @covers ::getid
+     * @return void
      */
-    public function test_getid() {
+    public function test_getid(): void {
         $this->resetAfterTest(true);
         $sectionid = $this->sectioninfos[0]->id;
         $sectionid1 = $this->sectioninfos[1]->id;

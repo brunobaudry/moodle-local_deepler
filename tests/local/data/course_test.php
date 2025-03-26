@@ -45,6 +45,7 @@ final class course_test extends advanced_testcase {
      * @return void
      */
     public function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest();
         $this->course = $this->getDataGenerator()->create_course();
         $this->coursewrapper = new course($this->course);
@@ -93,7 +94,6 @@ final class course_test extends advanced_testcase {
         $courseobj = new course($course);
 
         $fields = $courseobj->getfields();
-        //var_dump($fields);
         $this->assertIsArray($fields);
         $this->assertNotEmpty($fields);
         $this->assertCount(3, $fields);

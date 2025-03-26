@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
-use classes\local\services\lang_helper;
 
 /**
  * Lang helper Test.
@@ -70,7 +69,7 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_prepareoptionlangs(): void {
-        $options = $this->langhelper->prepareoptionlangs(true, true);
+        $options = $this->langhelper->prepareoptionlangs(true);
 
         $this->assertIsArray($options);
         $this->assertNotEmpty($options);

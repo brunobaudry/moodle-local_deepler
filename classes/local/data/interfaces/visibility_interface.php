@@ -24,5 +24,10 @@ namespace local_deepler\local\data\interfaces;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface visibility_interface {
+    /**
+     * Check if the object is visible to students.
+     *
+     * @return bool
+     */
     public function isvisible(): bool;
 }

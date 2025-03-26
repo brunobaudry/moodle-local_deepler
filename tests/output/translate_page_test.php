@@ -29,8 +29,9 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
-use classes\local\services\lang_helper;
 use filter_multilang2\filter;
+use local_deepler\local\data\course;
+use local_deepler\local\services\lang_helper;
 use moodle_url;
 use renderer_base;
 use stdClass;
@@ -47,7 +48,7 @@ final class translate_page_test extends advanced_testcase {
     private $translatepage;
 
     /**
-     * @var stdClass
+     * @var course
      */
     private $course;
 
@@ -77,57 +78,19 @@ final class translate_page_test extends advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest(true);
-        $this->course = $this->getDataGenerator()->create_course();
-        $this->coursedata = [[
-                'section' => [
-                        (object) [
-                                'id' => 1,
-                                'hierarchy' => 'level0',
-                                'tid' => '6737',
-                                'format' => 0,
-                                'table' => 'course',
-                                'field' => 'fullname',
-                                'cmid' => 0,
-                                'text' => 'Assignment 1',
-                                'link' => new moodle_url('/course/view.php', ['id' => 1]),
-                                'displaytext' => 'Assignment 1',
-                                'iconurl' => 'http://example.com/icon1.png',
-                                'pluginname' => 'assignment',
-                                'tneeded' => false,
-                                'section' => null,
-                                'purpose' => null,
-                                'translatedfieldname' => 'Full name',
-                        ],
-                ],
-                'activities' => [
-                        (object) [
-                                'id' => 2,
-                                'hierarchy' => 'level1',
-                                'tid' => '565',
-                                'format' => 1,
-                                'table' => 'forum',
-                                'field' => 'name',
-                                'cmid' => 1,
-                                'text' => 'Forum 1',
-                                'link' => new moodle_url('/course/view.php', ['id' => 1]),
-                                'displaytext' => 'Forum 1',
-                                'iconurl' => 'http://example.com/icon1.png',
-                                'pluginname' => 'forum',
-                                'tneeded' => false,
-                                'section' => 76,
-                                'purpose' => 'collaboration',
-                                'translatedfieldname' => 'Name',
-                        ],
-                ],
-        ]];
+        $course = $this->getDataGenerator()->create_course();
+        $this->course = new course($course);
         $this->mlangfilter = $this->createMock(\filter_multilang2::class);
-        $this->langhelper = $this->getMockBuilder(lang_helper::class)->enableOriginalConstructor()->getMock();
+        $this->langhelper = $this->createMock(lang_helper::class);
+        $this->makeenv();
+        $this->langhelper->initdeepl();
         $this->langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
+        $this->langhelper->method('preparehtmlotions')
+                ->willReturn('<option value="en">en</option><option value="fr">en</option>');
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
 
-        $this->translatepage = new translate_page($this->course, $this->coursedata, $this->mlangfilter, $this->langhelper,
-                'vtest');
+        $this->translatepage = new translate_page($this->course, $this->mlangfilter, $this->langhelper, 'v1.3.5');
     }
 
     /**
@@ -141,22 +104,21 @@ final class translate_page_test extends advanced_testcase {
      */
     public function test_export_for_template(): void {
         global $PAGE;
+        $this->resetAfterTest(true);
         $PAGE->set_url(new moodle_url('/local/deepler/translate.php'));
-        $renderer = $this->getMockBuilder(renderer_base::class)->disableOriginalConstructor()->getMock();
+        $renderer = $this->createMock(renderer_base::class);
 
         $result = $this->translatepage->export_for_template($renderer);
 
         $this->assertInstanceOf(stdClass::class, $result);
-        $this->assertEquals($this->course, $result->course);
         $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->targetlangs);
         $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->sourcelangs);
         $this->assertEquals('en', $result->current_lang);
         $this->assertEquals('fr', $result->target_lang);
         $this->assertEquals($this->mlangfilter, $result->mlangfilter);
-        $this->assertEquals($this->coursedata, $result->coursedata);
 
         // Test form rendering.
-        $this->assertStringContainsString('col-md-12', $result->mform);
+        $this->assertStringContainsString('<form', $result->mform);
     }
 
     /**
@@ -191,5 +153,40 @@ final class translate_page_test extends advanced_testcase {
 
         $this->assertEquals('checked', $result->escapelatexbydefault);
         $this->assertEquals('', $result->escapeprebydefault);
+    }
+
+    /**
+     * Helper for running test without network.
+     *
+     * @return void
+     */
+    private function makeenv() {
+        global $CFG;
+        // Define the path to the .env file.
+        $envfilepath = $CFG->dirroot . '/local/deepler/.env';
+
+        // Check if the .env file exists.
+        if (file_exists($envfilepath)) {
+            // Read the .env file line by line.
+            $lines = file($envfilepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                // Skip comments.
+                if (strpos(trim($line), '#') === 0) {
+                    continue;
+                }
+
+                // Parse the environment variable.
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
+
+                // Set the environment variable.
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        } else {
+            $this->assertEquals('DEFAULT', getenv('DEEPL_API_TOKEN'));
+        }
     }
 }

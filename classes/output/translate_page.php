@@ -16,9 +16,9 @@
 
 namespace local_deepler\output;
 
-use classes\local\services\lang_helper;
 use filter_multilang2;
 use local_deepler\local\data\course;
+use local_deepler\local\services\lang_helper;
 use renderable;
 use renderer_base;
 use stdClass;
@@ -73,7 +73,6 @@ class translate_page implements renderable, templatable {
     public function __construct(course $coursedata, filter_multilang2 $mlangfilter, lang_helper $languagepack,
             string $version) {
         $this->version = $version;
-        // $this->course = $course;
         $this->coursedata = $coursedata;
         $this->langpacks = $languagepack;
         $this->mlangfilter = $mlangfilter;
@@ -93,7 +92,6 @@ class translate_page implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $data = new stdClass();
         // Data for mustache template.
-        //$data->course = $this->course;
         $data->langstrings = $this->langpacks->preparestrings();
         $data->targethtmloptions = $this->langpacks->preparehtmlotions(false, true);
         $data->targetlangs = $this->langpacks->prepareoptionlangs(false, true);
@@ -107,15 +105,13 @@ class translate_page implements renderable, templatable {
 
         // Set langs.
         $data->current_lang = $this->langpacks->currentlang;
-        $data->deeplsource = $this->langpacks->deeplsourcelang;
+        $data->deeplsource = $this->langpacks->get_deeplsourcelang();
         $data->target_lang = $this->langpacks->targetlang === '' ? '?' : $this->langpacks->targetlang;
         $data->notarget = $this->langpacks->targetlang === '';
         $data->mlangfilter = $this->mlangfilter;
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
         // Pass data.
-        // $data->course = $this->course;
-        // $data->coursedata = $this->coursedata;
         $data->version = $this->version;
         return $data;
     }

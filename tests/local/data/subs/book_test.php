@@ -31,12 +31,15 @@ require_once($CFG->dirroot . '/mod/book/locallib.php');
  * @copyright  2025 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class book_test extends advanced_testcase {
+final class book_test extends advanced_testcase {
 
     /**
      * Test the constructor and getfields method.
+     *
+     * @return void
+     * @covers ::__construct
      */
-    public function test_constructor_and_getfields() {
+    public function test_constructor_and_getfields(): void {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $book = $this->getDataGenerator()->create_module('book', ['course' => $course->id]);

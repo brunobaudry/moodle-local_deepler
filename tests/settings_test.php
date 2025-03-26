@@ -46,7 +46,7 @@ final class settings_test extends \advanced_testcase {
      * @coversNothing
      * @return void
      */
-    public function test_usedeepl(): void {
+    public function test_global(): void {
         global $CFG;
         $this->assertNotNull($CFG);
         $this->assertEquals(2, 1 + 1);

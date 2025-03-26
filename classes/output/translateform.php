@@ -19,13 +19,13 @@ defined('MOODLE_INTERNAL') || die();
 define('DIV_CLOSE', '</div>');
 global $CFG;
 
-use classes\local\services\lang_helper;
 use core_filters\text_filter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\visibility_interface;
 use local_deepler\local\data\module;
 use local_deepler\local\data\section;
+use local_deepler\local\services\lang_helper;
 use moodleform;
 use MoodleQuickForm;
 
@@ -99,10 +99,10 @@ class translateform extends moodleform {
      * @return void
      * @throws \coding_exception
      */
-    function makecoursesetting(string $header, array $settingfields): void {
+    private function makecoursesetting(string $header, array $settingfields): void {
         // Open section container for the course settings course__settings section-item.
         $this->_form->addElement('html', "<div class='section-item'>");
-        // open header div.
+        // Open header div.
         $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
         $this->_form->addElement('html', $header);
         $this->_form->addElement('html', DIV_CLOSE); // Close header div.
@@ -142,10 +142,10 @@ class translateform extends moodleform {
         $sectionmodules = $section->getmodules();
         if (!empty($sectionmodules) || !empty($sectionsettingsfields)) {
             // Open section container for the course settings course__settings section-item.
-            $this->_form->addElement('html',
-                    "<div id='local_deepler__section{$section->getid()}' class='section-item {$this->getitemvisibilityclass($section)}'>");
+            $this->_form->addElement('html', "<div id='local_deepler__section{$section->getid()}'
+                        class='section-item {$this->getitemvisibilityclass($section)}'>");
             $this->buildhiddenftomstudent();
-            // open header div.
+            // Open header div.
             $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
             $this->_form->addElement('html',
                     $this->makeheader($this->mlangfilter->filter($section->getsectionname()), $section->getlink(), 3));
@@ -195,13 +195,12 @@ class translateform extends moodleform {
      * @throws \coding_exception
      */
     private function makemodule(module $module): void {
-
         $this->_form->addElement('html',
-                "<div id='{$module->getpluginname()}' 
+                "<div id='{$module->getpluginname()}'
                     class='activity-item local_deepler__activity py-2 {$this->getitemvisibilityclass($module)}'>");
         $this->buildhiddenftomstudent();
         $icon = $this->makeicon($module, "class='activityicon' data-region='activity-icon'");
-        $header = $this->makeheader($this->makeActivityDesc($module), $module->getlink(), 4, $icon);
+        $header = $this->makeheader($this->makeactivitydesc($module), $module->getlink(), 4, $icon);
         $this->_form->addElement('html', $header);
         $fileds = $module->getfields();
         $childs = $module->getchilds();
@@ -223,15 +222,14 @@ class translateform extends moodleform {
                 $this->_form->addElement('html', "<div class='section-item'>");
                 if ($isiconic && $iseditable) {
                     // Open header div.
-                    /** @var \local_deepler\local\data\interfaces\iconic_interface|\local_deepler\local\data\interfaces\editable_interface $child */
                     $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
                     // Add a header for the child.
                     $this->_form->addElement('html',
-                            $this->makeheader($this->makeActivityDesc($child), $child->getlink(), 5, $this->makeicon($child)));
+                            $this->makeheader($this->makeactivitydesc($child), $child->getlink(), 5, $this->makeicon($child)));
 
                     $this->_form->addElement('html', DIV_CLOSE);
                 }
-                /** @var field $field */
+                /** @var field $f */
                 foreach ($child->getfields() as $f) {
                     $this->makefieldrow($f);
                 }
@@ -280,10 +278,9 @@ class translateform extends moodleform {
     private function makeeditbutton(string $link): string {
         // Edit button.
         $editbuttontitle = get_string('editbutton', 'local_deepler');
-        return "<a 
-                    class='small p-2' 
-                    id='local_deepler__sourcelink' 
-                    href='{$link}' 
+        return "<a class='small p-2'
+                    id='local_deepler__sourcelink'
+                    href='{$link}'
                     target='_blank'
                     title='$editbuttontitle'>
                     <i class='icon fa fa-pen fa-fw' aria-hidden='true'></i>
@@ -296,7 +293,7 @@ class translateform extends moodleform {
      * @param editable_interface | iconic_interface $item
      * @return string
      */
-    public function makeActivityDesc(iconic_interface|editable_interface $item): string {
+    public function makeactivitydesc(iconic_interface|editable_interface $item): string {
         return $item->getpluginname() . ': ' . $this->mlangfilter->filter($item->getfields()[0]->get_text());
     }
 
@@ -511,12 +508,16 @@ class translateform extends moodleform {
     }
 
     /**
+     * Create a hidden from students badge.
+     *
      * @return void
      * @throws \coding_exception
      */
     public function buildhiddenftomstudent(): void {
         $hiddenfromstudents = get_string('hiddenfromstudents');
         $this->_form->addElement('html',
-                "<small class='badge rounded-pill bg-secondary text-dark' data-action='local_deepler__hiddenfromstudents'><i class='fa fa-eye-slash' aria-hidden='true'></i>&nbsp;<small>$hiddenfromstudents</small></small>");
+                "<small class='badge rounded-pill bg-secondary text-dark'
+                data-action='local_deepler__hiddenfromstudents'>
+                <i class='fa fa-eye-slash' aria-hidden='true'></i>&nbsp;<small>$hiddenfromstudents</small></small>");
     }
 }

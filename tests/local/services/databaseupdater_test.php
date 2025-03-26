@@ -25,14 +25,15 @@ use advanced_testcase;
  * @copyright  2025 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class databaseupdater_test extends advanced_testcase {
+final class databaseupdater_test extends advanced_testcase {
 
     /**
      * Test update_records method.
      *
      * @covers \local_deepler\local\services\database_updater::update_records
+     * @return void
      */
-    public function test_update_records() {
+    public function test_update_records(): void {
         global $DB;
 
         // Set up test data.
@@ -42,7 +43,7 @@ class databaseupdater_test extends advanced_testcase {
                 'field' => 'fullname',
                 'text' => 'Updated Name',
                 'table' => 'course',
-                'tid' => 1
+                'tid' => 1,
         ];
         $response = [];
 

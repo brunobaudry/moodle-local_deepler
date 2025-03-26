@@ -27,14 +27,19 @@ use core_external\external_api;
  * @copyright  2025 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class securitychecker_test extends advanced_testcase {
+final class securitychecker_test extends advanced_testcase {
 
     /**
      * Test perform_security_checks method.
      *
      * @covers \local_deepler\local\services\security_checker::perform_security_checks
+     * @return void
+     * @throws \coding_exception
+     * @throws \core_external\restricted_context_exception
+     * @throws \invalid_parameter_exception
+     * @throws \required_capability_exception
      */
-    public function test_perform_security_checks() {
+    public function test_perform_security_checks(): void {
         $this->resetAfterTest(true);
 
         // Create a course and a user for testing.
@@ -55,12 +60,7 @@ class securitychecker_test extends advanced_testcase {
 
         // Mock the context_course::instance method.
         $contextcourse = $this->createMock(context_course::class);
-        $contextcourse->method('instance')
-                ->willReturn($contextcourse);
-
-        // Use a static method replacement library or tool if available.
-        // For example, using Mockery or another tool that supports static method mocking.
-
+        $contextcourse->method('instance')->willReturn($contextcourse);
         // Mock the external_api::validate_context method.
         $externalapi = $this->createMock(external_api::class);
         $externalapi->method('validate_context')->with($contextcourse);
