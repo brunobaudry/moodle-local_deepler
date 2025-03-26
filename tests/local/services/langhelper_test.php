@@ -134,7 +134,7 @@ final class langhelper_test extends advanced_testcase {
                 $_SERVER[$name] = $value;
             }
         } else {
-            $this->assertEquals('DEFAULT', getenv('DEEPL_API_TOKEN'));
+            $this->assertEquals('***', getenv('DEEPL_API_TOKEN'));
         }
     }
 }

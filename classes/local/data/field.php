@@ -91,7 +91,6 @@ class field {
      * @param int $cmid
      * @throws \coding_exception
      * @throws \moodle_exception
-     * @TODO MDL-0000 usercolstoskip should be in a config.
      */
     public function __construct(
             int $id,
