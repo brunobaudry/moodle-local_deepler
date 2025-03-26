@@ -39,19 +39,16 @@ class section implements translatable_interface, editable_interface, visibility_
     /** @var module[] array of module */
     private array $modules;
     /**
-     * @var \cm_info[]
-     */
-    private array $cms;
-    /**
      * @var \moodle_url
      */
-    private ?moodle_url $link;
+    private moodle_url $link;
 
     /**
      * Constructor
      *
      * @param \section_info $sectioninfo
      * @param \core_courseformat\base $courseformat
+     * @throws \core\exception\moodle_exception
      */
     public function __construct(section_info $sectioninfo, base $courseformat) {
         global $CFG;
@@ -102,7 +99,6 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return array
      */
     public function getfields(): array {
-        $infos = [];
         $table = 'course_sections';
         $collumns = ['name', 'summary'];
         return field::getfieldsfromcolumns($this->si, $table, $collumns);

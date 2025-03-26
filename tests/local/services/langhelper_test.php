@@ -53,12 +53,7 @@ final class langhelper_test extends advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->langhelper = new lang_helper();
-        $key = getenv('DEEPL_API_TOKEN');
-        if ($key === 'DEFAULT' || !$key) {
-            $this->makeenv();
-            $key = getenv('DEEPL_API_TOKEN');
-        }
-        $this->assertNotEquals($key, 'DEFAULT');
+        $this->makeenv();
         $this->langhelper->initdeepl();
     }
 
@@ -102,10 +97,8 @@ final class langhelper_test extends advanced_testcase {
      * @throws \dml_exception
      */
     public function test_settings(): void {
-        $key = '';
         if ($this->langhelper->isapikeynoset()) {
             $this->makeenv();
-            $key = getenv('DEEPL_API_TOKEN');
         }
         $this->langhelper->initdeepl();
     }

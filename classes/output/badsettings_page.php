@@ -35,7 +35,7 @@ class badsettings_page implements renderable, templatable {
      * @param renderer_base $output
      * @return string
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(renderer_base $output): string {
         return '';
     }
 }

@@ -70,10 +70,6 @@ class field {
     private int $id;
     /** @var int */
     private int $cmid;
-    /**
-     * @var bool
-     */
-    private bool $tneeded;
     /** @var int */
     private int $format;
     /** @var int */
@@ -111,7 +107,6 @@ class field {
         $this->format = $format;
         $this->cmid = $cmid;
         $this->translatedfieldname = '';
-        $this->tneeded = true;
         $this->preparetexts($text);
         $this->init_db();
         $this->search_field_strings();
@@ -268,7 +263,6 @@ class field {
             $this->status->getupdate();
         }
         $this->tid = $this->status->get_id();
-        $this->tneeded = $this->status->istranslationneeded();
     }
 
     /**

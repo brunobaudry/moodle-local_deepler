@@ -48,8 +48,7 @@ final class section_test extends advanced_testcase {
         parent::setUp();
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
-        $section =
-                $this->getDataGenerator()->create_course_section(['course' => $course, 'section' => 1],
+        $this->getDataGenerator()->create_course_section(['course' => $course, 'section' => 1],
                         ['_name' => 'Test Section']);
         $this->course = get_fast_modinfo($course);
         $this->sectioninfos = $this->course->get_section_info_all();

@@ -41,24 +41,10 @@ use local_deepler\local\data\field;
 final class translate_test extends advanced_testcase {
 
     /**
-     * Helper to trace
-     *
-     * @param mixed $var
-     * @param string $info
-     * @return void
-     */
-    private function trace_to_cli(mixed $var, string $info): void {
-        echo "\n" . $info . "\n";
-        var_dump($var);
-        ob_flush();
-    }
-
-    /**
      * Testing that all settings are loaded
      *
      * @covers ::get_config
      * @return void
-     * @throws \coding_exception
      * @throws \dml_exception
      */
     public function test_plugin_config(): void {

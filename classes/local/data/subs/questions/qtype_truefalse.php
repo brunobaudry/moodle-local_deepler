@@ -45,7 +45,7 @@ class qtype_truefalse extends qbase {
                     'question_answers'
             );
         }
-        if (!empty($question->falsefeedback)) {
+        if (!empty($this->question->falsefeedback)) {
             $fields[] = new field(
                     $this->question->falseanswerid,
                     $this->question->falsefeedback,

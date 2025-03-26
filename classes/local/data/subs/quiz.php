@@ -75,26 +75,7 @@ class quiz {
                     'cmid' => $this->quizsettings->get_cmid(),
             ];
             $name = $question->qtype->plugin_name();
-            $class = "questions\\{$name}";
-
-            switch ($name) {
-                case 'qtype_shortanswer':
-                case 'qtype_calculatedmulti':
-                case 'qtype_multichoice':
-                    $class = 'questions\qtype_multi';
-                    break;
-                case 'qtype_numerical':
-                case 'qtype_calculated':
-                case 'qtype_calculatedsimple':
-                    $class = 'questions\qtype_calculated';
-                    break;
-                case 'qtype_ddwtos':
-                    $class = 'questions\qtype_gapselect'; // Same as qtype_gapselect obviously.
-                    break;
-                case 'qtype_ddmarker':
-                    $class = 'questions\qtype_ddimageortext'; // Same as qtype_ddimageortext obviously.
-                    break;
-            }
+            $class = $this->findClass($name);
 
             $item = field::createclassfromstring($class, $params);
             if ($item === null) {
@@ -105,7 +86,6 @@ class quiz {
                 // Other cases.
                 $item = field::createclassfromstring('questions\qtype_basic', $params);
             }
-            $childfields = $item->getfields();
             $childs[] = $item;
         }
         return $childs;
@@ -163,5 +143,35 @@ class quiz {
         foreach ($questions as $question) {
             $this->questions[] = question_bank::load_question($question);
         }
+    }
+
+    /**
+     * Guess the class name
+     *
+     * @param string $name
+     * @return string
+     */
+    private function findClass(string $name): string {
+        $class = "questions\\{$name}";
+
+        switch ($name) {
+            case 'qtype_shortanswer':
+            case 'qtype_calculatedmulti':
+            case 'qtype_multichoice':
+                $class = 'questions\qtype_multi';
+                break;
+            case 'qtype_numerical':
+            case 'qtype_calculated':
+            case 'qtype_calculatedsimple':
+                $class = 'questions\qtype_calculated';
+                break;
+            case 'qtype_ddwtos':
+                $class = 'questions\qtype_gapselect'; // Same as qtype_gapselect obviously.
+                break;
+            case 'qtype_ddmarker':
+                $class = 'questions\qtype_ddimageortext'; // Same as qtype_ddimageortext obviously.
+                break;
+        }
+        return $class;
     }
 }

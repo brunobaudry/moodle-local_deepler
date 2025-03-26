@@ -23,7 +23,6 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use core_external\required_capability_exception;
 use core_external\restricted_context_exception;
-use dml_exception;
 use dml_transaction_exception;
 use Exception;
 use invalid_parameter_exception;
@@ -110,8 +109,6 @@ class update_translation extends external_api {
             $response['error'] = "CAPABILITY " . $rc->getMessage();
         } catch (restricted_context_exception $rce) {
             $response['error'] = "CONTEXT " . $rce->getMessage();
-        } catch (dml_exception $dmlexception) {
-            $response['error'] = $dmlexception->getMessage();
         } catch (Exception $e) {
             $response['error'] = "Unexpected error: " . $e->getMessage();
         } catch (Throwable $t) {

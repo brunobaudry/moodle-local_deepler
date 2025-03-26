@@ -99,7 +99,7 @@ abstract class qbase implements translatable_interface, editable_interface, icon
         if (count($this->question->hints)) {
             foreach ($this->question->hints as $hint) {
                 $columns = field::filterdbtextfields('question_hints');
-                $hintfields[] = field::getfieldsfromcolumns($this->question, 'question_hints', $columns);
+                $hintfields[] = field::getfieldsfromcolumns($hint, 'question_hints', $columns);
                 array_merge($fields, $hintfields);
             }
         }

@@ -86,7 +86,7 @@ class lang_helper {
      *
      * @var string
      */
-    private mixed $allowsublangcodesasmain;
+    private mixed $allowsublangs;
     /**
      * Type of DeepL subscrription.
      *
@@ -107,7 +107,7 @@ class lang_helper {
      */
     public function __construct() {
         // Set to dummies values.
-        $this->allowsublangcodesasmain = get_config('local_deepler', 'allowsublangs');
+        $this->allowsublangs = get_config('local_deepler', 'allowsublangs');
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', '', PARAM_NOTAGS);
         $this->moodlelangs = get_string_manager()->get_list_of_translations();
@@ -141,7 +141,7 @@ class lang_helper {
         // Moodle format is not the common culture format.
         // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
         $hasunderscore = strpos($this->currentlang, '_');
-        if ($this->allowsublangcodesasmain && $hasunderscore && !$this->iscurrentsupported()) {
+        if ($this->allowsublangs && $hasunderscore && !$this->iscurrentsupported()) {
             $this->deeplsourcelang = strtoupper(substr($this->currentlang, 0, $hasunderscore));
         } else {
             $this->deeplsourcelang = strtoupper($this->currentlang);
@@ -196,21 +196,7 @@ class lang_helper {
         // Get the list of deepl langs that are supported by this moodle instance.
         $filtereddeepls = $this->finddeeplsformoodle($issource);
         foreach ($filtereddeepls as $l) {
-            $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
-            $text = $verbose ? $l->name : $l->code;
-            $text = ($same && $canimprove ? "® " : '') . $text;
-            $disable = $same && !$canimprove;
-            if ($issource) {
-                $selected = $this->isrephrase($l->code, $this->deeplsourcelang);
-            } else {
-                $selected = $this->targetlang !== '' && $this->isrephrase($l->code, $this->targetlang);
-            }
-            $tab[] = [
-                    'code' => $l->code,
-                    'lang' => $text,
-                    'selected' => $selected,
-                    'disabled' => $disable,
-            ];
+            $tab = $this->getoptions($issource, $l, $verbose, $canimprove, $tab);
         }
         return $tab;
     }
@@ -364,6 +350,33 @@ class lang_helper {
      */
     public function get_deeplsourcelang(): string {
         return $this->deeplsourcelang;
+    }
+
+    /**
+     * @param bool $issource
+     * @param mixed $l
+     * @param bool $verbose
+     * @param bool $canimprove
+     * @param array $tab
+     * @return array
+     */
+    public function getoptions(bool $issource, mixed $l, bool $verbose, bool $canimprove, array $tab): array {
+        $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
+        $text = $verbose ? $l->name : $l->code;
+        $text = ($same && $canimprove ? "® " : '') . $text;
+        $disable = $same && !$canimprove;
+        if ($issource) {
+            $selected = $this->isrephrase($l->code, $this->deeplsourcelang);
+        } else {
+            $selected = $this->targetlang !== '' && $this->isrephrase($l->code, $this->targetlang);
+        }
+        $tab[] = [
+                'code' => $l->code,
+                'lang' => $text,
+                'selected' => $selected,
+                'disabled' => $disable,
+        ];
+        return $tab;
     }
 
 }
