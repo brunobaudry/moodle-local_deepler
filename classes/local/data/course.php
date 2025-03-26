@@ -57,7 +57,12 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         $this->course = get_fast_modinfo($course);
         $this->format = course_get_format($course);
         $this->link = new moodle_url($CFG->wwwroot . "/course/edit.php", ['id' => $this->course->get_course_id()]);
-        $this->populatesections();
+        try {
+            $this->populatesections();
+        } catch (moodle_exception $ex) {
+            debugging($ex);
+        }
+
     }
 
     /**
@@ -104,6 +109,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * Populate the sections of the course.
      *
      * @return void
+     * @throws \core\exception\moodle_exception
      */
     private function populatesections(): void {
         foreach ($this->course->get_section_info_all() as $sectioninfo) {
