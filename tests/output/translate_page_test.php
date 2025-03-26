@@ -85,8 +85,8 @@ final class translate_page_test extends advanced_testcase {
         $this->makeenv();
         $this->langhelper->initdeepl();
         $this->langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
-        $this->langhelper->method('preparehtmlotions')
-                ->willReturn('<option value="en">en</option><option value="fr">en</option>');
+        $this->langhelper->method('preparehtmlotions')->willReturn(
+                '<option value="en">en</option><option value="fr">en</option>');
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
 

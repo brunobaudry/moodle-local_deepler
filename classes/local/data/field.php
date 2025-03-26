@@ -389,6 +389,7 @@ class field {
      * @return array
      */
     private function get_context_info(string $table, int $itemid, int $cmid = 0): array {
+        global $DB;
         switch ($table) {
             case 'course':
                 $context = context_course::instance($itemid);
@@ -400,7 +401,7 @@ class field {
 
             case 'course_sections':
                 $context = context_course::instance(
-                        get_field_sql("SELECT course FROM {course_sections} WHERE id = ?", [$itemid])
+                        $DB->get_field_sql("SELECT course FROM {course_sections} WHERE id = ?", [$itemid])
                 );
                 return [
                         'contextid' => $context->id,

@@ -32,6 +32,9 @@ use local_deepler\local\data\course;
 use local_deepler\local\services\lang_helper;
 use ReflectionClass;
 
+/**
+ * Test case for translateform class.
+ */
 final class translateform_test extends advanced_testcase {
     /** @var mixed */
     protected mixed $course;
@@ -51,8 +54,8 @@ final class translateform_test extends advanced_testcase {
         $this->course = $this->getDataGenerator()->create_course();
         $this->mlangfilter = $this->createMock(filter_multilang2::class);
         $this->langhelper = $this->createMock(lang_helper::class);
-        $this->langhelper->method('preparehtmlotions')
-                ->willReturn('<option value="en">en</option><option value="fr">en</option>');
+        $this->langhelper->method('preparehtmlotions')->willReturn(
+                '<option value="en">en</option><option value="fr">en</option>');
         $this->makeenv();
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
@@ -98,7 +101,7 @@ final class translateform_test extends advanced_testcase {
      * Test the definition method.
      *
      * @covers ::definition
-     * @returns void
+     * @return void
      */
     public function test_definition(): void {
         $this->resetAfterTest(true);
