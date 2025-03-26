@@ -422,10 +422,10 @@ class field {
     /**
      * Filter the text fields of a table.
      *
-     * @param $tablename
-     * @return int[]|mixed|string[]
+     * @param string $tablename
+     * @return mixed
      */
-    public static function filterdbtextfields($tablename) {
+    public static function filterdbtextfields(string $tablename): mixed {
         if (!isset(self::$filteredtablefields[$tablename])) {
             global $DB;
             // We build an array of all Text fields for this record.

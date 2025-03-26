@@ -54,12 +54,12 @@ final class langhelper_test extends advanced_testcase {
         parent::setUp();
         $this->langhelper = new lang_helper();
         $key = getenv('DEEPL_API_TOKEN');
-        if ($key === 'DEFAULT') {
+        if ($key === 'DEFAULT' || !$key) {
             $this->makeenv();
             $key = getenv('DEEPL_API_TOKEN');
         }
         $this->assertNotEquals($key, 'DEFAULT');
-        $this->langhelper->initdeepl($key);
+        $this->langhelper->initdeepl();
     }
 
     /**

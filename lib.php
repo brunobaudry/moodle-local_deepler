@@ -31,7 +31,7 @@
  * @return void
  * @package local_deepler
  */
-function local_deepler_extend_navigation_course($navigation, $course) {
+function local_deepler_extend_navigation_course($navigation, $course): void {
     // Do not show in menu if no capability.
     if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
         return;
@@ -53,19 +53,20 @@ function local_deepler_extend_navigation_course($navigation, $course) {
 }
 
 /**
- * File handling
+ * File handling.
  *
- * @param $course
- * @param $cm
- * @param $context
- * @param $filearea
- * @param $args
- * @param $forcedownload
- * @param $options
- * @return false|void
+ * @param object $course
+ * @param object $cm
+ * @param \core\context $context
+ * @param object $filearea
+ * @param object $args
+ * @param bool $forcedownload
+ * @param array $options
+ * @return bool
  * @throws \coding_exception
  */
-function local_deepler_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options) {
+function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, object $args,
+        bool $forcedownload, array $options): bool {
     // Context validation.
     if ($context->contextlevel != CONTEXT_BLOCK && $context->contextlevel != CONTEXT_SYSTEM) {
         return false;
@@ -89,4 +90,5 @@ function local_deepler_pluginfile($course, $cm, $context, $filearea, $args, $for
     }
 
     send_stored_file($file, 86400, 0, $forcedownload, $options);
+    return true;
 }

@@ -16,6 +16,7 @@
 
 namespace local_deepler\local\data\subs;
 
+use cm_info;
 use local_deepler\local\data\field;
 use mod_quiz\quiz_settings;
 use mod_quiz\structure;
@@ -43,10 +44,10 @@ class quiz {
     /**
      * Constructor.
      *
-     * @param $quiz
+     * @param \cm_info $quiz
      * @throws \dml_exception
      */
-    public function __construct($quiz) {
+    public function __construct(cm_info $quiz) {
         $this->quizsettings = quiz_settings::create($quiz->instance);
         $this->structure = structure::create_for_quiz($this->quizsettings);
         $slots = $this->structure->get_slots();

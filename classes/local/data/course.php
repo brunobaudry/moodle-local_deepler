@@ -47,6 +47,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     /**
      * Constructor.
      *
+     * @param \stdClass $course
      * @throws \core\exception\moodle_exception
      * @throws \moodle_exception
      */

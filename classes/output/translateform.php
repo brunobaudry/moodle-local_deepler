@@ -290,7 +290,7 @@ class translateform extends moodleform {
     /**
      * Build the header line.
      *
-     * @param editable_interface | iconic_interface $item
+     * @param editable_interface|iconic_interface $item
      * @return string
      */
     public function makeactivitydesc(iconic_interface|editable_interface $item): string {

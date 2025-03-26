@@ -48,6 +48,10 @@ final class course_test extends advanced_testcase {
         parent::setUp();
         $this->resetAfterTest();
         $this->course = $this->getDataGenerator()->create_course();
+        $this->getDataGenerator()->create_course_section(['course' => $this->course, 'section' => 1],
+                ['_name' => 'Test Section']);
+        $this->getDataGenerator()
+                ->create_module('quiz', ['course' => $this->course->id, 'name' => 'Test Quiz', 'description' => 'Test intro']);
         $this->coursewrapper = new course($this->course);
     }
 

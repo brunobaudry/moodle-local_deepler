@@ -53,10 +53,10 @@ final class translateform_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $this->course = $this->getDataGenerator()->create_course();
         $this->mlangfilter = $this->createMock(filter_multilang2::class);
+        $this->makeenv();
         $this->langhelper = $this->createMock(lang_helper::class);
         $this->langhelper->method('preparehtmlotions')->willReturn(
                 '<option value="en">en</option><option value="fr">en</option>');
-        $this->makeenv();
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
         $this->langhelper->initdeepl();
