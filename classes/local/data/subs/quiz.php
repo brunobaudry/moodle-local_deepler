@@ -33,13 +33,9 @@ class quiz {
     /** @var array */
     private array $questions;
     /**
-     * @var \mod_quiz\quiz_settings
+     * @var \cm_info
      */
-    private quiz_settings $quizsettings;
-    /**
-     * @var \mod_quiz\structure
-     */
-    private structure $structure;
+    private cm_info $quiz;
 
     /**
      * Constructor.
@@ -48,9 +44,8 @@ class quiz {
      * @throws \dml_exception
      */
     public function __construct(cm_info $quiz) {
-        $this->quizsettings = quiz_settings::create($quiz->instance);
-        $this->structure = structure::create_for_quiz($this->quizsettings);
-        $slots = $this->structure->get_slots();
+        $this->quiz = $quiz;
+        $slots = $this->getslots($quiz);
         $this->questions = [];
         foreach ($slots as $slot) {
             if ($slot->qtype === 'random') {
@@ -58,6 +53,36 @@ class quiz {
             } else {
                 $this->questions[] = question_bank::load_question($slot->questionid);
             }
+        }
+    }
+
+    private function getslots(cm_info $quiz) {
+        global $CFG;
+        if (!version_compare($CFG->version, '2023042411', '<')) {
+            global $DB;
+            // Load quiz data.
+            $quiz = $DB->get_record('quiz', ['id' => $this->quiz->instance], '*', MUST_EXIST);
+
+            // Load slots for the quiz.
+            // $slots = $DB->get_records('quiz_slots', ['quizid' => $this->quiz->instance]);
+            return $DB->get_records_sql("SELECT qs.*, 
+       qv.version, 
+       qv.id AS versionid, 
+       q.id AS questionid, 
+       q.qtype, 
+       q.name, 
+       q.questiontext, 
+       q.generalfeedback
+FROM {quiz_slots} qs
+JOIN {question_references} qr ON qr.component = 'mod_quiz' AND qr.questionarea = 'slot' AND qr.itemid = qs.id
+JOIN {question_versions} qv ON qv.questionbankentryid = qr.questionbankentryid
+JOIN {question} q ON q.id = qv.questionid
+WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
+
+        } else {
+            $quizsettings = quiz_settings::create($quiz->instance);
+            $structure = structure::create_for_quiz($quizsettings);
+            return $structure->get_slots();
         }
     }
 
@@ -72,7 +97,7 @@ class quiz {
         foreach ($this->questions as $question) {
             $params = [
                     'question' => $question,
-                    'cmid' => $this->quizsettings->get_cmid(),
+                    'cmid' => $this->quiz->id,
             ];
             $name = $question->qtype->plugin_name();
             $class = $this->findclass($name);
