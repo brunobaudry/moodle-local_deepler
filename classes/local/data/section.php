@@ -86,15 +86,6 @@ class section implements translatable_interface, editable_interface, visibility_
     }
 
     /**
-     * This method is used to get the section order.
-     *
-     * @return int
-     */
-    public function getorder(): int {
-        return $this->si->sectionnum;
-    }
-
-    /**
      * Fields of the section.
      *
      * @return array

@@ -151,7 +151,7 @@ class translateform extends moodleform {
                     $this->makeheader($this->mlangfilter->filter($section->getsectionname()), $section->getlink(), 3));
             $this->_form->addElement('html', DIV_CLOSE); // Close header div.
             // Section fields.
-            $this->makesettings($sectionfields, $section->getorder());
+            $this->makesettings($sectionfields, $section->getid());
             // Section's modules.
             $this->makemodules($sectionmodules);
             // Close section container for the course settings course__settings section-item.

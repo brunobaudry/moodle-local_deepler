@@ -99,22 +99,6 @@ final class section_test extends advanced_testcase {
     }
 
     /**
-     * Test getorder method.
-     *
-     * @covers ::getorder
-     * @return void
-     */
-    public function test_getorder(): void {
-        $this->resetAfterTest(true);
-
-        $section = new section($this->sectioninfos[0], $this->courseformat);
-        $section2 = new section($this->sectioninfos[1], $this->courseformat);
-
-        $this->assertEquals(0, $section->getorder());
-        $this->assertEquals(1, $section2->getorder());
-    }
-
-    /**
      * Test getfields method.
      *
      * @covers ::getfields
