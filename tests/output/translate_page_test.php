@@ -68,11 +68,12 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     protected function setUp(): void {
+        global $CFG;
         parent::setUp();
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
-        if (class_exists('\core_filters\text_filter')) {
+        if (version_compare($CFG->version, '2024042200', '>')) {
             // Moodle 4.5+ logic.
             $this->mlangfilter = $this->createMock(filter_multilang2::class);
         } else {
