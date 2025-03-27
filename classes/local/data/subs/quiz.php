@@ -56,22 +56,27 @@ class quiz {
         }
     }
 
+    /**
+     * Try to fetch the slots.
+     * With special cases for LTS 401.
+     *
+     * @param \cm_info $quiz
+     * @return array|\stdClass[]
+     * @throws \dml_exception
+     */
     private function getslots(cm_info $quiz) {
         global $CFG;
-        if (!version_compare($CFG->version, '2023042411', '<')) {
+        if (version_compare($CFG->version, '2023042411', '<')) {
             global $DB;
-            // Load quiz data.
-            $quiz = $DB->get_record('quiz', ['id' => $this->quiz->instance], '*', MUST_EXIST);
 
             // Load slots for the quiz.
-            // $slots = $DB->get_records('quiz_slots', ['quizid' => $this->quiz->instance]);
-            return $DB->get_records_sql("SELECT qs.*, 
-       qv.version, 
-       qv.id AS versionid, 
-       q.id AS questionid, 
-       q.qtype, 
-       q.name, 
-       q.questiontext, 
+            return $DB->get_records_sql("SELECT qs.*,
+       qv.version,
+       qv.id AS versionid,
+       q.id AS questionid,
+       q.qtype,
+       q.name,
+       q.questiontext,
        q.generalfeedback
 FROM {quiz_slots} qs
 JOIN {question_references} qr ON qr.component = 'mod_quiz' AND qr.questionarea = 'slot' AND qr.itemid = qs.id
