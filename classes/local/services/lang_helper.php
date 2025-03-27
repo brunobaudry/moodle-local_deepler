@@ -375,6 +375,7 @@ class lang_helper {
     /**
      * Creates props for html selects.
      *
+     * @param array $filtereddeepls
      * @param bool $issource
      * @param bool $verbose
      * @return array

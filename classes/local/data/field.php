@@ -328,7 +328,6 @@ class field {
             string $filearea, int $cmid = 0): string {
         $contextinfo = $this->get_context_info($table, $itemid, $cmid);
         $fs = get_file_storage();
-
         try {
             $files = $fs->get_area_files(
                     $contextinfo['contextid'],
