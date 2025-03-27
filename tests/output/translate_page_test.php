@@ -29,7 +29,6 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
-use core_filters\text_filter;
 use filter_multilang2;
 use filter_multilang2\filter;
 use local_deepler\local\data\course;
@@ -74,7 +73,7 @@ final class translate_page_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
-        $this->mlangfilter = $this->createMock(text_filter::class);
+        $this->mlangfilter = new filter_multilang2();
         $langhelper = $this->createMock(lang_helper::class);
         $langhelper->initdeepl();
         $langhelper->method('preparetargetsoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
