@@ -113,7 +113,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      */
     private function populatesections(): void {
         foreach ($this->course->get_section_info_all() as $sectioninfo) {
-            $this->sections[$sectioninfo->sectionnum] = new section($sectioninfo, $this->format);
+            $this->sections[$sectioninfo->section] = new section($sectioninfo, $this->format);
         }
     }
 }

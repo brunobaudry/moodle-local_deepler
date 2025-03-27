@@ -29,7 +29,6 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
-use core_filters\text_filter;
 use filter_multilang2;
 use filter_multilang2\filter;
 use local_deepler\local\data\course;
@@ -74,13 +73,13 @@ final class translate_page_test extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
         if (class_exists('\core_filters\text_filter')) {
-            // Moodle 4.5+ logic.
-            $this->mlangfilter = $this->createMock(text_filter::class);
+            // Moodle 4.5+ logic
+            $this->mlangfilter = $this->createMock(filter_multilang2::class);
         } else {
-            // Pre-4.5 workaround.
-            $this->mlangfilter = $this->getMockBuilder(filter_multilang2::class)
-                    ->disableOriginalConstructor()
-                    ->getMock();
+            // Pre-4.5 workaround
+            $mockbuilder = $this->getMockBuilder(filter_multilang2::class);
+            $mockbuilder->disableOriginalConstructor();
+            $this->mlangfilter = $mockbuilder->getMock();
         }
         $langhelper = $this->createMock(lang_helper::class);
         $langhelper->initdeepl();
