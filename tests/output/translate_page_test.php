@@ -73,10 +73,10 @@ final class translate_page_test extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
         if (class_exists('\core_filters\text_filter')) {
-            // Moodle 4.5+ logic
+            // Moodle 4.5+ logic.
             $this->mlangfilter = $this->createMock(filter_multilang2::class);
         } else {
-            // Pre-4.5 workaround
+            // Pre-4.5 workaround.
             $mockbuilder = $this->getMockBuilder(filter_multilang2::class);
             $mockbuilder->disableOriginalConstructor();
             $this->mlangfilter = $mockbuilder->getMock();

@@ -295,6 +295,7 @@ class field {
                 ['identifier' => $this->field, 'component' => 'core'], // Standard Moodle core strings.
                 ['identifier' => $this->field, 'component' => 'moodle'], // Standard Moodle core strings.
                 ['identifier' => $this->field, 'component' => 'question'], // Standard Moodle core strings.
+                ['identifier' => $this->field . 'n', 'component' => 'question'], // Standard Moodle core strings.
                 ['identifier' => $this->field, 'component' => $this->table], // Standard Moodle core strings.
                 ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent], // Common field patterns.
                 ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'], // Common field patterns.
@@ -307,7 +308,7 @@ class field {
             }
 
             if (get_string_manager()->string_exists($candidate['identifier'], $candidate['component'])) {
-                return get_string($candidate['identifier'], $candidate['component']);
+                return get_string($candidate['identifier'], $candidate['component'], $this->id);
             }
         }
 

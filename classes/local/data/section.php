@@ -111,7 +111,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return array
      */
     public function getmodules(): array {
-        if (!method_exists($this->si, 'get_sequence_cm_infos')) {
+        if (method_exists($this->si, 'get_sequence_cm_infos')) {
             // Moodle 405.
             $sectioncms = $this->si->get_sequence_cm_infos();
         } else {
