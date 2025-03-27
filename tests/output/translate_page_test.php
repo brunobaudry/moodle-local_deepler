@@ -29,6 +29,7 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
+use core_filters\text_filter;
 use filter_multilang2;
 use filter_multilang2\filter;
 use local_deepler\local\data\course;
@@ -78,7 +79,7 @@ final class translate_page_test extends advanced_testcase {
             $this->mlangfilter = $this->createMock(filter_multilang2::class);
         } else {
             // Pre-4.5 workaround.
-            $mockbuilder = $this->getMockBuilder(filter_multilang2::class);
+            $mockbuilder = $this->getMockBuilder(text_filter::class);
             $mockbuilder->disableOriginalConstructor();
             $this->mlangfilter = $mockbuilder->getMock();
         }
