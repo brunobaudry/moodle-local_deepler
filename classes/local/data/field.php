@@ -36,21 +36,6 @@ class field {
      */
     static public int $mintxtfieldsize = 254;
     /**
-     * @var array common columns to skip.
-     */
-    static private array $comoncolstoskip = ['*_displayoptions', '*_stamp'];
-    /**
-     * @var array|string[] columns to skip.
-     */
-    static private array $modcolstoskip =
-            ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
-                    'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles', 'studentquiz_reportingemail',
-                    'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
-                    'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
-                    'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
-                    'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata', 'filetypelist',
-            ];
-    /**
      * @var array customs columns to skip.
      */
     static private array $usercolstoskip = [];
@@ -119,6 +104,7 @@ class field {
     public function get_id(): int {
         return $this->id;
     }
+
 
     /**
      * Getter for cmid.
@@ -308,6 +294,7 @@ class field {
                 ['identifier' => $this->field, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
                 ['identifier' => $this->field, 'component' => 'core'], // Standard Moodle core strings.
                 ['identifier' => $this->field, 'component' => 'moodle'], // Standard Moodle core strings.
+                ['identifier' => $this->field, 'component' => 'question'], // Standard Moodle core strings.
                 ['identifier' => $this->field, 'component' => $this->table], // Standard Moodle core strings.
                 ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent], // Common field patterns.
                 ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'], // Common field patterns.
@@ -431,9 +418,8 @@ class field {
                 // Only scan the main text types that are above minîmum text field size.
                 return (($field->meta_type === "C" && $field->max_length > self::$mintxtfieldsize)
                                 || $field->meta_type === "X")
-                        && !in_array('*_' . $field->name, self::$comoncolstoskip)
-                        && !in_array($tablename . '_' . $field->name, self::$usercolstoskip)
-                        && !in_array($tablename . '_' . $field->name, self::$modcolstoskip);
+                        && !in_array('*_' . $field->name, ['*_displayoptions', '*_stamp'])
+                        && !in_array($tablename . '_' . $field->name, self::getcolstoskip());
             });
             self::$filteredtablefields[$tablename] = array_keys($textcols);
         }
@@ -491,6 +477,24 @@ class field {
             return new $class($record);
         }
         return null;
+    }
+
+    /**
+     * Prepare the array of default table columns to skip including the users.
+     *
+     * @return array|string[]
+     */
+    private static function getcolstoskip(): array {
+        $modcolstoskip =
+                ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
+                        'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles',
+                        'studentquiz_reportingemail',
+                        'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
+                        'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
+                        'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
+                        'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata', 'filetypelist',
+                ];
+        return array_merge(self::$usercolstoskip, $modcolstoskip);
     }
 
 }

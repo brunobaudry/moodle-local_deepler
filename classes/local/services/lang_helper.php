@@ -18,7 +18,7 @@ namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 
 use DeepL\DeepLClient;
-use DeepL\DeepLException;
+use DeepL\Language;
 use Deepl\Usage;
 use stdClass;
 
@@ -64,15 +64,15 @@ class lang_helper {
     /**
      * Languages available as source in Deepl's API.
      *
-     * @var object
+     * @var Language[]
      */
-    private mixed $deeplsources;
+    private array $deeplsources;
     /**
      * Languages available as target in Deepl's API.
      *
-     * @var object
+     * @var Language[]
      */
-    private mixed $deepltargets;
+    private array $deepltargets;
     /**
      * Deepl usage bound to the api key.
      *
@@ -90,13 +90,17 @@ class lang_helper {
      *
      * @var bool
      */
-    private $keyisfree;
+    private bool $keyisfree;
     /**
      * Mutlilangv2 parent lang behaviour.
      *
      * @var string
      */
     private string $multilangparentlang;
+    /**
+     * @var bool
+     */
+    private bool $canimprove;
 
     /**
      * Constructor.
@@ -121,10 +125,11 @@ class lang_helper {
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public function initdeepl() {
+    public function initdeepl(): void {
         $this->setdeeplapi();
         $this->inittranslator();
         $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
+        $this->canimprove = !$this->keyisfree && false;
         $this->usage = $this->translator->getUsage();
         $this->deeplsources = $this->translator->getSourceLanguages();
         $this->deepltargets = $this->translator->getTargetLanguages();
@@ -135,7 +140,7 @@ class lang_helper {
      *
      * @return void
      */
-    private function setcurrentlanguage() {
+    private function setcurrentlanguage(): void {
         // Moodle format is not the common culture format.
         // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
         $hasunderscore = strpos($this->currentlang, '_');
@@ -153,7 +158,7 @@ class lang_helper {
      * @return void
      * @throws \dml_exception
      */
-    private function setdeeplapi() {
+    private function setdeeplapi(): void {
         $configkey = get_config('local_deepler', 'apikey');
         if ($configkey === '') {
             $configkey = getenv('DEEPL_API_TOKEN') ? getenv('DEEPL_API_TOKEN') : '';
@@ -168,7 +173,7 @@ class lang_helper {
      * @return bool
      * @throws \DeepL\DeepLException
      */
-    private function inittranslator() {
+    private function inittranslator(): bool {
         if (!isset($this->translator)) {
             try {
                 $this->translator = new DeepLClient($this->apikey, ['send_platform_info' => false]);
@@ -180,60 +185,14 @@ class lang_helper {
     }
 
     /**
-     * Creates props for html selects.
-     *
-     * @param bool $issource
-     * @param bool $verbose
-     * @return array
-     */
-    public function prepareoptionlangs(bool $issource, bool $verbose = true) {
-        // If the key is free, we can't improve the source lang.
-        // TODO MDL-0000 ready for deepl-php-sdk to implement the rephrase, just remove && false.
-        $canimprove = !$this->keyisfree && false;
-        $tab = [];
-        // Get the list of deepl langs that are supported by this moodle instance.
-        $filtereddeepls = $this->finddeeplsformoodle($issource);
-        foreach ($filtereddeepls as $l) {
-            $tab = $this->getoptions($issource, $l, $verbose, $canimprove, $tab);
-        }
-        return $tab;
-    }
-
-    /**
-     * Create HTML props for select.
-     *
-     * @param bool $issource
-     * @param bool $verbose
-     * @return string
-     * TODO MDL-0000 allow regional languages setup (expl EN-GB)
-     */
-    public function preparehtmlotions(bool $issource, bool $verbose = true) {
-        $tab = $this->prepareoptionlangs($issource, $verbose);
-        $list = '';
-        foreach ($tab as $item) {
-            $list .= '<option value="' . $item['code'] . '"';
-            if ($item['selected']) {
-                $list .= ' selected ';
-            }
-            if ($item['disabled']) {
-                $list .= ' disabled ';
-            }
-            $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
-            $list .= $item['lang'] . '</option>';
-        }
-        return $list;
-    }
-
-    /**
      * Find the Deepl langs that are supported by this moodle instance.
      *
-     * @param bool $issource
+     * @param array $deepls
      * @return array
      */
-    private function finddeeplsformoodle(bool $issource) {
-        $deepls = $issource ? $this->deeplsources : $this->deepltargets;
+    private function finddeeplsformoodle(array $deepls): array {
         return array_filter($deepls, function($item) {
-            foreach ($this->moodlelangs as $code => $langverbose) {
+            foreach (array_keys($this->moodlelangs) as $code) {
                 $moodle = strtolower(str_replace('_', '', $code));
                 $deepl = strtolower(str_replace('-', '', $item->code));
                 if (stripos($deepl, $moodle) !== false) {
@@ -249,15 +208,10 @@ class lang_helper {
      *
      * @param \stdClass $config
      * @return \stdClass
-     * @throws DeepLException
      */
     public function prepareconfig(stdClass &$config) {
         $config->usage = $this->usage;
-        try {
-            $config->limitReached = $config->usage->anyLimitReached();
-        } catch (DeepLException $e) {
-            $config->limitReached = true;
-        }
+        $config->limitReached = $config->usage->anyLimitReached();
         $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
@@ -295,14 +249,13 @@ class lang_helper {
      *
      * @param string $lang
      * @param bool $issource
-     * @param bool $strict
      * @return bool
      */
-    private function islangsupported(string $lang, bool $issource, bool $strict = false) {
+    private function islangsupported(string $lang, bool $issource) {
         $list = $issource ? $this->deeplsources : $this->deepltargets;
         $len = count($list);
         while ($len--) {
-            $code = $strict ? $list[$len]->code : substr($list[$len]->code, 0, 2);
+            $code = $list[$len]->code;
             if ($code === $lang || $code === strtoupper($lang)) {
                 return true;
             }
@@ -316,7 +269,7 @@ class lang_helper {
      * @return bool
      */
     public function iscurrentsupported(): bool {
-        return $this->islangsupported($this->currentlang, true, true);
+        return $this->islangsupported($this->currentlang, true);
     }
 
     /**
@@ -355,28 +308,101 @@ class lang_helper {
      *
      * @param bool $issource
      * @param mixed $l
-     * @param bool $verbose
-     * @param bool $canimprove
-     * @param array $tab
+     * @param bool $isverbose
      * @return array
      */
-    public function getoptions(bool $issource, mixed $l, bool $verbose, bool $canimprove, array $tab): array {
+    private function getoption(bool $issource, mixed $l, bool $isverbose = true): array {
+        // If the key is free, we can't improve the source lang.
+        // TODO MDL-0000 ready for deepl-php-sdk to implement the rephrase, just remove && false.
         $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
-        $text = $verbose ? $l->name : $l->code;
-        $text = ($same && $canimprove ? "® " : '') . $text;
-        $disable = $same && !$canimprove;
+        $text = $isverbose ? $l->name : $l->code;
+        $text = ($same && $this->canimprove ? "® " : '') . $text;
+        $disable = $same && !$this->canimprove;
         if ($issource) {
             $selected = $this->isrephrase($l->code, $this->deeplsourcelang);
         } else {
             $selected = $this->targetlang !== '' && $this->isrephrase($l->code, $this->targetlang);
         }
-        $tab[] = [
+        return [
                 'code' => $l->code,
                 'lang' => $text,
                 'selected' => $selected,
                 'disabled' => $disable,
         ];
+    }
+
+    /**
+     * Create HTML props for select.
+     *
+     * @param array $tab
+     * @return string
+     * TODO MDL-0000 allow regional languages setup (expl EN-GB)
+     */
+    private function preparehtmlotions(array $tab): string {
+        $list = '';
+        foreach ($tab as $item) {
+            $list .= '<option value="' . $item['code'] . '"';
+            if ($item['selected']) {
+                $list .= ' selected ';
+            }
+            if ($item['disabled']) {
+                $list .= ' disabled ';
+            }
+            $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
+            $list .= $item['lang'] . '</option>';
+        }
+        return $list;
+    }
+
+    /**
+     * Prepare dropdown options for targets.
+     *
+     * @return string
+     */
+    public function preparehtmltagets(): string {
+        return $this->preparehtmlotions($this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false));
+    }
+
+    /**
+     * Prepare dropdown options for sources.
+     *
+     * @return string
+     */
+    public function preparehtmlsources(): string {
+        return $this->preparehtmlotions($this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false));
+    }
+
+    /**
+     * Creates props for html selects.
+     *
+     * @param bool $issource
+     * @param bool $verbose
+     * @return array
+     */
+    private function prepareoptionlangs(array $filtereddeepls, bool $issource = true, bool $verbose = true): array {
+        $tab = [];
+        // Get the list of deepl langs that are supported by this moodle instance.
+        foreach ($filtereddeepls as $l) {
+            $tab[] = $this->getoption($issource, $l, $verbose);
+        }
         return $tab;
     }
 
+    /**
+     * Prepare source options.
+     *
+     * @return array
+     */
+    public function preparesourcesoptionlangs(): array {
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources));
+    }
+
+    /**
+     *  Prepare target options.
+     *
+     * @return array
+     */
+    public function preparetargetsoptionlangs(): array {
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false);
+    }
 }

@@ -75,8 +75,9 @@ final class translate_page_test extends advanced_testcase {
         $this->mlangfilter = $this->createMock(filter_multilang2::class);
         $langhelper = $this->createMock(lang_helper::class);
         $langhelper->initdeepl();
-        $langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
-        $langhelper->method('preparehtmlotions')->willReturn(
+        $langhelper->method('preparetargetsoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
+        $langhelper->method('preparesourcesoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
+        $langhelper->method('preparehtmltagets')->willReturn(
                 '<option value="en">en</option><option value="fr">en</option>');
         $langhelper->currentlang = 'en';
         $langhelper->targetlang = 'fr';

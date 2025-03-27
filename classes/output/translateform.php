@@ -76,7 +76,7 @@ class translateform extends moodleform {
         // Get mlangfilter to filter text.
         $this->mlangfilter = $this->_customdata['mlangfilter'];
         // Get source options.
-        $this->sourceoptions = $this->langpack->preparehtmlotions(true, false);
+        $this->sourceoptions = $this->langpack->preparehtmlsources();
         // Start moodle form.
         $this->_form->disable_form_change_checker();
         MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
@@ -138,9 +138,9 @@ class translateform extends moodleform {
      * @throws \coding_exception
      */
     private function makesection(section $section) {
-        $sectionsettingsfields = $section->getfields();
+        $sectionfields = $section->getfields();
         $sectionmodules = $section->getmodules();
-        if (!empty($sectionmodules) || !empty($sectionsettingsfields)) {
+        if (!empty($sectionmodules) || !empty($sectionfields)) {
             // Open section container for the course settings course__settings section-item.
             $this->_form->addElement('html', "<div id='local_deepler__section{$section->getid()}'
                         class='section-item {$this->getitemvisibilityclass($section)}'>");
@@ -151,7 +151,7 @@ class translateform extends moodleform {
                     $this->makeheader($this->mlangfilter->filter($section->getsectionname()), $section->getlink(), 3));
             $this->_form->addElement('html', DIV_CLOSE); // Close header div.
             // Section fields.
-            $this->makesettings($sectionsettingsfields, $section->getorder());
+            $this->makesettings($sectionfields, $section->getorder());
             // Section's modules.
             $this->makemodules($sectionmodules);
             // Close section container for the course settings course__settings section-item.

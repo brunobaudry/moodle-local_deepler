@@ -16,6 +16,7 @@
 
 namespace local_deepler\local\data;
 
+use cm_info;
 use core_courseformat\base;
 use local_deepler\local\data\interfaces\editable_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
@@ -110,7 +111,14 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return array
      */
     public function getmodules(): array {
-        foreach ($this->si->get_sequence_cm_infos() as $cmid => $coursemodule) {
+        if (method_exists($this->si, 'get_sequence_cm_infos')) {
+            // Moodle 405.
+            $sectioncms = $this->si->get_sequence_cm_infos();
+        } else {
+            // Moodle 401 to 404.
+            $sectioncms = self::get_sequence_cm_infos($this->si);
+        }
+        foreach ($sectioncms as $cmid => $coursemodule) {
             $this->modules[$cmid] = new module($coursemodule);
         }
         return $this->modules;
@@ -132,5 +140,24 @@ class section implements translatable_interface, editable_interface, visibility_
      */
     public function getid() {
         return $this->si->id;
+    }
+
+    /**
+     * Returns the course modules in this section.
+     * Should be deprecated after 405 is the minimal supported version.
+     *
+     * @param \section_info $si
+     * @return cm_info[]
+     */
+    private static function get_sequence_cm_infos(section_info $si): array {
+        $sequence = $si->modinfo->sections[$si->sectionnum] ?? [];
+        $cms = $si->modinfo->get_cms();
+        $result = [];
+        foreach ($sequence as $cmid) {
+            if (isset($cms[$cmid])) {
+                $result[] = $cms[$cmid];
+            }
+        }
+        return $result;
     }
 }
