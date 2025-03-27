@@ -74,7 +74,7 @@ final class translate_page_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
-        $this->mlangfilter = $this->getMockBuilder(text_filter::class);
+        $this->mlangfilter = $this->createMock(text_filter::class);
         $langhelper = $this->createMock(lang_helper::class);
         $langhelper->initdeepl();
         $langhelper->method('preparetargetsoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
