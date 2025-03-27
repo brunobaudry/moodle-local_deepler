@@ -74,15 +74,7 @@ final class translate_page_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
-        if (version_compare($CFG->version, '2024042207', '>')) {
-            // Moodle 4.5+ logic.
-            $this->mlangfilter = $this->createMock(filter_multilang2::class);
-        } else {
-            // Pre-4.5 workaround.
-            $mockbuilder = $this->getMockBuilder(text_filter::class);
-            $mockbuilder->disableOriginalConstructor();
-            $this->mlangfilter = $mockbuilder->getMock();
-        }
+        $this->mlangfilter = $this->getMockBuilder(text_filter::class);
         $langhelper = $this->createMock(lang_helper::class);
         $langhelper->initdeepl();
         $langhelper->method('preparetargetsoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
