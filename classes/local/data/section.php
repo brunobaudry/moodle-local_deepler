@@ -111,7 +111,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return array
      */
     public function getmodules(): array {
-        if (method_exists($this->si, 'get_sequence_cm_infos')) {
+        if (!method_exists($this->si, 'get_sequence_cm_infos')) {
             // Moodle 405.
             $sectioncms = $this->si->get_sequence_cm_infos();
         } else {
@@ -150,7 +150,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return cm_info[]
      */
     private static function get_sequence_cm_infos(section_info $si): array {
-        $sequence = $si->modinfo->sections[$si->sectionnum] ?? [];
+        $sequence = $si->modinfo->sections[$si->section] ?? [];
         $cms = $si->modinfo->get_cms();
         $result = [];
         foreach ($sequence as $cmid) {
