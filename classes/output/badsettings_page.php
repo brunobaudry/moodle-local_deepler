@@ -30,10 +30,15 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class badsettings_page implements renderable, templatable {
+
     /**
      * @var string
      */
     private string $onomatopoeia;
+    /**
+     * @var \core\output\renderer_base
+     */
+    private renderer_base $output;
 
     /**
      * Constructor.
@@ -51,6 +56,7 @@ class badsettings_page implements renderable, templatable {
      * @return \stdClass
      */
     public function export_for_template(renderer_base $output) {
+        $this->output = $output;
         $data = new stdClass();
         $data->onomatopoeia = $this->onomatopoeia;
         return $data;
