@@ -68,7 +68,7 @@ function local_deepler_extend_navigation_course($navigation, $course): void {
 function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, object $args,
         bool $forcedownload, array $options): bool {
 
-    error_log($cm);
+    debugging($cm);
     // Context validation.
     if ($context->contextlevel != CONTEXT_BLOCK && $context->contextlevel != CONTEXT_SYSTEM) {
         return false;

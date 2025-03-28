@@ -38,12 +38,6 @@ require_once($CFG->dirroot . '/filter/multilang2/filter.php');
  */
 final class translate_page_test extends advanced_testcase {
 
-    /**
-     * Test setup.
-     */
-    protected function setUp(): void {
-        $this->resetAfterTest(true);
-    }
 
     /**
      * Test the constructor of translate_page.
@@ -72,8 +66,9 @@ final class translate_page_test extends advanced_testcase {
      * Test the export_for_template method.
      *
      * @covers \local_deepler\output\translate_page::export_for_template
+     * @return void
      */
-    public function test_export_for_template() {
+    public function test_export_for_template(): void {
         $coursedata = $this->createMock(course::class);
         $mlangfilter = $this->createMock(filter_multilang2::class);
         $languagepack = $this->createMock(lang_helper::class);
