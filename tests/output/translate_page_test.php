@@ -29,6 +29,7 @@ global $CFG;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
+use core_filters\text_filter;
 use filter_multilang2;
 use filter_multilang2\filter;
 use local_deepler\local\data\course;
@@ -73,7 +74,14 @@ final class translate_page_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $this->course = new course($course);
-        $this->mlangfilter = new filter_multilang2();
+        if (version_compare($CFG->version, '2024042207', '>')) {
+            // Moodle > 4.4.7.
+            $this->trace_to_cli($CFG->version, '> 2024042207 ');
+            $this->mlangfilter = new filter_multilang2();
+        } else {
+            $this->trace_to_cli($CFG->version, '447 or bellow ');
+            $this->mlangfilter = $this->createMock(text_filter::class);
+        }
         $langhelper = $this->createMock(lang_helper::class);
         $langhelper->initdeepl();
         $langhelper->method('preparetargetsoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
@@ -146,5 +154,18 @@ final class translate_page_test extends advanced_testcase {
 
         $this->assertEquals('checked', $result->escapelatexbydefault);
         $this->assertEquals('', $result->escapeprebydefault);
+    }
+
+    /**
+     * Helper to trace
+     *
+     * @param mixed $var
+     * @param string $info
+     * @return void
+     */
+    private function trace_to_cli(mixed $var, string $info): void {
+        echo "\n" . $info . "\n";
+        var_dump($var);
+        ob_flush();
     }
 }
