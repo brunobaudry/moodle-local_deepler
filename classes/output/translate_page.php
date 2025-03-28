@@ -16,7 +16,6 @@
 
 namespace local_deepler\output;
 
-use filter_multilang2;
 use local_deepler\local\data\course;
 use local_deepler\local\services\lang_helper;
 use renderable;
@@ -48,9 +47,9 @@ class translate_page implements renderable, templatable {
     /**
      * The current multilang filter object.
      *
-     * @var \filter_multilang2
+     * @var mixed
      */
-    private filter_multilang2 $mlangfilter;
+    private mixed $mlangfilter;
     /**
      * @var array|mixed
      */
@@ -66,11 +65,11 @@ class translate_page implements renderable, templatable {
      * Class Construct.
      *
      * @param \local_deepler\local\data\course $coursedata
-     * @param \filter_multilang2 $mlangfilter
+     * @param mixed $mlangfilter
      * @param lang_helper $languagepack
      * @param string $version
      */
-    public function __construct(course $coursedata, filter_multilang2 $mlangfilter, lang_helper $languagepack,
+    public function __construct(course $coursedata, mixed $mlangfilter, lang_helper $languagepack,
             string $version) {
         $this->version = $version;
         $this->coursedata = $coursedata;

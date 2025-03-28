@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 use advanced_testcase;
+use core_filters\text_filter;
 use filter_multilang2;
 use local_deepler\local\data\course;
 use local_deepler\local\services\lang_helper;
@@ -46,12 +47,16 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor(): void {
+        $this->resetAfterTest();
+        filter_set_global_state('multilang2', TEXTFILTER_ON);
         if (!class_exists('\core_filters\text_filter')) {
-            // Create an alias for pre-4.5 versions
-            class_alias(filter_multilang2::class, core_filters\text_filter::class);
+            // Create an alias for pre-4.5 versions.
+            class_alias(filter_multilang2::class, text_filter::class);
+            $mlangfilter = $this->createMock(filter_multilang2::class);
+        } else {
+            $mlangfilter = $this->createMock(text_filter::class);
         }
         $coursedata = $this->createMock(course::class);
-        $mlangfilter = $this->createMock(filter_multilang2::class);
         $languagepack = $this->createMock(lang_helper::class);
         $languagepack->currentlang = 'en';
         $languagepack->targetlang = 'fr';
@@ -74,12 +79,16 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_export_for_template(): void {
+        $this->resetAfterTest();
+        filter_set_global_state('multilang2', TEXTFILTER_ON);
         if (!class_exists('\core_filters\text_filter')) {
-            // Create an alias for pre-4.5 versions
-            class_alias(filter_multilang2::class, core_filters\text_filter::class);
+            // Create an alias for pre-4.5 versions.
+            class_alias(filter_multilang2::class, text_filter::class);
+            $mlangfilter = $this->createMock(filter_multilang2::class);
+        } else {
+            $mlangfilter = $this->createMock(text_filter::class);
         }
         $coursedata = $this->createMock(course::class);
-        $mlangfilter = $this->createMock(filter_multilang2::class);
         $languagepack = $this->createMock(lang_helper::class);
         $languagepack->currentlang = 'en';
         $languagepack->targetlang = 'fr';

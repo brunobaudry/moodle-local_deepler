@@ -16,9 +16,9 @@
 
 namespace local_deepler\local\services;
 
-use advanced_testcase;
 use context_course;
 use core_external\external_api;
+use local_deepler\external\base_external;
 
 /**
  * Unit tests for security_checker class.
@@ -27,7 +27,7 @@ use core_external\external_api;
  * @copyright  2025 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class securitychecker_test extends advanced_testcase {
+final class securitychecker_test extends base_external {
 
     /**
      * Test perform_security_checks method.
@@ -62,6 +62,9 @@ final class securitychecker_test extends advanced_testcase {
         $contextcourse = $this->createMock(context_course::class);
         $contextcourse->method('instance')->willReturn($contextcourse);
         // Mock the external_api::validate_context method.
+        if ($this->is_below_four_one()) {
+            return;
+        }
         $externalapi = $this->createMock(external_api::class);
         $externalapi->method('validate_context')->with($contextcourse);
         // Call the method.
