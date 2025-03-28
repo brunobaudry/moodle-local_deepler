@@ -39,7 +39,6 @@ class badsettings_page implements renderable, templatable {
      * Constructor.
      *
      * @param string $onomatopoeia
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(string $onomatopoeia) {
         $this->onomatopoeia = $onomatopoeia;
