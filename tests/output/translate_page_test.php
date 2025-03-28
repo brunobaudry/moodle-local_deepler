@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_deepler\tests;
+namespace local_deepler\output;
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
@@ -22,7 +22,6 @@ use advanced_testcase;
 use filter_multilang2;
 use local_deepler\local\data\course;
 use local_deepler\local\services\lang_helper;
-use local_deepler\output\translate_page;
 use ReflectionClass;
 use renderer_base;
 
@@ -37,7 +36,7 @@ require_once($CFG->dirroot . '/filter/multilang2/filter.php');
  * @copyright  2025 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class translate_page_test extends advanced_testcase {
+final class translate_page_test extends advanced_testcase {
 
     /**
      * Test setup.
@@ -48,6 +47,8 @@ class translate_page_test extends advanced_testcase {
 
     /**
      * Test the constructor of translate_page.
+     *
+     * @covers \local_deepler\output\translate_page::__construct
      */
     public function test_constructor() {
         $coursedata = $this->createMock(course::class);
@@ -61,14 +62,16 @@ class translate_page_test extends advanced_testcase {
         $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version);
 
         $this->assertInstanceOf(translate_page::class, $translatepage);
-        $this->assertEquals('1.0', $this->getPrivateProperty($translatepage, 'version'));
-        $this->assertSame($coursedata, $this->getPrivateProperty($translatepage, 'coursedata'));
-        $this->assertSame($mlangfilter, $this->getPrivateProperty($translatepage, 'mlangfilter'));
-        $this->assertSame($languagepack, $this->getPrivateProperty($translatepage, 'langpacks'));
+        $this->assertEquals('1.0', $this->getprivateproperty($translatepage, 'version'));
+        $this->assertSame($coursedata, $this->getprivateproperty($translatepage, 'coursedata'));
+        $this->assertSame($mlangfilter, $this->getprivateproperty($translatepage, 'mlangfilter'));
+        $this->assertSame($languagepack, $this->getprivateproperty($translatepage, 'langpacks'));
     }
 
     /**
      * Test the export_for_template method.
+     *
+     * @covers \local_deepler\output\translate_page::export_for_template
      */
     public function test_export_for_template() {
         $coursedata = $this->createMock(course::class);
@@ -107,7 +110,7 @@ class translate_page_test extends advanced_testcase {
      * @param string $property
      * @return mixed
      */
-    private function getPrivateProperty($object, $property) {
+    private function getprivateproperty($object, $property) {
         $reflection = new ReflectionClass($object);
         $property = $reflection->getProperty($property);
         $property->setAccessible(true);
