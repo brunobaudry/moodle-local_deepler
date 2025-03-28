@@ -64,13 +64,6 @@ final class securitychecker_test extends advanced_testcase {
         // Mock the external_api::validate_context method.
         $externalapi = $this->createMock(external_api::class);
         $externalapi->method('validate_context')->with($contextcourse);
-
-        // Mock the require_capability function.
-        global $CFG;
-        $CFG->mocks['require_capability'] = function($capability, $context, $userid) {
-            return true;
-        };
-
         // Call the method.
         security_checker::perform_security_checks($data, $userid, $courseid);
 

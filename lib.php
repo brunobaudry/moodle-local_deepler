@@ -64,6 +64,7 @@ function local_deepler_extend_navigation_course($navigation, $course): void {
  * @param array $options
  * @return bool
  * @throws \coding_exception
+ * @SuppressWarnings(PHPMD.UnusedFormalParameter)
  */
 function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, object $args,
         bool $forcedownload, array $options): bool {

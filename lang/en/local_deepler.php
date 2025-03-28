@@ -29,8 +29,8 @@ $string['allowsublangs_desc'] =
         'If enabled, when your installation has sub local language, for example de_ch, the main language (de) will be considered as source language. This is to prevent "The source language you are in is not supported by DeepL." from the API.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
-$string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API.
-Check with your Moodle admin';
+$string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
+Check with your Moodle admin.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
 $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
@@ -70,6 +70,7 @@ $string['nodeeplpapi'] =
         ':-( Cannot connect to DeepL API. <br/>Check with your admin. Looks like there is a network issue.';
 $string['nonsplittingtags'] = 'Non splitting tags';
 $string['notsupportedsource'] = 'The source language you are in is not supported by DeepL.';
+$string['onomatopoeia'] = 'Ouch !!!';
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
 $string['pluginname'] = 'DeepL Translator';

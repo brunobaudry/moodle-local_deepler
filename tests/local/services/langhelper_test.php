@@ -52,8 +52,8 @@ final class langhelper_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
-        $this->langhelper = new lang_helper();
         $this->makeenv();
+        $this->langhelper = new lang_helper();
         $this->langhelper->initdeepl();
     }
 

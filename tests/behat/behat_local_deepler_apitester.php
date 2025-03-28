@@ -71,7 +71,7 @@ class behat_local_deepler_apitester implements Context {
      * @param string $value
      * @return void
      */
-    public function i_set_the_deepl_token_to($value): void {
+    public function i_set_the_deepl_token_to(string $value): void {
         $this->i_set_the_header_to('Authorization', "$value");
     }
 
@@ -172,6 +172,7 @@ class behat_local_deepler_apitester implements Context {
      * @throws PendingException If the API secret token is not set.
      */
     public function before_scenario(BeforeScenarioScope $scope): void {
+        echo("SCOPE: " . $scope->getName()); // Debug statement.
         echo("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN']); // Debug statement.
         if (empty($_ENV['API_SECRET_TOKEN'])) {
             throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');

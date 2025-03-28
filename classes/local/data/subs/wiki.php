@@ -52,7 +52,7 @@ class wiki {
      */
     public function getfields(): array {
         $fields = [];
-        foreach ($this->wikis as $wid => $wiki) {
+        foreach (array_keys($this->wikis) as $wid) {
             $pages = wiki_get_page_list($wid);
             $pagesorphaned = array_map(function($op) {
                 return $op->id;

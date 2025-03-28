@@ -16,10 +16,6 @@
 
 namespace local_deepler\output;
 
-use renderable;
-use renderer_base;
-use templatable;
-
 /**
  * Translate Page Output.
  * Provides output class for /local/deepler/translate.php when error with unsupported source is found.
@@ -28,14 +24,5 @@ use templatable;
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sourcenotsupported_page implements renderable, templatable {
-    /**
-     * Export to Template.
-     *
-     * @param renderer_base $output
-     * @return string
-     */
-    public function export_for_template(renderer_base $output) {
-        return '';
-    }
+class sourcenotsupported_page extends badsettings_page {
 }
