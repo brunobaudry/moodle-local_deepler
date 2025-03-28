@@ -43,8 +43,13 @@ final class translate_page_test extends advanced_testcase {
      * Test the constructor of translate_page.
      *
      * @covers \local_deepler\output\translate_page::__construct
+     * @return void
      */
-    public function test_constructor() {
+    public function test_constructor(): void {
+        if (!class_exists('\core_filters\text_filter')) {
+            // Create an alias for pre-4.5 versions
+            class_alias(filter_multilang2::class, core_filters\text_filter::class);
+        }
         $coursedata = $this->createMock(course::class);
         $mlangfilter = $this->createMock(filter_multilang2::class);
         $languagepack = $this->createMock(lang_helper::class);
@@ -69,6 +74,10 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_export_for_template(): void {
+        if (!class_exists('\core_filters\text_filter')) {
+            // Create an alias for pre-4.5 versions
+            class_alias(filter_multilang2::class, core_filters\text_filter::class);
+        }
         $coursedata = $this->createMock(course::class);
         $mlangfilter = $this->createMock(filter_multilang2::class);
         $languagepack = $this->createMock(lang_helper::class);
