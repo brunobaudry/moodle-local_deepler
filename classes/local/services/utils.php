@@ -18,6 +18,7 @@ namespace local_deepler\local\services;
 
 use context_course;
 use context_module;
+use Exception;
 use local_deepler\local\data\field;
 
 /**
@@ -33,7 +34,6 @@ class utils {
      *
      * @param \local_deepler\local\data\field $field
      * @return string Processed text with valid URLs
-     * @throws \coding_exception
      */
     public static function resolve_pluginfiles(field $field): string {
         $contextinfo = self::get_context_info($field->get_table(), $field->get_id(), $field->get_cmid());

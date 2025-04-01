@@ -24,9 +24,6 @@
  * @see        https://docs.moodle.org/dev/String_API
  */
 defined('MOODLE_INTERNAL') || die();
-$string['allowsublangs'] = 'Allow sub-languages to be mapped to their main';
-$string['allowsublangs_desc'] =
-        'If enabled, when your installation has sub local language, for example de_ch, the main language (de) will be considered as source language. This is to prevent "The source language you are in is not supported by DeepL." from the API.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
