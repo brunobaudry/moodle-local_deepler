@@ -80,12 +80,6 @@ class lang_helper {
      */
     protected Usage $usage;
     /**
-     * Whether to allow sublanguages as main.
-     *
-     * @var string
-     */
-    private mixed $allowsublangs;
-    /**
      * Type of DeepL subscrription.
      *
      * @var bool
@@ -109,7 +103,6 @@ class lang_helper {
      */
     public function __construct() {
         // Set to dummies values.
-        $this->allowsublangs = get_config('local_deepler', 'allowsublangs');
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', '', PARAM_NOTAGS);
         $this->moodlelangs = get_string_manager()->get_list_of_translations();
@@ -145,7 +138,7 @@ class lang_helper {
         // Moodle format is not the common culture format.
         // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
         $hasunderscore = strpos($this->currentlang, '_');
-        if ($this->allowsublangs && $hasunderscore) {
+        if ($hasunderscore) {
             $this->deeplsourcelang = strtoupper(substr($this->currentlang, 0, $hasunderscore));
         } else {
             $this->deeplsourcelang = strtoupper($this->currentlang);

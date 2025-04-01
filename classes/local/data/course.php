@@ -18,6 +18,7 @@ namespace local_deepler\local\data;
 
 use core_courseformat\base;
 use course_modinfo;
+use moodle_exception;
 use moodle_url;
 use stdClass;
 
