@@ -44,7 +44,8 @@ class qtype_gapselect extends qbase {
                     $answer->answer,
                     0,
                     'answer',
-                    'question_answers'
+                    'question_answers',
+                    $this->cmid
             );
         }
         return $fields;

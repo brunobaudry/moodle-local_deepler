@@ -42,7 +42,8 @@ class qtype_multi extends qbase {
                     $answer->answer,
                     $answer->answerformat,
                     'answer',
-                    'question_answers'
+                    'question_answers',
+                    $this->cmid
             );
             if (!empty($answer->feedback)) {
                 $fields[] = new field(
@@ -50,7 +51,8 @@ class qtype_multi extends qbase {
                         $answer->feedback,
                         $answer->feedbackformat,
                         'feedback',
-                        'question_answers'
+                        'question_answers',
+                        $this->cmid
                 );
             }
         }

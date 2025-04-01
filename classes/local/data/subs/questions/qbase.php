@@ -49,6 +49,8 @@ abstract class qbase implements translatable_interface, editable_interface, icon
     private moodle_url $iconurl;
     /** @var string|lang_string */
     private string|lang_string $pluginname;
+    /** @var int|mixed */
+    protected int $cmid;
 
     /**
      * Constructor.
@@ -59,9 +61,10 @@ abstract class qbase implements translatable_interface, editable_interface, icon
     public function __construct(array $params) {
         global $DB, $OUTPUT;
         $this->question = $params['question'];
+        $this->cmid = $params['cmid'];
 
         $this->link = new moodle_url('/question/bank/editquestion/question.php',
-                ['cmid' => $params['cmid'], 'id' => $this->question->id]);
+                ['cmid' => $this->cmid, 'id' => $this->question->id]);
         $this->dbmanager = $DB->get_manager(); // Get the database manager.
         $this->qtype = $this->question->qtype->plugin_name(); // Get the question type.
         $this->iconurl = $OUTPUT->image_url('icon', $this->qtype);
@@ -76,7 +79,7 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      */
     private function getmain(): array {
         $columns = field::filterdbtextfields('question');
-        return field::getfieldsfromcolumns($this->question, 'question', $columns);
+        return field::getfieldsfromcolumns($this->question, 'question', $columns, $this->cmid);
     }
 
     /**
@@ -85,23 +88,18 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      * @return array
      */
     private function getoptions(): array {
-
         $fields = [];
-        if ($this->dbmanager->table_exists($this->qtype . '_options')) {
-            $columns = field::filterdbtextfields($this->qtype . '_options');
-            $optionsfields = field::getfieldsfromcolumns($this->question, $this->qtype . '_options', $columns);
-            $fields = array_merge($fields, $optionsfields);
-        }
-        if ($this->dbmanager->table_exists($this->qtype . '_choice')) {
-            $columns = field::filterdbtextfields($this->qtype . '_choice');
-            $choicesfields = field::getfieldsfromcolumns($this->question, $this->qtype . '_choice', $columns);
-            $fields = array_merge($fields, $choicesfields);
+        $tables = [$this->qtype . '_options', $this->qtype . '_choice'];
+        foreach ($tables as $table) {
+            if ($this->dbmanager->table_exists($table)) {
+                $fields = array_merge($fields,
+                        field::getfieldsfromcolumns($this->question, $table, field::filterdbtextfields($table), $this->cmid));
+            }
         }
         if (count($this->question->hints)) {
             foreach ($this->question->hints as $hint) {
-                $columns = field::filterdbtextfields('question_hints');
-                $hfields = field::getfieldsfromcolumns($hint, 'question_hints', $columns);
-                $fields = array_merge($fields, $hfields);
+                $fields = array_merge($fields, field::getfieldsfromcolumns($hint, 'question_hints',
+                        field::filterdbtextfields('question_hints'), $this->cmid));
             }
 
         }
@@ -161,4 +159,5 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      * @return array
      */
     abstract protected function getsubs(): array;
+
 }

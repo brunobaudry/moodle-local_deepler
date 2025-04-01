@@ -46,7 +46,8 @@ class qtype_match extends qbase {
                                     $subrecord->{$field},
                                     isset($subrecord->{$field . 'format'}) ?? 0,
                                     $field,
-                                    $substablename
+                                    $substablename,
+                                    $this->cmid
                             );
                         }
                     }

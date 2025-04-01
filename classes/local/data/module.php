@@ -38,7 +38,7 @@ class module implements translatable_interface, editable_interface, iconic_inter
     private string $modname;
     /** @var \moodle_url */
     private moodle_url $link;
-    /** @var string */
+    /** @var string|moodle_url */
     private string|moodle_url $iconurl;
     /** @var string|lang_string */
     private string|lang_string $pluginname;
@@ -51,14 +51,17 @@ class module implements translatable_interface, editable_interface, iconic_inter
      * Constructor
      *
      * @param \cm_info $cminfo
+     * @throws \coding_exception
      */
     public function __construct(cm_info $cminfo) {
         $this->childs = [];
         $this->cm = $cminfo;
         $this->modname = $this->cm->modname;
+
         $this->iconurl = $this->cm->get_icon_url();
         $this->pluginname = get_string('pluginname', $this->modname);
         $this->purpose = call_user_func($this->modname . '_supports', FEATURE_MOD_PURPOSE);
+
         $this->link = $this->buildlink();
         $this->fetchchilds();
     }
@@ -103,6 +106,7 @@ class module implements translatable_interface, editable_interface, iconic_inter
      * Fetch the childs of the module.
      *
      * @return void
+     * @throws \dml_exception
      */
     private function fetchchilds(): void {
         $path = "local_deepler\local\data\subs\\{$this->modname}";
@@ -134,7 +138,7 @@ class module implements translatable_interface, editable_interface, iconic_inter
      *
      * @return bool
      */
-    public function haschilds() {
+    public function haschilds(): bool {
         return !empty($this->childs);
     }
 

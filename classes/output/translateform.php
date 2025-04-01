@@ -202,12 +202,12 @@ class translateform extends moodleform {
         $icon = $this->makeicon($module, "class='activityicon' data-region='activity-icon'");
         $header = $this->makeheader($this->makeactivitydesc($module), $module->getlink(), 4, $icon);
         $this->_form->addElement('html', $header);
-        $fileds = $module->getfields();
+        $fields = $module->getfields();
         $childs = $module->getchilds();
         // Basic common fields.
-        if (!empty($fileds)) {
+        if (!empty($fields)) {
             /** @var field $field */
-            foreach ($fileds as $field) {
+            foreach ($fields as $field) {
                 $this->makefieldrow($field);
             }
         }

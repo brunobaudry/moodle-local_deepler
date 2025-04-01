@@ -43,7 +43,8 @@ class qtype_ordering extends qbase {
                     $answer->answer,
                     $answer->answerformat,
                     'answer',
-                    'question_answers'
+                    'question_answers',
+                    $this->cmid
             );
         }
         return $fields;

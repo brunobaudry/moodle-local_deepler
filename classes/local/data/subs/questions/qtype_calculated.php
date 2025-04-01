@@ -43,7 +43,8 @@ class qtype_calculated extends qbase {
                         $answer->feedback,
                         $answer->feedbackformat,
                         'feedback',
-                        'question_answers'
+                        'question_answers',
+                        $this->cmid
                 );
             }
         }

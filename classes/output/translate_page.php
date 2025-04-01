@@ -60,6 +60,10 @@ class translate_page implements renderable, templatable {
      * @var translateform
      */
     private translateform $mform;
+    /**
+     * @var \renderer_base
+     */
+    private renderer_base $output;
 
     /**
      * Class Construct.
@@ -89,6 +93,7 @@ class translate_page implements renderable, templatable {
      * @return object
      */
     public function export_for_template(renderer_base $output) {
+        $this->output = $output;
         $data = new stdClass();
         // Data for mustache template.
         $data->langstrings = $this->langpacks->preparestrings();

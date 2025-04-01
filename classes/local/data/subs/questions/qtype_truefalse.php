@@ -42,7 +42,8 @@ class qtype_truefalse extends qbase {
                     $this->question->truefeedback,
                     $this->question->truefeedbackformat,
                     'feedback',
-                    'question_answers'
+                    'question_answers',
+                    $this->cmid
             );
         }
         if (!empty($this->question->falsefeedback)) {
@@ -51,7 +52,8 @@ class qtype_truefalse extends qbase {
                     $this->question->falsefeedback,
                     $this->question->falsefeedbackformat,
                     'feedback',
-                    'question_answers'
+                    'question_answers',
+                    $this->cmid
             );
         }
         return $fields;

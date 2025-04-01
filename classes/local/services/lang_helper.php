@@ -326,6 +326,7 @@ class lang_helper {
         return [
                 'code' => $l->code,
                 'lang' => $text,
+                'verbose' => $l->name,
                 'selected' => $selected,
                 'disabled' => $disable,
         ];

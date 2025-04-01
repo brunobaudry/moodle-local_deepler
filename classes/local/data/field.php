@@ -17,9 +17,7 @@
 namespace local_deepler\local\data;
 
 use cm_info;
-use context_course;
-use context_module;
-use moodle_url;
+use local_deepler\local\services\utils;
 
 /**
  * Class filed
@@ -91,7 +89,10 @@ class field {
         $this->format = $format;
         $this->cmid = $cmid;
         $this->translatedfieldname = '';
-        $this->preparetexts($text);
+        $this->displaytext = $this->text = $text;
+        if ($this->format === 1) {
+            $this->preparetexts();
+        }
         $this->init_db();
         $this->search_field_strings();
     }
@@ -223,16 +224,16 @@ class field {
     public function has_multilang(): bool {
         return str_contains($this->text, '{mlang}');
     }
+
     /**
      * Building the text attributes.
      *
-     * @param string $text
      * @return void
+     * @throws \coding_exception
      */
-    private function preparetexts(string $text) {
-        $this->displaytext = $this->text = $text;
-        if (str_contains($text, '@@PLUGINFILE@@')) {
-            $this->displaytext = $this->resolve_pluginfiles($text, $this->table, $this->id, $this->cmid);
+    private function preparetexts(): void {
+        if (str_contains($this->displaytext, '@@PLUGINFILE@@')) {
+            $this->displaytext = utils::resolve_pluginfiles($this);
         }
     }
 
@@ -241,7 +242,7 @@ class field {
      *
      * @return void
      */
-    private function init_db() {
+    private function init_db(): void {
         $this->status = new status($this->id, $this->table, $this->field, self::$targetlangdeepl);
         // Skip if target lang is undefined.
         if ($this->status->isready()) {
@@ -315,92 +316,8 @@ class field {
         return $foundstring;
     }
 
-    /**
-     * Unified file URL resolver with context-aware processing.
-     *
-     * @param string $text Content containing @@PLUGINFILE@@ references
-     * @param string $table Entity type (course|course_sections|mod_name)
-     * @param int $itemid Entity ID from specified table
-     * @param string $filearea File area identifier
-     * @param int $cmid Course module ID (for activities)
-     * @return string Processed text with valid URLs
-     */
-    private function resolve_pluginfiles(string $text, string $table, int $itemid,
-            string $filearea, int $cmid = 0): string {
-        $contextinfo = $this->get_context_info($table, $itemid, $cmid);
-        $fs = get_file_storage();
-        try {
-            $files = $fs->get_area_files(
-                    $contextinfo['contextid'],
-                    $contextinfo['component'],
-                    $filearea,
-                    $contextinfo['itemid'],
-                    'filename, filepath',
-                    false
-            );
-
-            foreach ($files as $file) {
-                $url = moodle_url::make_pluginfile_url(
-                        $file->get_contextid(),
-                        $file->get_component(),
-                        $file->get_filearea(),
-                        $file->get_itemid(),
-                        $file->get_filepath(),
-                        $file->get_filename()
-                );
-
-                $text = str_replace(
-                        '@@PLUGINFILE@@/' . $file->get_filename(),
-                        $url->out(),
-                        $text
-                );
-            }
-        } catch (Exception $e) {
-            debugging('File processing error: ' . $e->getMessage());
-        }
-
-        return $text;
-    }
 
 
-    /**
-     * Context resolution optimized for Moodle's hierarchy.
-     *
-     * @param string $table
-     * @param int $itemid
-     * @param int $cmid
-     * @return array
-     */
-    private function get_context_info(string $table, int $itemid, int $cmid = 0): array {
-        global $DB;
-        switch ($table) {
-            case 'course':
-                $context = context_course::instance($itemid);
-                return [
-                        'contextid' => $context->id,
-                        'component' => 'course',
-                        'itemid' => $itemid,
-                ];
-
-            case 'course_sections':
-                $context = context_course::instance(
-                        $DB->get_field_sql("SELECT course FROM {course_sections} WHERE id = ?", [$itemid])
-                );
-                return [
-                        'contextid' => $context->id,
-                        'component' => 'course',
-                        'itemid' => $itemid,
-                ];
-
-            default: // Activity modules.
-                $context = context_module::instance($cmid);
-                return [
-                        'contextid' => $context->id,
-                        'component' => 'mod_' . $table,
-                        'itemid' => $cmid,
-                ];
-        }
-    }
 
     /**
      * Filter the text fields of a table.
@@ -439,7 +356,7 @@ class field {
         $infos = [];
         foreach ($collumns as $collumn) {
             $fieldtextformat = "{$collumn}format";
-            if ($info->{$collumn} !== null && $info->{$collumn} !== '' && is_string($info->{$collumn})) {
+            if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
                 $infos[] = new field(
                         $info->id,
                         $info->{$collumn},
@@ -460,8 +377,11 @@ class field {
      * @return array
      */
     public static function getfieldsfrominfo(cm_info $cminfo): array {
+        global $DB;
         $mod = $cminfo->modname;
-        return self::getfieldsfromcolumns($cminfo, $mod, self::filterdbtextfields($cminfo->modname), $cminfo->id);
+        // Get all the fields as CMINFO does not carry them all.
+        $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);
+        return self::getfieldsfromcolumns($activitydbrecord, $mod, self::filterdbtextfields($cminfo->modname), $cminfo->id);
     }
 
     /**

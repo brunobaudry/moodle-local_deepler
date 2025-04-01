@@ -48,7 +48,8 @@ class qtype_ddimageortext extends qbase {
                     $answer->label,
                     0,
                     'label',
-                    $modname
+                    $modname,
+                    $this->cmid
             );
         }
         return $fields;
