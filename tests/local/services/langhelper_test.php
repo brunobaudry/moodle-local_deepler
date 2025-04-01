@@ -24,7 +24,7 @@
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 
-namespace local_deepler\local\data;
+namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
@@ -52,14 +52,9 @@ final class langhelper_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
+        $this->makeenv();
         $this->langhelper = new lang_helper();
-        $key = getenv('DEEPL_API_TOKEN');
-        if ($key === 'DEFAULT') {
-            $this->makeenv();
-            $key = getenv('DEEPL_API_TOKEN');
-        }
-        $this->assertNotEquals($key, 'DEFAULT');
-        $this->langhelper->initdeepl($key);
+        $this->langhelper->initdeepl();
     }
 
     /**
@@ -69,12 +64,21 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_prepareoptionlangs(): void {
-        $options = $this->langhelper->prepareoptionlangs(true, true);
+        $optionscourse = $this->langhelper->preparesourcesoptionlangs();
+        $optionstargets = $this->langhelper->preparetargetsoptionlangs();
 
-        $this->assertIsArray($options);
-        $this->assertNotEmpty($options);
+        $this->assertIsArray($optionscourse);
+        $this->assertIsArray($optionstargets);
+        $this->assertNotEmpty($optionscourse);
+        $this->assertNotEmpty($optionstargets);
 
-        foreach ($options as $option) {
+        foreach ($optionscourse as $option) {
+            $this->assertArrayHasKey('code', $option);
+            $this->assertArrayHasKey('lang', $option);
+            $this->assertArrayHasKey('selected', $option);
+            $this->assertArrayHasKey('disabled', $option);
+        }
+        foreach ($optionstargets as $option) {
             $this->assertArrayHasKey('code', $option);
             $this->assertArrayHasKey('lang', $option);
             $this->assertArrayHasKey('selected', $option);
@@ -89,9 +93,12 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_preparehtmloptions(): void {
-        $htmloptions = $this->langhelper->preparehtmlotions(true, true);
-        $this->assertIsString($htmloptions);
-        $this->assertStringContainsString('<option', $htmloptions);
+        $htmltargets = $this->langhelper->preparehtmltagets();
+        $htmlsources = $this->langhelper->preparehtmlsources();
+        $this->assertIsString($htmltargets);
+        $this->assertIsString($htmlsources);
+        $this->assertStringContainsString('<option', $htmltargets);
+        $this->assertStringContainsString('<option', $htmlsources);
     }
 
     /**
@@ -102,10 +109,8 @@ final class langhelper_test extends advanced_testcase {
      * @throws \dml_exception
      */
     public function test_settings(): void {
-        $key = '';
         if ($this->langhelper->isapikeynoset()) {
             $this->makeenv();
-            $key = getenv('DEEPL_API_TOKEN');
         }
         $this->langhelper->initdeepl();
     }
@@ -141,7 +146,7 @@ final class langhelper_test extends advanced_testcase {
                 $_SERVER[$name] = $value;
             }
         } else {
-            $this->assertEquals('DEFAULT', getenv('DEEPL_API_TOKEN'));
+            $this->assertNotEmpty(getenv('DEEPL_API_TOKEN'));
         }
     }
 }

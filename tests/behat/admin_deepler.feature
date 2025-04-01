@@ -10,3 +10,4 @@ Feature: Feature for local_deepler plugin main admin page
     Then I should see "local_deepler | latexescapeadmin"
     Then I should see "local_deepler | preescapeadmin"
     Then I should see "local_deepler | scannedfieldsize"
+    Then I should see "Current version"

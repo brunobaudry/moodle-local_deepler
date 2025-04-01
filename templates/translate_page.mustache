@@ -237,17 +237,22 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <span>{{#str}}filters,local_deepler{{/str}}:</span>
         <div class="custom-control custom-switch ml-3">
             <input id="show-updated" class="custom-control-input local_deepler__show-updated" type="checkbox"
-                   data-id="local_deepler/outline_detection"
                    data-action="local_deepler/show-updated">
             <label class="custom-control-label" for="show-updated">{{#str}}uptodate,local_deepler{{/str}}</label>
         </div>
         <div class="custom-control custom-switch ml-3">
             <input id="show-needsupdate" checked="checked" type="checkbox"
                    class="custom-control-input local_deepler__show-needsupdate"
-                   data-id="local_deepler/outline_detection"
                    data-action="local_deepler/show-needsupdate"
             >
             <label class="custom-control-label" for="show-needsupdate">{{#str}}needsupdate,local_deepler{{/str}}</label>
+        </div>
+        <div class="custom-control custom-switch ml-3">
+            <input id="show-hidden" checked="checked" type="checkbox"
+                   class="custom-control-input local_deepler__show-hidden"
+                   data-action="local_deepler/show-hidden"
+            >
+            <label class="custom-control-label" for="show-hidden">{{#str}}show,local_deepler{{/str}} &quot;{{#str}}hiddenfromstudents{{/str}}&quot;</label>
         </div>
 
     </div>
@@ -297,6 +302,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             ><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>
         </div>
     </div>
+    <div id='local_deepler-scrollspy' class="row p-1 pl-3 bg-primary-light"></div>
 </div>
 <div class="course-section">
     {{{mform}}}

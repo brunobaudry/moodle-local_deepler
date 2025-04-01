@@ -1,8 +1,16 @@
-name: "Releasing in Moodle's Plugins directory"
+#
+# Whenever a new tag starting with "v" is pushed, add the tagged version
+# to the Moodle Plugins directory at https://moodle.org/plugins
+#
+# revision: 2021070201
+#
+name: Releasing in the Plugins directory
+
 on:
   push:
     tags:
       - v*
+
   workflow_dispatch:
     inputs:
       tag:
@@ -17,11 +25,12 @@ jobs:
   release-at-moodle-org:
     runs-on: ubuntu-latest
     env:
-      PLUGIN: local_deepler
+      PLUGIN: <put the frankenstyle component name of your plugin here>
       CURL: curl -s
       ENDPOINT: https://moodle.org/webservice/rest/server.php
       TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
       FUNCTION: local_plugins_add_version
+
     steps:
       - name: Call the service function
         id: add-version
@@ -35,13 +44,7 @@ jobs:
             echo "No tag name has been provided!"
             exit 1
           fi
-          echo "Tag name: ${TAGNAME}"
           ZIPURL="https://api.github.com/repos/${{ github.repository }}/zipball/${TAGNAME}"
-          echo "Zip URL: ${ZIPURL}"
-          
-          # Add a delay to ensure the ZIP is available
-          sleep 30
-          
           RESPONSE=$(${CURL} ${ENDPOINT} --data-urlencode "wstoken=${TOKEN}" \
                                          --data-urlencode "wsfunction=${FUNCTION}" \
                                          --data-urlencode "moodlewsrestformat=json" \
@@ -52,16 +55,12 @@ jobs:
                                          --data-urlencode "vcstag=${TAGNAME}" \
                                          --data-urlencode "changelogurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/${TAGNAME}" \
                                          --data-urlencode "altdownloadurl=${ZIPURL}")
-          echo "API Response: ${RESPONSE}"
-          echo "response=${RESPONSE}" >> $GITHUB_ENV
+          echo "response=${RESPONSE}" >> $GITHUB_OUTPUT
+
       - name: Evaluate the response
         id: evaluate-response
         env:
           RESPONSE: ${{ steps.add-version.outputs.response }}
         run: |
-          echo "API Response: ${RESPONSE}"
-          if echo "${RESPONSE}" | jq --exit-status ".id" > /dev/null; then
-            echo "API call successful."
-          else
-            echo "API call failed."
-            exit 1
+          jq <<< ${RESPONSE}
+          jq --exit-status ".id" <<< ${RESPONSE} > /dev/null

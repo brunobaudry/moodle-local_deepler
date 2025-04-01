@@ -31,10 +31,12 @@
 // Get libs.
 use DeepL\AuthorizationException;
 use DeepL\DeepLException;
-use local_deepler\local\data\course_data;
-use local_deepler\local\data\lang_helper;
+use local_deepler\local\data\course;
+use local_deepler\local\data\field;
+use local_deepler\local\services\lang_helper;
 use local_deepler\output\badsettings_page;
 use local_deepler\output\nodeepl_page;
+use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
 require_once(__DIR__ . '/../../config.php');
@@ -47,8 +49,8 @@ global $USER;
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 require_once('./classes/output/translate_page.php');
 require_once('./classes/output/nodeepl_page.php');
-require_once('./classes/local/data/course_data.php');
-require_once('./classes/local/data/lang_helper.php');
+require_once('./classes/local/data/course.php');
+require_once('./classes/local/services/lang_helper.php');
 require_once(__DIR__ . '/version.php');
 require_once($CFG->dirroot . '/lib/editorlib.php');
 
@@ -85,47 +87,47 @@ echo $output->heading($mlangfilter->filter($course->fullname));
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
+    field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
     $languagepack->initdeepl();
-    // Set js data.
-    $jsconfig = new stdClass();
-    $jsconfig->version = $plugin->release;
-    // Adds user ID for security checks in external calls.
-    $jsconfig->userid = $USER->id;
-    // Adds the user's prefered editor to the jsconfig.
-    $defaulteditor = strstr($CFG->texteditors, ',', true);
-    $userprefs = get_user_preferences();
-    $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
-    // Adds course id.
-    $jsconfig->courseid = $courseid;
-    // Add the debug setting for logger.
-    $jsconfig->debug = $CFG->debug;
-    // Adds the language settings strings to the jsconfig.
-    $jsconfig = $languagepack->prepareconfig($jsconfig);
-    // Adding page JS.
-    $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
-    // Output translation grid.
-    $coursedata = new course_data($course, $languagepack->targetlang, $context->id);
-    // Build the page.
-    $prepareddata = $coursedata->getdata();
-    $renderable = new translate_page($course, $prepareddata, $mlangfilter, $languagepack, $plugin->release);
-    echo $output->render($renderable);
-    // Output footer.
-    echo $output->footer();
+    if ($languagepack->iscurrentsupported()) {
+        // Set js data.
+        $jsconfig = new stdClass();
+        $jsconfig->version = $plugin->release;
+        // Adds user ID for security checks in external calls.
+        $jsconfig->userid = $USER->id;
+        // Adds the user's prefered editor to the jsconfig.
+        $defaulteditor = strstr($CFG->texteditors, ',', true);
+        $userprefs = get_user_preferences();
+        $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
+        // Adds course id.
+        $jsconfig->courseid = $courseid;
+        // Add the debug setting for logger.
+        $jsconfig->debug = $CFG->debug;
+        // Adds the language settings strings to the jsconfig.
+        $jsconfig = $languagepack->prepareconfig($jsconfig);
+        // Adding page JS.
+        $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
+        // Create the structure.
+        $coursedata = new course($course);
+        // Build the page.
+        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release);
+        echo $output->render($renderable);
+    } else {
+        $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
+        echo $output->render($renderable);
+    }
 } catch (AuthorizationException $e) {
     // Deepl could not be initialized.
-
-    $renderable = new badsettings_page();
+    $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
     echo $output->render($renderable);
-    // Output footer.
-    echo $output->footer();
 } catch (DeepLException $e) {
     // Deepl cannot connect.
     if ($languagepack->isapikeynoset()) {
-        $renderable = new badsettings_page();
+        $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
     } else {
-        $renderable = new nodeepl_page();
+        $renderable = new nodeepl_page(get_string('onomatopoeia', 'local_deepler'));
     }
     echo $output->render($renderable);
-    // Output footer.
-    echo $output->footer();
 }
+// Output footer.
+echo $output->footer();

@@ -46,7 +46,7 @@ final class settings_test extends \advanced_testcase {
      * @coversNothing
      * @return void
      */
-    public function test_usedeepl(): void {
+    public function test_global(): void {
         global $CFG;
         $this->assertNotNull($CFG);
         $this->assertEquals(2, 1 + 1);
@@ -66,6 +66,10 @@ final class settings_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/lib/adminlib.php');
         require_once(__DIR__ . '/../settings.php');
         $settings1 = new \admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
+        $this->assertEquals($settings1->name, 'local_deepler');
+        $this->assertEquals($settings1->visiblename, get_string('pluginname', 'local_deepler'));
+        $this->assertEquals($settings1->req_capability[0], 'moodle/site:config');
+        $this->assertIsArray($settings1->req_capability);
         $this->assertFileExists($CFG->dirroot . '/lib/adminlib.php');
         $this->assertFileExists(__DIR__ . '/../settings.php');
         $this->assertFalse(has_capability('moodle/site:config', \context_system::instance()));

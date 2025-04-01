@@ -16,8 +16,8 @@
 
 namespace local_deepler\output;
 
-use filter_multilang2;
-use local_deepler\local\data\lang_helper;
+use local_deepler\local\data\course;
+use local_deepler\local\services\lang_helper;
 use renderable;
 use renderer_base;
 use stdClass;
@@ -39,23 +39,17 @@ class translate_page implements renderable, templatable {
      */
     private string $version;
     /**
-     * The course in translation.
-     *
-     * @var object
-     */
-    private object $course;
-    /**
      * The data of the course parsed from mod_info.
      *
-     * @var array
+     * @var \local_deepler\local\data\course
      */
-    private array $coursedata;
+    private course $coursedata;
     /**
      * The current multilang filter object.
      *
-     * @var \filter_multilang2
+     * @var mixed
      */
-    private object $mlangfilter;
+    private mixed $mlangfilter;
     /**
      * @var array|mixed
      */
@@ -63,29 +57,30 @@ class translate_page implements renderable, templatable {
     /**
      * The form to display the row UI.
      *
-     * @var translate_form
-     * TODO MDL-0 change this to mustache.
+     * @var translateform
      */
-    private translate_form $mform;
+    private translateform $mform;
+    /**
+     * @var \renderer_base
+     */
+    private renderer_base $output;
 
     /**
      * Class Construct.
      *
-     * @param \stdClass $course
-     * @param array $coursedata
-     * @param \filter_multilang2 $mlangfilter
+     * @param \local_deepler\local\data\course $coursedata
+     * @param mixed $mlangfilter
      * @param lang_helper $languagepack
      * @param string $version
      */
-    public function __construct(stdClass $course, array $coursedata, filter_multilang2 $mlangfilter, lang_helper $languagepack,
+    public function __construct(course $coursedata, mixed $mlangfilter, lang_helper $languagepack,
             string $version) {
         $this->version = $version;
-        $this->course = $course;
         $this->coursedata = $coursedata;
         $this->langpacks = $languagepack;
         $this->mlangfilter = $mlangfilter;
         // Moodle Form.
-        $mform = new translate_form(null, ['course' => $course, 'coursedata' => $coursedata, 'mlangfilter' => $mlangfilter,
+        $mform = new translateform(null, ['coursedata' => $coursedata, 'mlangfilter' => $mlangfilter,
                 'langpack' => $languagepack,
         ]);
         $this->mform = $mform;
@@ -98,13 +93,13 @@ class translate_page implements renderable, templatable {
      * @return object
      */
     public function export_for_template(renderer_base $output) {
+        $this->output = $output;
         $data = new stdClass();
         // Data for mustache template.
-        $data->course = $this->course;
         $data->langstrings = $this->langpacks->preparestrings();
-        $data->targethtmloptions = $this->langpacks->preparehtmlotions(false, true);
-        $data->targetlangs = $this->langpacks->prepareoptionlangs(false, true);
-        $data->sourcelangs = $this->langpacks->prepareoptionlangs(true, true);
+        $data->targethtmloptions = $this->langpacks->preparehtmltagets();
+        $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
+        $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
 
         // Hacky fix but the only way to adjust html...
         // This could be overridden in css and I might look at that fix for the future.
@@ -114,15 +109,13 @@ class translate_page implements renderable, templatable {
 
         // Set langs.
         $data->current_lang = $this->langpacks->currentlang;
-        $data->deeplsource = $this->langpacks->deeplsourcelang;
+        $data->deeplsource = $this->langpacks->get_deeplsourcelang();
         $data->target_lang = $this->langpacks->targetlang === '' ? '?' : $this->langpacks->targetlang;
         $data->notarget = $this->langpacks->targetlang === '';
         $data->mlangfilter = $this->mlangfilter;
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
         // Pass data.
-        $data->course = $this->course;
-        $data->coursedata = $this->coursedata;
         $data->version = $this->version;
         return $data;
     }

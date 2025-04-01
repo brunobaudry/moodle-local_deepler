@@ -35,6 +35,7 @@ export default {
         sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
         showUpdated: '[data-action="local_deepler/show-updated"]',
+        showHidden: '[data-action="local_deepler/show-hidden"]',
         escapeLatex: '[data-id="local_deepler/latexeascape"]',
         escapePre: '[data-id="local_deepler/preescape"]',
         toggleMultilang: '#toggleMultilang'
@@ -44,6 +45,7 @@ export default {
         checkedCheckBoxes: '[data-action="local_deepler/checkbox"]:checked',
         updated: '[data-status="updated"]',
         needsupdate: '[data-status="needsupdate"]',
+        hidden: '.local_deeplerinvisible',
         keys: '[data-status-key="<KEY>"',
         successMessages: '[data-status="local_deepler/success-message"][data-key="<KEY>"]',
         prevTransStatus: '[data-row-id="<KEY>"] span#previousTranslationStatus',
@@ -68,6 +70,7 @@ export default {
         contentEditable: '[data-action="local_deepler/editor"] [contenteditable="true"]',
         multiples: {
             checkBoxesWithKey: 'input[type="checkbox"][data-key="<KEY>"]',
+            checkBoxesWithKeyHidden: '.local_deeplerinvisible input[type="checkbox"][data-key]',
             editorChilds: '[data-action="local_deepler/editor"][data-key="<KEY>"] > *',
             textAreas: '[data-action="local_deepler/textarea"][data-key="<KEY>"]',
             editorsWithKey: '[data-action="local_deepler/editor"][data-key="<KEY>"]',

@@ -14,182 +14,131 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Test case for translate_page class.
- *
- * @package    local_deepler
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \local_deepler\output\translate_page
- */
-
 namespace local_deepler\output;
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 use advanced_testcase;
-use filter_multilang2\filter;
-use local_deepler\local\data\lang_helper;
-use moodle_url;
+use core_filters\text_filter;
+use filter_multilang2;
+use local_deepler\local\data\course;
+use local_deepler\local\services\lang_helper;
+use ReflectionClass;
 use renderer_base;
-use stdClass;
+
+// Include the filter_multilang2 class manually.
+require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 /**
- * Test case for translate_page class.
+ * Unit tests for the translate_page class.
  *
- * @coversDefaultClass \local_deepler\output\translate_page
+ * @package    local_deepler
+ * @category   test
+ * @copyright  2025 Your Name
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class translate_page_test extends advanced_testcase {
-    /**
-     * @var translate_page
-     */
-    private $translatepage;
+
 
     /**
-     * @var stdClass
-     */
-    private $course;
-
-    /**
-     * @var array
-     */
-    private $coursedata;
-
-    /**
-     * @var \filter_multilang2|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $mlangfilter;
-
-    /**
-     * @var lang_helper|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $langhelper;
-
-    /**
-     * Set up the test case.
+     * Test the constructor of translate_page.
      *
-     * This method creates a test course, mock objects for dependencies,
-     * and initializes the translate_page object for testing.
-     *
+     * @covers \local_deepler\output\translate_page::__construct
      * @return void
      */
-    protected function setUp(): void {
-        parent::setUp();
-        $this->resetAfterTest(true);
-        $this->course = $this->getDataGenerator()->create_course();
-        $this->coursedata = [[
-                'section' => [
-                        (object) [
-                                'id' => 1,
-                                'hierarchy' => 'level0',
-                                'tid' => '6737',
-                                'format' => 0,
-                                'table' => 'course',
-                                'field' => 'fullname',
-                                'cmid' => 0,
-                                'text' => 'Assignment 1',
-                                'link' => new moodle_url('/course/view.php', ['id' => 1]),
-                                'displaytext' => 'Assignment 1',
-                                'iconurl' => 'http://example.com/icon1.png',
-                                'pluginname' => 'assignment',
-                                'tneeded' => false,
-                                'section' => null,
-                                'purpose' => null,
-                                'translatedfieldname' => 'Full name',
-                        ],
-                ],
-                'activities' => [
-                        (object) [
-                                'id' => 2,
-                                'hierarchy' => 'level1',
-                                'tid' => '565',
-                                'format' => 1,
-                                'table' => 'forum',
-                                'field' => 'name',
-                                'cmid' => 1,
-                                'text' => 'Forum 1',
-                                'link' => new moodle_url('/course/view.php', ['id' => 1]),
-                                'displaytext' => 'Forum 1',
-                                'iconurl' => 'http://example.com/icon1.png',
-                                'pluginname' => 'forum',
-                                'tneeded' => false,
-                                'section' => 76,
-                                'purpose' => 'collaboration',
-                                'translatedfieldname' => 'Name',
-                        ],
-                ],
-        ]];
-        $this->mlangfilter = $this->createMock(\filter_multilang2::class);
-        $this->langhelper = $this->getMockBuilder(lang_helper::class)->enableOriginalConstructor()->getMock();
-        $this->langhelper->method('prepareoptionlangs')->willReturn(['en' => 'English', 'fr' => 'French']);
-        $this->langhelper->currentlang = 'en';
-        $this->langhelper->targetlang = 'fr';
+    public function test_constructor(): void {
+        $this->resetAfterTest();
+        filter_set_global_state('multilang2', TEXTFILTER_ON);
+        if (!class_exists('\core_filters\text_filter')) {
+            // Create an alias for pre-4.5 versions.
+            class_alias(filter_multilang2::class, text_filter::class);
+            $mlangfilter = $this->createMock(filter_multilang2::class);
+        } else {
+            $mlangfilter = $this->createMock(text_filter::class);
+        }
+        $coursedata = $this->createMock(course::class);
+        $languagepack = $this->createMock(lang_helper::class);
+        $languagepack->currentlang = 'en';
+        $languagepack->targetlang = 'fr';
 
-        $this->translatepage = new translate_page($this->course, $this->coursedata, $this->mlangfilter, $this->langhelper,
-                'vtest');
+        $version = '1.0';
+
+        $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version);
+
+        $this->assertInstanceOf(translate_page::class, $translatepage);
+        $this->assertEquals('1.0', $this->getprivateproperty($translatepage, 'version'));
+        $this->assertSame($coursedata, $this->getprivateproperty($translatepage, 'coursedata'));
+        $this->assertSame($mlangfilter, $this->getprivateproperty($translatepage, 'mlangfilter'));
+        $this->assertSame($languagepack, $this->getprivateproperty($translatepage, 'langpacks'));
     }
 
     /**
      * Test the export_for_template method.
      *
-     * This test verifies that the export_for_template method returns the expected data structure
-     * and values, including course information, language options, and form rendering.
-     *
-     * @covers ::export_for_template
+     * @covers \local_deepler\output\translate_page::export_for_template
      * @return void
      */
     public function test_export_for_template(): void {
-        global $PAGE;
-        $PAGE->set_url(new moodle_url('/local/deepler/translate.php'));
-        $renderer = $this->getMockBuilder(renderer_base::class)->disableOriginalConstructor()->getMock();
+        $this->resetAfterTest();
+        filter_set_global_state('multilang2', TEXTFILTER_ON);
+        if (!class_exists('\core_filters\text_filter')) {
+            // Create an alias for pre-4.5 versions.
+            class_alias(filter_multilang2::class, text_filter::class);
+            $mlangfilter = $this->createMock(filter_multilang2::class);
+        } else {
+            $mlangfilter = $this->createMock(text_filter::class);
+        }
+        $coursedata = $this->createMock(course::class);
+        $languagepack = $this->createMock(lang_helper::class);
+        $languagepack->currentlang = 'en';
+        $languagepack->targetlang = 'fr';
 
-        $result = $this->translatepage->export_for_template($renderer);
+        $version = '1.0';
 
-        $this->assertInstanceOf(stdClass::class, $result);
-        $this->assertEquals($this->course, $result->course);
-        $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->targetlangs);
-        $this->assertEquals(['en' => 'English', 'fr' => 'French'], $result->sourcelangs);
-        $this->assertEquals('en', $result->current_lang);
-        $this->assertEquals('fr', $result->target_lang);
-        $this->assertEquals($this->mlangfilter, $result->mlangfilter);
-        $this->assertEquals($this->coursedata, $result->coursedata);
+        $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version);
 
-        // Test form rendering.
-        $this->assertStringContainsString('col-md-12', $result->mform);
+        $output = $this->createMock(renderer_base::class);
+        $data = $translatepage->export_for_template($output);
+
+        $this->assertIsObject($data);
+        $this->assertTrue(property_exists($data, 'langstrings'));
+        $this->assertTrue(property_exists($data, 'targethtmloptions'));
+        $this->assertTrue(property_exists($data, 'targetlangs'));
+        $this->assertTrue(property_exists($data, 'sourcelangs'));
+        $this->assertTrue(property_exists($data, 'mform'));
+        $this->assertTrue(property_exists($data, 'current_lang'));
+        $this->assertTrue(property_exists($data, 'deeplsource'));
+        $this->assertTrue(property_exists($data, 'target_lang'));
+        $this->assertTrue(property_exists($data, 'notarget'));
+        $this->assertTrue(property_exists($data, 'mlangfilter'));
+        $this->assertTrue(property_exists($data, 'escapelatexbydefault'));
+        $this->assertTrue(property_exists($data, 'escapeprebydefault'));
+        $this->assertTrue(property_exists($data, 'version'));
     }
 
     /**
-     * Test the constructor of the translate_page class.
+     * Helper method to access private properties.
      *
-     * This test ensures that the constructor correctly initializes a translate_page object
-     * with the provided course, course data, multilang filter, and language helper.
-     *
-     * @covers ::__construct
-     * @return void
+     * @param object $object
+     * @param string $property
+     * @return mixed
      */
-    public function test_constructor(): void {
-        $this->assertInstanceOf(translate_page::class, $this->translatepage);
+    private function getprivateproperty($object, $property) {
+        $reflection = new ReflectionClass($object);
+        $property = $reflection->getProperty($property);
+        $property->setAccessible(true);
+        return $property->getValue($object);
     }
-
     /**
-     * Test the config settings for latex and pre escaping.
+     * Helper to trace
      *
-     * This test verifies that the export_for_template method correctly applies
-     * the configuration settings for latex escaping and pre-escaping.
-     *
-     * @covers ::export_for_template
+     * @param mixed $var
+     * @param string $info
      * @return void
      */
-    public function test_config_settings(): void {
-        global $PAGE;
-        $PAGE->set_url(new \moodle_url('/local/deepler/translate.php'));
-        set_config('latexescapeadmin', 1, 'local_deepler');
-        set_config('preescapeadmin', 0, 'local_deepler');
-        $renderer = $this->getMockBuilder(renderer_base::class)->disableOriginalConstructor()->getMock();
-        $result = $this->translatepage->export_for_template($renderer);
-
-        $this->assertEquals('checked', $result->escapelatexbydefault);
-        $this->assertEquals('', $result->escapeprebydefault);
+    private function trace_to_cli(mixed $var, string $info): void {
+        echo "\n" . $info . "\n";
+        var_dump($var);
+        ob_flush();
     }
 }

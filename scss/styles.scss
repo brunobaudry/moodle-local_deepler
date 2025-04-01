@@ -88,6 +88,12 @@ $secondary: $gray-400 !default;
 
     .local_deepler__form {
         padding: 0;
+        .d-none {
+            display:none !important; /* stylelint-disable-line declaration-no-important */
+        }
+        .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
+            display: none;
+        }
     }
 
     .course_sections__name,
@@ -119,6 +125,15 @@ $secondary: $gray-400 !default;
 
     .local_deepler__level0 {
         padding-left: 15px;
+    }
+    .local_deepler__level1 {
+        padding-left: 30px;
+    }
+    .local_deepler__level2 {
+        padding-left: 45px;
+    }
+    .local_deepler__level3 {
+        padding-left: 60px;
     }
     .local_deepler__activitydesc,
     .local_deepler__activityfield {

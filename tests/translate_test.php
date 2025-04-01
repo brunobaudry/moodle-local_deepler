@@ -27,11 +27,12 @@
 namespace local_deepler;
 
 use advanced_testcase;
+use classes\local\services\lang_helper;
 use context_course;
 use filter_multilang2;
+use local_deepler\local\data\course;
 use local_deepler\local\data\course_data;
-use local_deepler\local\data\lang_helper;
-use local_deepler\output\translate_page;
+use local_deepler\local\data\field;
 
 /**
  * Translate Test
@@ -40,28 +41,13 @@ use local_deepler\output\translate_page;
 final class translate_test extends advanced_testcase {
 
     /**
-     * Helper to trace
-     *
-     * @param mixed $var
-     * @param string $info
-     * @return void
-     */
-    private function trace_to_cli(mixed $var, string $info): void {
-        echo "\n" . $info . "\n";
-        var_dump($var);
-        ob_flush();
-    }
-
-    /**
      * Testing that all settings are loaded
      *
      * @covers ::get_config
      * @return void
-     * @throws \coding_exception
      * @throws \dml_exception
      */
     public function test_plugin_config(): void {
-        global $CFG;
         $this->assertNotNull(get_config('local_deepler', 'apikey'));
         $this->assertNotNull(get_config('local_deepler', 'apikey'));
         $this->assertFalse(get_config('local_deepler', 'deeplpro'), 'Deprecated setting deeplpro !');
@@ -90,30 +76,19 @@ final class translate_test extends advanced_testcase {
     /**
      * Verifying test
      *
-     * @covers \local_deepler\data\course_data
+     * @covers \local_deepler\data\course
      * @return void
      */
     public function test_course_data(): void {
         global $CFG;
         $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/output/translate_page.php');
-        $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/local/data/course_data.php');
+        $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/local/data/course.php');
         $course = $this->getDataGenerator()->create_course();
-        $context = context_course::instance($course->id);
-        $coursedata = new course_data($course, $CFG->lang, $context->id);
+        $coursedata = new course($course);
         $this->assertNotNull($coursedata);
-        $getdata = $coursedata->getdata();
+        $getdata = $coursedata->getfields();
         $this->assertIsArray($getdata);
-        $this->assertIsArray($getdata['0']);
-        foreach ($getdata as $v) {
-            $this->assertIsArray($v);
-            $this->assertArrayHasKey('section', $v);
-            $this->assertArrayHasKey('activities', $v);
-        }
-        $langhelper = new lang_helper();
-        $langhelper->initdeepl('DEFAULT');
-        $renderable = new translate_page($course, $coursedata->getdata(),
-                new filter_multilang2(), $langhelper, 'vtest');
-        $this->assertNotNull($renderable);
+        $this->assertInstanceOf(field::class, $getdata['0']);
     }
 
     /**

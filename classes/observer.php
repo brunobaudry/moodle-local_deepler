@@ -57,7 +57,7 @@ class observer {
                 'id'
         );
 
-        // Update s_lastmodified time.
+        // Update s_lastmodified (source) time.
         foreach ($records as $record) {
             $DB->update_record(
                     'local_deepler',

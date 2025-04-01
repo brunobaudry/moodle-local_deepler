@@ -31,7 +31,7 @@
  * @return void
  * @package local_deepler
  */
-function local_deepler_extend_navigation_course($navigation, $course) {
+function local_deepler_extend_navigation_course($navigation, $course): void {
     // Do not show in menu if no capability.
     if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
         return;
@@ -50,4 +50,47 @@ function local_deepler_extend_navigation_course($navigation, $course) {
     // Do not show in menu if no capability.
     $navigation->add_node($translatecontent);
     $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
+}
+
+/**
+ * File handling.
+ *
+ * @param object $course
+ * @param object $cm
+ * @param \core\context $context
+ * @param object $filearea
+ * @param object $args
+ * @param bool $forcedownload
+ * @param array $options
+ * @return bool
+ * @throws \coding_exception
+ */
+function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, object $args,
+        bool $forcedownload, array $options): bool {
+
+    debugging($cm);
+    // Context validation.
+    if ($context->contextlevel != CONTEXT_BLOCK && $context->contextlevel != CONTEXT_SYSTEM) {
+        return false;
+    }
+    // File area whitelist.
+    $validareas = ['custom_docs', 'user_uploads'];
+    if (!in_array($filearea, $validareas)) {
+        return false;
+    }
+    // Security checks.
+    if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
+        return false;
+    }
+    $itemid = array_shift($args);
+    $filename = array_pop($args);
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+
+    $fs = get_file_storage();
+    if (!$file = $fs->get_file($context->id, 'local_deepler', $filearea, $itemid, $filepath, $filename)) {
+        return false;
+    }
+
+    send_stored_file($file, 86400, 0, $forcedownload, $options);
+    return true;
 }

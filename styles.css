@@ -49,6 +49,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate .local_deepler__form {
     padding: 0;
 }
+#page-local-deepler-translate .local_deepler__form .d-none {
+    display: none !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate .local_deepler__form .local_deeplervisible > [data-action=local_deepler__hiddenfromstudents] {
+    display: none;
+}
 #page-local-deepler-translate .course_sections__name,
 #page-local-deepler-translate .course__fullname {
     margin-top: 3rem;
@@ -72,6 +78,15 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }
 #page-local-deepler-translate .local_deepler__level0 {
     padding-left: 15px;
+}
+#page-local-deepler-translate .local_deepler__level1 {
+    padding-left: 30px;
+}
+#page-local-deepler-translate .local_deepler__level2 {
+    padding-left: 45px;
+}
+#page-local-deepler-translate .local_deepler__level3 {
+    padding-left: 60px;
 }
 #page-local-deepler-translate .local_deepler__activitydesc,
 #page-local-deepler-translate .local_deepler__activityfield {

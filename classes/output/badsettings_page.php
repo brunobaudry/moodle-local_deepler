@@ -16,8 +16,9 @@
 
 namespace local_deepler\output;
 
+use core\output\renderer_base;
 use renderable;
-use renderer_base;
+use stdClass;
 use templatable;
 
 /**
@@ -29,13 +30,35 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class badsettings_page implements renderable, templatable {
+
     /**
-     * Export to Template.
+     * @var string
+     */
+    private string $onomatopoeia;
+    /**
+     * @var \core\output\renderer_base
+     */
+    private renderer_base $output;
+
+    /**
+     * Constructor.
      *
-     * @param renderer_base $output
-     * @return string
+     * @param string $onomatopoeia
+     */
+    public function __construct(string $onomatopoeia) {
+        $this->onomatopoeia = $onomatopoeia;
+    }
+
+    /**
+     * Mandatory for renderer.
+     *
+     * @param \core\output\renderer_base $output
+     * @return \stdClass
      */
     public function export_for_template(renderer_base $output) {
-        return '';
+        $this->output = $output;
+        $data = new stdClass();
+        $data->onomatopoeia = $this->onomatopoeia;
+        return $data;
     }
 }

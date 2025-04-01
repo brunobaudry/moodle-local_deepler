@@ -15,7 +15,7 @@
 
 /**
  * @module     local_deepler/deepler
- * @file       amd/src/deepler_new.js
+ * @file       amd/src/deepler.js
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

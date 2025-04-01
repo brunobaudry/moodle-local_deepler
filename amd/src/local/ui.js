@@ -27,13 +27,16 @@ define(['core/log',
         './selectors',
         './translation',
         './utils',
-        './customevents'],
+        './customevents',
+        './scrollspy'
+    ],
     (Log, TinyMCE,
      Modal,
      Selectors,
      Translation,
      Utils,
-     Events) => {
+     Events,
+     ScrollSpy) => {
 
     let config = {};
     let langstrings = {};
@@ -106,6 +109,9 @@ define(['core/log',
         }
         if (e.target.closest(Selectors.actions.showNeedUpdate)) {
             showRows(Selectors.statuses.needsupdate, e.target.checked);
+        }
+        if (e.target.closest(Selectors.actions.showHidden)) {
+            showRows(Selectors.statuses.hidden, e.target.checked);
         }
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
@@ -395,7 +401,7 @@ define(['core/log',
      * @param {HTMLElement} row
      * @param {Boolean} checked
      * ui.js
-     */
+     *
     const toggleRowVisibility = (row, checked) => {
         if (checked) {
             row.classList.remove("d-none");
@@ -403,6 +409,7 @@ define(['core/log',
             row.classList.add("d-none");
         }
     };
+     */
         /**
          * Factory to display process' statuses for each item.
          *
@@ -442,30 +449,37 @@ define(['core/log',
                     break;
             }
         };
-        /* Const refreshTempTranslation = (key)=>{
-            Translation.initTempForKey(
-                key, findEditor(key),
-                domQuery(Selectors.sourcetexts.keys, key).getAttribute("data-sourcetext-raw"),
-                domQuery(Selectors.sourcetexts.keys, key).getAttribute("data-filedtext-raw"),
-                domQuery(Selectors.sourcetexts.sourcelangs, key).value
-            );
-        };*/
     /**
      * Shows/hides rows.
      * @param {string} selector
      * @param {boolean} selected
-     * ui.js ok
      */
     const showRows = (selector, selected) => {
         const items = domQueryAll(selector);
         const allSelected = domQuery(Selectors.actions.selectAllBtn).checked;
+        const shoudlcheck = allSelected && selected;
         items.forEach((item) => {
             let k = item.getAttribute('data-row-id');
-            toggleRowVisibility(item, selected);
+            if (selected) {
+                item.classList.remove("d-none");
+            } else {
+                item.classList.add("d-none");
+            }
             // When a row is toggled then we don't want it to be selected and sent from translation.
             try {
-                domQuery(Selectors.editors.multiples.checkBoxesWithKey, k).checked = allSelected && selected;
-                toggleStatus(k, false);
+                const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, k);
+                if (single !== null) {
+                    single.checked = shoudlcheck;
+                    toggleStatus(k, false);
+                }
+                const allchilds = domQueryAll(Selectors.editors.multiples.checkBoxesWithKeyHidden, k);
+                if (allchilds !== null && allchilds.length > 0) {
+                    allchilds.forEach(c => {
+                        const key = c.getAttribute('data-key');
+                        c.checked = shoudlcheck;
+                        toggleStatus(key, false);
+                    });
+                }
             } catch (e) {
                 Log.warn(`${k} translation is disalbled`);
             }
@@ -725,6 +739,8 @@ define(['core/log',
      * @param {*} cfg
      */
     const init = (cfg) => {
+        ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
+            {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100});
         Translation.init(cfg);
         config = cfg;
         Log.info(cfg);
