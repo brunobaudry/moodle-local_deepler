@@ -92,7 +92,7 @@ class utils {
      * @param int $cmid
      * @return array
      */
-    private static function get_context_info(string $table, int $itemid, int $cmid = 0): array {
+    public static function get_context_info(string $table, int $itemid, int $cmid = 0): array {
         global $DB;
         switch ($table) {
             case 'course':

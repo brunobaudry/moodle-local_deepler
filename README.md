@@ -46,13 +46,15 @@ Translation workflow being the following:
   * [Filters](#filters)
     + [Up to date:](#up-to-date)
     + [Needs update:](#needs-update)
+    + [Hidden:](#hidden)
+  * [Breadcrumbs](#breadcrumbs)
   * [Status indicator](#status-indicator)
   * [Translation process](#translation-process)
     + [Editing the source](#editing-the-source)
     + [Reviewing past translations and multilang's tags](#reviewing-past-translations-and-multilangs-tags)
     + [Images and medias.](#images-and-medias)
   * [Performing translations](#performing-translations)
-  * [Modules](#modules)
+  * [Structure](#structure)
 - [User tour (inline tutorial)](#user-tour-inline-tutorial)
 - [WARNINGS](#warnings)
   * [Complex modules/activities structures.](#complex-modulesactivities-structures)
@@ -149,7 +151,7 @@ Usually the default as set below should work fine with Moodle activity content.
 
 ##### Glossaries
 *Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
-DeepL's Glossary ID's are saved by course id + source<7target lang pairs. 
+DeepL's Glossary ID's are saved by course id + source/target lang pairs in the Cookie for now. 
 
 #### Other setting
 
@@ -218,6 +220,21 @@ They appear with the RED DOT indicator when they were never translated.
 
 They appear with the ORANGE DOT indicator when they were already translated but the source text change since.
 
+#### Hidden:
+**NEW since 1.5.0**
+Toggle this filter to show/hide hidden (to users) sections or modules.
+![](pix/hidden_filter.png)
+![](pix/hidden_tag.png)
+
+### Breadcrumbs
+**NEW since 1.5.0**
+
+When you scroll down the breadcrumbs status give you an indication on where you are in the course.
+
+_ in the expl below we are editing the 'Question text' field of the multichoice question titled 'Multi choice ABC' of the quiz 'Test MDL-84560' located in the course's 
+'Quizzes' section.
+![](pix/breadcrumbs.png)
+
 ### Status indicator
 
 ![](pix/bullet_status.png)
@@ -236,6 +253,8 @@ It is not possible to edit the source content from this plugin's interface.
 Nevertheless, clicking on the PENCIL icon will jump you to the regular place for you to do so.
 
 ![](pix/source_editing.png)
+
+_
 
 #### Reviewing past translations and multilang's tags
 
@@ -289,7 +308,7 @@ The original content **has already MLANG tag** and the source lang is different 
 
 `{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-### Modules
+### Structure
 
 ![](pix/modules_activities.png)
 
@@ -325,6 +344,8 @@ throughout content that utilize the same language._
 
 Currently, images are only displayed in the preview but not in the text editor. Instead, the alt attribute content is highlighted.
 The Alt attribute is not sent to ©DeepL. This should be added in further improvement for better accessibility.
+
+_question's image are still not displayed we are getting there..._ 
 
 ## Compatibility
 

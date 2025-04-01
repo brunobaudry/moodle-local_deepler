@@ -42,11 +42,10 @@ define([
             mainSourceLang = source;
         }
         if (target !== '') {
-            targetLang = target;
+            targetLang = target.toLowerCase();
         }
     };
     const onTrDbSuccess = (data)=>{
-        Log.info(`translation/onTrDbSuccess:46`);
         Log.info(data);
         if (data.length === 0) {
             Log.error(data);
@@ -117,7 +116,7 @@ define([
          * translation.js
          */
         const getupdatedtext = (key, maineditorIsTextArea) => {
-            const sourceItemLang = tempTranslations[key].sourceLang;
+            const sourceItemLang = tempTranslations[key].sourceLang.toLowerCase();
             const fieldText = tempTranslations[key].fieldText; // Translation
             const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
             const source = getSourceText(key);// Translation
@@ -157,7 +156,7 @@ define([
         const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
             let manipulatedText = langsItems.fullContent;
             // Do we have a TARGET tag already ?
-            const targetReg = new RegExp(tagPatterns.target, "sg");
+            const targetReg = new RegExp(tagPatterns.target, "sgi");
             const hasTagTarget = manipulatedText.match(targetReg);
             if (hasTagTarget) {
                 // Yes replace it.
@@ -171,10 +170,10 @@ define([
                 ].join('');
             }
             // Do we have a OTHER tag already ?
-            const otherReg = new RegExp(tagPatterns.other, "sg");
+            const otherReg = new RegExp(tagPatterns.other, "sgi");
             const hasTagOther = manipulatedText.match(otherReg);
             // Do we have a SOURCE tag already ?
-            const sourceReg = new RegExp(tagPatterns.other, "sg");
+            const sourceReg = new RegExp(tagPatterns.other, "sgi");
             const hasTagSource = manipulatedText.match(sourceReg);
             if (isSourceOther) {
                 // Whatever was the {mlang other} tag language we need to replace it by this source.
