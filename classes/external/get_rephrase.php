@@ -33,7 +33,6 @@ use external_api;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_rephrase extends external_api {
-    /** @var deeplapi_trait $this */
     use deeplapi_trait;
 
     /** @var string */
@@ -43,22 +42,30 @@ class get_rephrase extends external_api {
     private static AppInfo $appinfo;
 
     /**
+     * External service to call DeepL's improve API.
+     *
+     * @param array $rephrasings
+     * @param array $options
+     * @param string $version
+     * @return array
+     * @throws \DeepL\DeepLException
      * @throws \dml_exception
-     * @throws \DeepL\DeepLException|\invalid_parameter_exception
+     * @throws \invalid_parameter_exception
      */
     public static function execute(array $rephrasings, array $options, string $version): array {
         // Set the api with env so that it can be unit tested.
-        self::setdeeplapi($version);
+        $key = self::setdeeplapikey();
+        $appinfo = self::setdeeplappinfo($version);
         if (empty(self::$apikey)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
         $params = self::validate_parameters(self::execute_parameters(),
                 ['rephrasings' => $rephrasings, 'options' => $options, 'version' => $version]);
         $improver = new DeepLClient(
-                self::$apikey,
+                $key,
                 [
                         'send_platform_info' => true,
-                        'app_info' => self::$appinfo,
+                        'app_info' => $appinfo,
                 ]
         );
         $improver->buildRephraseBodyParams($params['options']);

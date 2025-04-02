@@ -46,4 +46,11 @@ $functions = [
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
+        'local_deepler_get_rephrase' => [
+                'classname' => 'local_deepler\external\get_rephrase',
+                'description' => 'Get DeepL to rephrase',
+                'type' => 'read',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
 ];

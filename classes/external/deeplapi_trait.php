@@ -30,16 +30,26 @@ trait deeplapi_trait {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @param string $version
-     * @return void
+     * @return string
      * @throws \dml_exception
      */
-    public static function setdeeplapi(string $version): void {
-        self::$appinfo = new AppInfo('Moodle-Deepler', $version);
+    public static function setdeeplapikey(): string {
         $configkey = get_config('local_deepler', 'apikey');
         if ($configkey === '') {
             $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
         }
-        self::$apikey = $configkey;
+        return $configkey;
     }
+
+    /**
+     * Set the key string.
+     * If empty, it will try to get it from the .env useful for tests runs.
+     *
+     * @param string $version
+     * @return \DeepL\AppInfo
+     */
+    public static function setdeeplappinfo(string $version): AppInfo {
+        return new AppInfo('Moodle-Deepler', $version);
+    }
+
 }

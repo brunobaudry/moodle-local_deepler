@@ -21,6 +21,7 @@ require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
 
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
+use DeepL\AppInfo;
 
 /**
  * PHPUnit tests for get_translation external service.
@@ -58,7 +59,44 @@ final class gettranslation_test extends base_external {
         $this->assertInstanceOf(external_multiple_structure::class, $returns);
     }
 
-    public function test_setdeepltrait() {
+    /**
+     * Test setdeeplapikey method.
+     *
+     * @return void
+     * @covers \local_deepler\external\get_translation::setdeeplapikey
+     * @covers \local_deepler\external\
+     * @throws \dml_exception
+     */
+    public function test_setdeeplapikey(): void {
+        // Set up the environment.
+        $this->resetAfterTest(true);
 
+        // Set the environment variable.
+        putenv('DEEPL_APIKEY=testapikey');
+
+        // Call the method.
+        $apikey = get_translation::setdeeplapikey();
+
+        // Assert the API key is returned correctly.
+        $this->assertEquals('testapikey', $apikey);
+    }
+
+    /**
+     * Test setdeeplappinfo method.
+     *
+     * @return void
+     * @covers \local_deepler\external\get_translation::setdeeplappinfo
+     */
+    public function test_setdeeplappinfo(): void {
+        // Set up the environment.
+        $this->resetAfterTest(true);
+
+        // Call the method.
+        $appinfo = get_translation::setdeeplappinfo('1.0');
+
+        // Assert the AppInfo object is created correctly.
+        $this->assertInstanceOf(AppInfo::class, $appinfo);
+        $this->assertEquals('Moodle-Deepler', $appinfo->appName);
+        $this->assertEquals('1.0', $appinfo->appVersion);
     }
 }

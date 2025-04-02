@@ -38,7 +38,6 @@ use Exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_translation extends external_api {
-    /** @var deeplapi_trait $this */
     use deeplapi_trait;
     /** @var string */
     private static string $apikey;
@@ -59,17 +58,18 @@ class get_translation extends external_api {
      */
     public static function execute(array $translations, array $options, string $version): array {
         // Set the api with env so that it can be unit tested.
-        self::setDeeplApi($version);
+        $key = self::setdeeplapikey();
+        $appinfo = self::setdeeplappinfo($version);
         if (empty(self::$apikey)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
         $params = self::validate_parameters(self::execute_parameters(),
                 ['translations' => $translations, 'options' => $options, 'version' => $version]);
         $translator = new DeepLClient(
-                self::$apikey,
+                $key,
                 [
                         'send_platform_info' => true,
-                        'app_info' => self::$appinfo,
+                        'app_info' => $appinfo,
                 ]
         );
         $tragetlang = $params['options']['target_lang'];
