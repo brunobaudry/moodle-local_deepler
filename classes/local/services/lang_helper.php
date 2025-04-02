@@ -95,6 +95,10 @@ class lang_helper {
      * @var bool
      */
     private bool $canimprove;
+    /**
+     * @var array|string[]
+     */
+    private array $deeplrephraselangs;
 
     /**
      * Constructor.
@@ -124,6 +128,8 @@ class lang_helper {
         $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
         $this->canimprove = !$this->keyisfree && false;
         $this->usage = $this->translator->getUsage();
+        // Not in the API yet.
+        $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
         $this->deeplsources = $this->translator->getSourceLanguages();
         $this->deepltargets = $this->translator->getTargetLanguages();
         $this->setcurrentlanguage();

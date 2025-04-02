@@ -29,14 +29,17 @@ use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use Exception;
 
+
 /**
- * External service to call DeepL's API.
+ * External service to call DeepL's translation API.
  *
  * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_translation extends external_api {
+    /** @var deeplapi_trait $this */
+    use deeplapi_trait;
     /** @var string */
     private static string $apikey;
 
@@ -164,22 +167,5 @@ class get_translation extends external_api {
                         ]
                 )
         );
-    }
-
-    /**
-     * Set the key string.
-     * If empty, it will try to get it from the .env useful for tests runs.
-     *
-     * @param string $version
-     * @return void
-     * @throws \dml_exception
-     */
-    private static function setdeeplapi(string $version): void {
-        self::$appinfo = new AppInfo('Moodle-Deepler', $version);
-        $configkey = get_config('local_deepler', 'apikey');
-        if ($configkey === '') {
-            $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
-        }
-        self::$apikey = $configkey;
     }
 }

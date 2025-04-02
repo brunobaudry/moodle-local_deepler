@@ -57,4 +57,8 @@ final class gettranslation_test extends base_external {
         $returns = get_translation::execute_returns();
         $this->assertInstanceOf(external_multiple_structure::class, $returns);
     }
+
+    public function test_setdeepltrait() {
+
+    }
 }
