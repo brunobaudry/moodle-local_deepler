@@ -24,7 +24,6 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
-use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use Exception;
@@ -39,11 +38,6 @@ use Exception;
  */
 class get_translation extends external_api {
     use deeplapi_trait;
-    /** @var string */
-    private static string $apikey;
-
-    /** @var \DeepL\AppInfo */
-    private static AppInfo $appinfo;
 
     /**
      * External service to call DeepL's API.
@@ -60,18 +54,26 @@ class get_translation extends external_api {
         // Set the api with env so that it can be unit tested.
         $key = self::setdeeplapikey();
         $appinfo = self::setdeeplappinfo($version);
-        if (empty(self::$apikey)) {
+        if (empty($key)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
         $params = self::validate_parameters(self::execute_parameters(),
                 ['translations' => $translations, 'options' => $options, 'version' => $version]);
-        $translator = new DeepLClient(
-                $key,
-                [
-                        'send_platform_info' => true,
-                        'app_info' => $appinfo,
-                ]
-        );
+        try {
+            $translator = new DeepLClient(
+                    $key,
+                    [
+                            'send_platform_info' => true,
+                            'app_info' => $appinfo,
+                    ]
+            );
+        } catch (DeepLException $exception) {
+            return [['error' => 'Exception ' . $exception->getMessage(),
+                    'key' => '',
+                    'translated_text' => '',
+            ]];
+        }
+
         $tragetlang = $params['options']['target_lang'];
 
         $groupedtranslations = [];

@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use DeepL\DeepLClient;
 use DeepL\Language;
+use DeepL\LanguageCode;
 use Deepl\Usage;
 use stdClass;
 
@@ -33,6 +34,10 @@ require_once(__DIR__ . '/../../vendor/autoload.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class lang_helper {
+    /**
+     * Constant to display hte lang as rephrasing.
+     */
+    const REPHRASESYMBOL = "® ";
     /**
      * The current moodle language.
      *
@@ -109,6 +114,9 @@ class lang_helper {
         // Set to dummies values.
         $this->currentlang = optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = optional_param('target_lang', '', PARAM_NOTAGS);
+        if ($this->targetlang !== '') {
+            $this->targetlang = LanguageCode::standardizeLanguageCode($this->targetlang);
+        }
         $this->moodlelangs = get_string_manager()->get_list_of_translations();
         $this->multilangparentlang = get_config('filter_multilang2', 'parentlangbehaviour');
         $this->deeplsourcelang = '';
@@ -126,10 +134,10 @@ class lang_helper {
         $this->setdeeplapi();
         $this->inittranslator();
         $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
-        $this->canimprove = !$this->keyisfree && false;
         $this->usage = $this->translator->getUsage();
         // Not in the API yet.
         $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
+        $this->canimprove = !$this->keyisfree;
         $this->deeplsources = $this->translator->getSourceLanguages();
         $this->deepltargets = $this->translator->getTargetLanguages();
         $this->setcurrentlanguage();
@@ -139,16 +147,12 @@ class lang_helper {
      * Set the source language.
      *
      * @return void
+     * @throws \DeepL\DeepLException
      */
     private function setcurrentlanguage(): void {
         // Moodle format is not the common culture format.
         // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
-        $hasunderscore = strpos($this->currentlang, '_');
-        if ($hasunderscore) {
-            $this->deeplsourcelang = strtoupper(substr($this->currentlang, 0, $hasunderscore));
-        } else {
-            $this->deeplsourcelang = strtoupper($this->currentlang);
-        }
+        $this->deeplsourcelang = LanguageCode::removeRegionalVariant(str_replace('_', '-', $this->currentlang));
     }
 
     /**
@@ -192,9 +196,9 @@ class lang_helper {
      */
     private function finddeeplsformoodle(array $deepls): array {
         return array_filter($deepls, function($item) {
-            foreach (array_keys($this->moodlelangs) as $code) {
-                $moodle = strtolower(str_replace('_', '', $code));
-                $deepl = strtolower(str_replace('-', '', $item->code));
+            foreach (array_keys($this->moodlelangs) as $moodlecode) {
+                $moodle = strtolower(str_replace('_', '-', $moodlecode));
+                $deepl = strtolower($item->code);
                 if (stripos($deepl, $moodle) !== false) {
                     return true;
                 }
@@ -216,6 +220,8 @@ class lang_helper {
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
         $config->isfree = $this->keyisfree;
+        $config->rephrasesymbol = self::REPHRASESYMBOL;
+        $config->canimprove = $this->canimprove;
         return $config;
     }
 
@@ -254,8 +260,8 @@ class lang_helper {
         $list = $this->deeplsources;
         $len = count($list);
         while ($len--) {
-            $code = $list[$len]->code;
-            if ($code === $lang || $code === strtoupper($lang)) {
+            $code = LanguageCode::standardizeLanguageCode($list[$len]->code);
+            if ($code === $lang || $code === strtolower($lang)) {
                 return true;
             }
         }
@@ -288,8 +294,8 @@ class lang_helper {
      * @return bool
      */
     public function isrephrase(string $source = '', string $target = ''): bool {
-        $t = $target === '' ? $this->targetlang : $target;
         $s = $source === '' ? $this->deeplsourcelang : $source;
+        $t = $target === '' ? $this->targetlang : $target;
         return str_contains($t, $s);
     }
 
@@ -312,18 +318,24 @@ class lang_helper {
      */
     private function getoption(bool $issource, mixed $l, bool $isverbose = true): array {
         // If the key is free, we can't improve the source lang.
-        // TODO MDL-0000 ready for deepl-php-sdk to implement the rephrase, just remove && false.
-        $same = $issource ? $this->isrephrase($l->code) : $this->isrephrase('', $l->code);
-        $text = $isverbose ? $l->name : $l->code;
-        $text = ($same && $this->canimprove ? "® " : '') . $text;
-        $disable = $same && !$this->canimprove;
+        $code = LanguageCode::standardizeLanguageCode($l->code);
+        $same = $issource ? $this->isrephrase($code, '') : $this->isrephrase('', $code);
+        $text = $isverbose ? $l->name : $code;
+        $langisrephrasable = in_array($code, $this->deeplrephraselangs, true);
+
         if ($issource) {
-            $selected = $this->isrephrase($l->code, $this->deeplsourcelang);
+            $selected = $this->isrephrase($code, $this->deeplsourcelang);
+            $disable = !$selected && ($same && !$this->canimprove || $same && !$langisrephrasable);
         } else {
-            $selected = $this->targetlang !== '' && $this->isrephrase($l->code, $this->targetlang);
+            $selected = $this->targetlang !== '' && $this->isrephrase($code, $this->targetlang);
+            $disable = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
+        }
+        if ($same && $this->canimprove) {
+            $text = self::REPHRASESYMBOL . $text;
+            $code = self::REPHRASESYMBOL . $code;
         }
         return [
-                'code' => $l->code,
+                'code' => $code,
                 'lang' => $text,
                 'verbose' => $l->name,
                 'selected' => $selected,
@@ -405,5 +417,23 @@ class lang_helper {
      */
     public function preparetargetsoptionlangs(): array {
         return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false);
+    }
+
+    /**
+     * Getter for canimprove.
+     *
+     * @return bool
+     */
+    public function get_canimprove(): bool {
+        return $this->canimprove;
+    }
+
+    /**
+     * Getter for deeplrephraselangs.
+     *
+     * @return array
+     */
+    public function get_deeplrephraselangs(): array {
+        return $this->deeplrephraselangs;
     }
 }

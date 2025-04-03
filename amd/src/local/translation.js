@@ -30,11 +30,13 @@ define([
     let courseid = 0;
     let userid = 0;
     let settings = {};
+    let settingsRephrase = {};
     const ON_ITEM_TRANSLATED = 'onItemTranslated';
     // Const ON_ITEM_NOT_TRANSLATED = 'onItemsNotTranslated';
     const ON_ITEM_SAVED = 'onItemSaved';
     const ON_ITEM_NOT_SAVED = 'onItemNotSaved';
     const ON_TRANSLATION_FAILED = 'onTranslationFailed';
+    const ON_REPHRASE_FAILED = 'onRephraseFailed';
     const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
     const ON_DB_FAILED = 'onDbFailed';
     const setMainLangs = (source = '', target = '') => {
@@ -263,7 +265,12 @@ define([
             tokens: []
         };
     };
-
+        /**
+         * Prepare the texts for the external api calls.
+         *
+         * @param {string} key
+         * @returns {{text, source_lang: (string|string|*), key}}
+         */
     const prepareTranslation = (key) => {
         return {
             text: tempTranslations[key].source,
@@ -276,47 +283,87 @@ define([
      * Call the external translation service to translate the selected keys.
      *
      * @param {array} keys
+     * @param {object} config
+     * @return void
      */
-    const callTranslations = (keys) => {
+    const callTranslations = (keys, config) => {
         const translations = [];
-        prepareAdvancedSettings(targetLang);
+        const rephrases = [];
+        prepareAdvancedSettings(targetLang, config);
+        // We parse and check if it is a tranlsation or text improvment.
         keys.forEach((key) => {
-            translations.push(prepareTranslation(key));
+            const t = prepareTranslation(key);
+            if (config.canimprove && t.source_lang.includes(config.rephrasesymbol)) {
+                delete t.source_lang;
+                rephrases.push(t);
+            } else {
+                translations.push(t);
+            }
         });
-        Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
-        Events.on(Api.DEEPL_FAILED, onTranslateFailed);
-        Api.translate(translations, settings, Api.APP_VERSION);
-    };
-const onTranslateSuccess = (response)=>{
-    Log.info(`translation//onTranslateSuccess::response`);
-    Log.info(response);
-    response.forEach((tr) => {
-        if (tr.error === '') {
-            let key = tr.key;
-            let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
-            Log.debug(`translation/onTranslateSuccess/each::translation Tokeniser.postprocess`);
-            Log.debug(translation);
-            tempTranslations[key].editor.innerHTML = translation;
-            Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
-            Log.debug(tempTranslations[key].editor.innerHTML);
-            tempTranslations[key].translation = translation;
-            Events.emit(ON_ITEM_TRANSLATED, key);
-        } else {
-            Events.emit(ON_TRANSLATION_FAILED, tr.error);
+        if (translations.length > 0) {
+            Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
+            Events.on(Api.DEEPL_FAILED, onTranslateFailed);
+             Api.translate(translations, settings, Api.APP_VERSION);
         }
-    });
-};
-const onTranslateFailed = (status, error)=>{
-    Events.emit(ON_TRANSLATION_FAILED, status, error);
-};
+        if (rephrases.length > 0) {
+            Events.on(Api.DEEPL_RF_SUCCESS, onRephraseSuccess);
+            Events.on(Api.DEEPL_RF_FAILED, onRephaseFailed);
+            Api.rephrase(rephrases, settingsRephrase, Api.APP_VERSION);
+        }
+    };
+    const onTranslateSuccess = (response)=>{
+        Log.info(`translation//onTranslateSuccess::response`);
+        Log.info(response);
+        response.forEach((tr) => {
+            if (tr.error === '') {
+                let key = tr.key;
+                let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
+                Log.debug(`translation/onTranslateSuccess/each::translation Tokeniser.postprocess`);
+                Log.debug(translation);
+                tempTranslations[key].editor.innerHTML = translation;
+                Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
+                Log.debug(tempTranslations[key].editor.innerHTML);
+                tempTranslations[key].translation = translation;
+                Events.emit(ON_ITEM_TRANSLATED, key);
+            } else {
+                Events.emit(ON_TRANSLATION_FAILED, tr.error);
+            }
+        });
+    };
+    const onRephraseSuccess = (response)=>{
+        Log.info(`translation//onRephraseSuccess::response`);
+        Log.info(response);
+        response.forEach((tr) => {
+            if (tr.error === '') {
+                let key = tr.key;
+                let rephrase = Tokeniser.postprocess(tr.text, tempTranslations[key].tokens);
+                Log.debug(`translation/onRephraseSuccess/each::translation Tokeniser.postprocess`);
+                Log.debug(rephrase);
+                tempTranslations[key].editor.innerHTML = rephrase;
+                Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
+                Log.debug(tempTranslations[key].editor.innerHTML);
+                tempTranslations[key].translation = rephrase;
+                Events.emit(ON_ITEM_TRANSLATED, key);
+            } else {
+                Events.emit(ON_REPHRASE_FAILED, tr.error);
+            }
+        });
+    };
+    const onTranslateFailed = (status, error)=>{
+        Events.emit(ON_TRANSLATION_FAILED, status, error);
+    };
+    const onRephaseFailed = (status, error)=>{
+        Events.emit(ON_REPHRASE_FAILED, status, error);
+    };
     /**
      * Compile Advanced settings.
      *
      * @param {string} targetLang
+     * @param {object} config
      * @returns {{}}
      * translation.js ok
      */
-    const prepareAdvancedSettings = (targetLang) => {
+    const prepareAdvancedSettings = (targetLang, config) => {
         escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
         escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
         // eslint-disable-next-line camelcase
@@ -341,14 +388,15 @@ const onTranslateFailed = (status, error)=>{
         // eslint-disable-next-line camelcase
         settings.ignore_tags = Utils.toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
         // eslint-disable-next-line camelcase
-        settings.target_lang = targetLang.toUpperCase();
-        // eslint-disable-next-line camelcase
         settings.model_type = document.querySelector(Selectors.deepl.modelType).value ?? 'prefer_quality_optimized';
         // eslint-disable-next-line camelcase
         settings.show_billed_characters = true;
-
-        // Settings.auth_key = config.apikey;
-        // return settings;
+        // eslint-disable-next-line camelcase
+        settings.target_lang = targetLang.toUpperCase();
+        if (config.canimprove) {
+            settingsRephrase.target_lang = settings.target_lang;
+            settingsRephrase.toneorstyle = document.querySelector(Selectors.deepl.toneorstyle).value ?? 'default';
+        }
     };
     /**
      * Check if the item is translatable.
@@ -371,19 +419,19 @@ const onTranslateFailed = (status, error)=>{
         };
         return {
             init: init,
-        callTranslations: callTranslations,
-        saveTranslations: saveTranslations,
-        initTempForKey: initTempForKey,
-        initTemp: initTemp,
-        ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
-        ON_DB_FAILED: ON_DB_FAILED,
-        ON_ITEM_SAVED: ON_ITEM_SAVED,
-        ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
-        ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
-        ON_TRANSLATION_SUCCESS: ON_DB_SAVE_SUCCESS,
-        /* TempTranslations: tempTranslations,*/
-        setMainLangs: setMainLangs,
-        isTranslatable: isTranslatable,
-        translated: translated
+            callTranslations: callTranslations,
+            saveTranslations: saveTranslations,
+            initTempForKey: initTempForKey,
+            initTemp: initTemp,
+            ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
+            ON_DB_FAILED: ON_DB_FAILED,
+            ON_ITEM_SAVED: ON_ITEM_SAVED,
+            ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
+            ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
+            ON_REPHRASE_FAILED: ON_REPHRASE_FAILED,
+            ON_DB_SAVE_SUCCESS: ON_DB_SAVE_SUCCESS,
+            setMainLangs: setMainLangs,
+            isTranslatable: isTranslatable,
+            translated: translated
     };
 });

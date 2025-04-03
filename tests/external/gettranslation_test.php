@@ -36,14 +36,18 @@ final class gettranslation_test extends base_external {
      * Test execute_parameters method.
      *
      * @covers \local_deepler\external\get_translation::execute_parameters
+     * @covers \local_deepler\external\get_rephrase::execute_parameters
      * @return void
      */
     public function test_execute_parameters(): void {
         if ($this->is_below_four_one()) {
             return;
         }
+
         $params = get_translation::execute_parameters();
+        $paramsreph = get_rephrase::execute_parameters();
         $this->assertInstanceOf(external_function_parameters::class, $params);
+        $this->assertInstanceOf(external_function_parameters::class, $paramsreph);
     }
     /**
      * Test execute_returns method.
@@ -56,7 +60,9 @@ final class gettranslation_test extends base_external {
             return;
         }
         $returns = get_translation::execute_returns();
+        $returnsrephraz = get_rephrase::execute_returns();
         $this->assertInstanceOf(external_multiple_structure::class, $returns);
+        $this->assertInstanceOf(external_multiple_structure::class, $returnsrephraz);
     }
 
     /**
@@ -90,13 +96,16 @@ final class gettranslation_test extends base_external {
     public function test_setdeeplappinfo(): void {
         // Set up the environment.
         $this->resetAfterTest(true);
-
         // Call the method.
         $appinfo = get_translation::setdeeplappinfo('1.0');
+        $appinforephraz = get_rephrase::setdeeplappinfo('1.0');
 
         // Assert the AppInfo object is created correctly.
         $this->assertInstanceOf(AppInfo::class, $appinfo);
+        $this->assertInstanceOf(AppInfo::class, $appinforephraz);
         $this->assertEquals('Moodle-Deepler', $appinfo->appName);
+        $this->assertEquals('Moodle-Deepler', $appinforephraz->appName);
         $this->assertEquals('1.0', $appinfo->appVersion);
+        $this->assertEquals('1.0', $appinforephraz->appVersion);
     }
 }

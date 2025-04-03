@@ -15,7 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 
+use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
@@ -23,7 +27,6 @@ use core_external\external_value;
 use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
-use external_api;
 
 /**
  * External service to call DeepL's text improvement API.
@@ -34,12 +37,6 @@ use external_api;
  */
 class get_rephrase extends external_api {
     use deeplapi_trait;
-
-    /** @var string */
-    private static string $apikey;
-
-    /** @var \DeepL\AppInfo */
-    private static AppInfo $appinfo;
 
     /**
      * External service to call DeepL's improve API.
@@ -56,7 +53,7 @@ class get_rephrase extends external_api {
         // Set the api with env so that it can be unit tested.
         $key = self::setdeeplapikey();
         $appinfo = self::setdeeplappinfo($version);
-        if (empty(self::$apikey)) {
+        if (empty($key)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
         $params = self::validate_parameters(self::execute_parameters(),
@@ -68,21 +65,33 @@ class get_rephrase extends external_api {
                         'app_info' => $appinfo,
                 ]
         );
-        $improver->buildRephraseBodyParams($params['options']);
+        // Have the params cleaned by Deepl lib.
+        $rephreaseotions = explode('|', $params['options']['toneorstyle']);
+        $tone = $rephreaseotions[0] === 'tone' ? $rephreaseotions[1] : null;
+        $style = $rephreaseotions[0] === 'writing_style' ? $rephreaseotions[1] : null;
+        $validatedparams =
+                $improver->buildRephraseBodyParams($params['options']['target_lang'], $style, $tone);
+        // Get the target.
+        $targetlang = $validatedparams['target_lang'];
+        // Remove target from arrray to pass just the options.
+        unset($validatedparams['target_lang']);
+        // Prepare the texts.
+        // Results.
         $improvedtexts = [];
-        $rephrases = $params['rephrasings'];
+        // Extract the texts.
         $texts = array_map(function($t) {
             return $t['text'];
-        }, $rephrases);
+        }, $params['rephrasings']);
         try {
-            $results = $improver->rephraseText($texts);
+            $results = $improver->rephraseText($texts, $targetlang, $validatedparams);
             foreach ($results as $index => $result) {
+                $key = $params['rephrasings'][$index]['key']; // Map the key in the to the results.
                 $improvedtexts[] = [
                         'error' => '',
-                        'key' => $rephrases[$index]['key'],
+                        'key' => $key,
                         'text' => $result->text,
-                        'target_language' => $result->target_language,
-                        'detected_source_language' => $result->detected_source_language,
+                        'target_language' => $result->targetLanguage,
+                        'detected_source_language' => $result->detectedSourceLanguage,
                 ];
             }
         } catch (DeepLException $e) {
@@ -113,9 +122,8 @@ class get_rephrase extends external_api {
                 'options' => new external_single_structure(
                         [
                                 'target_lang' => new external_value(PARAM_RAW, 'target language'),
-                                'writing_style' => new external_value(PARAM_RAW, 'writing style of your improvements',
+                                'toneorstyle' => new external_value(PARAM_RAW, 'Tone or writing style of your improvements',
                                         VALUE_OPTIONAL),
-                                'tone' => new external_value(PARAM_ALPHA, 'Changes the tone of your improvements.', VALUE_OPTIONAL),
                         ]
                 ),
                 'version' => new external_value(PARAM_RAW, 'the plugin version id'),

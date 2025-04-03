@@ -103,7 +103,8 @@ export default {
         tagHandling: '[data-id="local_deepler/tag_handling"]',
         outlineDetection: '[data-id="local_deepler/outline_detection"]',
         splitSentences: '[name="local_deepler/split_sentences"]:checked',
-        modelType: '[name="local_deepler/modeltype"]:checked'
+        modelType: '[name="local_deepler/modeltype"]:checked',
+        toneorstyle: '[name="local_deepler/toneorstyle"]:checked',
     },
     config: {
         langstrings: '#local_deepler__stringscontainer',

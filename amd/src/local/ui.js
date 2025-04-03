@@ -75,6 +75,7 @@ define(['core/log',
         // Translation events.
         Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
         Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
+        Events.on(Translation.ON_REPHRASE_FAILED, onTranslationFailed);
         Events.on(Translation.ON_DB_SAVE_SUCCESS, onDbSavedSuccess);
         Events.on(Translation.ON_DB_FAILED, onDBFailed);
         Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
@@ -150,7 +151,7 @@ define(['core/log',
             if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
                 showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
             } else {
-                doAutotranslate();
+                callDeeplServices();
             }
         }
         if (e.target.closest(Selectors.actions.selectAllBtn)) {
@@ -373,10 +374,9 @@ define(['core/log',
         setIconStatus(key, Selectors.statuses.tosave, true);
     };
     /**
-     * Launch autotranslation.
-     * ui.js + translation.js (split)
+     * Launch deepl services.
      */
-    const doAutotranslate = () => {
+    const callDeeplServices = () => {
         const keys = [];
         saveAllBtn.disabled = false;
         domQueryAll(Selectors.statuses.checkedCheckBoxes)
@@ -392,24 +392,9 @@ define(['core/log',
                 );
                 keys.push(key);
             });
+        Translation.callTranslations(keys, config);
+    };
 
-        Translation.callTranslations(keys);
-    };
-    /**
-     * Row visibility.
-     *
-     * @param {HTMLElement} row
-     * @param {Boolean} checked
-     * ui.js
-     *
-    const toggleRowVisibility = (row, checked) => {
-        if (checked) {
-            row.classList.remove("d-none");
-        } else {
-            row.classList.add("d-none");
-        }
-    };
-     */
         /**
          * Factory to display process' statuses for each item.
          *
@@ -574,7 +559,8 @@ define(['core/log',
     const switchTarget = (e) => {
         let url = new URL(window.location.href);
         let searchParams = url.searchParams;
-        searchParams.set("target_lang", e.target.value);
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("target_lang", e.target.value.replace(config.rephrasesymbol, '').trim());
         window.location = url.toString();
     };
     /**
