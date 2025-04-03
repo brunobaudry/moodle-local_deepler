@@ -74,6 +74,9 @@ final class gettranslation_test extends base_external {
      * @throws \dml_exception
      */
     public function test_setdeeplapikey(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
         // Set up the environment.
         $this->resetAfterTest(true);
 
@@ -94,6 +97,9 @@ final class gettranslation_test extends base_external {
      * @covers \local_deepler\external\get_translation::setdeeplappinfo
      */
     public function test_setdeeplappinfo(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
         // Set up the environment.
         $this->resetAfterTest(true);
         // Call the method.
