@@ -18,7 +18,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 @todo doc
 }}
 
-
+<div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
+    <!-- This is a hidden container for the strings that are used in the JS -->
+</div>
 <div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_mlangremover-header">
     <div class="row pb-2 pt-3 align-items-center">
         <div class="col-3 px-5">
@@ -32,7 +34,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         name="select-all"
                         id="select-all"/>
                 <label class="form-check-label" for="select-all">
-                    {{#str}}selectall,local_mlangremover{{/str}}
+                    {{#str}}selectall,local_deepler{{/str}}
                 </label>
             </div>
         </div>
@@ -43,24 +45,24 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             <!--            </div>-->
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="keepselected" id="local_mlangremover/keepselected">
-                <label class="form-check-label" for="local_mlangremover/keepselected">{{#str}}keepselected,local_mlangremover{{/str}}</label>
+                <label class="form-check-label" for="local_mlangremover/keepselected">{{#str}}keepselected,local_deepler{{/str}}</label>
             </div>
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="removeselected" id="local_mlangremover/removeselected">
-                <label class="form-check-label" for="local_mlangremover/removeselected">{{#str}}removeselected,local_mlangremover{{/str}}</label>
+                <label class="form-check-label" for="local_mlangremover/removeselected">{{#str}}removeselected,local_deepler{{/str}}</label>
             </div>
             <hr class="hr hr-blurry"/>
             <div class="form-group">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="removetag" value="removetag" id="local_mlangremover__removetag">
                     <label class="form-check-label" for="removetag">
-                        {{#str}}removetag,local_mlangremover{{/str}}
+                        {{#str}}removetag,local_deepler{{/str}}
                     </label>
                 </div>
             </div>
         </div>
         <div class="form-group col-3" id="local_mlangremover__mlangtags">
-            <label for="local_mlangremover/mlangtags">{{#str}}mlangtagsstring,local_mlangremover{{/str}}</label>
+            <label for="local_mlangremover/mlangtags">{{#str}}mlangtagsstring,local_deepler{{/str}}</label>
             {{#mlangtags}}
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="mlangsselected[]" value="{{.}}" id="{{.}}">
@@ -80,15 +82,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         class="float-right mr-2 btn btn-primary local_mlangremover__letsdobutton"
                         data-action="local_mlangremover/letsdobutton"
                         disabled
-                >{{#str}}letsdobutton,local_mlangremover,{{target_lang}} {{/str}}
+                >{{#str}}letsdobutton,local_deepler,{{target_lang}} {{/str}}
                 </button>
             </div>
         </div>
     </div>
 </div>
-{{{mform}}}
-<footer id="page-footer" class="py-3 bg-dark ">
-    <div class="container">
-        <p class="text-right">Deepler : {{version}}</p>
+<div class="course-section">
+    {{{mform}}}
+</div>
+<footer id="page-footer" class="py-3">
+    <div id="local_deepler__footer" class="text-center">
+        <small id="local_deepler__version">{{version}}</small>
     </div>
 </footer>

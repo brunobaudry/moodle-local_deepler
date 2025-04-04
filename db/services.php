@@ -40,7 +40,14 @@ $functions = [
                 'description' => 'Update translation with new mlang tags',
                 'type' => 'write',
                 'ajax' => true,
-                'capabilities' => [LOCAL_DEEPLER_CAP, LOCAL_DEEPLER_REMOVEMLANG_CAP],
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
+        'local_deepler_remove_mlangs' => [
+                'classname' => 'local_deepler\external\update_translation',
+                'description' => 'Remove translation with new mlang tags',
+                'type' => 'write',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_REMOVEMLANG_CAP,
         ],
         'local_deepler_get_translation' => [
                 'classname' => 'local_deepler\external\get_translation',

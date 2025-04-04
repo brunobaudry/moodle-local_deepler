@@ -320,7 +320,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </label>
             </div>
         </div>
-        <div class="col-7 text-center">
+        <div class="col-6 text-center">
                 <span id="local_deepler-translate-header-usage" class="ml-2 p-1 alert">
                     {{#str}}wordcountsentence,local_deepler{{/str}}
             </span>
@@ -347,6 +347,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     data-action="local_deepler/saveall-btn"
                     disabled
             ><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>
+        </div>
+        <div class="col-1">
+            <select style="display:{{hidecompatible}}"
+                    title="{{#str}}targetcompatibleexplain,local_deepler{{/str}}"
+                    class="local_deepler__tartgetcompatible form-control"
+                    data-action="local_deepler/tartgetcompatible-switcher"
+            >
+                {{#compatiblelangs}}
+                    <option value="{{.}}">{{.}}</option>
+                {{/compatiblelangs}}
+            </select>
         </div>
     </div>
     <div id='local_deepler-scrollspy' class="row p-1 pl-3 bg-primary-light"></div>

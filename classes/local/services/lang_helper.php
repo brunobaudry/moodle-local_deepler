@@ -436,4 +436,31 @@ class lang_helper {
     public function get_deeplrephraselangs(): array {
         return $this->deeplrephraselangs;
     }
+
+    /**
+     * Lists the compatible moodle langs for the current target lang.
+     *
+     * @return array
+     * @throws \DeepL\DeepLException
+     */
+    public function findcompatiblelangs(): array {
+        if ($this->targetlang === '') {
+            return [];
+        }
+        $langroot = LanguageCode::removeRegionalVariant($this->targetlang);
+
+        $compatibles = [];
+        foreach (array_keys($this->moodlelangs) as $code) {
+            if (str_contains($code, $langroot)) {
+                $compatibles[] = $code;
+            }
+        }
+        // Sort the array by the lang code, starting with the simplest one obviously.
+        asort($compatibles);
+        $tab = [];
+        foreach ($compatibles as $item) {
+            $tab[] = $item;
+        }
+        return $tab;
+    }
 }

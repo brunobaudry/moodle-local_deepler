@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Import libs
-import Selectors from "./selectors";
+import Selectors from "./local/selectors";
 import ajax from "core/ajax";
 
 // Initialize the temporary translations dictionary @todo make external class

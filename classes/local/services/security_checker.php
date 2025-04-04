@@ -65,8 +65,8 @@ class security_checker {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    public function perform_security_checks_for_translations(array $data, int $userid, int $courseid): void {
-        self::perform_security_checks($data, $userid, $courseid, 'local/deepler:updatetranslations');
+    public static function perform_security_checks_for_translations(array $data, int $userid, int $courseid): void {
+        self::perform_security_checks($data, $userid, $courseid, 'local/deepler:edittranslations');
     }
 
     /**
@@ -80,7 +80,7 @@ class security_checker {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    public function perform_security_checks_for_removal(array $data, int $userid, int $courseid): void {
+    public static function perform_security_checks_for_removal(array $data, int $userid, int $courseid): void {
         self::perform_security_checks($data, $userid, $courseid, 'local/deepler:deletetranslations');
     }
 }

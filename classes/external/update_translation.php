@@ -82,7 +82,7 @@ class update_translation extends external_api {
         $responses = [];
         try {
             $params = self::validate_parameters(self::execute_parameters(),
-                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid]);
+                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid, 'action' => $action]);
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
             foreach ($params['data'] as $d) {

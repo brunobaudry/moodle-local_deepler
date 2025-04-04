@@ -23,7 +23,8 @@
  * @see        https://docs.moodle.org/dev/version.php
  */
 
-use local_mlangremover\output\remove_mlangs_page;
+use local_deepler\local\data\course;
+use local_deepler\output\remove_mlangs_page;
 
 require_once(__DIR__ . '/../../config.php');
 
@@ -33,7 +34,7 @@ global $DB;
 require_once('./version.php');
 require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 require_once(__DIR__ . '/version.php');
-require_once('./classes/local/data/course.php');
+
 // Needed vars for processing.
 try {
     $courseid = required_param('courseid', PARAM_INT);
@@ -49,7 +50,7 @@ $PAGE->set_context($context);
 require_login();
 require_capability('local/deepler:deletetranslations', $context);
 // Set initial page layout.
-$title = get_string('pluginname', 'local_mlangremover');
+$title = get_string('mlangremover', 'local_deepler');
 $PAGE->set_url('/local/deepler/remove_mlangs.php', ['course_id' => $courseid]);
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
@@ -61,7 +62,7 @@ $jsconfig->courseid = $courseid;
 $jsconfig->debug = $CFG->debug;
 $PAGE->requires->js_call_amd('local_deepler/mlangremover', 'init', [$jsconfig]);
 
-$output = $PAGE->get_renderer('local_deepler', 'mlangremover');
+$output = $PAGE->get_renderer('local_deepler');
 
 // Output header.
 echo $output->header();

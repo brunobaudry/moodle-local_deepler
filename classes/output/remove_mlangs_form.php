@@ -1,29 +1,57 @@
 <?php
 
-namespace local_mlangremover\output;
+namespace local_deepler\output;
+
 define('DIV_CLOSE', '</div>');
 
+use local_deepler\local\data\course;
+use local_deepler\local\data\field;
 use local_mlangremover\local\data\multilangfield;
 use local_mlangremover\local\data\textfield;
+use MoodleQuickForm;
 
-class remove_mlangs_form extends \moodleform {
-    /** @var \filter_multilang2 $mlangfilter */
-    private $mlangfilter;
-
+/**
+ *
+ */
+class remove_mlangs_form extends deeplerform {
     /**
      * @inheritDoc
      */
-    protected function definition() {
-
+    protected function definition(): void {
+        parent::definition();
         $this->mlangfilter = $this->_customdata['mlangfilter'];
-        // All fileds
+        /** @var \local_deepler\local\data\course $coursedata */
         $coursedata = $this->_customdata['coursedata'];
         // Start moodle form.
-        $mform = $this->_form;
-        $mform->disable_form_change_checker();
+        $this->_form->disable_form_change_checker();
         // Open Form.
-        $mform->addElement('html', '<div class="container-fluid local_deepler__form">');
+        $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
         // Loop through course data to build form.
+        //$this->old($coursedata, $mform);
+        $this->makecoursesetting($this->makeheader(get_string('settings'), $coursedata->getlink(), 3),
+                $coursedata->getfields());
+        // Create sections.
+        $this->makesections($this->coursedata->getsections());
+        // Close form.
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+
+    /**
+     * Granular row creation.
+     *
+     * @param \local_deepler\local\data\field $field
+     * @return void
+     */
+    protected function makefieldrow(field $field) {
+        $this->_form->addElement('html', '<div>You are here');
+        $this->_form->addElement('html', DIV_CLOSE);
+    }
+    /**
+     * @param \local_deepler\local\data\course $coursedata
+     * @param \MoodleQuickForm $mform
+     * @return void
+     */
+    public function old(course $coursedata, MoodleQuickForm $mform): void {
         $sectioncount = 1;
         /**
          * @var int $i
@@ -82,7 +110,11 @@ class remove_mlangs_form extends \moodleform {
         $mform->addElement('html', DIV_CLOSE);
     }
 
-    private function get_formrow(\MoodleQuickForm $mform, multilangfield $item) {
+    /**
+     * @inheritDoc
+     */
+
+    private function get_formrow(MoodleQuickForm $mform, multilangfield $item) {
         /** @var textfield $field */
         $field = $item->get_textfield();
         $fieldtext = $field->get_text();

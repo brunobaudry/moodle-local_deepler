@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_mlangremover\output;
-require_once('remove_mlangs_form.php');
+namespace local_deepler\output;
 
+use filter_multilang2;
+use local_deepler\local\data\course;
 use renderable;
 use renderer_base;
 use stdClass;
@@ -61,7 +62,7 @@ class remove_mlangs_page implements renderable, templatable {
      * All the mlang tags used in the course.
      * */
     private array $mlangtags;
-    private \filter_multilang2 $mlangfilter;
+    private filter_multilang2 $mlangfilter;
 
     /**
      * Class Construct.
@@ -70,15 +71,12 @@ class remove_mlangs_page implements renderable, templatable {
      * @param array $coursedata
      * @throws \moodle_exception
      */
-    public function __construct(\stdClass $course, array $coursedata, \filter_multilang2 $mlangfilter, array $mlangtags,
-            string $version) {
+    public function __construct(course $course, filter_multilang2 $mlangfilter, string $version) {
         $this->mlangfilter = $mlangfilter;
         $this->pluginversion = $version;
         $this->course = $course;
-        $this->coursedata = $coursedata;
-        $this->mlangtags = $mlangtags;
         // Moodle Form.
-        $mform = new remove_mlangs_form(null, ['course' => $course, 'coursedata' => $coursedata, 'mlangfilter' => $mlangfilter]);
+        $mform = new remove_mlangs_form(null, ['coursedata' => $this->course, 'mlangfilter' => $mlangfilter]);
         $this->mform = $mform;
     }
 
@@ -92,22 +90,12 @@ class remove_mlangs_page implements renderable, templatable {
         $data = new stdClass();
         // Data for mustache template.
         $data->course = $this->course;
-
-        // Hacky fix but the only way to adjust html...
-        // This could be overridden in css and I might look at that fix for the future.
         $renderedform = $this->mform->render();
-        //$renderedform = str_replace('col-md-9', 'col-md-12', $renderedform);
         $data->mform = $renderedform;
-
         // Set langs.
-        // $data->current_lang = mb_strtoupper($this->langpacks->currentlang);
-        // $data->target_lang = mb_strtoupper($this->langpacks->targetlang);
-        $data->mlangtags = $this->mlangtags;
         $data->mlangfilter = $this->mlangfilter;
         // $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         // Pass data.
-        $data->course = $this->course;
-        $data->coursedata = $this->coursedata;
         $data->version = $this->pluginversion;
         // var_dump($data);
         return $data;

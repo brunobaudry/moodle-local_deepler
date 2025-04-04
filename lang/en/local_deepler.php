@@ -24,6 +24,7 @@
  * @see        https://docs.moodle.org/dev/String_API
  */
 defined('MOODLE_INTERNAL') || die();
+
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
@@ -57,6 +58,12 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+$string['letsdobutton'] = 'Lets do';
+$string['keepselected'] = 'Keep selected';
+
+$string['mlangremover'] = '{mlang} Remover';
+$string['mlangtagsstring'] = 'Mlang tags';
+
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
@@ -77,6 +84,8 @@ $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
+$string['removeselected'] = 'Remove selected';
+$string['removetag'] = 'remove tag';
 $string['rephraseinfos'] =
         'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.
         The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>';
@@ -113,6 +122,7 @@ $string['statustotranslate'] = 'Ready to translate';
 $string['statuswait'] = 'Not selected';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
+$string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
 $string['toneconfident'] = 'Confident tone';
 $string['tonediplomatic'] = 'Diplomatic tone';
 $string['toneenthusiastic'] = 'Enthusiastic tone';

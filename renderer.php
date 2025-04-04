@@ -33,9 +33,22 @@ class renderer extends plugin_renderer_base {
      *
      * @param object $page
      * @return string
+     * @throws \core\exception\moodle_exception
      */
     public function render_translate_page($page) {
         $data = $page->export_for_template($this);
         return parent::render_from_template('local_deepler/translate_page', $data);
+    }
+
+    /**
+     * Render MLANG remover.
+     *
+     * @param object $page
+     * @return string
+     * @throws \core\exception\moodle_exception
+     */
+    public function render_remove_mlangs_page($page) {
+        $data = $page->export_for_template($this);
+        return parent::render_from_template('local_deepler/remove_mlangs_page', $data);
     }
 }

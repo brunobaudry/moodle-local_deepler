@@ -426,10 +426,16 @@ define(['core/log',
                     }
                     break;
                 case Selectors.statuses.failed :
+                    if (checked) {
+                        setIconStatus(key, Selectors.statuses.totranslate);
+                    }
                     break;
                 case Selectors.statuses.success :
                     break;
                 case Selectors.statuses.saved :
+                    if (checked) {
+                        setIconStatus(key, Selectors.statuses.totranslate);
+                    }
                     Translation.initTemp(key);
                     break;
             }
@@ -514,8 +520,6 @@ define(['core/log',
      * @param {string} savedText
      */
     const onSuccessMessageItem = (key, savedText) => {
-        Log.info(`ui/successMessageItem > savedText`);
-        Log.info(savedText);
         domQuery(Selectors.editors.multiples.editorsWithKey, key)
             .classList.add("local_deepler__success");
         // Add saved indicator.

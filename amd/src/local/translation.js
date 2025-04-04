@@ -26,11 +26,13 @@ define([
     let tempTranslations = {};
     let escapePatterns = {};
     let mainSourceLang = "";
+    let deeplSourceLang = "";
     let targetLang = "";
     let courseid = 0;
     let userid = 0;
     let settings = {};
     let settingsRephrase = {};
+    let rephrasesymbol = '';
     const ON_ITEM_TRANSLATED = 'onItemTranslated';
     // Const ON_ITEM_NOT_TRANSLATED = 'onItemsNotTranslated';
     const ON_ITEM_SAVED = 'onItemSaved';
@@ -39,27 +41,29 @@ define([
     const ON_REPHRASE_FAILED = 'onRephraseFailed';
     const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
     const ON_DB_FAILED = 'onDbFailed';
-    const setMainLangs = (source = '', target = '') => {
-        if (source !== '') {
-            mainSourceLang = source;
+    const setMainLangs = (config) => {
+        Log.debug(`translation/x/setMainLangs::config`);
+        Log.debug(config);
+        if (config.currentlang !== '') {
+            mainSourceLang = config.currentlang;
         }
-        if (target !== '') {
-            targetLang = target.toLowerCase();
+        if (config.targetlang !== '') {
+            targetLang = config.targetlang.toLowerCase();
+        }
+        if (config.deeplsourcelang !== '') {
+            deeplSourceLang = config.deeplsourcelang.toLowerCase();
         }
     };
     const onTrDbSuccess = (data)=>{
         Log.info(data);
         if (data.length === 0) {
-            Log.error(data);
             Events.emit(ON_DB_FAILED, 'no data returned', '');
-            // ShowModal();
         } else {
             const errors = data.filter((item) => item.error !== '');
             data.forEach((item) => {
-                // Ui.setIconStatus(item.key, Selectors.statuses.saved, true);
-                Log.debug(`translation/:54`);
-                Log.debug(item);
                 if (item.error === '') {
+                    // Refreshing the text in the temp obbject in case of new translation without page refresh.
+                    tempTranslations[item.keyid].fieldText = item.text;
                     Events.emit(ON_ITEM_SAVED, item.keyid, item.text);
                 } else {
                     Events.emit(ON_ITEM_NOT_SAVED, item.keyid, item.error);
@@ -118,26 +122,38 @@ define([
          * translation.js
          */
         const getupdatedtext = (key, maineditorIsTextArea) => {
-            const sourceItemLang = tempTranslations[key].sourceLang.toLowerCase();
+            const sourceItemLang = tempTranslations[key].sourceLang.toLowerCase().replace(rephrasesymbol, '');
             const fieldText = tempTranslations[key].fieldText; // Translation
+            Log.debug(`translation/x/getupdatedtext::fieldText`);
+            Log.debug(fieldText);
             const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
             const source = getSourceText(key);// Translation
             const isFirstTranslation = fieldText.indexOf("{mlang") === -1;
-            const isSourceOther = sourceItemLang === mainSourceLang;
+            const isSourceOther = sourceItemLang === deeplSourceLang;
+            Log.debug(`translation/x/getupdatedtext::mainSourceLang`);
+            Log.debug(mainSourceLang);
+            Log.debug(sourceItemLang);
+            Log.debug(isSourceOther);
+            const selectedTarget = document.querySelector(Selectors.actions.targetCompatibleSwitcher).value;
+            const selectedTargetLangRoot = selectedTarget.toLowerCase().substring(0, 2);
+            Log.debug(`translation/x/getupdatedtext::selectedTarget`);
+            Log.debug(selectedTarget);
             const tagPatterns = {
                 "other": "({mlang other)(.*?){mlang}",
-                "target": `({mlang ${targetLang}}(.*?){mlang})`,
+                "target": `({mlang ${selectedTarget}}(.*?){mlang})`,
                 "source": `({mlang ${sourceItemLang}}(.*?){mlang})`
             };
             const langsItems = {
                 "fullContent": fieldText,
                 "other": `{mlang other}${source}{mlang}`,
-                "target": `{mlang ${targetLang}}${translation}{mlang}`,
+                "target": `{mlang ${selectedTarget}}${translation}{mlang}`,
                 "source": `{mlang ${sourceItemLang}}${source}{mlang}`
             };
             if (isFirstTranslation) {
                 // No mlang tag : easy.
-                if (isSourceOther) {
+                if (selectedTargetLangRoot === sourceItemLang) {
+                    return translation;
+                } else if (isSourceOther) {
                     return langsItems.other + langsItems.target;
                 } else {
                     return langsItems.other + langsItems.source + langsItems.target;
@@ -156,6 +172,8 @@ define([
          * @todo MDL-000 refactor this.
          */
         const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
+            Log.debug(`translation/x/additionalUpdate::langsItems`);
+            Log.debug(langsItems);
             let manipulatedText = langsItems.fullContent;
             // Do we have a TARGET tag already ?
             const targetReg = new RegExp(tagPatterns.target, "sgi");
@@ -287,13 +305,14 @@ define([
      * @return void
      */
     const callTranslations = (keys, config) => {
+        rephrasesymbol = config.rephrasesymbol;
         const translations = [];
         const rephrases = [];
         prepareAdvancedSettings(targetLang, config);
         // We parse and check if it is a tranlsation or text improvment.
         keys.forEach((key) => {
             const t = prepareTranslation(key);
-            if (config.canimprove && t.source_lang.includes(config.rephrasesymbol)) {
+            if (config.canimprove && t.source_lang.includes(rephrasesymbol)) {
                 delete t.source_lang;
                 rephrases.push(t);
             } else {
@@ -318,11 +337,7 @@ define([
             if (tr.error === '') {
                 let key = tr.key;
                 let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
-                Log.debug(`translation/onTranslateSuccess/each::translation Tokeniser.postprocess`);
-                Log.debug(translation);
                 tempTranslations[key].editor.innerHTML = translation;
-                Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
-                Log.debug(tempTranslations[key].editor.innerHTML);
                 tempTranslations[key].translation = translation;
                 Events.emit(ON_ITEM_TRANSLATED, key);
             } else {
@@ -331,17 +346,11 @@ define([
         });
     };
     const onRephraseSuccess = (response)=>{
-        Log.info(`translation//onRephraseSuccess::response`);
-        Log.info(response);
         response.forEach((tr) => {
             if (tr.error === '') {
                 let key = tr.key;
                 let rephrase = Tokeniser.postprocess(tr.text, tempTranslations[key].tokens);
-                Log.debug(`translation/onRephraseSuccess/each::translation Tokeniser.postprocess`);
-                Log.debug(rephrase);
                 tempTranslations[key].editor.innerHTML = rephrase;
-                Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
-                Log.debug(tempTranslations[key].editor.innerHTML);
                 tempTranslations[key].translation = rephrase;
                 Events.emit(ON_ITEM_TRANSLATED, key);
             } else {
@@ -415,7 +424,7 @@ define([
             Api.APP_VERSION = cfg.version;
             courseid = cfg.courseid;
             userid = cfg.userid;
-            setMainLangs(cfg.currentlang, cfg.targetlang);
+            setMainLangs(cfg);
         };
         return {
             init: init,

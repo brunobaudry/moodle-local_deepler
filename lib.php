@@ -52,12 +52,12 @@ function local_deepler_extend_navigation_course($navigation, $course): void {
     $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
 
     // MLANG remover.
-    if (!has_capability('local/mlangremover:deletetranslations', context_course::instance($course->id))) {
+    if (!has_capability('local/deepler:deletetranslations', context_course::instance($course->id))) {
         return;
     }
 
     // Build a moodle url.
-    $url2 = new moodle_url("/local/mlangremover/remove_mlangs.php?courseid=$course->id");
+    $url2 = new moodle_url("/local/deepler/remove_mlangs.php?courseid=$course->id");
 
     // Get title of translate page for navigation menu.
     $title2 = get_string('mlangremover', 'local_deepler');
