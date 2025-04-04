@@ -38,18 +38,49 @@ class security_checker {
      * @param array $data
      * @param int $userid
      * @param int $courseid
+     * @param string $cap
      * @return void
-     * @throws restricted_context_exception
-     * @throws invalid_parameter_exception
-     * @throws required_capability_exception
+     * @throws \core_external\restricted_context_exception
+     * @throws \invalid_parameter_exception
+     * @throws \required_capability_exception
      */
-    public static function perform_security_checks(array $data, int $userid, int $courseid): void {
+    private static function perform_security_checks(array $data, int $userid, int $courseid, string $cap): void {
         $context = context_course::instance($courseid);
         external_api::validate_context($context);
-        require_capability('local/deepler:edittranslations', $context, $userid);
+        require_capability($cap, $context, $userid);
         if ($data['cmid'] != 0) {
             $contextmodule = context_module::instance($data['cmid']);
             require_capability('moodle/course:manageactivities', $contextmodule, $userid);
         }
+    }
+
+    /**
+     * Perform security checks for translations.
+     *
+     * @param array $data
+     * @param int $userid
+     * @param int $courseid
+     * @return void
+     * @throws \core_external\restricted_context_exception
+     * @throws \invalid_parameter_exception
+     * @throws \required_capability_exception
+     */
+    public function perform_security_checks_for_translations(array $data, int $userid, int $courseid): void {
+        self::perform_security_checks($data, $userid, $courseid, 'local/deepler:updatetranslations');
+    }
+
+    /**
+     * Perform security checks for removal.
+     *
+     * @param array $data
+     * @param int $userid
+     * @param int $courseid
+     * @return void
+     * @throws \core_external\restricted_context_exception
+     * @throws \invalid_parameter_exception
+     * @throws \required_capability_exception
+     */
+    public function perform_security_checks_for_removal(array $data, int $userid, int $courseid): void {
+        self::perform_security_checks($data, $userid, $courseid, 'local/deepler:deletetranslations');
     }
 }

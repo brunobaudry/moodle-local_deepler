@@ -30,6 +30,9 @@ defined('MOODLE_INTERNAL') || die();
 if (!defined('LOCAL_DEEPLER_CAP')) {
     define('LOCAL_DEEPLER_CAP', 'local/deepler:edittranslations');
 }
+if (!defined('LOCAL_DEEPLER_REMOVEMLANG_CAP')) {
+    define('LOCAL_DEEPLER_REMOVEMLANG_CAP', 'local/deepler:deletetranslations');
+}
 // Add functions for webservices.
 $functions = [
         'local_deepler_update_translation' => [
@@ -37,7 +40,7 @@ $functions = [
                 'description' => 'Update translation with new mlang tags',
                 'type' => 'write',
                 'ajax' => true,
-                'capabilities' => LOCAL_DEEPLER_CAP,
+                'capabilities' => [LOCAL_DEEPLER_CAP, LOCAL_DEEPLER_REMOVEMLANG_CAP],
         ],
         'local_deepler_get_translation' => [
                 'classname' => 'local_deepler\external\get_translation',

@@ -37,7 +37,8 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 args: {
                     data: data,
                     userid: userid,
-                    courseid: courseid
+                    courseid: courseid,
+                    action: 'update'
                 },
                 done: (response) => {
                    Log.info(`api/updateTranslationsInDb/done::response`);

@@ -39,6 +39,11 @@ use Throwable;
  */
 class update_translation extends external_api {
     /**
+     * @var string
+     */
+    private static string $action;
+
+    /**
      * Returns description of method parameters
      *
      * @return external_function_parameters
@@ -58,6 +63,7 @@ class update_translation extends external_api {
                 ),
                 'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
                 'courseid' => new external_value(PARAM_ALPHANUM, 'the course id'),
+                'action' => new external_value(PARAM_ALPHANUM, 'type of action to perform'),
         ]);
     }
 
@@ -67,10 +73,12 @@ class update_translation extends external_api {
      * @param array $data
      * @param string $userid
      * @param int $courseid
+     * @param string $action
      * @return array
      */
-    public static function execute(array $data, string $userid, int $courseid): array {
+    public static function execute(array $data, string $userid, int $courseid, string $action): array {
         global $DB;
+        self::$action = $action;
         $responses = [];
         try {
             $params = self::validate_parameters(self::execute_parameters(),
@@ -101,7 +109,16 @@ class update_translation extends external_api {
      */
     private static function process_data(array $data, array $params, array $response): array {
         try {
-            security_checker::perform_security_checks($data, $params['userid'], $params['courseid']);
+            switch (self::$action) {
+                case 'update':
+                    security_checker::perform_security_checks_for_translations($data, $params['userid'], $params['courseid']);
+                    break;
+                case 'remove':
+                    security_checker::perform_security_checks_for_removal($data, $params['userid'], $params['courseid']);
+                    break;
+                default:
+                    throw new invalid_parameter_exception('Invalid action');
+            }
             database_updater::update_records($data, $response);
         } catch (invalid_parameter_exception $i) {
             $response['error'] = "INVALID PARAM " . $i->getMessage();

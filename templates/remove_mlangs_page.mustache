@@ -1,0 +1,94 @@
+{{!
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+@todo doc
+}}
+
+
+<div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_mlangremover-header">
+    <div class="row pb-2 pt-3 align-items-center">
+        <div class="col-3 px-5">
+            <div class="form-check" id="local_mlangremover-translate-header-select-all">
+                <input
+                        class="form-check-input local_mlangremover__select-all"
+                        data-action="local_mlangremover/select-all"
+                        type="checkbox"
+                        aria-label="{{#str}}selectall,local_mlangremover{{/str}}"
+                        title="{{#str}}selectall,local_mlangremover{{/str}}"
+                        name="select-all"
+                        id="select-all"/>
+                <label class="form-check-label" for="select-all">
+                    {{#str}}selectall,local_mlangremover{{/str}}
+                </label>
+            </div>
+        </div>
+        <div class="form-group col-3">
+            <!--            <div class="form-check">-->
+            <!--                <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="all" id="local_mlangremover/removehowall">-->
+            <!--                <label class="form-check-label" for="local_mlangremover/removehowall">[[removehowall]]</label>-->
+            <!--            </div>-->
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="keepselected" id="local_mlangremover/keepselected">
+                <label class="form-check-label" for="local_mlangremover/keepselected">{{#str}}keepselected,local_mlangremover{{/str}}</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="removeselected" id="local_mlangremover/removeselected">
+                <label class="form-check-label" for="local_mlangremover/removeselected">{{#str}}removeselected,local_mlangremover{{/str}}</label>
+            </div>
+            <hr class="hr hr-blurry"/>
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="removetag" value="removetag" id="local_mlangremover__removetag">
+                    <label class="form-check-label" for="removetag">
+                        {{#str}}removetag,local_mlangremover{{/str}}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-3" id="local_mlangremover__mlangtags">
+            <label for="local_mlangremover/mlangtags">{{#str}}mlangtagsstring,local_mlangremover{{/str}}</label>
+            {{#mlangtags}}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="mlangsselected[]" value="{{.}}" id="{{.}}">
+                    <label class="form-check-label" for="{{.}}">
+                        {{.}}
+                    </label>
+                </div>
+            {{/mlangtags}}
+        </div>
+
+
+        <div class="col-3 px-0">
+            <div class="text-center">
+                <button
+                        id="local_mlangremover-translate-header-letsdobutton"
+                        type="button"
+                        class="float-right mr-2 btn btn-primary local_mlangremover__letsdobutton"
+                        data-action="local_mlangremover/letsdobutton"
+                        disabled
+                >{{#str}}letsdobutton,local_mlangremover,{{target_lang}} {{/str}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{{mform}}}
+<footer id="page-footer" class="py-3 bg-dark ">
+    <div class="container">
+        <p class="text-right">Deepler : {{version}}</p>
+    </div>
+</footer>

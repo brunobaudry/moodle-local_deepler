@@ -36,4 +36,11 @@ $capabilities = [
                 'contextlevel' => CONTEXT_USER,
                 'archetypes' => ['manager' => CAP_ALLOW],
         ],
+    // Remove mlang tags capability.
+        'local/deepler:deletetranslations' => [
+                'captype' => 'write',
+                'riskbitmask' => RISK_XSS,
+                'contextlevel' => CONTEXT_USER,
+                'archetypes' => ['manager' => CAP_ALLOW],
+        ],
 ];
