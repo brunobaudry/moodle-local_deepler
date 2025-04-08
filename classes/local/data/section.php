@@ -100,6 +100,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * Get the modules of the section.
      *
      * @return array
+     * @throws \coding_exception
      */
     public function getmodules(): array {
         if (method_exists($this->si, 'get_sequence_cm_infos')) {

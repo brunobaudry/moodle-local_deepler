@@ -30,10 +30,36 @@ use local_deepler\local\data\field;
  */
 class utils {
     /**
+     * List of bg colors for highlighting.
+     */
+    const colors = [
+            'FloralWhite',
+            'Lavender',
+            'LightYellow',
+            'MintCream',
+            'Honeydew',
+            'AliceBlue', 'GhostWhite',
+            'Ivory',];
+
+    /**
+     * Generate a color index for a given array.
+     *
+     * @param \local_deepler\local\services\arry $tab
+     * @return array
+     */
+    public static function makecolorindex(arry $tab): array {
+        $t = [];
+        foreach ($tab as $i => $v) {
+            $t[$v] = self::colors[$i % count(self::colors)];
+        }
+        return $t;
+    }
+    /**
      * Unified file URL resolver with context-aware processing.
      *
      * @param \local_deepler\local\data\field $field
      * @return string Processed text with valid URLs
+     * @throws \dml_exception
      */
     public static function resolve_pluginfiles(field $field): string {
         $contextinfo = self::get_context_info($field->get_table(), $field->get_id(), $field->get_cmid());
@@ -91,6 +117,7 @@ class utils {
      * @param int $itemid
      * @param int $cmid
      * @return array
+     * @throws \dml_exception
      */
     public static function get_context_info(string $table, int $itemid, int $cmid = 0): array {
         global $DB;

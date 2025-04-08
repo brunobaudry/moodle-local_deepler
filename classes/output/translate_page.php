@@ -106,7 +106,7 @@ class translate_page implements renderable, templatable {
         $renderedform = $this->mform->render();
         $renderedform = str_replace('col-md-9', 'col-md-12', $renderedform);
         $data->mform = $renderedform;
-
+        $data->codes = $this->mform->get_langcodes();
         // Set langs.
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();

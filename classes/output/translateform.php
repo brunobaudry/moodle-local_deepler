@@ -26,6 +26,7 @@ use local_deepler\local\data\interfaces\visibility_interface;
 use local_deepler\local\data\module;
 use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
+use local_deepler\local\services\multilanger;
 use moodleform;
 use MoodleQuickForm;
 
@@ -138,8 +139,10 @@ class translateform extends deeplerform {
      * @throws \coding_exception
      */
     public function fieldrowcolumn2(field $field, string $keyid, string $key, bool $isdbkey): void {
+        $multilanger = new multilanger($field);
+        $this->gatherlangcodes($multilanger->findmlangcodes());
         $hasotherandsourcetag = $field->check_field_has_other_and_sourcetag($this->langpack->currentlang);
-        $alreadyhasmultilang = $field->has_multilang();
+        $alreadyhasmultilang = $multilanger->has_multilang();
         $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
         if ($alreadyhasmultilang) {
             if ($hasotherandsourcetag) {
@@ -248,8 +251,8 @@ class translateform extends deeplerform {
                     data-status='$status'>");
         // Column 1 layout.
         $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
-        $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>
-            {$field->get_translatedfieldname()}</small><br/>");
+        $fieldtranslation = multilanger::findfieldstring($field); // Get the
+        $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>$fieldtranslation</small><br/>");
         if (!$isdbkey) {
             $this->_form->addElement('html', $bulletstatus);
             $this->_form->addElement('html', $checkbox);

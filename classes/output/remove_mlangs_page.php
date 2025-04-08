@@ -67,9 +67,9 @@ class remove_mlangs_page implements renderable, templatable {
     /**
      * Class Construct.
      *
-     * @param \stdClass $course
-     * @param array $coursedata
-     * @throws \moodle_exception
+     * @param \local_deepler\local\data\course $course
+     * @param \filter_multilang2 $mlangfilter
+     * @param string $version
      */
     public function __construct(course $course, filter_multilang2 $mlangfilter, string $version) {
         $this->mlangfilter = $mlangfilter;
@@ -94,10 +94,9 @@ class remove_mlangs_page implements renderable, templatable {
         $data->mform = $renderedform;
         // Set langs.
         $data->mlangfilter = $this->mlangfilter;
-        // $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         // Pass data.
         $data->version = $this->pluginversion;
-        // var_dump($data);
+        $data->mlangtags = $this->mform->get_langcodes();
         return $data;
     }
 }

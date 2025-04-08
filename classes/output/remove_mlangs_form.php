@@ -6,7 +6,8 @@ define('DIV_CLOSE', '</div>');
 
 use local_deepler\local\data\course;
 use local_deepler\local\data\field;
-use local_mlangremover\local\data\multilangfield;
+use local_deepler\local\services\multilanger;
+use local_deepler\local\services\utils;
 use local_mlangremover\local\data\textfield;
 use MoodleQuickForm;
 
@@ -14,11 +15,52 @@ use MoodleQuickForm;
  *
  */
 class remove_mlangs_form extends deeplerform {
+
+    /**
+     * @var array|string[]
+     */
+    private array $colors;
+
+    /**
+     * Inject the current mlangs into the form.
+     * Returns the number of languages found.
+     *
+     * @param array $langs
+     * @return string
+     */
+    public function makemlangs(array $langs): string {
+        $i = 0;
+        $s = '';
+        foreach ($langs as $l => $lang) {
+            $color = $this->colors[$i];
+            $i++;
+            $s .= "<div class='mlangremover__lang local_deepler__color_$l'>$lang</div>";
+        }
+        return $s;
+    }
+
+    /**
+     * Inject the language codes into the form.
+     * Returns the number of languages found.
+     *
+     * @param array $codes
+     * @return string
+     */
+    public function makecodes(array $codes): string {
+        $s = '';
+        foreach ($codes as $k) {
+            $s .= "<span class='col-1  local_deepler__color_$k'><input type='checkbox' class='mlangremover__lang' 
+                data-action='local_deepler/checkboxlangcode'>$k</input></span>";
+        }
+        return $s;
+    }
+
     /**
      * @inheritDoc
      */
     protected function definition(): void {
         parent::definition();
+        $this->colors = utils::makecolorindex($this->langcodes);
         $this->mlangfilter = $this->_customdata['mlangfilter'];
         /** @var \local_deepler\local\data\course $coursedata */
         $coursedata = $this->_customdata['coursedata'];
@@ -27,9 +69,10 @@ class remove_mlangs_form extends deeplerform {
         // Open Form.
         $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
         // Loop through course data to build form.
-        //$this->old($coursedata, $mform);
+        $coursefields = $coursedata->getfields();
+        // Add the course fields.
         $this->makecoursesetting($this->makeheader(get_string('settings'), $coursedata->getlink(), 3),
-                $coursedata->getfields());
+                $coursefields);
         // Create sections.
         $this->makesections($this->coursedata->getsections());
         // Close form.
@@ -43,7 +86,32 @@ class remove_mlangs_form extends deeplerform {
      * @return void
      */
     protected function makefieldrow(field $field) {
-        $this->_form->addElement('html', '<div>You are here');
+        $multillanger = new multilanger($field);
+        $this->gatherlangcodes($multillanger->findmlangcodes());
+        $langs = $multillanger->findmlangs();
+        $countlangs = count($langs);
+        $key = $field->getkey();
+        if ($countlangs === 0) {
+            return;
+        }
+        // The checkbox to select items for batch actions.
+        $checkbox = "<input type='checkbox' data-key='$key'
+            class='mx-2'
+            data-action='local_deepler/checkbox'
+            disabled/>";
+        $this->_form->addElement('html', '<div>');
+        $this->_form->addElement('html',
+                "<div class='row sectionname mb-0 p-2'>");
+        $translatedfieldname = multilanger::findfieldstring($field);
+        $col1 = "<small class='local_deepler__activityfield lh-sm'>$translatedfieldname</small>";
+        $this->makecodes(array_keys($langs));
+
+        $col2 = $this->makecodes(array_keys($langs));
+        $this->_form->addElement('html', $checkbox);
+        $this->_form->addElement('html', $col1 . $col2);
+        $this->_form->addElement('html', '</div>');
+        $this->_form->addElement('html', $this->makemlangs($langs));
+
         $this->_form->addElement('html', DIV_CLOSE);
     }
     /**

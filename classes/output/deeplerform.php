@@ -14,6 +14,13 @@ use moodleform;
  *
  */
 abstract class deeplerform extends moodleform {
+    /**
+     * @var string[]
+     */
+    protected array $langcodes;
+    /**
+     * @var mixed
+     */
     protected mixed $coursedata;
     /**
      * @var text_filter
@@ -21,10 +28,19 @@ abstract class deeplerform extends moodleform {
     protected text_filter $mlangfilter;
 
     /**
+     * Getter for langcodes.
+     *
+     * @return array
+     */
+    public function get_langcodes(): array {
+        return $this->langcodes;
+    }
+
+    /**
      * @inheritDoc
      */
     protected function definition(): void {
-        // TODO: Implement definition() method.
+        $this->langcodes = [];
         // Get course data.
         /** @var \local_deepler\local\data\course $coursedata */
         $this->coursedata = $this->_customdata['coursedata'];
@@ -32,6 +48,19 @@ abstract class deeplerform extends moodleform {
         $this->mlangfilter = $this->_customdata['mlangfilter'];
     }
 
+    /**
+     * List of langcodes.
+     *
+     * @param array $codes
+     * @return void
+     */
+    protected function gatherlangcodes(array $codes): void {
+        foreach ($codes as $code) {
+            if (!in_array($code, $this->langcodes)) {
+                $this->langcodes[] = $code;
+            }
+        }
+    }
     /**
      * Course first section
      *

@@ -58,8 +58,6 @@ class field {
     private int $tid;
     /** @var string */
     private string $displaytext;
-    /** @var string */
-    private string $translatedfieldname;
     /** @var status */
     private status $status;
 
@@ -88,13 +86,11 @@ class field {
         $this->table = $table;
         $this->format = $format;
         $this->cmid = $cmid;
-        $this->translatedfieldname = '';
         $this->displaytext = $this->text = $text;
         if ($this->format === 1) {
             $this->preparetexts();
         }
         $this->init_db();
-        $this->search_field_strings();
     }
 
     /**
@@ -182,10 +178,10 @@ class field {
      * Getter for the translated string field name.
      *
      * @return string
-     */
-    public function get_translatedfieldname(): string {
-        return $this->translatedfieldname;
-    }
+     *
+     * public function get_translatedfieldname(): string {
+     * return $this->translatedfieldname;
+     * }*/
 
     /**
      * Generate the field key identifier.
@@ -216,14 +212,7 @@ class field {
         return str_contains($this->text, '{mlang other}') && str_contains($this->text, "{mlang $lang");
     }
 
-    /**
-     * As the title says.
-     *
-     * @return bool
-     */
-    public function has_multilang(): bool {
-        return str_contains($this->text, '{mlang}');
-    }
+
 
     /**
      * Building the text attributes.
@@ -256,66 +245,67 @@ class field {
      *
      * @return void
      * @throws \coding_exception
+     *
+     * private function search_field_strings(): void {
+     * // Try to find the activity names as well as the field translated in the current lang.
+     * if ($this->table === 'course') {
+     * $this->translatedfieldname = get_string($this->field);
+     * } else if ($this->table === 'course_sections') {
+     * if ($this->field === 'name') {
+     * $this->translatedfieldname = get_string('sectionname');
+     * } else if ($this->field === 'summary') {
+     * $this->translatedfieldname = get_string('description');
+     * }
+     * } else {
+     * if ($this->field === 'intro') {
+     * $this->translatedfieldname = get_string('description');
+     * } else if ($this->field === 'name') {
+     * $this->translatedfieldname = get_string('name');
+     * } else {
+     * // One should be better than the other.
+     * $this->translatedfieldname = $this->findoutstanding();
+     * }
+     * }
+     * }
      */
-    private function search_field_strings(): void {
-        // Try to find the activity names as well as the field translated in the current lang.
-        if ($this->table === 'course') {
-            $this->translatedfieldname = get_string($this->field);
-        } else if ($this->table === 'course_sections') {
-            if ($this->field === 'name') {
-                $this->translatedfieldname = get_string('sectionname');
-            } else if ($this->field === 'summary') {
-                $this->translatedfieldname = get_string('description');
-            }
-        } else {
-            if ($this->field === 'intro') {
-                $this->translatedfieldname = get_string('description');
-            } else if ($this->field === 'name') {
-                $this->translatedfieldname = get_string('name');
-            } else {
-                // One should be better than the other.
-                $this->translatedfieldname = $this->findoutstanding();
-            }
-        }
-    }
-
     /**
      * Find the string in the Moodle database.
      *
      * @return string
+     * @throws \coding_exception
+     *
+     * private function findoutstanding(): string {
+     * $foundstring = $this->field;
+     *
+     * // Extract plugin component from table name.
+     * $tableparts = explode('_', $this->table, 2);
+     * $plugincomponent = isset($tableparts[1]) ? 'mod_' . $tableparts[0] : '';
+     *
+     * $candidates = [
+     * ['identifier' => $this->field, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
+     * ['identifier' => $this->field, 'component' => 'core'], // Standard Moodle core strings.
+     * ['identifier' => $this->field, 'component' => 'moodle'], // Standard Moodle core strings.
+     * ['identifier' => $this->field, 'component' => 'question'], // Standard Moodle core strings.
+     * ['identifier' => $this->field . 'n', 'component' => 'question'], // Standard Moodle core strings.
+     * ['identifier' => $this->field, 'component' => $this->table], // Standard Moodle core strings.
+     * ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent], // Common field patterns.
+     * ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'], // Common field patterns.
+     * ['identifier' => $this->field, 'component' => 'datafield_' . $this->field], // Field type specific (data activity).
+     * ['identifier' => $this->table . $this->field, 'component' => $plugincomponent], // Legacy patterns.
+     * ];
+     * foreach ($candidates as $candidate) {
+     * if (empty($candidate['component'])) {
+     * continue;
+     * }
+     *
+     * if (get_string_manager()->string_exists($candidate['identifier'], $candidate['component'])) {
+     * return get_string($candidate['identifier'], $candidate['component'], $this->id);
+     * }
+     * }
+     *
+     * return $foundstring;
+     * }
      */
-    private function findoutstanding(): string {
-        $foundstring = $this->field;
-
-        // Extract plugin component from table name.
-        $tableparts = explode('_', $this->table, 2);
-        $plugincomponent = isset($tableparts[1]) ? 'mod_' . $tableparts[0] : '';
-
-        $candidates = [
-                ['identifier' => $this->field, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
-                ['identifier' => $this->field, 'component' => 'core'], // Standard Moodle core strings.
-                ['identifier' => $this->field, 'component' => 'moodle'], // Standard Moodle core strings.
-                ['identifier' => $this->field, 'component' => 'question'], // Standard Moodle core strings.
-                ['identifier' => $this->field . 'n', 'component' => 'question'], // Standard Moodle core strings.
-                ['identifier' => $this->field, 'component' => $this->table], // Standard Moodle core strings.
-                ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent], // Common field patterns.
-                ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'], // Common field patterns.
-                ['identifier' => $this->field, 'component' => 'datafield_' . $this->field], // Field type specific (data activity).
-                ['identifier' => $this->table . $this->field, 'component' => $plugincomponent], // Legacy patterns.
-        ];
-        foreach ($candidates as $candidate) {
-            if (empty($candidate['component'])) {
-                continue;
-            }
-
-            if (get_string_manager()->string_exists($candidate['identifier'], $candidate['component'])) {
-                return get_string($candidate['identifier'], $candidate['component'], $this->id);
-            }
-        }
-
-        return $foundstring;
-    }
-
 
 
 
