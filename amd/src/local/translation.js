@@ -138,6 +138,7 @@ define([
             const selectedTargetLangRoot = selectedTarget.toLowerCase().substring(0, 2);
             Log.debug(`translation/x/getupdatedtext::selectedTarget`);
             Log.debug(selectedTarget);
+            Log.debug(selectedTargetLangRoot);
             const tagPatterns = {
                 "other": "({mlang other)(.*?){mlang}",
                 "target": `({mlang ${selectedTarget}}(.*?){mlang})`,
