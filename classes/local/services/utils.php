@@ -44,13 +44,13 @@ class utils {
     /**
      * Generate a color index for a given array.
      *
-     * @param \local_deepler\local\services\arry $tab
+     * @param array $tab
      * @return array
      */
-    public static function makecolorindex(arry $tab): array {
+    public static function makecolorindex(array $tab): array {
         $t = [];
         foreach ($tab as $i => $v) {
-            $t[$v] = self::colors[$i % count(self::colors)];
+            $t[] = ['key' => $v, 'value' => self::colors[$i % count(self::colors)]];
         }
         return $t;
     }

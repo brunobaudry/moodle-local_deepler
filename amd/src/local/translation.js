@@ -44,13 +44,13 @@ define([
     const setMainLangs = (config) => {
         Log.debug(`translation/x/setMainLangs::config`);
         Log.debug(config);
-        if (config.currentlang !== '') {
+        if (config.currentlang !== undefined && config.currentlang !== '') {
             mainSourceLang = config.currentlang;
         }
-        if (config.targetlang !== '') {
+        if (config.targetlang !== undefined && config.targetlang !== '') {
             targetLang = config.targetlang.toLowerCase();
         }
-        if (config.deeplsourcelang !== '') {
+        if (config.deeplsourcelang !== undefined && config.deeplsourcelang !== '') {
             deeplSourceLang = config.deeplsourcelang.toLowerCase();
         }
     };

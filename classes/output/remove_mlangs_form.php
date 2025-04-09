@@ -22,6 +22,13 @@ class remove_mlangs_form extends deeplerform {
     private array $colors;
 
     /**
+     * @return array
+     */
+    public function get_colors(): array {
+        return $this->colors;
+    }
+
+    /**
      * Inject the current mlangs into the form.
      * Returns the number of languages found.
      *
@@ -29,11 +36,8 @@ class remove_mlangs_form extends deeplerform {
      * @return string
      */
     public function makemlangs(array $langs): string {
-        $i = 0;
         $s = '';
         foreach ($langs as $l => $lang) {
-            $color = $this->colors[$i];
-            $i++;
             $s .= "<div class='mlangremover__lang local_deepler__color_$l'>$lang</div>";
         }
         return $s;
@@ -49,8 +53,31 @@ class remove_mlangs_form extends deeplerform {
     public function makecodes(array $codes): string {
         $s = '';
         foreach ($codes as $k) {
-            $s .= "<span class='col-1  local_deepler__color_$k'><input type='checkbox' class='mlangremover__lang' 
-                data-action='local_deepler/checkboxlangcode'>$k</input></span>";
+            $s .= "<span class='col-1  local_deepler__color_$k'><input type='checkbox' class='form-check-input mlangremover__lang' 
+                data-action='local_deepler/checkboxlangcode' name='mlangsselected[]'></input></span>";
+        }
+        return $s;
+    }
+
+    /**
+     * @param array $codes
+     * @param string $key
+     * @return string
+     */
+    public function mlangsubrows(array $langs, string $key): string {
+        // The checkbox to select items for batch actions.
+        $s = '';
+        foreach ($langs as $code => $mlang) {
+            $s .= "<div class='row local_deepler__color_$code'>
+                        <div class='col-1'>
+                            <input type='checkbox' class='form-check-input mlangremover__lang' 
+                            data-action='local_deepler/checkboxlangcode' name='local_deepler/key_langs[]' value='{$key}_{$code}' id='{$key}_{$code}'/>
+                            <label for='{$key}_{$code}'>$code</label>
+                        </div>
+                        <div class='col-11'>
+                            $mlang
+                        </div>
+                </div>";
         }
         return $s;
     }
@@ -60,7 +87,7 @@ class remove_mlangs_form extends deeplerform {
      */
     protected function definition(): void {
         parent::definition();
-        $this->colors = utils::makecolorindex($this->langcodes);
+
         $this->mlangfilter = $this->_customdata['mlangfilter'];
         /** @var \local_deepler\local\data\course $coursedata */
         $coursedata = $this->_customdata['coursedata'];
@@ -77,6 +104,7 @@ class remove_mlangs_form extends deeplerform {
         $this->makesections($this->coursedata->getsections());
         // Close form.
         $this->_form->addElement('html', DIV_CLOSE);
+        $this->colors = utils::makecolorindex($this->langcodes);
     }
 
     /**
@@ -86,33 +114,27 @@ class remove_mlangs_form extends deeplerform {
      * @return void
      */
     protected function makefieldrow(field $field) {
+        // Add multilingual functionalities to field.
         $multillanger = new multilanger($field);
         $this->gatherlangcodes($multillanger->findmlangcodes());
+        // fetch the languages.
         $langs = $multillanger->findmlangs();
         $countlangs = count($langs);
         $key = $field->getkey();
         if ($countlangs === 0) {
+            // If not language stop.
             return;
         }
-        // The checkbox to select items for batch actions.
-        $checkbox = "<input type='checkbox' data-key='$key'
-            class='mx-2'
-            data-action='local_deepler/checkbox'
-            disabled/>";
-        $this->_form->addElement('html', '<div>');
-        $this->_form->addElement('html',
-                "<div class='row sectionname mb-0 p-2'>");
         $translatedfieldname = multilanger::findfieldstring($field);
+        $allmlangrows = $this->mlangsubrows($langs, $key);
         $col1 = "<small class='local_deepler__activityfield lh-sm'>$translatedfieldname</small>";
-        $this->makecodes(array_keys($langs));
-
-        $col2 = $this->makecodes(array_keys($langs));
-        $this->_form->addElement('html', $checkbox);
-        $this->_form->addElement('html', $col1 . $col2);
-        $this->_form->addElement('html', '</div>');
-        $this->_form->addElement('html', $this->makemlangs($langs));
-
+        $this->_form->addElement('html', "<div class='sectionname mb-0 p-2'>");
+        //
+        $this->_form->addElement('html', $col1);
+        //$this->_form->addElement('html', DIV_CLOSE);
+        $this->_form->addElement('html', $this->mlangsubrows($langs, $key));
         $this->_form->addElement('html', DIV_CLOSE);
+
     }
     /**
      * @param \local_deepler\local\data\course $coursedata

@@ -66,7 +66,7 @@ export default {
         deeplUsage: '#local_deepler__used',
         deeplMax: '#local_deepler__max',
         deeplStatusContainer: '#local_deepler-translate-header-usage',
-        allMLangCkboxes: '#local_mlangremover__mlangtags input[type="checkbox"]', //
+        allMLangCkboxes: '#local_mlangremover__mlangtags', //
         allMLangCkboxesNames: '[name="mlangsselected[]"]', //
         selectedMLangCkboxes: '#local_mlangremover__mlangtags input[type="checkbox"]:checked', //
         removetag: '#local_mlangremover__removetag', //

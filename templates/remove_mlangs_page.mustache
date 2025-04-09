@@ -17,32 +17,36 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 {{!
 @todo doc
 }}
+<style type="text/css">
+    {{#colors}}
+        .local_deepler__color_{{key}} > label,
+        .local_deepler__color_{{key}} > input[type="checkbox"],
+        div.local_deepler__color_{{key}} {
+            background-color: {{value}};
+        }
+    {{/colors}}
+</style>
 
 <div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
     <!-- This is a hidden container for the strings that are used in the JS -->
 </div>
 <div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_mlangremover-header">
     <div class="row pb-2 pt-3 align-items-center">
-        <div class="col-3 px-5">
-            <div class="form-check" id="local_mlangremover-translate-header-select-all">
-                <input
-                        class="form-check-input local_mlangremover__select-all"
-                        data-action="local_mlangremover/select-all"
-                        type="checkbox"
-                        aria-label="{{#str}}selectall,local_mlangremover{{/str}}"
-                        title="{{#str}}selectall,local_mlangremover{{/str}}"
-                        name="select-all"
-                        id="select-all"/>
-                <label class="form-check-label" for="select-all">
-                    {{#str}}selectall,local_deepler{{/str}}
-                </label>
-            </div>
+        <div class="form-group col-1" id="local_mlangremover__mlangtags">
+            <label for="local_mlangremover/mlangtags">{{#str}}mlangtagsstring,local_deepler{{/str}}</label>
+            {{#mlangtags}}
+                <div class="form-check local_deepler__color_{{.}}">
+                    <input class="form-check-input" type="checkbox" name="mlangsselected[]" value="{{.}}" id="{{.}}">
+                    <label class="form-check-label" for="{{.}}">
+                        {{.}}
+                    </label>
+                </div>
+            {{/mlangtags}}
         </div>
-        <div class="form-group col-3">
-            <!--            <div class="form-check">-->
-            <!--                <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="all" id="local_mlangremover/removehowall">-->
-            <!--                <label class="form-check-label" for="local_mlangremover/removehowall">[[removehowall]]</label>-->
-            <!--            </div>-->
+        <div class="col-5">
+            <hr class="hr hr-blurry"/>
+        </div>
+        <div class="form-group col-4">
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="keepselected" id="local_mlangremover/keepselected">
                 <label class="form-check-label" for="local_mlangremover/keepselected">{{#str}}keepselected,local_deepler{{/str}}</label>
@@ -51,30 +55,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="removeselected" id="local_mlangremover/removeselected">
                 <label class="form-check-label" for="local_mlangremover/removeselected">{{#str}}removeselected,local_deepler{{/str}}</label>
             </div>
-            <hr class="hr hr-blurry"/>
-            <div class="form-group">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="removetag" value="removetag" id="local_mlangremover__removetag">
-                    <label class="form-check-label" for="removetag">
-                        {{#str}}removetag,local_deepler{{/str}}
-                    </label>
-                </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="removeselectedcontentonly" id="local_mlangremover/removeselected">
+                <label class="form-check-label" for="local_mlangremover/removeselectedcontentonly">{{#str}}removeselectedcontentonly,local_deepler{{/str}}</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="local_mlangremover/removehow" value="removeselectedtagonly" id="local_mlangremover/removeselected">
+                <label class="form-check-label" for="local_mlangremover/removeselectedtagonly">{{#str}}removeselectedtagonly,local_deepler{{/str}}</label>
             </div>
         </div>
-        <div class="form-group col-3" id="local_mlangremover__mlangtags">
-            <label for="local_mlangremover/mlangtags">{{#str}}mlangtagsstring,local_deepler{{/str}}</label>
-            {{#mlangtags}}
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="mlangsselected[]" value="{{.}}" id="{{.}}">
-                    <label class="form-check-label" for="{{.}}">
-                        {{.}}
-                    </label>
-                </div>
-            {{/mlangtags}}
-        </div>
-
-
-        <div class="col-3 px-0">
+        <div class="col-1 px-0">
             <div class="text-center">
                 <button
                         id="local_mlangremover-translate-header-letsdobutton"

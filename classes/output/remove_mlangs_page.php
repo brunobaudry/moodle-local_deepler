@@ -97,6 +97,7 @@ class remove_mlangs_page implements renderable, templatable {
         // Pass data.
         $data->version = $this->pluginversion;
         $data->mlangtags = $this->mform->get_langcodes();
+        $data->colors = $this->mform->get_colors();
         return $data;
     }
 }

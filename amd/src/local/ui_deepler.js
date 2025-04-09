@@ -15,7 +15,7 @@
 
 /**
  * @module     local_deepler/deepler
- * @file       amd/src/local/ui.js
+ * @file       amd/src/local/ui_deepler.js
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -82,6 +82,29 @@ define(['core/log',
         Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
     };
     /**
+     * Register UI elements.
+     */
+    const registerUI = () => {
+        try {
+            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+            errordbtitle = langstrings.uistrings.errordbtitle;
+            saveAllBtn = domQuery(Selectors.actions.saveAll);
+            selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
+            autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
+            checkboxes = domQueryAll(Selectors.actions.checkBoxes);
+            glossaryId = domQuery(Selectors.deepl.glossaryId);
+            const glossaryCookie = Utils.getCookie(Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid);
+            if (glossaryCookie !== null) {
+                glossaryId.value = glossaryCookie;
+            }
+
+        } catch (e) {
+            if (config.debug) {
+                Log.error(e.message);
+            }
+        }
+    };
+    /**
      * Opens a modal infobox to warn user trunks of fields are saving.
      * @returns {Promise<void>}
      * ui.js
@@ -93,11 +116,40 @@ define(['core/log',
         });
         await saveAllModal.show();
     };
+    /**
+     * Event listener for click events.
+     *
+     * @param {event} e
+     */
+    const handleClickEvent = (e) => {
+        if (e.target.closest(Selectors.actions.toggleMultilang)) {
+            onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
+        }
+        if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
+            if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
+                showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
+            } else {
+                callDeeplServices();
+            }
+        }
+        if (e.target.closest(Selectors.actions.selectAllBtn)) {
+            toggleAllCheckboxes(e);
+        }
+        if (e.target.closest(Selectors.actions.checkBoxes)) {
+            toggleAutotranslateButton();
 
-        /**
-         * Event listener for change events.
-         * @param {event} e
-         */
+        }
+        if (e.target.closest(Selectors.actions.saveAll)) {
+            saveTranslations();
+        }
+        if (e.target.closest(Selectors.actions.validatorsBtns)) {
+            saveSingleTranslation(e);
+        }
+    };
+    /**
+     * Event listener for change events.
+     * @param {event} e
+     */
     const handleChangeEvent = (e) => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
@@ -138,36 +190,7 @@ define(['core/log',
             multilang.classList.toggle("show");
         }
     };
-    /**
-     * Event listener for click events.
-     *
-     * @param {event} e
-     */
-    const handleClickEvent = (e) => {
-        if (e.target.closest(Selectors.actions.toggleMultilang)) {
-            onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
-        }
-        if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
-            if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
-                showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
-            } else {
-                callDeeplServices();
-            }
-        }
-        if (e.target.closest(Selectors.actions.selectAllBtn)) {
-            toggleAllCheckboxes(e);
-        }
-        if (e.target.closest(Selectors.actions.checkBoxes)) {
-            toggleAutotranslateButton();
 
-        }
-        if (e.target.closest(Selectors.actions.saveAll)) {
-            saveTranslations();
-        }
-        if (e.target.closest(Selectors.actions.validatorsBtns)) {
-            saveSingleTranslation(e);
-        }
-    };
 
         /**
          * @returns
@@ -246,26 +269,7 @@ define(['core/log',
         }
 
     };
-    const registerUI = () => {
-        try {
-            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
-            errordbtitle = langstrings.uistrings.errordbtitle;
-            saveAllBtn = domQuery(Selectors.actions.saveAll);
-            selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
-            autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
-            checkboxes = domQueryAll(Selectors.actions.checkBoxes);
-            glossaryId = domQuery(Selectors.deepl.glossaryId);
-            const glossaryCookie = Utils.getCookie(Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid);
-            if (glossaryCookie !== null) {
-                glossaryId.value = glossaryCookie;
-            }
 
-        } catch (e) {
-            if (config.debug) {
-                Log.error(e.message);
-            }
-        }
-    };
     /**
      * Toggle checkboxes
      * @param {Event} e Event
@@ -746,9 +750,6 @@ define(['core/log',
         showRows(Selectors.statuses.needsupdate, domQuery(Selectors.actions.showNeedUpdate).checked);
     };
     return {
-        init: init,
-        setIconStatus: setIconStatus,
-        findEditor: findEditor,
-        findEditorByType: findEditorByType,
+        init: init
     };
 });

@@ -84,8 +84,10 @@ $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
-$string['removeselected'] = 'Remove selected';
-$string['removetag'] = 'remove tag';
+$string['removeselected'] = 'Remove selected (mlang tag & content)';
+$string['removeselectedcontentonly'] = 'Remove selected content';
+$string['removeselectedtagonly'] = 'Remove selected mlang tag';
+$string['removetag'] = 'Remove its mlang tag';
 $string['rephraseinfos'] =
         'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.
         The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>';
