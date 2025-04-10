@@ -1,12 +1,12 @@
 <?php
 
-namespace local_deepler\local\services;
+namespace local_deepler\local\data;
 
 use lang_string;
-use local_deepler\local\data\field;
 
 /**
- *
+ * Class multilanger.
+ * String decorator with mlang functionalities.
  */
 class multilanger {
     /**
@@ -14,31 +14,24 @@ class multilanger {
      */
     static array $translatedfields = [];
     /**
-     * @var \local_deepler\local\data\field
+     * @var string
      */
-    private field $field;
+    private string $text;
 
     /**
-     * @param field $field
+     * Getter for main text
+     *
+     * @return string
      */
-    public function __construct(field $field) {
-        $this->field = $field;
+    public function get_text(): string {
+        return $this->text;
     }
 
     /**
-     * Checks if any of the collection of fields has a multilang filter.
-     *
-     * @param array $fields
-     * @return bool
+     * @param string $field
      */
-    public static function have_multilang(array $fields): bool {
-        foreach ($fields as $field) {
-            $ml = new multilanger($field);
-            if ($ml->has_multilang()) {
-                return true;
-            }
-        }
-        return false;
+    public function __construct(string $field) {
+        $this->text = $field;
     }
 
     /**
@@ -47,27 +40,17 @@ class multilanger {
      * @return bool
      */
     public function has_multilang(): bool {
-        return str_contains($this->field->get_text(), '{mlang}');
+        return str_contains($this->text, '{mlang}');
     }
 
     /**
-     * Get all mlang codes for collections of fields.
+     * Checks if field contains a mlang translation for the given code.
      *
-     * @param array $fields
-     * @return array
+     * @param string $code
+     * @return bool
      */
-    public static function langcodesforfields(array $fields): array {
-        $mlangs = [];
-        foreach ($fields as $field) {
-            $ml = new multilanger($field);
-            $codes = $ml->findmlangcodes();
-            foreach ($codes as $code) {
-                if (!in_array($code, $mlangs)) {
-                    $mlangs[] = $code;
-                }
-            }
-        }
-        return $mlangs;
+    public function hasmultilangcode(string $code): bool {
+        return str_contains($this->text, "{mlang $code}");
     }
 
     /**
@@ -80,13 +63,54 @@ class multilanger {
     }
 
     /**
+     * Update the field text
+     *
+     * @param string $code
+     * @param string $text
+     * @return void
+     */
+    private function updatemlang(string $code, string $text): void {
+        $pattern = "/{mlang\s+{$code}\s*}(.*?){mlang\s*}/si";
+        $this->text = preg_replace($pattern, "{mlang $code}$text{mlang}", $this->text);
+    }
+
+    /**
+     * Only adds the mlang if it does not exist.
+     *
+     * @param string $code
+     * @param string $text
+     * @return void
+     */
+    public function update_or_add_mlang(string $code, string $text): void {
+        if ($this->hasmultilangcode($code)) {
+            $this->updatemlang($code, $text);
+        } else {
+            $this->addmlang_ifothers($code, $text);
+        }
+    }
+
+    /**
+     * Add a mlang tag to the field text.
+     * Assuming the text filed already has mlangs but not this code's.
+     *
+     * @param string $code
+     * @param string $text
+     * @return void
+     */
+    private function addmlang_ifothers(string $code, string $text) {
+        $needle = '{mlang}';
+        $pos = strrpos($this->text, $needle);
+        $update = "{mlang}{mlang $code}$text{mlang}";
+        $this->text = substr_replace($this->text, $update, $pos, 0);
+    }
+    /**
      * Builds languages an array of string of iso codes or 'other'.
      *
      * @return array
      */
     public function findmlangs(): array {
         $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}.*?{mlang\s*})/si";
-        preg_match_all($pattern, $this->field->get_text(), $matches);
+        preg_match_all($pattern, $this->text, $matches);
 
         $result = [];
         foreach ($matches[2] as $index => $key) {
@@ -97,13 +121,36 @@ class multilanger {
     }
 
     /**
+     * Get all mlang codes for collections of fields.
+     *
+     * @param array $fields
+     * @return array
+     */
+    public static function langcodesforfields(array $fields): array {
+        $mlangs = [];
+        foreach ($fields as $field) {
+            $ml = new multilanger($field->get_text());
+            $codes = $ml->findmlangcodes();
+            foreach ($codes as $code) {
+                if (!in_array($code, $mlangs)) {
+                    $mlangs[] = $code;
+                }
+            }
+        }
+        return $mlangs;
+    }
+
+    /**
      * @param \local_deepler\local\data\field $field
      * @return \lang_string|string
      * @throws \coding_exception
      */
     public static function findfieldstring(field $field): lang_string|string {
         $trkey = $field->get_table() . "#" . $field->get_tablefield();
-        if (self::$translatedfields[$trkey] === null) {
+        if (!isset(self::$translatedfields)) {
+            self::$translatedfields = [];
+        }
+        if (!isset(self::$translatedfields[$trkey])) {
             // Create it if not cached.
             self::$translatedfields[$trkey] = self::search_field_strings($field);
         }

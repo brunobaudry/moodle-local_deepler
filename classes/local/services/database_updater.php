@@ -16,6 +16,8 @@
 
 namespace local_deepler\local\services;
 
+use dml_exception;
+
 /**
  * Database updater service for local_deepler.
  *
@@ -34,6 +36,7 @@ class database_updater {
      */
     public static function update_records(array $data, array &$response): void {
         global $DB;
+
         $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
         $DB->update_record($data['table'], (object) $dataobject);
 
@@ -42,5 +45,20 @@ class database_updater {
 
         $response['t_lastmodified'] = $timemodified; // Translation last modified time.
         $response['text'] = $data['text'];
+    }
+
+    /**
+     * Get the text field from a record in the database.
+     *
+     * @param string $table
+     * @param string $field
+     * @param int $id
+     * @return string
+     * @throws \dml_exception
+     */
+    public static function get_textfield(string $table, string $field, int $id): string {
+        global $DB;
+        $record = $DB->get_record($table, ['id' => $id], '*', MUST_EXIST);
+        return $record->{$field};
     }
 }

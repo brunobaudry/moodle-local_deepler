@@ -110,7 +110,7 @@ final class updatetranslation_test extends base_external {
                 'keyid' => "course[$cid][fullname][0]",
         ]];
 
-        $result = update_translation::execute($data, $user->id, $course->id);
+        $result = update_translation::execute($data, $user->id, $course->id, 'update');
 
         $this->assertCount(1, $result);
         $this->assertArrayHasKey('t_lastmodified', $result[0]);

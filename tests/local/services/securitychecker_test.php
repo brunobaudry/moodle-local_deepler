@@ -68,7 +68,7 @@ final class securitychecker_test extends base_external {
         $externalapi = $this->createMock(external_api::class);
         $externalapi->method('validate_context')->with($contextcourse);
         // Call the method.
-        security_checker::perform_security_checks($data, $userid, $courseid);
+        security_checker::perform_security_checks($data, $userid, $courseid, 'local/deepler:edittranslations');
 
         // Add assertions to verify the behavior.
         $this->assertTrue(true); // Replace with actual assertions.

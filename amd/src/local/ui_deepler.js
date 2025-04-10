@@ -122,6 +122,7 @@ define(['core/log',
      * @param {event} e
      */
     const handleClickEvent = (e) => {
+
         if (e.target.closest(Selectors.actions.toggleMultilang)) {
             onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
         }
@@ -137,7 +138,6 @@ define(['core/log',
         }
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             toggleAutotranslateButton();
-
         }
         if (e.target.closest(Selectors.actions.saveAll)) {
             saveTranslations();
@@ -146,10 +146,12 @@ define(['core/log',
             saveSingleTranslation(e);
         }
     };
-    /**
-     * Event listener for change events.
-     * @param {event} e
-     */
+
+
+        /**
+         * Event listener for change events.
+         * @param {event} e
+         */
     const handleChangeEvent = (e) => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
@@ -235,6 +237,9 @@ define(['core/log',
          * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
          */
     const prepareDBitem = (key) => {
+        Log.debug(`ui_deepler/x/prepareDBitem::key`);
+        Log.debug(key);
+        Log.debug(Translation.debugTemp(key));
         const element = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         return {
             key: key,
@@ -736,6 +741,8 @@ define(['core/log',
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100});
         Translation.init(cfg);
+        Log.debug(`ui_deepler/x/init::Translation.moodleTargetToSave`);
+        Log.debug(Translation.moodleTargetToSave);
         config = cfg;
         Log.info(cfg);
         registerUI();

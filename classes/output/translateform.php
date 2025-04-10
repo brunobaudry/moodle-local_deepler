@@ -19,15 +19,9 @@ defined('MOODLE_INTERNAL') || die();
 define('DIV_CLOSE', '</div>');
 global $CFG;
 
-use core_filters\text_filter;
 use local_deepler\local\data\field;
-use local_deepler\local\data\interfaces\iconic_interface;
-use local_deepler\local\data\interfaces\visibility_interface;
-use local_deepler\local\data\module;
-use local_deepler\local\data\section;
+use local_deepler\local\data\multilanger;
 use local_deepler\local\services\lang_helper;
-use local_deepler\local\services\multilanger;
-use moodleform;
 use MoodleQuickForm;
 
 // Load the files we're going to need.
@@ -139,7 +133,7 @@ class translateform extends deeplerform {
      * @throws \coding_exception
      */
     public function fieldrowcolumn2(field $field, string $keyid, string $key, bool $isdbkey): void {
-        $multilanger = new multilanger($field);
+        $multilanger = new multilanger($field->get_text());
         $this->gatherlangcodes($multilanger->findmlangcodes());
         $hasotherandsourcetag = $field->check_field_has_other_and_sourcetag($this->langpack->currentlang);
         $alreadyhasmultilang = $multilanger->has_multilang();

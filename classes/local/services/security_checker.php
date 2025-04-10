@@ -44,7 +44,7 @@ class security_checker {
      * @throws \invalid_parameter_exception
      * @throws \required_capability_exception
      */
-    private static function perform_security_checks(array $data, int $userid, int $courseid, string $cap): void {
+    public static function perform_security_checks(array $data, int $userid, int $courseid, string $cap): void {
         $context = context_course::instance($courseid);
         external_api::validate_context($context);
         require_capability($cap, $context, $userid);

@@ -26,7 +26,9 @@ use core_external\restricted_context_exception;
 use dml_transaction_exception;
 use Exception;
 use invalid_parameter_exception;
+use local_deepler\local\data\multilanger;
 use local_deepler\local\services\database_updater;
+use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\security_checker;
 use Throwable;
 
@@ -57,8 +59,12 @@ class update_translation extends external_api {
                                 'table' => new external_value(PARAM_ALPHANUMEXT, 'The table name'),
                                 'field' => new external_value(PARAM_ALPHANUMEXT, 'The field name'),
                                 'cmid' => new external_value(PARAM_ALPHANUMEXT, 'The course module id'),
-                                'text' => new external_value(PARAM_RAW, 'The new text content with multilang2 translations'),
+                                'text' => new external_value(PARAM_RAW, 'The new text content translated or updated'),
                                 'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
+                                'mainsourcecode' => new external_value(PARAM_ALPHANUMEXT, 'The main source code'),
+                                'sourcecode' => new external_value(PARAM_RAW, 'The source code of the translation'),
+                                'targetcode' => new external_value(PARAM_RAW, 'The targe code to save to'),
+                                'sourcetext' => new external_value(PARAM_RAW, 'The sourcetext to save if needed'),
                         ])
                 ),
                 'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
@@ -119,6 +125,7 @@ class update_translation extends external_api {
                 default:
                     throw new invalid_parameter_exception('Invalid action');
             }
+            self::preparedata($data);
             database_updater::update_records($data, $response);
         } catch (invalid_parameter_exception $i) {
             $response['error'] = "INVALID PARAM " . $i->getMessage();
@@ -134,6 +141,41 @@ class update_translation extends external_api {
         return $response;
     }
 
+    /**
+     * Prepare the text for saving.
+     * Keeping the source text in OTHER or the main source code, or without mlang if rephrase.
+     * And adding the target code if not rephrased.
+     *
+     * @param array $data
+     * @return void
+     * @throws \dml_exception
+     */
+    private static function preparedata(array &$data): void {
+        $fieldtext = database_updater::get_textfield($data['table'], $data['field'], $data['id']);
+        $mlanger = new multilanger($fieldtext);
+        if (str_contains($data['sourcecode'], lang_helper::REPHRASESYMBOL)) {
+            // Rephrasing,
+            if ($mlanger->has_multilang()) {
+                if ($data['sourcecode'] === $data['mainsourcecode']) {
+                    $mlanger->update_or_add_mlang('other', $data['text']);
+                } else {
+                    $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
+                }
+                $data['text'] = $mlanger->get_text();
+            }
+            // Rephrasing, no mlang then no need to manipulate the text: Save rephrassed.
+        } else {
+            // translation.
+            if ($mlanger->hasmultilangcode('other') && $data['sourcecode'] === $data['mainsourcecode']) {
+                $mlanger->update_or_add_mlang($data['sourcecode'], $data['sourcetext']);
+
+            } else {
+                $mlanger->update_or_add_mlang('other', $data['sourcetext']);
+            }
+            $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
+            $data['text'] = $mlanger->get_text();
+        }
+    }
     /**
      * Handle exceptions and prepare response.
      *

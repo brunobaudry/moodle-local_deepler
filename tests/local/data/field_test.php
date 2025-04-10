@@ -90,9 +90,10 @@ final class field_test extends advanced_testcase {
     public function test_has_multilang(): void {
         $field1 = new field(1, '{mlang en}English{mlang}', 1, 'shortname', 'course');
         $field2 = new field(2, 'Regular text', 1, 'name', 'course');
-
-        $this->assertTrue($field1->has_multilang());
-        $this->assertFalse($field2->has_multilang());
+        $mlanger1 = new multilanger($field1);
+        $mlanger2 = new multilanger($field2);
+        $this->assertTrue($mlanger1->has_multilang());
+        $this->assertFalse($mlanger2->has_multilang());
     }
 
     /**
