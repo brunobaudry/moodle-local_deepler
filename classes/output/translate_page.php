@@ -119,7 +119,7 @@ class translate_page implements renderable, templatable {
         $data->canimprove = $this->langpacks->get_canimprove();
         $data->supportedlangs = implode(', ', $this->langpacks->get_deeplrephraselangs());
         $data->rephrasesymbol = lang_helper::REPHRASESYMBOL;
-        $data->hidecompatible = count($this->langpacks->findcompatiblelangs()) < 2 ? "none" : "inherit";
+        $data->hidecompatible = count($this->langpacks->findcompatiblelangs()) < 2 ? 'none' : 'inherit';
         $data->compatiblelangs = array_map('strval', $this->langpacks->findcompatiblelangs());
         // Pass data.
         $data->version = $this->version;

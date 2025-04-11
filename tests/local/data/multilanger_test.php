@@ -49,26 +49,7 @@ final class multilanger_test extends advanced_testcase {
      */
     private function create_mock_field(string $table, string $fieldname): field {
         return new class(0, '', 0, $fieldname, $table, 0) extends field {
-            /**
-             * Constructor for the mock field class.
-             *
-             * @param int $id
-             * @param string $text
-             * @param int $format
-             * @param string $field
-             * @param string $table
-             * @param int $cmid
-             */
-            public function __construct(
-                    int $id,
-                    string $text,
-                    int $format,
-                    string $field,
-                    string $table,
-                    int $cmid = 0
-            ) {
-                parent::__construct($id, $text, $format, $field, $table, $cmid);
-            }
+            // No constructor needed - uses parent constructor directly.
         };
     }
 
