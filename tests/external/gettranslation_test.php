@@ -70,7 +70,6 @@ final class gettranslation_test extends base_external {
      *
      * @return void
      * @covers \local_deepler\external\get_translation::setdeeplapikey
-     * @covers \local_deepler\external\
      * @throws \dml_exception
      */
     public function test_setdeeplapikey(): void {

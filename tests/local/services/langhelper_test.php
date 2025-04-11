@@ -33,7 +33,7 @@ use advanced_testcase;
 /**
  * Lang helper Test.
  *
- * @covers \lang_helper
+ * @covers \local_deepler\local\services\lang_helper
  */
 final class langhelper_test extends advanced_testcase {
     /**
@@ -60,7 +60,7 @@ final class langhelper_test extends advanced_testcase {
     /**
      * Tests the values returned as object ready to be transformed .
      *
-     * @covers ::prepareoptionlangs
+     * @covers \local_deepler\local\services\lang_helper::prepareoptionlangs
      * @return void
      */
     public function test_prepareoptionlangs(): void {
@@ -88,7 +88,8 @@ final class langhelper_test extends advanced_testcase {
 
     /**
      * Tests the values returned as object ready to be transformed as HTM dropdown option list.
-     * @covers ::preparehtmlotions
+     *
+     * @covers \local_deepler\local\services\lang_helper::preparehtmlotions
      *
      * @return void
      */
@@ -104,6 +105,8 @@ final class langhelper_test extends advanced_testcase {
     /**
      * Basic setting tests.
      *
+     * @covers \local_deepler\local\services\lang_helper::initdeepl
+     * @covers \local_deepler\local\services\lang_helper::isapikeynoset
      * @return void
      * @throws \DeepL\DeepLException
      * @throws \dml_exception

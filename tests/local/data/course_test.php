@@ -62,7 +62,7 @@ final class course_test extends advanced_testcase {
      * Test the constructor.
      *
      * @return void
-     * @covers ::__construct
+     * @covers \local_deepler\local\data\course::__construct
      */
     public function test_constructor(): void {
         $this->assertInstanceOf(course::class, $this->coursewrapper);
@@ -120,7 +120,7 @@ final class course_test extends advanced_testcase {
      * Test the getfields method.
      *
      * @return void
-     * @covers ::getfields
+     * @covers \local_deepler\local\data\course::getfields
      */
     public function test_getfields2(): void {
         $fields = $this->coursewrapper->getfields();
@@ -152,7 +152,7 @@ final class course_test extends advanced_testcase {
      * Test the getsections method another way.
      *
      * @return void
-     * @covers ::getsections
+     * @covers \local_deepler\local\data\course::getsections
      */
     public function test_getsections2(): void {
         $sections = $this->coursewrapper->getsections();
@@ -166,7 +166,7 @@ final class course_test extends advanced_testcase {
      * Test the getinfo method.
      *
      * @return void
-     * @covers ::getinfo
+     * @covers \local_deepler\local\data\course::getinfo
      */
     public function test_getinfo(): void {
         $this->assertInstanceOf(course_modinfo::class, $this->coursewrapper->getinfo());
@@ -177,7 +177,7 @@ final class course_test extends advanced_testcase {
      * Test the getlink method.
      *
      * @return void
-     * @covers ::getlink
+     * @covers \local_deepler\local\data\course::getlink
      */
     public function test_getlink(): void {
         global $CFG;

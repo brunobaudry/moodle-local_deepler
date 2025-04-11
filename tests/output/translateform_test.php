@@ -69,7 +69,7 @@ final class translateform_test extends advanced_testcase {
     /**
      * Test the definition method.
      *
-     * @covers ::definition
+     * @covers \local_deepler\output\translateform::definition
      * @return void
      * @throws \core\exception\moodle_exception
      * @throws \moodle_exception

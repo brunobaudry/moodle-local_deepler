@@ -79,7 +79,7 @@ class multilanger {
      *
      * @return int[]|string[]
      */
-    public function findmlangcodes() {
+    public function findmlangcodes(): array {
         return array_keys($this->findmlangs());
     }
 
@@ -87,6 +87,7 @@ class multilanger {
      * Wraps code around initial text.
      * Must not have mlang tags.
      *
+     * @param string $code
      * @throws \coding_exception
      */
     public function wrapmlang(string $code): void {

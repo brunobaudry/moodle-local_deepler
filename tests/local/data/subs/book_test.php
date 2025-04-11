@@ -37,7 +37,7 @@ final class book_test extends advanced_testcase {
      * Test the constructor and getfields method.
      *
      * @return void
-     * @covers ::__construct
+     * @covers \local_deepler\local\data\subs\book::__construct
      */
     public function test_constructor_and_getfields(): void {
         $this->resetAfterTest(true);

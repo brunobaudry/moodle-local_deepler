@@ -58,8 +58,9 @@ final class section_test extends advanced_testcase {
     /**
      * Test the constructor.
      *
-     * @covers ::__construct
+     * @covers \local_deepler\local\data\section::__construct
      * @return void
+     * @throws \core\exception\moodle_exception
      */
     public function test_constructor(): void {
         $this->resetAfterTest(true);
@@ -72,7 +73,7 @@ final class section_test extends advanced_testcase {
     /**
      * Test isvisible method.
      *
-     * @covers ::isvisible
+     * @covers \local_deepler\local\data\section::isvisible
      * @return void
      */
     public function test_isvisible(): void {
@@ -86,7 +87,7 @@ final class section_test extends advanced_testcase {
     /**
      * Test getsectionname method.
      *
-     * @covers ::getsectionname
+     * @covers \local_deepler\local\data\section::getsectionname
      * @return void
      * @todo MDL-0000 find a way to test this method with proper name.
      */
@@ -101,7 +102,7 @@ final class section_test extends advanced_testcase {
     /**
      * Test getfields method.
      *
-     * @covers ::getfields
+     * @covers \local_deepler\local\data\section::getfields
      * @return void
      */
     public function test_getfields(): void {
@@ -116,7 +117,7 @@ final class section_test extends advanced_testcase {
     /**
      * Test getmodules method.
      *
-     * @covers ::getmodules
+     * @covers \local_deepler\local\data\section::getmodules
      * @return void
      */
     public function test_getmodules(): void {
@@ -131,8 +132,9 @@ final class section_test extends advanced_testcase {
     /**
      * Test getlink method.
      *
-     * @covers ::getlink
+     * @covers \local_deepler\local\data\section::getlink
      * @return void
+     * @throws \core\exception\moodle_exception
      */
     public function test_getlink(): void {
         $this->resetAfterTest(true);
@@ -149,7 +151,7 @@ final class section_test extends advanced_testcase {
     /**
      * Test getid method.
      *
-     * @covers ::getid
+     * @covers \local_deepler\local\data\section::getid
      * @return void
      */
     public function test_getid(): void {

@@ -33,13 +33,13 @@ final class field_test extends advanced_testcase {
     /**
      * Test the constructor and basic getters.
      *
-     * @covers ::__construct
-     * @covers ::get_id
-     * @covers ::get_cmid
-     * @covers ::get_tablefield
-     * @covers ::get_table
-     * @covers ::get_text
-     * @covers ::get_format
+     * @covers \local_deepler\local\data\field::__construct
+     * @covers \local_deepler\local\data\field::get_id
+     * @covers \local_deepler\local\data\field::get_cmid
+     * @covers \local_deepler\local\data\field::get_tablefield
+     * @covers \local_deepler\local\data\field::get_table
+     * @covers \local_deepler\local\data\field::get_text
+     * @covers \local_deepler\local\data\field::get_format
      * @return void
      */
     public function test_constructor_and_getters(): void {
@@ -56,8 +56,8 @@ final class field_test extends advanced_testcase {
     /**
      * Test the getkey and getkeyid methods.
      *
-     * @covers ::getkey
-     * @covers ::getkeyid
+     * @covers \local_deepler\local\data\field::getkey
+     * @covers \local_deepler\local\data\field::getkeyid
      * @return void
      */
     public function test_key_generation(): void {
@@ -76,7 +76,7 @@ final class field_test extends advanced_testcase {
     /**
      * Test the check_field_has_other_and_sourcetag method.
      *
-     * @covers ::check_field_has_other_and_sourcetag
+     * @covers \local_deepler\local\data\field::check_field_has_other_and_sourcetag
      * @return void
      */
     public function test_check_field_has_other_and_sourcetag(): void {
@@ -90,7 +90,7 @@ final class field_test extends advanced_testcase {
     /**
      * Test the has_multilang method.
      *
-     * @covers ::has_multilang
+     * @covers \local_deepler\local\data\multilanger::has_multilangs
      * @return void
      */
     public function test_has_multilang(): void {
@@ -105,7 +105,7 @@ final class field_test extends advanced_testcase {
     /**
      * Test the filterdbtextfields static method.
      *
-     * @covers ::filterdbtextfields
+     * @covers \local_deepler\local\data\field::filterdbtextfields
      * @return void
      */
     public function test_filterdbtextfields(): void {
@@ -147,7 +147,7 @@ final class field_test extends advanced_testcase {
     /**
      * Test the getfieldsfromcolumns static method.
      *
-     * @covers ::getfieldsfromcolumns
+     * @covers \local_deepler\local\data\field::getfieldsfromcolumns
      * @return void
      */
     public function test_getfieldsfromcolumns(): void {

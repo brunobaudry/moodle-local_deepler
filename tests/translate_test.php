@@ -43,7 +43,7 @@ final class translate_test extends advanced_testcase {
     /**
      * Testing that all settings are loaded
      *
-     * @covers ::get_config
+     * @coversNothing
      * @return void
      * @throws \dml_exception
      */
@@ -76,7 +76,7 @@ final class translate_test extends advanced_testcase {
     /**
      * Verifying test
      *
-     * @covers \local_deepler\data\course
+     * @covers \local_deepler\local\data\course
      * @return void
      */
     public function test_course_data(): void {

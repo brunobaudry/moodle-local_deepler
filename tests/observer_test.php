@@ -50,7 +50,7 @@ final class observer_test extends advanced_testcase {
     /**
      * Test the update course event.
      *
-     * @covers \local_deepler\local_deepler_observer::course_updated
+     * @covers \local_deepler\observer::course_updated
      * @return void
      * @throws \coding_exception
      * @throws \dml_exception
@@ -75,7 +75,7 @@ final class observer_test extends advanced_testcase {
     /**
      * Test the update section event.
      *
-     * @covers \local_deepler\local_deepler_observer::course_section_updated
+     * @covers \local_deepler\observer::course_section_updated
      * @throws \coding_exception
      * @throws \dml_exception
      */
@@ -105,7 +105,7 @@ final class observer_test extends advanced_testcase {
     /**
      * Tests the module event.
      *
-     * @covers \local_deepler\local_deepler_observer::course_module_updated
+     * @covers \local_deepler\observer::course_module_updated
      * @return void
      * @throws \coding_exception
      * @throws \dml_exception

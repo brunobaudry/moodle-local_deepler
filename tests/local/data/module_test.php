@@ -90,6 +90,8 @@ final class module_test extends advanced_testcase {
      *
      * @covers \local_deepler\local\data\module::isvisible
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function test_isvisible(): void {
         $this->resetAfterTest(true);
@@ -103,6 +105,8 @@ final class module_test extends advanced_testcase {
      *
      * @covers \local_deepler\local\data\module::getchilds
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function test_getchilds(): void {
         $this->resetAfterTest(true);
@@ -117,6 +121,8 @@ final class module_test extends advanced_testcase {
      *
      * @covers \local_deepler\local\data\module::haschilds
      * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function test_haschilds(): void {
         $this->resetAfterTest(true);
