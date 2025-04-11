@@ -24,24 +24,20 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
-use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use Exception;
 
+
 /**
- * External service to call DeepL's API.
+ * External service to call DeepL's translation API.
  *
  * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_translation extends external_api {
-    /** @var string */
-    private static string $apikey;
-
-    /** @var \DeepL\AppInfo */
-    private static AppInfo $appinfo;
+    use deeplapi_trait;
 
     /**
      * External service to call DeepL's API.
@@ -56,19 +52,28 @@ class get_translation extends external_api {
      */
     public static function execute(array $translations, array $options, string $version): array {
         // Set the api with env so that it can be unit tested.
-        self::setDeeplApi($version);
-        if (empty(self::$apikey)) {
+        $key = self::setdeeplapikey();
+        $appinfo = self::setdeeplappinfo($version);
+        if (empty($key)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
         $params = self::validate_parameters(self::execute_parameters(),
                 ['translations' => $translations, 'options' => $options, 'version' => $version]);
-        $translator = new DeepLClient(
-                self::$apikey,
-                [
-                        'send_platform_info' => true,
-                        'app_info' => self::$appinfo,
-                ]
-        );
+        try {
+            $translator = new DeepLClient(
+                    $key,
+                    [
+                            'send_platform_info' => true,
+                            'app_info' => $appinfo,
+                    ]
+            );
+        } catch (DeepLException $exception) {
+            return [['error' => 'Exception ' . $exception->getMessage(),
+                    'key' => '',
+                    'translated_text' => '',
+            ]];
+        }
+
         $tragetlang = $params['options']['target_lang'];
 
         $groupedtranslations = [];
@@ -164,22 +169,5 @@ class get_translation extends external_api {
                         ]
                 )
         );
-    }
-
-    /**
-     * Set the key string.
-     * If empty, it will try to get it from the .env useful for tests runs.
-     *
-     * @param string $version
-     * @return void
-     * @throws \dml_exception
-     */
-    private static function setdeeplapi(string $version): void {
-        self::$appinfo = new AppInfo('Moodle-Deepler', $version);
-        $configkey = get_config('local_deepler', 'apikey');
-        if ($configkey === '') {
-            $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
-        }
-        self::$apikey = $configkey;
     }
 }

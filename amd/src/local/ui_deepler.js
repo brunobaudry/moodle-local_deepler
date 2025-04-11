@@ -15,7 +15,7 @@
 
 /**
  * @module     local_deepler/deepler
- * @file       amd/src/local/ui.js
+ * @file       amd/src/local/ui_deepler.js
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -75,10 +75,34 @@ define(['core/log',
         // Translation events.
         Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
         Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
+        Events.on(Translation.ON_REPHRASE_FAILED, onTranslationFailed);
         Events.on(Translation.ON_DB_SAVE_SUCCESS, onDbSavedSuccess);
         Events.on(Translation.ON_DB_FAILED, onDBFailed);
         Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
         Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
+    };
+    /**
+     * Register UI elements.
+     */
+    const registerUI = () => {
+        try {
+            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+            errordbtitle = langstrings.uistrings.errordbtitle;
+            saveAllBtn = domQuery(Selectors.actions.saveAll);
+            selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
+            autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
+            checkboxes = domQueryAll(Selectors.actions.checkBoxes);
+            glossaryId = domQuery(Selectors.deepl.glossaryId);
+            const glossaryCookie = Utils.getCookie(Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid);
+            if (glossaryCookie !== null) {
+                glossaryId.value = glossaryCookie;
+            }
+
+        } catch (e) {
+            if (config.debug) {
+                Log.error(e.message);
+            }
+        }
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
@@ -92,6 +116,37 @@ define(['core/log',
         });
         await saveAllModal.show();
     };
+    /**
+     * Event listener for click events.
+     *
+     * @param {event} e
+     */
+    const handleClickEvent = (e) => {
+
+        if (e.target.closest(Selectors.actions.toggleMultilang)) {
+            onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
+        }
+        if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
+            if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
+                showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
+            } else {
+                callDeeplServices();
+            }
+        }
+        if (e.target.closest(Selectors.actions.selectAllBtn)) {
+            toggleAllCheckboxes(e);
+        }
+        if (e.target.closest(Selectors.actions.checkBoxes)) {
+            toggleAutotranslateButton();
+        }
+        if (e.target.closest(Selectors.actions.saveAll)) {
+            saveTranslations();
+        }
+        if (e.target.closest(Selectors.actions.validatorsBtns)) {
+            saveSingleTranslation(e);
+        }
+    };
+
 
         /**
          * Event listener for change events.
@@ -137,36 +192,7 @@ define(['core/log',
             multilang.classList.toggle("show");
         }
     };
-    /**
-     * Event listener for click events.
-     *
-     * @param {event} e
-     */
-    const handleClickEvent = (e) => {
-        if (e.target.closest(Selectors.actions.toggleMultilang)) {
-            onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
-        }
-        if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
-            if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
-                showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
-            } else {
-                doAutotranslate();
-            }
-        }
-        if (e.target.closest(Selectors.actions.selectAllBtn)) {
-            toggleAllCheckboxes(e);
-        }
-        if (e.target.closest(Selectors.actions.checkBoxes)) {
-            toggleAutotranslateButton();
 
-        }
-        if (e.target.closest(Selectors.actions.saveAll)) {
-            saveTranslations();
-        }
-        if (e.target.closest(Selectors.actions.validatorsBtns)) {
-            saveSingleTranslation(e);
-        }
-    };
 
         /**
          * @returns
@@ -211,6 +237,9 @@ define(['core/log',
          * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
          */
     const prepareDBitem = (key) => {
+        Log.debug(`ui_deepler/x/prepareDBitem::key`);
+        Log.debug(key);
+        Log.debug(Translation.debugTemp(key));
         const element = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         return {
             key: key,
@@ -245,26 +274,7 @@ define(['core/log',
         }
 
     };
-    const registerUI = () => {
-        try {
-            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
-            errordbtitle = langstrings.uistrings.errordbtitle;
-            saveAllBtn = domQuery(Selectors.actions.saveAll);
-            selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
-            autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
-            checkboxes = domQueryAll(Selectors.actions.checkBoxes);
-            glossaryId = domQuery(Selectors.deepl.glossaryId);
-            const glossaryCookie = Utils.getCookie(Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid);
-            if (glossaryCookie !== null) {
-                glossaryId.value = glossaryCookie;
-            }
 
-        } catch (e) {
-            if (config.debug) {
-                Log.error(e.message);
-            }
-        }
-    };
     /**
      * Toggle checkboxes
      * @param {Event} e Event
@@ -373,10 +383,9 @@ define(['core/log',
         setIconStatus(key, Selectors.statuses.tosave, true);
     };
     /**
-     * Launch autotranslation.
-     * ui.js + translation.js (split)
+     * Launch deepl services.
      */
-    const doAutotranslate = () => {
+    const callDeeplServices = () => {
         const keys = [];
         saveAllBtn.disabled = false;
         domQueryAll(Selectors.statuses.checkedCheckBoxes)
@@ -392,24 +401,9 @@ define(['core/log',
                 );
                 keys.push(key);
             });
+        Translation.callTranslations(keys, config);
+    };
 
-        Translation.callTranslations(keys);
-    };
-    /**
-     * Row visibility.
-     *
-     * @param {HTMLElement} row
-     * @param {Boolean} checked
-     * ui.js
-     *
-    const toggleRowVisibility = (row, checked) => {
-        if (checked) {
-            row.classList.remove("d-none");
-        } else {
-            row.classList.add("d-none");
-        }
-    };
-     */
         /**
          * Factory to display process' statuses for each item.
          *
@@ -441,10 +435,16 @@ define(['core/log',
                     }
                     break;
                 case Selectors.statuses.failed :
+                    if (checked) {
+                        setIconStatus(key, Selectors.statuses.totranslate);
+                    }
                     break;
                 case Selectors.statuses.success :
                     break;
                 case Selectors.statuses.saved :
+                    if (checked) {
+                        setIconStatus(key, Selectors.statuses.totranslate);
+                    }
                     Translation.initTemp(key);
                     break;
             }
@@ -529,8 +529,6 @@ define(['core/log',
      * @param {string} savedText
      */
     const onSuccessMessageItem = (key, savedText) => {
-        Log.info(`ui/successMessageItem > savedText`);
-        Log.info(savedText);
         domQuery(Selectors.editors.multiples.editorsWithKey, key)
             .classList.add("local_deepler__success");
         // Add saved indicator.
@@ -574,7 +572,8 @@ define(['core/log',
     const switchTarget = (e) => {
         let url = new URL(window.location.href);
         let searchParams = url.searchParams;
-        searchParams.set("target_lang", e.target.value);
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("target_lang", e.target.value.replace(config.rephrasesymbol, '').trim());
         window.location = url.toString();
     };
     /**
@@ -742,6 +741,8 @@ define(['core/log',
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100});
         Translation.init(cfg);
+        Log.debug(`ui_deepler/x/init::Translation.moodleTargetToSave`);
+        Log.debug(Translation.moodleTargetToSave);
         config = cfg;
         Log.info(cfg);
         registerUI();
@@ -756,9 +757,6 @@ define(['core/log',
         showRows(Selectors.statuses.needsupdate, domQuery(Selectors.actions.showNeedUpdate).checked);
     };
     return {
-        init: init,
-        setIconStatus: setIconStatus,
-        findEditor: findEditor,
-        findEditorByType: findEditorByType,
+        init: init
     };
 });

@@ -29,6 +29,7 @@ namespace local_deepler\output;
 use advanced_testcase;
 use filter_multilang2;
 use local_deepler\local\data\course;
+use local_deepler\local\data\multilanger;
 use local_deepler\local\services\lang_helper;
 use ReflectionClass;
 
@@ -47,6 +48,8 @@ final class translateform_test extends advanced_testcase {
      * Set it up.
      *
      * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
      */
     public function setUp(): void {
         parent::setUp();
@@ -68,6 +71,8 @@ final class translateform_test extends advanced_testcase {
      *
      * @covers ::definition
      * @return void
+     * @throws \core\exception\moodle_exception
+     * @throws \moodle_exception
      */
     public function test_definition(): void {
         $this->resetAfterTest(true);
@@ -79,7 +84,7 @@ final class translateform_test extends advanced_testcase {
                 'langpack' => $this->langhelper,
                 'mlangfilter' => $this->mlangfilter,
         ];
-
+        multilanger::$translatedfields = ["course#fullname" => ''];
         // Instantiate the form.
         $form = new translateform(null, $customdata);
         // Use reflection to access the private _mform property.

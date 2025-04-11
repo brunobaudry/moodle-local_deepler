@@ -24,7 +24,6 @@
  * @see        https://docs.moodle.org/dev/Output_API
  */
 /**
- * @todo MDL-0 use deepl-php instead of js ajax for further maintainability and absctraction
  * @todo MDL-0 check images tag handling in deepl.
  */
 
@@ -74,9 +73,6 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 $PAGE->set_course($course);
-$current = current_language();
-$languages = get_string_manager()->get_list_of_translations(true);
-$languages2 = get_string_manager()->get_list_of_translations();
 // Get the renderer.
 $output = $PAGE->get_renderer('local_deepler');
 // Output header.

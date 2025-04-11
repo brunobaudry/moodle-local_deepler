@@ -65,6 +65,12 @@ final class field_test extends advanced_testcase {
 
         $this->assertEquals('course[1][shortname][2]', $field->getkey());
         $this->assertEquals('course-1-shortname-2', $field->getkeyid());
+        $datafromkey = field::generatedatfromkey($field->getkey());
+        $this->assertIsArray($datafromkey);
+        $this->assertEquals('course', $datafromkey['table']);
+        $this->assertEquals(1, $datafromkey['id']);
+        $this->assertEquals('shortname', $datafromkey['field']);
+        $this->assertEquals(2, $datafromkey['cmid']);
     }
 
     /**
@@ -90,9 +96,10 @@ final class field_test extends advanced_testcase {
     public function test_has_multilang(): void {
         $field1 = new field(1, '{mlang en}English{mlang}', 1, 'shortname', 'course');
         $field2 = new field(2, 'Regular text', 1, 'name', 'course');
-
-        $this->assertTrue($field1->has_multilang());
-        $this->assertFalse($field2->has_multilang());
+        $mlanger1 = new multilanger($field1->get_text());
+        $mlanger2 = new multilanger($field2->get_text());
+        $this->assertTrue($mlanger1->has_multilangs());
+        $this->assertFalse($mlanger2->has_multilangs());
     }
 
     /**

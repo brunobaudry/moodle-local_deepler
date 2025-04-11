@@ -24,6 +24,7 @@
  * @see        https://docs.moodle.org/dev/String_API
  */
 defined('MOODLE_INTERNAL') || die();
+
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
@@ -52,11 +53,16 @@ $string['formalityprefermore'] = 'prefer more';
 $string['glossaryid'] = 'Glossary id';
 $string['glossaryid_placeholder'] = 'Glossary id should you have one...';
 $string['ignoretags'] = 'Tags to ignore';
+$string['keepselected'] = 'Keep selected';
 $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+$string['letsdobutton'] = 'Lets do';
+$string['mlangremover'] = '{mlang} Remover';
+$string['mlangtagsstring'] = 'Mlang tags';
+
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
@@ -77,6 +83,14 @@ $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
+$string['removeselected'] = 'Remove selected (mlang tag & content)';
+$string['removeselectedcontentonly'] = 'Remove selected content';
+$string['removeselectedtagonly'] = 'Remove selected mlang tag';
+$string['removetag'] = 'Remove its mlang tag';
+$string['rephraseinfos'] =
+        'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.
+        The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>';
+$string['rephrasetitle'] = '{$a}Rephrase settings.';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>
@@ -109,6 +123,12 @@ $string['statustotranslate'] = 'Ready to translate';
 $string['statuswait'] = 'Not selected';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
+$string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
+$string['toneconfident'] = 'Confident tone';
+$string['tonediplomatic'] = 'Diplomatic tone';
+$string['toneenthusiastic'] = 'Enthusiastic tone';
+$string['tonefriendly'] = 'Friendly tone';
+$string['toneorstyle'] = 'Changes the tone or writing style of your improvements:';
 $string['tour_advancedsettings00'] =
         'Click here to see how you can fine tune the DeepL’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
 $string['tour_advancedsettings00title'] = 'DeepL’s advanced settings';
@@ -260,3 +280,7 @@ $string['warningsource'] =
         'Watch out ! The current source language &quot;{$a}&quot; is already as a multilang tag along side with the fallback tag &quot;OTHER&quot;. Note that both will be merge as the &quot;OTHER&quot; multilang tag.';
 $string['wordcountsentence'] =
         'Total <span id="local_deepler__wc">0</span> words, <span id="local_deepler__wosc">0</span> characters (<span id="local_deepler__wsc">0</span> chars including spaces) DeepL\'s usage = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
+$string['writingstyleacademic'] = 'Academic writing style';
+$string['writingstylebusiness'] = 'Business writing style';
+$string['writingstylecasual'] = 'Casual writing style';
+$string['writingstylesimple'] = 'Simple writing style';

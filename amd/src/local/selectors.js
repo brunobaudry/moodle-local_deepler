@@ -32,13 +32,17 @@ export default {
         autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
         autoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span',
         targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+        targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
         sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
         showUpdated: '[data-action="local_deepler/show-updated"]',
         showHidden: '[data-action="local_deepler/show-hidden"]',
         escapeLatex: '[data-id="local_deepler/latexeascape"]',
         escapePre: '[data-id="local_deepler/preescape"]',
-        toggleMultilang: '#toggleMultilang'
+        toggleMultilang: '#toggleMultilang',
+        letsdobutton: '[data-action="local_mlangremover/letsdobutton"]', //
+        removeRadios: '[name="local_mlangremover/removehow"]', //
+        removehow: '[name="local_mlangremover/removehow"]:checked', //
     },
     statuses: {
         sourceTextWarings: '[data-status="sourceTextWarings"]',
@@ -62,6 +66,10 @@ export default {
         deeplUsage: '#local_deepler__used',
         deeplMax: '#local_deepler__max',
         deeplStatusContainer: '#local_deepler-translate-header-usage',
+        allMLangCkboxes: '#local_mlangremover__mlangtags', //
+        allMLangCkboxesNames: '[name="mlangsselected[]"]', //
+        selectedMLangCkboxes: '#local_mlangremover__mlangtags input[type="checkbox"]:checked', //
+        removetag: '#local_mlangremover__removetag', //
     },
     editors: {
         textarea: '[data-action="local_deepler/textarea"',
@@ -74,7 +82,8 @@ export default {
             editorChilds: '[data-action="local_deepler/editor"][data-key="<KEY>"] > *',
             textAreas: '[data-action="local_deepler/textarea"][data-key="<KEY>"]',
             editorsWithKey: '[data-action="local_deepler/editor"][data-key="<KEY>"]',
-            contentEditableKeys: '[data-key="<KEY>"] [contenteditable="true"]'
+            contentEditableKeys: '[data-key="<KEY>"] [contenteditable="true"]',
+            textAreasResults: 'div[data-result-key="<KEY>"]', //
         },
         types: {
             basic: '[data-action="local_deepler/editor"][data-key="<KEY>"] [contenteditable="true"]',
@@ -103,7 +112,8 @@ export default {
         tagHandling: '[data-id="local_deepler/tag_handling"]',
         outlineDetection: '[data-id="local_deepler/outline_detection"]',
         splitSentences: '[name="local_deepler/split_sentences"]:checked',
-        modelType: '[name="local_deepler/modeltype"]:checked'
+        modelType: '[name="local_deepler/modeltype"]:checked',
+        toneorstyle: '[name="local_deepler/toneorstyle"]:checked',
     },
     config: {
         langstrings: '#local_deepler__stringscontainer',

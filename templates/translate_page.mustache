@@ -177,6 +177,53 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                           placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
         </div>
     </div>
+    {{#canimprove}}
+    <hr class="hr hr-blurry"/>
+    <div class="text-right">
+        <h5>{{#str}}rephrasetitle,local_deepler,{{rephrasesymbol}}{{/str}}</h5>
+    </div>
+    <div class="row py-3">
+        <div class="text-right col-5">
+
+            <em>{{#str}}rephraseinfos,local_deepler, {{supportedlangs}}{{/str}}</em>
+        </div>
+        <div class="col-7" id="local_deepler__toneorstyle">
+            {{#str}}toneorstyle,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="writing_style|prefer_simple" id="writingstyle9" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle9">{{#str}}writingstylesimple  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="writing_style|prefer_business" id="writingstyle7" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle7">{{#str}}writingstylebusiness  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" checked="checked" value="writing_style|prefer_academic" id="writingstyle5" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle5">{{#str}}writingstyleacademic  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="writing_style|prefer_casual" id="writingstyle6" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle6">{{#str}}writingstylecasual  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_enthusiastic" id="tone6" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone6">{{#str}}toneenthusiastic,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_friendly" id="tone7" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone7">{{#str}}tonefriendly,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_confident" id="tone8" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone8">{{#str}}toneconfident,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_diplomatic" id="tone9" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone9">{{#str}}tonediplomatic,local_deepler{{/str}}</label>
+            </div>
+        </div>
+    </div>
+    {{/canimprove}}
     <hr class="hr hr-blurry"/>
     <div class="text-right">
         <h4>{{#str}}othersettingstitle,local_deepler{{/str}}</h4>
@@ -273,7 +320,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </label>
             </div>
         </div>
-        <div class="col-7 text-center">
+        <div class="col-6 text-center">
                 <span id="local_deepler-translate-header-usage" class="ml-2 p-1 alert">
                     {{#str}}wordcountsentence,local_deepler{{/str}}
             </span>
@@ -300,6 +347,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     data-action="local_deepler/saveall-btn"
                     disabled
             ><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>
+        </div>
+        <div class="col-1">
+            <select style="display:{{hidecompatible}}"
+                    title="{{#str}}targetcompatibleexplain,local_deepler{{/str}}"
+                    class="local_deepler__tartgetcompatible form-control"
+                    data-action="local_deepler/tartgetcompatible-switcher"
+            >
+                {{#compatiblelangs}}
+                    <option value="{{.}}">{{.}}</option>
+                {{/compatiblelangs}}
+            </select>
         </div>
     </div>
     <div id='local_deepler-scrollspy' class="row p-1 pl-3 bg-primary-light"></div>

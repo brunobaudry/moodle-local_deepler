@@ -51,7 +51,7 @@ class module implements translatable_interface, editable_interface, iconic_inter
      * Constructor
      *
      * @param \cm_info $cminfo
-     * @throws \coding_exception
+     * @throws \coding_exception|\dml_exception
      */
     public function __construct(cm_info $cminfo) {
         $this->childs = [];

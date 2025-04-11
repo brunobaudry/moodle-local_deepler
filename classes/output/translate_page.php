@@ -106,7 +106,7 @@ class translate_page implements renderable, templatable {
         $renderedform = $this->mform->render();
         $renderedform = str_replace('col-md-9', 'col-md-12', $renderedform);
         $data->mform = $renderedform;
-
+        $data->codes = $this->mform->get_langcodes();
         // Set langs.
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
@@ -115,6 +115,11 @@ class translate_page implements renderable, templatable {
         $data->mlangfilter = $this->mlangfilter;
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
+        $data->canimprove = $this->langpacks->get_canimprove();
+        $data->supportedlangs = implode(', ', $this->langpacks->get_deeplrephraselangs());
+        $data->rephrasesymbol = lang_helper::REPHRASESYMBOL;
+        $data->hidecompatible = count($this->langpacks->findcompatiblelangs()) < 2 ? 'none' : 'inherit';
+        $data->compatiblelangs = array_map('strval', $this->langpacks->findcompatiblelangs());
         // Pass data.
         $data->version = $this->version;
         return $data;

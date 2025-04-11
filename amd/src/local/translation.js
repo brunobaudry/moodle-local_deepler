@@ -26,38 +26,45 @@ define([
     let tempTranslations = {};
     let escapePatterns = {};
     let mainSourceLang = "";
+    let deeplSourceLang = "";
     let targetLang = "";
+    let moodleTargetToSave = "";
     let courseid = 0;
     let userid = 0;
     let settings = {};
+    let settingsRephrase = {};
+    let rephrasesymbol = '';
     const ON_ITEM_TRANSLATED = 'onItemTranslated';
     // Const ON_ITEM_NOT_TRANSLATED = 'onItemsNotTranslated';
     const ON_ITEM_SAVED = 'onItemSaved';
     const ON_ITEM_NOT_SAVED = 'onItemNotSaved';
     const ON_TRANSLATION_FAILED = 'onTranslationFailed';
+    const ON_REPHRASE_FAILED = 'onRephraseFailed';
     const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
     const ON_DB_FAILED = 'onDbFailed';
-    const setMainLangs = (source = '', target = '') => {
-        if (source !== '') {
-            mainSourceLang = source;
+    const setMainLangs = (config) => {
+        Log.debug(`translation/x/setMainLangs::config`);
+        Log.debug(config);
+        if (config.currentlang !== undefined && config.currentlang !== '') {
+            mainSourceLang = config.currentlang;
         }
-        if (target !== '') {
-            targetLang = target.toLowerCase();
+        if (config.targetlang !== undefined && config.targetlang !== '') {
+            targetLang = config.targetlang.toLowerCase();
+        }
+        if (config.deeplsourcelang !== undefined && config.deeplsourcelang !== '') {
+            deeplSourceLang = config.deeplsourcelang.toLowerCase();
         }
     };
     const onTrDbSuccess = (data)=>{
         Log.info(data);
         if (data.length === 0) {
-            Log.error(data);
             Events.emit(ON_DB_FAILED, 'no data returned', '');
-            // ShowModal();
         } else {
             const errors = data.filter((item) => item.error !== '');
             data.forEach((item) => {
-                // Ui.setIconStatus(item.key, Selectors.statuses.saved, true);
-                Log.debug(`translation/:54`);
-                Log.debug(item);
                 if (item.error === '') {
+                    // Refreshing the text in the temp obbject in case of new translation without page refresh.
+                    tempTranslations[item.keyid].fieldText = item.text;
                     Events.emit(ON_ITEM_SAVED, item.keyid, item.text);
                 } else {
                     Events.emit(ON_ITEM_NOT_SAVED, item.keyid, item.error);
@@ -83,6 +90,8 @@ define([
      */
     const saveTranslations = (items, config) => {
         const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
+        Log.debug(`translation/x/saveTranslations::data`);
+        Log.debug(data);
         Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
         Events.on(Api.TR_DB_FAILED, onTrDbFailed);
         Api.updateTranslationsInDb(data, userid, courseid);
@@ -90,21 +99,29 @@ define([
         /**
          * Prepare the data to be saved in the DB.
          * @param {object} item
-         * @param {bool} maineditorIsTextArea
+         * @param {boolean} maineditorIsTextArea
          * @returns {{ id, tid: *, field, table, text: string}}
          */
         const prepareDbUpdateItem = (item, maineditorIsTextArea) => {
             const key = item.key;
-            const textTosave = getupdatedtext(key, maineditorIsTextArea);
-            item.text = textTosave;
+            Log.debug(tempTranslations[key]);
+            // Const textTosave = getupdatedtext(key, maineditorIsTextArea);
+            const textTosave = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);
+            Log.debug(`translation/x/prepareDbUpdateItem::textTosave`);
+            Log.debug(textTosave);
+            Log.debug(tempTranslations[key]);
+            Log.debug(mainSourceLang);
+            Log.debug(deeplSourceLang);
+            Log.debug(moodleTargetToSave);
+            // TextTosave = getEditorText(key, maineditorIsTextArea);
             return {
-                id: item.id,
                 tid: item.tid,
-                field: item.field,
-                table: item.table,
-                text: textTosave,
-                cmid: item.cmid,
-                keyid: key
+                text: getEditorText(tempTranslations[key].editor, maineditorIsTextArea),
+                keyid: key,
+                mainsourcecode: mainSourceLang,
+                sourcecode: tempTranslations[key].sourceLang,
+                targetcode: document.querySelector(Selectors.actions.targetCompatibleSwitcher).value,
+                sourcetext: getSourceText(key)
             };
         };
         /**
@@ -114,28 +131,41 @@ define([
          * @param {boolean} maineditorIsTextArea
          * @returns {string}
          * translation.js
-         */
+         *
         const getupdatedtext = (key, maineditorIsTextArea) => {
-            const sourceItemLang = tempTranslations[key].sourceLang.toLowerCase();
+            const sourceItemLang = tempTranslations[key].sourceLang.toLowerCase().replace(rephrasesymbol, '');
             const fieldText = tempTranslations[key].fieldText; // Translation
+            Log.debug(`translation/x/getupdatedtext::fieldText`);
+            Log.debug(fieldText);
             const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
             const source = getSourceText(key);// Translation
             const isFirstTranslation = fieldText.indexOf("{mlang") === -1;
-            const isSourceOther = sourceItemLang === mainSourceLang;
+            const isSourceOther = sourceItemLang === deeplSourceLang;
+            Log.debug(`translation/x/getupdatedtext::mainSourceLang`);
+            Log.debug(mainSourceLang);
+            Log.debug(sourceItemLang);
+            Log.debug(isSourceOther);
+            const selectedTarget = moodleTargetToSave;
+            const selectedTargetLangRoot = selectedTarget.toLowerCase().substring(0, 2);
+            Log.debug(`translation/x/getupdatedtext::selectedTarget`);
+            Log.debug(selectedTarget);
+            Log.debug(selectedTargetLangRoot);
             const tagPatterns = {
                 "other": "({mlang other)(.*?){mlang}",
-                "target": `({mlang ${targetLang}}(.*?){mlang})`,
+                "target": `({mlang ${selectedTarget}}(.*?){mlang})`,
                 "source": `({mlang ${sourceItemLang}}(.*?){mlang})`
             };
             const langsItems = {
                 "fullContent": fieldText,
                 "other": `{mlang other}${source}{mlang}`,
-                "target": `{mlang ${targetLang}}${translation}{mlang}`,
+                "target": `{mlang ${selectedTarget}}${translation}{mlang}`,
                 "source": `{mlang ${sourceItemLang}}${source}{mlang}`
             };
             if (isFirstTranslation) {
                 // No mlang tag : easy.
-                if (isSourceOther) {
+                if (selectedTargetLangRoot === sourceItemLang) {
+                    return translation;
+                } else if (isSourceOther) {
                     return langsItems.other + langsItems.target;
                 } else {
                     return langsItems.other + langsItems.source + langsItems.target;
@@ -144,6 +174,7 @@ define([
             // Alreaddy mlang tag-s.
             return additionalUpdate(isSourceOther, tagPatterns, langsItems);
         };
+         */
         /**
          * Update Textarea when there was mlang tags.
          * Main regex '({mlang ([a-z]{2,5})}(.*?){mlang})'.
@@ -152,8 +183,10 @@ define([
          * @param {string} langsItems
          * @returns {string} {string}
          * @todo MDL-000 refactor this.
-         */
+         *
         const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
+            Log.debug(`translation/x/additionalUpdate::langsItems`);
+            Log.debug(langsItems);
             let manipulatedText = langsItems.fullContent;
             // Do we have a TARGET tag already ?
             const targetReg = new RegExp(tagPatterns.target, "sgi");
@@ -198,6 +231,7 @@ define([
             }
             return manipulatedText;
         };
+         */
         /**
          * Editor's text content.
          *
@@ -263,7 +297,12 @@ define([
             tokens: []
         };
     };
-
+        /**
+         * Prepare the texts for the external api calls.
+         *
+         * @param {string} key
+         * @returns {{text, source_lang: (string|string|*), key}}
+         */
     const prepareTranslation = (key) => {
         return {
             text: tempTranslations[key].source,
@@ -276,47 +315,80 @@ define([
      * Call the external translation service to translate the selected keys.
      *
      * @param {array} keys
+     * @param {object} config
+     * @return void
      */
-    const callTranslations = (keys) => {
+    const callTranslations = (keys, config) => {
+        rephrasesymbol = config.rephrasesymbol;
         const translations = [];
-        prepareAdvancedSettings(targetLang);
+        const rephrases = [];
+        prepareAdvancedSettings(targetLang, config);
+        // We parse and check if it is a tranlsation or text improvment.
         keys.forEach((key) => {
-            translations.push(prepareTranslation(key));
+            const t = prepareTranslation(key);
+            if (config.canimprove && t.source_lang.includes(rephrasesymbol)) {
+                delete t.source_lang;
+                Log.debug(`translation/x/callTranslations::t`);
+                Log.debug(t);
+                rephrases.push(t);
+            } else {
+                translations.push(t);
+            }
         });
-        Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
-        Events.on(Api.DEEPL_FAILED, onTranslateFailed);
-        Api.translate(translations, settings, Api.APP_VERSION);
-    };
-const onTranslateSuccess = (response)=>{
-    Log.info(`translation//onTranslateSuccess::response`);
-    Log.info(response);
-    response.forEach((tr) => {
-        if (tr.error === '') {
-            let key = tr.key;
-            let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
-            Log.debug(`translation/onTranslateSuccess/each::translation Tokeniser.postprocess`);
-            Log.debug(translation);
-            tempTranslations[key].editor.innerHTML = translation;
-            Log.debug(`translation/onTranslateSuccess::tempTranslations[key].editor.innerHTML`);
-            Log.debug(tempTranslations[key].editor.innerHTML);
-            tempTranslations[key].translation = translation;
-            Events.emit(ON_ITEM_TRANSLATED, key);
-        } else {
-            Events.emit(ON_TRANSLATION_FAILED, tr.error);
+        if (translations.length > 0) {
+            Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
+            Events.on(Api.DEEPL_FAILED, onTranslateFailed);
+             Api.translate(translations, settings, Api.APP_VERSION);
         }
-    });
-};
-const onTranslateFailed = (status, error)=>{
-    Events.emit(ON_TRANSLATION_FAILED, status, error);
-};
+        if (rephrases.length > 0) {
+            Events.on(Api.DEEPL_RF_SUCCESS, onRephraseSuccess);
+            Events.on(Api.DEEPL_RF_FAILED, onRephaseFailed);
+            Api.rephrase(rephrases, settingsRephrase, Api.APP_VERSION);
+        }
+    };
+    const onTranslateSuccess = (response)=>{
+        Log.info(`translation//onTranslateSuccess::response`);
+        Log.info(response);
+        response.forEach((tr) => {
+            if (tr.error === '') {
+                let key = tr.key;
+                let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
+                tempTranslations[key].editor.innerHTML = translation;
+                tempTranslations[key].translation = translation;
+                Events.emit(ON_ITEM_TRANSLATED, key);
+            } else {
+                Events.emit(ON_TRANSLATION_FAILED, tr.error);
+            }
+        });
+    };
+    const onRephraseSuccess = (response)=>{
+        response.forEach((tr) => {
+            if (tr.error === '') {
+                let key = tr.key;
+                let rephrase = Tokeniser.postprocess(tr.text, tempTranslations[key].tokens);
+                tempTranslations[key].editor.innerHTML = rephrase;
+                tempTranslations[key].translation = rephrase;
+                Events.emit(ON_ITEM_TRANSLATED, key);
+            } else {
+                Events.emit(ON_REPHRASE_FAILED, tr.error);
+            }
+        });
+    };
+    const onTranslateFailed = (status, error)=>{
+        Events.emit(ON_TRANSLATION_FAILED, status, error);
+    };
+    const onRephaseFailed = (status, error)=>{
+        Events.emit(ON_REPHRASE_FAILED, status, error);
+    };
     /**
      * Compile Advanced settings.
      *
      * @param {string} targetLang
+     * @param {object} config
      * @returns {{}}
      * translation.js ok
      */
-    const prepareAdvancedSettings = (targetLang) => {
+    const prepareAdvancedSettings = (targetLang, config) => {
         escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
         escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
         // eslint-disable-next-line camelcase
@@ -341,14 +413,15 @@ const onTranslateFailed = (status, error)=>{
         // eslint-disable-next-line camelcase
         settings.ignore_tags = Utils.toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
         // eslint-disable-next-line camelcase
-        settings.target_lang = targetLang.toUpperCase();
-        // eslint-disable-next-line camelcase
         settings.model_type = document.querySelector(Selectors.deepl.modelType).value ?? 'prefer_quality_optimized';
         // eslint-disable-next-line camelcase
         settings.show_billed_characters = true;
-
-        // Settings.auth_key = config.apikey;
-        // return settings;
+        // eslint-disable-next-line camelcase
+        settings.target_lang = targetLang.toUpperCase();
+        if (config.canimprove) {
+            settingsRephrase.target_lang = settings.target_lang;
+            settingsRephrase.toneorstyle = document.querySelector(Selectors.deepl.toneorstyle).value ?? 'default';
+        }
     };
     /**
      * Check if the item is translatable.
@@ -363,27 +436,34 @@ const onTranslateFailed = (status, error)=>{
         const translated = (key)=>{
             return tempTranslations[key]?.translation?.length > 0;
         };
+        const debugTemp = (key)=>{
+            Log.debug(`translation/x/debugTemp::key`);
+            Log.debug(key);
+            Log.debug(tempTranslations[key]);
+        };
         const init = (cfg) => {
             Api.APP_VERSION = cfg.version;
             courseid = cfg.courseid;
             userid = cfg.userid;
-            setMainLangs(cfg.currentlang, cfg.targetlang);
+            setMainLangs(cfg);
         };
         return {
             init: init,
-        callTranslations: callTranslations,
-        saveTranslations: saveTranslations,
-        initTempForKey: initTempForKey,
-        initTemp: initTemp,
-        ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
-        ON_DB_FAILED: ON_DB_FAILED,
-        ON_ITEM_SAVED: ON_ITEM_SAVED,
-        ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
-        ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
-        ON_TRANSLATION_SUCCESS: ON_DB_SAVE_SUCCESS,
-        /* TempTranslations: tempTranslations,*/
-        setMainLangs: setMainLangs,
-        isTranslatable: isTranslatable,
-        translated: translated
+            debugTemp: debugTemp,
+            callTranslations: callTranslations,
+            saveTranslations: saveTranslations,
+            initTempForKey: initTempForKey,
+            initTemp: initTemp,
+            moodleTargetToSave: moodleTargetToSave,
+            ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
+            ON_DB_FAILED: ON_DB_FAILED,
+            ON_ITEM_SAVED: ON_ITEM_SAVED,
+            ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
+            ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
+            ON_REPHRASE_FAILED: ON_REPHRASE_FAILED,
+            ON_DB_SAVE_SUCCESS: ON_DB_SAVE_SUCCESS,
+            setMainLangs: setMainLangs,
+            isTranslatable: isTranslatable,
+            translated: translated
     };
 });

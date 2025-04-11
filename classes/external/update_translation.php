@@ -26,7 +26,10 @@ use core_external\restricted_context_exception;
 use dml_transaction_exception;
 use Exception;
 use invalid_parameter_exception;
+use local_deepler\local\data\field;
+use local_deepler\local\data\multilanger;
 use local_deepler\local\services\database_updater;
+use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\security_checker;
 use Throwable;
 
@@ -39,6 +42,11 @@ use Throwable;
  */
 class update_translation extends external_api {
     /**
+     * @var string
+     */
+    private static string $action;
+
+    /**
      * Returns description of method parameters
      *
      * @return external_function_parameters
@@ -47,17 +55,18 @@ class update_translation extends external_api {
         return new external_function_parameters([
                 'data' => new external_multiple_structure(
                         new external_single_structure([
-                                'id' => new external_value(PARAM_INT, 'The id of the course field'),
-                                'tid' => new external_value(PARAM_INT, 'The id of the activity table'),
-                                'table' => new external_value(PARAM_ALPHANUMEXT, 'The table name'),
-                                'field' => new external_value(PARAM_ALPHANUMEXT, 'The field name'),
-                                'cmid' => new external_value(PARAM_ALPHANUMEXT, 'The course module id'),
-                                'text' => new external_value(PARAM_RAW, 'The new text content with multilang2 translations'),
+                                'tid' => new external_value(PARAM_INT, 'The id of the in the deepler table to trsck'),
+                                'text' => new external_value(PARAM_RAW, 'The new text content translated or updated'),
                                 'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
+                                'mainsourcecode' => new external_value(PARAM_ALPHANUMEXT, 'The main source code'),
+                                'sourcecode' => new external_value(PARAM_RAW, 'The source code of the translation'),
+                                'targetcode' => new external_value(PARAM_RAW, 'The targe code to save to'),
+                                'sourcetext' => new external_value(PARAM_RAW, 'The sourcetext to save if needed'),
                         ])
                 ),
                 'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
                 'courseid' => new external_value(PARAM_ALPHANUM, 'the course id'),
+                'action' => new external_value(PARAM_ALPHANUM, 'type of action to perform'),
         ]);
     }
 
@@ -67,14 +76,16 @@ class update_translation extends external_api {
      * @param array $data
      * @param string $userid
      * @param int $courseid
+     * @param string $action
      * @return array
      */
-    public static function execute(array $data, string $userid, int $courseid): array {
+    public static function execute(array $data, string $userid, int $courseid, string $action): array {
         global $DB;
+        self::$action = $action;
         $responses = [];
         try {
             $params = self::validate_parameters(self::execute_parameters(),
-                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid]);
+                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid, 'action' => $action]);
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
             foreach ($params['data'] as $d) {
@@ -101,7 +112,23 @@ class update_translation extends external_api {
      */
     private static function process_data(array $data, array $params, array $response): array {
         try {
-            security_checker::perform_security_checks($data, $params['userid'], $params['courseid']);
+            // Parse the key and setup the text.
+            // We need to do it here caus' we need the $cmid to check security.
+            self::preparedata($data);
+            // Perform different security checks depending on the action.
+            switch (self::$action) {
+                case 'update':
+                    security_checker::perform_security_checks_for_translations($data, $params['userid'], $params['courseid']);
+                    break;
+                case 'remove':
+                    security_checker::perform_security_checks_for_removal($data, $params['userid'], $params['courseid']);
+                    break;
+                default:
+                    throw new invalid_parameter_exception('Invalid action');
+            }
+            // Fetch the current text field content.
+            $fieldtext = database_updater::get_textfield($data['table'], $data['field'], $data['id']);
+            self::preparetext($data, $fieldtext);
             database_updater::update_records($data, $response);
         } catch (invalid_parameter_exception $i) {
             $response['error'] = "INVALID PARAM " . $i->getMessage();
@@ -110,13 +137,30 @@ class update_translation extends external_api {
         } catch (restricted_context_exception $rce) {
             $response['error'] = "CONTEXT " . $rce->getMessage();
         } catch (Exception $e) {
-            $response['error'] = "Unexpected error: " . $e->getMessage();
+            $errortoolong = get_string('errortoolong', 'local_deepler');
+            $response['error'] = "Unexpected error: " . $e->getMessage() . " $errortoolong";
         } catch (Throwable $t) {
             $response['error'] = "Critical error: " . $t->getMessage();
         }
         return $response;
     }
 
+    /**
+     * Prepare the text for saving.
+     * Keeping the source text in OTHER or the main source code, or without mlang if rephrase.
+     * And adding the target code if not rephrased.
+     *
+     * @param array $data
+     * @return void
+     * @throws \dml_exception|\coding_exception
+     */
+    public static function preparedata(array &$data): void {
+        $datafromkey = field::generatedatfromkey($data['keyid']);
+        $data['table'] = $datafromkey['table'];
+        $data['field'] = $datafromkey['field'];
+        $data['id'] = $datafromkey['id'];
+        $data['cmid'] = $datafromkey['cmid'];
+    }
     /**
      * Handle exceptions and prepare response.
      *
@@ -161,5 +205,41 @@ class update_translation extends external_api {
                         'keyid' => new external_value(PARAM_RAW, 'the key id of the field updated table-id-field'),
                 ])
         );
+    }
+
+    /**
+     * Manipulate the text and mlangs.
+     *
+     * @param array $data
+     * @param string $fieldtext
+     * @return void
+     * @throws \coding_exception
+     */
+    public static function preparetext(array &$data, string $fieldtext): void {
+        $mlanger = new multilanger($fieldtext);
+        if (str_contains($data['sourcecode'], lang_helper::REPHRASESYMBOL)) {
+            // Rephrasing.
+            $sourcecode = str_replace(lang_helper::REPHRASESYMBOL, '', $data['sourcecode']);
+            if ($mlanger->has_multilangs()) {
+                if ($sourcecode === $data['mainsourcecode']) {
+                    $mlanger->replacemlang($sourcecode, $data['sourcetext'], $data['text']);
+                } else {
+                    $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
+                }
+                $data['text'] = $mlanger->get_text();
+            }
+            // Rephrasing, no mlang then no need to manipulate the text: Save rephrassed.
+        } else {
+            // Translation.
+            if (!$mlanger->has_multilangs()) {
+                $mlanger->wrapmlang('other');
+            } else {
+                if ($data['sourcecode'] !== $data['mainsourcecode']) {
+                    $mlanger->update_or_add_mlang($data['sourcecode'], $data['sourcetext']);
+                }
+            }
+            $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
+            $data['text'] = $mlanger->get_text();
+        }
     }
 }

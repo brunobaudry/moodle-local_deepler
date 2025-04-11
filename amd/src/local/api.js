@@ -20,10 +20,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils, Events) => {
-    const TR_DB_SUCCESS = 'onTranslationUpdateSuccess';
-    const DEEPL_SUCCESS = 'onDeeplUpdateSuccess';
-    const TR_DB_FAILED = 'onTranslationUpdateFailed';
-    const DEEPL_FAILED = 'onDeeplUpdateFailed';
+    const TR_DB_SUCCESS = 'onDbUpdateSuccess';
+    const TR_DB_FAILED = 'onDbUpdateFailed';
+    const DEEPL_SUCCESS = 'onDeeplTrSuccess';
+    const DEEPL_RF_SUCCESS = 'onDeeplRfSuccess';
+    const DEEPL_FAILED = 'onDeeplTrFailed';
+    const DEEPL_RF_FAILED = 'onDeeplRfFailed';
     let APP_VERSION = '';
     const updateTranslationsInDb = (data, userid, courseid) => {
         Log.debug(`api.updateTranslationsInDb.33`);
@@ -35,7 +37,8 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 args: {
                     data: data,
                     userid: userid,
-                    courseid: courseid
+                    courseid: courseid,
+                    action: 'update'
                 },
                 done: (response) => {
                    Log.info(`api/updateTranslationsInDb/done::response`);
@@ -55,28 +58,45 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             }]
         );
     };
+    /**
+     * Parent DeepL external service caller.
+     *
+     * @param {object} args
+     * @param {string} endPoint
+     * @param {string} successEvent
+     * @param {string} failedEvent
+     */
+    const deeplService = (args, endPoint, successEvent, failedEvent)=>{
+        Ajax.call([{
+            methodname: endPoint,
+            args: args,
+            done: (response) => {
+                Log.debug(`${endPoint} api/translate/done::response`);
+                Log.debug(response);
+                Events.emit(successEvent, response);
+            },
+            fail: (jqXHR, status, error) => {
+                Log.debug(`${endPoint} api/translate/fail::jqXHR`);
+                Log.debug(jqXHR);
+                Events.emit(failedEvent, status ?? '', error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode);
+            }
+        }]);
+    };
     const translate = (data, options, version) => {
         const args = {
             translations: data, // Array of text, keys, source_lang
             options: options, // Object with DeepL's settings options including target_lang.
             version: version
         };
-        Log.info(`api/translate > args`);
-        Log.info(args);
-        Ajax.call([{
-            methodname: "local_deepler_get_translation",
-            args: args,
-            done: (response) => {
-                Log.info(`api/translate/done::response`);
-                Log.info(response);
-                Events.emit(DEEPL_SUCCESS, response);
-            },
-            fail: (jqXHR, status, error) => {
-                Log.error(`api/translate/fail::jqXHR`);
-                Log.error(jqXHR);
-                Events.emit(DEEPL_FAILED, status ?? '', error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode);
-            }
-        }]);
+        deeplService(args, 'local_deepler_get_translation', DEEPL_SUCCESS, DEEPL_FAILED);
+    };
+    const rephrase = (data, options, version) => {
+        const args = {
+            rephrasings: data, // Array of text, keys, source_lang
+            options: options, // Object with DeepL's settings options including target_lang.
+            version: version
+        };
+        deeplService(args, 'local_deepler_get_rephrase', DEEPL_RF_SUCCESS, DEEPL_RF_FAILED);
     };
 
     return {
@@ -84,8 +104,11 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
         TR_DB_SUCCESS: TR_DB_SUCCESS,
         TR_DB_FAILED: TR_DB_FAILED,
         DEEPL_SUCCESS: DEEPL_SUCCESS,
+        DEEPL_RF_SUCCESS: DEEPL_RF_SUCCESS,
         DEEPL_FAILED: DEEPL_FAILED,
+        DEEPL_RF_FAILED: DEEPL_RF_FAILED,
         updateTranslationsInDb: updateTranslationsInDb,
-        translate: translate
+        translate: translate,
+        rephrase: rephrase
     };
 });
