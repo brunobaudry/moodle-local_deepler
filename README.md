@@ -18,6 +18,7 @@ Translation workflow being the following:
 7. Your course is multilingual.
 8. ...
 
+
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
 
