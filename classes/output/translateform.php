@@ -136,7 +136,7 @@ class translateform extends deeplerform {
         $multilanger = new multilanger($field->get_text());
         $this->gatherlangcodes($multilanger->findmlangcodes());
         $hasotherandsourcetag = $field->check_field_has_other_and_sourcetag($this->langpack->currentlang);
-        $alreadyhasmultilang = $multilanger->has_multilang();
+        $alreadyhasmultilang = $multilanger->has_multilangs();
         $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
         if ($alreadyhasmultilang) {
             if ($hasotherandsourcetag) {
@@ -245,7 +245,7 @@ class translateform extends deeplerform {
                     data-status='$status'>");
         // Column 1 layout.
         $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
-        $fieldtranslation = multilanger::findfieldstring($field); // Get the
+        $fieldtranslation = multilanger::findfieldstring($field);
         $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>$fieldtranslation</small><br/>");
         if (!$isdbkey) {
             $this->_form->addElement('html', $bulletstatus);

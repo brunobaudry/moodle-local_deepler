@@ -115,12 +115,8 @@ define([
             Log.debug(moodleTargetToSave);
             // TextTosave = getEditorText(key, maineditorIsTextArea);
             return {
-                id: item.id,
                 tid: item.tid,
-                field: item.field,
-                table: item.table,
                 text: getEditorText(tempTranslations[key].editor, maineditorIsTextArea),
-                cmid: item.cmid,
                 keyid: key,
                 mainsourcecode: mainSourceLang,
                 sourcecode: tempTranslations[key].sourceLang,

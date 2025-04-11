@@ -53,14 +53,13 @@ $string['formalityprefermore'] = 'prefer more';
 $string['glossaryid'] = 'Glossary id';
 $string['glossaryid_placeholder'] = 'Glossary id should you have one...';
 $string['ignoretags'] = 'Tags to ignore';
+$string['keepselected'] = 'Keep selected';
 $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
 $string['letsdobutton'] = 'Lets do';
-$string['keepselected'] = 'Keep selected';
-
 $string['mlangremover'] = '{mlang} Remover';
 $string['mlangtagsstring'] = 'Mlang tags';
 

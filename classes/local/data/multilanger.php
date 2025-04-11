@@ -1,18 +1,37 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data;
 
+use coding_exception;
 use lang_string;
 
 /**
  * Class multilanger.
- * String decorator with mlang functionalities.
+ * String decorator with mlang manipulations.
+ *
+ * @package local_deepler
+ * @copyright 2025 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class multilanger {
     /**
      * @var string[]
      */
-    static array $translatedfields = [];
+    static public array $translatedfields = [];
     /**
      * @var string
      */
@@ -28,6 +47,8 @@ class multilanger {
     }
 
     /**
+     * Constructor.
+     *
      * @param string $field
      */
     public function __construct(string $field) {
@@ -39,7 +60,7 @@ class multilanger {
      *
      * @return bool
      */
-    public function has_multilang(): bool {
+    public function has_multilangs(): bool {
         return str_contains($this->text, '{mlang}');
     }
 
@@ -49,7 +70,7 @@ class multilanger {
      * @param string $code
      * @return bool
      */
-    public function hasmultilangcode(string $code): bool {
+    public function has_multilangcode(string $code): bool {
         return str_contains($this->text, "{mlang $code}");
     }
 
@@ -62,6 +83,21 @@ class multilanger {
         return array_keys($this->findmlangs());
     }
 
+    /**
+     * Wraps code around initial text.
+     * Must not have mlang tags.
+     *
+     * @throws \coding_exception
+     */
+    public function wrapmlang(string $code): void {
+        if ($this->has_multilangs()) {
+            throw new coding_exception('The field already has mlang tags. Use update_or_add_mlang instead.');
+        }
+        if ($this->has_multilangcode($code)) {
+            return;
+        }
+        $this->text = "{mlang $code}{$this->text}{mlang}";
+    }
     /**
      * Update the field text
      *
@@ -82,7 +118,7 @@ class multilanger {
      * @return void
      */
     public function update_or_add_mlang(string $code, string $text): void {
-        if ($this->hasmultilangcode($code)) {
+        if ($this->has_multilangcode($code)) {
             $this->updatemlang($code, $text);
         } else {
             $this->addmlang_ifothers($code, $text);
@@ -97,11 +133,11 @@ class multilanger {
      * @param string $text
      * @return void
      */
-    private function addmlang_ifothers(string $code, string $text) {
+    private function addmlang_ifothers(string $code, string $text): void {
         $needle = '{mlang}';
         $pos = strrpos($this->text, $needle);
         $update = "{mlang}{mlang $code}$text{mlang}";
-        $this->text = substr_replace($this->text, $update, $pos, 0);
+        $this->text = substr_replace($this->text, $update, $pos, strlen($needle));
     }
     /**
      * Builds languages an array of string of iso codes or 'other'.
@@ -115,6 +151,23 @@ class multilanger {
         $result = [];
         foreach ($matches[2] as $index => $key) {
             $result[$key] = $matches[1][$index];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Builds languages an array of string of iso codes or 'other'.
+     *
+     * @return array
+     */
+    public function findmlangs_withouttags(): array {
+        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}(.*?){mlang\s*})/si";
+        preg_match_all($pattern, $this->text, $matches);
+
+        $result = [];
+        foreach ($matches[2] as $index => $key) {
+            $result[$key] = $matches[5][$index];
         }
 
         return $result;
@@ -141,6 +194,8 @@ class multilanger {
     }
 
     /**
+     * Fetches the Moodle string that describe the field in the UI.
+     *
      * @param \local_deepler\local\data\field $field
      * @return \lang_string|string
      * @throws \coding_exception
@@ -227,6 +282,28 @@ class multilanger {
         }
 
         return $foundstring;
+    }
+
+    /**
+     * Replaces a mlang tag and content with the new text.
+     *
+     * @param mixed $sourcecode
+     * @param mixed $sourcetext
+     * @param mixed $text
+     * @return void
+     */
+    public function replacemlang(mixed $sourcecode, mixed $sourcetext, mixed $text) {
+        $mlangs = $this->findmlangs_withouttags();
+        $realsource = '';
+        foreach ($mlangs as $code => $mlag) {
+            if ($mlag === $sourcetext) {
+                $realsource = $code;
+                break;
+            }
+        }
+        // If source text not found, could be that someone edited it in the mean time, we still save it with the source code.
+        $sourcecode = $sourcecode === '' ? $sourcecode : $realsource;
+        $this->update_or_add_mlang($sourcecode, $text);
     }
 
 }

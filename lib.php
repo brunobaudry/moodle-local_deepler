@@ -26,12 +26,13 @@
 /**
  * Add Translate Course to course settings menu.
  *
- * @param object $navigation
- * @param object $course
+ * @param mixed $navigation
+ * @param mixed $course
  * @return void
+ * @throws \coding_exception
  * @package local_deepler
  */
-function local_deepler_extend_navigation_course($navigation, $course): void {
+function local_deepler_extend_navigation_course(mixed $navigation, mixed $course): void {
     // Do not show in menu if no capability.
     if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
         return;
@@ -50,7 +51,6 @@ function local_deepler_extend_navigation_course($navigation, $course): void {
     // Do not show in menu if no capability.
     $navigation->add_node($translatecontent);
     $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
-    
 }
 
 /**
@@ -60,13 +60,13 @@ function local_deepler_extend_navigation_course($navigation, $course): void {
  * @param object $cm
  * @param \core\context $context
  * @param object $filearea
- * @param object $args
+ * @param array $args
  * @param bool $forcedownload
  * @param array $options
  * @return bool
  * @throws \coding_exception
  */
-function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, object $args,
+function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, array $args,
         bool $forcedownload, array $options): bool {
 
     debugging($cm);

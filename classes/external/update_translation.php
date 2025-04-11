@@ -26,6 +26,7 @@ use core_external\restricted_context_exception;
 use dml_transaction_exception;
 use Exception;
 use invalid_parameter_exception;
+use local_deepler\local\data\field;
 use local_deepler\local\data\multilanger;
 use local_deepler\local\services\database_updater;
 use local_deepler\local\services\lang_helper;
@@ -54,11 +55,7 @@ class update_translation extends external_api {
         return new external_function_parameters([
                 'data' => new external_multiple_structure(
                         new external_single_structure([
-                                'id' => new external_value(PARAM_INT, 'The id of the course field'),
-                                'tid' => new external_value(PARAM_INT, 'The id of the activity table'),
-                                'table' => new external_value(PARAM_ALPHANUMEXT, 'The table name'),
-                                'field' => new external_value(PARAM_ALPHANUMEXT, 'The field name'),
-                                'cmid' => new external_value(PARAM_ALPHANUMEXT, 'The course module id'),
+                                'tid' => new external_value(PARAM_INT, 'The id of the in the deepler table to trsck'),
                                 'text' => new external_value(PARAM_RAW, 'The new text content translated or updated'),
                                 'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
                                 'mainsourcecode' => new external_value(PARAM_ALPHANUMEXT, 'The main source code'),
@@ -115,6 +112,10 @@ class update_translation extends external_api {
      */
     private static function process_data(array $data, array $params, array $response): array {
         try {
+            // Parse the key and setup the text.
+            // We need to do it here caus' we need the $cmid to check security.
+            self::preparedata($data);
+            // Perform different security checks depending on the action.
             switch (self::$action) {
                 case 'update':
                     security_checker::perform_security_checks_for_translations($data, $params['userid'], $params['courseid']);
@@ -125,7 +126,9 @@ class update_translation extends external_api {
                 default:
                     throw new invalid_parameter_exception('Invalid action');
             }
-            self::preparedata($data);
+            // Fetch the current text field content.
+            $fieldtext = database_updater::get_textfield($data['table'], $data['field'], $data['id']);
+            self::preparetext($data, $fieldtext);
             database_updater::update_records($data, $response);
         } catch (invalid_parameter_exception $i) {
             $response['error'] = "INVALID PARAM " . $i->getMessage();
@@ -134,7 +137,8 @@ class update_translation extends external_api {
         } catch (restricted_context_exception $rce) {
             $response['error'] = "CONTEXT " . $rce->getMessage();
         } catch (Exception $e) {
-            $response['error'] = "Unexpected error: " . $e->getMessage();
+            $errortoolong = get_string('errortoolong', 'local_deepler');
+            $response['error'] = "Unexpected error: " . $e->getMessage() . " $errortoolong";
         } catch (Throwable $t) {
             $response['error'] = "Critical error: " . $t->getMessage();
         }
@@ -148,33 +152,14 @@ class update_translation extends external_api {
      *
      * @param array $data
      * @return void
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
-    private static function preparedata(array &$data): void {
-        $fieldtext = database_updater::get_textfield($data['table'], $data['field'], $data['id']);
-        $mlanger = new multilanger($fieldtext);
-        if (str_contains($data['sourcecode'], lang_helper::REPHRASESYMBOL)) {
-            // Rephrasing,
-            if ($mlanger->has_multilang()) {
-                if ($data['sourcecode'] === $data['mainsourcecode']) {
-                    $mlanger->update_or_add_mlang('other', $data['text']);
-                } else {
-                    $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
-                }
-                $data['text'] = $mlanger->get_text();
-            }
-            // Rephrasing, no mlang then no need to manipulate the text: Save rephrassed.
-        } else {
-            // translation.
-            if ($mlanger->hasmultilangcode('other') && $data['sourcecode'] === $data['mainsourcecode']) {
-                $mlanger->update_or_add_mlang($data['sourcecode'], $data['sourcetext']);
-
-            } else {
-                $mlanger->update_or_add_mlang('other', $data['sourcetext']);
-            }
-            $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
-            $data['text'] = $mlanger->get_text();
-        }
+    public static function preparedata(array &$data): void {
+        $datafromkey = field::generatedatfromkey($data['keyid']);
+        $data['table'] = $datafromkey['table'];
+        $data['field'] = $datafromkey['field'];
+        $data['id'] = $datafromkey['id'];
+        $data['cmid'] = $datafromkey['cmid'];
     }
     /**
      * Handle exceptions and prepare response.
@@ -220,5 +205,41 @@ class update_translation extends external_api {
                         'keyid' => new external_value(PARAM_RAW, 'the key id of the field updated table-id-field'),
                 ])
         );
+    }
+
+    /**
+     * Manipulate the text and mlangs.
+     *
+     * @param array $data
+     * @param string $fieldtext
+     * @return void
+     * @throws \coding_exception
+     */
+    public static function preparetext(array &$data, string $fieldtext): void {
+        $mlanger = new multilanger($fieldtext);
+        if (str_contains($data['sourcecode'], lang_helper::REPHRASESYMBOL)) {
+            // Rephrasing.
+            $sourcecode = str_replace(lang_helper::REPHRASESYMBOL, '', $data['sourcecode']);
+            if ($mlanger->has_multilangs()) {
+                if ($sourcecode === $data['mainsourcecode']) {
+                    $mlanger->replacemlang($sourcecode, $data['sourcetext'], $data['text']);
+                } else {
+                    $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
+                }
+                $data['text'] = $mlanger->get_text();
+            }
+            // Rephrasing, no mlang then no need to manipulate the text: Save rephrassed.
+        } else {
+            // Translation.
+            if (!$mlanger->has_multilangs()) {
+                $mlanger->wrapmlang('other');
+            } else {
+                if ($data['sourcecode'] !== $data['mainsourcecode']) {
+                    $mlanger->update_or_add_mlang($data['sourcecode'], $data['sourcetext']);
+                }
+            }
+            $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
+            $data['text'] = $mlanger->get_text();
+        }
     }
 }

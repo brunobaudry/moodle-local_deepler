@@ -32,14 +32,15 @@ class utils {
     /**
      * List of bg colors for highlighting.
      */
-    const colors = [
+    const COLORS = [
             'FloralWhite',
             'Lavender',
             'LightYellow',
             'MintCream',
             'Honeydew',
             'AliceBlue', 'GhostWhite',
-            'Ivory',];
+            'Ivory',
+    ];
 
     /**
      * Generate a color index for a given array.
@@ -50,7 +51,7 @@ class utils {
     public static function makecolorindex(array $tab): array {
         $t = [];
         foreach ($tab as $i => $v) {
-            $t[] = ['key' => $v, 'value' => self::colors[$i % count(self::colors)]];
+            $t[] = ['key' => $v, 'value' => self::COLORS[$i % count(self::COLORS)]];
         }
         return $t;
     }

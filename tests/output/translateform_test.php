@@ -48,6 +48,8 @@ final class translateform_test extends advanced_testcase {
      * Set it up.
      *
      * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
      */
     public function setUp(): void {
         parent::setUp();
@@ -69,6 +71,8 @@ final class translateform_test extends advanced_testcase {
      *
      * @covers ::definition
      * @return void
+     * @throws \core\exception\moodle_exception
+     * @throws \moodle_exception
      */
     public function test_definition(): void {
         $this->resetAfterTest(true);

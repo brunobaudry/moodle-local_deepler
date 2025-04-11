@@ -17,6 +17,7 @@
 namespace local_deepler\local\data;
 
 use cm_info;
+use coding_exception;
 use local_deepler\local\services\utils;
 
 /**
@@ -407,4 +408,24 @@ class field {
         return array_merge(self::$usercolstoskip, $modcolstoskip);
     }
 
+    /**
+     * Set the columns to skip.
+     *
+     * @param string $key
+     * @return array
+     * @throws \coding_exception
+     */
+    public static function generatedatfromkey(string $key) {
+        $pattern = "/(\w+)\[(\d+)\]\[(\w+)\]\[(\d+)\]/si";
+        preg_match($pattern, $key, $matches);
+        if (count($matches) !== 5) {
+            throw new coding_exception('Invalid key format');
+        }
+        return [
+                'table' => $matches[1],
+                'id' => $matches[2],
+                'field' => $matches[3],
+                'cmid' => $matches[4],
+        ];
+    }
 }
