@@ -1,4 +1,4 @@
-name: Moodle Plugin CI DEV or DEBUG
+name: Moodle Plugin CI DEBUG
 on:
   push:
     branches: [ debug ]
@@ -167,6 +167,4 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
-        run: |
-          php admin/tool/behat/cli/init.php
-          php admin/tool/behat/cli/run.php --tags="@local_deepler~@local_deepler_notesting" --suite="default" --profile="chrome" --format-settings='{"behat_increasetimeout":30}' --rerun
+        run: moodle-plugin-ci behat --profile chrome --tags=@local_deepler --format-settings='{"behat_increasetimeout":30}' --rerun
