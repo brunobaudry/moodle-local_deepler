@@ -74,15 +74,15 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <div class="col-2" id="local_deepler__modeltype">
             {{#str}}modeltype,local_deepler{{/str}}
             <div class="custom-control custom-radio">
-                <input type="radio" value="prefer_quality_optimized" checked="checked" id="modeltype1" name="local_deepler/modeltype" class="custom-control-input">
+                <input type="radio" value="prefer_quality_optimized" checked="checked" id="modeltype1" name="local_deepler/model_type" class="custom-control-input">
                 <label class="custom-control-label" for="modeltype1">{{#str}}modeltpreferqualityoptimized,local_deepler{{/str}}</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" value="quality_optimized" id="modeltype2" name="local_deepler/modeltype" class="custom-control-input">
+                <input type="radio" value="quality_optimized" id="modeltype2" name="local_deepler/model_type" class="custom-control-input">
                 <label class="custom-control-label" for="modeltype2">{{#str}}modeltypequalityoptimized,local_deepler{{/str}}</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" value="latency_optimized" id="modeltype3" name="local_deepler/modeltype" class="custom-control-input">
+                <input type="radio" value="latency_optimized" id="modeltype3" name="local_deepler/model_type" class="custom-control-input">
                 <label class="custom-control-label" for="modeltype3">{{#str}}modeltypelatencyoptimized  ,local_deepler{{/str}}</label>
             </div>
         </div>
@@ -185,6 +185,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div class="col-7" id="local_deepler__toneorstyle">
             {{#str}}toneorstyle,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="default" id="toneorstyle0" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="toneorstyle0">{{#str}}formalitydefault  ,local_deepler{{/str}}</label>
+            </div>
             <div class="custom-control custom-radio">
                 <input type="radio" value="writing_style|prefer_simple" id="writingstyle9" name="local_deepler/toneorstyle" class="custom-control-input">
                 <label class="custom-control-label" for="writingstyle9">{{#str}}writingstylesimple  ,local_deepler{{/str}}</label>

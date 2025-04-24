@@ -89,7 +89,7 @@ $string['removeselectedtagonly'] = 'Remove selected mlang tag';
 $string['removetag'] = 'Remove its mlang tag';
 $string['rephraseinfos'] =
         'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.
-        The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>';
+        The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong><br><br>Using "default" as value behaves the same as not sending a tone nor a writing style.';
 $string['rephrasetitle'] = '{$a}Rephrase settings.';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';

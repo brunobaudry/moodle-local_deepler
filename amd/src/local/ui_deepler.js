@@ -44,12 +44,10 @@ define(['core/log',
     let saveAllBtn = {};
     let selectAllBtn = {};
     let checkboxes = [];
-    // Let sourceLang = "";
-    // let targetLang = "";
     let format = new Intl.NumberFormat();
     let saveAllModal = {};
     let errordbtitle = '';
-    let glossaryId = {};
+    let settingsUI = {};
 
     const onDBFailed = (error, status) => {
         showModal(`${errordbtitle} ${status}`, `DB failed to save translations. ${error}`, 'Alert');
@@ -92,15 +90,64 @@ define(['core/log',
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
             autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
             checkboxes = domQueryAll(Selectors.actions.checkBoxes);
-            glossaryId = domQuery(Selectors.deepl.glossaryId);
-            const glossaryCookie = Utils.getCookie(Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid);
-            if (glossaryCookie !== null) {
-                glossaryId.value = glossaryCookie;
-            }
-
+            settingsUI[Selectors.deepl.glossaryId] = domQuery(Selectors.deepl.glossaryId);
+            settingsUI[Selectors.deepl.context] = domQuery(Selectors.deepl.context);
+            settingsUI[Selectors.deepl.formality] = domQuery(Selectors.deepl.formality);
+            settingsUI[Selectors.deepl.modelType] = domQuery(Selectors.deepl.modelType);
+            settingsUI[Selectors.deepl.ignoreTags] = domQuery(Selectors.deepl.ignoreTags);
+            settingsUI[Selectors.deepl.nonSplittingTags] = domQuery(Selectors.deepl.nonSplittingTags);
+            settingsUI[Selectors.deepl.outlineDetection] = domQuery(Selectors.deepl.outlineDetection);
+            settingsUI[Selectors.deepl.preserveFormatting] = domQuery(Selectors.deepl.preserveFormatting);
+            settingsUI[Selectors.deepl.splitSentences] = domQuery(Selectors.deepl.splitSentences);
+            settingsUI[Selectors.deepl.splittingTags] = domQuery(Selectors.deepl.splittingTags);
+            settingsUI[Selectors.deepl.tagHandling] = domQuery(Selectors.deepl.tagHandling);
+            settingsUI[Selectors.deepl.toneorstyle] = domQuery(Selectors.deepl.toneorstyle);
+            settingsUI[Selectors.actions.escapeLatex] = domQuery(Selectors.actions.escapeLatex);
+            settingsUI[Selectors.actions.escapePre] = domQuery(Selectors.actions.escapePre);
+            fetchCookies();
         } catch (e) {
             if (config.debug) {
                 Log.error(e.message);
+            }
+        }
+    };
+    const fetchCookies = () => {
+        if (config.targetlang) {
+            const oldCookieName = Utils.COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid;
+            const newCookiename = Utils.COOKIE_PREFIX_NEW + config.currentlang + config.targetlang + config.courseid;
+            Log.debug(`ui_deepler/x/fetchCookies::oldCookieName`);
+            Log.debug(oldCookieName);
+            Log.debug(newCookiename);
+            const glossaryCookie = Utils.getCookie(oldCookieName);
+            const newCookie = Utils.getEncodedCookie(newCookiename);
+            if (newCookie !== null) {
+                Log.debug(`ui_deepler/x/fetchCookies::newCookie`);
+                Log.debug(newCookie);
+                const settingsCookie = JSON.parse(newCookie);
+                for (const selector in settingsUI) {
+                    Log.debug(`ui_deepler/x/fetchCookies::selector`);
+                    Log.debug(selector);
+                    Log.debug(settingsCookie[selector]);
+                    Log.debug(settingsUI[selector].type);
+                    if (settingsCookie[selector] !== undefined) {
+                        switch (settingsUI[selector].type) {
+                            case 'checkbox' :
+                                settingsUI[selector].checked = settingsCookie[selector];
+                                break;
+                            case 'radio' :
+                                domQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
+                                break;
+                            default:
+                                settingsUI[selector].value = settingsCookie[selector];
+                                break;
+                        }
+
+                    }
+                }
+            }
+            if (glossaryCookie !== null) {
+                // Legacy cookie.
+                settingsUI[Selectors.deepl.glossaryId].value = glossaryCookie;
             }
         }
     };
@@ -146,12 +193,10 @@ define(['core/log',
             saveSingleTranslation(e);
         }
     };
-
-
-        /**
-         * Event listener for change events.
-         * @param {event} e
-         */
+    /**
+     * Event listener for change events.
+     * @param {event} e
+     */
     const handleChangeEvent = (e) => {
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
@@ -237,9 +282,6 @@ define(['core/log',
          * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
          */
     const prepareDBitem = (key) => {
-        Log.debug(`ui_deepler/x/prepareDBitem::key`);
-        Log.debug(key);
-        Log.debug(Translation.debugTemp(key));
         const element = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         return {
             key: key,
@@ -387,6 +429,7 @@ define(['core/log',
      */
     const callDeeplServices = () => {
         const keys = [];
+        const [cookie, settings] = prepareSettingsAndCookieValues();
         saveAllBtn.disabled = false;
         domQueryAll(Selectors.statuses.checkedCheckBoxes)
             .forEach((ckBox) => {
@@ -401,54 +444,83 @@ define(['core/log',
                 );
                 keys.push(key);
             });
-        Translation.callTranslations(keys, config);
+        const newCookiename = Utils.COOKIE_PREFIX_NEW + config.currentlang + config.targetlang + config.courseid;
+        Utils.setEncodedCookie(newCookiename, JSON.stringify(cookie), 703);
+        Translation.callTranslations(keys, config, settings);
     };
-
-        /**
-         * Factory to display process' statuses for each item.
-         *
-         * @param {String} key
-         * @param {Boolean} checked
-         * ui.js
-         */
-        const toggleStatus = (key, checked) => {
-            const status = domQuery(Selectors.actions.validatorBtn, key).dataset.status;
-            switch (status) {
-                case Selectors.statuses.wait :
-                    Translation.initTemp(key); // Reset the translation.
-                    if (checked) {
-                        setIconStatus(key, Selectors.statuses.totranslate);
-                        // RefreshTempTranslation(key);
-                    }
+    /**
+     * Parse the advanced settings UI and map the values for cookies and Deepl.
+     *
+     * @returns {[{},{}]}
+     */
+    const prepareSettingsAndCookieValues = () => {
+        let settings = {};
+        let cookie = {};
+        for (const selector in settingsUI) {
+            switch (settingsUI[selector].type) {
+                case 'textarea':
+                    cookie[selector] = settingsUI[selector].value;
+                    // Deepl needs an array.
+                    settings[selector] = Utils.toJsonArray(cookie[selector]);
                     break;
-                case Selectors.statuses.totranslate :
-                    // If (checked && Translation.tempTranslations[key]?.translation?.length > 0) {
-                    if (checked && Translation.translated[key]) {
-                        setIconStatus(key, Selectors.statuses.tosave, true);
-                    } else {
-                        setIconStatus(key, Selectors.statuses.wait);
-                    }
+                case 'checkbox':
+                    settings[selector] = cookie[selector] = settingsUI[selector].checked;
                     break;
-                case Selectors.statuses.tosave :
-                    if (!checked) {
-                        setIconStatus(key, Selectors.statuses.totranslate);
-                    }
+                case 'radio':
+                    settings[selector] = cookie[selector] = queryRadioValue(selector);
                     break;
-                case Selectors.statuses.failed :
-                    if (checked) {
-                        setIconStatus(key, Selectors.statuses.totranslate);
-                    }
-                    break;
-                case Selectors.statuses.success :
-                    break;
-                case Selectors.statuses.saved :
-                    if (checked) {
-                        setIconStatus(key, Selectors.statuses.totranslate);
-                    }
-                    Translation.initTemp(key);
+                default: // Text.
+                    settings[selector] = cookie[selector] = settingsUI[selector].value;
                     break;
             }
-        };
+        }
+        return [cookie, settings];
+    };
+    /**
+     * Factory to display process' statuses for each item.
+     *
+     * @param {String} key
+     * @param {Boolean} checked
+     * ui.js
+     */
+    const toggleStatus = (key, checked) => {
+        const status = domQuery(Selectors.actions.validatorBtn, key).dataset.status;
+        switch (status) {
+            case Selectors.statuses.wait :
+                Translation.initTemp(key); // Reset the translation.
+                if (checked) {
+                    setIconStatus(key, Selectors.statuses.totranslate);
+                    // RefreshTempTranslation(key);
+                }
+                break;
+            case Selectors.statuses.totranslate :
+                // If (checked && Translation.tempTranslations[key]?.translation?.length > 0) {
+                if (checked && Translation.translated[key]) {
+                    setIconStatus(key, Selectors.statuses.tosave, true);
+                } else {
+                    setIconStatus(key, Selectors.statuses.wait);
+                }
+                break;
+            case Selectors.statuses.tosave :
+                if (!checked) {
+                    setIconStatus(key, Selectors.statuses.totranslate);
+                }
+                break;
+            case Selectors.statuses.failed :
+                if (checked) {
+                    setIconStatus(key, Selectors.statuses.totranslate);
+                }
+                break;
+            case Selectors.statuses.success :
+                break;
+            case Selectors.statuses.saved :
+                if (checked) {
+                    setIconStatus(key, Selectors.statuses.totranslate);
+                }
+                Translation.initTemp(key);
+                break;
+        }
+    };
     /**
      * Shows/hides rows.
      * @param {string} selector
@@ -705,6 +777,15 @@ define(['core/log',
             "charNumWithSpace": trimmedVal.length,
             "charNumWithOutSpace": trimmedVal.replace(/\s+/g, '').length
         };
+    };
+    /**
+     * Wrapper for radios value.
+     *
+     * @param {string} selector
+     * @returns {*}
+     */
+    const queryRadioValue = (selector) => {
+        return domQuery(Selectors.actions.radioValues.replace("<RADIO>", selector)).value;
     };
     /**
      * Shortcut for dom querySelector.

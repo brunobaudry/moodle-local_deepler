@@ -21,6 +21,7 @@
  */
 define([], () => {
     const COOKIE_PREFIX = 'moodle_deepler_glossary_';
+    const COOKIE_PREFIX_NEW = 'moodle_deepler_settings_';
     const MAX_INPUT_LENGTH = 256;
     /**
      * Simple helper to manage selectors
@@ -53,13 +54,13 @@ define([], () => {
      * @param {string} s
      * @param {string} sep
      * @returns {string}
-     * utils.js
      */
     const toJsonArray = (s, sep = ",") => {
         return JSON.stringify(s.split(sep));
     };
     /**
      * Helper function to decode the PHP base64 encoded source.
+     *
      * @param {string} encoded
      * @returns {string}
      */
@@ -70,6 +71,7 @@ define([], () => {
     };
     /**
      * Helper function for the decode html escaped content.
+     *
      * @param {string} encodedStr
      * @returns {string}
      */
@@ -93,18 +95,19 @@ define([], () => {
      * Cookie setter.
      *
      * @param {string} name
-     * @param {object} value
+     * @param {string} value
      * @param {int} hours
      */
     const setCookie = (name, value, hours)=>{
-        var expires = "";
+        let expires = "";
         if (hours) {
-            var date = new Date();
+            const date = new Date();
             date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
             expires = "; expires=" + date.toUTCString();
         }
         document.cookie = name + "=" + (value || "") + expires + "; path=/";
     };
+
     /**
      * Cookie Getter.
      *
@@ -117,6 +120,7 @@ define([], () => {
         for (let i = 0; i < ca.length; i++) {
             let c = ca[i];
             while (c.charAt(0) == ' ') {
+                // Strips leading spaces.
                 c = c.substring(1, c.length);
             }
             if (c.indexOf(nameEQ) == 0) {
@@ -125,13 +129,40 @@ define([], () => {
         }
         return null;
     };
+
+    /**
+     * Wrapper for the setCookie function to encode the value in base64.
+     *
+     * @param {string} name
+     * @param {string} value
+     * @param {int} hours
+     */
+   const setEncodedCookie = (name, value, hours)=>{
+       setCookie(name, btoa(value), hours);
+   };
+    /**
+     * Wrapper for the getCookie function to decode the value from base64.
+     *
+     * @param {string} name
+     * @returns {string}
+     */
+   const getEncodedCookie = (name) => {
+       const cook = getCookie(name);
+       if (cook === null) {
+           return null;
+       }
+       return atob(cook);
+    };
     /**
      * Api to be used by the other modules.
      */
     return {
         COOKIE_PREFIX: COOKIE_PREFIX,
+        COOKIE_PREFIX_NEW: COOKIE_PREFIX_NEW,
         getCookie: getCookie,
+        getEncodedCookie: getEncodedCookie,
         setCookie: setCookie,
+        setEncodedCookie: setEncodedCookie,
         replaceKey: replaceKey,
         keyidToKey: keyidToKey,
         decodeHTML: decodeHTML,

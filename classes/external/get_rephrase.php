@@ -66,9 +66,12 @@ class get_rephrase extends external_api {
                 ]
         );
         // Have the params cleaned by Deepl lib.
-        $rephreaseotions = explode('|', $params['options']['toneorstyle']);
-        $tone = $rephreaseotions[0] === 'tone' ? $rephreaseotions[1] : null;
-        $style = $rephreaseotions[0] === 'writing_style' ? $rephreaseotions[1] : null;
+        $style = $tone = null;
+        if ($params['options']['toneorstyle'] !== 'default') {
+            $rephreaseotions = explode('|', $params['options']['toneorstyle']);
+            $tone = $rephreaseotions[0] === 'tone' ? $rephreaseotions[1] : null;
+            $style = $rephreaseotions[0] === 'writing_style' ? $rephreaseotions[1] : null;
+        }
         $validatedparams =
                 $improver->buildRephraseBodyParams($params['options']['target_lang'], $style, $tone);
         // Get the target.

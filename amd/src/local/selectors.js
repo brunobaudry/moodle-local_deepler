@@ -21,6 +21,7 @@
  */
 export default {
     actions: {
+        radioValues: '<RADIO>:checked',
         validatorsBtns: 'div[data-key-validator]',
         validator: '[data-key-validator="<KEY>"]',
         validatorIcon: '[data-key-validator="<KEY>"] i',
@@ -107,13 +108,13 @@ export default {
         splittingTags: '[data-id="local_deepler/splitting_tags"]',
         ignoreTags: '[data-id="local_deepler/ignore_tags"]',
         preserveFormatting: '[data-id="local_deepler/preserve_formatting"]',
-        formality: '[name="local_deepler/formality"]:checked',
+        formality: '[name="local_deepler/formality"]',
         glossaryId: '[data-id="local_deepler/glossary_id"]',
         tagHandling: '[data-id="local_deepler/tag_handling"]',
         outlineDetection: '[data-id="local_deepler/outline_detection"]',
-        splitSentences: '[name="local_deepler/split_sentences"]:checked',
-        modelType: '[name="local_deepler/modeltype"]:checked',
-        toneorstyle: '[name="local_deepler/toneorstyle"]:checked',
+        splitSentences: '[name="local_deepler/split_sentences"]',
+        modelType: '[name="local_deepler/model_type"]',
+        toneorstyle: '[name="local_deepler/toneorstyle"]',
     },
     config: {
         langstrings: '#local_deepler__stringscontainer',

@@ -31,9 +31,8 @@ define([
     let moodleTargetToSave = "";
     let courseid = 0;
     let userid = 0;
-    let settings = {};
-    let settingsRephrase = {};
     let rephrasesymbol = '';
+    const deeplSettinRegex = /\[(name="local_deepler|data-id="local_deepler)\/(\w+)"\]/i;
     const ON_ITEM_TRANSLATED = 'onItemTranslated';
     // Const ON_ITEM_NOT_TRANSLATED = 'onItemsNotTranslated';
     const ON_ITEM_SAVED = 'onItemSaved';
@@ -98,6 +97,7 @@ define([
     };
         /**
          * Prepare the data to be saved in the DB.
+         *
          * @param {object} item
          * @param {boolean} maineditorIsTextArea
          * @returns {{ id, tid: *, field, table, text: string}}
@@ -124,114 +124,6 @@ define([
                 sourcetext: getSourceText(key)
             };
         };
-        /**
-         * Update Textarea.
-         *
-         * @param {string} key
-         * @param {boolean} maineditorIsTextArea
-         * @returns {string}
-         * translation.js
-         *
-        const getupdatedtext = (key, maineditorIsTextArea) => {
-            const sourceItemLang = tempTranslations[key].sourceLang.toLowerCase().replace(rephrasesymbol, '');
-            const fieldText = tempTranslations[key].fieldText; // Translation
-            Log.debug(`translation/x/getupdatedtext::fieldText`);
-            Log.debug(fieldText);
-            const translation = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);// Translation
-            const source = getSourceText(key);// Translation
-            const isFirstTranslation = fieldText.indexOf("{mlang") === -1;
-            const isSourceOther = sourceItemLang === deeplSourceLang;
-            Log.debug(`translation/x/getupdatedtext::mainSourceLang`);
-            Log.debug(mainSourceLang);
-            Log.debug(sourceItemLang);
-            Log.debug(isSourceOther);
-            const selectedTarget = moodleTargetToSave;
-            const selectedTargetLangRoot = selectedTarget.toLowerCase().substring(0, 2);
-            Log.debug(`translation/x/getupdatedtext::selectedTarget`);
-            Log.debug(selectedTarget);
-            Log.debug(selectedTargetLangRoot);
-            const tagPatterns = {
-                "other": "({mlang other)(.*?){mlang}",
-                "target": `({mlang ${selectedTarget}}(.*?){mlang})`,
-                "source": `({mlang ${sourceItemLang}}(.*?){mlang})`
-            };
-            const langsItems = {
-                "fullContent": fieldText,
-                "other": `{mlang other}${source}{mlang}`,
-                "target": `{mlang ${selectedTarget}}${translation}{mlang}`,
-                "source": `{mlang ${sourceItemLang}}${source}{mlang}`
-            };
-            if (isFirstTranslation) {
-                // No mlang tag : easy.
-                if (selectedTargetLangRoot === sourceItemLang) {
-                    return translation;
-                } else if (isSourceOther) {
-                    return langsItems.other + langsItems.target;
-                } else {
-                    return langsItems.other + langsItems.source + langsItems.target;
-                }
-            }
-            // Alreaddy mlang tag-s.
-            return additionalUpdate(isSourceOther, tagPatterns, langsItems);
-        };
-         */
-        /**
-         * Update Textarea when there was mlang tags.
-         * Main regex '({mlang ([a-z]{2,5})}(.*?){mlang})'.
-         * @param {boolean} isSourceOther
-         * @param {string} tagPatterns
-         * @param {string} langsItems
-         * @returns {string} {string}
-         * @todo MDL-000 refactor this.
-         *
-        const additionalUpdate = (isSourceOther, tagPatterns, langsItems) => {
-            Log.debug(`translation/x/additionalUpdate::langsItems`);
-            Log.debug(langsItems);
-            let manipulatedText = langsItems.fullContent;
-            // Do we have a TARGET tag already ?
-            const targetReg = new RegExp(tagPatterns.target, "sgi");
-            const hasTagTarget = manipulatedText.match(targetReg);
-            if (hasTagTarget) {
-                // Yes replace it.
-                manipulatedText = manipulatedText.replace(targetReg, Tokeniser.escapeReplacementString(langsItems.target));
-            } else {
-                // No, add it at the end.
-                const lastMlangClosingTagEnd = manipulatedText.lastIndexOf("{mlang}") + "{mlang}".length;
-                manipulatedText = [manipulatedText.slice(0, lastMlangClosingTagEnd),
-                    langsItems.target,
-                    manipulatedText.slice(lastMlangClosingTagEnd)
-                ].join('');
-            }
-            // Do we have a OTHER tag already ?
-            const otherReg = new RegExp(tagPatterns.other, "sgi");
-            const hasTagOther = manipulatedText.match(otherReg);
-            // Do we have a SOURCE tag already ?
-            const sourceReg = new RegExp(tagPatterns.other, "sgi");
-            const hasTagSource = manipulatedText.match(sourceReg);
-            if (isSourceOther) {
-                // Whatever was the {mlang other} tag language we need to replace it by this source.
-                manipulatedText = manipulatedText.replace(otherReg, Tokeniser.escapeReplacementString(langsItems.other));
-                if (hasTagSource) {
-                    // And remove the {mlang source} tag if found.
-                    manipulatedText.replace(sourceReg, "");
-                }
-            } else {
-                if (!hasTagOther) {
-                    // We still add this source as otherTag of the so that it can be replaced further.
-                    const firstMlangClosingTagEnd = manipulatedText.indexOf("{mlang");
-                    manipulatedText = [manipulatedText.slice(0, firstMlangClosingTagEnd),
-                        langsItems.other,
-                        manipulatedText.slice(firstMlangClosingTagEnd)
-                    ].join('');
-                }
-                if (!hasTagSource) {
-                    // Add the {mlang source} tag if not found.
-                    manipulatedText.replace(sourceReg, Tokeniser.escapeReplacementString(langsItems.source));
-                }
-            }
-            return manipulatedText;
-        };
-         */
         /**
          * Editor's text content.
          *
@@ -260,6 +152,7 @@ define([
         };
     /**
      * Initializing object storage before translation.
+     *
      * @param {string} key
      * @param {editor: object, editorType: string} editorSettings
      * @param {string} sourceTextEncoded
@@ -269,7 +162,7 @@ define([
     const initTempForKey = (key, editorSettings, sourceTextEncoded, multilangRawTextEncoded, sourceLang) => {
         const sourceText = Utils.fromBase64(sourceTextEncoded);
         const fieldText = Utils.fromBase64(multilangRawTextEncoded);
-        const tokenised = Tokeniser.preprocess(sourceText, escapePatterns, escapePatterns);
+        const tokenised = Tokeniser.preprocess(sourceText, escapePatterns);
         tempTranslations[key] = {
             editorType: editorSettings.editorType,
             editor: editorSettings.editor,
@@ -297,12 +190,12 @@ define([
             tokens: []
         };
     };
-        /**
-         * Prepare the texts for the external api calls.
-         *
-         * @param {string} key
-         * @returns {{text, source_lang: (string|string|*), key}}
-         */
+    /**
+     * Prepare the texts for the external api calls.
+     *
+     * @param {string} key
+     * @returns {{text, source_lang: (string|string|*), key}}
+     */
     const prepareTranslation = (key) => {
         return {
             text: tempTranslations[key].source,
@@ -316,13 +209,13 @@ define([
      *
      * @param {array} keys
      * @param {object} config
+     * @param {object} settings
      * @return void
      */
-    const callTranslations = (keys, config) => {
+    const callTranslations = (keys, config, settings) => {
         rephrasesymbol = config.rephrasesymbol;
         const translations = [];
         const rephrases = [];
-        prepareAdvancedSettings(targetLang, config);
         // We parse and check if it is a tranlsation or text improvment.
         keys.forEach((key) => {
             const t = prepareTranslation(key);
@@ -338,14 +231,19 @@ define([
         if (translations.length > 0) {
             Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
             Events.on(Api.DEEPL_FAILED, onTranslateFailed);
-             Api.translate(translations, settings, Api.APP_VERSION);
+             Api.translate(translations, prepareTranslationSettings(settings), Api.APP_VERSION);
         }
         if (rephrases.length > 0) {
             Events.on(Api.DEEPL_RF_SUCCESS, onRephraseSuccess);
             Events.on(Api.DEEPL_RF_FAILED, onRephaseFailed);
-            Api.rephrase(rephrases, settingsRephrase, Api.APP_VERSION);
+            Api.rephrase(rephrases, prepareRephraseSettings(settings), Api.APP_VERSION);
         }
     };
+    /**
+     * When translation went good.
+     *
+     * @param {object} response
+     */
     const onTranslateSuccess = (response)=>{
         Log.info(`translation//onTranslateSuccess::response`);
         Log.info(response);
@@ -361,6 +259,11 @@ define([
             }
         });
     };
+    /**
+     * When rephrasing went good.
+     *
+     * @param {object} response
+     */
     const onRephraseSuccess = (response)=>{
         response.forEach((tr) => {
             if (tr.error === '') {
@@ -374,54 +277,72 @@ define([
             }
         });
     };
+    /**
+     * When translation failed.
+     *
+     * @param {int} status
+     * @param {string} error
+     */
     const onTranslateFailed = (status, error)=>{
         Events.emit(ON_TRANSLATION_FAILED, status, error);
     };
+    /**
+     * Event handler for when the rephrase fails.
+     *
+     * @param {string} status
+     * @param {string} error
+     */
     const onRephaseFailed = (status, error)=>{
         Events.emit(ON_REPHRASE_FAILED, status, error);
     };
-    /**
-     * Compile Advanced settings.
-     *
-     * @param {string} targetLang
-     * @param {object} config
-     * @returns {{}}
-     * translation.js ok
-     */
-    const prepareAdvancedSettings = (targetLang, config) => {
-        escapePatterns.LATEX = document.querySelector(Selectors.actions.escapeLatex).checked;
-        escapePatterns.PRETAG = document.querySelector(Selectors.actions.escapePre).checked;
-        // eslint-disable-next-line camelcase
-        settings.tag_handling = document.querySelector(Selectors.deepl.tagHandling).checked ? 'html' : 'xml';//
-        settings.context = document.querySelector(Selectors.deepl.context).value ?? null;//
-        // eslint-disable-next-line camelcase
-        settings.split_sentences = document.querySelector(Selectors.deepl.splitSentences).value;//
-        // eslint-disable-next-line camelcase
-        settings.preserve_formatting = document.querySelector(Selectors.deepl.preserveFormatting).checked;//
-        settings.formality = document.querySelector('[name="local_deepler/formality"]:checked').value;
-        // eslint-disable-next-line camelcase
-        settings.glossary_id = document.querySelector(Selectors.deepl.glossaryId).value;//
-        if (settings.glossary_id !== '') {
-            Utils.setCookie(Utils.COOKIE_PREFIX + mainSourceLang + targetLang + courseid, settings.glossary_id, 703);
+        /**
+         * Set up the Deepl settings needed for translations.
+         *
+         * @param {object} settings
+         * @returns {{}}
+         */
+    const prepareTranslationSettings = (settings)=>{
+        const trSelectors = [Selectors.deepl.tagHandling,
+            Selectors.deepl.context,
+            Selectors.deepl.splitSentences,
+            Selectors.deepl.preserveFormatting,
+            Selectors.deepl.formality,
+            Selectors.deepl.glossaryId,
+            Selectors.deepl.outlineDetection,
+            Selectors.deepl.nonSplittingTags,
+            Selectors.deepl.splittingTags,
+            Selectors.deepl.ignoreTags,
+            Selectors.deepl.modelType
+        ];
+        const s = filterSetting(settings, trSelectors);
+        s.target_lang = targetLang.toUpperCase();
+        s.show_billed_characters = true;
+        return s;
+    };
+        /**
+         * Set up the Deepl settings needed for rephrases.
+         * @param {object}  settings
+         * @returns {{}}
+         */
+    const prepareRephraseSettings = (settings)=>{
+        const rephraseSelectors = [Selectors.deepl.toneorstyle];
+        const s = filterSetting(settings, rephraseSelectors);
+        s.target_lang = targetLang.toUpperCase();
+        return s;
+    };
+        /**
+         * Filter the UI settings by Deepl service needed set.
+         * @param {object} settings
+         * @param {array}  selList
+         * @returns {{}}
+         */
+    const filterSetting = (settings, selList) =>{
+        const se = {};
+        for (let i in selList) {
+            const set = selList[i].match(deeplSettinRegex)[2];
+            se[set] = settings[selList[i]];
         }
-        // eslint-disable-next-line camelcase
-        settings.outline_detection = document.querySelector(Selectors.deepl.outlineDetection).checked;//
-        // eslint-disable-next-line camelcase
-        settings.non_splitting_tags = Utils.toJsonArray(document.querySelector(Selectors.deepl.nonSplittingTags).value);
-        // eslint-disable-next-line camelcase
-        settings.splitting_tags = Utils.toJsonArray(document.querySelector(Selectors.deepl.splittingTags).value);
-        // eslint-disable-next-line camelcase
-        settings.ignore_tags = Utils.toJsonArray(document.querySelector(Selectors.deepl.ignoreTags).value);
-        // eslint-disable-next-line camelcase
-        settings.model_type = document.querySelector(Selectors.deepl.modelType).value ?? 'prefer_quality_optimized';
-        // eslint-disable-next-line camelcase
-        settings.show_billed_characters = true;
-        // eslint-disable-next-line camelcase
-        settings.target_lang = targetLang.toUpperCase();
-        if (config.canimprove) {
-            settingsRephrase.target_lang = settings.target_lang;
-            settingsRephrase.toneorstyle = document.querySelector(Selectors.deepl.toneorstyle).value ?? 'default';
-        }
+        return se;
     };
     /**
      * Check if the item is translatable.
