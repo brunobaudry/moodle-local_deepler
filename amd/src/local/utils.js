@@ -92,30 +92,42 @@ define([], () => {
         return doc.body.textContent || "";
     };
     /**
+     * Helps to create a cookie name based on the config.
+     *
+     * @param {object} config
+     * @param {bool} oldWay
+     */
+    const makeCookieName = (config, oldWay = false) =>{
+        if (oldWay) {
+            return COOKIE_PREFIX + config.currentlang + config.targetlang + config.courseid;
+        }
+        return COOKIE_PREFIX_NEW + config.currentlang + config.targetlang + config.courseid;
+    };
+    /**
      * Cookie setter.
      *
-     * @param {string} name
+     * @param {object} config
      * @param {string} value
      * @param {int} hours
      */
-    const setCookie = (name, value, hours)=>{
+    const setCookie = (config, value, hours)=>{
         let expires = "";
         if (hours) {
             const date = new Date();
             date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
             expires = "; expires=" + date.toUTCString();
         }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        document.cookie = makeCookieName(config, true) + "=" + (value || "") + expires + "; path=/";
     };
 
     /**
      * Cookie Getter.
      *
-     * @param {string} name
+     * @param {object} config
      * @returns {object}
      */
-   const getCookie = (name) => {
-        const nameEQ = name + "=";
+    const getCookie = (config) => {
+        const nameEQ = makeCookieName(config, true) + "=";
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
             let c = ca[i];
@@ -133,21 +145,21 @@ define([], () => {
     /**
      * Wrapper for the setCookie function to encode the value in base64.
      *
-     * @param {string} name
+     * @param {object} config
      * @param {string} value
      * @param {int} hours
      */
-   const setEncodedCookie = (name, value, hours)=>{
-       setCookie(name, btoa(value), hours);
-   };
+    const setEncodedCookie = (config, value, hours)=>{
+       setCookie(makeCookieName(config), btoa(value), hours);
+    };
     /**
      * Wrapper for the getCookie function to decode the value from base64.
      *
-     * @param {string} name
+     * @param {object} config
      * @returns {string}
      */
-   const getEncodedCookie = (name) => {
-       const cook = getCookie(name);
+    const getEncodedCookie = (config) => {
+       const cook = getCookie(makeCookieName(config));
        if (cook === null) {
            return null;
        }
@@ -157,8 +169,6 @@ define([], () => {
      * Api to be used by the other modules.
      */
     return {
-        COOKIE_PREFIX: COOKIE_PREFIX,
-        COOKIE_PREFIX_NEW: COOKIE_PREFIX_NEW,
         getCookie: getCookie,
         getEncodedCookie: getEncodedCookie,
         setCookie: setCookie,

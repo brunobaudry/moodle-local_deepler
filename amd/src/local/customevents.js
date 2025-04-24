@@ -12,9 +12,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-
 /**
+ * Basic custom event engine.
  * @module     local_deepler/deepler
  * @file       amd/src/local/customevents.js
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -22,7 +21,9 @@
  */
 define([], () => {
     const events = {};
-
+    /**
+     * Api to be used by the other modules.
+     */
     return {
         // Register an event handler
         on: (eventName, callback)=> {

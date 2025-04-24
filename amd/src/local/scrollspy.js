@@ -183,12 +183,9 @@ define(['core/log'], (Log) => {
         OFFSET_TOP = options.offsetTop || 0;
         const headingsPerLevel = getHeadingsPerLevel();
         makeBreadcrumbs(headingsPerLevel);
-
         window.addEventListener('scroll', () =>{
             makeBreadcrumbs(headingsPerLevel);
         });
-
-
     };
     return {
         init: init

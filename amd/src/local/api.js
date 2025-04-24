@@ -27,10 +27,13 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
     const DEEPL_FAILED = 'onDeeplTrFailed';
     const DEEPL_RF_FAILED = 'onDeeplRfFailed';
     let APP_VERSION = '';
+    /**
+     *
+     * @param {object} data
+     * @param {int} userid
+     * @param {int} courseid
+     */
     const updateTranslationsInDb = (data, userid, courseid) => {
-        Log.debug(`api.updateTranslationsInDb.33`);
-        Log.debug(data);
-        Log.debug(courseid);
         Ajax.call([
             {
                 methodname: "local_deepler_update_translation",
@@ -82,6 +85,12 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             }
         }]);
     };
+    /**
+     * Calls Deepl's translation.
+     * @param data
+     * @param options
+     * @param version
+     */
     const translate = (data, options, version) => {
         const args = {
             translations: data, // Array of text, keys, source_lang
@@ -90,6 +99,12 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
         };
         deeplService(args, 'local_deepler_get_translation', DEEPL_SUCCESS, DEEPL_FAILED);
     };
+    /**
+     * Calls Deepl's rephrase.
+     * @param data
+     * @param options
+     * @param version
+     */
     const rephrase = (data, options, version) => {
         const args = {
             rephrasings: data, // Array of text, keys, source_lang
@@ -98,7 +113,9 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
         };
         deeplService(args, 'local_deepler_get_rephrase', DEEPL_RF_SUCCESS, DEEPL_RF_FAILED);
     };
-
+    /**
+     * Api to be used by the other modules.
+     */
     return {
         APP_VERSION: APP_VERSION,
         TR_DB_SUCCESS: TR_DB_SUCCESS,

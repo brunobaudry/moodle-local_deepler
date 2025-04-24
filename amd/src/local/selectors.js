@@ -14,6 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * All UI selector strings.
  * @module     local_deepler/deepler
  * @file       amd/src/local/selectors.js
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>

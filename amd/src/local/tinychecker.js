@@ -34,7 +34,9 @@ define(['core/log'], (log)=> {
             }, 100);
         }
     };
-
+    /**
+     * Api to be used by the other modules.
+     */
     return {
         init: function() {
             waitForTinyMCE(function() {
