@@ -247,6 +247,7 @@ class lang_helper {
         $config->uistrings->errortoolong = get_string('errortoolong', 'local_deepler');
         $config->uistrings->saveallmodaltitle = get_string('saveallmodaltitle', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
+        $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
         return json_encode($config);
     }
 

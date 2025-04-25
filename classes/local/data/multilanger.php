@@ -61,7 +61,7 @@ class multilanger {
      * @return bool
      */
     public function has_multilangs(): bool {
-        return str_contains($this->text, '{mlang}');
+        return str_contains(mb_strtolower($this->text), '{mlang}');
     }
 
     /**
@@ -71,9 +71,19 @@ class multilanger {
      * @return bool
      */
     public function has_multilangcode(string $code): bool {
-        return str_contains($this->text, "{mlang $code}");
+        $c = mb_strtolower($code);
+        return str_contains(mb_strtolower($this->text), "{mlang $c}");
     }
 
+    /**
+     * Checks if field contains a mlang translation for the given code and 'other'.
+     *
+     * @param string $code
+     * @return bool
+     */
+    public function has_multilandcode_and_others(string $code): bool {
+        return $this->has_multilangcode($code) && $this->has_multilangcode('other');
+    }
     /**
      * Get the codes availables in the multilang filter.
      *

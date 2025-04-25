@@ -30,6 +30,7 @@ $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine trans
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
 Check with your Moodle admin.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
+$string['canttranslatesame'] = 'Both languages are the same:';
 $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
         'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
@@ -88,9 +89,10 @@ $string['removeselectedcontentonly'] = 'Remove selected content';
 $string['removeselectedtagonly'] = 'Remove selected mlang tag';
 $string['removetag'] = 'Remove its mlang tag';
 $string['rephraseinfos'] =
-        'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.
-        The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong><br><br>Using "default" as value behaves the same as not sending a tone nor a writing style.';
-$string['rephrasetitle'] = '{$a}Rephrase settings.';
+        'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.';
+$string['rephraseoptionsinfos'] =
+        'The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>. Using "default" as value behaves the same as not sending a tone nor a writing style.';
+$string['rephrasetitle'] = '{$a}Rephrase settings';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>

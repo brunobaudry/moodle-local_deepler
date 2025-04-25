@@ -90,4 +90,19 @@ final class multilanger_test extends advanced_testcase {
         $field = $this->create_mock_field('unknown_table', 'unknown_field');
         $this->assertEquals('unknown_field', multilanger::findfieldstring($field));
     }
+
+    /**
+     * Test the has_multilandcode_and_others method.
+     *
+     * @covers \local_deepler\local\data\multilanger::has_multilandcode_and_others
+     * @return void
+     */
+    public function test_check_field_has_other_and_sourcetag(): void {
+        $mlanger1 = new multilanger('{mlang other}Other{mlang}{mlang en}English{mlang}');
+        $mlanger2 = new multilanger('Regular text');
+        $mlanger3 = new multilanger('{mlang en}Regular text{mlang}');
+        $this->assertTrue($mlanger1->has_multilandcode_and_others('en'));
+        $this->assertFalse($mlanger2->has_multilandcode_and_others('en'));
+        $this->assertFalse($mlanger3->has_multilandcode_and_others('en'));
+    }
 }

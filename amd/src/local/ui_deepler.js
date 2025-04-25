@@ -175,8 +175,8 @@ define(['core/log',
                 onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
             }
             if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
-                if (config.deeplsourcelang === config.targetlang || config.targetlang === undefined) {
-                    showModal('Cannot call deepl', `<p>Both languages are the same ${config.targetlang}</p>`);
+                if ((!config.canimprove && config.deeplsourcelang === config.targetlang) || config.targetlang === undefined) {
+                    showModal('Cannot call deepl', `<p>${config.uistrings.canttranslatesame} ${config.targetlang}</p>`);
                 } else {
                     callDeeplServices();
                 }
@@ -306,7 +306,6 @@ define(['core/log',
         /**
          * Event listener for selection checkboxes.
          * @param {Event} e
-
          */
         const onItemChecked = (e) => {
             // Check/uncheck checkboxes changes the charcount and icon status.
@@ -314,7 +313,6 @@ define(['core/log',
                 toggleStatus(e.target.getAttribute('data-key'), e.target.checked);
                 countWordAndChar();
             }
-
         };
 
         /**
@@ -464,7 +462,13 @@ define(['core/log',
                         settings[selector] = Utils.toJsonArray(cookie[selector]);
                         break;
                     case 'checkbox':
-                        settings[selector] = cookie[selector] = settingsUI[selector].checked;
+                        if (selector === Selectors.deepl.tagHandling) {
+                            cookie[selector] = settingsUI[selector].checked;
+                            // Exception for tag_handling that checkbox but not boolean value for Deepl.
+                            settings[selector] = settingsUI[selector].checked ? 'html' : 'xml';
+                        } else {
+                            settings[selector] = cookie[selector] = settingsUI[selector].checked;
+                        }
                         break;
                     case 'radio':
                         settings[selector] = cookie[selector] = queryRadioValue(selector);

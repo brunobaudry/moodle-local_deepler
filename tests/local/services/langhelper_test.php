@@ -29,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
+use DeepL\AuthorizationException;
+use DeepL\TooManyRequestsException;
 
 /**
  * Lang helper Test.
@@ -115,7 +117,13 @@ final class langhelper_test extends advanced_testcase {
         if ($this->langhelper->isapikeynoset()) {
             $this->makeenv();
         }
-        $this->langhelper->initdeepl();
+        try {
+            $this->langhelper->initdeepl();
+        } catch (AuthorizationException $e) {
+            $this->assertEquals('Authorization failed: Invalid auth key.', $e->getMessage());
+        } catch (TooManyRequestsException $e) {
+            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
+        }
     }
 
     /**

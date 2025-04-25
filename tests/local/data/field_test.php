@@ -76,15 +76,17 @@ final class field_test extends advanced_testcase {
     /**
      * Test the check_field_has_other_and_sourcetag method.
      *
-     * @covers \local_deepler\local\data\field::check_field_has_other_and_sourcetag
+     * @covers \local_deepler\local\data\field::__construct
+     * @covers \local_deepler\local\data\multilanger::has_multilandcode_and_others
      * @return void
      */
     public function test_check_field_has_other_and_sourcetag(): void {
         $field1 = new field(1, '{mlang other}Other{mlang}{mlang en}English{mlang}', 1, 'shortname', 'course');
         $field2 = new field(2, 'Regular text', 1, 'name', 'course');
-
-        $this->assertTrue($field1->check_field_has_other_and_sourcetag('en'));
-        $this->assertFalse($field2->check_field_has_other_and_sourcetag('en'));
+        $mlanger1 = new multilanger($field1->get_text());
+        $mlanger2 = new multilanger($field2->get_text());
+        $this->assertTrue($mlanger1->has_multilandcode_and_others('en'));
+        $this->assertFalse($mlanger2->has_multilandcode_and_others('en'));
     }
 
     /**

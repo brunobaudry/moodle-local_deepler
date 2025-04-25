@@ -134,8 +134,9 @@ class translateform extends deeplerform {
      */
     public function fieldrowcolumn2(field $field, string $keyid, string $key, bool $isdbkey): void {
         $multilanger = new multilanger($field->get_text());
-        $this->gatherlangcodes($multilanger->findmlangcodes());
-        $hasotherandsourcetag = $field->check_field_has_other_and_sourcetag($this->langpack->currentlang);
+        $alllancodes = $multilanger->findmlangcodes();
+        $this->gatherlangcodes($alllancodes);
+        $hasotherandsourcetag = $multilanger->has_multilandcode_and_others($this->langpack->currentlang);
         $alreadyhasmultilang = $multilanger->has_multilangs();
         $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
         if ($alreadyhasmultilang) {
@@ -147,6 +148,7 @@ class translateform extends deeplerform {
                 $titlestring = get_string('viewsource', 'local_deepler');
                 $badgeclass = 'info';
             }
+            $titlestring .= ' (' . implode(', ', $alllancodes) . ')';
         } else {
             $titlestring = get_string('viewsourcedisabled', 'local_deepler');
             $badgeclass = 'secondary';
