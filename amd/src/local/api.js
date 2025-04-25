@@ -87,9 +87,9 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
     };
     /**
      * Calls Deepl's translation.
-     * @param data
-     * @param options
-     * @param version
+     * @param {object} data
+     * @param {object} options
+     * @param {string} version
      */
     const translate = (data, options, version) => {
         const args = {
@@ -101,9 +101,9 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
     };
     /**
      * Calls Deepl's rephrase.
-     * @param data
-     * @param options
-     * @param version
+     * @param {object} data
+     * @param {object} options
+     * @param {string} version
      */
     const rephrase = (data, options, version) => {
         const args = {

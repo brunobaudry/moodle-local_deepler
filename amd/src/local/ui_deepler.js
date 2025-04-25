@@ -124,32 +124,33 @@ define(['core/log',
          * Get the stored settings for this course and lang pair.
          */
         const fetchCookies = () => {
-            if (config.targetlang) {
-                const glossaryCookie = Utils.getCookie(config);
-                const newCookie = Utils.getEncodedCookie(config);
-                if (newCookie !== null) {
-                    const settingsCookie = JSON.parse(newCookie);
-                    for (const selector in settingsUI) {
-                        if (settingsCookie[selector] !== undefined) {
-                            switch (settingsUI[selector].type) {
-                                case 'checkbox' :
-                                    settingsUI[selector].checked = settingsCookie[selector];
-                                    break;
-                                case 'radio' :
-                                    domQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
-                                    break;
-                                default:
-                                    settingsUI[selector].value = settingsCookie[selector];
-                                    break;
-                            }
-
+            if (!config.targetlang) {
+                return;
+            }
+            const glossaryCookie = Utils.getCookie(config);
+            const newCookie = Utils.getEncodedCookie(config);
+            if (newCookie !== null) {
+                const settingsCookie = JSON.parse(newCookie);
+                for (const selector in settingsUI) {
+                    if (settingsCookie[selector] !== undefined) {
+                        switch (settingsUI[selector].type) {
+                            case 'checkbox' :
+                                settingsUI[selector].checked = settingsCookie[selector];
+                                break;
+                            case 'radio' :
+                                domQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
+                                break;
+                            default:
+                                settingsUI[selector].value = settingsCookie[selector];
+                                break;
                         }
+
                     }
                 }
-                if (glossaryCookie !== null) {
-                    // Legacy cookie.
-                    settingsUI[Selectors.deepl.glossaryId].value = glossaryCookie;
-                }
+            }
+            if (glossaryCookie !== null) {
+                // Legacy cookie.
+                settingsUI[Selectors.deepl.glossaryId].value = glossaryCookie;
             }
         };
         /**

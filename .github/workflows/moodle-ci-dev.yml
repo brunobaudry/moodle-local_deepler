@@ -167,4 +167,4 @@ jobs:
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags=@local_deepler --format-settings='{"behat_increasetimeout":30}' --rerun
+        run: moodle-plugin-ci behat --profile chrome --tags=@local_deepler

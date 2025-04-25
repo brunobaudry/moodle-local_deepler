@@ -320,7 +320,9 @@ define([
                 Selectors.deepl.modelType
             ];
             const s = filterSetting(settings, trSelectors);
+            // eslint-disable-next-line camelcase
             s.target_lang = targetLang.toUpperCase();
+            // eslint-disable-next-line camelcase
             s.show_billed_characters = true;
             return s;
         };
@@ -332,6 +334,7 @@ define([
         const prepareRephraseSettings = (settings)=>{
             const rephraseSelectors = [Selectors.deepl.toneorstyle];
             const s = filterSetting(settings, rephraseSelectors);
+            // eslint-disable-next-line camelcase
             s.target_lang = targetLang.toUpperCase();
             return s;
         };
