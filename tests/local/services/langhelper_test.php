@@ -56,7 +56,13 @@ final class langhelper_test extends advanced_testcase {
         parent::setUp();
         $this->makeenv();
         $this->langhelper = new lang_helper();
-        $this->langhelper->initdeepl();
+        try {
+            $this->langhelper->initdeepl();
+        } catch (AuthorizationException $e) {
+            $this->assertEquals('Authorization failed: Invalid auth key.', $e->getMessage());
+        } catch (TooManyRequestsException $e) {
+            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
+        }
     }
 
     /**
@@ -66,26 +72,31 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_prepareoptionlangs(): void {
-        $optionscourse = $this->langhelper->preparesourcesoptionlangs();
-        $optionstargets = $this->langhelper->preparetargetsoptionlangs();
 
-        $this->assertIsArray($optionscourse);
-        $this->assertIsArray($optionstargets);
-        $this->assertNotEmpty($optionscourse);
-        $this->assertNotEmpty($optionstargets);
+        try {
+            $optionscourse = $this->langhelper->preparesourcesoptionlangs();
+            $optionstargets = $this->langhelper->preparetargetsoptionlangs();
+            $this->assertIsArray($optionscourse);
+            $this->assertIsArray($optionstargets);
+            $this->assertNotEmpty($optionscourse);
+            $this->assertNotEmpty($optionstargets);
 
-        foreach ($optionscourse as $option) {
-            $this->assertArrayHasKey('code', $option);
-            $this->assertArrayHasKey('lang', $option);
-            $this->assertArrayHasKey('selected', $option);
-            $this->assertArrayHasKey('disabled', $option);
+            foreach ($optionscourse as $option) {
+                $this->assertArrayHasKey('code', $option);
+                $this->assertArrayHasKey('lang', $option);
+                $this->assertArrayHasKey('selected', $option);
+                $this->assertArrayHasKey('disabled', $option);
+            }
+            foreach ($optionstargets as $option) {
+                $this->assertArrayHasKey('code', $option);
+                $this->assertArrayHasKey('lang', $option);
+                $this->assertArrayHasKey('selected', $option);
+                $this->assertArrayHasKey('disabled', $option);
+            }
+        } catch (TooManyRequestsException $e) {
+            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
         }
-        foreach ($optionstargets as $option) {
-            $this->assertArrayHasKey('code', $option);
-            $this->assertArrayHasKey('lang', $option);
-            $this->assertArrayHasKey('selected', $option);
-            $this->assertArrayHasKey('disabled', $option);
-        }
+
     }
 
     /**
@@ -96,14 +107,17 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_preparehtmloptions(): void {
-        $htmltargets = $this->langhelper->preparehtmltagets();
-        $htmlsources = $this->langhelper->preparehtmlsources();
-        $this->assertIsString($htmltargets);
-        $this->assertIsString($htmlsources);
-        $this->assertStringContainsString('<option', $htmltargets);
-        $this->assertStringContainsString('<option', $htmlsources);
+        try {
+            $htmltargets = $this->langhelper->preparehtmltagets();
+            $htmlsources = $this->langhelper->preparehtmlsources();
+            $this->assertIsString($htmltargets);
+            $this->assertIsString($htmlsources);
+            $this->assertStringContainsString('<option', $htmltargets);
+            $this->assertStringContainsString('<option', $htmlsources);
+        } catch (TooManyRequestsException $e) {
+            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
+        }
     }
-
     /**
      * Basic setting tests.
      *
