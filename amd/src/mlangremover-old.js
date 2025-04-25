@@ -21,7 +21,7 @@
 // Import libs
 import Selectors from "./selectors";
 import ajax from "core/ajax";
-
+// DELETE ME ONCE LOGIC IS COVERED.
 // Initialize the temporary translations dictionary @todo make external class
 let tempTranslations = {};
 let config = {};
