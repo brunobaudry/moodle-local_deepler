@@ -1,7 +1,7 @@
 name: Moodle Plugin CI DEV or DEBUG
 on:
   push:
-    branches: [ dev, debug ]
+    branches: [ dev ]
 jobs:
   test:
     runs-on: ubuntu-latest
