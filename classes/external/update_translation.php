@@ -155,7 +155,7 @@ class update_translation extends external_api {
      *
      * @param array $data
      * @return void
-     * @throws \dml_exception|\coding_exception
+     * @throws \coding_exception
      */
     public static function preparedata(array &$data): void {
         $datafromkey = field::generatedatfromkey($data['keyid']);

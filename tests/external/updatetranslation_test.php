@@ -17,11 +17,11 @@
 namespace local_deepler\external;
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
+
 require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
 
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
-use local_deepler\local\data\field;
 use local_deepler\local\services\lang_helper;
 
 /**
@@ -133,6 +133,9 @@ final class updatetranslation_test extends base_external {
      * @throws \coding_exception
      */
     public function test_preparetext(array $data, string $fieldtext, array $expected): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
         $this->resetAfterTest();
         update_translation::preparetext($data, $fieldtext);
         $this->assertEquals($expected['text'], $data['text']);
