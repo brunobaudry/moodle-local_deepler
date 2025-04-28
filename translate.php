@@ -45,13 +45,8 @@ global $PAGE;
 global $DB;
 global $USER;
 
-require_once($CFG->dirroot . '/filter/multilang2/filter.php');
-require_once('./classes/output/translate_page.php');
-require_once('./classes/output/nodeepl_page.php');
-require_once('./classes/local/data/course.php');
-require_once('./classes/local/services/lang_helper.php');
 require_once(__DIR__ . '/version.php');
-require_once($CFG->dirroot . '/lib/editorlib.php');
+
 
 // Needed vars for processing.
 try {
@@ -78,7 +73,12 @@ $output = $PAGE->get_renderer('local_deepler');
 // Output header.
 echo $output->header();
 // Course name heading.
-$mlangfilter = new filter_multilang2($context, []);
+try {
+    $mlangfilter = new filter_multilang2\text_filter($context, []);
+} catch (Exception $e) {
+    $mlangfilter = new filter_multilang2($context, []);
+}
+
 echo $output->heading($mlangfilter->filter($course->fullname));
 // Get Language helper.
 $languagepack = new lang_helper();
@@ -88,6 +88,7 @@ try {
     if ($languagepack->iscurrentsupported()) {
         // Set js data.
         $jsconfig = new stdClass();
+        // We get the version from the version dot php file.
         $jsconfig->version = $plugin->release;
         // Adds user ID for security checks in external calls.
         $jsconfig->userid = $USER->id;

@@ -17,6 +17,7 @@
 namespace local_deepler\output;
 
 use core_filters\text_filter;
+use filter_multilang2\text_filter as Multilang2TextFilter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\visibility_interface;
@@ -41,9 +42,9 @@ abstract class deeplerform extends moodleform {
      */
     protected mixed $coursedata;
     /**
-     * @var text_filter
+     * @var text_filter|Multilang2TextFilter
      */
-    protected text_filter $mlangfilter;
+    protected text_filter|Multilang2TextFilter $mlangfilter;
 
     /**
      * Getter for langcodes.
