@@ -3,8 +3,9 @@
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 
-Deepler is a local Moodle plugin that provides automatic machine translation using the ©DeepL Pro Translation api.
-It is developed for those who want to translate a course all on one page,
+Deepler is a local Moodle plugin that provides automatic machine translation or text improvement (not available with ©DeepL free api accounts) using the ©DeepL Pro Translation api.
+
+It is developed for those who want to translate or rephrase a course all on one page,
 without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
@@ -88,7 +89,8 @@ upgrade process.
 
 ### Dependencies
 
-You need a [©DeepL API](https://www.deepl.com/en/pro-api)  Free or Pro account.
+You need a [©DeepL API](https://www.deepl.com/en/pro-api)  Free or Pro account when you want to translate your content from one source to a distinct target.
+You need a [©DeepL API Improve text](https://developers.deepl.com/docs/api-reference/improve-text) Pro account should your need be to rephrase your source in the same language.
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
 ## Configuration
@@ -143,7 +145,20 @@ Usually the default as set below should work fine with Moodle activity content.
 
 ##### Glossaries
 *Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
-DeepL's Glossary ID's are saved by course id + source/target lang pairs in the Cookie for now. 
+
+##### ®Rephrase (NEW since v1.6)
+This is a Pro feature that will rephrase the source text.
+__This is not available with the free API key.__
+
+Text improvement is beta and currently supported for the following target languages: 
+ - de, 
+ - en-GB, en-US, 
+ - es, 
+ - fr, 
+ - it, 
+ - pt-BR, pt-PT.
+For German and english (de, en-GB and en-US) there are some options to choose from to define the tone or writing style.
+![](pix/rephrase_settings.png)
 
 #### Other setting
 
@@ -155,6 +170,9 @@ upon return.
 This setting's default in the editor can be set in the plugin [admin page](#admin).
 
 ![](pix/advanced_settings.png)
+
+#### Cookie (NEW since v1.6)
+All of the advanced settings are saved by course id + source/target lang pairs in the Cookie for one month (each call for sevices resets it).
 
 ### Language selection
 
@@ -197,7 +215,7 @@ To change the source language you'd change Moodle's lang.
 It is important, from a translation standpoint, to **select the source language from the language it was initially written** (and to stick with it).
 
 When first translating your content the plugin will insert ```{mlang other}Your Content...{mlang}``` tags .
-Please checkout the [mlang docs](https://moodle.org/plugins/filter_multilang2) if you are not familiar with Moodle's MLANG concept more.
+Please check out the [mlang docs](https://moodle.org/plugins/filter_multilang2) if you are not familiar with Moodle's MLANG concept more.
 
 ![](pix/source_lang.png)
 
@@ -206,11 +224,25 @@ Please checkout the [mlang docs](https://moodle.org/plugins/filter_multilang2) i
 To change the language you want to translate to, choose a language from the **Target language {mlang XX}** dropdown.
 Note: indeed you cannot translate from and to the same language so buttons and checkboxes would be disabled if so.
 
-#### Unsupported
+#### ® Rephrasing (text improvement) (NEW since v1.6)
+
+DeepL API pro account can now use the rephrase feature to improve the source text.
+
+When selecting a target language that is supported and that is the same as the source language, the ® sign will be enabled in front of the target languages.
+![](pix/rephrase_sources_main_targets.png)
+
+When you selected a target language and a field has outstanding content in another source language than the ® sign will display in front of the single source.
+![](pix/rephrase_single_source.png)
+
+#### Unsupported languages
 
 Language that are not supported by ©DeepL are checked at each session so if your Moodle instance have unsupported languages, you will not be able to select it.
 
+Also if you have a Free account, you cannot select a same source and target languages.
+
 ![](pix/target_lang.png)
+
+
 
 ### Header
 
@@ -279,6 +311,10 @@ Clicking on the TRANSLATION icon will toggle the display of multilang tags and a
 
 ![](pix/multilang_toggle_off.png)
 ![](pix/multilang_toggle_on.png)
+
+##### List of mlang tags for each field (NEW since v1.6)
+Hovering the button shows you all the tags/languages already present in the field.
+![](pix/list_of_tags_in_field.png)
 
 #### Images and medias.
 
@@ -402,13 +438,10 @@ translate your content. When you backup and restore courses, your translations w
 message on the course translation page.
 
 ## Future (todos)
-
-- Machine translation API abstraction to use other services than ©DeepL.
-- Display images all times.
+- Add a glossary import interface.
+- Display images in editors field.
 - Translations versioning.
-- Import glossaries.
 - Multiple API key setting and user mapping.
-- Document translation.
 
 ## Submit an issue
 
