@@ -72,8 +72,11 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_prepareoptionlangs(): void {
-
+        if ($this->langhelper->isapikeynoset()) {
+            $this->makeenv();
+        }
         try {
+            $this->langhelper->initdeepl();
             $optionscourse = $this->langhelper->preparesourcesoptionlangs();
             $optionstargets = $this->langhelper->preparetargetsoptionlangs();
             $this->assertIsArray($optionscourse);
@@ -107,7 +110,11 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_preparehtmloptions(): void {
+        if ($this->langhelper->isapikeynoset()) {
+            $this->makeenv();
+        }
         try {
+            $this->langhelper->initdeepl();
             $htmltargets = $this->langhelper->preparehtmltagets();
             $htmlsources = $this->langhelper->preparehtmlsources();
             $this->assertIsString($htmltargets);
