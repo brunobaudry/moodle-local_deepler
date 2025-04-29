@@ -61,6 +61,7 @@ class translateform extends deeplerform {
         parent::definition();
         global $CFG;
         $this->langpack = $this->_customdata['langpack'];
+        field::$targetlangdeepl = $this->langpack->targetlang;
         // Get source options.
         $this->sourceoptions = $this->langpack->preparehtmlsources();
         // Start moodle form.

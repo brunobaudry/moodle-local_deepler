@@ -1,10 +1,9 @@
-@local @local_deepler @javascript @deepler_menu
-Feature: Check course 'MORE' menu entry with DeepL Translator
-  In order to access plugin functionality
-  As a teacher
-  I need to see the plugin entry in the course 'MORE' menu
+@local @local_deepler @javascript @deepler_page
+Feature: Check the main translator page.
+  As a translator I should see some fields and buttons on the main page.
   Background:
-    Given the following "users" exist:
+    Given I set the DeepL api token to "{{DEEPL_API_TOKEN}}"
+    And the following "users" exist:
       | username | firstname | lastname | email                |
       | teacher1 | Teacher   | One      | teacher1@example.com |
     And the following "courses" exist:
@@ -21,6 +20,5 @@ Feature: Check course 'MORE' menu entry with DeepL Translator
 
   Scenario: Teacher can see the plugin entry in the course 'MORE' menu
     Given I am on the "C1" "course" page
-    Then I should see "Course 1"
     And I navigate to "DeepL Translator" in current page administration
-    Then I should see "DeepL Translator"
+    Then I should see "Advanced settings"

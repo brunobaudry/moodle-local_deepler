@@ -121,6 +121,7 @@ class translate_page implements renderable, templatable {
         $data->rephrasesymbol = lang_helper::REPHRASESYMBOL;
         $data->hidecompatible = count($this->langpacks->findcompatiblelangs()) < 2;
         $data->compatiblelangs = array_map('strval', $this->langpacks->findcompatiblelangs());
+        $data->showhiddenforstudents = get_string('showhiddenforstudents', 'local_deepler', get_string('hiddenfromstudents'));
         // Pass data.
         $data->version = $this->version;
         return $data;

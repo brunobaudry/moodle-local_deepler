@@ -108,7 +108,7 @@ $string['scannedfieldsize_desc'] = 'Small text field are often limited in the da
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
-$string['show'] = 'Show';
+$string['showhiddenforstudents'] = 'Show "{$a}"';
 $string['sourcelang'] =
         'Source lang <em>{mlang other} </em>';
 $string['specialsourcetext'] = 'Use a different source than "{$a}"';
