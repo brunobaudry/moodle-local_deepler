@@ -21,6 +21,7 @@ use filter_multilang2\text_filter as Multilang2TextFilter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\visibility_interface;
+use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\module;
 use local_deepler\local\data\section;
 use moodleform;
@@ -306,10 +307,15 @@ abstract class deeplerform extends moodleform {
     /**
      * Build the header line.
      *
-     * @param editable_interface|iconic_interface $item
+     * @param translatable_interface $item
      * @return string
      */
-    protected function makeactivitydesc(iconic_interface|editable_interface $item): string {
-        return $item->getpluginname() . ': ' . $this->mlangfilter->filter($item->getfields()[0]->get_text());
+    protected function makeactivitydesc(translatable_interface $item): string {
+        $fields = $item->getfields();
+        if (count($fields) > 0) {
+            // If the item has at least a field. We get the first one as description.
+            return $item->getpluginname() . ': ' . $this->mlangfilter->filter($fields[0]->get_text());
+        }
+        return $item->getpluginname();
     }
 }
