@@ -62,10 +62,10 @@ class utils {
      * @throws \dml_exception
      */
     public static function resolve_pluginfiles(field $field): string {
+        $text = $field->get_displaytext();
         try {
             $contextinfo = self::get_context_info($field->get_table(), $field->get_id(), $field->get_cmid());
             $fs = get_file_storage();
-            $text = $field->get_displaytext();
             $filearea = $field->get_tablefield();
             // Get first valid file for metadata.
             $files = $fs->get_area_files(
