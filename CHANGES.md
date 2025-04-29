@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] 2025-04-29
+
+### Added
+- Added doc for save to specific lang when Moodle instance have sub-langs installed.
+
+### Fixed
+- Exception with plugin without 'purpose' field (issue #67).
 
 ## [1.6.1] 2025-04-28
 

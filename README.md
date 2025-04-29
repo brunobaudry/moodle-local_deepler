@@ -46,6 +46,7 @@ Translation workflow being the following:
     + [Target language](#target-language)
     + [® Rephrasing (text improvement) (NEW since v1.6)](#%C2%AE-rephrasing-text-improvement-new-since-v16)
     + [Unsupported languages](#unsupported-languages)
+    + [Saving to sub-languages (new since v1.6)](#saving-to-sub-languages-new-since-v16)
   * [Header](#header)
   * [Filters](#filters)
     + [Up to date:](#up-to-date)
@@ -202,10 +203,7 @@ But will then save it as the main language in the DB.
 
 For example if you have a EN package you will be able to choose either EN-GB or EN-US as your target language, but it will save it as {mlang en}
 
-Make sure you set the correct multilangv2 setting for that matter. 
-
-_It would make sense to allow you, from the interface, to map to which sub language you wish to save your translation.
-Let us know if this is a real need by submitting a GITHUB issue._
+Make sure you set the correct multilangv2 setting for that matter.
 
 #### Source language
 
@@ -244,7 +242,9 @@ Also if you have a Free account, you cannot select a same source and target lang
 
 ![](pix/target_lang.png)
 
-
+#### Saving to sub-languages (new since v1.6)
+If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
+![](pix/save_as_target.png)
 
 ### Header
 
