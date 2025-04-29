@@ -60,7 +60,9 @@ class module implements translatable_interface, editable_interface, iconic_inter
 
         $this->iconurl = $this->cm->get_icon_url();
         $this->pluginname = get_string('pluginname', $this->modname);
-        $this->purpose = call_user_func($this->modname . '_supports', FEATURE_MOD_PURPOSE);
+        $this->purpose = '';
+
+        $this->makepurpose();
 
         $this->link = $this->buildlink();
         $this->fetchchilds();
@@ -185,5 +187,17 @@ class module implements translatable_interface, editable_interface, iconic_inter
      */
     public function getpluginname(): string {
         return $this->pluginname;
+    }
+
+    /**
+     * Prepare the purpose of the module.
+     *
+     * @return void
+     */
+    private function makepurpose(): void {
+        $purpose = call_user_func($this->modname . '_supports', FEATURE_MOD_PURPOSE);
+        if ($purpose) {
+            $this->purpose = $purpose;
+        }
     }
 }
