@@ -35,28 +35,7 @@ function xmldb_local_deepler_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2025043004) {
-
-        // Define table local_deepler to be created.
-        $table = new xmldb_table('local_deepler');
-        // Clear the index to update the field.
-        $langindex = new xmldb_index('t_lang_index', XMLDB_INDEX_NOTUNIQUE, ['t_lang']);
-        if ($dbman->index_exists($table, $langindex)) {
-            $dbman->drop_index($table, $langindex);
-        }
-        // Define fields to be added to local_deepler.
-        $langfield = new xmldb_field('t_lang', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, '');
-
-        // Change field length
-        $dbman->change_field_precision($table, $langfield);
-
-        // Recreate the index.
-        $dbman->add_index($table, $langindex);
-        // Coursetranslator savepoint reached.
-        upgrade_plugin_savepoint(true, 2025043004, 'local', 'deepler');
-    }
     if ($oldversion < 2022050100) {
-
         // Define table local_deepler to be created.
         $table = new xmldb_table('local_deepler');
 
@@ -86,10 +65,28 @@ function xmldb_local_deepler_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022050300) {
-
         // Coursetranslator savepoint reached.
         upgrade_plugin_savepoint(true, 2022050300, 'local', 'deepler');
     }
+    if ($oldversion < 2025043004) {
 
+        // Define table local_deepler to be created.
+        $table = new xmldb_table('local_deepler');
+        // Clear the index to update the field.
+        $langindex = new xmldb_index('t_lang_index', XMLDB_INDEX_NOTUNIQUE, ['t_lang']);
+        if ($dbman->index_exists($table, $langindex)) {
+            $dbman->drop_index($table, $langindex);
+        }
+        // Define fields to be added to local_deepler.
+        $langfield = new xmldb_field('t_lang', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, '');
+
+        // Change field length.
+        $dbman->change_field_precision($table, $langfield);
+
+        // Recreate the index.
+        $dbman->add_index($table, $langindex);
+        // Coursetranslator savepoint reached.
+        upgrade_plugin_savepoint(true, 2025043004, 'local', 'deepler');
+    }
     return true;
 }
