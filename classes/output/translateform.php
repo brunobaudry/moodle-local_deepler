@@ -215,18 +215,21 @@ class translateform extends deeplerform {
         $tneeded = $field->get_status()->istranslationneeded();
         $status = $tneeded ? 'needsupdate' : 'updated';
         $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
-
+        $canrephrase = $this->langpack->get_canimprove();
         $sametargetassource = $this->langpack->isrephrase();
-        if ($sametargetassource || $this->langpack->targetlang === '') {
+        if ((!$canrephrase && $sametargetassource) || $this->langpack->targetlang === '') {
             $buttonclass = 'badge-dark';
-            $titlestring = get_string('canttranslate', 'local_deepler', $this->langpack->targetlang);
+            $titlestring =
+                    get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler', $this->langpack->targetlang);
         } else if ($tneeded) {
             if (str_contains($field->get_text(), "{mlang " . $this->langpack->targetlang)) {
                 $buttonclass = 'badge-warning';
                 $titlestring = get_string('needsupdate', 'local_deepler');
             } else {
-                $buttonclass = 'badge-danger';
-                $titlestring = get_string('nevertranslated', 'local_deepler', $this->langpack->targetlang);
+                $buttonclass = $canrephrase && $sametargetassource ? 'badge-primary' : 'badge-danger';
+                $titlestring = get_string($canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
+                        'local_deepler',
+                        $this->langpack->targetlang);
             }
 
         } else {

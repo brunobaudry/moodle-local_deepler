@@ -40,6 +40,7 @@ $string['deeplapiexception'] = 'DeepL\'s API returned an error';
 $string['deepler:edittranslations'] = 'Edit course translations in DeepL Translator';
 $string['deeplprotitle'] = 'Use DeepL Pro?';
 $string['deeplprotitle_desc'] = 'If enabled use DeepL Pro else the free version of DeepL API.';
+$string['doselecttarget'] = 'Please select a target language.';
 $string['editbutton'] = 'Edit source in place';
 $string['errordbpartial'] = '{$a} of the fields NOT saved in the database. Check manually in place';
 $string['errordbtitle'] = 'Database error';
@@ -60,15 +61,12 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
-$string['letsdobutton'] = 'Lets do';
-$string['mlangremover'] = '{mlang} Remover';
-$string['mlangtagsstring'] = 'Mlang tags';
-
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
 $string['modeltypequalityoptimized'] = 'quality optimized';
 $string['needsupdate'] = 'Needs update';
+$string['neverrephrased'] = 'This text was never improved';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
         ':-( Cannot connect to DeepL API. <br/>Check with your admin. Looks like there is a network issue.';
@@ -84,10 +82,6 @@ $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
-$string['removeselected'] = 'Remove selected (mlang tag & content)';
-$string['removeselectedcontentonly'] = 'Remove selected content';
-$string['removeselectedtagonly'] = 'Remove selected mlang tag';
-$string['removetag'] = 'Remove its mlang tag';
 $string['rephraseinfos'] =
         'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.';
 $string['rephraseoptionsinfos'] =

@@ -31,9 +31,6 @@ if (has_capability('moodle/site:config', context_system::instance())) {
     // Create new settings page.
     $settings = new admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
 
-    // Add to admin menu.
-    $ADMIN->add('localplugins', $settings);
-
     // DeepL apikey.
     $settings->add(
             new admin_setting_configtext(
@@ -83,4 +80,6 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     $plugin->release ?? 'version'
             )
     );
+    // Add to admin menu.
+    $ADMIN->add('localplugins', $settings);
 }

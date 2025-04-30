@@ -46,7 +46,6 @@ Translation workflow being the following:
     + [Target language](#target-language)
     + [® Rephrasing (text improvement) (NEW since v1.6)](#%C2%AE-rephrasing-text-improvement-new-since-v16)
     + [Unsupported languages](#unsupported-languages)
-    + [Saving to sub-languages (new since v1.6)](#saving-to-sub-languages-new-since-v16)
   * [Header](#header)
   * [Filters](#filters)
     + [Up to date:](#up-to-date)
@@ -59,6 +58,7 @@ Translation workflow being the following:
     + [Reviewing past translations and multilang's tags](#reviewing-past-translations-and-multilangs-tags)
     + [Images and medias.](#images-and-medias)
   * [Performing translations](#performing-translations)
+    + [Saving to sub-languages (new since v1.6)](#saving-to-sub-languages-new-since-v16)
   * [Structure](#structure)
 - [User tour (inline tutorial)](#user-tour-inline-tutorial)
 - [WARNINGS](#warnings)
@@ -107,7 +107,11 @@ The context for this capability is set to USER so that you can also assign it to
 
 ### Admin
 
-To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.** From this page you can configure ©DeepL settings, specify wether
+To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.**
+
+![](pix/admin_go.png)
+
+From this page you can configure ©DeepL settings, specify wether
 you are using ©DeepL API Free or ©DeepL API Pro. Visit
 the [©DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
@@ -138,6 +142,8 @@ To begin translating content, visit a course, open the course settings action me
 ![](pix/launch.png)
 
 You will be sent to the translation page for the course.
+
+![](pix/translation_overview.png)
 
 ### Advanced settings
 
@@ -241,10 +247,6 @@ Language that are not supported by ©DeepL are checked at each session so if you
 Also if you have a Free account, you cannot select a same source and target languages.
 
 ![](pix/target_lang.png)
-
-#### Saving to sub-languages (new since v1.6)
-If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
-![](pix/save_as_target.png)
 
 ### Header
 
@@ -362,6 +364,11 @@ The original content **has already MLANG tag** and the source lang is different 
 The original content **has already MLANG tag** and the source lang is different from the main and there were **already a {mlang other**:
 
 `{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+
+#### Saving to sub-languages (new since v1.6)
+If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
+![](pix/save_as_target.png)
+
 
 ### Structure
 
