@@ -15,6 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data\subs\questions;
+
+use local_deepler\local\data\field;
+
 /**
  * Matching question type wrapper.
  *
@@ -36,10 +39,11 @@ class qtype_match extends qbase {
         $substablename = $this->qtype . '_subquestions';
         if ($this->dbmanager->table_exists($substablename)) {
             if ($DB->record_exists($substablename, [$this->qidcolname => $this->question->id])) {
-                $submatches = $DB->record_exists($substablename, [$this->qidcolname => $this->question->id]);
+                $submatches = $DB->get_records($substablename, [$this->qidcolname => $this->question->id]);
                 foreach ($submatches as $submatch) {
                     $subrecord = $DB->get_record($substablename, ['id' => $submatch->id]);
-                    foreach ($this->filterdbtextfields($substablename) as $field) {
+                    $subtablefileds = field::filterdbtextfields($substablename);
+                    foreach ($subtablefileds as $field) {
                         if ($subrecord->{$field} !== null && trim($subrecord->{$field}) !== '') {
                             $fields[] = new field(
                                     $subrecord->id,

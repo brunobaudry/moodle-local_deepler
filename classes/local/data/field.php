@@ -347,6 +347,9 @@ class field {
         $infos = [];
         foreach ($collumns as $collumn) {
             $fieldtextformat = "{$collumn}format";
+            if (!isset($info->{$collumn})) {
+                continue;
+            }
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
                 $infos[] = new field(
                         $info->id,
