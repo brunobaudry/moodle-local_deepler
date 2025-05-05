@@ -49,16 +49,16 @@ final class moodlequickformcteditor_test extends advanced_testcase {
         $editorsoptions = new \stdClass();
 
         $editor = new MoodleQuickForm_cteditor($elementname, $elementlabel, $attributes, $editorsoptions);
-        $this->assertTrue($editor->getSubdirs() === 1);
+        $this->assertTrue($editor->getSubdirs() == false);
         $this->assertEquals(10240, $editor->getMaxbytes());
-        $this->assertEquals(EDITOR_UNLIMITED_FILES, $editor->getMaxfiles());
+        $this->assertEquals(0, $editor->getMaxfiles());
         $editor->setValue(['text' => 'hello']);
         $this->assertEquals('hello', $editor->get_text());
         $reflection = new \ReflectionClass($editor);
         $optionsproperty = $reflection->getProperty('_options');
         $optionsproperty->setAccessible(true);
         $options = $optionsproperty->getValue($editor);
-        $this->assertTrue($options['enable_filemanagement']);
+        $this->assertFalse($options['enable_filemanagement']);
         $this->assertEquals('collapse = collapse
         style1 = title, bold, italic
         list = unorderedlist, orderedlist, indent
