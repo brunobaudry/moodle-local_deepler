@@ -42,12 +42,12 @@ class MoodleQuickForm_cteditor extends MoodleQuickForm_editor {
      */
     public function __construct($elementName = null, $elementLabel = null, $attributes = null, $options = null) { // phpcs:ignore
         // Set custom options.
-        $this->_options['subdirs'] = true;
+        $this->_options['subdirs'] = false;
         $this->_options['maxbytes'] = 10240;
-        $this->_options['maxfiles'] = EDITOR_UNLIMITED_FILES;
+        $this->_options['maxfiles'] = 0;
         $this->_options['noclean'] = true;
         $this->_options['trusttext'] = true;
-        $this->_options['enable_filemanagement'] = true;
+        $this->_options['enable_filemanagement'] = false;
         $this->_options['atto:toolbar'] = 'collapse = collapse
         style1 = title, bold, italic
         list = unorderedlist, orderedlist, indent
