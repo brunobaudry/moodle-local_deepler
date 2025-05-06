@@ -28,6 +28,11 @@ use local_deepler\local\services\utils;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class field {
+    /** @var int */
+    public static int $countsimplefields = 0;
+    /** @var int */
+    public static int $countareafields = 0;
+
     /** @var string */
     public static string $targetlangdeepl = '';
     /**
@@ -71,7 +76,6 @@ class field {
      * @param string $field
      * @param string $table
      * @param int $cmid
-     * @throws \coding_exception
      * @throws \moodle_exception
      */
     public function __construct(
@@ -89,7 +93,10 @@ class field {
         $this->cmid = $cmid;
         $this->displaytext = $this->text = $text;
         if ($this->format === 1) {
+            self::$countareafields++;
             $this->preparetexts();
+        } else {
+            self::$countsimplefields++;
         }
         $this->init_db();
     }
@@ -219,7 +226,7 @@ class field {
      * Building the text attributes.
      *
      * @return void
-     * @throws \coding_exception
+     * @throws \dml_exception
      */
     private function preparetexts(): void {
         if (str_contains($this->displaytext, '@@PLUGINFILE@@')) {
@@ -240,75 +247,6 @@ class field {
         }
         $this->tid = $this->status->get_id();
     }
-
-    /**
-     * Try to find the string of each fields of mod/plugin.
-     *
-     * @return void
-     * @throws \coding_exception
-     *
-     * private function search_field_strings(): void {
-     * // Try to find the activity names as well as the field translated in the current lang.
-     * if ($this->table === 'course') {
-     * $this->translatedfieldname = get_string($this->field);
-     * } else if ($this->table === 'course_sections') {
-     * if ($this->field === 'name') {
-     * $this->translatedfieldname = get_string('sectionname');
-     * } else if ($this->field === 'summary') {
-     * $this->translatedfieldname = get_string('description');
-     * }
-     * } else {
-     * if ($this->field === 'intro') {
-     * $this->translatedfieldname = get_string('description');
-     * } else if ($this->field === 'name') {
-     * $this->translatedfieldname = get_string('name');
-     * } else {
-     * // One should be better than the other.
-     * $this->translatedfieldname = $this->findoutstanding();
-     * }
-     * }
-     * }
-     */
-    /**
-     * Find the string in the Moodle database.
-     *
-     * @return string
-     * @throws \coding_exception
-     *
-     * private function findoutstanding(): string {
-     * $foundstring = $this->field;
-     *
-     * // Extract plugin component from table name.
-     * $tableparts = explode('_', $this->table, 2);
-     * $plugincomponent = isset($tableparts[1]) ? 'mod_' . $tableparts[0] : '';
-     *
-     * $candidates = [
-     * ['identifier' => $this->field, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
-     * ['identifier' => $this->field, 'component' => 'core'], // Standard Moodle core strings.
-     * ['identifier' => $this->field, 'component' => 'moodle'], // Standard Moodle core strings.
-     * ['identifier' => $this->field, 'component' => 'question'], // Standard Moodle core strings.
-     * ['identifier' => $this->field . 'n', 'component' => 'question'], // Standard Moodle core strings.
-     * ['identifier' => $this->field, 'component' => $this->table], // Standard Moodle core strings.
-     * ['identifier' => $this->table . '_' . $this->field, 'component' => $plugincomponent], // Common field patterns.
-     * ['identifier' => $this->table . '_' . $this->field, 'component' => 'core'], // Common field patterns.
-     * ['identifier' => $this->field, 'component' => 'datafield_' . $this->field], // Field type specific (data activity).
-     * ['identifier' => $this->table . $this->field, 'component' => $plugincomponent], // Legacy patterns.
-     * ];
-     * foreach ($candidates as $candidate) {
-     * if (empty($candidate['component'])) {
-     * continue;
-     * }
-     *
-     * if (get_string_manager()->string_exists($candidate['identifier'], $candidate['component'])) {
-     * return get_string($candidate['identifier'], $candidate['component'], $this->id);
-     * }
-     * }
-     *
-     * return $foundstring;
-     * }
-     */
-
-
 
     /**
      * Filter the text fields of a table.
