@@ -96,6 +96,10 @@ You need a [©DeepL API](https://www.deepl.com/en/pro-api)  Free or Pro account 
 You need a [©DeepL API Improve text](https://developers.deepl.com/docs/api-reference/improve-text) Pro account should your need be to rephrase your source in the same language.
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
+
+> (Prefer using the Atto editor when translating if your course as lots of activities and quiz questions, 
+> as Tiny does lots of http calls. Fix will come someday... see issue #69)
+
 ## Configuration
 see [Coding, Debugging and Contributing](#coding-debugging-and-contributing) if you intend to help improving this plugin, or just if you are an admin and want to do some test in a dedicated sandbox.
 
@@ -137,7 +141,7 @@ Size this here based on your main language properties and the number on language
 
 ## Translating
 
-To begin translating content, visit a course, open the course settings action menu, and then go to **Course Translator**.
+To begin translating content, visit a course, open the course settings action menu, and then go to **DeepL Translator**.
 
 ![](pix/launch.png)
 
@@ -421,7 +425,7 @@ Should work with the following editors:
 
 - Plaintext
 - Atto
-- Tiny°
+- Tiny° (Prefer Atto if your course as lots of activities and quiz questions, as Tiny does lots of http calls. Fix will come someday... see issue #69)
 - Marklar
 
 °Tiny editor has an autosave function by default. This can be annoying/puzzling when you switch languages and see the previous language cached in the textarea.
