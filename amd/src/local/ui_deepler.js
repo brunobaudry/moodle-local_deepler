@@ -110,7 +110,9 @@ define(['core/log',
                 settingsUI[Selectors.deepl.splitSentences] = domQuery(Selectors.deepl.splitSentences);
                 settingsUI[Selectors.deepl.splittingTags] = domQuery(Selectors.deepl.splittingTags);
                 settingsUI[Selectors.deepl.tagHandling] = domQuery(Selectors.deepl.tagHandling);
-                settingsUI[Selectors.deepl.toneorstyle] = domQuery(Selectors.deepl.toneorstyle);
+                if (!config.isfree) {
+                    settingsUI[Selectors.deepl.toneorstyle] = domQuery(Selectors.deepl.toneorstyle);
+                }
                 settingsUI[Selectors.actions.escapeLatex] = domQuery(Selectors.actions.escapeLatex);
                 settingsUI[Selectors.actions.escapePre] = domQuery(Selectors.actions.escapePre);
                 fetchCookies();
