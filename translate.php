@@ -95,8 +95,7 @@ try {
         // Adds the user's prefered editor to the jsconfig.
         $defaulteditor = strstr($CFG->texteditors, ',', true);
         $userprefs = get_user_preferences();
-        $userseditor = $userprefs['htmleditor'];
-        $jsconfig->userPrefs = $userseditor ?? $defaulteditor;
+        $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
         // Adds course id.
         $jsconfig->courseid = $courseid;
         // Add the debug setting for logger.
