@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.7] 2025-05-21
 ### Fixed
 - Book chapter title wrong db field.
-- 
 
 ## [1.6.9.2] 2025-05-08
 ### Fixed
