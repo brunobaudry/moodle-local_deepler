@@ -61,11 +61,11 @@ final class book_test extends advanced_testcase {
         $this->assertEquals('Chapter 1', $fields[2]->get_text());
         $this->assertEquals('Content 1', $fields[3]->get_text());
         $this->assertEquals('book_chapters', $fields[0]->get_table());
-        $this->assertEquals('chapter', $fields[0]->get_tablefield());
+        $this->assertEquals('title', $fields[0]->get_tablefield());
         $this->assertEquals('book_chapters', $fields[1]->get_table());
         $this->assertEquals('content', $fields[1]->get_tablefield());
         $this->assertEquals('book_chapters', $fields[2]->get_table());
-        $this->assertEquals('chapter', $fields[2]->get_tablefield());
+        $this->assertEquals('title', $fields[2]->get_tablefield());
         $this->assertEquals('book_chapters', $fields[3]->get_table());
         $this->assertEquals('content', $fields[3]->get_tablefield());
     }
