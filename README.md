@@ -32,6 +32,7 @@ Translation workflow being the following:
 - [Configuration](#configuration)
   * [Permissions (Moodle capability)](#permissions-moodle-capability)
   * [Admin](#admin)
+    + [Tell the browser not to render embed iframes by default.](#tell-the-browser-not-to-render-embed-iframes-by-default)
     + [Default value Escape LaTeX (in the courses translation page "Advanced Settings")](#default-value-escape-latex-in-the-courses-translation-page-advanced-settings)
     + [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
     + [Minimum textfield size](#minimum-textfield-size)
@@ -120,6 +121,9 @@ you are using ©DeepL API Free or ©DeepL API Pro. Visit
 the [©DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
+#### Tell the browser not to render embed iframes by default.
+Sometimes iframes can overlap the user interface toggle this to show/hide all iframes in the source text display.
+
 #### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
 
 Set to true will check "escape LaTeX formulas", in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
@@ -182,7 +186,11 @@ When this is set, Deepler will seek $$...$$ string, replace by a token, send to 
 upon return.
 This setting's default in the editor can be set in the plugin [admin page](#admin).
 
+##### Tell the browser not to render embed iframes. (NEW since v1.7)
+Toggle this to show/hide iframes in the source texts.
+
 ![](pix/advanced_settings.png)
+
 
 #### Cookie (NEW since v1.6)
 All of the advanced settings are saved by course id + source/target lang pairs in the Cookie for one month (each call for sevices resets it).

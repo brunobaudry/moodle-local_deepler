@@ -45,6 +45,7 @@ export default {
         letsdobutton: '[data-action="local_mlangremover/letsdobutton"]', //
         removeRadios: '[name="local_mlangremover/removehow"]', //
         removehow: '[name="local_mlangremover/removehow"]:checked', //
+        hideiframes: '#local_deepler__hideiframes #hideiframes',
     },
     statuses: {
         sourceTextWarings: '[data-status="sourceTextWarings"]',
@@ -101,7 +102,8 @@ export default {
         sourcelang: '#local_deepler__sourcelang strong',
         targetlang: '#local_deepler__targetlang strong',
         multilangs: '#<KEY>',
-        parentrow: '[data-row-id="<KEY>"]'
+        parentrow: '[data-row-id="<KEY>"]',
+        iframes: '.local_deepler__source-text iframe'
     },
     deepl: {
         context: '[data-id="local_deepler/context"]',

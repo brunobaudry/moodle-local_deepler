@@ -116,6 +116,7 @@ class translate_page implements renderable, templatable {
         $data->mlangfilter = $this->mlangfilter;
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
+        $data->hideiframesdefault = get_config('local_deepler', 'hideiframesadmin') ? 'checked' : '';
         $data->canimprove = $this->langpacks->get_canimprove();
         $data->supportedlangs = implode(', ', $this->langpacks->get_deeplrephraselangs());
         $data->rephrasesymbol = lang_helper::REPHRASESYMBOL;

@@ -242,6 +242,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     <label class="custom-control-label" for="preescape">{{#str}}preescape,local_deepler{{/str}}</label>
                 </div>
             </div>
+            <div id="local_deepler__hideiframes">
+                <div class="mt-1 custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="hideiframes" data-id="local_deepler/hideiframes" {{hideiframesdefault}}>
+                    <label class="custom-control-label" for="hideiframes">{{#str}}hideiframes,local_deepler{{/str}}</label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -250,7 +256,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <div class="row py-4" id="local_deepler__sourcetarget">
         <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h4></div>
         <!--div class="col-2">
-            <select class="form-control" id="source_lang"
+            <select class="form-control w-25" id="source_lang"
                     data-action="local_deepler/source-switcher">
                 {{#langs}}
                     <option value="{{ code }}" {{selected}} {{disabled}}>{{ lang }}</option>

@@ -37,6 +37,9 @@ define(['core/log',
      Utils,
      Events,
      ScrollSpy) => {
+        let hideiframes = {};
+        // Store removed iframes and their parent/next sibling for restoration.
+        let removedIframes = [];
 
         let config = {};
         let langstrings = {};
@@ -66,8 +69,8 @@ define(['core/log',
                 saveAllModal.hide();
             }
             if (errors.length > 0) {
-                let s = config.uistrings.errordbpartial;
-                s.replace('{$a}', errors.length);
+                let s = langstrings.uistrings.errordbpartial;
+                s = s.replace('{$a}', errors.length);
                 showModal(errordbtitle, s, 'Alert');
             }
         };
@@ -93,6 +96,7 @@ define(['core/log',
          */
         const registerUI = () => {
             try {
+                hideiframes = domQuery(Selectors.actions.hideiframes);
                 langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
                 errordbtitle = langstrings.uistrings.errordbtitle;
                 saveAllBtn = domQuery(Selectors.actions.saveAll);
@@ -161,8 +165,8 @@ define(['core/log',
          */
         const launchModal = async() => {
             saveAllModal = await Modal.create({
-                title: config.uistrings.saveallmodaltitle,
-                body: config.uistrings.saveallmodalbody,
+                title: langstrings.uistrings.saveallmodaltitle,
+                body: langstrings.uistrings.saveallmodalbody,
             });
             await saveAllModal.show();
         };
@@ -178,7 +182,7 @@ define(['core/log',
             }
             if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
                 if ((!config.canimprove && config.deeplsourcelang === config.targetlang) || config.targetlang === undefined) {
-                    showModal('Cannot call deepl', `<p>${config.uistrings.canttranslatesame} ${config.targetlang}</p>`);
+                    showModal('Cannot call deepl', `<p>${langstrings.uistrings.canttranslatesame} ${config.targetlang}</p>`);
                 } else {
                     callDeeplServices();
                 }
@@ -196,11 +200,53 @@ define(['core/log',
                 saveSingleTranslation(e);
             }
         };
+
+        /**
+         * Toggle iFrames in sourcetexts.
+         * @param {boolean} isChecked
+         */
+        function doHideiframes(isChecked) {
+            Log.info('doHideiframes');
+            Log.info(isChecked);
+            const allIframes = domQueryAll(Selectors.sourcetexts.iframes);
+
+            if (isChecked && allIframes.length > 0) {
+                removedIframes = [];
+                allIframes.forEach(iframe => {
+                    removedIframes.push({
+                        parent: iframe.parentNode,
+                        nextSibling: iframe.nextSibling,
+                        html: iframe.outerHTML
+                    });
+                    iframe.remove();
+                });
+            } else if (removedIframes.length > 0) {
+                // Restore all previously removed iframes.
+                removedIframes.forEach(info => {
+                    // Create a new element from the stored HTML.
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = info.html;
+                    const newIframe = tempDiv.firstChild;
+                    // Insert it back into the DOM
+                    if (info.nextSibling) {
+                        info.parent.insertBefore(newIframe, info.nextSibling);
+                    } else {
+                        info.parent.appendChild(newIframe);
+                    }
+                });
+                removedIframes = [];
+            }
+        }
+
         /**
          * Event listener for change events.
          * @param {event} e
          */
         const handleChangeEvent = (e) => {
+            window.console.info('CHANGE');
+            if (e.target.closest(Selectors.actions.hideiframes)) {
+                doHideiframes(e);
+            }
             if (e.target.closest(Selectors.actions.targetSwitcher)) {
                 switchTarget(e);
             }
@@ -457,27 +503,32 @@ define(['core/log',
             let settings = {};
             let cookie = {};
             for (const selector in settingsUI) {
-                switch (settingsUI[selector].type) {
-                    case 'textarea':
-                        cookie[selector] = settingsUI[selector].value;
-                        // Deepl needs an array.
-                        settings[selector] = Utils.toJsonArray(cookie[selector]);
-                        break;
-                    case 'checkbox':
-                        if (selector === Selectors.deepl.tagHandling) {
-                            cookie[selector] = settingsUI[selector].checked;
-                            // Exception for tag_handling that checkbox but not boolean value for Deepl.
-                            settings[selector] = settingsUI[selector].checked ? 'html' : 'xml';
-                        } else {
-                            settings[selector] = cookie[selector] = settingsUI[selector].checked;
-                        }
-                        break;
-                    case 'radio':
-                        settings[selector] = cookie[selector] = queryRadioValue(selector);
-                        break;
-                    default: // Text.
-                        settings[selector] = cookie[selector] = settingsUI[selector].value;
-                        break;
+                if (settingsUI[selector] === null) {
+                    Log.warn(`prepareSettingsAndCookieValues. Could not find selector ${selector}`);
+                    window.console.warn(settingsUI);
+                } else {
+                    switch (settingsUI[selector].type) {
+                        case 'textarea':
+                            cookie[selector] = settingsUI[selector].value;
+                            // Deepl needs an array.
+                            settings[selector] = Utils.toJsonArray(cookie[selector]);
+                            break;
+                        case 'checkbox':
+                            if (selector === Selectors.deepl.tagHandling) {
+                                cookie[selector] = settingsUI[selector].checked;
+                                // Exception for tag_handling that checkbox but not boolean value for Deepl.
+                                settings[selector] = settingsUI[selector].checked ? 'html' : 'xml';
+                            } else {
+                                settings[selector] = cookie[selector] = settingsUI[selector].checked;
+                            }
+                            break;
+                        case 'radio':
+                            settings[selector] = cookie[selector] = queryRadioValue(selector);
+                            break;
+                        default: // Text.
+                            settings[selector] = cookie[selector] = settingsUI[selector].value;
+                            break;
+                    }
                 }
             }
             return [cookie, settings];
@@ -830,6 +881,7 @@ define(['core/log',
             registerUI();
             registerEventListeners();
             toggleAutotranslateButton();
+            doHideiframes(hideiframes.checked);
             saveAllBtn.disabled = true;
             selectAllBtn.disabled = !Translation.isTranslatable();
             checkboxes.forEach((node) => {

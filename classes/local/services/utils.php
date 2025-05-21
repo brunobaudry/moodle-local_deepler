@@ -105,7 +105,6 @@ class utils {
             }
 
         } catch (Exception $e) {
-            debugging("File error: {$e->getMessage()}");
             return $text; // Fail gracefully.
         }
     }

@@ -56,7 +56,7 @@ class book {
         $table = 'book_chapters';
         foreach ($this->chapters as $c) {
             $fields[] = new field($c->id,
-                    $c->title, 0, 'chapter', $table, $this->book->id);
+                    $c->title, 0, 'title', $table, $this->book->id);
             $fields[] = new field($c->id,
                     $c->content, 1, 'content', $table, $this->book->id);
         }
