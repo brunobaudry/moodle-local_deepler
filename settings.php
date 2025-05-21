@@ -42,6 +42,15 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     40
             )
     );
+    // Do set if escaping hidding iframes is default.
+    $settings->add(
+            new admin_setting_configcheckbox(
+                    'local_deepler/hideiframesadmin',
+                    get_string('hideiframesadmin', 'local_deepler'),
+                    get_string('hideiframesadmin_desc', 'local_deepler'),
+                    false
+            )
+    );
     // Do set if escaping LaTeX tag is default.
     $settings->add(
             new admin_setting_configcheckbox(
