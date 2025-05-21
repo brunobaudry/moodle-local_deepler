@@ -53,6 +53,7 @@ $string['formalitymore'] = 'more';
 $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
 $string['glossaryid'] = 'Glossary id';
+$string['glossaryid_placeholder'] = 'Glossary id should you have one...';
 $string['hideiframes'] = 'Tell the browser not to render embed iframes.';
 $string['hideiframesadmin'] = 'Tell the browser not to render embed iframes by default.';
 $string['hideiframesadmin_desc'] =
