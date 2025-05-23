@@ -156,4 +156,32 @@ class utils {
                 ];
         }
     }
+
+    /**
+     * Helper to make sure attributes generated from text are compatible.
+     *
+     * @param string $text
+     * @return string
+     */
+    public static function makehtmlid(string $text): string {
+        // Convert to lowercase.
+        $text = strtolower($text);
+
+        // Replace spaces and underscores with hyphens.
+        $text = preg_replace('/[\s_]+/', '-', $text);
+
+        // Remove all characters that are not alphanumeric or hyphens.
+        $text = preg_replace('/[^a-z0-9\-]/', '', $text);
+
+        // Ensure it doesn't start with a digit.
+        if (preg_match('/^[0-9]/', $text)) {
+            $text = 'id-' . $text;
+        }
+
+        // Trim hyphens from start and end.
+        $text = trim($text, '-');
+
+        return $text;
+    }
+
 }

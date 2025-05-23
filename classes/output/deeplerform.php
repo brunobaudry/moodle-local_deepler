@@ -24,6 +24,7 @@ use local_deepler\local\data\interfaces\visibility_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\module;
 use local_deepler\local\data\section;
+use local_deepler\local\services\utils;
 use moodleform;
 
 /**
@@ -200,8 +201,9 @@ abstract class deeplerform extends moodleform {
      * @throws \coding_exception
      */
     protected function makeheader(string $title, string $link, int $level, string $icon = ''): string {
+        $t = Utils::makehtmlid($title);
         $class = "h$level sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2";
-        return "<span id='$title' class='$class'>$icon $title {$this->makeeditbutton($link)}</span>";
+        return "<span id='$t' class='$class'>$icon $title {$this->makeeditbutton($link)}</span>";
     }
 
     /**

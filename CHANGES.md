@@ -5,10 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1]
+### Fixed
+- Sections' id generated from header text for breadcrumb could break the html.
+- TinyMCE slowing down the pages on initial load. Now it will be loaded only if the user wants to modify the translation. If TinyMCE is your prefered editor the plugin will initiate the page with a simple editable div. Only should you need to modify the recieved translation from
+  DeepL, the plugin will load a basic TinyMCE for you to do so upon clicking inside the field.
+
+### Added.
+- TinyMCE load on demand.
+
 ## [1.7] 2025-05-21
 ### Fixed
 - Book chapter title wrong db field.
-### Added source text iFrame toggler.
+### Added 
+- source text iFrame toggler.
 
 ## [1.6.9.2] 2025-05-08
 ### Fixed

@@ -54,10 +54,10 @@ $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
 $string['glossaryid'] = 'Glossary id';
 $string['glossaryid_placeholder'] = 'Glossary id should you have one...';
-$string['hideiframes'] = 'Tell the browser not to render embed iframes.';
-$string['hideiframesadmin'] = 'Tell the browser not to render embed iframes by default.';
+$string['hideiframes'] = 'Render embed iframes in source text.';
+$string['hideiframesadmin'] = 'Select this if you want rendering embed iframes be the default.';
 $string['hideiframesadmin_desc'] =
-        'Sometimes iframes can overlap the user interface toggle this to show/hide all iframes in the source text display';
+        'Sometimes iframes can overlap the user interface, or alter the browser\'s performances.';
 $string['ignoretags'] = 'Tags to ignore';
 $string['keepselected'] = 'Keep selected';
 $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';

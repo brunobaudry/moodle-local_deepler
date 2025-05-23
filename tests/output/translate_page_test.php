@@ -47,6 +47,7 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor(): void {
+
         $this->resetAfterTest();
         filter_set_global_state('multilang2', TEXTFILTER_ON);
         if (!class_exists('\core_filters\text_filter')) {
@@ -63,9 +64,8 @@ final class translate_page_test extends advanced_testcase {
 
         $version = '1.0';
 
-        $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version);
+        $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $this->geteditor());
 
-        $this->assertInstanceOf(translate_page::class, $translatepage);
         $this->assertEquals('1.0', $this->getprivateproperty($translatepage, 'version'));
         $this->assertSame($coursedata, $this->getprivateproperty($translatepage, 'coursedata'));
         $this->assertSame($mlangfilter, $this->getprivateproperty($translatepage, 'mlangfilter'));
@@ -95,7 +95,7 @@ final class translate_page_test extends advanced_testcase {
 
         $version = '1.0';
 
-        $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version);
+        $translatepage = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $this->geteditor());
 
         $output = $this->createMock(renderer_base::class);
         $data = $translatepage->export_for_template($output);
@@ -122,6 +122,7 @@ final class translate_page_test extends advanced_testcase {
      * @param object $object
      * @param string $property
      * @return mixed
+     * @throws \ReflectionException
      */
     private function getprivateproperty($object, $property) {
         $reflection = new ReflectionClass($object);
@@ -140,5 +141,17 @@ final class translate_page_test extends advanced_testcase {
         echo "\n" . $info . "\n";
         var_dump($var);
         ob_flush();
+    }
+
+    /**
+     * Get the site editor. Either the default or users.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    private function geteditor(): string {
+        global $CFG;
+        $defaulteditor = strstr($CFG->texteditors, ',', true);
+        return get_user_preferences()['htmleditor'] ?? $defaulteditor;
     }
 }

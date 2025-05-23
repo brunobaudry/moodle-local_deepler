@@ -75,10 +75,7 @@ export default {
         removetag: '#local_mlangremover__removetag', //
     },
     editors: {
-        textarea: '[data-action="local_deepler/textarea"',
-        all: '[data-action="local_deepler/editor"]',
-        iframes: '[data-action="local_deepler/editor"] iframe',
-        contentEditable: '[data-action="local_deepler/editor"] [contenteditable="true"]',
+        targetarea: '[data-format="1"]',
         multiples: {
             checkBoxesWithKey: 'input[type="checkbox"][data-key="<KEY>"]',
             checkBoxesWithKeyHidden: '.local_deeplerinvisible input[type="checkbox"][data-key]',

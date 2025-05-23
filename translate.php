@@ -38,6 +38,7 @@ use local_deepler\output\nodeepl_page;
 use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
+
 require_once(__DIR__ . '/../../config.php');
 
 global $CFG;
@@ -107,7 +108,7 @@ try {
         // Create the structure.
         $coursedata = new course($course);
         // Build the page.
-        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release);
+        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release, $jsconfig->userPrefs);
         echo $output->render($renderable);
     } else {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));

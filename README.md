@@ -433,12 +433,14 @@ Should work with the following editors:
 
 - Plaintext
 - Atto
-- Tiny° (Prefer Atto if your course as lots of activities and quiz questions, as Tiny does lots of http calls. Fix will come someday... see issue #69)
+- Tiny°
 - Marklar
 
-°Tiny editor has an autosave function by default. This can be annoying/puzzling when you switch languages and see the previous language cached in the textarea.
-Until we find a satisfying way to disable that behaviour from the plugin. As a Moodle admin disabling *AutoSave* from Admin>Plugins>Text-Editors>TinyMCE>General settings.
-
+°Tiny editor: When a user has TinyMCE as prefered editor (Default behaviour since 4.4+) and if your moodle instance added TinyMCE funky plugin, it makes tons of http call upon 
+loading.
+NEW since v1.7.1: If TinyMCE is your prefered editor the plugin will initiate the page with a simple editable div. Only should you need to modify the recieved translation from 
+DeepL, the plugin will load a basic TinyMCE for you to do so upon clicking inside the field.
+In a future version you will have the choice between the above behaviour and loading a modal with the full TinyMCE with all your fancy plugins.
 
 ### Coding
 
