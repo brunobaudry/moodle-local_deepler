@@ -44,8 +44,6 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                     action: 'update'
                 },
                 done: (response) => {
-                   Log.info(`api/updateTranslationsInDb/done::response`);
-                   Log.info(response);
                     if (response.length === 1 && response[0].error && response[0].keyid === '') {
                         Log.warn(`api/updateTranslationsInDb/done::response has errors`);
                         Events.emit(TR_DB_FAILED, response[0].error);
@@ -74,8 +72,6 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             methodname: endPoint,
             args: args,
             done: (response) => {
-                Log.debug(`${endPoint} api/translate/done::response`);
-                Log.debug(response);
                 Events.emit(successEvent, response);
             },
             fail: (jqXHR, status, error) => {

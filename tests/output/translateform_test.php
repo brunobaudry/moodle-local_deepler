@@ -83,6 +83,7 @@ final class translateform_test extends advanced_testcase {
                 'coursedata' => $coursedata,
                 'langpack' => $this->langhelper,
                 'mlangfilter' => $this->mlangfilter,
+                'editor' => $this->geteditor(),
         ];
         multilanger::$translatedfields = ["course#fullname" => ''];
         // Instantiate the form.
@@ -100,5 +101,17 @@ final class translateform_test extends advanced_testcase {
         // Check if the form elements are added correctly.
         $elements = $mform->getAttributes();
         $this->assertNotEmpty($elements);
+    }
+
+    /**
+     * Get the site editor. Either the default or users.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    private function geteditor(): string {
+        global $CFG;
+        $defaulteditor = strstr($CFG->texteditors, ',', true);
+        return get_user_preferences()['htmleditor'] ?? $defaulteditor;
     }
 }

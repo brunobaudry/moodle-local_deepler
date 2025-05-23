@@ -354,12 +354,8 @@ define([
         };
         /**
          * Check if the item is translatable.
-         * @todo MDL-0000 implement in v1.4.0 (return based on local source)
-         * @param {string} sourceLang
          */
-        const isTranslatable = (sourceLang = '') =>{
-             Log.info(targetLang, sourceLang, targetLang === (sourceLang === '' ? mainSourceLang : sourceLang));
-            // Return targetLang !== (sourceLang === '' ? mainSourceLang : sourceLang);
+        const isTranslatable = () =>{
             return targetLang !== '';
         };
         /**

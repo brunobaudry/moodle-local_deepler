@@ -49,8 +49,8 @@ class translateform extends deeplerform {
      * @var string dropdown options for source language.
      */
     private string $sourceoptions;
-
-
+    /** @var string */
+    private string $editor;
     /**
      * Define Moodle Form.
      *
@@ -60,6 +60,7 @@ class translateform extends deeplerform {
     public function definition(): void {
         parent::definition();
         global $CFG;
+        $this->editor = $this->_customdata['editor'];
         $this->langpack = $this->_customdata['langpack'];
         field::$targetlangdeepl = $this->langpack->targetlang;
         // Get source options.
@@ -104,14 +105,21 @@ class translateform extends deeplerform {
                 class='format-{$fieldformat} border py-2 px-3'
                 contenteditable='true'
                 data-format='{$fieldformat}'>" . DIV_CLOSE; // No wisiwig editor text fields.
+        $unloadedtiny = "<div
+                id='tiny_{$key}'
+                class='format-{$fieldformat} border py-2 px-3'
+                contenteditable='true'
+                data-format='{$fieldformat}'>" . DIV_CLOSE; // Tiny editor text fields (initialize after focus).
 
         // Column 3 Layout.
         $this->_form->addElement('html', $translatededitor); // Open $translatededitor.
         if ($fieldformat === 0) { // Plain text input.
             $this->_form->addElement('html', $nowisiwig);
-        } else {
+        } else if ($this->editor !== 'tiny') {
             $this->_form->addElement('cteditor', $key);
             $this->_form->setType($key, PARAM_RAW);
+        } else {
+            $this->_form->addElement('html', $unloadedtiny);
         }
         $this->_form->addElement('html', DIV_CLOSE); // Closing $translatededitor.
         // Status button.

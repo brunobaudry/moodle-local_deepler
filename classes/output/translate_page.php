@@ -64,6 +64,8 @@ class translate_page implements renderable, templatable {
      * @var \renderer_base
      */
     private renderer_base $output;
+    /** @var string */
+    private string $editor;
 
     /**
      * Class Construct.
@@ -72,16 +74,17 @@ class translate_page implements renderable, templatable {
      * @param mixed $mlangfilter
      * @param lang_helper $languagepack
      * @param string $version
+     * @param string $editor
      */
-    public function __construct(course $coursedata, mixed $mlangfilter, lang_helper $languagepack,
-            string $version) {
+    public function __construct(course $coursedata, mixed $mlangfilter, lang_helper $languagepack, string $version,
+            string $editor) {
         $this->version = $version;
         $this->coursedata = $coursedata;
         $this->langpacks = $languagepack;
         $this->mlangfilter = $mlangfilter;
         // Moodle Form.
         $mform = new translateform(null, ['coursedata' => $coursedata, 'mlangfilter' => $mlangfilter,
-                'langpack' => $languagepack,
+                'langpack' => $languagepack, 'editor' => $editor,
         ]);
         $this->mform = $mform;
     }

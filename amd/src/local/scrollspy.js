@@ -24,7 +24,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see https://github.com/angelikatyborska
  */
-define(['core/log'], (Log) => {
+define([], () => {
     let OFFSET_TOP;
     let ARTICLE;
     let CONTAINER;
@@ -173,7 +173,6 @@ define(['core/log'], (Log) => {
         return Math.min(opacityTop, opacityBottom);
     };
     const init = (article, breadcrumbsContainer, options) =>{
-        Log.debug(`local_deepler/scrollspy/init`);
         ARTICLE = document.querySelector(article);
         CONTAINER = document.querySelector(breadcrumbsContainer);
         END_OF_ARTICLE = ARTICLE.offsetTop + ARTICLE.offsetHeight;

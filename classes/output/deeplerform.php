@@ -24,6 +24,7 @@ use local_deepler\local\data\interfaces\visibility_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\module;
 use local_deepler\local\data\section;
+use local_deepler\local\services\utils;
 use moodleform;
 
 /**
@@ -200,8 +201,9 @@ abstract class deeplerform extends moodleform {
      * @throws \coding_exception
      */
     protected function makeheader(string $title, string $link, int $level, string $icon = ''): string {
+        $t = Utils::makehtmlid($title);
         $class = "h$level sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2";
-        return "<span id='$title' class='$class'>$icon $title {$this->makeeditbutton($link)}</span>";
+        return "<span id='$t' class='$class'>$icon $title {$this->makeeditbutton($link)}</span>";
     }
 
     /**
@@ -318,4 +320,26 @@ abstract class deeplerform extends moodleform {
         }
         return $item->getpluginname();
     }
+
+    function makeHtmlId($text) {
+        // Convert to lowercase
+        $text = strtolower($text);
+
+        // Replace spaces and underscores with hyphens
+        $text = preg_replace('/[\s_]+/', '-', $text);
+
+        // Remove all characters that are not alphanumeric or hyphens
+        $text = preg_replace('/[^a-z0-9\-]/', '', $text);
+
+        // Ensure it doesn't start with a digit
+        if (preg_match('/^[0-9]/', $text)) {
+            $text = 'id-' . $text;
+        }
+
+        // Trim hyphens from start and end
+        $text = trim($text, '-');
+
+        return $text;
+    }
+
 }

@@ -22,6 +22,7 @@
 
 
 define(['core/log',
+        'editor_tiny/loader',
         'editor_tiny/editor',
         'core/modal',
         './selectors',
@@ -30,7 +31,7 @@ define(['core/log',
         './customevents',
         './scrollspy'
     ],
-    (Log, TinyMCE,
+    (Log, TinyMCEinit, TinyMCE,
      Modal,
      Selectors,
      Translation,
@@ -51,6 +52,7 @@ define(['core/log',
         let saveAllModal = {};
         let errordbtitle = '';
         let settingsUI = {};
+        let allDataFormatOne = [];
         /**
          * When a main error with the DB occurs.
          *
@@ -81,6 +83,7 @@ define(['core/log',
         const registerEventListeners = () => {
             document.addEventListener('change', handleChangeEvent);
             document.addEventListener('click', handleClickEvent);
+            document.addEventListener('focusin', handleFocusEvent);
 
             // Translation events.
             Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
@@ -91,11 +94,35 @@ define(['core/log',
             Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
             Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
         };
+        const resizeEditors = ()=>{
+
+            allDataFormatOne.forEach((editable)=>{
+                const key = editable.id.replace('tiny_', '');
+                const selector = `[data-sourcetext-key="${key}"]`;
+                let parent = domQuery(selector);
+                const grandparent = parent.parentElement;
+
+                const updateEditableHeight = ()=> {
+                    const totalHeight = grandparent.offsetHeight + 80; // Tiny header average height is 80.
+                    editable.style.height = totalHeight + 'px';
+                };
+
+                // Observe size changes in parent and grandparent.
+                const resizeObserver = new ResizeObserver(() => {
+                    updateEditableHeight();
+                });
+
+                resizeObserver.observe(parent);
+                resizeObserver.observe(grandparent);
+
+            });
+        };
         /**
          * Register UI elements.
          */
         const registerUI = () => {
             try {
+                allDataFormatOne = domQueryAll(Selectors.editors.targetarea);
                 hideiframes = domQuery(Selectors.actions.hideiframes);
                 langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
                 errordbtitle = langstrings.uistrings.errordbtitle;
@@ -120,6 +147,7 @@ define(['core/log',
                 settingsUI[Selectors.actions.escapeLatex] = domQuery(Selectors.actions.escapeLatex);
                 settingsUI[Selectors.actions.escapePre] = domQuery(Selectors.actions.escapePre);
                 fetchCookies();
+                resizeEditors();
             } catch (e) {
                 if (config.debug) {
                     Log.error(e.message);
@@ -170,13 +198,38 @@ define(['core/log',
             });
             await saveAllModal.show();
         };
+        const handleFocusEvent = (e)=>{
+            if (e.target.closest(Selectors.editors.targetarea)) {
+                const options = {
+                    subdirs: false,
+                    maxbytes: 10240,
+                    maxfiles: 0,
+                    noclean: true,
+                    trusttext: true,
+                    enable_filemanagement: false,
+                    autosave: false,
+                    removeorphaneddrafts: true,
+                    plugins: []
+                };
+                 TinyMCEinit.getTinyMCE().then(
+                    ()=>{
+                        TinyMCE.setupForTarget(e.target, options)
+                            .then(()=>{
+ Log.info('tiny loaded for ' + e.target.id);
+})
+                            .catch((r)=>{
+ Log.error(r);
+});
+                    }
+                );
+            }
+        };
         /**
          * Event listener for click events.
          *
          * @param {event} e
          */
         const handleClickEvent = (e) => {
-
             if (e.target.closest(Selectors.actions.toggleMultilang)) {
                 onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
             }
@@ -206,11 +259,8 @@ define(['core/log',
          * @param {boolean} isChecked
          */
         function doHideiframes(isChecked) {
-            Log.info('doHideiframes');
-            Log.info(isChecked);
             const allIframes = domQueryAll(Selectors.sourcetexts.iframes);
-
-            if (isChecked && allIframes.length > 0) {
+            if (!isChecked && allIframes.length > 0) {
                 removedIframes = [];
                 allIframes.forEach(iframe => {
                     removedIframes.push({
@@ -245,7 +295,7 @@ define(['core/log',
         const handleChangeEvent = (e) => {
             window.console.info('CHANGE');
             if (e.target.closest(Selectors.actions.hideiframes)) {
-                doHideiframes(e);
+                doHideiframes(hideiframes.checked);
             }
             if (e.target.closest(Selectors.actions.targetSwitcher)) {
                 switchTarget(e);
@@ -349,6 +399,7 @@ define(['core/log',
          */
         const onSourceChange = (e) => {
             // Do check source and target and propose rephrase if PRO.
+            Log.info('source changed');
             Log.info(e.target.getAttribute('data-key'));
         };
         /**
