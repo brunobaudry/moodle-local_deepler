@@ -103,6 +103,8 @@ try {
         $jsconfig->debug = $CFG->debug;
         // Adds the language settings strings to the jsconfig.
         $jsconfig = $languagepack->prepareconfig($jsconfig);
+        // Pass the breadcrumbs subs max length to JS.
+        $jsconfig->crumbsmaxlen = get_config('local_deepler', 'breadcrumblength');
         // Adding page JS.
         $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
         // Create the structure.

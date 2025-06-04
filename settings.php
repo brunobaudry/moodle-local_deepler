@@ -80,6 +80,17 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     4
             )
     );
+    // Min size of scanned fields.
+    $settings->add(
+            new admin_setting_configtext(
+                    'local_deepler/breadcrumblength',
+                    get_string('breadcrumblength', 'local_deepler'),
+                    get_string('breadcrumblength_desc', 'local_deepler'),
+                    30,
+                    PARAM_INT,
+                    4
+            )
+    );
     // Plugin's version.
     require_once(__DIR__ . '/version.php');
     $settings->add(

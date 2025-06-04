@@ -29,6 +29,9 @@ $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
 Check with your Moodle admin.';
+$string['breadcrumblength'] = 'Max length of breadcrumb\'s sub';
+$string['breadcrumblength_desc'] =
+        'Set it to limit the size of the breadcrumb\'s subs. Set it to zero should you want no limiting.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
 $string['canttranslatesame'] = 'Both languages are the same:';
 $string['contextdeepl'] = 'Course context ';

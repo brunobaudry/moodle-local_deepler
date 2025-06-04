@@ -925,7 +925,7 @@ define(['core/log',
          */
         const init = (cfg) => {
             ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
-                {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100});
+                {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100, crumbsmaxlen: cfg.crumbsmaxlen});
             Translation.init(cfg);
             config = cfg;
             Log.info(cfg);
