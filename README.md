@@ -1,7 +1,10 @@
 # Deepler, Multilang Machine Translator for Moodle
 
-[![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) [![Dependency Review](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/dependency-review.yml)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
+[![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml) 
+![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
+[![License GPL-3.0](https://img.shields.io/github/license/brunobaudry/moodle-local_deepler?color=lightgrey)](https://github.com/brunobaudry/moodle-local_deepler/blob/main/LICENSE)
 
 Deepler is a local Moodle plugin that provides automatic machine translation or text improvement (not available with ©DeepL free api accounts) using the ©DeepL Pro Translation api.
 
@@ -36,6 +39,7 @@ Translation workflow being the following:
     + [Default value Escape LaTeX (in the courses translation page "Advanced Settings")](#default-value-escape-latex-in-the-courses-translation-page-advanced-settings)
     + [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
     + [Minimum textfield size](#minimum-textfield-size)
+    + [Max length of breadcrumb's sub](#max-length-of-breadcrumbs-sub)
 - [Translating](#translating)
   * [Advanced settings](#advanced-settings)
     + [Deepl API setting](#deepl-api-setting)
@@ -139,7 +143,12 @@ Do not send &lt;pre&gt;...&lt;/pre&gt; to translation by default.
 Small text field are often limited in the database. The text content grows quite fast (plus the mlang tags) at each translation steps.
 After translation, if the text is too big, the DB will through an error.
 
-Size this here based on your main language properties and the number on languages your Moodle supports
+Size this here based on your main language properties and the number on languages your Moodle supports.
+
+#### Max length of breadcrumb's sub
+
+The plugin adds a little breadcrumb when you scroll down the translation page. As some titles can be lengthy you can set a max length for each breadcrumb sub.
+Set to zero if you'd prefer no limiting.
 
 ![](pix/admin.png)
 

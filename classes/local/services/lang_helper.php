@@ -90,12 +90,7 @@ class lang_helper {
      * @var bool
      */
     private bool $keyisfree;
-    /**
-     * Mutlilangv2 parent lang behaviour.
-     *
-     * @var string
-     */
-    private string $multilangparentlang;
+
     /**
      * @var bool
      */
@@ -118,7 +113,6 @@ class lang_helper {
             $this->targetlang = LanguageCode::standardizeLanguageCode($this->targetlang);
         }
         $this->moodlelangs = get_string_manager()->get_list_of_translations();
-        $this->multilangparentlang = get_config('filter_multilang2', 'parentlangbehaviour');
         $this->deeplsourcelang = '';
 
     }

@@ -24,7 +24,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see https://github.com/angelikatyborska
  */
-define([], () => {
+define(['./utils'], (Utils) => {
     let OFFSET_TOP;
     let ARTICLE;
     let CONTAINER;
@@ -32,6 +32,7 @@ define([], () => {
     let HIGHEST_LEVEL;
     let FADING_DISTANCE;
     let OFFSET_END_OF_SCOPE;
+    let MAX_SUB_LENGTH;
     /**
      * Injects the breadcrumbs into the container.
      *
@@ -115,7 +116,7 @@ define([], () => {
                 headingsInScope.push({
                     id: heading.id,
                     tag: heading.tagName.toLowerCase(),
-                    text: heading.textContent.trim(),
+                    text: Utils.smartTruncate(heading.textContent.trim(), MAX_SUB_LENGTH),
                     beginningOfScope: heading.offsetTop + heading.offsetHeight,
                     endOfScope: endOfScope
                 });
@@ -172,7 +173,10 @@ define([], () => {
         const opacityBottom = diffBottom > FADING_DISTANCE ? 1 : bottomOnFade;
         return Math.min(opacityTop, opacityBottom);
     };
+
+
     const init = (article, breadcrumbsContainer, options) =>{
+        MAX_SUB_LENGTH = options.crumbsmaxlen || 30;
         ARTICLE = document.querySelector(article);
         CONTAINER = document.querySelector(breadcrumbsContainer);
         END_OF_ARTICLE = ARTICLE.offsetTop + ARTICLE.offsetHeight;
