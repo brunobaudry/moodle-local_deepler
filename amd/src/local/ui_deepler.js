@@ -200,28 +200,31 @@ define(['core/log',
         };
         const handleFocusEvent = (e)=>{
             if (e.target.closest(Selectors.editors.targetarea)) {
-                const options = {
-                    subdirs: false,
-                    maxbytes: 10240,
-                    maxfiles: 0,
-                    noclean: true,
-                    trusttext: true,
-                    enable_filemanagement: false,
-                    autosave: false,
-                    removeorphaneddrafts: true,
-                    plugins: []
-                };
-                 TinyMCEinit.getTinyMCE().then(
-                    ()=>{
-                        TinyMCE.setupForTarget(e.target, options)
-                            .then(()=>{
- Log.info('tiny loaded for ' + e.target.id);
-})
-                            .catch((r)=>{
- Log.error(r);
-});
-                    }
-                );
+                if (getIconStatus(e.target.id.replace('tiny_', '')) === Selectors.statuses.tosave) {
+                    const options = {
+                        subdirs: false,
+                        maxbytes: 10240,
+                        maxfiles: 0,
+                        noclean: true,
+                        trusttext: true,
+                        enable_filemanagement: false,
+                        autosave: false,
+                        removeorphaneddrafts: true,
+                        plugins: []
+                    };
+                    TinyMCEinit.getTinyMCE().then(
+                        ()=>{
+                            TinyMCE.setupForTarget(e.target, options)
+                                .then(()=>{
+                                    Log.info('tiny loaded for ' + e.target.id);
+                                })
+                                .catch((r)=>{
+                                    Log.error(r);
+                                });
+                        }
+                    );
+                }
+
             }
         };
         /**

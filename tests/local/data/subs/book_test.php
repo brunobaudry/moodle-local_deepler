@@ -42,16 +42,16 @@ final class book_test extends advanced_testcase {
     public function test_constructor_and_getfields(): void {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
+
         $book = $this->getDataGenerator()->create_module('book', ['course' => $course->id]);
         $bookgenerator = $this->getDataGenerator()->get_plugin_generator('mod_book');
         $bookgenerator->create_chapter(
                 ['bookid' => $book->id, 'content' => 'Content 1', 'title' => 'Chapter 1']);
         $bookgenerator->create_chapter(
                 ['bookid' => $book->id, 'content' => 'Content 2', 'title' => 'Chapter 2']);
-
+        $courseinfo = get_fast_modinfo($course);
         // Create an instance of the book class.
-        $bookinstance = new book($book);
-
+        $bookinstance = new book($courseinfo->get_cm($book->cmid));
         // Test the getfields method.
         /** @var field[] $fields */
         $fields = $bookinstance->getfields();

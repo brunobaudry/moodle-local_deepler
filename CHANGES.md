@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3]
+### Added
+- Non core Kprime qtype.
+
+### Fixed
+- silly cmid jam in book and wiki parsing.
+- tiny preload, only only loads after text is retrieved from Deepl, as it would not inject translation into the loaded tiny.
+
 ## [1.7.2]
 ### Added
 - Breadcrumb's subs limit. (issue #73)

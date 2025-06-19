@@ -118,8 +118,7 @@ class module implements translatable_interface, editable_interface, iconic_inter
             $this->childs = $quiz->getchilds();
         } else {
             global $DB;
-            $record = $DB->get_record($this->modname, ['id' => $this->cm->instance]);
-            $item = field::createclassfromstring($this->modname, $record);
+            $item = field::createclassfromstring($this->modname, $this->cm);
             if ($item) {
                 $this->childs = [$item];
             }

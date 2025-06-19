@@ -80,7 +80,7 @@ if (has_capability('moodle/site:config', context_system::instance())) {
                     4
             )
     );
-    // Min size of scanned fields.
+    // Max size of breadcrumbs subs.
     $settings->add(
             new admin_setting_configtext(
                     'local_deepler/breadcrumblength',

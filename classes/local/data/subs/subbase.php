@@ -15,36 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data\subs;
-defined('MOODLE_INTERNAL') || die();
 
-use local_deepler\local\data\field;
-
-global $CFG;
-require_once($CFG->dirroot . '/mod/book/locallib.php');
+use cm_info;
 
 /**
- * Subclass of book as it has chapters (subs).
+ * Base class for subs.
  *
  * @package    local_deepler
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class book extends subbase {
+abstract class subbase {
     /**
-     * Get the fields to be translated.
-     *
-     * @return array
+     * @var \cm_info
      */
-    public function getfields() {
-        $fields = [];
-        $table = 'book_chapters';
-        $chapters = book_preload_chapters($this->record);
-        foreach ($chapters as $c) {
-            $fields[] = new field($c->id,
-                    $c->title, 0, 'title', $table, $this->cm->id);
-            $fields[] = new field($c->id,
-                    $c->content, 1, 'content', $table, $this->cm->id);
-        }
-        return $fields;
+    protected cm_info $cm;
+    /**
+     * @var false|mixed|\stdClass
+     */
+    protected mixed $record;
+
+    /**
+     * Constuctor.
+     *
+     * @param \cm_info $cm
+     * @throws \dml_exception
+     */
+    public function __construct(cm_info $cm) {
+        global $DB;
+        $this->cm = $cm;
+        $this->record = $DB->get_record($this->cm->modname, ['id' => $this->cm->instance]);
     }
 }
