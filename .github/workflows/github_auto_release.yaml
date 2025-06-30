@@ -1,0 +1,34 @@
+name: AutoRelease for GitHub
+on:
+  push:
+    branches: [ main ]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get version from commit message
+        id: get_version
+        run: |
+          VERSION=$(git log -1 --pretty=%B | grep -oP 'Release: v\K(\d+\.\d+\.\d+)')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        shell: bash
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Auto Release
+        id: auto_release
+        uses: CupOfTea696/gh-action-auto-release@master
+        with:
+          title: "Release: v${{ env.VERSION }}"
+          tag: "v${{ env.VERSION }}"
+          draft: false
+          regex: "/^Release: v(\\d+\\.\\d+\\.\\d+)$/i"
+          changelog: CHANGES.md
+          changelog-entry: ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

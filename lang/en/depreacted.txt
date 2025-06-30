@@ -1,0 +1,4 @@
+// Deprecated since local_deepler v1.3.5
+allowsublangs, local_deepler
+// Deprecated since local_deepler v1.6.5
+show, local_deepler

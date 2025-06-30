@@ -1,0 +1,202 @@
+qtype_calculated:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+  question_calculated_options:
+    id: question
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+qtype_calculatedmulti:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+  question_calculated_options:
+    id: question
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+
+qtype_calculatedsimple:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+  question_calculated_options:
+    id: question
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+
+qtype_ddimageortext:
+  qtype_ddimageortext_drags:
+    fields:
+      label:
+
+qtype_ddmarker:
+  qtype_ddmarker:
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+  qtype_ddmarker_drags:
+    fields:
+      label:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+
+qtype_ddwtos:
+  question_answers:
+    id: question
+    fields:
+      answer:
+#      feedback:
+  question_ddwtos:
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+qtype_essay:
+  qtype_essay_options:
+    fields:
+      graderinfo:
+      responsetemplate:
+qtype_formulas:
+  qtype_formulas_answers:
+    fields:
+      answer:
+      partcorrectfb:
+      partincorrectfb:
+      partpartiallycorrectfb:
+      subqtext:
+  qtype_formulas_options:
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+qtype_fileresponse:
+  qtype_fileresponse_options:
+    fields:
+      graderinfo:
+qtype_gapselect:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+  question_gapselect:
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+
+qtype_kprime:
+  qtype_kprime_columns:
+    fields:
+      responsetext:
+  qtype_kprime_rows:
+    fields:
+      optionfeedback:
+      optiontext:
+
+qtype_match:
+  qtype_match_subquestions:
+    fields:
+      answertext:
+      questiontext:
+  question_calculated_options:
+    id: question
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+      partiallycorrectfeedback:
+
+qtype_mtf:
+  qtype_mtf_columns:
+    fields:
+      responsetext:
+  qtype_mtf_rows:
+    fields:
+      optionfeedback:
+      optiontext:
+
+qtype_multichoice:
+  qtype_multichoice_options:
+    fields:
+      correctfeedback:
+      partiallycorrectfeedback:
+      incorrectfeedback:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+qtype_multichoiceset:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+  qtype_multichoiceset_options:
+    fields:
+      correctfeedback:
+      incorrectfeedback:
+qtype_numerical:
+  question_answers:
+    id: question
+    fields:
+      feedback:
+qtype_ordering:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+  qtype_ordering_options:
+    fields:
+      correctfeedback:
+      partiallycorrectfeedback:
+      incorrectfeedback:
+qtype_pmatch:
+  question_answers:
+    id: question
+    fields:
+      answer:
+        exclude: "*"
+      feedback:
+qtype_randomsamatch:
+  qtype_randomsamatch_options:
+    fields:
+      correctfeedback:
+      partiallycorrectfeedback:
+      incorrectfeedback:
+qtype_shortanswer:
+  question_answers:
+    id: question
+    fields:
+      answer:
+      feedback:
+
+qtype_truefalse:
+  question_answers:
+    id: question
+    fields:
+      feedback:
+mod_url:
+  url:
+    fields:
+      name:
+      intro:
+      externalurl:
+        editable: false
