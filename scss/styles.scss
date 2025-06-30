@@ -67,16 +67,12 @@ $secondary: $gray-400 !default;
         position: relative;
         top: -4px;
     }
-
-    /* Default: show right caret, hide down caret */
     .caret-icons .fa-caret-down {
         display: none;
     }
     .caret-icons .fa-caret-right {
         display: inline;
     }
-
-    /* When expanded: show down caret, hide right caret */
     a[aria-expanded="true"] .fa-caret-down {
         display: inline;
     }
