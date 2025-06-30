@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/deepler/db" VERSION="20220430" COMMENT="XMLDB file for Moodle local/deepler"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+    <TABLES>
+        <TABLE NAME="local_deepler" COMMENT="Source vs translation modified time tracker.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="t_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Translation ID"/>
+                <FIELD NAME="t_lang" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" COMMENT="Translation language"/>
+                <FIELD NAME="t_table" TYPE="char" LENGTH="55" NOTNULL="true" SEQUENCE="false" COMMENT="Translation table name"/>
+                <FIELD NAME="t_field" TYPE="char" LENGTH="55" NOTNULL="false" SEQUENCE="false" COMMENT="Translation field"/>
+                <FIELD NAME="s_lastmodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Last modified time of source text"/>
+                <FIELD NAME="t_lastmodified" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Last modified time of translation"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="t_id_index" UNIQUE="false" FIELDS="t_id" COMMENT="Translation id index"/>
+                <INDEX NAME="t_lang_index" UNIQUE="false" FIELDS="t_lang" COMMENT="Translation language index"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_deepler_tokens" COMMENT="API tokens">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="attribute" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Usable mdl_user attributes"/>
+                <FIELD NAME="valuefilter" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Attribute value that the user must have"/>
+                <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Api's token"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="token_attribute_index" UNIQUE="false" FIELDS="attribute" COMMENT="Token atribute index"/>
+                <INDEX NAME="token_valuefilter_index" UNIQUE="false" FIELDS="valuefilter" COMMENT="Attributes value index"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>

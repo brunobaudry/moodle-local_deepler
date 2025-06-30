@@ -1,0 +1,237 @@
+/*
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*.local_deepler__translation img
+ * @module     local_deepler/deepler
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+@use "sass:color";
+$white: #fff !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #8f959e !default;
+$gray-600: #6a737b !default;
+$gray-700: #495057 !default;
+$gray-800: #343a40 !default;
+$gray-900: #1d2125 !default;
+$black: #000 !default;
+
+$blue: #0f6cbf !default;
+$indigo: #6610f2 !default;
+$purple: #613d7c !default;
+$pink: #e83e8c !default;
+$red: #ca3120 !default;
+$orange: #f0ad4e !default;
+$yellow: #ff7518 !default;
+$green: #357a32 !default;
+$teal: #20c997 !default;
+$cyan: #008196 !default;
+$primary: $blue !default;
+$success: $green !default;
+$info: $cyan !default;
+$warning: $orange !default;
+$danger: $red !default;
+$secondary: $gray-400 !default;
+
+#page-local-deepler-translate {
+    .sticky-offset {
+        top: 20px;
+    }
+
+    #local_deepler-translate-header {
+        z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    nav {
+        z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
+    }
+    #local_deepler__settings {
+        position: relative;
+        top: -4px;
+    }
+
+    a[aria-expanded="true"] .fa-caret-right {
+        display: none;
+    }
+
+    a[aria-expanded="false"] .fa-caret-down {
+        display: none;
+    }
+
+    .local_deepler__source-text img,
+    .local_deepler__translation img {
+        background-color: color.adjust($orange, $lightness: 30%) !important; /* stylelint-disable-line declaration-no-important */
+        font-style: italic;
+    }
+
+    img::before {
+        content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    .local_deepler__form {
+        padding: 0;
+        .d-none {
+            display:none !important; /* stylelint-disable-line declaration-no-important */
+        }
+        .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
+            display: none;
+        }
+    }
+
+    .course_sections__name,
+    .course__fullname {
+        margin-top: 3rem;
+    }
+
+    .local_deepler__sectiondata {
+        margin-top: 3rem;
+    }
+
+    .local_deepler__activitysmalltitle {
+        position: absolute;
+    }
+
+    .local_deepler__selectorbox {
+        margin-top: -1.4rem;
+    }
+
+    div[data-table^='question'] {
+        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    div[id^="question["].local_deepler__activity > :first-child {
+        color: $gray-900 !important; /* stylelint-disable-line declaration-no-important */
+        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
+        margin-bottom: 1rem;
+    }
+
+    .local_deepler__level0 {
+        padding-left: 15px;
+    }
+    .local_deepler__level1 {
+        padding-left: 30px;
+    }
+    .local_deepler__level2 {
+        padding-left: 45px;
+    }
+    .local_deepler__level3 {
+        padding-left: 60px;
+    }
+    .local_deepler__activitydesc,
+    .local_deepler__activityfield {
+        color: $gray-600;
+        position: relative;
+    }
+
+    .local_deepler__activitydesc {
+        top: -16px;
+    }
+
+    .local_deepler__activityfield {
+        display: inline-block;
+    }
+
+    .local_deepler__source-text iframe {
+        max-width: 100%; /* responsive iframes */
+    }
+
+    .local_deepler__translation {
+
+        iframe {
+            max-width: 100%; /* responsive iframes */
+        }
+        [data-action="local_deepler/editor"],
+        [data-fieldtype="editor"] {
+            width: 100%; /* editor tweaks */
+        }
+
+        textarea[data-action="local_deepler/editor"] {
+            width: 100%; /* editor tweaks */
+            min-height: 300px;
+        }
+
+        .form-group.row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .col-form-label {
+            display: none !important; /* stylelint-disable-line declaration-no-important */
+        }
+    }
+
+    .local_deepler__error {
+        border: 2px solid $red; /* ui notices */
+        border-radius: 6px;
+    }
+
+    .local_deepler__success {
+        border: 2px solid $green;
+        border-radius: 6px;
+    }
+
+    [data-status="local_deepler/success-message"] {
+        background: $teal;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        padding: 0.25rem 1rem;
+        margin-top: 2rem;
+        top: 12px;
+        bottom: 9px;
+        right: 9px;
+        border-radius: 4px;
+    }
+
+    [data-status="local_deepler/wait"] i::before {
+        content: '\f141'; /*3 dots ellipse*/
+        color: $gray-400;
+    }
+
+    [data-status="local_deepler/totranslate"] i::before {
+        content: '\f251'; /* Sand icon*/
+        color: $blue;
+    }
+
+    [data-status="local_deepler/tosave"] i::before {
+        content: '\f0c7'; /*floppy (save) icon*/
+        color: $blue;
+    }
+
+    [data-status="local_deepler/success"] i::before {
+        content: '\f00c'; /*check  icon*/
+        color: $green;
+    }
+
+    [data-status="local_deepler/saved"] i::before {
+        content: '\f1c0'; /*database  icon*/
+        color: $green;
+    }
+
+    [data-status="local_deepler/failed"] i::before {
+        content: '\f071'; /*exclamation triangle icon*/
+        color: $red;
+    }
+
+    [data-status="local_deepler/error"] i::before {
+        content: '\f1e2'; /*bomb icon*/
+        color: $red;
+    }
+}
