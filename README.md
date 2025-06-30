@@ -34,12 +34,8 @@ Translation workflow being the following:
   * [Dependencies](#dependencies)
 - [Configuration](#configuration)
   * [Permissions (Moodle capability)](#permissions-moodle-capability)
-  * [Admin](#admin)
-    + [Tell the browser not to render embed iframes by default.](#tell-the-browser-not-to-render-embed-iframes-by-default)
-    + [Default value Escape LaTeX (in the courses translation page "Advanced Settings")](#default-value-escape-latex-in-the-courses-translation-page-advanced-settings)
-    + [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
-    + [Minimum textfield size](#minimum-textfield-size)
-    + [Max length of breadcrumb's sub](#max-length-of-breadcrumbs-sub)
+  * [Main Admin settings](#main-admin-settings)
+  * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
 - [Translating](#translating)
   * [Advanced settings](#advanced-settings)
     + [Deepl API setting](#deepl-api-setting)
@@ -111,9 +107,8 @@ Course Translator will extend Moodle with the ```local/deepler:edittranslations`
 existing roles.
 The context for this capability is set to USER so that you can also assign it to a user directly (provided it will have capabilities to access the course and modules).
 
-### Admin
-
-To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> Manage local plugins.**
+### Main Admin settings
+To configure the plugin, navigate to **Site Administration -> Plugins -> Local plugins -> DeepL Translator.**
 
 ![](pix/admin_go.png)
 
@@ -122,32 +117,54 @@ you are using ©DeepL API Free or ©DeepL API Pro. Visit
 the [©DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
-#### Tell the browser not to render embed iframes by default.
+##### API Key for DeepL Translate - Allow Fallback key.
+
+The main API key now can be used for all users if you do tick **Allow fallback key**
+
+If you untick *Allow fallback key* than a user must have an attribute mapped to a token in the **Token manager**
+
+##### Tell the browser not to render embed iframes by default.
 Sometimes iframes can overlap the user interface toggle this to show/hide all iframes in the source text display.
 
-#### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
+##### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
 
 Set to true will check "escape LaTeX formulas", in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
 set here to true).
 Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler's performances,
 
-#### Default value Escape PRE (in the courses translation page "Advanced Settings")
+##### Default value Escape PRE (in the courses translation page "Advanced Settings")
 
 Do not send &lt;pre&gt;...&lt;/pre&gt; to translation by default.
 
-#### Minimum textfield size
+##### Minimum textfield size
 
 Small text field are often limited in the database. The text content grows quite fast (plus the mlang tags) at each translation steps.
 After translation, if the text is too big, the DB will through an error.
 
 Size this here based on your main language properties and the number on languages your Moodle supports.
 
-#### Max length of breadcrumb's sub
+##### Max length of breadcrumb's sub
 
 The plugin adds a little breadcrumb when you scroll down the translation page. As some titles can be lengthy you can set a max length for each breadcrumb sub.
 Set to zero if you'd prefer no limiting.
 
 ![](pix/admin.png)
+
+### Token manager (mapping user to DeepL's API keys)
+
+DeepL API allows you to generate several API keys mainly for cost control and reporting.
+
+To map, navigate to **Site Administration -> Plugins -> Local plugins -> Deepler Token manager.**
+
+![](pix/token_manager_go.png)
+
+1. Select a User attribute.
+2. Add a simple filter (* % and _ wild cards can be used).
+3. Add it to the list.
+
+Now a user having the required capability, when translating a course will get affected a token.
+
+![](pix/token_manager.png)
 
 ## Translating
 

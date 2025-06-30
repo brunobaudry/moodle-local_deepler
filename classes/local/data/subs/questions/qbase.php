@@ -157,13 +157,12 @@ abstract class qbase implements translatable_interface, editable_interface, icon
     public function getpurpose(): string {
         return '';
     }
+
     /**
      * Find qtype's sub table fields.
      *
-     * @param array $additionals
      * @return array
      * @throws \dml_exception
-     * @throws \moodle_exception
      */
     protected function getadditionalsubs(): array {
         global $DB;

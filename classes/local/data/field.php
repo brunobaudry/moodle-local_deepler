@@ -83,7 +83,8 @@ class field {
      * @param string $field
      * @param string $table
      * @param int $cmid
-     * @throws \moodle_exception
+     * @param bool $editable
+     * @throws \dml_exception
      */
     public function __construct(
             int $id,

@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0]
+### Added
+- **Lesson** mod type was missing.
+- **URL** external url cannot be multilang. Removed from translatable fields but left it to help translators getting the context.
+- **Wiki** page title are now displayed but not translatable as it would break the links.
+- Added API **multiple token mapping**. An additional admin page is there for you to create a rule to map a user's Moodle user attribute (including custom profiles) to one of your 
+  DeepL api key. 
+- Added non core questions:
+  - qtype_calculatedmulti
+  - qtype_calculatedsimple
+  - qtype_ddwtos
+  - qtype_formulas
+  - qtype_fileresponse
+  - qtype_kprime
+  - qtype_mtf
+  - qtype_multichoiceset
+  - qtype_pmatch
+  - ... more to come
+- Prepared a new YAML definition so you could grab you custom mods and qtypes db field to be scanned (next release)
+
+### Fixed
+- Session modules were scanned twice.
+
 ## [1.7.3]
 ### Added
 - Non core Kprime qtype.

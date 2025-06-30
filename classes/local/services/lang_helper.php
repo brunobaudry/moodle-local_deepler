@@ -106,7 +106,14 @@ class lang_helper {
     /**
      * Constructor.
      *
+     * @param \DeepL\DeepLClient|null $translator
+     * @param string|null $apikey
+     * @param array|null $moodlelangs
+     * @param string|null $currentlang
+     * @param string|null $targetlang
+     * @throws \DeepL\DeepLException
      * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function __construct(
             ?DeepLClient $translator = null,
@@ -178,7 +185,7 @@ class lang_helper {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @param \core\user|stdClass $user
+     * @param \stdClass $user
      * @return void
      * @throws \dml_exception
      */
