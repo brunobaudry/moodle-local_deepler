@@ -17,6 +17,7 @@
 namespace local_deepler\output;
 
 use core_filters\text_filter;
+use Exception;
 use filter_multilang2\text_filter as Multilang2TextFilter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\iconic_interface;
