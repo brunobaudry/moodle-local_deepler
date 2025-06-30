@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+<<<<<<< HEAD
 ## [1.8.0]
+=======
+## [1.8.2]
+>>>>>>> main
 ### Added
 - **Lesson** mod type was missing.
 - **URL** external url cannot be multilang. Removed from translatable fields but left it to help translators getting the context.
@@ -27,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Session modules were scanned twice.
+<<<<<<< HEAD
+=======
+- Less DB calls for field discovery.
+>>>>>>> main
 
 ## [1.7.3]
 ### Added
