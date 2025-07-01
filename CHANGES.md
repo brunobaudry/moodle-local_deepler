@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.8.5]
 ### Deprecated
 - php 8.1 and Moodle 401
-- 
+### Fixed 
 
 ## [1.8.2]
 ### Added
