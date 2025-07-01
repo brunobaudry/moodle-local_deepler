@@ -259,7 +259,7 @@ class translateform extends deeplerform {
         // Open translation item.
         $editable = $field->iseditable() ? $status : 'local_deepler/disabled';
         if (!$field->iseditable()) {
-            $cssclass = $cssclass . ' border-bottom border-secondary rounded-bottom mt-2';
+            $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
         }
         $this->_form->addElement('html',
                 "<div title='$rowtitle' class='$cssclass d-flex align-items-start py-2' data-row-id='$isdbkey$key'

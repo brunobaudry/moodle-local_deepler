@@ -346,12 +346,17 @@ class field {
         global $DB;
         $mod = $cminfo->modname;
         // Get all the fields as CMINFO does not carry them all.
-        $filters = self::$additionals['mod_' . $mod][$mod]['fields'];
+        $filters = [];
+        if (isset(self::$additionals['mod_' . $mod])
+                && isset(self::$additionals['mod_' . $mod][$mod])
+                && isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
+            $filters = self::$additionals['mod_' . $mod][$mod]['fields'];
+        }
         $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);
         $infocols = self::filterdbtextfields($cminfo->modname);
         $filteredfileds = [];
         foreach ($infocols as $infocol) {
-            if ($filters[$infocol]) {
+            if (isset($filters[$infocol])) {
                 $filteredfileds[$infocol] = $filters[$infocol];
             } else {
                 $filteredfileds[$infocol] = [];
