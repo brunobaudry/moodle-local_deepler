@@ -67,14 +67,20 @@ $secondary: $gray-400 !default;
         position: relative;
         top: -4px;
     }
-
+    .caret-icons .fa-caret-down {
+        display: none;
+    }
+    .caret-icons .fa-caret-right {
+        display: inline;
+    }
+    a[aria-expanded="true"] .fa-caret-down {
+        display: inline;
+    }
     a[aria-expanded="true"] .fa-caret-right {
         display: none;
     }
 
-    a[aria-expanded="false"] .fa-caret-down {
-        display: none;
-    }
+
 
     .local_deepler__source-text img,
     .local_deepler__translation img {

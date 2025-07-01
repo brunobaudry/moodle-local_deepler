@@ -32,10 +32,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     position: relative;
     top: -4px;
 }
-#page-local-deepler-translate a[aria-expanded=true] .fa-caret-right {
+#page-local-deepler-translate .caret-icons .fa-caret-down {
     display: none;
 }
-#page-local-deepler-translate a[aria-expanded=false] .fa-caret-down {
+#page-local-deepler-translate .caret-icons .fa-caret-right {
+    display: inline;
+}
+#page-local-deepler-translate a[aria-expanded=true] .fa-caret-down {
+    display: inline;
+}
+#page-local-deepler-translate a[aria-expanded=true] .fa-caret-right {
     display: none;
 }
 #page-local-deepler-translate .local_deepler__source-text img,
