@@ -3,7 +3,7 @@ on:
   push:
     branches: [ dev ]
 jobs:
-  test-mariadb:
+  testMaria:
     runs-on: ubuntu-latest
     services:
       mariadb:
@@ -131,7 +131,7 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --tags=@local_deepler
-  test-pgsql:
+  testPG:
     runs-on: ubuntu-latest
     services:
       postgres:
