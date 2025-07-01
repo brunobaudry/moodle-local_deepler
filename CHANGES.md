@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.5]
 ### Deprecated
-- php 8.1 and Moodle 401
-### Fixed 
+- php 8.1 and Moodle 401 (due to dependencies of DeepL libs)
+
+### Added
+- Ready for Moodle 5 and BS5
+- Choice's choices (#.#)
+- Feedback's questions (~.~)
+- Glossary's entries (^.^) 
 
 ## [1.8.2]
 ### Added
