@@ -15,7 +15,7 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
       mariadb:
-        image: mariadb:10
+        image: mariadb:${{ matrix.mariadb_version }}
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -36,6 +36,7 @@ jobs:
           - php: 8.4
             moodle-branch: MOODLE_500_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.3
             moodle-branch: MOODLE_500_STABLE
             database: pgsql
@@ -43,6 +44,7 @@ jobs:
           - php: 8.3
             moodle-branch: MOODLE_500_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.2
             moodle-branch: MOODLE_500_STABLE
             database: pgsql
@@ -50,6 +52,7 @@ jobs:
           - php: 8.2
             moodle-branch: MOODLE_500_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.3
             moodle-branch: MOODLE_405_STABLE
             database: pgsql
@@ -57,6 +60,7 @@ jobs:
           - php: 8.3
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.2
             moodle-branch: MOODLE_405_STABLE
             database: pgsql
@@ -64,6 +68,7 @@ jobs:
           - php: 8.2
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.3
             moodle-branch: MOODLE_404_STABLE
             database: pgsql
@@ -71,6 +76,7 @@ jobs:
           - php: 8.3
             moodle-branch: MOODLE_404_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.2
             moodle-branch: MOODLE_404_STABLE
             database: pgsql
@@ -78,6 +84,7 @@ jobs:
           - php: 8.2
             moodle-branch: MOODLE_404_STABLE
             database: mariadb
+            mariadb_version: 10.11
           - php: 8.2
             moodle-branch: MOODLE_403_STABLE
             database: pgsql
@@ -85,6 +92,7 @@ jobs:
           - php: 8.2
             moodle-branch: MOODLE_403_STABLE
             database: mariadb
+            mariadb_version: 10.6
           - php: 8.2
             moodle-branch: MOODLE_402_STABLE
             database: pgsql
@@ -92,6 +100,7 @@ jobs:
           - php: 8.2
             moodle-branch: MOODLE_402_STABLE
             database: mariadb
+            mariadb_version: 10.6
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
