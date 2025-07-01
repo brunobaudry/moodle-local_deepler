@@ -18,44 +18,45 @@ namespace local_deepler\local\data\subs;
 
 use context_module;
 use local_deepler\local\data\field;
-
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . "/mod/forum/lib.php");
+use local_deepler\local\data\subs\subbase;
 
 /**
- * Sub for Forum activities.
+ * Sub for Glossary activities.
  *
  * @package local_deepler
  * @copyright 2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class forum extends subbase {
+class glossary extends subbase {
     /**
-     * Get the fields to be translated.
+     * Glossary wrapper.
      *
      * @return array
      */
     public function getfields(): array {
         global $DB;
         $fields = [];
-        $table = 'forum_posts';
+        $table = 'glossary_entries';
         $modcontext = context_module::instance($this->cm->id); // Var $cmid is the course module ID.
-        require_capability('mod/forum:viewdiscussion', $modcontext);
-
-        $discussions = $DB->get_records('forum_discussions', ['forum' => $this->cm->instance]);
-        foreach ($discussions as $discussion) {
-            $posts = forum_get_all_discussion_posts($discussion->id, 'discussion ASC');
-            foreach ($posts as $post) {
-                // Do something with $post.
-                if ($post->subject) {
-                    $fields[] = new field($post->id,
-                            $post->subject, 0, 'subject', $table, $this->cm->id);
-                }
-                if ($post->message) {
-                    $fields[] = new field($post->id,
-                            $post->message, 1, 'message', $table, $this->cm->id);
-                }
+        require_capability('mod/glossary:manageentries', $modcontext);
+        $entries = $DB->get_records($table, ['glossaryid' => $this->cm->instance]);
+        foreach ($entries as $entry) {
+            $fields[] = new field(
+                    $entry->id,
+                    $entry->concept,
+                    0,
+                    'concept',
+                    $table,
+                    $this->cm->id
+            );
+            if ($entry->definition) {
+                $fields[] = new field(
+                        $entry->id,
+                        $entry->definition,
+                        1,
+                        'definition',
+                        $table,
+                        $this->cm->id);
             }
         }
         return $fields;

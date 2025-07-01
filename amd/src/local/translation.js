@@ -252,6 +252,7 @@ define([
          * @param {object} response
          */
         const onTranslateSuccess = (response)=>{
+            Log.info(response);
             response.forEach((tr) => {
                 if (tr.error === '') {
                     let key = tr.key;
