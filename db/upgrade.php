@@ -88,5 +88,32 @@ function xmldb_local_deepler_upgrade($oldversion) {
         // Coursetranslator savepoint reached.
         upgrade_plugin_savepoint(true, 2025043004, 'local', 'deepler');
     }
+    if ($oldversion < 2025070201) {
+
+        // Define table local_deepler_tokens to be created.
+        $table = new xmldb_table('local_deepler_tokens');
+
+        // Add fields.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('attribute', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('valuefilter', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('token', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+
+        // Add keys.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Add indexes.
+        $table->add_index('token_attribute_index', XMLDB_INDEX_NOTUNIQUE, ['attribute']);
+        $table->add_index('token_valuefilter_index', XMLDB_INDEX_NOTUNIQUE, ['valuefilter']);
+
+        // Conditionally launch create table.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Upgrade savepoint.
+        upgrade_plugin_savepoint(true, 2025070200, 'local', 'deepler');
+    }
+
     return true;
 }
