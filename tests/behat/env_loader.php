@@ -37,6 +37,7 @@ class env_loader {
      */
     public static function load($path): void {
         if (!file_exists($path)) {
+            echo "WARNING: .env $path does not exist.\n";
             return;
         }
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

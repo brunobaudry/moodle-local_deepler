@@ -47,4 +47,32 @@ class behat_local_deepler extends behat_base {
         }
         $driver->executeScript("document.querySelector('$cssselector').scrollIntoView(true);");
     }
+
+    /**
+     * @Then I dump the DEEPL_API_TOKEN
+     */
+    public function i_dump_the_deepl_api_token(): void {
+        echo "DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
+    }
+
+    /**
+     * @BeforeSuite
+     */
+    #[BeforeSuite]
+    public static function load_env() {
+        require_once(__DIR__ . '/env_loader.php');
+        env_loader::load(__DIR__ . '/../../.env');
+        echo "Loaded .env: DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
+    }
+
+    /**
+     * Test
+     *
+     * @return void
+     */
+    #[BeforeScenario]
+    public static function test() {
+        echo 'DEEPLER SUITE';
+    }
+
 }
