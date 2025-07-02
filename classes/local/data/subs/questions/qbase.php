@@ -26,9 +26,6 @@ use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 use question_definition;
 
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/vendor/autoload.php');
 
 /**
  * Base class for question types.
