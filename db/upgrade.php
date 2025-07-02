@@ -88,7 +88,7 @@ function xmldb_local_deepler_upgrade($oldversion) {
         // Coursetranslator savepoint reached.
         upgrade_plugin_savepoint(true, 2025043004, 'local', 'deepler');
     }
-    if ($oldversion < 2025070201) {
+    if ($oldversion < 2025070202) {
 
         // Define table local_deepler_tokens to be created.
         $table = new xmldb_table('local_deepler_tokens');
@@ -112,7 +112,7 @@ function xmldb_local_deepler_upgrade($oldversion) {
         }
 
         // Upgrade savepoint.
-        upgrade_plugin_savepoint(true, 2025070201, 'local', 'deepler');
+        upgrade_plugin_savepoint(true, 2025070202, 'local', 'deepler');
     }
 
     return true;
