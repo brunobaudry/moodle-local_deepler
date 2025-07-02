@@ -112,7 +112,7 @@ function xmldb_local_deepler_upgrade($oldversion) {
         }
 
         // Upgrade savepoint.
-        upgrade_plugin_savepoint(true, 2025070200, 'local', 'deepler');
+        upgrade_plugin_savepoint(true, 2025070201, 'local', 'deepler');
     }
 
     return true;
