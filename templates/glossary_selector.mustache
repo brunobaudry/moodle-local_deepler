@@ -1,0 +1,15 @@
+<div class="glossary-selector">
+    <label for="glossarylist" class="form-label">{{glossaryselect}}</label>
+
+    {{#hasglossaries}}
+        <select id="glossarylist" class="form-select" aria-label="{{glossaryselectplaceholder}}">
+            {{#glossaries}}
+                <option value="{{glossaryId}}">{{name}}</option>
+            {{/glossaries}}
+        </select>
+    {{/hasglossaries}}
+
+    {{^hasglossaries}}
+        <p>{{glossarylistempty}}</p>
+    {{/hasglossaries}}
+</div>

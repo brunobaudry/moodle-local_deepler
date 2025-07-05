@@ -61,8 +61,55 @@ $string['formalityless'] = 'less';
 $string['formalitymore'] = 'more';
 $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
+$string['glossaryactions'] = 'Actions';
+$string['glossarydeeplid'] = 'UUID';
+$string['glossarydeepllink'] = 'DeepL API documentation';
+$string['glossaryhelpmodaltitle'] = 'Simple 2 columns csv file';
 $string['glossaryid'] = 'Glossary id';
 $string['glossaryid_placeholder'] = 'Glossary id should you have one...';
+$string['glossarymanagetitle'] = 'DeepLer glossaries';
+$string['glossaryname'] = 'Name';
+$string['glossarynbentries'] = 'Entries';
+$string['glossaryselect'] = 'Select a glossary';
+$string['glossaryselectplaceholder'] = 'Enter a glossary name';
+$string['glossarysourcelang'] = 'Source';
+$string['glossarytargetlang'] = 'Target';
+$string['glossaryupload'] = 'Upload';
+$string['glossaryuploadbtn'] = 'Create glossary';
+$string['glossaryuploadfile'] = "##### Follow those simple file naming conventions:
+
+1.  File extension must be .csv *(no .tsv)
+2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
+4.  Name it meaningfully but not too long (for a nice display in tables).
+5.  No header in the csv file. 
+3.  SOURCE and TARGET must be 2 character language code.
+4. DeepL does not manage bi directional glossaries.";
+$string['glossaryuploadfileexpla'] =
+        "##### For translating FR > ES
+**File: 'litérature\_fr-es.csv**'  
+belle      , hermosa  
+delicieux  , exquisito  
+mouse      , mouse  
+
+##### For translating ES > FR
+**File: 'litérature\_es-fr.csv**'  
+hermosa   , belle  
+exquisito , delicieux  
+mouse     , mouse  ";
+$string['glossaryuploadfileexplb'] =
+        "##### File naming
+**Expl OK:**
+ 
+*   私の用語集**_en-jp.csv**
+*   Tech\_jargon**\_FR-ES.CSV**
+
+**Expl NOT OK:**
+
+*   myGlossary**-**en-fr.csv
+*   Tech\_jargon\_**FRA-SPA**.CSV
+*   myHistoricalGlo_fr-es.**tsv**
+";
+
 $string['hideiframes'] = 'Render embed iframes in source text.';
 $string['hideiframesadmin'] = 'Select this if you want rendering embed iframes be the default.';
 $string['hideiframesadmin_desc'] =

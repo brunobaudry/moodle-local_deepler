@@ -1,0 +1,22 @@
+<table class="generaltable">
+    <thead>
+    <tr>
+        <th>{{#str}}glossaryname, local_deepler{{/str}}</th>
+        <th>{{#str}}glossarydeeplid, local_deepler{{/str}}</th>
+        <th>{{#str}}glossarysourcelang, local_deepler{{/str}} &gt; {{#str}}glossarytargetlang, local_deepler{{/str}}</th>
+        <th>{{#str}}glossarynbentries, local_deepler{{/str}}</th>
+        <th>{{#str}}glossaryactions, local_deepler{{/str}}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#glossaries}}
+        <tr>
+            <td>{{name}}</td>
+            <td>{{glossaryid}}</td>
+            <td>{{sourcelang}} &gt; {{targetlang}}</td>
+            <td>{{entrycount}}</td>
+            <td>{{{actions}}}</td>
+        </tr>
+    {{/glossaries}}
+    </tbody>
+</table>

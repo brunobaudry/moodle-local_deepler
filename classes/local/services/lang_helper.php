@@ -24,6 +24,8 @@ use DeepL\DeepLException;
 use DeepL\Language;
 use DeepL\LanguageCode;
 use Deepl\Usage;
+use local_deepler\local\data\glossary;
+use local_deepler\local\data\user_glossary;
 use stdClass;
 
 require_once(__DIR__ . '/../../vendor/autoload.php');
@@ -102,6 +104,8 @@ class lang_helper {
      * @var array|string[]
      */
     private array $deeplrephraselangs;
+    /** @var \stdClass */
+    private stdClass $user;
 
     /**
      * Constructor.
@@ -163,8 +167,9 @@ class lang_helper {
      * @throws \dml_exception
      */
     public function initdeepl(stdClass $user): bool {
+        $this->user = $user;
         if (!$this->translator) {
-            $this->setdeeplapi($user);
+            $this->setdeeplapi();
             $this->inittranslator();
         }
 
@@ -185,12 +190,11 @@ class lang_helper {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @param \stdClass $user
      * @return void
      * @throws \dml_exception
      */
-    private function setdeeplapi(stdClass $user): void {
-        $tokenrecord = $this->find_first_matching_token($user);
+    private function setdeeplapi(): void {
+        $tokenrecord = $this->find_first_matching_token($this->user);
         if ($tokenrecord) {
             $this->apikey = $tokenrecord->token;
         } else if (!get_config('local_deepler', 'allowfallbackkey')) {
@@ -365,7 +369,7 @@ class lang_helper {
      * @param string $lang
      * @return bool
      */
-    private function islangsupported(string $lang) {
+    public function islangsupported(string $lang) {
         $list = $this->deeplsources;
         $len = count($list);
         while ($len--) {
@@ -643,5 +647,36 @@ class lang_helper {
      */
     public function getcanimprove(): bool {
         return $this->canimprove;
+    }
+
+    /**
+     * Return all glossaries for current user.
+     *
+     * @return array
+     */
+    public function getusersglossaries(): array {
+        $glos = [];
+        $pivot = user_glossary::getallbyuser($this->user->id);
+
+        foreach ($pivot as $item) {
+            $glos[] = glossary::getbyid($item->glossaryid);
+        }
+        return $glos;
+    }
+
+    /**
+     * Delete user's glossary.
+     *
+     * @param int $glossarydbid
+     * @return null
+     * @throws \DeepL\DeepLException
+     */
+    public function deleteglossary(int $glossarydbid) {
+        $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
+        $delete = user_glossary::delete($guid->id);
+        $glo = glossary::getbyid($glossarydbid);
+        $gid = glossary::delete($guid->glossaryid);
+        $sucess = $this->translator->deleteglossary($glo->glossaryid);
+        return $sucess;
     }
 }
