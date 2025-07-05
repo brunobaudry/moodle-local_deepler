@@ -35,25 +35,55 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "nodeeplpapi": "Message to tell the user that cnx failed."
   }
 }}
+{{#errors}}
+    <div class="alert alert-danger">{{.}}</div>
+{{/errors}}
+
+
+
+<h3>{{mappingsheading}}</h3>
+
 <table class="generaltable">
     <thead>
     <tr>
-        <th>{{#str}}glossaryname, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarydeeplid, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarysourcelang, local_deepler{{/str}} &gt; {{#str}}glossarytargetlang, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarynbentries, local_deepler{{/str}}</th>
-        <th>{{#str}}glossaryactions, local_deepler{{/str}}</th>
+        <th>{{attribute}}</th>
+        <th>{{valuefilter}}</th>
+        <th>{{token}}</th>
+        <th>{{actions}}</th>
     </tr>
     </thead>
     <tbody>
-    {{#glossaries}}
+    {{#records}}
         <tr>
-            <td>{{name}}</td>
-            <td>{{glossaryid}}</td>
-            <td>{{sourcelang}} &gt; {{targetlang}}</td>
-            <td>{{entrycount}}</td>
-            <td>{{{actions}}}</td>
+            <td>{{attribute}}</td>
+            <td>{{valuefilter}}</td>
+            <td>{{token}}</td>
+            <td>{{{action}}}</td>
         </tr>
-    {{/glossaries}}
+    {{/records}}
     </tbody>
 </table>
+
+<h4>{{addnewheading}}</h4>
+<div class="adminpage-description mb-2">{{{description}}}</div>
+<form method="post" action="{{formaction}}" class="mform PT-2">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+
+    <div class="form-inline">
+        {{{select}}}
+
+        <input type="text" name="valuefilter" class="form-control mr-2" id="deepler-valuefilter"
+               placeholder="{{valuefilterplaceholder}}">
+
+        <input type="text" name="token" class="form-control mr-2" id="deepler-token"
+               placeholder="{{tokenplaceholder}}" size="40">
+
+        <input type="submit" name="addtoken" value="{{addbutton}}" class="btn btn-primary">
+    </div>
+</form>
+
+<div class="pt-2" id="deepler-form-errors"></div>
+
+<div class="mb-3 pt-4">
+    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a>
+</div>
