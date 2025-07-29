@@ -81,7 +81,7 @@ if (isset($_REQUEST['uploadstatus'])) {
 // Glossary table
 echo $renderer->glossary_table($glossaries);
 echo $renderer->glossary_uploader();
-echo $renderer->glossay_selector_deepl($glossaries);
+
 // Add js.
 $PAGE->requires->js_call_amd('local_deepler/glossary', 'init', []);
 echo $OUTPUT->footer();

@@ -168,6 +168,13 @@ define(['core/log',
                 for (const selector in settingsUI) {
                     if (settingsCookie[selector] !== undefined) {
                         switch (settingsUI[selector].type) {
+                            case 'select-one' :
+                                // eslint-disable-next-line no-case-declarations
+                                let optionToSelect = domQuery(`option[value="${settingsCookie[selector]}"]`);
+                                if (optionToSelect) {
+                                    optionToSelect.selected = true;
+                                }
+                                break;
                             case 'checkbox' :
                                 settingsUI[selector].checked = settingsCookie[selector];
                                 break;
@@ -562,6 +569,10 @@ define(['core/log',
                     window.console.warn(settingsUI);
                 } else {
                     switch (settingsUI[selector].type) {
+                        case 'select-one':
+                            cookie[selector] = settingsUI[selector].value;
+                            settings[selector] = settingsUI[selector].value;
+                            break;
                         case 'textarea':
                             cookie[selector] = settingsUI[selector].value;
                             // Deepl needs an array.

@@ -90,16 +90,19 @@ class glossary_renderer extends plugin_renderer_base {
      *
      *
      * @param array $glossaries
+     * @param string $sourcelang
+     * @param string $targetlang
      * @return string
      * @throws \coding_exception
+     * @throws \core\exception\moodle_exception
      */
-    public function glossay_selector_deepl(array $glossaries): string {
+    public function glossay_selector_deepl(array $glossaries, string $sourcelang, string $targetlang): string {
         $glossarylist = [];
 
         foreach ($glossaries as $g) {
-            if ($g->ready) {
+            if ($g->sourcelang === $sourcelang && $g->targetlang === $targetlang) {
                 $glossarylist[] = [
-                        'glossaryId' => $g->glossaryId,
+                        'glossaryid' => $g->glossaryid,
                         'name' => $g->name
                 ];
             }

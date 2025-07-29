@@ -39,9 +39,13 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <label for="glossarylist" class="form-label">{{glossaryselect}}</label>
 
     {{#hasglossaries}}
-        <select id="glossarylist" class="form-select" aria-label="{{glossaryselectplaceholder}}">
+        <select id="local_deepler__glossary"
+                class="form-select"
+                data-id="local_deepler/glossary_id"
+                aria-label="{{glossaryselectplaceholder}}">
+            <option value="">{{glossaryselect}}</option>
             {{#glossaries}}
-                <option value="{{glossaryId}}">{{name}}</option>
+                <option value="{{glossaryid}}">{{name}}</option>
             {{/glossaries}}
         </select>
     {{/hasglossaries}}
