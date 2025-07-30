@@ -40,7 +40,6 @@ define([], function() {
         }
 
         form.addEventListener('submit', function(e) {
-            window.console.log('Form submited bro');
             let errors = [];
 
             // Attribute dropdown must be selected.

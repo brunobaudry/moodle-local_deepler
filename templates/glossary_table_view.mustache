@@ -18,11 +18,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     @template local_deepler/nodeepl_page
     provides a basic alert when connection to the api failed
       Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
 
   Data attributes required for JS:
   * none
@@ -31,11 +26,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * none
 
   Example context (json):
-  {
-    "nodeeplpapi": "Message to tell the user that cnx failed."
-  }
+
 }}
-<h4>{{#str}}glossary:my:title, local_deepler{{/str}}</h4>
+<h4>{{title}}</h4>
 <table class="generaltable">
     <thead>
     <tr>
@@ -43,7 +36,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <th>{{#str}}glossarydeeplid, local_deepler{{/str}}</th>
         <th>{{#str}}glossarysourcelang, local_deepler{{/str}} &gt; {{#str}}glossarytargetlang, local_deepler{{/str}}</th>
         <th>{{#str}}glossarynbentries, local_deepler{{/str}}</th>
-        <th>{{#str}}glossaryactions, local_deepler{{/str}}</th>
     </tr>
     </thead>
     <tbody>
@@ -53,7 +45,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             <td>{{glossaryid}}</td>
             <td>{{sourcelang}} &gt; {{targetlang}}</td>
             <td>{{entrycount}}</td>
-            <td>{{{actions}}}</td>
         </tr>
     {{/glossaries}}
     </tbody>

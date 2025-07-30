@@ -15,25 +15,53 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_deepler/nodeepl_page
-    provides a basic alert when connection to the api failed
-      Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
+    @template local_deepler/token_manager
 
-  Data attributes required for JS:
-  * none
+    Classes required for JS:
+    #deepler-valuefilter
+    #deepler-token
 
-  Context variables required for this template:
-  * none
+    Data attributes required for JS: none
 
-  Example context (json):
-  {
-    "nodeeplpapi": "Message to tell the user that cnx failed."
-  }
+    Context variables required for this template:
+    - description
+    - mappingsheading
+    - addnewheading
+    - attribute
+    - valuefilter
+    - token
+    - actions
+    - formaction
+    - sesskey
+    - userattributeselect
+    - valuefilterplaceholder
+    - tokenplaceholder
+    - addbutton
+    - settingsurl
+    - backtosettings
+
+    Example context (JSON):
+    {
+        "description": "Select a user attribute, give it a filter (you can use *,% or _) and match that to a token.",
+        "mappingsheading": "Token table",
+        "addnewheading": "Add a new token filter",
+        "attribute": "User Attribute",
+        "valuefilter": "Value Filter",
+        "token": "Token",
+        "actions": "Actions",
+        "formaction":"https://yourmoodle.test/local/deepler/tokenmanager.php",
+        "sesskey": "9879-189023",
+        "userattributeselect": "<select class="select form-select custom-select mr-2" id="deepler-attribute" name="attribute">
+            <option selected="selected" value="">Choose</option>
+            <option value="username">Username</option>
+            <option value="email">Email address</option>
+            </select>",
+        "valuefilterplaceholder": "Add a filter value",
+        "tokenplaceholder": "Token",
+        "addbutton": "Add token map",
+        "settingsurl": "https://yourmoodle.test/admin/settings.php?section=local_deepler",
+        "backtosettings": "Manage Deepler\'s settings",
+    }
 }}
 {{#errors}}
     <div class="alert alert-danger">{{.}}</div>
@@ -70,7 +98,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <input type="hidden" name="sesskey" value="{{sesskey}}">
 
     <div class="form-inline">
-        {{{select}}}
+        {{{userattributeselect}}}
 
         <input type="text" name="valuefilter" class="form-control mr-2" id="deepler-valuefilter"
                placeholder="{{valuefilterplaceholder}}">

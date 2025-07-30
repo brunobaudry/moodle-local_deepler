@@ -40,7 +40,7 @@ require_once(__DIR__ . '/../../vendor/autoload.php');
  */
 class lang_helper {
     /**
-     * Constant to display hte lang as rephrasing.
+     * Constant to display the lang as rephrasing.
      */
     const REPHRASESYMBOL = "® ";
     /**
@@ -67,6 +67,8 @@ class lang_helper {
      * @var string
      */
     private string $apikey;
+    /** @var int the db id for the API key matching the user */
+    private int $dbtokenid;
     /**
      * @var DeepLClient
      */
@@ -137,7 +139,8 @@ class lang_helper {
         }
         $this->moodlelangs = $moodlelangs ?? get_string_manager()->get_list_of_translations();
         $this->deeplsourcelang = '';
-        $this->apikey = $this->initapikey();
+        $this->apikey = $apikey ?? $this->initapikey();
+        $this->dbtokenid = 0;
         $this->translator = $translator;
     }
 
@@ -197,6 +200,7 @@ class lang_helper {
         $tokenrecord = $this->find_first_matching_token($this->user);
         if ($tokenrecord) {
             $this->apikey = $tokenrecord->token;
+            $this->dbtokenid = $tokenrecord->id;
         } else if (!get_config('local_deepler', 'allowfallbackkey')) {
             $this->apikey = '';
         }
@@ -650,9 +654,42 @@ class lang_helper {
     }
 
     /**
+     * @return array
+     * @throws \DeepL\DeepLException
+     */
+    public function getalldeeplglossaries(): array {
+        return $this->translator->listGlossaries();
+    }
+
+    /**
+     * @param array $deeplglossaries
+     * @return void
+     * @throws \dml_exception
+     */
+    public function adddeeplglossariesifunknown(array $deeplglossaries): void {
+        /** @var \DeepL\GlossaryInfo $deeplglossary */
+        foreach ($deeplglossaries as $deeplglossary) {
+            try {
+                if (!glossary::exists($deeplglossary->glossaryId)) {
+                    glossary::create(new glossary(
+                            $deeplglossary->glossaryId,
+                            $deeplglossary->name,
+                            $deeplglossary->sourceLang,
+                            $deeplglossary->targetLang,
+                            $deeplglossary->entryCount
+                    ));
+                }
+            } catch (dml_exception $e) {
+
+            }
+        }
+    }
+
+    /**
      * Return all glossaries for current user.
      *
      * @return array
+     * @throws \dml_exception
      */
     public function getusersglossaries(): array {
         $glos = [];
@@ -665,11 +702,32 @@ class lang_helper {
     }
 
     /**
+     * @return array
+     * @throws \dml_exception
+     */
+    public function getpoolglossaries(?array $except = []): array {
+        // Build a set of IDs to avoid duplicates.
+        $ids = array_map(fn($o) => $o->glossaryid, $except);
+        $poolglossaries = glossary::getallbytokenid($this->dbtokenid);
+        // Filter glossaries not build by user.
+        return array_filter($poolglossaries, fn($glo) => !in_array($glo->glossaryid, $ids));
+    }
+
+    /**
+     * @return \local_deepler\local\data\glossary
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function getpublicglossaries() {
+        return glossary::getpublicexcepttokenid($this->dbtokenid);
+    }
+
+    /**
      * Delete user's glossary.
      *
      * @param int $glossarydbid
      * @return null
-     * @throws \DeepL\DeepLException
+     * @throws \DeepL\DeepLException|\dml_exception
      */
     public function deleteglossary(int $glossarydbid) {
         $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
@@ -678,5 +736,12 @@ class lang_helper {
         $gid = glossary::delete($guid->glossaryid);
         $sucess = $this->translator->deleteglossary($glo->glossaryid);
         return $sucess;
+    }
+
+    /**
+     * @return int
+     */
+    public function getdbtokenid() {
+        return $this->dbtokenid;
     }
 }

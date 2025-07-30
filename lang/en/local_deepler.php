@@ -67,6 +67,8 @@ $string['glossarydeepllink'] = 'DeepL API documentation';
 $string['glossaryhelpmodaltitle'] = 'Simple 2 columns csv file';
 $string['glossaryid'] = 'Glossary id';
 $string['glossaryid_placeholder'] = 'Glossary id should you have one...';
+$string['glossarylistempty'] =
+        'There are no glossaries available with this language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
 $string['glossarymanagetitle'] = 'DeepLer glossaries';
 $string['glossaryname'] = 'Name';
 $string['glossarynbentries'] = 'Entries';
@@ -120,7 +122,7 @@ $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to transl
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
-Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve DeepLer\'s performances.';
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
@@ -141,7 +143,7 @@ $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
 $string['preserveformatting'] = 'Preserve formatting';
-$string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
+$string['privacy:metadata'] = 'The DeepLer plugin does not store any personal data.';
 $string['rephraseinfos'] =
         'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.';
 $string['rephraseoptionsinfos'] =
@@ -184,7 +186,7 @@ $string['tokenactions'] = 'Actions';
 $string['tokenadd'] = 'Add token map';
 $string['tokenaddtoken'] = 'Add Token';
 $string['tokenadminpagedescription'] =
-        'Select a user attribute, give it a filter (you can use *,% or _) and match that to a token.';
+        'Select a user attribute, give it a filter (you can use *,% or _ wildcards) and match that to a token.';
 $string['tokenattribute'] = 'User Attribute';
 $string['tokenchoose'] = 'Select an attribute';
 $string['tokendeletetoken'] = 'Delete Token';
@@ -193,9 +195,9 @@ $string['tokenerror_invaliduuid'] = 'Invalid token format';
 $string['tokenerror_noattribute'] = 'You must select an attribute to filter.';
 $string['tokenerror_nofilter'] = 'You must ad a value to filter.';
 $string['tokenfiltervalue'] = 'Add a filter value';
-$string['tokengobacktosettings'] = 'Manage Deepler\'s settings';
-$string['tokengototokenmanager'] = 'Manage Deepl\'s tokens';
-$string['tokenmanager'] = 'Deepler Token manager';
+$string['tokengobacktosettings'] = 'Manage DeepLer\'s settings';
+$string['tokengototokenmanager'] = 'Manage DeepL\'s tokens';
+$string['tokenmanager'] = 'DeepLer Token manager';
 $string['tokennotokens'] = 'No tokens found.';
 $string['tokensettings'] = 'API Token Settings';
 $string['tokentabletitle'] = 'Token table';

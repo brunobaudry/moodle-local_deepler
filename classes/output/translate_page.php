@@ -132,7 +132,11 @@ class translate_page implements renderable, templatable {
         // Pass the glossary selector rendered.
         global $PAGE;
         $glorenderer = $PAGE->get_renderer('local_deepler', 'glossary');
-        $data->glossayselector = $glorenderer->glossay_selector_deepl($this->langpacks->getusersglossaries(),
+        $glossaries = $this->langpacks->getusersglossaries();
+        $poolglossaries = $this->langpacks->getpoolglossaries($glossaries);
+        $publicglossaries = $this->langpacks->getpublicglossaries();
+        $glo = array_merge($glossaries, $publicglossaries, $poolglossaries);
+        $data->glossayselector = $glorenderer->glossay_selector_deepl($glo,
                 $this->langpacks->getcurrentlang(), $this->langpacks->gettargetlang());
         return $data;
     }

@@ -61,6 +61,43 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
+     * @param array $glossaries
+     * @return string
+     * @throws \core\exception\moodle_exception
+     */
+    public function glossary_table_view(array $glossaries, string $title): string {
+        $g = array_change_key_case($glossaries, CASE_LOWER);
+        $data = [];
+
+        foreach ($g as $glo) {
+
+            $data[] = [
+                    'name' => format_string($glo->name),
+                    'glossaryid' => format_string($glo->glossaryid),
+                    'sourcelang' => format_string($glo->sourcelang),
+                    'targetlang' => format_string($glo->targetlang),
+                    'entrycount' => format_string($glo->entrycount),
+            ];
+        }
+
+        return $this->render_from_template('local_deepler/glossary_table_view',
+                [
+                        'glossaries' => $data,
+                        'title' => $title,
+                ]);
+    }
+
+    /**
+     * @param array $glossaries
+     * @return string
+     */
+    public function glossaries_table_admin(array $glossaries): string {
+        $data = [
+                'glossaries' => $glossaries
+        ];
+        return $this->render_from_template('local_deepler/glossary_table_admin', $data);
+    }
+    /**
      * Renderer for glossary upload.
      *
      * @return string

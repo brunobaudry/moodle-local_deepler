@@ -84,7 +84,7 @@ class tokens_renderer extends plugin_renderer_base {
                 'actions' => get_string('tokenactions', 'local_deepler'),
                 'formaction' => (new moodle_url('/local/deepler/tokenmanager.php'))->out(),
                 'sesskey' => sesskey(),
-                'select' => html_writer::select($userfields, 'attribute', '', ['' => get_string('choose')],
+                'userattributeselect' => html_writer::select($userfields, 'attribute', '', ['' => get_string('choose')],
                         ['class' => 'custom-select mr-2', 'id' => 'deepler-attribute']),
                 'valuefilterplaceholder' => get_string('tokenfiltervalue', 'local_deepler'),
                 'tokenplaceholder' => get_string('tokentoken', 'local_deepler'),

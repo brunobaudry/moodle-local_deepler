@@ -66,6 +66,7 @@ if ($uploadinglossary) {
                         $glossaryinfo->sourceLang,
                         $glossaryinfo->targetLang,
                         $glossaryinfo->entryCount,
+                        $langhelper->getdbtokenid()
                 ));
                 $guid = user_glossary::create(new user_glossary($USER->id, $gid));
                 $status = 'success';

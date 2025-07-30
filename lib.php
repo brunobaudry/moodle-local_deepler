@@ -62,7 +62,7 @@ function local_deepler_extend_navigation_course(mixed $navigation, mixed $course
  * @return array
  * @throws \coding_exception
  */
-function local_deepler_extend_user_navigation($navigation, $user, $context, $course, $coursecontext): array {
+/*function local_deepler_extend_user_navigation($navigation, $user, $context, $course, $coursecontext): array {
     $node = navigation_node::create(
             get_string('glossarymanagetitle', 'local_deepler'),
             new moodle_url('/local/deepler/glossarymanager.php'),
@@ -75,7 +75,7 @@ function local_deepler_extend_user_navigation($navigation, $user, $context, $cou
     $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
     $usernode->add_node($node);
     return [];
-}
+}*/
 
 /**
  * @param $user
@@ -91,7 +91,7 @@ function local_deepler_extend_navigation_user_settings($navigation, $user, $user
         return null;
     }
     if (has_capability('local/deepler:edittranslations', $usercontext)) {
-        $url = new moodle_url('/local/deepler/glossarymanager.php');
+        $url = new moodle_url('/local/deepler/glossarymanageruser.php');
         $node = navigation_node::create(get_string('glossarymanagetitle', 'local_deepler'), $url,
                 navigation_node::TYPE_SETTING);
         $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);

@@ -28,6 +28,7 @@
 namespace local_deepler\local\data;
 
 use coding_exception;
+use phpDocumentor\Reflection\Types\Boolean;
 use stdClass;
 
 /**
@@ -53,7 +54,10 @@ class glossary {
 
     /** @var string Target language code (e.g., 'de') */
     public string $targetlang;
-
+    /** @var int|null shared status (0=private,1=pool,2=public) */
+    public int $shared;
+    /** @var int the db token ID the glossary was created with (for pool sharing) */
+    public int $tokenid;
     /** @var int Unix timestamp of creation */
     public int $timecreated;
     /** @var int entrycount */
@@ -66,6 +70,9 @@ class glossary {
      * @param string $name
      * @param string $sourcelang
      * @param string $target
+     * @param int $entrycount
+     * @param int $tokenid
+     * @param int|null $shared
      * @param int|null $timecreated
      * @param int|null $id
      */
@@ -75,6 +82,8 @@ class glossary {
             string $sourcelang,
             string $target,
             int $entrycount,
+            ?int $tokenid = 0,
+            ?int $shared = 0,
             ?int $timecreated = null,
             ?int $id = null
     ) {
@@ -83,6 +92,8 @@ class glossary {
         $this->sourcelang = $sourcelang;
         $this->targetlang = $target;
         $this->entrycount = $entrycount;
+        $this->shared = $shared;
+        $this->tokenid = $tokenid;
         $this->timecreated = $timecreated ?? time();
         $this->id = $id;
     }
@@ -111,6 +122,8 @@ class glossary {
                 'targetlang' => $this->targetlang,
                 'entrycount' => $this->entrycount,
                 'timecreated' => $this->timecreated,
+                'shared' => $this->shared,
+                'tokenid' => $this->tokenid,
         ];
         if ($this->id !== null) {
             $obj->id = $this->id;
@@ -123,6 +136,7 @@ class glossary {
      *
      * @param int $id
      * @return self
+     * @throws \dml_exception
      */
     public static function getbyid(int $id): self {
         global $DB;
@@ -133,11 +147,41 @@ class glossary {
                 $record->sourcelang,
                 $record->targetlang,
                 $record->entrycount,
+                $record->tokenid,
+                $record->shared,
                 $record->timecreated,
                 $record->id
         );
     }
 
+    /**
+     * @param int $tokenid
+     * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function getpublicexcepttokenid(int $tokenid): array {
+        global $DB;
+        $glossaries = [];
+        list($notin_sql, $params) = $DB->get_in_or_equal($tokenid, SQL_PARAMS_NAMED, 'tokenid', false);
+        $select = "shared = :shared AND tokenid $notin_sql";
+        $params['shared'] = 2;
+        $records = $DB->get_records_select(self::TABLE, $select, $params);
+        foreach ($records as $record) {
+            $glossaries[] = new self(
+                    $record->glossaryid,
+                    $record->name,
+                    $record->sourcelang,
+                    $record->targetlang,
+                    $record->entrycount,
+                    $record->tokenid,
+                    $record->shared,
+                    $record->timecreated,
+                    $record->id
+            );
+        }
+        return $glossaries;
+    }
     /**
      * Retrieves a glossary record by ID and returns a glossary object.
      *
@@ -154,9 +198,37 @@ class glossary {
                 $record->sourcelang,
                 $record->targetlang,
                 $record->entrycount,
+                $record->tokenid,
+                $record->shared,
                 $record->timecreated,
                 $record->id
         );
+    }
+
+    /**
+     * @param int $tokenid
+     * @return array
+     * @throws \dml_exception
+     */
+    public static function getallbytokenid(int $tokenid): array {
+        global $DB;
+        $glossaries = [];
+        $records = $DB->get_records(self::TABLE, ['tokenid' => $tokenid], '');
+        if ($records) {
+            foreach ($records as $record) {
+                $glossaries[] = new self(
+                        $record->glossaryid,
+                        $record->name,
+                        $record->sourcelang,
+                        $record->targetlang,
+                        $record->entrycount,
+                        $record->tokenid,
+                        $record->shared,
+                        $record->timecreated,
+                        $record->id);
+            }
+        }
+        return $glossaries;
     }
 
     /**
@@ -183,6 +255,8 @@ class glossary {
                     $record->sourcelang,
                     $record->targetlang,
                     $record->entrycount,
+                    $record->tokenid,
+                    $record->shared,
                     $record->timecreated,
                     $record->id
             );
@@ -215,5 +289,18 @@ class glossary {
     public static function delete(int $id): bool {
         global $DB;
         return $DB->delete_records(self::TABLE, ['id' => $id]);
+    }
+
+    /**
+     * Checks if a DeepL glossary ID exists in DB.
+     *
+     * @param string $deeplid
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function exists(string $deeplid): bool {
+        global $DB;
+        return $DB->record_exists(self::TABLE, ['glossaryid' => $deeplid]);
+
     }
 }

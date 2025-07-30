@@ -30,6 +30,7 @@
  *
  * @param integer $oldversion
  * @return boolean
+ * @throws \ddl_exception
  */
 function xmldb_local_deepler_upgrade($oldversion) {
     global $DB;
@@ -185,6 +186,39 @@ function xmldb_local_deepler_upgrade($oldversion) {
             $dbman->create_table($table);
         }
         upgrade_plugin_savepoint(true, 2025070307, 'local', 'deepler');
+    }
+    if ($oldversion < 2025073000) {
+
+        // Define field to be added to your table.
+        $table = new xmldb_table('local_deepler_glossaries');
+        $table2 = new xmldb_table('local_deepler_user_glossary');
+        $field = new xmldb_field('shared', XMLDB_TYPE_INTEGER, '1', null, true, null, 0);
+        $field2 = new xmldb_field('tokenid', XMLDB_TYPE_INTEGER, '10', null, null, null, 0);
+
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        if (!$dbman->field_exists($table2, $field2)) {
+            $dbman->add_field($table2, $field2);
+        }
+        upgrade_plugin_savepoint(true, 2025073000, 'local', 'deepler');
+    }
+    if ($oldversion < 2025073001) {
+
+        // Define field to be added to your table.
+        $table = new xmldb_table('local_deepler_glossaries');
+        $table2 = new xmldb_table('local_deepler_user_glossary');
+        $field2 = new xmldb_field('tokenid', XMLDB_TYPE_INTEGER, '10', null, null, null, 0);
+
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field2)) {
+            $dbman->add_field($table, $field2);
+        }
+        if ($dbman->field_exists($table2, $field2)) {
+            $dbman->drop_field($table2, $field2);
+        }
+        upgrade_plugin_savepoint(true, 2025073001, 'local', 'deepler');
     }
     return true;
 }

@@ -59,7 +59,11 @@ class user_glossary {
      * @param int $isactive
      * @param int|null $id
      */
-    public function __construct(int $userid, int $glossarydbid, int $isactive = 1, ?int $id = null) {
+    public function __construct(
+            int $userid,
+            int $glossarydbid,
+            int $isactive = 1,
+            ?int $id = null) {
         $this->userid = $userid;
         $this->glossaryid = $glossarydbid;
         $this->isactive = $isactive;
@@ -71,6 +75,7 @@ class user_glossary {
      *
      * @param self $mapping
      * @return int Inserted record ID
+     * @throws \dml_exception
      */
     public static function create(self $mapping): int {
         global $DB;
@@ -99,6 +104,7 @@ class user_glossary {
      *
      * @param int $id
      * @return self
+     * @throws \dml_exception
      */
     public static function getbyid(int $id): self {
         global $DB;
@@ -117,6 +123,7 @@ class user_glossary {
      * @param int $userid
      * @param int $glossaryid
      * @return self|null
+     * @throws \dml_exception
      */
     public static function getbyuserandglossary(int $userid, int $glossaryid): ?self {
         global $DB;
@@ -151,7 +158,6 @@ class user_glossary {
                     $record->id
             );
         }
-
         return $mappings;
     }
 
@@ -199,6 +205,7 @@ class user_glossary {
      *
      * @param int $id
      * @return bool True on success
+     * @throws \dml_exception
      */
     public static function delete(int $id): bool {
         global $DB;

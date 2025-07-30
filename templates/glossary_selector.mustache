@@ -15,29 +15,42 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_deepler/nodeepl_page
-    provides a basic alert when connection to the api failed
-      Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
+    @template local_deepler/glossary_selector
 
-  Data attributes required for JS:
-  * none
+    Classes required for JS:
+    # local_deepler__glossary
 
-  Context variables required for this template:
-  * none
+    Data attributes required for JS:
+    - local_deepler/glossary_id
 
-  Example context (json):
-  {
-    "nodeeplpapi": "Message to tell the user that cnx failed."
-  }
+    Context variables required for this template:
+    - glossaryid
+    - hasglossaries
+    - glossaryselectplaceholder
+    - glossaryselect
+    - glossaries
+    - glossarylistempty
+
+    Example context (JSON): {
+        "glossaryid": "",
+        "hasglossaries": "true",
+        "glossaryselectplaceholder": "Enter a glossary name",
+        "glossaryselect": "Select a glossary",
+        "glossaries": [
+            {
+                "name": "My glossary",
+                "glossaryid": "987987-0980",
+            },
+            {
+                "name": "My other glossary",
+                "glossaryid": "9999-999"
+        ],
+        "glossarylistempty": "There are no glossaries available with this language pair.",
+    }
+
 }}
 <div class="glossary-selector">
-    <label for="glossarylist" class="form-label">{{glossaryselect}}</label>
-
+    <p class="form-label">{{#str}}glossaryid,local_deepler{{/str}}</p>
     {{#hasglossaries}}
         <select id="local_deepler__glossary"
                 class="form-select"
@@ -51,6 +64,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     {{/hasglossaries}}
 
     {{^hasglossaries}}
-        <p>{{glossarylistempty}}</p>
+        <em>{{glossarylistempty}}</em>
     {{/hasglossaries}}
 </div>
