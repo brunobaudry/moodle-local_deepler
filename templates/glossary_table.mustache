@@ -35,24 +35,33 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "nodeeplpapi": "Message to tell the user that cnx failed."
   }
 }}
-<h4>{{#str}}glossary:my:title, local_deepler{{/str}}</h4>
+<h4>{{#str}}glossary:private:title, local_deepler{{/str}}</h4>
 <table class="generaltable">
     <thead>
     <tr>
-        <th>{{#str}}glossaryname, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarydeeplid, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarysourcelang, local_deepler{{/str}} &gt; {{#str}}glossarytargetlang, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarynbentries, local_deepler{{/str}}</th>
-        <th>{{#str}}glossaryactions, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:visibility, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:actions, local_deepler{{/str}}</th>
     </tr>
     </thead>
     <tbody>
     {{#glossaries}}
         <tr>
-            <td>{{name}}</td>
-            <td>{{glossaryid}}</td>
+            <td title="{{glossaryid}}">{{name}}</td>
+<!--            <td>{{glossaryid}}</td>-->
             <td>{{sourcelang}} &gt; {{targetlang}}</td>
-            <td>{{entrycount}}</td>
+            <td>{{entrycount}} {{{entrycountlink}}}</td>
+            <td>{{lastused}}</td>
+            <td><select
+                    class="form-select"
+                    data-id="local_deepler/glossary_visibility"
+                    data-glossary="{{glossaryid}}"
+                    aria-label="{{glossaryselectvisibilityplaceholder}}">
+                {{{shared}}}
+            </select>
             <td>{{{actions}}}</td>
         </tr>
     {{/glossaries}}

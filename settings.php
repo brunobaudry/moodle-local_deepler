@@ -60,6 +60,15 @@ if ($hassiteconfig) {
                         ['target' => '_self']
                 )
         ));
+        $settings->add(new admin_setting_description(
+                'local_deepler/glossaryadminlink',
+                get_string('glossary:manage:title', 'local_deepler'),
+                html_writer::link(
+                        new moodle_url('/local/deepler/glossarymanageradmin.php'),
+                        get_string('glossary:manage:title', 'local_deepler'),
+                        ['target' => '_self']
+                )
+        ));
     }
     // Allow non found token to fall back to the common API key (might be smart to use a free key for that).
     $settings->add(new admin_setting_configcheckbox(
@@ -138,7 +147,7 @@ if ($hassiteconfig) {
         ));
         $ADMIN->add('localplugins', new admin_externalpage(
                 'local_deepler_glossaryadmin',
-                get_string('glossarymanagetitle', 'local_deepler'),
+                get_string('glossary:manage:title', 'local_deepler'),
                 new moodle_url('/local/deepler/glossarymanageradmin.php'),
                 'moodle/site:config'
         ));

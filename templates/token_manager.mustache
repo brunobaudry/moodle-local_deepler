@@ -74,6 +74,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <table class="generaltable">
     <thead>
     <tr>
+        <th>id</th>
         <th>{{attribute}}</th>
         <th>{{valuefilter}}</th>
         <th>{{token}}</th>
@@ -83,6 +84,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <tbody>
     {{#records}}
         <tr>
+            <td>{{id}}</td>
             <td>{{attribute}}</td>
             <td>{{valuefilter}}</td>
             <td>{{token}}</td>
@@ -113,5 +115,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div class="pt-2" id="deepler-form-errors"></div>
 
 <div class="mb-3 pt-4">
-    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a>
+    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br/>
+    <a href="{{glossariesurl}}" target="_self">{{glossarymanagetitle}}</a>
 </div>

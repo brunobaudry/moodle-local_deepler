@@ -18,11 +18,34 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
   Provides translation form header and controls
   Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
+  * DeepL's
+  - context: '[data-id="local_deepler/context"]',
+  - nonSplittingTags: '[data-id="local_deepler/non_splitting_tags"]',
+  - splittingTags: '[data-id="local_deepler/splitting_tags"]',
+  - ignoreTags: '[data-id="local_deepler/ignore_tags"]',
+  - preserveFormatting: '[data-id="local_deepler/preserve_formatting"]',
+  - formality: '[name="local_deepler/formality"]',
+  - glossaryId: '[data-id="local_deepler/glossary_id"]',
+  - tagHandling: '[data-id="local_deepler/tag_handling"]',
+  - outlineDetection: '[data-id="local_deepler/outline_detection"]',
+  - splitSentences: '[name="local_deepler/split_sentences"]',
+  - modelType: '[name="local_deepler/model_type"]',
+  - toneorstyle: '[name="local_deepler/toneorstyle"]',
+  * UI
+  - #local_deepler__footer
+  - #local_deepler__settings
+  - sourceselect: '[data-action="local_deepler/sourceselect"]',
+  - selectAllCk: '[data-action="local_deepler/select-all"]',
+  - saveAll: '[data-action="local_deepler/saveall-btn"]',
+  - autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+  - targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+  - targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
+  - showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
+  - showUpdated: '[data-action="local_deepler/show-updated"]',
+  - showHidden: '[data-action="local_deepler/show-hidden"]',
+  - escapeLatex: '[data-id="local_deepler/latexeascape"]',
+  - escapePre: '[data-id="local_deepler/preescape"]',
+  - #local_deepler-translate-header-usage
 
   Data attributes required for JS:
   * none

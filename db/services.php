@@ -35,6 +35,27 @@ if (!defined('LOCAL_DEEPLER_REMOVEMLANG_CAP')) {
 }
 // Add functions for webservices.
 $functions = [
+        'local_deepler_get_glossary_entries' => [
+                'classname' => 'local_deepler\external\get_glossary_entries',
+                'description' => 'Get the glossary details',
+                'type' => 'read',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
+        'local_deepler_update_glossary_visibility' => [
+                'classname' => 'local_deepler\external\update_glossary_visibility',
+                'description' => 'Update the glossary visibilty',
+                'type' => 'write',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
+        'local_deepler_update_glossary' => [
+                'classname' => 'local_deepler\external\update_glossary',
+                'description' => 'Update the glossaries usage',
+                'type' => 'write',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
         'local_deepler_update_translation' => [
                 'classname' => 'local_deepler\external\update_translation',
                 'description' => 'Update translation with new mlang tags',
@@ -63,4 +84,5 @@ $functions = [
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
+
 ];

@@ -50,19 +50,23 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 }}
 <div class="glossary-selector">
-    <p class="form-label">{{#str}}glossaryid,local_deepler{{/str}}</p>
-    {{#hasglossaries}}
+    <p class="form-label">{{#str}}glossary:id,local_deepler{{/str}}</p>
+        <div class="row">
         <select id="local_deepler__glossary"
-                class="form-select"
+                class="form-select col-10"
                 data-id="local_deepler/glossary_id"
-                aria-label="{{glossaryselectplaceholder}}">
-            <option value="">{{glossaryselect}}</option>
+                aria-label="{{glossaryselectplaceholder}}"
+            {{^hasglossaries}}disabled{{/hasglossaries}}
+        >
+            <option value="">{{glossarynotselected}}</option>
             {{#glossaries}}
                 <option value="{{glossaryid}}">{{name}}</option>
             {{/glossaries}}
         </select>
-    {{/hasglossaries}}
-
+    <span class="col-1">
+    {{#hasglossaries}}{{{linkentries}}}{{/hasglossaries}}
+    </span>
+        </div>
     {{^hasglossaries}}
         <em>{{glossarylistempty}}</em>
     {{/hasglossaries}}

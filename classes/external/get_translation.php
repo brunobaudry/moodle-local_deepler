@@ -75,6 +75,7 @@ class get_translation extends external_api {
         }
 
         $tragetlang = $params['options']['target_lang'];
+        unset($params['options']['target_lang']);
 
         $groupedtranslations = [];
         foreach ($params['translations'] as $t) {
@@ -88,11 +89,12 @@ class get_translation extends external_api {
             }, $translations);
 
             try {
-                $results = $translator->translateText($texts, $sourcelang, $tragetlang);
+                $results = $translator->translateText($texts, $sourcelang, $tragetlang, $params['options']);
                 foreach ($results as $index => $result) {
                     $translatedtexts[] = [
                             'key' => $translations[$index]['key'],
                             'translated_text' => $result->text,
+                            'glossary_id' => $params['options']['glossary_id'],
                             'error' => '',
                     ];
                 }
@@ -165,6 +167,7 @@ class get_translation extends external_api {
                         [
                                 'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
                                 'translated_text' => new external_value(PARAM_RAW, 'translated text'),
+                                'glossary_id' => new external_value(PARAM_RAW, 'glossary id used'),
                                 'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
                         ]
                 )

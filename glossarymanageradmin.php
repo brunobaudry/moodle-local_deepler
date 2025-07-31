@@ -43,8 +43,9 @@ $langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
 //$langhelper->initdeepl($USER);
 $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
 $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
-$PAGE->set_title(get_string('glossarymanagetitle', 'local_deepler'));
-$PAGE->set_heading(get_string('glossarymanagetitle', 'local_deepler'));
+$title = get_string('glossary:manage:title', 'local_deepler');
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 
 echo $OUTPUT->header();
@@ -108,8 +109,8 @@ if (isset($_REQUEST['uploadstatus'])) {
     handlestatus('upload', $status, $message, $renderer);
 }
 // Glossary table
-echo $renderer->glossaries_table_admin($pluginsglossaries);
 echo $renderer->glossary_uploader();
+echo $renderer->glossaries_table_admin($pluginsglossaries);
 
 // Add js.
 $PAGE->requires->js_call_amd('local_deepler/glossary', 'init', []);

@@ -66,6 +66,7 @@ class tokens_renderer extends plugin_renderer_base {
             ]);
 
             $data['records'][] = [
+                    'id' => $record->id,
                     'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
                     'valuefilter' => s($record->valuefilter),
                     'token' => s($record->token),
@@ -91,6 +92,9 @@ class tokens_renderer extends plugin_renderer_base {
                 'addbutton' => get_string('tokenadd', 'local_deepler'),
                 'settingsurl' => (new moodle_url('/admin/settings.php', ['section' => 'local_deepler']))->out(),
                 'backtosettings' => get_string('tokengobacktosettings', 'local_deepler'),
+                'glossariesurl' => (new moodle_url('/local/deepler/glossarymanageradmin.php', ['section' => 'local_deepler']))
+                        ->out(),
+                'glossarymanagetitle' => get_string('glossary:manage:title', 'local_deepler'),
         ];
 
         $this->page->requires->js_call_amd('local_deepler/formvalidation', 'init');

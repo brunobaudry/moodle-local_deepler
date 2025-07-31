@@ -29,7 +29,8 @@ define(['core/log',
         './translation',
         './utils',
         './customevents',
-        './scrollspy'
+        './scrollspy',
+    './api'
     ],
     (Log, TinyMCEinit, TinyMCE,
      Modal,
@@ -37,7 +38,8 @@ define(['core/log',
      Translation,
      Utils,
      Events,
-     ScrollSpy) => {
+     ScrollSpy,
+     Api) => {
         let hideiframes = {};
         // Store removed iframes and their parent/next sibling for restoration.
         let removedIframes = [];
@@ -53,6 +55,7 @@ define(['core/log',
         let errordbtitle = '';
         let settingsUI = {};
         let allDataFormatOne = [];
+        let glossaryDetailViewr;
         /**
          * When a main error with the DB occurs.
          *
@@ -76,6 +79,8 @@ define(['core/log',
                 showModal(errordbtitle, s, 'Alert');
             }
         };
+
+
         // Const ON_TARGET_LANG_CHANGE = 'onTargetLangChange';
         /**
          * Event factories.
@@ -93,6 +98,66 @@ define(['core/log',
             Events.on(Translation.ON_DB_FAILED, onDBFailed);
             Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
             Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
+            Events.on(Api.GLOSSARY_DB_ALL_FAILED, onGlossaryDbAllfailed);
+            Events.on(Api.GLOSSARY_DB_FAILED, onGlossaryDbfailed);
+            Events.on(Api.GLOSSARY_DB_SUCCESS, onGlossaryDbSuccess);
+            Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);
+            Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>window.console.error(e));
+        };
+        const showEntriesModal = (ajaxResponse)=>{
+            const glossaryid = ajaxResponse.glossaryid;
+            const entries = JSON.parse(ajaxResponse.entries);
+            const status = ajaxResponse.status;
+            const message = ajaxResponse.message;
+            if (status === 'success') {
+                const table = document.createElement('table');
+                table.className = 'generaltable';
+                // Create the header.
+                const thead = document.createElement('thead');
+                thead.innerHTML = `<tr><th>${ajaxResponse.source.toUpperCase()}</th>
+                <th>${ajaxResponse.target.toUpperCase()}</th></tr>`;
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+
+                Object.entries(entries).forEach(([key, value]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${key}</td><td>${value}</td>`;
+                    tbody.appendChild(row);
+                });
+
+                table.appendChild(tbody);
+
+                Modal.create({
+                    title: 'Entries',
+                    body: table,
+                    type: 'default',
+                    show: true,
+                    removeOnClose: true,
+                });
+            } else {
+                Modal.create({
+                    title: `Error fetching entries for<br/><em>${glossaryid}</em>`,
+                    body: message,
+                    type: 'default',
+                    show: true,
+                    removeOnClose: true,
+                });
+            }
+        };
+        const onGlossaryDbAllfailed = (obj)=> {
+            Log.info('onGlossaryDbAllfailed');
+            Log.error(obj);
+        };
+
+        const onGlossaryDbfailed = (obj)=> {
+            Log.info('onGlossaryDbfailed');
+            Log.error(obj);
+        };
+
+        const onGlossaryDbSuccess = (obj)=> {
+            Log.info('onGlossaryDbSuccess');
+            Log.info(obj);
         };
         const resizeEditors = ()=>{
 
@@ -121,6 +186,7 @@ define(['core/log',
          * Register UI elements.
          */
         const registerUI = () => {
+
             try {
                 allDataFormatOne = domQueryAll(Selectors.editors.targetarea);
                 hideiframes = domQuery(Selectors.actions.hideiframes);
@@ -130,6 +196,7 @@ define(['core/log',
                 selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
                 autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
                 checkboxes = domQueryAll(Selectors.actions.checkBoxes);
+                glossaryDetailViewr = domQuery(Selectors.glossary.entriesviewerPage);
                 settingsUI[Selectors.deepl.glossaryId] = domQuery(Selectors.deepl.glossaryId);
                 settingsUI[Selectors.deepl.context] = domQuery(Selectors.deepl.context);
                 settingsUI[Selectors.deepl.formality] = domQuery(Selectors.deepl.formality);
@@ -262,8 +329,54 @@ define(['core/log',
             if (e.target.closest(Selectors.actions.validatorsBtns)) {
                 saveSingleTranslation(e);
             }
+            if (e.target.closest(Selectors.glossary.entriesviewerPage)) {
+                window.console.info('CLICK');
+                window.console.info(settingsUI[Selectors.deepl.glossaryId].value);
+                Api.getGlossariesEntries(
+                    settingsUI[Selectors.deepl.glossaryId].value,
+                    config.deeplsourcelang,
+                    config.targetlang
+                );
+            }
         };
+        /**
+         * Event listener for change events.
+         * @param {event} e
+         */
+        const handleChangeEvent = (e) => {
 
+            if (e.target.closest(Selectors.actions.hideiframes)) {
+                doHideiframes(hideiframes.checked);
+            }
+            if (e.target.closest(Selectors.actions.targetSwitcher)) {
+                switchTarget(e);
+            }
+            if (e.target.closest(Selectors.actions.sourceSwitcher)) {
+                switchSource(e);
+            }
+            if (e.target.closest(Selectors.actions.showUpdated)) {
+                showRows(Selectors.statuses.updated, e.target.checked);
+            }
+            if (e.target.closest(Selectors.actions.showNeedUpdate)) {
+                showRows(Selectors.statuses.needsupdate, e.target.checked);
+            }
+            if (e.target.closest(Selectors.actions.showHidden)) {
+                showRows(Selectors.statuses.hidden, e.target.checked);
+            }
+            if (e.target.closest(Selectors.actions.checkBoxes)) {
+                onItemChecked(e);
+            }
+            if (e.target.closest(Selectors.actions.sourceselect)) {
+                onSourceChange(e);
+            }
+            if (e.target.closest(Selectors.deepl.glossaryId)) {
+                if (settingsUI[Selectors.deepl.glossaryId].value !== '') {
+                    glossaryDetailViewr.style.display = 'block';
+                } else {
+                    glossaryDetailViewr.style.display = 'none';
+                }
+            }
+        };
         /**
          * Toggle iFrames in sourcetexts.
          * @param {boolean} isChecked
@@ -298,37 +411,7 @@ define(['core/log',
             }
         }
 
-        /**
-         * Event listener for change events.
-         * @param {event} e
-         */
-        const handleChangeEvent = (e) => {
-            window.console.info('CHANGE');
-            if (e.target.closest(Selectors.actions.hideiframes)) {
-                doHideiframes(hideiframes.checked);
-            }
-            if (e.target.closest(Selectors.actions.targetSwitcher)) {
-                switchTarget(e);
-            }
-            if (e.target.closest(Selectors.actions.sourceSwitcher)) {
-                switchSource(e);
-            }
-            if (e.target.closest(Selectors.actions.showUpdated)) {
-                showRows(Selectors.statuses.updated, e.target.checked);
-            }
-            if (e.target.closest(Selectors.actions.showNeedUpdate)) {
-                showRows(Selectors.statuses.needsupdate, e.target.checked);
-            }
-            if (e.target.closest(Selectors.actions.showHidden)) {
-                showRows(Selectors.statuses.hidden, e.target.checked);
-            }
-            if (e.target.closest(Selectors.actions.checkBoxes)) {
-                onItemChecked(e);
-            }
-            if (e.target.closest(Selectors.actions.sourceselect)) {
-                onSourceChange(e);
-            }
-        };
+
         /**
          * Multilang button handler
          *

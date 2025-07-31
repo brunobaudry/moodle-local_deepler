@@ -32,19 +32,20 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <table class="generaltable">
     <thead>
     <tr>
-        <th>{{#str}}glossaryname, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarydeeplid, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarysourcelang, local_deepler{{/str}} &gt; {{#str}}glossarytargetlang, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarynbentries, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
     </tr>
     </thead>
     <tbody>
     {{#glossaries}}
         <tr>
-            <td>{{name}}</td>
-            <td>{{glossaryid}}</td>
+            <td title="{{glossaryid}}">{{name}}</td>
+<!--            <td>{{glossaryid}}</td>-->
             <td>{{sourcelang}} &gt; {{targetlang}}</td>
-            <td>{{entrycount}}</td>
+            <td>{{entrycount}} {{{entrycountlink}}}</td>
+            <td>{{lastused}}</td>
         </tr>
     {{/glossaries}}
     </tbody>

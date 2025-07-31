@@ -220,5 +220,18 @@ function xmldb_local_deepler_upgrade($oldversion) {
         }
         upgrade_plugin_savepoint(true, 2025073001, 'local', 'deepler');
     }
+    if ($oldversion < 2025073002) {
+
+        // Define field to be added to your table.
+        $table = new xmldb_table('local_deepler_glossaries');
+
+        $field = new xmldb_field('lastused', XMLDB_TYPE_INTEGER, '10', null, true, null, 0);
+
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2025073002, 'local', 'deepler');
+    }
     return true;
 }

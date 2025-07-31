@@ -20,7 +20,7 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['./local/selectors', './local/api', './local/customevents', 'core/modal'], function(Selectors, Api, Events, Modal) {
     const initCode = ()=> {
         const fileInput = document.getElementById('fileElem');
         const fileNameDisplay = document.getElementById('filename-display');
@@ -34,12 +34,81 @@ define([], function() {
             }
         });
     };
+    const registerEventListeners = ()=>{
+        const allVisibilitySelect = document.querySelectorAll(Selectors.glossary.visibilityDropdown);
+        allVisibilitySelect.forEach((e)=>{
+        e.addEventListener('change',
+                (evt)=>{
+                    window.console.log(evt.target.dataset.glossary, evt.target.value);
+                    Api.updateGlossariesVisibility(evt.target.dataset.glossary, evt.target.value);
+                }
+            );
+        });
+        const allGlossarriesEntry = document.querySelectorAll(Selectors.glossary.entriesviewer);
+        window.console.log(allGlossarriesEntry);
+        allGlossarriesEntry.forEach((e)=>{
+            e.addEventListener('click',
+                (e)=>{
+                    window.console.log(e.target.parentNode.dataset.glossary);
+                    Api.getGlossariesEntries(
+                        e.target.parentNode.dataset.glossary,
+                        e.target.parentNode.dataset.source,
+                        e.target.parentNode.dataset.target,
+                    );
+                    // Api.updateGlossariesVisibility(evt.target.dataset.glossary, evt.target.value);
+                }
+            );
+        });
+        Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);
+        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>window.console.error(e));
+    };
+    const showEntriesModal = (ajaxResponse)=>{
+        const glossaryid = ajaxResponse.glossaryid;
+        const entries = JSON.parse(ajaxResponse.entries);
+        const status = ajaxResponse.status;
+        const message = ajaxResponse.message;
+        if (status === 'success') {
+            const table = document.createElement('table');
+            table.className = 'generaltable';
+            // Create the header.
+            const thead = document.createElement('thead');
+            thead.innerHTML = `<tr><th>${ajaxResponse.source.toUpperCase()}</th><th>${ajaxResponse.target.toUpperCase()}</th></tr>`;
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+
+            Object.entries(entries).forEach(([key, value]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${key}</td><td>${value}</td>`;
+                tbody.appendChild(row);
+            });
+
+            table.appendChild(tbody);
+
+            Modal.create({
+                title: 'Entries',
+                body: table,
+                type: 'default',
+                show: true,
+                removeOnClose: true,
+            });
+        } else {
+            Modal.create({
+                title: `Error fetching entries for<br/><em>${glossaryid}</em>`,
+                body: message,
+                type: 'default',
+                show: true,
+                removeOnClose: true,
+            });
+        }
+    };
 
     return {
         init: function() {
             if (document.readyState !== 'loading') {
                 // DOM is already ready.
                 initCode();
+                registerEventListeners();
             } else {
                 // Wait for DOMContentLoaded.
                 document.addEventListener('DOMContentLoaded', initCode);

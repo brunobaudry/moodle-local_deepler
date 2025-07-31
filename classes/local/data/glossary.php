@@ -60,6 +60,8 @@ class glossary {
     public int $tokenid;
     /** @var int Unix timestamp of creation */
     public int $timecreated;
+    /** @var int Unix timestamp of last usage */
+    public int $lastused;
     /** @var int entrycount */
     public int $entrycount;
 
@@ -71,9 +73,10 @@ class glossary {
      * @param string $sourcelang
      * @param string $target
      * @param int $entrycount
-     * @param int $tokenid
+     * @param int|null $tokenid
      * @param int|null $shared
      * @param int|null $timecreated
+     * @param int|null $lastused
      * @param int|null $id
      */
     public function __construct(
@@ -85,6 +88,7 @@ class glossary {
             ?int $tokenid = 0,
             ?int $shared = 0,
             ?int $timecreated = null,
+            ?int $lastused = 0,
             ?int $id = null
     ) {
         $this->glossaryid = $glossaryid;
@@ -95,6 +99,7 @@ class glossary {
         $this->shared = $shared;
         $this->tokenid = $tokenid;
         $this->timecreated = $timecreated ?? time();
+        $this->lastused = $lastused ?? 0;
         $this->id = $id;
     }
 
@@ -122,6 +127,7 @@ class glossary {
                 'targetlang' => $this->targetlang,
                 'entrycount' => $this->entrycount,
                 'timecreated' => $this->timecreated,
+                'lastused,' => $this->lastused,
                 'shared' => $this->shared,
                 'tokenid' => $this->tokenid,
         ];
@@ -150,6 +156,7 @@ class glossary {
                 $record->tokenid,
                 $record->shared,
                 $record->timecreated,
+                $record->lastused,
                 $record->id
         );
     }
@@ -177,6 +184,7 @@ class glossary {
                     $record->tokenid,
                     $record->shared,
                     $record->timecreated,
+                    $record->lastused,
                     $record->id
             );
         }
@@ -201,6 +209,7 @@ class glossary {
                 $record->tokenid,
                 $record->shared,
                 $record->timecreated,
+                $record->lastused,
                 $record->id
         );
     }
@@ -225,6 +234,7 @@ class glossary {
                         $record->tokenid,
                         $record->shared,
                         $record->timecreated,
+                        $record->lastused,
                         $record->id);
             }
         }
@@ -258,6 +268,7 @@ class glossary {
                     $record->tokenid,
                     $record->shared,
                     $record->timecreated,
+                    $record->lastused,
                     $record->id
             );
         }

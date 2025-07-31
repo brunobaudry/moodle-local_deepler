@@ -42,15 +42,13 @@ function local_deepler_extend_navigation_course(mixed $navigation, mixed $course
 
     // Build a moodle url.
     $url = new moodle_url("/local/deepler/translate.php?courseid=$course->id&lang=$lang");
-    //$url2 = new moodle_url("/local/deepler/glossarymanager.php?courseid=$course->id&lang=$lang");
 
     // Get title of translate page for navigation menu.
     $title = get_string('pluginname', 'local_deepler');
-    //$title2 = $title . '_glossarymanager';
 
     // Navigation node.
     $translatecontent = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, $title, 'translate');
-    //$translatecontent2 = navigation_node::create($title2, $url2, navigation_node::TYPE_CUSTOM, $title, 'glossary');
+    
     // Do not show in menu if no capability.
     $navigation->add_node($translatecontent);
     //$navigation->add_node($translatecontent2);
@@ -58,27 +56,13 @@ function local_deepler_extend_navigation_course(mixed $navigation, mixed $course
 }
 
 /**
+ * Add entry in user prefs.
+ *
+ * @param $navigation
  * @param $user
- * @return array
- * @throws \coding_exception
- */
-/*function local_deepler_extend_user_navigation($navigation, $user, $context, $course, $coursecontext): array {
-    $node = navigation_node::create(
-            get_string('glossarymanagetitle', 'local_deepler'),
-            new moodle_url('/local/deepler/glossarymanager.php'),
-            navigation_node::TYPE_SETTING,
-            null,
-            '100',
-            new pix_icon('i/customicon', '')
-
-    );
-    $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
-    $usernode->add_node($node);
-    return [];
-}*/
-
-/**
- * @param $user
+ * @param $usercontext
+ * @param $course
+ * @param $coursecontext
  * @return array
  * @throws \coding_exception
  */
@@ -92,7 +76,7 @@ function local_deepler_extend_navigation_user_settings($navigation, $user, $user
     }
     if (has_capability('local/deepler:edittranslations', $usercontext)) {
         $url = new moodle_url('/local/deepler/glossarymanageruser.php');
-        $node = navigation_node::create(get_string('glossarymanagetitle', 'local_deepler'), $url,
+        $node = navigation_node::create(get_string('glossary:manage:title', 'local_deepler'), $url,
                 navigation_node::TYPE_SETTING);
         $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
         $usernode->add_node($node);

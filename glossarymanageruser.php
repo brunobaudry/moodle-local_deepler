@@ -40,8 +40,9 @@ $langhelper = new lang_helper();
 $langhelper->initdeepl($USER);
 $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
 $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
-$PAGE->set_title(get_string('glossarymanagetitle', 'local_deepler'));
-$PAGE->set_heading(get_string('glossarymanagetitle', 'local_deepler'));
+$title = get_string('glossary:manage:title', 'local_deepler');
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 
 echo $OUTPUT->header();
@@ -50,37 +51,12 @@ $glossaries = $langhelper->getusersglossaries();
 $poolglossaries = $langhelper->getpoolglossaries($glossaries);
 $publicglossaries = $langhelper->getpublicglossaries();
 
-/**
- * @param $type
- * @param $status
- * @param $data
- * @param $renderer
- * @return void
- * @throws \coding_exception
- */
-function handle_glossary_status($type, $status, $data, $renderer) {
-    $successKey = $type . 'success';
-    $errorKey = $status !== '' ? $status : 'error' . $type;
-
-    if ($status !== 'success') {
-        echo $renderer->glossary_error(
-                get_string("glossary:{$errorKey}:title", 'local_deepler'),
-                get_string("glossary:{$errorKey}:body", 'local_deepler', $data)
-        );
-    } else {
-        echo $renderer->glossary_success(
-                get_string("glossary:{$successKey}:title", 'local_deepler'),
-                get_string("glossary:{$successKey}:body", 'local_deepler', $data)
-        );
-    }
-}
-
 // Handle glossary deletion status.
 if (isset($_REQUEST['deletestatus'])) {
     // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
     $status = $_REQUEST['deletestatus'];
     $glossary = $_REQUEST['deleteglossary'] ?? '';
-    handle_glossary_status('delete', $status, $glossary, $renderer);
+    echo $renderer->handle_glossary_status('delete', $status, $glossary);
 }
 
 // Handle glossary upload status.
@@ -88,7 +64,7 @@ if (isset($_REQUEST['uploadstatus'])) {
     // Statuses are: deeplissue, failed, fileerror, invalidsesskey, success, suffixerror, unknownerror.
     $status = $_REQUEST['uploadstatus'];
     $message = $_REQUEST['message'] ?? '';
-    handle_glossary_status('upload', $status, $message, $renderer);
+    echo $renderer->handle_glossary_status('upload', $status, $message);
 }
 // Glossary table
 if (!empty($publicglossaries)) {

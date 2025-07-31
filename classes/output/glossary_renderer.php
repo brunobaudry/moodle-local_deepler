@@ -53,6 +53,10 @@ class glossary_renderer extends plugin_renderer_base {
                     'sourcelang' => format_string($glo->sourcelang),
                     'targetlang' => format_string($glo->targetlang),
                     'entrycount' => format_string($glo->entrycount),
+                    'lastused' => $glo->lastused === 0 ? get_string('glossary:neverused', 'local_deepler') :
+                            userdate($glo->lastused),
+                    'entrycountlink' => $this->generateentrieslink($glo),
+                    'shared' => $this->dovisibilityoptions($glo->shared, false),
                     'actions' => $this->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete'))),
             ];
         }
@@ -77,6 +81,9 @@ class glossary_renderer extends plugin_renderer_base {
                     'sourcelang' => format_string($glo->sourcelang),
                     'targetlang' => format_string($glo->targetlang),
                     'entrycount' => format_string($glo->entrycount),
+                    'lastused' => $glo->lastused === 0 ? get_string('glossary:neverused', 'local_deepler') :
+                            userdate($glo->lastused),
+                    'entrycountlink' => $this->generateentrieslink($glo),
             ];
         }
 
@@ -92,10 +99,56 @@ class glossary_renderer extends plugin_renderer_base {
      * @return string
      */
     public function glossaries_table_admin(array $glossaries): string {
-        $data = [
-                'glossaries' => $glossaries
-        ];
-        return $this->render_from_template('local_deepler/glossary_table_admin', $data);
+        $g = array_change_key_case($glossaries, CASE_LOWER);
+        $data = [];
+
+        foreach ($g as $glo) {
+            $deleteurl = new moodle_url('/local/deepler/glossarydelete.php', [
+                    'section' => 'local_deepler',
+                    'deleteglossary' => $glo->id,
+                    'sesskey' => sesskey(),
+            ]);
+            $data[] = [
+                    'name' => format_string($glo->name),
+                    'glossaryid' => format_string($glo->glossaryid),
+                    'sourcelang' => format_string($glo->sourcelang),
+                    'targetlang' => format_string($glo->targetlang),
+                    'entrycount' => format_string($glo->entrycount),
+                    'entrycountlink' => $this->generateentrieslink($glo),
+                    'shared' => $this->dovisibilityoptions($glo->shared),
+                    'tokenid' => format_string($glo->tokenid),
+                    'lastused' => $glo->lastused === 0 ? get_string('glossary:neverused', 'local_deepler') :
+                            userdate($glo->lastused),
+                    'actions' =>
+                            $this->action_icon($deleteurl,
+                                    new pix_icon('t/delete', get_string('delete'))),
+
+            ];
+        }
+        return $this->render_from_template('local_deepler/glossary_table_admin', [
+                'glossaries' => $data,
+                'settingsurl' => (new moodle_url('/admin/settings.php', ['section' => 'local_deepler']))->out(),
+                'backtosettings' => get_string('tokengobacktosettings', 'local_deepler'),
+                'tokensettingsurl' => (new moodle_url('/local/deepler/tokenmanager.php', ['section' => 'local_deepler']))->out(),
+                'tokensettings' => get_string('tokensettings', 'local_deepler'),
+        ]);
+    }
+
+    /**
+     * @param object $glo
+     * @return void
+     * @throws \coding_exception
+     */
+    private function generateentrieslink(object $glo) {
+        return $this->action_icon('#',
+                new pix_icon('i/preview', get_string('view')),
+                null,
+                [
+                        'data-id' => 'local_deepler/glossary_entriesviewer',
+                        'data-glossary' => $glo->glossaryid,
+                        'data-source' => $glo->sourcelang,
+                        'data-target' => $glo->targetlang,
+                ]);
     }
     /**
      * Renderer for glossary upload.
@@ -105,18 +158,18 @@ class glossary_renderer extends plugin_renderer_base {
      */
     public function glossary_uploader(): string {
         $data = [
-                'glossaryupload' => get_string('glossaryupload', 'local_deepler'),
+                'glossaryupload' => get_string('glossary:upload', 'local_deepler'),
                 'formaction' => (new moodle_url('/local/deepler/glossaryupload.php'))->out(),
                 'sesskey' => sesskey(),
-                'glossaryexplcol1' => format_text(get_string('glossaryuploadfile', 'local_deepler'), FORMAT_MARKDOWN,
+                'glossaryexplcol1' => format_text(get_string('glossary:upload:file', 'local_deepler'), FORMAT_MARKDOWN,
                         ['trusted' => true]),
-                'glossaryexplcol2' => format_text(get_string('glossaryuploadfileexpla', 'local_deepler'), FORMAT_MARKDOWN,
+                'glossaryexplcol2' => format_text(get_string('glossary:upload:file:expla', 'local_deepler'), FORMAT_MARKDOWN,
                         ['trusted' => true]),
-                'glossaryexplcol3' => format_text(get_string('glossaryuploadfileexplb', 'local_deepler'), FORMAT_MARKDOWN,
+                'glossaryexplcol3' => format_text(get_string('glossary:upload:file:explb', 'local_deepler'), FORMAT_MARKDOWN,
                         ['trusted' => true]),
-                'glossarydeepllink' => get_string('glossarydeepllink', 'local_deepler'),
-                'glossaryuploadbtn' => get_string('glossaryuploadbtn', 'local_deepler'),
-                'glossaryhelpmodaltitle' => get_string('glossaryhelpmodaltitle', 'local_deepler'),
+                'glossarydeepllink' => get_string('glossary:deepl:link', 'local_deepler'),
+                'glossaryuploadbtn' => get_string('glossary:upload:btn', 'local_deepler'),
+                'glossaryhelpmodaltitle' => get_string('glossary:helpmodal:title', 'local_deepler'),
                 'close' => get_string('ok'),
         ];
 
@@ -138,22 +191,79 @@ class glossary_renderer extends plugin_renderer_base {
 
         foreach ($glossaries as $g) {
             if ($g->sourcelang === $sourcelang && $g->targetlang === $targetlang) {
+                $nameadd = ' (' . get_string('glossary:visibility:private', 'local_deepler') . ')';
+                if ($g->shared === 1) {
+                    $nameadd = ' (' . get_string('glossary:visibility:pool', 'local_deepler') . ')';
+                }
+                if ($g->shared === 2) {
+                    $nameadd = ' (' . get_string('glossary:visibility:public', 'local_deepler') . ')';
+                }
+
                 $glossarylist[] = [
                         'glossaryid' => $g->glossaryid,
-                        'name' => $g->name
+                        'name' => $g->name . $nameadd,
                 ];
             }
         }
 
         $data = [
-                'glossaryselect' => get_string('glossaryselect', 'local_deepler'),
-                'glossaryselectplaceholder' => get_string('glossaryselectplaceholder', 'local_deepler'),
-                'glossarylistempty' => get_string('glossarylistempty', 'local_deepler'),
+                'glossarynotselected' => get_string('glossary:notselected', 'local_deepler'),
+                'glossaryselectplaceholder' => get_string('glossary:selectplaceholder', 'local_deepler'),
+                'glossarylistempty' => get_string('glossary:listempty', 'local_deepler'),
                 'hasglossaries' => !empty($glossarylist),
-                'glossaries' => $glossarylist
+                'glossaries' => $glossarylist,
+                'linkentries' => $this->action_icon('#',
+                        new pix_icon('e/find_replace', get_string('view')),
+                        null, ['data-id' => 'local_deepler/glossary_entriesviewer_page'])
         ];
 
         return $this->render_from_template('local_deepler/glossary_selector', $data);
+    }
+
+    /**
+     * @param int $current
+     * @return string
+     * @throws \coding_exception
+     */
+    private function dovisibilityoptions(int $current, bool $admin = true): string {
+        $output = html_writer::tag('option',
+                get_string('glossary:visibility:private', 'local_deepler'),
+                ['value' => '0'] + ($current === 0 ? ['selected' => 'selected'] : [])
+        );
+        $output .= html_writer::tag('option',
+                get_string('glossary:visibility:pool', 'local_deepler'),
+                ['value' => '1'] + ($current === 1 ? ['selected' => 'selected'] : [])
+        );
+        if ($admin) {
+            $output .= html_writer::tag('option',
+                    get_string('glossary:visibility:public', 'local_deepler'),
+                    ['value' => '2'] + ($current === 2 ? ['selected' => 'selected'] : [])
+            );
+        }
+        return $output;
+    }
+
+    /**
+     * @param $type
+     * @param $status
+     * @param $data
+     * @return string
+     * @throws \coding_exception
+     */
+    public function handle_glossary_status($type, $status, $data) {
+        $key = $type . ':' . $status;
+
+        if ($status !== 'success') {
+            return $this->glossary_error(
+                    get_string("glossary:{$key}:title", 'local_deepler'),
+                    get_string("glossary:{$key}:body", 'local_deepler', $data)
+            );
+        } else {
+            return $this->glossary_success(
+                    get_string("glossary:{$key}:title", 'local_deepler'),
+                    get_string("glossary:{$key}:body", 'local_deepler', $data)
+            );
+        }
     }
 
     /**
@@ -183,4 +293,5 @@ class glossary_renderer extends plugin_renderer_base {
         $output .= html_writer::end_div();
         return $output;
     }
+
 }

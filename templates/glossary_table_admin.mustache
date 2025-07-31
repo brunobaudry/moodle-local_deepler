@@ -18,14 +18,11 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     @template local_deepler/nodeepl_page
     provides a basic alert when connection to the api failed
       Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
+
 
   Data attributes required for JS:
-  * none
+  * data-glossary
+  * data-id="local_deepler/glossary_glossaryid"
 
   Context variables required for this template:
   * none
@@ -38,22 +35,39 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <table class="generaltable">
     <thead>
     <tr>
-        <th>{{#str}}glossaryname, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarydeeplid, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarysourcelang, local_deepler{{/str}} &gt; {{#str}}glossarytargetlang, local_deepler{{/str}}</th>
-        <th>{{#str}}glossarynbentries, local_deepler{{/str}}</th>
-        <th>{{#str}}glossaryactions, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:deeplid, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:visibility, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:pool, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
+        <th>{{#str}}glossary:actions, local_deepler{{/str}}</th>
     </tr>
     </thead>
     <tbody>
     {{#glossaries}}
         <tr>
-            <td>{{name}}</td>
+            <td title="{{glossaryid}}">{{name}}</td>
             <td>{{glossaryid}}</td>
             <td>{{sourcelang}} &gt; {{targetlang}}</td>
-            <td>{{entrycount}}</td>
+            <td>{{entrycount}} {{{entrycountlink}}}</td>
+            <td><select
+                        class="form-select"
+                        data-id="local_deepler/glossary_visibility"
+                        data-glossary="{{glossaryid}}"
+                        aria-label="{{glossaryselectvisibilityplaceholder}}">
+                {{{shared}}}
+            </select>
+                </td>
+            <td>{{tokenid}}</td>
+            <td>{{lastused}}</td>
             <td>{{{actions}}}</td>
         </tr>
     {{/glossaries}}
     </tbody>
 </table>
+<div class="mb-3 pt-4">
+    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br/>
+    <a href="{{tokensettingsurl}}" target="_self">{{tokensettings}}</a>
+</div>

@@ -61,24 +61,47 @@ $string['formalityless'] = 'less';
 $string['formalitymore'] = 'more';
 $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
-$string['glossaryactions'] = 'Actions';
-$string['glossarydeeplid'] = 'UUID';
-$string['glossarydeepllink'] = 'DeepL API documentation';
-$string['glossaryhelpmodaltitle'] = 'Simple 2 columns csv file';
-$string['glossaryid'] = 'Glossary id';
-$string['glossaryid_placeholder'] = 'Glossary id should you have one...';
-$string['glossarylistempty'] =
+$string['glossary:actions'] = 'Actions';
+$string['glossary:deeplid'] = 'UUID';
+
+$string['glossary:deepl:link'] = 'DeepL API documentation';
+$string['glossary:delete:deeplissue:body'] = 'Could not delete the glossary: {$a}';
+$string['glossary:delete:deeplissue:title'] = 'DeepL issue';
+$string['glossary:delete:failed:body'] = 'Failed to delete the glossary: {$a}';
+$string['glossary:delete:failed:title'] = 'Deletion failed';
+$string['glossary:delete:idmissing:body'] = 'Failed to delete the glossary: {$a}';
+$string['glossary:delete:idmissing:title'] = 'Missing ID';
+$string['glossary:delete:invalidsesskey:body'] = 'Failed to delete the glossary: {$a}';
+$string['glossary:delete:invalidsesskey:title'] = 'Invalid session key';
+$string['glossary:delete:success:body'] = '{$a} has been removed!';
+$string['glossary:delete:success:title'] = 'Deletion successful';
+$string['glossary:helpmodal:title'] = 'Simple 2 columns csv file';
+$string['glossary:id'] = 'Glossary id';
+$string['glossary:id_placeholder'] = 'Glossary id should you have one...';
+$string['glossary:lastused'] = 'Last time it was used';
+$string['glossary:listempty'] =
         'There are no glossaries available with this language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
-$string['glossarymanagetitle'] = 'DeepLer glossaries';
-$string['glossaryname'] = 'Name';
-$string['glossarynbentries'] = 'Entries';
-$string['glossaryselect'] = 'Select a glossary';
-$string['glossaryselectplaceholder'] = 'Enter a glossary name';
-$string['glossarysourcelang'] = 'Source';
-$string['glossarytargetlang'] = 'Target';
-$string['glossaryupload'] = 'Upload';
-$string['glossaryuploadbtn'] = 'Create glossary';
-$string['glossaryuploadfile'] = "##### Follow those simple file naming conventions:
+$string['glossary:manage:title'] = 'DeepLer glossaries';
+$string['glossary:name'] = 'Name';
+$string['glossary:neverused'] = 'Never';
+$string['glossary:notselected'] = 'No Glossary selected';
+$string['glossary:nbentries'] = 'Entries';
+$string['glossary:pool'] = 'Pool';
+$string['glossary:pool:title'] = 'Pool\'s glossaries';
+$string['glossary:private:title'] = 'Private glossaries';
+$string['glossary:public:title'] = 'Public glossaries';
+$string['glossary:select'] = 'Select a glossary';
+$string['glossary:selectplaceholder'] = 'Enter a glossary name';
+$string['glossary:sourcelang'] = 'Source';
+$string['glossary:targetlang'] = 'Target';
+$string['glossary:upload'] = 'Upload';
+$string['glossary:upload:btn'] = 'Create glossary';
+$string['glossary:upload:deeplissue:body'] = 'Could not upload the glossary because: {$a}';
+$string['glossary:upload:deeplissue:title'] = 'DeepL issue';
+$string['glossary:upload:failed:body'] = 'Failed to upload the glossary because: {$a}';
+$string['glossary:upload:failed:title'] = 'Upload error';
+
+$string['glossary:upload:file'] = "##### Follow those simple file naming conventions:
 
 1.  File extension must be .csv *(no .tsv)
 2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
@@ -86,7 +109,7 @@ $string['glossaryuploadfile'] = "##### Follow those simple file naming conventio
 5.  No header in the csv file. 
 3.  SOURCE and TARGET must be 2 character language code.
 4. DeepL does not manage bi directional glossaries.";
-$string['glossaryuploadfileexpla'] =
+$string['glossary:upload:file:expla'] =
         "##### For translating FR > ES
 **File: 'litérature\_fr-es.csv**'  
 belle      , hermosa  
@@ -98,7 +121,7 @@ mouse      , mouse
 hermosa   , belle  
 exquisito , delicieux  
 mouse     , mouse  ";
-$string['glossaryuploadfileexplb'] =
+$string['glossary:upload:file:explb'] =
         "##### File naming
 **Expl OK:**
  
@@ -111,7 +134,20 @@ $string['glossaryuploadfileexplb'] =
 *   Tech\_jargon\_**FRA-SPA**.CSV
 *   myHistoricalGlo_fr-es.**tsv**
 ";
-
+$string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: {$a}';
+$string['glossary:upload:fileerror:title'] = 'File error';
+$string['glossary:upload:invalidsesskey:body'] = 'Failed to upload the glossary because: {$a}';
+$string['glossary:upload:invalidsesskey:title'] = 'Invalid session key';
+$string['glossary:upload:success:body'] = '{$a} has been uploaded!';
+$string['glossary:upload:success:title'] = 'Upload successful';
+$string['glossary:upload:suffixerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
+$string['glossary:upload:suffixerror:title'] = 'Incorrect suffix';
+$string['glossary:upload:unknownerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
+$string['glossary:upload:unknownerror:title'] = 'Incorrect suffix';
+$string['glossary:visibility'] = 'Visibility';
+$string['glossary:visibility:pool'] = 'Pool';
+$string['glossary:visibility:private'] = 'Private';
+$string['glossary:visibility:public'] = 'Public';
 $string['hideiframes'] = 'Render embed iframes in source text.';
 $string['hideiframesadmin'] = 'Select this if you want rendering embed iframes be the default.';
 $string['hideiframesadmin_desc'] =
