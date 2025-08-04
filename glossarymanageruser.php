@@ -18,8 +18,7 @@
  * Local Deepler plugin glossaries management settings in user's pref.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman
- * @copyright  2024 Bruno Baudry
+ * @copyright  2025 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -66,7 +65,7 @@ if (isset($_REQUEST['uploadstatus'])) {
     $message = $_REQUEST['message'] ?? '';
     echo $renderer->handle_glossary_status('upload', $status, $message);
 }
-// Glossary table
+// Glossary table.
 if (!empty($publicglossaries)) {
     echo $renderer->glossary_table_view($publicglossaries, get_string('glossary:public:title', 'local_deepler'));
 }

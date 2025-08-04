@@ -16,35 +16,34 @@
 
 namespace local_deepler\local\data;
 
+use advanced_testcase;
+use dml_missing_record_exception;
+
 /**
  * Unit tests for the glossary model.
  *
  * @package    local_deepler
- * @category   test
- * @group      local_deepler
+ * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \local_deepler\local\data\glossary
  */
-
-use local\data\glossary;
-
-/**
- * Glossary model test case.
- */
-class glossary_testcase extends advanced_testcase {
+final class glossary_test extends advanced_testcase {
     /**
-     * Test creation..
+     * Test creation.
      *
-     * @covers \local\data\glossary
+     * @covers \local_deepler\local\data\glossary
      * @return void
      * @throws \dml_exception
      */
-    public function test_create_and_get_glossary() {
-        $data = (object) [
-                'glossaryid' => 'abc123',
-                'name' => 'Test Glossary',
-                'source' => 'en',
-                'target' => 'de',
-                'timecreated' => time()
-        ];
+    public function test_create_and_get_glossary(): void {
+        $data = new glossary(
+                'abc123',
+                'Test Glossary',
+                'en',
+                'de',
+                3,
+                time()
+        );
 
         $id = glossary::create($data);
         $record = glossary::getbyid($id);
@@ -56,18 +55,19 @@ class glossary_testcase extends advanced_testcase {
     /**
      * Test update.
      *
-     * @covers \local\data\glossary
+     * @covers \local_deepler\local\data\glossary
      * @return void
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
-    public function test_update_glossary() {
-        $data = (object) [
-                'glossaryid' => 'xyz789',
-                'name' => 'Initial Name',
-                'source' => 'en',
-                'target' => 'fr',
-                'timecreated' => time()
-        ];
+    public function test_update_glossary(): void {
+        $data = new glossary(
+                'abc124',
+                'Test Glossary 2',
+                'en',
+                'de',
+                3,
+                time()
+        );
 
         $id = glossary::create($data);
         $record = glossary::getbyid($id);
@@ -82,18 +82,19 @@ class glossary_testcase extends advanced_testcase {
     /**
      * Test deletion.
      *
-     * @covers \local\data\glossary
+     * @covers \local_deepler\local\data\glossary
      * @return void
      * @throws \dml_exception
      */
-    public function test_delete_glossary() {
-        $data = (object) [
-                'glossaryid' => 'del001',
-                'name' => 'To Delete',
-                'source' => 'en',
-                'target' => 'es',
-                'timecreated' => time()
-        ];
+    public function test_delete_glossary(): void {
+        $data = new glossary(
+                'abc12356',
+                'Test Glossary 3',
+                'it',
+                'fr',
+                3,
+                time()
+        );
 
         $id = glossary::create($data);
         glossary::delete($id);
@@ -102,7 +103,13 @@ class glossary_testcase extends advanced_testcase {
         glossary::getbyid($id);
     }
 
+    /**
+     * Basic setup.
+     *
+     * @return void
+     */
     protected function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest(true);
     }
 }

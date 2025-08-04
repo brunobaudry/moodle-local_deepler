@@ -654,6 +654,8 @@ class lang_helper {
     }
 
     /**
+     * Fetches all glossaries.
+     *
      * @return array
      * @throws \DeepL\DeepLException
      */
@@ -662,6 +664,8 @@ class lang_helper {
     }
 
     /**
+     * Adds a DeepL glossary if not yet stored in DB.
+     *
      * @param array $deeplglossaries
      * @return void
      * @throws \dml_exception
@@ -669,18 +673,14 @@ class lang_helper {
     public function adddeeplglossariesifunknown(array $deeplglossaries): void {
         /** @var \DeepL\GlossaryInfo $deeplglossary */
         foreach ($deeplglossaries as $deeplglossary) {
-            try {
-                if (!glossary::exists($deeplglossary->glossaryId)) {
-                    glossary::create(new glossary(
-                            $deeplglossary->glossaryId,
-                            $deeplglossary->name,
-                            $deeplglossary->sourceLang,
-                            $deeplglossary->targetLang,
-                            $deeplglossary->entryCount
-                    ));
-                }
-            } catch (dml_exception $e) {
-
+            if (!glossary::exists($deeplglossary->glossaryId)) {
+                glossary::create(new glossary(
+                        $deeplglossary->glossaryId,
+                        $deeplglossary->name,
+                        $deeplglossary->sourceLang,
+                        $deeplglossary->targetLang,
+                        $deeplglossary->entryCount
+                ));
             }
         }
     }
@@ -702,6 +702,8 @@ class lang_helper {
     }
 
     /**
+     * Get all glossaries uploaded by translators of the same pool (sharing the same api token).
+     *
      * @return array
      * @throws \dml_exception
      */
@@ -714,6 +716,8 @@ class lang_helper {
     }
 
     /**
+     * Get all dictionaries except those bound to an api token.
+     *
      * @return \local_deepler\local\data\glossary
      * @throws \coding_exception
      * @throws \dml_exception
@@ -739,6 +743,8 @@ class lang_helper {
     }
 
     /**
+     * Getter for the current token id.
+     *
      * @return int
      */
     public function getdbtokenid() {

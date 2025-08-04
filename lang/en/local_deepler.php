@@ -62,9 +62,8 @@ $string['formalitymore'] = 'more';
 $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
 $string['glossary:actions'] = 'Actions';
-$string['glossary:deeplid'] = 'UUID';
-
 $string['glossary:deepl:link'] = 'DeepL API documentation';
+$string['glossary:deeplid'] = 'UUID';
 $string['glossary:delete:deeplissue:body'] = 'Could not delete the glossary: {$a}';
 $string['glossary:delete:deeplissue:title'] = 'DeepL issue';
 $string['glossary:delete:failed:body'] = 'Failed to delete the glossary: {$a}';
@@ -80,12 +79,12 @@ $string['glossary:id'] = 'Glossary id';
 $string['glossary:id_placeholder'] = 'Glossary id should you have one...';
 $string['glossary:lastused'] = 'Last time it was used';
 $string['glossary:listempty'] =
-        'There are no glossaries available with this language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
+        'There are no glossaries available with for language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
 $string['glossary:manage:title'] = 'DeepLer glossaries';
 $string['glossary:name'] = 'Name';
+$string['glossary:nbentries'] = 'Entries';
 $string['glossary:neverused'] = 'Never';
 $string['glossary:notselected'] = 'No Glossary selected';
-$string['glossary:nbentries'] = 'Entries';
 $string['glossary:pool'] = 'Pool';
 $string['glossary:pool:title'] = 'Pool\'s glossaries';
 $string['glossary:private:title'] = 'Private glossaries';
@@ -106,25 +105,31 @@ $string['glossary:upload:file'] = "##### Follow those simple file naming convent
 1.  File extension must be .csv *(no .tsv)
 2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
 4.  Name it meaningfully but not too long (for a nice display in tables).
-5.  No header in the csv file. 
+5.  No header in the csv file.
 3.  SOURCE and TARGET must be 2 character language code.
 4. DeepL does not manage bi directional glossaries.";
 $string['glossary:upload:file:expla'] =
         "##### For translating FR > ES
-**File: 'litérature\_fr-es.csv**'  
-belle      , hermosa  
-delicieux  , exquisito  
-mouse      , mouse  
+**File: 'litérature\_fr-es.csv**'
+
+belle      , hermosa
+
+delicieux  , exquisito
+
+mouse      , mouse
 
 ##### For translating ES > FR
-**File: 'litérature\_es-fr.csv**'  
-hermosa   , belle  
-exquisito , delicieux  
+**File: 'litérature\_es-fr.csv**'
+
+hermosa   , belle
+
+exquisito , delicieux
+
 mouse     , mouse  ";
 $string['glossary:upload:file:explb'] =
         "##### File naming
 **Expl OK:**
- 
+
 *   私の用語集**_en-jp.csv**
 *   Tech\_jargon**\_FR-ES.CSV**
 
@@ -159,6 +164,7 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve DeepLer\'s performances.';
+$string['missingmainapikey'] = 'First add a default API key to use this feature';
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
@@ -234,6 +240,8 @@ $string['tokenfiltervalue'] = 'Add a filter value';
 $string['tokengobacktosettings'] = 'Manage DeepLer\'s settings';
 $string['tokengototokenmanager'] = 'Manage DeepL\'s tokens';
 $string['tokenmanager'] = 'DeepLer Token manager';
+$string['tokenmanager_desc'] =
+        'Here you can map your DeepL api keys to user\'s attributes in order to create pools of translators. This can be useful should you need to measure and control consumption for each API key.';
 $string['tokennotokens'] = 'No tokens found.';
 $string['tokensettings'] = 'API Token Settings';
 $string['tokentabletitle'] = 'Token table';

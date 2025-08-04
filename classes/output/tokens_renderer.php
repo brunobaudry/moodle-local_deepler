@@ -70,12 +70,13 @@ class tokens_renderer extends plugin_renderer_base {
                     'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
                     'valuefilter' => s($record->valuefilter),
                     'token' => s($record->token),
-                    'action' => $this->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete')))
+                    'action' => $this->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete'))),
             ];
         }
 
         // Strings and form data.
         $data += [
+                'apikeyisset' => get_config('local_deepler', 'apikey'),
                 'description' => get_string('tokenadminpagedescription', 'local_deepler'),
                 'mappingsheading' => get_string('tokentokenmanager_mappings', 'local_deepler'),
                 'addnewheading' => get_string('tokentokenmanager_addnew', 'local_deepler'),

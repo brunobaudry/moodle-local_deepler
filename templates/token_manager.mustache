@@ -66,8 +66,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 {{#errors}}
     <div class="alert alert-danger">{{.}}</div>
 {{/errors}}
-
-
+<p>
+    {{#str}}tokenmanager_desc,local_deepler{{/str}}
+</p>
+{{#apikeyisset}}
 
 <h3>{{mappingsheading}}</h3>
 
@@ -111,6 +113,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <input type="submit" name="addtoken" value="{{addbutton}}" class="btn btn-primary">
     </div>
 </form>
+{{/apikeyisset}}
+{{^apikeyisset}}
+    <div class="alert alert-warning">
+        {{#str}}missingmainapikey,local_deepler{{/str}}
+    </div>
+{{/apikeyisset}}
 
 <div class="pt-2" id="deepler-form-errors"></div>
 

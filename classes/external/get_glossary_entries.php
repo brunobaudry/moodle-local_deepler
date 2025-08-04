@@ -71,7 +71,7 @@ class get_glossary_entries extends external_api {
                     'status' => 'error',
                     'source' => $params['source'],
                     'target' => $params['target'],
-                    'message' => $exception->getMessage()
+                    'message' => $exception->getMessage(),
             ];
         }
 

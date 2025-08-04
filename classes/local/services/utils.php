@@ -31,6 +31,10 @@ use local_deepler\local\data\field;
  */
 class utils {
     /**
+     * API Key validator.
+     */
+    const DEEPL_API_REGEX = '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(:fx|:pro)?$/i';
+    /**
      * List of bg colors for highlighting.
      */
     const COLORS = [

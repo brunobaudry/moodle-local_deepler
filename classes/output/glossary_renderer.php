@@ -24,14 +24,16 @@ use moodle_url;
 use plugin_renderer_base;
 
 /**
- *
+ * Sub renderer for Glossary stuff.
  *
  * @package local_deepler
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class glossary_renderer extends plugin_renderer_base {
     /**
+     * For user's preferences. Tables with delete/share actions.
+     *
      * @param array $glossaries
      * @return string
      * @throws \coding_exception|\core\exception\moodle_exception
@@ -65,6 +67,8 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Read only tables.
+     *
      * @param array $glossaries
      * @return string
      * @throws \core\exception\moodle_exception
@@ -95,6 +99,8 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Admin glossary management renderer.
+     *
      * @param array $glossaries
      * @return string
      */
@@ -135,6 +141,8 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
+     * View entries link renderer.
+     *
      * @param object $glo
      * @return void
      * @throws \coding_exception
@@ -177,7 +185,7 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
-     *
+     * Dropdown selection of available glossaries.
      *
      * @param array $glossaries
      * @param string $sourcelang
@@ -214,13 +222,15 @@ class glossary_renderer extends plugin_renderer_base {
                 'glossaries' => $glossarylist,
                 'linkentries' => $this->action_icon('#',
                         new pix_icon('e/find_replace', get_string('view')),
-                        null, ['data-id' => 'local_deepler/glossary_entriesviewer_page'])
+                        null, ['data-id' => 'local_deepler/glossary_entriesviewer_page']),
         ];
 
         return $this->render_from_template('local_deepler/glossary_selector', $data);
     }
 
     /**
+     * Sub function to generate a dropdown to select glossarie's visibility.
+     *
      * @param int $current
      * @return string
      * @throws \coding_exception
@@ -244,6 +254,8 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Simple notifications wrapper.
+     *
      * @param $type
      * @param $status
      * @param $data
@@ -267,27 +279,48 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render glossaries errors.
+     *
      * @param string $title
      * @param string $message
      * @return string
      */
     public function glossary_error(string $title, string $message): string {
-
-        $output = html_writer::start_div('alert alert-danger', ['role' => 'alert']);
-        $output .= html_writer::tag('h5', $title);
-        $output .= html_writer::tag('p', $message);
-        $output .= html_writer::end_div();
-        return $output;
+        return $this->notifications($title, $message, 'danger');
     }
 
     /**
+     * Render glossaries success.
+     *
      * @param string $title
      * @param string $message
      * @return string
      */
     public function glossary_success(string $title, string $message): string {
+        return $this->notifications($title, $message, 'success');
+    }
 
-        $output = html_writer::start_div('alert alert-success', ['role' => 'alert']);
+    /**
+     * Renders glossaries warnings.
+     *
+     * @param string $title
+     * @param string $message
+     * @return null
+     */
+    public function glossary_warning(string $title, string $message) {
+        return $this->notifications($title, $message, 'warning');
+    }
+
+    /**
+     * Notification comon.
+     *
+     * @param string $title
+     * @param string $message
+     * @param string $type
+     * @return string
+     */
+    private function notifications(string $title, string $message, string $type): string {
+        $output = html_writer::start_div('alert alert-' . $type, ['role' => 'alert']);
         $output .= html_writer::tag('h5', $title);
         $output .= html_writer::tag('p', $message);
         $output .= html_writer::end_div();

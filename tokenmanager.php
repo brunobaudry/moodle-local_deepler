@@ -23,6 +23,7 @@
  */
 
 use core\notification;
+use local_deepler\local\services\utils;
 
 require_once(__DIR__ . '/../../config.php');
 require_login();
@@ -47,7 +48,7 @@ if (optional_param('addtoken', false, PARAM_BOOL)) {
     if (empty(trim($valuefilter))) {
         $errors[] = get_string('tokenerror_nofilter', 'local_deepler');
     }
-    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $token)) {
+    if (!preg_match(utils::DEEPL_API_REGEX, $token)) {
         $errors[] = get_string('tokenerror_invaliduuid', 'local_deepler');
     }
     if (empty($errors)) {

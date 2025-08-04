@@ -233,5 +233,10 @@ function xmldb_local_deepler_upgrade($oldversion) {
         }
         upgrade_plugin_savepoint(true, 2025073002, 'local', 'deepler');
     }
+    if ($oldversion < 2025080400) {
+        $table = new xmldb_table('local_deepler_glossaries');
+        $field = new xmldb_field('lastused', XMLDB_TYPE_INTEGER, '10', null, true, null, 0);
+        $dbman->change_field_default($table, $field);
+    }
     return true;
 }

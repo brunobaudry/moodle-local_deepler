@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Local Deepler plugin glossaries removal management.
+ *
+ * @package    local_deepler
+ * @copyright  2025 Bruno Baudry
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 use core\output\notification;
 use DeepL\DeepLException;
 use local_deepler\local\services\lang_helper;

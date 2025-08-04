@@ -23,10 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+use local_deepler\lib\admin_setting_deeplapikey_configtext;
 
-use core\notification;
-use local_deepler\lib\admin_setting_tokenmanager;
+defined('MOODLE_INTERNAL') || die();
 
 // Plugin version display.
 require_once(__DIR__ . '/version.php');
@@ -41,7 +40,7 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
 
     // Key setting.
-    $settings->add(new admin_setting_configtext(
+    $settings->add(new admin_setting_deeplapikey_configtext(
             'local_deepler/apikey',
             get_string('apikeytitle', 'local_deepler'),
             get_string('apikeytitle_desc', 'local_deepler'),
@@ -49,27 +48,7 @@ if ($hassiteconfig) {
             PARAM_RAW_TRIMMED,
             40
     ));
-    if (get_config('local_deepler', 'apikey')) {
-        // Token manager.
-        $settings->add(new admin_setting_description(
-                'local_deepler/tokenmanagerlink',
-                get_string('tokenmanager', 'local_deepler'),
-                html_writer::link(
-                        new moodle_url('/local/deepler/tokenmanager.php'),
-                        get_string('tokengototokenmanager', 'local_deepler'),
-                        ['target' => '_self']
-                )
-        ));
-        $settings->add(new admin_setting_description(
-                'local_deepler/glossaryadminlink',
-                get_string('glossary:manage:title', 'local_deepler'),
-                html_writer::link(
-                        new moodle_url('/local/deepler/glossarymanageradmin.php'),
-                        get_string('glossary:manage:title', 'local_deepler'),
-                        ['target' => '_self']
-                )
-        ));
-    }
+
     // Allow non found token to fall back to the common API key (might be smart to use a free key for that).
     $settings->add(new admin_setting_configcheckbox(
             'local_deepler/allowfallbackkey',
@@ -136,20 +115,27 @@ if ($hassiteconfig) {
             get_string('pluginversion', 'local_deepler'),
             $plugin->release ?? 'version'
     ));
-    // Add the settings page to the admin menu.
-    $ADMIN->add('localplugins', $settings);
     if (get_config('local_deepler', 'apikey')) {
-        $ADMIN->add('localplugins', new admin_externalpage(
-                'local_deepler_tokenmanager',
+        // Token manager.
+        $settings->add(new admin_setting_description(
+                'local_deepler/tokenmanagerlink',
                 get_string('tokenmanager', 'local_deepler'),
-                new moodle_url('/local/deepler/tokenmanager.php'),
-                'moodle/site:config'
+                html_writer::link(
+                        new moodle_url('/local/deepler/tokenmanager.php'),
+                        get_string('tokengototokenmanager', 'local_deepler'),
+                        ['target' => '_self']
+                )
         ));
-        $ADMIN->add('localplugins', new admin_externalpage(
-                'local_deepler_glossaryadmin',
+        $settings->add(new admin_setting_description(
+                'local_deepler/glossaryadminlink',
                 get_string('glossary:manage:title', 'local_deepler'),
-                new moodle_url('/local/deepler/glossarymanageradmin.php'),
-                'moodle/site:config'
+                html_writer::link(
+                        new moodle_url('/local/deepler/glossarymanageradmin.php'),
+                        get_string('glossary:manage:title', 'local_deepler'),
+                        ['target' => '_self']
+                )
         ));
     }
+    // Add the settings page to the admin menu.
+    $ADMIN->add('localplugins', $settings);
 }

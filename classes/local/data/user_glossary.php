@@ -20,7 +20,6 @@
  * This class provides CRUD operations for the local_deepler_user_glossary table.
  *
  * @package    local_deepler
- * @category   model
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -56,17 +55,17 @@ class user_glossary {
      *
      * @param int $userid
      * @param int $glossarydbid
-     * @param int $isactive
+     * @param int|null $isactive
      * @param int|null $id
      */
     public function __construct(
             int $userid,
             int $glossarydbid,
-            int $isactive = 1,
+            ?int $isactive = 1,
             ?int $id = null) {
         $this->userid = $userid;
         $this->glossaryid = $glossarydbid;
-        $this->isactive = $isactive;
+        $this->isactive = $isactive ?? 1;
         $this->id = $id;
     }
 

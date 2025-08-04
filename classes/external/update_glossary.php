@@ -47,9 +47,7 @@ class update_glossary extends external_api {
     public static function execute(array $glossaryids): array {
         global $DB;
 
-        $params = self::validate_parameters(self::execute_parameters(), [
-                'glossaryids' => $glossaryids
-        ]);
+        $params = self::validate_parameters(self::execute_parameters(), ['glossaryids' => $glossaryids]);
 
         $results = [];
         $now = time();
@@ -64,13 +62,13 @@ class update_glossary extends external_api {
                         $results[] = [
                                 'glossaryid' => $id,
                                 'status' => 'success',
-                                'message' => 'Timestamp updated'
+                                'message' => 'Timestamp updated',
                         ];
                     } catch (dml_exception $e) {
                         $results[] = [
                                 'glossaryid' => $id,
                                 'status' => 'error',
-                                'message' => 'Could not update glossary last used'
+                                'message' => 'Could not update glossary last used',
                         ];
                     }
 
@@ -78,7 +76,7 @@ class update_glossary extends external_api {
                     $results[] = [
                             'glossaryid' => $id,
                             'status' => 'error',
-                            'message' => 'Glossary ID not found'
+                            'message' => 'Glossary ID not found',
                     ];
                 }
             }
@@ -87,7 +85,9 @@ class update_glossary extends external_api {
 
         } catch (Exception $e) {
             // Transaction will auto-rollback here.
-            throw new moodle_exception('transactionfailed', 'local_deepler', '', null, $e->getMessage());
+            throw new moodle_exception(
+                    'transactionfailed',
+                    'local_deepler', '', null, $e->getMessage());
         }
         return $results;
     }
@@ -98,12 +98,10 @@ class update_glossary extends external_api {
      * @return \core_external\external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters([
-                'glossaryids' => new external_multiple_structure(
+        return new external_function_parameters(['glossaryids' => new external_multiple_structure(
                         new external_value(PARAM_TEXT, 'Glossary ID'),
                         'Array of glossary IDs'
-                )
-        ]);
+        )]);
     }
 
     /**
@@ -116,7 +114,7 @@ class update_glossary extends external_api {
                 new external_single_structure([
                         'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
                         'status' => new external_value(PARAM_TEXT, 'Result status: success or error'),
-                        'message' => new external_value(PARAM_TEXT, 'Detailed message')
+                        'message' => new external_value(PARAM_TEXT, 'Detailed message'),
                 ])
         );
     }

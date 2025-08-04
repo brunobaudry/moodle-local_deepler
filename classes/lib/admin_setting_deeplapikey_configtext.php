@@ -14,20 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace local_deepler\lib;
+
+use admin_setting_configtext;
+use local_deepler\local\services\utils;
+
 /**
- * Hook for behats.
+ * Wrapper calss to add UUID key validation.
  *
- * @package    local_deepler
+ * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-throw new Exception("behat_hooks.php was loaded!");
-
-// This file is automatically loaded by Behat before any scenario runs.
-require_once(__DIR__ . '/../env_loader.php');
-
-// Load environment variables from the .env.
-env_loader::load(__DIR__ . '/../../../.env');
-
-// Debug output.
-echo "Loaded .env: DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
+class admin_setting_deeplapikey_configtext extends admin_setting_configtext {
+    /**
+     * Validate data before storage
+     *
+     * @param string data
+     * @return mixed true if ok string if error found
+     */
+    public function validate($data) {
+        $allowfallbackkey = get_config('local_deepler', 'allowfallbackkey');
+        if (empty($data) && $allowfallbackkey) {
+            return get_string('missingmainapikey', 'local_deepler');
+        } else if (!preg_match(utils::DEEPL_API_REGEX, $data) || trim($data) === '') {
+            return get_string('tokenerror_invaliduuid', 'local_deepler');
+        }
+        return true;
+    }
+}

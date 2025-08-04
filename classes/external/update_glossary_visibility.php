@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
-defined('MOODLE_INTERNAL') || die();
 
 use core\exception\moodle_exception;
 use core_external\external_api;
@@ -44,7 +43,7 @@ class update_glossary_visibility extends external_api {
 
         $params = self::validate_parameters(self::execute_parameters(), [
                 'glossaryid' => $glossaryid,
-                'shared' => $shared
+                'shared' => $shared,
         ]);
 
         if (!in_array($params['shared'], [0, 1, 2], true)) {
@@ -63,7 +62,7 @@ class update_glossary_visibility extends external_api {
         return [
                 'glossaryid' => $params['glossaryid'],
                 'status' => 'success',
-                'message' => 'Shared value updated'
+                'message' => 'Shared value updated',
         ];
     }
 
@@ -75,7 +74,7 @@ class update_glossary_visibility extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
                 'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
-                'shared' => new external_value(PARAM_INT, 'Shared value (0, 1, or 2)')
+                'shared' => new external_value(PARAM_INT, 'Shared value (0, 1, or 2)'),
         ]);
     }
 
@@ -88,7 +87,7 @@ class update_glossary_visibility extends external_api {
         return new external_single_structure([
                 'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
                 'status' => new external_value(PARAM_TEXT, 'Result status'),
-                'message' => new external_value(PARAM_TEXT, 'Detailed message')
+                'message' => new external_value(PARAM_TEXT, 'Detailed message'),
         ]);
     }
 }

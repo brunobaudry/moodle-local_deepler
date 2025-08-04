@@ -48,5 +48,4 @@
             <file>rsslib.php</file>
         </include>
     </coverage>
-
 </phpunit>

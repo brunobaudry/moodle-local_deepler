@@ -49,6 +49,8 @@ class behat_local_deepler extends behat_base {
     }
 
     /**
+     * Used mainly debug and check if token was loaded.
+     *
      * @Then I dump the DEEPL_API_TOKEN
      */
     public function i_dump_the_deepl_api_token(): void {
@@ -56,7 +58,10 @@ class behat_local_deepler extends behat_base {
     }
 
     /**
+     * Helper static to load the env before launching tests.
+     *
      * @BeforeSuite
+     * @return void
      */
     #[BeforeSuite]
     public static function load_env() {
@@ -68,6 +73,7 @@ class behat_local_deepler extends behat_base {
     /**
      * Test
      *
+     * @BeforeScenario
      * @return void
      */
     #[BeforeScenario]

@@ -16,81 +16,80 @@
 
 namespace local_deepler\local\data;
 
+use advanced_testcase;
+use dml_missing_record_exception;
+
 /**
- * Unit tests for the user_glossary model.
+ * User user_glossary model test case.
  *
  * @package    local_deepler
- * @category   test
- * @group      local_deepler
+ * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \local_deepler\local\data\user_glossary
  */
-
-use local\data\user_glossary;
-
-/**
- * User glossary model test case.
- */
-final class user_glossary_testcase extends advanced_testcase {
+final class user_glossary_test extends advanced_testcase {
     /**
      * Test creation.
      *
-     * @covers \local\data\user_glossary
+     * @covers \local_deepler\local\data\user_glossary
      * @return void
      * @throws \dml_exception
      */
-    public function test_create_and_get_user_glossary() {
+    public function test_create_and_get_user_glossary(): void {
         $user = $this->getDataGenerator()->create_user();
-        $data = (object) [
-                'userid' => $user->id,
-                'glossaryid' => 1,
-                'is_active' => 1
-        ];
+        $glo = new glossary('11111111-2222-3333-4444-555555555555',
+                'test', 'en', 'fr', 10);
+        $glodbid = glossary::create($glo);
+        $data = new user_glossary($user->id,
+                $glodbid,
+                1
+        );
 
-        $id = user_glossary::create($data);
-        $record = user_glossary::getbyid($id);
+        $usergloid = user_glossary::create($data);
+        $record = user_glossary::getbyid($usergloid);
 
         $this->assertEquals($data->userid, $record->userid);
-        $this->assertEquals($data->glossaryid, $record->glossarydbid);
+        $this->assertEquals($glodbid, $record->glossaryid);
+        $this->assertEquals($data->glossaryid, $record->glossaryid);
     }
 
     /**
      * Test update.
      *
-     * @covers \local\data\user_glossary
+     * @covers \local_deepler\local\data\user_glossary
      * @return void
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
-    public function test_update_user_glossary() {
+    public function test_update_user_glossary(): void {
         $user = $this->getDataGenerator()->create_user();
-        $data = (object) [
-                'userid' => $user->id,
-                'glossaryid' => 2,
-                'is_active' => 1
-        ];
+        $data = new user_glossary($user->id,
+                2,
+                1
+        );
 
         $id = user_glossary::create($data);
         $record = user_glossary::getbyid($id);
-        $record->is_active = 0;
+        $record->isactive = 0;
 
         user_glossary::update($record);
         $updated = user_glossary::getbyid($id);
 
-        $this->assertEquals(0, $updated->is_active);
+        $this->assertEquals(0, $updated->isactive);
     }
 
     /**
      * Test deletion.
      *
-     * @covers \local\data\user_glossary
+     * @covers \local_deepler\local\data\user_glossary
      * @return void
      * @throws \dml_exception
      */
-    public function test_delete_user_glossary() {
+    public function test_delete_user_glossary(): void {
         $user = $this->getDataGenerator()->create_user();
-        $data = (object) [
-                'userid' => $user->id,
-                'glossaryid' => 3,
-                'is_active' => 1
-        ];
+        $data = new user_glossary($user->id,
+                3,
+                0
+        );
 
         $id = user_glossary::create($data);
         user_glossary::delete($id);
@@ -100,11 +99,12 @@ final class user_glossary_testcase extends advanced_testcase {
     }
 
     /**
-     * Set up.
+     * Basic setup.
      *
      * @return void
      */
     protected function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest(true);
     }
 }

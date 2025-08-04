@@ -36,7 +36,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <thead>
     <tr>
         <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:deeplid, local_deepler{{/str}}</th>
+<!--        <th>{{#str}}glossary:deeplid, local_deepler{{/str}}</th>-->
         <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
         <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
         <th>{{#str}}glossary:visibility, local_deepler{{/str}}</th>
@@ -48,8 +48,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <tbody>
     {{#glossaries}}
         <tr>
-            <td title="{{glossaryid}}">{{name}}</td>
-            <td>{{glossaryid}}</td>
+            <td title="{{glossaryid}}"><strong>{{name}}</strong><br/><small>{{glossaryid}}</small></td>
+<!--            <td>{{glossaryid}}</td>-->
             <td>{{sourcelang}} &gt; {{targetlang}}</td>
             <td>{{entrycount}} {{{entrycountlink}}}</td>
             <td><select

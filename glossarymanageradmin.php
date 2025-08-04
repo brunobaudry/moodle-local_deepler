@@ -18,8 +18,7 @@
  * Local Deepler plugin glossaries management settings in Admin.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman
- * @copyright  2024 Bruno Baudry
+ * @copyright  2025 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,10 +36,7 @@ require_login();
 require_capability('local/deepler:edittranslations', $context);
 
 $PAGE->set_context($context);
-// Load glossary manager.
-$apikey = get_config('local_deepler', 'apikey');
-$langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
-//$langhelper->initdeepl($USER);
+
 $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
 $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
 $title = get_string('glossary:manage:title', 'local_deepler');
@@ -49,10 +45,13 @@ $PAGE->set_heading($title);
 $PAGE->set_pagelayout('base');
 
 echo $OUTPUT->header();
-// Prepare content.
-$deeplglossaries = $langhelper->getalldeeplglossaries();
-foreach ($deeplglossaries as $deeplglossary) {
-    try {
+// Load glossary manager.
+$apikey = get_config('local_deepler', 'apikey');
+if ($apikey) {
+    $langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
+    // Prepare content.
+    $deeplglossaries = $langhelper->getalldeeplglossaries();
+    foreach ($deeplglossaries as $deeplglossary) {
         if (!glossary::exists($deeplglossary->glossaryId)) {
             glossary::create(new glossary(
                     $deeplglossary->glossaryId,
@@ -62,55 +61,29 @@ foreach ($deeplglossaries as $deeplglossary) {
                     $deeplglossary->entryCount
             ));
         }
-    } catch (dml_exception $e) {
-
     }
-}
-$pluginsglossaries = glossary::getall(null, null);
-// $glossaries = $langhelper->getusersglossaries();
-/**
- * @param $type
- * @param $status
- * @param $data
- * @param $renderer
- * @return void
- * @throws \coding_exception
- */
-function handlestatus($type, $status, $data, $renderer): void {
-    $successKey = $type . 'success';
-    $errorKey = $status !== '' ? $status : 'error' . $type;
-
-    if ($status !== 'success') {
-        echo $renderer->glossary_error(
-                get_string("glossary:{$errorKey}:title", 'local_deepler'),
-                get_string("glossary:{$errorKey}:body", 'local_deepler', $data)
-        );
-    } else {
-        echo $renderer->glossary_success(
-                get_string("glossary:{$successKey}:title", 'local_deepler'),
-                get_string("glossary:{$successKey}:body", 'local_deepler', $data)
-        );
+    $pluginsglossaries = glossary::getall(null, null);
+    // Handle glossary deletion status.
+    if (isset($_REQUEST['deletestatus'])) {
+        // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
+        $status = $_REQUEST['deletestatus'];
+        $glossary = $_REQUEST['deleteglossary'] ?? '';
+        echo $renderer->handle_glossary_status('delete', $status, $glossary);
     }
-}
 
-// Handle glossary deletion status.
-if (isset($_REQUEST['deletestatus'])) {
-    // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
-    $status = $_REQUEST['deletestatus'];
-    $glossary = $_REQUEST['deleteglossary'] ?? '';
-    handlestatus('delete', $status, $glossary, $renderer);
+    // Handle glossary upload status.
+    if (isset($_REQUEST['uploadstatus'])) {
+        // Statuses are: deeplissue, failed, fileerror, invalidsesskey, success, suffixerror, unknownerror.
+        $status = $_REQUEST['uploadstatus'];
+        $message = $_REQUEST['message'] ?? '';
+        echo $renderer->handle_glossary_status('upload', $status, $message);
+    }
+    // Glossary table.
+    echo $renderer->glossary_uploader();
+    echo $renderer->glossaries_table_admin($pluginsglossaries);
+} else {
+    echo $renderer->glossary_warning(get_string('error'), get_string('missingmainapikey', 'local_deepler'));
 }
-
-// Handle glossary upload status.
-if (isset($_REQUEST['uploadstatus'])) {
-    // Statuses are: deeplissue, failed, fileerror, invalidsesskey, success, suffixerror, unknownerror.
-    $status = $_REQUEST['uploadstatus'];
-    $message = $_REQUEST['message'] ?? '';
-    handlestatus('upload', $status, $message, $renderer);
-}
-// Glossary table
-echo $renderer->glossary_uploader();
-echo $renderer->glossaries_table_admin($pluginsglossaries);
 
 // Add js.
 $PAGE->requires->js_call_amd('local_deepler/glossary', 'init', []);

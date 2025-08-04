@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Local Deepler plugin glossaries upload management.
+ *
+ * @package    local_deepler
+ * @copyright  2025 Bruno Baudry
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+use DeepL\DeepLException;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
 use local_deepler\local\services\lang_helper;
@@ -74,12 +83,10 @@ if ($uploadinglossary) {
             } else {
                 $status = 'suffixerror';
             }
-        }
-        catch (\DeepL\DeepLException $e) {
+        } catch (DeepLException $e) {
             $status = 'deeplissue';
             $message = $e->getMessage();
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $status = 'unknownerror';
             $message = $e->getMessage();
         }

@@ -20,7 +20,6 @@
  * This class provides CRUD operations for the local_deepler_glossaries table.
  *
  * @package    local_deepler
- * @category   model
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +27,6 @@
 namespace local_deepler\local\data;
 
 use coding_exception;
-use phpDocumentor\Reflection\Types\Boolean;
 use stdClass;
 
 /**
@@ -162,6 +160,8 @@ class glossary {
     }
 
     /**
+     * Find public Glossaries except the ones linked to the current token.
+     *
      * @param int $tokenid
      * @return array
      * @throws \coding_exception
@@ -170,8 +170,8 @@ class glossary {
     public static function getpublicexcepttokenid(int $tokenid): array {
         global $DB;
         $glossaries = [];
-        list($notin_sql, $params) = $DB->get_in_or_equal($tokenid, SQL_PARAMS_NAMED, 'tokenid', false);
-        $select = "shared = :shared AND tokenid $notin_sql";
+        list($notinsql, $params) = $DB->get_in_or_equal($tokenid, SQL_PARAMS_NAMED, 'tokenid', false);
+        $select = "shared = :shared AND tokenid $notinsql";
         $params['shared'] = 2;
         $records = $DB->get_records_select(self::TABLE, $select, $params);
         foreach ($records as $record) {
@@ -215,6 +215,8 @@ class glossary {
     }
 
     /**
+     * Fetches all glossaries bound to a token.
+     *
      * @param int $tokenid
      * @return array
      * @throws \dml_exception
