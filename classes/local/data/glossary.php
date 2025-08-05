@@ -242,23 +242,24 @@ class glossary {
         }
         return $glossaries;
     }
-
     /**
      * Retrieves all glossary records as glossary objects.
      *
-     * @return self[]
+     * @param string $sourcelang
+     * @param string $targetlang
+     * @return array
      * @throws \dml_exception
      */
-    public static function getall(?string $sourcelang, ?string $targetlang): array {
+    public static function getall(string $sourcelang, string $targetlang): array {
         global $DB;
         $records = $DB->get_records(self::TABLE);
         $glossaries = [];
 
         foreach ($records as $record) {
-            if ($sourcelang !== null && $sourcelang !== $record->sourcelang) {
+            if ($sourcelang !== '' && $sourcelang !== $record->sourcelang) {
                 continue;
             }
-            if ($targetlang !== null && $targetlang !== $record->targetlang) {
+            if ($targetlang !== '' && $targetlang !== $record->targetlang) {
                 continue;
             }
             $glossaries[] = new self(

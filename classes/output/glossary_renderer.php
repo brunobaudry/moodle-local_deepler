@@ -73,7 +73,9 @@ class glossary_renderer extends plugin_renderer_base {
      * Read only tables.
      *
      * @param array $glossaries
+     * @param string $title
      * @return string
+     * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      */
     public function glossary_table_view(array $glossaries, string $title): string {
@@ -242,6 +244,7 @@ class glossary_renderer extends plugin_renderer_base {
      * Sub function to generate a dropdown to select glossarie's visibility.
      *
      * @param int $current
+     * @param bool $admin
      * @return string
      * @throws \coding_exception
      */
@@ -264,7 +267,7 @@ class glossary_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Simple notifications wrapper.
+     * Simple notifications' wrapper.
      *
      * @param $type
      * @param $status
@@ -272,7 +275,7 @@ class glossary_renderer extends plugin_renderer_base {
      * @return string
      * @throws \coding_exception
      */
-    public function handle_glossary_status($type, $status, $data) {
+    public function handle_glossary_status($type, $status, $data): string {
         $key = $type . ':' . $status;
 
         if ($status !== 'success') {

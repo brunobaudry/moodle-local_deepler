@@ -17,6 +17,7 @@
 namespace local_deepler\lib;
 
 use admin_setting_configtext;
+use lang_string;
 use local_deepler\local\services\utils;
 
 /**
@@ -30,10 +31,16 @@ class admin_setting_deeplapikey_configtext extends admin_setting_configtext {
     /**
      * Validate data before storage
      *
-     * @param string data
-     * @return mixed true if ok string if error found
+     * @param string $data
+     * @return string|\lang_string|true true if ok string if error found
      */
-    public function validate($data) {
+    public function validate($data): string|lang_string|true {
+
+        // Skip validation during install or PHPUnit init.
+        if (empty($CFG->version) || during_initial_install()) {
+            return true;
+        }
+
         $allowfallbackkey = get_config('local_deepler', 'allowfallbackkey');
         if (empty($data) && $allowfallbackkey) {
             return get_string('missingmainapikey', 'local_deepler');

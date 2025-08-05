@@ -67,20 +67,31 @@ if ($uploadinglossary) {
             $glossaryname = str_replace(' ', '_', implode('_', $namearray));
             $source = $langpair[0];
             $target = $langpair[1];
-            if (isset($source) && isset($target) && $langhelper->islangsupported($source) && $langhelper->islangsupported
-                    ($target)) {
-                $glossaryinfo = $langhelper->gettranslator()->createGlossaryFromCsv($glossaryname, $source, $target, $file);
-                $gid = glossary::create(new glossary(
-                        $glossaryinfo->glossaryId,
-                        $glossaryinfo->name,
-                        $glossaryinfo->sourceLang,
-                        $glossaryinfo->targetLang,
-                        $glossaryinfo->entryCount,
-                        $langhelper->getdbtokenid()
-                ));
-                $guid = user_glossary::create(new user_glossary($USER->id, $gid));
-                $status = 'success';
-                $message = $filename;
+
+            if (isset($source) && isset($target)) {
+                $sourceok = $langhelper->islangsupported($source);
+                $targetok = $langhelper->islangsupported($target);
+                if (!$sourceok) {
+                    $status = 'sourcenotsupported';
+                    $message = $source;
+                } else if (!$targetok) {
+                    $status = 'targetnotsupported';
+                    $message = $target;
+                } else {
+                    $glossaryinfo = $langhelper->gettranslator()->createGlossaryFromCsv($glossaryname, $source, $target, $file);
+                    $gid = glossary::create(new glossary(
+                            $glossaryinfo->glossaryId,
+                            $glossaryinfo->name,
+                            $glossaryinfo->sourceLang,
+                            $glossaryinfo->targetLang,
+                            $glossaryinfo->entryCount,
+                            $langhelper->getdbtokenid()
+                    ));
+                    $guid = user_glossary::create(new user_glossary($USER->id, $gid));
+                    $status = 'success';
+                    $message = $filename;
+                }
+
             } else {
                 $status = 'suffixerror';
                 $message = 'suffix is unreadible.';

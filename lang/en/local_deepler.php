@@ -130,7 +130,7 @@ $string['glossary:upload:file:explb'] =
         "##### File naming
 **Expl OK:**
 
-*   私の用語集**_en-jp.csv**
+*   私の用語集**_en-ja.csv**
 *   Tech\_jargon**\_FR-ES.CSV**
 
 **Expl NOT OK:**
@@ -143,6 +143,10 @@ $string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary becau
 $string['glossary:upload:fileerror:title'] = 'File error';
 $string['glossary:upload:invalidsesskey:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:invalidsesskey:title'] = 'Invalid session key';
+$string['glossary:upload:sourcenotsupported:body'] = '{$a} is not a supported source language';
+$string['glossary:upload:sourcenotsupported:title'] = 'DeepL not supported source language';
+$string['glossary:upload:targetnotsupported:body'] = '{$a} is not a supported target language';
+$string['glossary:upload:targetnotsupported:title'] = 'DeepL not supported target language';
 $string['glossary:upload:success:body'] = '{$a} has been uploaded!';
 $string['glossary:upload:success:title'] = 'Upload successful';
 $string['glossary:upload:suffixerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';

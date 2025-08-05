@@ -62,7 +62,7 @@ if ($apikey) {
             ));
         }
     }
-    $pluginsglossaries = glossary::getall(null, null);
+    $pluginsglossaries = glossary::getall('', '');
     // Handle glossary deletion status.
     if (isset($_REQUEST['deletestatus'])) {
         // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.

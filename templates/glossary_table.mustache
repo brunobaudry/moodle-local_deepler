@@ -15,25 +15,43 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_deepler/nodeepl_page
-    provides a basic alert when connection to the api failed
-      Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
+    @template local_deepler/glossary_table
+    displays lists of glossaries to user prefs.
 
-  Data attributes required for JS:
-  * none
+    Classes required for JS: none
 
-  Context variables required for this template:
-  * none
+      Data attributes required for JS:
+      * data-id='local_deepler/glossary_visibility'
+      * data-glossary='GLOSSARY-UUID'
+      Context variables required for this template:
+      * glossaries
+          * glossaryid
+          * name
+          * sourcelang
+          * targetlang
+          * entrycount
+          * entrycountlink
+          * lastused
+          * glossaryselectvisibilityplaceholder
+          * shared
 
-  Example context (json):
-  {
-    "nodeeplpapi": "Message to tell the user that cnx failed."
-  }
+    Example context (json):
+    {
+    "glossaries": [
+        {"glossaryid": "uuid",
+        "name": "myglossary",
+        "sourcelang": "en",
+        "targetlang": "ja",
+        "entrycount": "uuid",
+        "entrycountlink": "<a href="#" class="action-icon" data-id="local_deepler/glossary_entriesviewer" data-source="en" data-target="ja">
+            <i class="icon fa fa-magnifying-glass-plus fa-fw " title="View" role="img" aria-label="View"></i></a>",
+        "lastused": "uuid",
+        "glossaryselectvisibilityplaceholder": "0",
+        "shared": "0",
+        "actions": "<a href="#" class="action-icon">
+            <i class="icon fa fa-trash-can fa-fw " title="Delete" role="img" aria-label="Delete"></i></a>",
+    }]
+    }
 }}
 <h4>{{#str}}glossary:private:title, local_deepler{{/str}}</h4>
 <table class="generaltable">

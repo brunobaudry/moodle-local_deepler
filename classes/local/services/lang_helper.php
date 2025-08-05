@@ -329,7 +329,7 @@ class lang_helper {
      * @param \stdClass $config
      * @return \stdClass
      */
-    public function prepareconfig(stdClass &$config) {
+    public function prepareconfig(stdClass &$config): stdClass {
         $config->usage = $this->usage;
         $config->limitReached = $config->usage->anyLimitReached();
         $config->targetlang = $this->targetlang;
@@ -345,6 +345,7 @@ class lang_helper {
      * Prepare the strings for the UI as JSON.
      *
      * @return string
+     * @throws \coding_exception
      */
     public function preparestrings(): string {
         // Status strings for UI icons.
@@ -372,6 +373,7 @@ class lang_helper {
      *
      * @param string $lang
      * @return bool
+     * @throws \DeepL\DeepLException
      */
     public function islangsupported(string $lang) {
         $list = $this->deeplsources;
@@ -704,6 +706,7 @@ class lang_helper {
     /**
      * Get all glossaries uploaded by translators of the same pool (sharing the same api token).
      *
+     * @param array|null $except
      * @return array
      * @throws \dml_exception
      */
@@ -718,7 +721,7 @@ class lang_helper {
     /**
      * Get all dictionaries except those bound to an api token.
      *
-     * @return \local_deepler\local\data\glossary
+     * @return array
      * @throws \coding_exception
      * @throws \dml_exception
      */
@@ -730,10 +733,11 @@ class lang_helper {
      * Delete user's glossary.
      *
      * @param int $glossarydbid
-     * @return null
-     * @throws \DeepL\DeepLException|\dml_exception
+     * @return bool|null
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
      */
-    public function deleteglossary(int $glossarydbid) {
+    public function deleteglossary(int $glossarydbid): ?bool {
         $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
         if ($guid) {
             // Public glossaries downloaded from DeepL do not have users.
@@ -750,7 +754,7 @@ class lang_helper {
      *
      * @return int
      */
-    public function getdbtokenid() {
+    public function getdbtokenid(): int {
         return $this->dbtokenid;
     }
 }

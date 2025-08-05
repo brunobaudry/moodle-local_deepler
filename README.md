@@ -42,6 +42,7 @@ Translation workflow being the following:
       - [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
       - [Minimum textfield size](#minimum-textfield-size)
       - [Max length of breadcrumb's sub](#max-length-of-breadcrumbs-sub)
+    + [Additional admin pages for Token management and Glossaries.](#additional-admin-pages-for-token-management-and-glossaries)
   * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
 - [Translating](#translating)
   * [Advanced settings](#advanced-settings)
@@ -161,6 +162,8 @@ The plugin adds a little breadcrumb when you scroll down the translation page. A
 Set to zero if you'd prefer no limiting.
 
 ![](pix/admin.png)
+
+#### Additional admin pages for Token management and Glossaries. 
 
 ### Token manager (mapping user to DeepL's API keys)
 

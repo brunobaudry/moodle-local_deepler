@@ -15,28 +15,57 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_deepler/nodeepl_page
-    provides a basic alert when connection to the api failed
-      Classes required for JS:
+    @template local_deepler/glossary_table_admin
+    displays lists of glossaries in admin.
 
+    Classes required for JS: none
 
-  Data attributes required for JS:
-  * data-glossary
-  * data-id="local_deepler/glossary_glossaryid"
+      Data attributes required for JS:
+      * data-id='local_deepler/glossary_visibility'
+      * data-glossary='GLOSSARY-UUID'
+      Context variables required for this template:
+      * settingsurl
+      * backtosettings
+      * tokensettingsurl
+      * tokensettings
+      * glossaries
+          ** glossaryid
+          ** name
+          ** sourcelang
+          ** targetlang
+          ** entrycount
+          ** entrycountlink
+          ** lastused
+          ** glossaryselectvisibilityplaceholder
+          ** shared
 
-  Context variables required for this template:
-  * none
-
-  Example context (json):
-  {
-    "nodeeplpapi": "Message to tell the user that cnx failed."
-  }
+    Example context (json):
+    {
+    "settingsurl,
+    "backtosettings,
+    "tokensettingsurl,
+    "tokensettings,
+    "glossaries": [
+        {"glossaryid": "uuid",
+        "name": "myglossary",
+        "sourcelang": "en",
+        "targetlang": "ja",
+        "entrycount": "uuid",
+        "tokenid": "uuid",
+        "entrycountlink": "<a href="#" class="action-icon" data-id="local_deepler/glossary_entriesviewer" data-source="en" data-target="ja">
+            <i class="icon fa fa-magnifying-glass-plus fa-fw " title="View" role="img" aria-label="View"></i></a>",
+        "lastused": "uuid",
+        "glossaryselectvisibilityplaceholder": "0",
+        "shared": "0",
+        "actions": "<a href="#" class="action-icon">
+            <i class="icon fa fa-trash-can fa-fw " title="Delete" role="img" aria-label="Delete"></i></a>",
+    }]
+    }
 }}
 <table class="generaltable">
     <thead>
     <tr>
         <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
-<!--        <th>{{#str}}glossary:deeplid, local_deepler{{/str}}</th>-->
         <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
         <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
         <th>{{#str}}glossary:visibility, local_deepler{{/str}}</th>
@@ -49,7 +78,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     {{#glossaries}}
         <tr>
             <td title="{{glossaryid}}"><strong>{{name}}</strong><br/><small>{{glossaryid}}</small></td>
-<!--            <td>{{glossaryid}}</td>-->
             <td>{{sourcelang}} &gt; {{targetlang}}</td>
             <td>{{entrycount}} {{{entrycountlink}}}</td>
             <td><select

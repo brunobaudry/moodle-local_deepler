@@ -60,7 +60,6 @@ class behat_local_deepler extends behat_base {
     /**
      * Helper static to load the env before launching tests.
      *
-     * @BeforeSuite
      * @return void
      */
     #[BeforeSuite]
@@ -73,7 +72,6 @@ class behat_local_deepler extends behat_base {
     /**
      * Test
      *
-     * @BeforeScenario
      * @return void
      */
     #[BeforeScenario]
