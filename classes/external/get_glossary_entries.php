@@ -40,9 +40,12 @@ class get_glossary_entries extends external_api {
     /**
      * Execute.
      *
+     * @param string $glossaryid
+     * @param string $source
+     * @param string $target
+     * @return array
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
-     * @throws \moodle_exception
      */
     public static function execute(string $glossaryid, string $source, string $target): array {
         global $DB;

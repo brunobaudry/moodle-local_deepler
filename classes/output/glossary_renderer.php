@@ -269,9 +269,9 @@ class glossary_renderer extends plugin_renderer_base {
     /**
      * Simple notifications' wrapper.
      *
-     * @param $type
-     * @param $status
-     * @param $data
+     * @param string $type
+     * @param string $status
+     * @param string $data
      * @return string
      * @throws \coding_exception
      */

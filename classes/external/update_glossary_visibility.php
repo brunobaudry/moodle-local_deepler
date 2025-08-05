@@ -34,9 +34,12 @@ class update_glossary_visibility extends external_api {
     /**
      * Execute.
      *
+     * @param string $glossaryid
+     * @param int $shared
+     * @return array
+     * @throws \core\exception\moodle_exception
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
-     * @throws \moodle_exception
      */
     public static function execute(string $glossaryid, int $shared): array {
         global $DB;

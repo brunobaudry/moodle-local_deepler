@@ -56,11 +56,11 @@ function local_deepler_extend_navigation_course(mixed $navigation, mixed $course
 /**
  * Add entry in user prefs.
  *
- * @param $navigation
- * @param $user
- * @param $usercontext
- * @param $course
- * @param $coursecontext
+ * @param mixed $navigation
+ * @param mixed $user
+ * @param mixed $usercontext
+ * @param mixed $course
+ * @param mixed $coursecontext
  * @return array
  * @throws \coding_exception
  */
