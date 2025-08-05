@@ -51,12 +51,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         "name": "myglossary",
         "sourcelang": "en",
         "targetlang": "ja",
-        "entrycount": "uuid",
+        "entrycount": "3",
         "tokenid": "uuid",
         "entrycountlink" :"<a href='#' class='action-icon' data-id='local_deepler/glossary_entriesviewer' data-source='en' data-target='ja'><i class='icon fa fa-magnifying-glass-plus fa-fw' title='View' role='img' aria-label='View'></i></a>",
-        "lastused": "uuid",
+        "lastused": "Monday 4 april 2025",
         "glossaryselectvisibilityplaceholder": "0",
-        "shared": "0",
+        "shared": "<option value='3'>3</option>",
         "actions": "<a href='#' class='action-icon'><i class='icon fa fa-trash-can fa-fw ' title='Delete' role='img' aria-label='Delete'></i></a>"
     }
     ]
@@ -84,9 +84,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         class="form-select"
                         data-id="local_deepler/glossary_visibility"
                         data-glossary="{{glossaryid}}"
-                        aria-label="{{glossaryselectvisibilityplaceholder}}">
-                {{{shared}}}
-            </select>
+                        aria-label="{{glossaryselectvisibilityplaceholder}}">{{{shared}}}</select>
                 </td>
             <td>{{tokenid}}</td>
             <td>{{lastused}}</td>
@@ -96,6 +94,5 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     </tbody>
 </table>
 <div class="mb-3 pt-4">
-    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br/>
-    <a href="{{tokensettingsurl}}" target="_self">{{tokensettings}}</a>
+    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br/><a href="{{tokensettingsurl}}" target="_self">{{tokensettings}}</a>
 </div>
