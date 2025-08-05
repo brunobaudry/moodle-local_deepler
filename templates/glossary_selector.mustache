@@ -32,22 +32,23 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     - glossarylistempty
 
     Example context (JSON):
-    {
-        "glossaryid": "",
-        "hasglossaries": "true",
-        "glossaryselectplaceholder": "Enter a glossary name",
-        "glossaryselect": "Select a glossary",
-        "glossaries": [
-            {
-                "name": "My glossary",
-                "glossaryid": "987987-0980",
-            },
-            {
-                "name": "My other glossary",
-                "glossaryid": "9999-999"
-        ],
-        "glossarylistempty": "There are no glossaries available with this language pair.",
-    }
+{
+    "glossaryid": "",
+    "hasglossaries": "true",
+    "glossaryselectplaceholder": "Enter a glossary name",
+    "glossaryselect": "Select a glossary",
+    "glossaries": [
+        {
+            "name": "My glossary",
+            "glossaryid": "987987-0980"
+        },
+        {
+            "name": "My other glossary",
+            "glossaryid": "9999-999"
+        }
+    ],
+    "glossarylistempty": "There are no glossaries available with this language pair."
+}
 }}
 <div class="glossary-selector">
     <p class="form-label">{{#str}}glossary:id,local_deepler{{/str}}</p>
