@@ -46,7 +46,7 @@
                 <FIELD NAME="sourcelang" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
                 <FIELD NAME="targetlang" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
                 <FIELD NAME="entrycount" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="shared" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="shared" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
                 <FIELD NAME="tokenid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
                 <FIELD NAME="lastused" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>

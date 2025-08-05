@@ -54,7 +54,7 @@ $publicglossaries = $langhelper->getpublicglossaries();
 if (isset($_REQUEST['deletestatus'])) {
     // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
     $status = $_REQUEST['deletestatus'];
-    $glossary = $_REQUEST['deleteglossary'] ?? '';
+    $glossary = $_REQUEST['name'] . ' (' . $_REQUEST['token'] . ')';
     echo $renderer->handle_glossary_status('delete', $status, $glossary);
 }
 
@@ -73,7 +73,7 @@ if (!empty($poolglossaries)) {
     echo $renderer->glossary_table_view($poolglossaries, get_string('glossary:pool:title', 'local_deepler'));
 }
 echo $renderer->glossary_table($glossaries);
-echo $renderer->glossary_uploader();
+echo $renderer->glossary_uploader('user');
 
 // Add js.
 $PAGE->requires->js_call_amd('local_deepler/glossary', 'init', []);

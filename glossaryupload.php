@@ -32,6 +32,7 @@ require_login();
 global $USER;
 try {
     $uploadinglossary = required_param('uploadinglossary', PARAM_BOOL);
+    $redirect = required_param('redirect', PARAM_ALPHANUM);
 } catch (moodle_exception $exception) {
     $uploadinglossary = null;
     $status = 'idmissing';
@@ -82,6 +83,7 @@ if ($uploadinglossary) {
                 $message = $filename;
             } else {
                 $status = 'suffixerror';
+                $message = 'suffix is unreadible.';
             }
         } catch (DeepLException $e) {
             $status = 'deeplissue';
@@ -94,4 +96,5 @@ if ($uploadinglossary) {
     unset($uploadinglossary);
 }
 // Redirect.
-redirect(new moodle_url('/local/deepler/glossarymanager.php?uploadstatus=' . $status.'&message='.urlencode($message)));
+redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php?uploadstatus=' . $status . '&message=' .
+        urlencode($message)));

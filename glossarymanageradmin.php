@@ -67,7 +67,7 @@ if ($apikey) {
     if (isset($_REQUEST['deletestatus'])) {
         // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
         $status = $_REQUEST['deletestatus'];
-        $glossary = $_REQUEST['deleteglossary'] ?? '';
+        $glossary = $_REQUEST['name'] . ' (' . $_REQUEST['token'] . ')';
         echo $renderer->handle_glossary_status('delete', $status, $glossary);
     }
 
@@ -79,7 +79,7 @@ if ($apikey) {
         echo $renderer->handle_glossary_status('upload', $status, $message);
     }
     // Glossary table.
-    echo $renderer->glossary_uploader();
+    echo $renderer->glossary_uploader('admin');
     echo $renderer->glossaries_table_admin($pluginsglossaries);
 } else {
     echo $renderer->glossary_warning(get_string('error'), get_string('missingmainapikey', 'local_deepler'));

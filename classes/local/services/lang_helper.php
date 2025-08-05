@@ -735,11 +735,14 @@ class lang_helper {
      */
     public function deleteglossary(int $glossarydbid) {
         $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
-        $delete = user_glossary::delete($guid->id);
+        if ($guid) {
+            // Public glossaries downloaded from DeepL do not have users.
+            $delete = user_glossary::delete($guid->id);
+        }
         $glo = glossary::getbyid($glossarydbid);
-        $gid = glossary::delete($guid->glossaryid);
-        $sucess = $this->translator->deleteglossary($glo->glossaryid);
-        return $sucess;
+        $success = $this->translator->deleteglossary($glo->glossaryid);
+        $deleted = glossary::delete($glossarydbid);
+        return $success && $deleted;
     }
 
     /**

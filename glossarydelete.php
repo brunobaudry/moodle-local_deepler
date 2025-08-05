@@ -33,6 +33,9 @@ global $USER;
 $status = 'failed';
 try {
     $deletingglossary = required_param('deleteglossary', PARAM_ALPHANUMEXT);
+    $redirect = required_param('redirect', PARAM_ALPHANUM);
+    $name = required_param('glossaryname', PARAM_ALPHANUM);
+    $token = required_param('glossarytoken', PARAM_ALPHANUM);
 } catch (moodle_exception $exception) {
     $deletingglossary = null;
     $status = 'idmissing';
@@ -50,7 +53,7 @@ $langhelper->initdeepl($USER);
 if ($deletingglossary) {
     if (!confirm_sesskey()) {
         $status = 'invalidsesskey';
-        redirect(new moodle_url('/local/deepler/glossarymanager.php'),
+        redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php'),
                 'Session expired or invalid. Please try again.', null, notification::NOTIFY_ERROR);
     }
     try {
@@ -61,4 +64,5 @@ if ($deletingglossary) {
     }
 }
 // Redirect.
-redirect(new moodle_url('/local/deepler/glossarymanager.php?deletestatus=' . $status . '&deleteglossary=' . $deletingglossary));
+redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php?deletestatus=' . $status . '&deleteglossary=' .
+        $deletingglossary . '&name=' . $name . '&token=' . $token));

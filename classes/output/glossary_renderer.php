@@ -46,7 +46,10 @@ class glossary_renderer extends plugin_renderer_base {
             $deleteurl = new moodle_url('/local/deepler/glossarydelete.php', [
                     'section' => 'local_deepler',
                     'deleteglossary' => $glo->id,
+                    'glossaryname' => $glo->name,
+                    'glossarytoken' => $glo->glossaryid,
                     'sesskey' => sesskey(),
+                    'redirect' => 'user',
             ]);
 
             $data[] = [
@@ -112,7 +115,10 @@ class glossary_renderer extends plugin_renderer_base {
             $deleteurl = new moodle_url('/local/deepler/glossarydelete.php', [
                     'section' => 'local_deepler',
                     'deleteglossary' => $glo->id,
+                    'glossaryname' => $glo->name,
+                    'glossarytoken' => $glo->glossaryid,
                     'sesskey' => sesskey(),
+                    'redirect' => 'admin',
             ]);
             $data[] = [
                     'name' => format_string($glo->name),
@@ -158,14 +164,18 @@ class glossary_renderer extends plugin_renderer_base {
                         'data-target' => $glo->targetlang,
                 ]);
     }
+
     /**
      * Renderer for glossary upload.
      *
+     * @param string $form
      * @return string
-     * @throws \coding_exception|\core\exception\moodle_exception
+     * @throws \coding_exception
+     * @throws \core\exception\moodle_exception
      */
-    public function glossary_uploader(): string {
+    public function glossary_uploader(string $form): string {
         $data = [
+                'redirect' => $form,
                 'glossaryupload' => get_string('glossary:upload', 'local_deepler'),
                 'formaction' => (new moodle_url('/local/deepler/glossaryupload.php'))->out(),
                 'sesskey' => sesskey(),
