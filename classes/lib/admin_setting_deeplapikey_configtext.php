@@ -34,6 +34,12 @@ class admin_setting_deeplapikey_configtext extends admin_setting_configtext {
      * @return mixed true if ok string if error found
      */
     public function validate($data) {
+
+        // Skip validation during install or PHPUnit init.
+        if (empty($CFG->version) || during_initial_install()) {
+            return true;
+        }
+
         $allowfallbackkey = get_config('local_deepler', 'allowfallbackkey');
         if (empty($data) && $allowfallbackkey) {
             return get_string('missingmainapikey', 'local_deepler');
