@@ -51,16 +51,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         "actions": "Actions",
         "formaction":"https://yourmoodle.test/local/deepler/tokenmanager.php",
         "sesskey": "9879-189023",
-        "userattributeselect": "<select class="select form-select custom-select mr-2" id="deepler-attribute" name="attribute">
-            <option selected="selected" value="">Choose</option>
-            <option value="username">Username</option>
-            <option value="email">Email address</option>
-            </select>",
+        "userattributeselect": "<select class='select form-select custom-select mr-2' id='deepler-attribute' name='attribute'><option selected='selected' value=''>Choose</option><option value='username'>Username</option><option value='email'>Email address</option></select>",
         "valuefilterplaceholder": "Add a filter value",
         "tokenplaceholder": "Token",
         "addbutton": "Add token map",
         "settingsurl": "https://yourmoodle.test/admin/settings.php?section=local_deepler",
-        "backtosettings": "Manage Deepler\'s settings",
+        "backtosettings": "Manage settings"
     }
 }}
 {{#errors}}
@@ -123,5 +119,5 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div class="pt-2" id="deepler-form-errors"></div>
 
 <div class="mb-3 pt-4">
-    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br/><a href="{{glossariesurl}}" target="_self">{{glossarymanagetitle}}</a>
+    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br><a href="{{glossariesurl}}" target="_self">{{glossarymanagetitle}}</a>
 </div>

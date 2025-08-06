@@ -1,9 +1,5 @@
 @local @local_deepler @javascript @deepler_menu_token
-Feature: Check course 'MORE' menu entry with DeepL Translator
-  In order to access plugin functionality
-  As a teacher
-  I need to see the plugin entry in the course 'MORE' menu
-
+Feature: Check page loaded with API token
   Background:
     Given the following config values are set as admin:
       | local_deepler/apikey | "{{DEEPL_API_TOKEN}}" |
@@ -22,7 +18,7 @@ Feature: Check course 'MORE' menu entry with DeepL Translator
       | teacher1 | C1     | editingteacher |
     And I log in as "teacher1"
 
-  Scenario: Teacher can see the plugin entry in the course 'MORE' menu
+  Scenario: Teacher can see source and target lang headers
     Given I am on the "C1" "course" page
     Then I should see "Course 1"
     And I navigate to "DeepL Translator" in current page administration
