@@ -44,15 +44,19 @@ Translation workflow being the following:
       - [Max length of breadcrumb's sub](#max-length-of-breadcrumbs-sub)
     + [Additional admin pages for Token management and Glossaries.](#additional-admin-pages-for-token-management-and-glossaries)
   * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
+- [Glossaries' management (NEW since v1.9)](#glossaries-management-new-since-v19)
+  * [Admin glossaries](#admin-glossaries)
+    + [File naming and formating conventions](#file-naming-and-formating-conventions)
+      - [DeepLer does not manage bi directional glossaries.](#deepler-does-not-manage-bi-directional-glossaries)
 - [Translating](#translating)
   * [Advanced settings](#advanced-settings)
     + [Deepl API setting](#deepl-api-setting)
-      - [Glossaries](#glossaries)
-      - [®Rephrase (NEW since v1.6)](#%C2%AErephrase-new-since-v16)
+      - [Glossaries (NEW since v1.9)](#glossaries-new-since-v19)
+      - [®Rephrase](#%C2%AErephrase)
     + [Other setting](#other-setting)
       - [Escape LaTeX and or PRE tags](#escape-latex-and-or-pre-tags)
       - [Tell the browser not to render embed iframes. (NEW since v1.7)](#tell-the-browser-not-to-render-embed-iframes-new-since-v17)
-    + [Cookie (NEW since v1.6)](#cookie-new-since-v16)
+    + [Cookie](#cookie)
   * [Language selection](#language-selection)
     + [Deepl language list vs Moodle's](#deepl-language-list-vs-moodles)
     + [Source language](#source-language)
@@ -181,6 +185,72 @@ Now a user having the required capability, when translating a course will get af
 
 ![](pix/token_manager.png)
 
+## Glossaries' management (NEW since v1.9)
+
+Glossaries are added to your Moodle instance in 3 different ways:
+- Downloaded from your DeepL API account.
+  - This is done automatically.
+  - Admin can make these Glossaries 'public' meaning every translator will be able to use them.
+- Uploaded by Moodle admins.
+  - Admin can make these Glossaries 'public' meaning every translator will be able to use them.
+  - Once uploaded they will be just as the ones downloaded from DeepL.
+- Uploaded by translators via their user's preferences.
+  - Can be made available to the translators in the same pool (sharing the same token as seen above).
+  - Can be kept private (only available to the translator that uploaded it).
+
+### Admin glossaries
+
+Once the admin has set the main api key 2 additional links will display.
+![](pix/admin_additionaltabs.png)
+
+Click on "Deepler glossaries" to manage them.
+
+#### File naming and formating conventions
+
+In order to simplify the process you must follow the file naming conventions below.
+
+1.  File extension must be .csv (no .tsv)
+2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
+4.  Name it meaningfully but not too long (for a nice display in tables).
+5.  No header in the csv file. 
+6.  SOURCE and TARGET must be 2 character language code.
+4.  DeepL does not manage bi directional glossaries.
+
+**Expl OK:**
+
+*   私の用語集**_en-ja.csv**
+*   Tech\_jargon**\_FR-ES.CSV**
+
+**Expl NOT OK:**
+
+*   myGlossary**-**en-fr.csv
+*   Tech\_jargon\_**FRA-SPA**.CSV
+*   myHistoricalGlo_fr-es.**tsv**
+
+##### DeepLer does not manage bi directional glossaries.
+
+Expl When translating FR > ES
+
+**File: 'litérature\_fr-es.csv**'
+
+|||
+|---|---|
+| belle | hermosa |
+| delicieux | exquisito |
+| mouse | mouse |
+
+Expl When translating ES > FR
+
+**File: 'litérature\_es-fr.csv**'
+
+|||
+|---|---|
+| hermosa | belle |
+| exquisito | delicieux |
+| mouse | mouse |
+
+
+
 ## Translating
 
 To begin translating content, visit a course, open the course settings action menu, and then go to **DeepL Translator**.
@@ -198,10 +268,24 @@ You will be sent to the translation page for the course.
 There you can fine tune [©DeepL's commands](https://developers.deepl.com/docs).
 Usually the default as set below should work fine with Moodle activity content.
 
-##### Glossaries
-*Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
+![](pix/advanced_settings_deepl_all.png)
 
-##### ®Rephrase (NEW since v1.6)
+##### Glossaries (NEW since v1.9)
+
+Glossaries (DeepL's) are managed by the plugin.
+**ONLY single source>target glossaries (v2) can be used with the plugin** 
+
+Available glossaries are added to a dropdown list if they match the current language pair.
+Once you select a glossary it will be stored in the course/source/target cookie.
+
+![](pix/glossaries_user_advancedsettings.png)
+
+Clicking on the magnifier icon will display glossary mappings:
+![](pix/glossaries_user_advancedsettings_entries.png)
+
+
+
+##### ®Rephrase
 This is a Pro feature that will rephrase the source text.
 __This is not available with the free API key.__
 
@@ -227,10 +311,7 @@ This setting's default in the editor can be set in the plugin [admin page](#admi
 ##### Tell the browser not to render embed iframes. (NEW since v1.7)
 Toggle this to show/hide iframes in the source texts.
 
-![](pix/advanced_settings.png)
-
-
-#### Cookie (NEW since v1.6)
+#### Cookie
 All of the advanced settings are saved by course id + source/target lang pairs in the Cookie for one month (each call for sevices resets it).
 
 ### Language selection
@@ -430,6 +511,7 @@ underneath you can see it available for translation.
 
 _Note that: for now, the naming of the instances as well ads the fields are the DB ones,
 it will soon be replaced by the one used in Moodle's course layout for a better usability._
+
 
 ## User tour (inline tutorial)
 

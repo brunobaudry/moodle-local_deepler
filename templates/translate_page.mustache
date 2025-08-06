@@ -56,9 +56,46 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * wordcount
   * charcount
   * charcountspaces
+  * langstrings
+  * glossayselector
+  * canimprove
+  * supportedlangs
+  * rephrasesymbol
+  * deeplsource
+  * target_lang
+  * notarget
+  * target_langs_htmloptions
+  * targetlangs
+  * showhiddenforstudents
+  * escapelatexbydefault
+  * escapeprebydefault
+  * hideiframesdefault
+  * hidecompatible
+  * compatiblelangs
+  * mform
+  * version
 
   Example context (json):
   {
+  "version":"v1.9.0",
+  "mform":"<div>lots of divs</div>",
+  "compatiblelangs": "<select><option value="en-gb"></option><option value="en-us"></option></select>",
+  "hidecompatible": false,
+  "hideiframesdefault":"checked",
+  "escapeprebydefault":"checked",
+  "escapelatexbydefault":"checked",
+  "showhiddenforstudents":"Show hidden for students",
+  "targetlangs": [{"code":"fr","selected":true,"disabled":"false","lang":"French"}],
+  "target_langs_htmloptions": "<option value='® en-US'>® English (American)</option><option value='fr'>French</option><option value='it'>Italian</option>",
+  "notarget": false,
+  "target_lang": "fr",
+  "deeplsource": "en",
+  "rephrasesymbol": "® ",
+  "canimprove": true,
+  "supportedlangs": "de, en-GB, en-US, es, fr, it, pt-BR, pt-PT",
+    "glossayselector":"<select id='local_deepler__glossary' class='form-select col-10' data-id='local_deepler/glossary_id' aria-label='Enter a glossary name' disabled=''><option value=''>No Glossary selected</option></select>",
+    "langstrings": {"statusstrings":{"failed":"Failed","success":"Succeeded","tosave":"Save this"},"uistrings":{"deeplapiexception":"DeepL's API returned an error","errordbpartial"}
+    },
     "lang": "en",
     "langs": [
       {
@@ -75,6 +112,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "charcountspaces": 25
   }
 }}
+
+{"statusstrings":{"failed":"Failed","success":"Succeeded","tosave":"Save this","totranslate":"Ready to translate","wait":"Not selected"},"uistrings":{"deeplapiexception":"DeepL's API returned an error","errordbpartial":"{$a} of the fields NOT saved in the database. Check manually in place","errordbtitle":"Database error","errortoolong":"(could be that the text is too long for the field... Check manually in place)","saveallmodaltitle":"Saving translations to the database","saveallmodalbody":"<div class=\"spinner-border text-primary\" role=\"status\"><span class=\"sr-only\">Saving...<\/span>\\n<\/div>\n<p>Please wait ...<br\/>When all fields are saved in the database,<br\/>I will automatically close<\/p>\n<p>If you are impatient, and want to close this window,\n<br\/>make sure all selected translation's statuses are <i class=\"fa fa-database\" aria-hidden=\"true\"><\/i><\/p>","canttranslatesame":"Both languages are the same:"}}
 <div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
     <!-- This is a hidden container for the strings that are used in the JS -->
 </div>
@@ -165,10 +204,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             </div>
         </div>
         <div class="col-5" id="local_deepler__glossarycontext">
-            <!--<label class="" for="local_deepler__glossary">{{#str}}glossaryid,local_deepler{{/str}}</label>-->
             {{{glossayselector}}}
-            <!--<input type="text" class="w-50 form-control mb-2 mr-sm-2" id="local_deepler__glossary" placeholder="{{#str}}glossaryid_placeholder,local_deepler{{/str}}"
-                   data-id="local_deepler/glossary_id">-->
             <label for="local_deepler__context">{{#str}}contextdeepl,local_deepler{{/str}}</label>
             <textarea class="form-control" id="local_deepler__context" data-id="local_deepler/context" rows="3"
                       placeholder="{{#str}}contextdeepl_placeholder,local_deepler{{/str}}"></textarea>
