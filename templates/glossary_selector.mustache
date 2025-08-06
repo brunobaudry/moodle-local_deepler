@@ -17,11 +17,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 {{!
     @template local_deepler/glossary_selector
 
-    Classes required for JS:
-    # local_deepler__glossary
+    Classes required for JS: none
 
     Data attributes required for JS:
-    - local_deepler/glossary_id
+    - id=local_deepler/glossary_entriesviewer_page
 
     Context variables required for this template:
     - glossaryid
@@ -30,13 +29,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     - glossaryselect
     - glossaries
     - glossarylistempty
+    - glossarynotselected
+    - linkentries
 
     Example context (json):
     {
-    "glossaryid": "",
-    "hasglossaries": "true",
+    "glossarynotselected":"No glossary selected",
+    "glossaryid": "1111-2222",
+    "hasglossaries": true,
     "glossaryselectplaceholder": "Enter a glossary name",
     "glossaryselect": "Select a glossary",
+    "linkentries":"<a href='#' data-id='local_deepler/glossary_entriesviewer_page'><i class='fa fa-view'></i></a>",
     "glossaries": [
         {
             "name": "My glossary",
