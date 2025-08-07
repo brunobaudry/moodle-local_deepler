@@ -24,6 +24,7 @@ use core\output\pix_icon;
 use core_plugin_manager;
 use Exception;
 use local_deepler\local\data\field;
+use moodle_url;
 
 /**
  * Utilitarian statics.
@@ -288,21 +289,29 @@ class utils {
     }
 
     /**
-     * @param $url
-     * @param $iconname
-     * @param $tooltip
-     * @param $component
-     * @param $attributes
-     * @return \core\output\action_icon|string
+     * Wrapper Alternative for v > 405.
+     *
+     * @param mixed $url
+     * @param string $iconname
+     * @param string $tooltip
+     * @param string $component
+     * @param array $attributes
+     * @return \action_icon|string
+     * @throws \core\exception\moodle_exception
      */
-    public static function local_deepler_get_action_icon($url,
-            $iconname, $tooltip = '', $component = 'core', $attributes = []) {
+    public static function local_deepler_get_action_icon(mixed $url,
+            string $iconname, string $tooltip = '', string $component = 'core', array $attributes = []) {
         global $OUTPUT;
+
+        // Ensure $url is a moodle_url object.
+        if (is_string($url)) {
+            $url = new moodle_url($url);
+        }
 
         // Check if the action_icon class exists (Moodle >= 4.0.5).
         if (class_exists('\core\output\action_icon')) {
-            $icon = new pix_icon($iconname, $tooltip, $component, $attributes);
-            return new action_icon($url, $icon);
+            $icon = new \pix_icon($iconname, $tooltip, $component, $attributes);
+            return new \action_icon($url, $icon);
         } else {
             // Fallback for older Moodle versions.
             $iconhtml = html_writer::empty_tag('img', array_merge([
