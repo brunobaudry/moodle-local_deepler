@@ -208,7 +208,6 @@ class glossary_renderer extends plugin_renderer_base {
      */
     public function glossay_selector_deepl(array $glossaries, string $sourcelang, string $targetlang): string {
         $glossarylist = [];
-
         foreach ($glossaries as $g) {
             if ($g->sourcelang === $sourcelang && $g->targetlang === $targetlang) {
                 $nameadd = ' (' . get_string('glossary:visibility:private', 'local_deepler') . ')';

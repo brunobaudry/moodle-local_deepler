@@ -47,33 +47,33 @@ class get_glossary_entries extends external_api {
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
-    public static function execute(string $glossaryid, string $source, string $target): array {
+    public static function execute(string $glossaryid): array {
         global $DB;
 
-        $params = self::validate_parameters(self::execute_parameters(), [
-                'glossaryid' => $glossaryid,
-                'source' => $source,
-                'target' => $target,
-        ]);
+        $params = self::validate_parameters(self::execute_parameters(), ['glossaryid' => $glossaryid]);
         $key = self::setdeeplapikey();
         try {
+            $glossaryid = $params['glossaryid'];
             $translator = new DeepLClient($key);
-            $ge = $translator->getGlossaryEntries($params['glossaryid']);
+            $glo = $translator->getGlossary($glossaryid);
+            $sourcelang = $glo->sourceLang;
+            $targetlang = $glo->targetLang;
+            $ge = $translator->getGlossaryEntries($glossaryid);
             return [
-                    'glossaryid' => $params['glossaryid'],
+                    'glossaryid' => $glossaryid,
                     'entries' => json_encode($ge->getEntries(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                     'status' => 'success',
                     'message' => 'Shared value updated',
-                    'source' => $params['source'],
-                    'target' => $params['target'],
+                    'source' => $sourcelang,
+                    'target' => $targetlang,
             ];
         } catch (DeepLException $exception) {
             return [
-                    'glossaryid' => $params['glossaryid'],
+                    'glossaryid' => $glossaryid,
                     'entries' => '',
                     'status' => 'error',
-                    'source' => $params['source'],
-                    'target' => $params['target'],
+                    'source' => $sourcelang ?? 'source',
+                    'target' => $targetlang ?? 'target',
                     'message' => $exception->getMessage(),
             ];
         }
@@ -86,12 +86,7 @@ class get_glossary_entries extends external_api {
      * @return \external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters(
-                [
-                        'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
-                        'source' => new external_value(PARAM_TEXT, 'Glossary SOURCE'),
-                        'target' => new external_value(PARAM_TEXT, 'Glossary TARGET'),
-                ]);
+        return new external_function_parameters(['glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID')]);
     }
 
     /**

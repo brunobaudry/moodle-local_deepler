@@ -4,12 +4,8 @@
         xsi:noNamespaceSchemaLocation="../../lib/phpunit/phpunit.xsd"
         bootstrap="../../lib/phpunit/bootstrap.php"
         colors="true"
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true"
         processIsolation="false"
         backupGlobals="false"
-        backupStaticAttributes="false"
         cacheResult="false"
         stopOnError="false"
         stopOnFailure="false"
@@ -17,6 +13,7 @@
         stopOnSkipped="false"
         beStrictAboutTestsThatDoNotTestAnything="false"
         beStrictAboutOutputDuringTests="true"
+        displayDetailsOnTestsThatTriggerDeprecations="true"
 >
 
     <php>

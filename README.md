@@ -46,8 +46,19 @@ Translation workflow being the following:
   * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
 - [Glossaries' management (NEW since v1.9)](#glossaries-management-new-since-v19)
   * [Admin glossaries](#admin-glossaries)
-    + [File naming and formating conventions](#file-naming-and-formating-conventions)
+    + [1. File naming and formating conventions](#1-file-naming-and-formating-conventions)
       - [DeepLer does not manage bi directional glossaries.](#deepler-does-not-manage-bi-directional-glossaries)
+    + [2. Select and upload](#2-select-and-upload)
+    + [3. Name and Glossary ID](#3-name-and-glossary-id)
+    + [4. Source > Target](#4-source--target)
+    + [5. Entries](#5-entries)
+    + [6. Visibility](#6-visibility)
+    + [7. Pool](#7-pool)
+    + [8. Last time it was used](#8-last-time-it-was-used)
+    + [9. Actions](#9-actions)
+  * [Users' glossaries](#users-glossaries)
+    + [Public and Pool glossaries](#public-and-pool-glossaries)
+    + [Private glossaries](#private-glossaries)
 - [Translating](#translating)
   * [Advanced settings](#advanced-settings)
     + [Deepl API setting](#deepl-api-setting)
@@ -200,20 +211,24 @@ Glossaries are added to your Moodle instance in 3 different ways:
 
 ### Admin glossaries
 
-Once the admin has set the main api key 2 additional links will display.
+Once the admin has set the main api key, 2 additional links will display.
 ![](pix/admin_additionaltabs.png)
 
 Click on "Deepler glossaries" to manage them.
 
-#### File naming and formating conventions
+![](pix/glossaries_admin.png)
+
+#### 1. File naming and formating conventions
 
 In order to simplify the process you must follow the file naming conventions below.
+_(The ? help icon will help you remember the instructions listed below)_
 
 1.  File extension must be .csv (no .tsv)
 2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
 4.  Name it meaningfully but not too long (for a nice display in tables).
 5.  No header in the csv file. 
 6.  SOURCE and TARGET must be 2 character language code.
+  1. (Sub languages for target are not allowed)
 4.  DeepL does not manage bi directional glossaries.
 
 **Expl OK:**
@@ -249,7 +264,76 @@ Expl When translating ES > FR
 | exquisito | delicieux |
 | mouse | mouse |
 
+#### 2. Select and upload
 
+Select here a file on your file system and upload it.
+If the file does not match the above conventions error messages will display.
+
+Upon successful upload, the Glossary is transmitted to DeepL, its metadata stored in Moodle DB and listed in the same page below.
+
+#### 3. Name and Glossary ID
+
+The first column displays the name of both Glossaries retrieved from DeepL and those uploaded from Moodle:
+
+- The one you gave the CSV file without the suffix.
+- The name given when created in DeepL's interface.
+
+Below the name is DeepL's glossary uuid, this what will be transmitted when calling the translations.
+
+#### 4. Source > Target
+
+Displays the glossary's source and target language.
+
+#### 5. Entries
+
+Clicking on the +magnifier will display all the pairs defined. 
+
+#### 6. Visibility
+
+Here you can set who can use the glossary.
+
+1. Private
+   2. Only the user that uploaded it.
+   3. Glossaries uploaded via your DeepL.com account have no user, so setting it 'private' would be like disabling it.
+4. Pool
+   5. All users mapped to a DeepL API token will have access to that glossary (see token management).
+   6. Glossaries uploaded via your DeepL.com account are mapped to the main API token (id 0). So only admin or users that are not mapped to a sub token (providing you set 
+      "Allow fallback key" to true) will have access to that glossary.
+7. Public
+   8. Public glossaries are accessible by any user.
+   9. Only Admins can set this visibility.
+
+#### 7. Pool
+
+The is the DB id of the token the user that uploaded is affiliated with.
+When you set the visibility to 'Pool' all users in mapped to the same token will access the glossary.
+
+#### 8. Last time it was used
+
+Each time a translator uses a Glossary (by selecting it in the advanced settings) a time stamp is stored in DB.
+This is usefull mainly to cleanup unused glossaries.
+
+#### 9. Actions
+
+For now only deletion.  
+__Deleting a glossary here will delete it from DeepL.com too__
+
+### Users' glossaries
+Non admin users, hence translators, can manage their won set of glossaries.
+
+![](pix/glossaries_userprefs.png)
+
+#### Public and Pool glossaries
+
+These are Glossaries shared by the site admin or one of the translators sharing the same API token as the current user.
+
+#### Private glossaries
+
+Are the ones uploaded by the current user.
+The **visibility** can be:
+
+- Private: not shared
+- Pool: shared with other translators sharing the same token.
 
 ## Translating
 
@@ -340,7 +424,7 @@ But will then save it as the main language in the DB.
 
 For example if you have a EN package you will be able to choose either EN-GB or EN-US as your target language, but it will save it as {mlang en}
 
-Make sure you set the correct multilangv2 setting for that matter.
+Make sure you set the correct Multilang-V2 setting for that matter.
 
 #### Source language
 

@@ -137,7 +137,7 @@ class translate_page implements renderable, templatable {
         $publicglossaries = $this->langpacks->getpublicglossaries() ?? [];
         $glo = array_merge($glossaries, $publicglossaries, $poolglossaries);
         $data->glossayselector = $glorenderer->glossay_selector_deepl($glo,
-                $this->langpacks->getcurrentlang(), $this->langpacks->gettargetlang());
+                $this->langpacks->getcurrentlang(true), $this->langpacks->gettargetlang(true));
         return $data;
     }
 }

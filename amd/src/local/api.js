@@ -86,18 +86,12 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
      * Service to update used glossary visibility.
      *
      * @param {string} glossaryId
-     * @param {string} source
-     * @param {string} target
      */
-    const getGlossariesEntries = (glossaryId, source, target)=>{
+    const getGlossariesEntries = (glossaryId)=>{
         Ajax.call([
             {
                 methodname: "local_deepler_get_glossary_entries",
-                args: {
-                    'glossaryid': glossaryId,
-                    'source': source,
-                    'target': target,
-                },
+                args: {'glossaryid': glossaryId},
                 done: (response)=>{
                     Events.emit(GLOSSARY_ENTRIES_SUCCESS, response);
                 },

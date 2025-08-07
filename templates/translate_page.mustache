@@ -79,7 +79,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   {
   "version":"v1.9.0",
   "mform":"<div>lots of divs</div>",
-  "compatiblelangs": "<select><option value="en-gb"></option><option value="en-us"></option></select>",
+  "compatiblelangs": "<select><option value='en-gb'></option><option value='en-us'></option></select>",
   "hidecompatible": false,
   "hideiframesdefault":"checked",
   "escapeprebydefault":"checked",
@@ -94,7 +94,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   "canimprove": true,
   "supportedlangs": "de, en-GB, en-US, es, fr, it, pt-BR, pt-PT",
     "glossayselector":"<select id='local_deepler__glossary' class='form-select col-10' data-id='local_deepler/glossary_id' aria-label='Enter a glossary name' disabled=''><option value=''>No Glossary selected</option></select>",
-    "langstrings": {"statusstrings":{"failed":"Failed","success":"Succeeded","tosave":"Save this"},"uistrings":{"deeplapiexception":"DeepL's API returned an error","errordbpartial"}
+    "langstrings": {"statusstrings":{"failed":"Failed","success":"Succeeded","tosave":"Save this"},"uistrings":{"deeplapiexception":"DeepL's API returned an error",
+    "errordbpartial":"{$a} of the fields NOT saved in the database. Check manually in place"}
     },
     "lang": "en",
     "langs": [
@@ -113,7 +114,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   }
 }}
 
-{"statusstrings":{"failed":"Failed","success":"Succeeded","tosave":"Save this","totranslate":"Ready to translate","wait":"Not selected"},"uistrings":{"deeplapiexception":"DeepL's API returned an error","errordbpartial":"{$a} of the fields NOT saved in the database. Check manually in place","errordbtitle":"Database error","errortoolong":"(could be that the text is too long for the field... Check manually in place)","saveallmodaltitle":"Saving translations to the database","saveallmodalbody":"<div class=\"spinner-border text-primary\" role=\"status\"><span class=\"sr-only\">Saving...<\/span>\\n<\/div>\n<p>Please wait ...<br\/>When all fields are saved in the database,<br\/>I will automatically close<\/p>\n<p>If you are impatient, and want to close this window,\n<br\/>make sure all selected translation's statuses are <i class=\"fa fa-database\" aria-hidden=\"true\"><\/i><\/p>","canttranslatesame":"Both languages are the same:"}}
 <div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
     <!-- This is a hidden container for the strings that are used in the JS -->
 </div>

@@ -631,19 +631,21 @@ class lang_helper {
     /**
      * Getter for current lang.
      *
+     * @param bool $mainlonly
      * @return string
      */
-    public function getcurrentlang(): string {
-        return $this->currentlang;
+    public function getcurrentlang(bool $mainlonly = false): string {
+        return $mainlonly ? substr($this->currentlang, 0, 2) : $this->currentlang;
     }
 
     /**
      * Getter for chosen target.
      *
+     * @param bool $mainlonly
      * @return string
      */
-    public function gettargetlang(): string {
-        return $this->targetlang;
+    public function gettargetlang(bool $mainlonly = false): string {
+        return $mainlonly ? substr($this->targetlang, 0, 2) : $this->targetlang;
     }
 
     /**
