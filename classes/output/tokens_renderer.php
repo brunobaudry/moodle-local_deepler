@@ -69,8 +69,7 @@ class tokens_renderer extends plugin_renderer_base {
                     'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
                     'valuefilter' => s($record->valuefilter),
                     'token' => s($record->token),
-                    'action' => $this->action_icon($deleteurl,
-                            utils::local_deepler_get_pix_icon('t/delete', get_string('delete'))),
+                    'action' => utils::local_deepler_get_action_icon($deleteurl, 't/delete', get_string('delete')),
             ];
         }
 

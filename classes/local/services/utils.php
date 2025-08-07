@@ -18,6 +18,7 @@ namespace local_deepler\local\services;
 
 use context_course;
 use context_module;
+use core\output\action_icon;
 use html_writer;
 use core\output\pix_icon;
 use core_plugin_manager;
@@ -283,6 +284,34 @@ class utils {
                     'alt' => $alt,
                     'class' => 'icon',
             ], $attributes));
+        }
+    }
+
+    /**
+     * @param $url
+     * @param $iconname
+     * @param $tooltip
+     * @param $component
+     * @param $attributes
+     * @return \core\output\action_icon|string
+     */
+    public static function local_deepler_get_action_icon($url,
+            $iconname, $tooltip = '', $component = 'core', $attributes = []) {
+        global $OUTPUT;
+
+        // Check if the action_icon class exists (Moodle >= 4.0.5).
+        if (class_exists('\core\output\action_icon')) {
+            $icon = new pix_icon($iconname, $tooltip, $component, $attributes);
+            return new action_icon($url, $icon);
+        } else {
+            // Fallback for older Moodle versions.
+            $iconhtml = html_writer::empty_tag('img', array_merge([
+                    'src' => $OUTPUT->image_url($iconname, $component),
+                    'alt' => $tooltip,
+                    'class' => 'icon',
+            ], $attributes));
+
+            return html_writer::link($url->out(false), $iconhtml, ['title' => $tooltip]);
         }
     }
 

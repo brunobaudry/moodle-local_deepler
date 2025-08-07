@@ -60,8 +60,7 @@ class glossary_renderer extends plugin_renderer_base {
                             userdate($glo->lastused),
                     'entrycountlink' => $this->generateentrieslink($glo),
                     'shared' => $this->dovisibilityoptions($glo->shared, false),
-                    'actions' => $this->action_icon($deleteurl,
-                            utils::local_deepler_get_pix_icon('t/delete', get_string('delete'))),
+                    'actions' => utils::local_deepler_get_action_icon($deleteurl, 't/delete', get_string('delete')),
             ];
         }
 
@@ -133,8 +132,7 @@ class glossary_renderer extends plugin_renderer_base {
                     'lastused' => $glo->lastused === 0 ? get_string('glossary:neverused', 'local_deepler') :
                             userdate($glo->lastused),
                     'actions' =>
-                            $this->action_icon($deleteurl,
-                                    utils::local_deepler_get_pix_icon('t/delete', get_string('delete'))),
+                            utils::local_deepler_get_action_icon($deleteurl, 't/delete', get_string('delete')),
 
             ];
         }
@@ -151,14 +149,13 @@ class glossary_renderer extends plugin_renderer_base {
      * View entries link renderer.
      *
      * @param object $glo
-     * @return void
+     * @return \core\output\action_icon|string
      * @throws \coding_exception
      */
     private function generateentrieslink(object $glo) {
-        return $this->action_icon('#',
-                utils::local_deepler_get_pix_icon('i/preview', get_string('view')),
-                null,
-                [
+        return utils::local_deepler_get_action_icon('#',
+                'i/preview', get_string('view'),
+                'core', [
                         'data-id' => 'local_deepler/glossary_entriesviewer',
                         'data-glossary' => $glo->glossaryid,
                         'data-source' => $glo->sourcelang,
@@ -230,9 +227,9 @@ class glossary_renderer extends plugin_renderer_base {
                 'glossarylistempty' => get_string('glossary:listempty', 'local_deepler'),
                 'hasglossaries' => !empty($glossarylist),
                 'glossaries' => $glossarylist,
-                'linkentries' => $this->action_icon('#',
-                        utils::local_deepler_get_pix_icon('e/find_replace', get_string('view')),
-                        null, ['data-id' => 'local_deepler/glossary_entriesviewer_page']),
+                'linkentries' => utils::local_deepler_get_action_icon('#',
+                        'e/find_replace', get_string('view'),
+                        'core', ['data-id' => 'local_deepler/glossary_entriesviewer_page']),
         ];
 
         return $this->render_from_template('local_deepler/glossary_selector', $data);
