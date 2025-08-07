@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.0]
 ### Added
 - Glossary management.
+  - DeepL glossaries are downloaded from DeepL.com
+  - User can upload and share own glossaries.
 
 ### Fixed
 - Some advanced settings were not correctly sent with translation to DeepL.

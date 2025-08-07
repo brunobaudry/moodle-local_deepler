@@ -20,13 +20,13 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/selectors', './local/api', './local/customevents', 'core/modal'], function(Selectors, Api, Events, Modal) {
+define(['./local/selectors', './local/api', './local/customevents', 'core/modal', 'core/log'],
+    function(Selectors, Api, Events, Modal, Log) {
     const initCode = ()=> {
         const fileInput = document.getElementById('fileElem');
         const fileNameDisplay = document.getElementById('filename-display');
 
         fileInput.addEventListener('change', function() {
-            // Window.console.log('YO from amd');
             if (fileInput.files.length > 0) {
                 fileNameDisplay.textContent = `Selected file: ${fileInput.files[0].name}`;
             } else {
@@ -39,17 +39,17 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
         allVisibilitySelect.forEach((e)=>{
         e.addEventListener('change',
                 (evt)=>{
-                    window.console.log(evt.target.dataset.glossary, evt.target.value);
+                    Log.info(evt.target.dataset.glossary, evt.target.value);
                     Api.updateGlossariesVisibility(evt.target.dataset.glossary, evt.target.value);
                 }
             );
         });
         const allGlossarriesEntry = document.querySelectorAll(Selectors.glossary.entriesviewer);
-        window.console.log(allGlossarriesEntry);
+        Log.info(allGlossarriesEntry);
         allGlossarriesEntry.forEach((e)=>{
             e.addEventListener('click',
                 (e)=>{
-                    window.console.log(e.target.parentNode.dataset.glossary);
+                    Log.info(e.target.parentNode.dataset.glossary);
                     Api.getGlossariesEntries(
                         e.target.parentNode.dataset.glossary,
                         e.target.parentNode.dataset.source,

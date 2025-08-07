@@ -101,7 +101,7 @@ define(['core/log',
         Events.on(Api.GLOSSARY_DB_FAILED, onGlossaryDbfailed);
         Events.on(Api.GLOSSARY_DB_SUCCESS, onGlossaryDbSuccess);
         Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);
-        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>window.console.error(e));
+        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>Log.error(e));
     };
     const showEntriesModal = (ajaxResponse)=>{
         const glossaryid = ajaxResponse.glossaryid;
@@ -340,8 +340,8 @@ define(['core/log',
             saveSingleTranslation(e);
         }
         if (e.target.closest(Selectors.glossary.entriesviewerPage)) {
-            window.console.info('CLICK');
-            window.console.info(settingsUI[Selectors.deepl.glossaryId].value);
+            Log.info('CLICK');
+            Log.info(settingsUI[Selectors.deepl.glossaryId].value);
             Api.getGlossariesEntries(
                 settingsUI[Selectors.deepl.glossaryId].value,
                 config.deeplsourcelang,
@@ -659,7 +659,7 @@ define(['core/log',
         for (const selector in settingsUI) {
             if (settingsUI[selector] === null) {
                 Log.warn(`prepareSettingsAndCookieValues. Could not find selector ${selector}`);
-                window.console.warn(settingsUI);
+                Log.warn(settingsUI);
             } else {
                 switch (settingsUI[selector].type) {
                     case 'select-one':

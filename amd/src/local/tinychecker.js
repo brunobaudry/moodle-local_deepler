@@ -1,4 +1,4 @@
-define(['core/log'], (log)=> {
+define(['core/log'], (Log)=> {
     /**
      * Find tinyMCEs
      *
@@ -6,15 +6,15 @@ define(['core/log'], (log)=> {
      */
     const checkTinyMCELoaded = ()=> {
         if (tinymce === undefined || tinymce === null) {
-            window.console.log("searching tinymce !!!");
+            Log.info("searching tinymce !!!");
              return false;
             }
-        window.console.log("tinymce !!!");
+        Log.info("tinymce !!!");
         if (tinymce.editors === undefined) {
-            window.console.log(tinymce);
+            Log.info(tinymce);
          return false;
         }
-        window.console.log("tinymce !!!");
+        Log.info("tinymce !!!");
         return tinymce.editors.every(function(editor) {
             return editor.initialized;
         });
@@ -40,7 +40,7 @@ define(['core/log'], (log)=> {
     return {
         init: function() {
             waitForTinyMCE(function() {
-                log.debug('All TinyMCE instances are loaded');
+                Log.debug('All TinyMCE instances are loaded');
                 // Perform actions after all TinyMCE instances are loaded
             });
         }
