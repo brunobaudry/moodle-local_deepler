@@ -16,7 +16,6 @@
 
 namespace local_deepler\external;
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
 
 use core\exception\moodle_exception;
 use core_external\external_api;
