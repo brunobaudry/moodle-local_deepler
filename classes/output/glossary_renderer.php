@@ -17,9 +17,7 @@
 namespace local_deepler\output;
 
 use core\output\html_writer;
-use core\output\pix_icon;
-use core_table\output\html_table;
-use DeepL\GlossaryInfo;
+use local_deepler\local\services\utils;
 use moodle_url;
 use plugin_renderer_base;
 
@@ -62,7 +60,8 @@ class glossary_renderer extends plugin_renderer_base {
                             userdate($glo->lastused),
                     'entrycountlink' => $this->generateentrieslink($glo),
                     'shared' => $this->dovisibilityoptions($glo->shared, false),
-                    'actions' => $this->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete'))),
+                    'actions' => $this->action_icon($deleteurl,
+                            utils::local_deepler_get_pix_icon('t/delete', get_string('delete'))),
             ];
         }
 
@@ -135,7 +134,7 @@ class glossary_renderer extends plugin_renderer_base {
                             userdate($glo->lastused),
                     'actions' =>
                             $this->action_icon($deleteurl,
-                                    new pix_icon('t/delete', get_string('delete'))),
+                                    utils::local_deepler_get_pix_icon('t/delete', get_string('delete'))),
 
             ];
         }
@@ -157,7 +156,7 @@ class glossary_renderer extends plugin_renderer_base {
      */
     private function generateentrieslink(object $glo) {
         return $this->action_icon('#',
-                new pix_icon('i/preview', get_string('view')),
+                utils::local_deepler_get_pix_icon('i/preview', get_string('view')),
                 null,
                 [
                         'data-id' => 'local_deepler/glossary_entriesviewer',
@@ -232,7 +231,7 @@ class glossary_renderer extends plugin_renderer_base {
                 'hasglossaries' => !empty($glossarylist),
                 'glossaries' => $glossarylist,
                 'linkentries' => $this->action_icon('#',
-                        new pix_icon('e/find_replace', get_string('view')),
+                        utils::local_deepler_get_pix_icon('e/find_replace', get_string('view')),
                         null, ['data-id' => 'local_deepler/glossary_entriesviewer_page']),
         ];
 

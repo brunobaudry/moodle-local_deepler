@@ -16,11 +16,10 @@
 
 namespace local_deepler\output;
 
-use html_table;
+
 use html_writer;
 use local_deepler\local\services\utils;
 use moodle_url;
-use pix_icon;
 use plugin_renderer_base;
 
 /**
@@ -70,7 +69,8 @@ class tokens_renderer extends plugin_renderer_base {
                     'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
                     'valuefilter' => s($record->valuefilter),
                     'token' => s($record->token),
-                    'action' => $this->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete'))),
+                    'action' => $this->action_icon($deleteurl,
+                            utils::local_deepler_get_pix_icon('t/delete', get_string('delete'))),
             ];
         }
 

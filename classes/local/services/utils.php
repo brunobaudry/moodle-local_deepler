@@ -18,6 +18,7 @@ namespace local_deepler\local\services;
 
 use context_course;
 use context_module;
+use core\output\pix_icon;
 use core_plugin_manager;
 use Exception;
 use local_deepler\local\data\field;
@@ -257,6 +258,31 @@ class utils {
         $pluginman = core_plugin_manager::instance();
         $plugininfo = $pluginman->get_plugin_info('local_deepler');
         return $plugininfo->rootdir;
+    }
+
+    /**
+     * Alternative for v > 405.
+     *
+     * @param string $icon
+     * @param string $alt
+     * @param string $component
+     * @param array $attributes
+     * @return \core\output\pix_icon
+     */
+    public static function local_deepler_get_pix_icon($icon, $alt, $component = 'core', $attributes = []) {
+        global $CFG;
+
+        // Check if the class exists (Moodle >= 4.0.4)
+        if (class_exists('\core\output\pix_icon')) {
+            return new pix_icon($icon, $alt, $component, $attributes);
+        } else {
+            // Fallback for older Moodle versions
+            return html_writer::empty_tag('img', array_merge([
+                    'src' => $CFG->wwwroot . "/pix/$component/$icon.png",
+                    'alt' => $alt,
+                    'class' => 'icon'
+            ], $attributes));
+        }
     }
 
 }
