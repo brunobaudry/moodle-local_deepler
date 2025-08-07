@@ -18,7 +18,7 @@ namespace local_deepler\local\services;
 
 use context_course;
 use context_module;
-use core\output\html_writer;
+use html_writer;
 use core\output\pix_icon;
 use core_plugin_manager;
 use Exception;
