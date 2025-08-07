@@ -76,26 +76,27 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * version
 
   Example context (json):
+
+  Provides translation form header and controls
+  Classes required for JS:
+  * local_deepler__localeswitcher
+  * local_deepler__select-all
+  * local_deepler__show-updated
+  * local_deepler__show-needsupdate
+  * local_deepler__autotranslate-btn
+
+  Data attributes required for JS:
+  * none
+
+  Context variables required for this template:
+  * lang
+  * langs
+  * wordcount
+  * charcount
+  * charcountspaces
+
+  Example context (json):
   {
-  "version":"v1.9.0",
-  "mform":"<div>lots of divs</div>",
-  "compatiblelangs": "<select><option value='en-gb'></option><option value='en-us'></option></select>",
-  "hidecompatible": false,
-  "hideiframesdefault":"checked",
-  "escapeprebydefault":"checked",
-  "escapelatexbydefault":"checked",
-  "showhiddenforstudents":"Show hidden for students",
-  "targetlangs": [{"code":"fr","selected":true,"disabled":"false","lang":"French"}],
-  "target_langs_htmloptions": "<option value='® en-US'>® English (American)</option><option value='fr'>French</option><option value='it'>Italian</option>",
-  "notarget": false,
-  "target_lang": "fr",
-  "deeplsource": "en",
-  "rephrasesymbol": "® ",
-  "canimprove": true,
-  "supportedlangs": "de, en-GB, en-US, es, fr, it, pt-BR, pt-PT",
-    "glossayselector":"<select id='local_deepler__glossary' class='form-select col-10' data-id='local_deepler/glossary_id' aria-label='Enter a glossary name' disabled=''><option value=''>No Glossary selected</option></select>",
-    "langstrings": "langstringobject",
-    "errordbpartial":"{$a} of the fields NOT saved in the database. Check manually in place",
     "lang": "en",
     "langs": [
       {
@@ -111,6 +112,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "charcount": 20,
     "charcountspaces": 25
   }
+}}
 }}
 
 <div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">

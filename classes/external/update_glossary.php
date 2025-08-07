@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
-defined('MOODLE_INTERNAL') || die();
 
 use core\exception\moodle_exception;
 use core_external\external_api;
