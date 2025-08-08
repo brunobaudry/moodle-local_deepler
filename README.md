@@ -7,13 +7,14 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 [![License GPL-3.0](https://img.shields.io/github/license/brunobaudry/moodle-local_deepler?color=lightgrey)](https://github.com/brunobaudry/moodle-local_deepler/blob/main/LICENSE)
 
-Deepler is a local Moodle plugin that provides automatic machine translation or text improvement (not available with ©DeepL free api accounts) using the ©DeepL Pro Translation api.
+DeepLer is a local Moodle plugin that provides automatic machine translation or text improvement (not available with ©DeepL free api accounts) using the ©DeepL Pro Translation api.
 
 It is developed for those who want to translate or rephrase a course all on one page,
 without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
-1. Set Moodle current language as your source language. 
+1. Upload your prefered terminologies (DeepL glossaries)
+2. Set Moodle current language as your source language. 
 0. Fine tune your ©DeepL's settings.
 2. Select the target language.
 3. Select the fields to translate and if need different source than the current main (Moodle's).
@@ -66,13 +67,13 @@ Translation workflow being the following:
       - [®Rephrase](#%C2%AErephrase)
     + [Other setting](#other-setting)
       - [Escape LaTeX and or PRE tags](#escape-latex-and-or-pre-tags)
-      - [Tell the browser not to render embed iframes. (NEW since v1.7)](#tell-the-browser-not-to-render-embed-iframes-new-since-v17)
+      - [Tell the browser not to render embed iframes.](#tell-the-browser-not-to-render-embed-iframes)
     + [Cookie](#cookie)
   * [Language selection](#language-selection)
     + [Deepl language list vs Moodle's](#deepl-language-list-vs-moodles)
     + [Source language](#source-language)
     + [Target language](#target-language)
-    + [® Rephrasing (text improvement) (NEW since v1.6)](#%C2%AE-rephrasing-text-improvement-new-since-v16)
+    + [® Rephrasing (text improvement)](#%C2%AE-rephrasing-text-improvement)
     + [Unsupported languages](#unsupported-languages)
   * [Header](#header)
   * [Filters](#filters)
@@ -84,10 +85,10 @@ Translation workflow being the following:
   * [Translation process](#translation-process)
     + [Editing the source](#editing-the-source)
     + [Reviewing past translations and multilang's tags](#reviewing-past-translations-and-multilangs-tags)
-      - [List of mlang tags for each field (NEW since v1.6)](#list-of-mlang-tags-for-each-field-new-since-v16)
+      - [List of mlang tags for each field](#list-of-mlang-tags-for-each-field)
     + [Images and medias.](#images-and-medias)
   * [Performing translations](#performing-translations)
-    + [Saving to sub-languages (new since v1.6)](#saving-to-sub-languages-new-since-v16)
+    + [Saving to sub-languages](#saving-to-sub-languages)
   * [Structure](#structure)
 - [User tour (inline tutorial)](#user-tour-inline-tutorial)
 - [WARNINGS](#warnings)
@@ -392,7 +393,7 @@ When this is set, Deepler will seek $$...$$ string, replace by a token, send to 
 upon return.
 This setting's default in the editor can be set in the plugin [admin page](#admin).
 
-##### Tell the browser not to render embed iframes. (NEW since v1.7)
+##### Tell the browser not to render embed iframes.
 Toggle this to show/hide iframes in the source texts.
 
 #### Cookie
@@ -445,7 +446,7 @@ Please check out the [mlang docs](https://moodle.org/plugins/filter_multilang2) 
 To change the language you want to translate to, choose a language from the **Target language {mlang XX}** dropdown.
 Note: indeed you cannot translate from and to the same language so buttons and checkboxes would be disabled if so.
 
-#### ® Rephrasing (text improvement) (NEW since v1.6)
+#### ® Rephrasing (text improvement)
 
 DeepL API pro account can now use the rephrase feature to improve the source text.
 
@@ -489,13 +490,13 @@ They appear with the RED DOT indicator when they were never translated.
 They appear with the ORANGE DOT indicator when they were already translated but the source text change since.
 
 #### Hidden:
-**NEW since 1.5.0**
+
 Toggle this filter to show/hide hidden (to users) sections or modules.
 ![](pix/hidden_filter.png)
 ![](pix/hidden_tag.png)
 
 ### Breadcrumbs
-**NEW since 1.5.0**
+
 
 When you scroll down the breadcrumbs status give you an indication on where you are in the course.
 
@@ -531,7 +532,7 @@ Clicking on the TRANSLATION icon will toggle the display of multilang tags and a
 ![](pix/multilang_toggle_off.png)
 ![](pix/multilang_toggle_on.png)
 
-##### List of mlang tags for each field (NEW since v1.6)
+##### List of mlang tags for each field
 Hovering the button shows you all the tags/languages already present in the field.
 ![](pix/list_of_tags_in_field.png)
 
@@ -580,7 +581,7 @@ The original content **has already MLANG tag** and the source lang is different 
 
 `{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-#### Saving to sub-languages (new since v1.6)
+#### Saving to sub-languages
 If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
 ![](pix/save_as_target.png)
 
