@@ -5,21 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.9]
-### Fixed
-- Updated composer.jon to load local Symfony/Yaml
+## [1.9.0]
+### Added
+- Glossary management.
+  - User can upload and share own glossaries.
+  - Admin can fetch DeepL's glossaries (from your DeepL'a API account) and edit glossaries' visibilty scope.
 
-## [1.8.8]
 ### Fixed
-- error in endpoint
-
-## [1.8.7]
-### Fixed
-- missing db upgrade ...
-
-## [1.8.6]
-### Fixed
-- blocking bugs with not set array 
+- Some advanced settings were not correctly sent with translation to DeepL.
 
 ## [1.8.5]
 ### Deprecated
@@ -27,9 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Ready for Moodle 5 and BS5
-- Choice's choices (#.#)
-- Feedback's questions (~.~)
-- Glossary's entries (^.^) 
 
 ## [1.8.2]
 ### Added

@@ -24,6 +24,10 @@ use moodle_url;
 use stdClass;
 use Symfony\Component\Yaml\Yaml;
 
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/vendor/autoload.php');
+
 /**
  * Class course wraps a course object and provides a way to access its fields.
  *

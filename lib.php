@@ -54,6 +54,36 @@ function local_deepler_extend_navigation_course(mixed $navigation, mixed $course
 }
 
 /**
+ * Add entry in user prefs.
+ *
+ * @param mixed $navigation
+ * @param mixed $user
+ * @param mixed $usercontext
+ * @param mixed $course
+ * @param mixed $coursecontext
+ * @return array
+ * @throws \coding_exception
+ */
+function local_deepler_extend_navigation_user_settings($navigation, $user, $usercontext, $course, $coursecontext) {
+    $prefs = [];
+    global $PAGE;
+    // Only inject if user is on the preferences page.
+    $onpreferencepage = $PAGE->url->compare(new moodle_url('/user/preferences.php'), URL_MATCH_BASE);
+    if (!$onpreferencepage) {
+        return null;
+    }
+    if (has_capability('local/deepler:edittranslations', $usercontext)) {
+        $url = new moodle_url('/local/deepler/glossarymanageruser.php');
+        $node = navigation_node::create(get_string('glossary:manage:title', 'local_deepler'), $url,
+                navigation_node::TYPE_SETTING);
+        $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
+        $usernode->add_node($node);
+    }
+
+    return $prefs;
+}
+
+/**
  * File handling.
  *
  * @param object $course

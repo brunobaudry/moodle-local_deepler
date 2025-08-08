@@ -24,6 +24,8 @@ use DeepL\DeepLException;
 use DeepL\Language;
 use DeepL\LanguageCode;
 use Deepl\Usage;
+use local_deepler\local\data\glossary;
+use local_deepler\local\data\user_glossary;
 use stdClass;
 
 require_once(__DIR__ . '/../../vendor/autoload.php');
@@ -38,7 +40,7 @@ require_once(__DIR__ . '/../../vendor/autoload.php');
  */
 class lang_helper {
     /**
-     * Constant to display hte lang as rephrasing.
+     * Constant to display the lang as rephrasing.
      */
     const REPHRASESYMBOL = "® ";
     /**
@@ -65,6 +67,8 @@ class lang_helper {
      * @var string
      */
     private string $apikey;
+    /** @var int the db id for the API key matching the user */
+    private int $dbtokenid;
     /**
      * @var DeepLClient
      */
@@ -102,6 +106,8 @@ class lang_helper {
      * @var array|string[]
      */
     private array $deeplrephraselangs;
+    /** @var \stdClass */
+    private stdClass $user;
 
     /**
      * Constructor.
@@ -133,7 +139,8 @@ class lang_helper {
         }
         $this->moodlelangs = $moodlelangs ?? get_string_manager()->get_list_of_translations();
         $this->deeplsourcelang = '';
-        $this->apikey = $this->initapikey();
+        $this->apikey = $apikey ?? $this->initapikey();
+        $this->dbtokenid = 0;
         $this->translator = $translator;
     }
 
@@ -163,8 +170,9 @@ class lang_helper {
      * @throws \dml_exception
      */
     public function initdeepl(stdClass $user): bool {
+        $this->user = $user;
         if (!$this->translator) {
-            $this->setdeeplapi($user);
+            $this->setdeeplapi();
             $this->inittranslator();
         }
 
@@ -185,14 +193,14 @@ class lang_helper {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @param \stdClass $user
      * @return void
      * @throws \dml_exception
      */
-    private function setdeeplapi(stdClass $user): void {
-        $tokenrecord = $this->find_first_matching_token($user);
+    private function setdeeplapi(): void {
+        $tokenrecord = $this->find_first_matching_token($this->user);
         if ($tokenrecord) {
             $this->apikey = $tokenrecord->token;
+            $this->dbtokenid = $tokenrecord->id;
         } else if (!get_config('local_deepler', 'allowfallbackkey')) {
             $this->apikey = '';
         }
@@ -321,7 +329,7 @@ class lang_helper {
      * @param \stdClass $config
      * @return \stdClass
      */
-    public function prepareconfig(stdClass &$config) {
+    public function prepareconfig(stdClass &$config): stdClass {
         $config->usage = $this->usage;
         $config->limitReached = $config->usage->anyLimitReached();
         $config->targetlang = $this->targetlang;
@@ -337,6 +345,7 @@ class lang_helper {
      * Prepare the strings for the UI as JSON.
      *
      * @return string
+     * @throws \coding_exception
      */
     public function preparestrings(): string {
         // Status strings for UI icons.
@@ -364,8 +373,9 @@ class lang_helper {
      *
      * @param string $lang
      * @return bool
+     * @throws \DeepL\DeepLException
      */
-    private function islangsupported(string $lang) {
+    public function islangsupported(string $lang) {
         $list = $this->deeplsources;
         $len = count($list);
         while ($len--) {
@@ -621,19 +631,21 @@ class lang_helper {
     /**
      * Getter for current lang.
      *
+     * @param bool $mainlonly
      * @return string
      */
-    public function getcurrentlang(): string {
-        return $this->currentlang;
+    public function getcurrentlang(bool $mainlonly = false): string {
+        return $mainlonly ? substr($this->currentlang, 0, 2) : $this->currentlang;
     }
 
     /**
      * Getter for chosen target.
      *
+     * @param bool $mainlonly
      * @return string
      */
-    public function gettargetlang(): string {
-        return $this->targetlang;
+    public function gettargetlang(bool $mainlonly = false): string {
+        return $mainlonly ? substr($this->targetlang, 0, 2) : $this->targetlang;
     }
 
     /**
@@ -643,5 +655,108 @@ class lang_helper {
      */
     public function getcanimprove(): bool {
         return $this->canimprove;
+    }
+
+    /**
+     * Fetches all glossaries.
+     *
+     * @return array
+     * @throws \DeepL\DeepLException
+     */
+    public function getalldeeplglossaries(): array {
+        return $this->translator->listGlossaries();
+    }
+
+    /**
+     * Adds a DeepL glossary if not yet stored in DB.
+     *
+     * @param array $deeplglossaries
+     * @return void
+     * @throws \dml_exception
+     */
+    public function adddeeplglossariesifunknown(array $deeplglossaries): void {
+        /** @var \DeepL\GlossaryInfo $deeplglossary */
+        foreach ($deeplglossaries as $deeplglossary) {
+            if (!glossary::exists($deeplglossary->glossaryId)) {
+                glossary::create(new glossary(
+                        $deeplglossary->glossaryId,
+                        $deeplglossary->name,
+                        $deeplglossary->sourceLang,
+                        $deeplglossary->targetLang,
+                        $deeplglossary->entryCount
+                ));
+            }
+        }
+    }
+
+    /**
+     * Return all glossaries for current user.
+     *
+     * @return array
+     * @throws \dml_exception
+     */
+    public function getusersglossaries(): array {
+        $glos = [];
+        $pivot = user_glossary::getallbyuser($this->user->id);
+
+        foreach ($pivot as $item) {
+            $glos[] = glossary::getbyid($item->glossaryid);
+        }
+        return $glos;
+    }
+
+    /**
+     * Get all glossaries uploaded by translators of the same pool (sharing the same api token).
+     *
+     * @param array|null $except
+     * @return array
+     * @throws \dml_exception
+     */
+    public function getpoolglossaries(?array $except = []): array {
+        // Build a set of IDs to avoid duplicates.
+        $ids = array_map(fn($o) => $o->glossaryid, $except);
+        $poolglossaries = glossary::getallbytokenid($this->dbtokenid);
+        // Filter glossaries not build by user.
+        return array_filter($poolglossaries, fn($glo) => !in_array($glo->glossaryid, $ids));
+    }
+
+    /**
+     * Get all dictionaries except those bound to an api token.
+     *
+     * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function getpublicglossaries() {
+        return glossary::getpublicexcepttokenid($this->dbtokenid);
+    }
+
+    /**
+     * Delete user's glossary.
+     *
+     * @param int $glossarydbid
+     * @return bool|null
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function deleteglossary(int $glossarydbid): ?bool {
+        $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
+        if ($guid) {
+            // Public glossaries downloaded from DeepL do not have users.
+            $delete = user_glossary::delete($guid->id);
+        }
+        $glo = glossary::getbyid($glossarydbid);
+        $success = $this->translator->deleteglossary($glo->glossaryid);
+        $deleted = glossary::delete($glossarydbid);
+        return $success && $deleted;
+    }
+
+    /**
+     * Getter for the current token id.
+     *
+     * @return int
+     */
+    public function getdbtokenid(): int {
+        return $this->dbtokenid;
     }
 }

@@ -97,6 +97,7 @@ class translate_page implements renderable, templatable {
      * @throws \DeepL\DeepLException
      */
     public function export_for_template(renderer_base $output) {
+
         $this->output = $output;
         $data = new stdClass();
         // Data for mustache template.
@@ -128,6 +129,15 @@ class translate_page implements renderable, templatable {
         $data->showhiddenforstudents = get_string('showhiddenforstudents', 'local_deepler', get_string('hiddenfromstudents'));
         // Pass data.
         $data->version = $this->version;
+        // Pass the glossary selector rendered.
+        global $PAGE;
+        $glorenderer = $PAGE->get_renderer('local_deepler', 'glossary');
+        $glossaries = $this->langpacks->getusersglossaries() ?? [];
+        $poolglossaries = $this->langpacks->getpoolglossaries($glossaries) ?? [];
+        $publicglossaries = $this->langpacks->getpublicglossaries() ?? [];
+        $glo = array_merge($glossaries, $publicglossaries, $poolglossaries);
+        $data->glossayselector = $glorenderer->glossay_selector_deepl($glo,
+                $this->langpacks->getcurrentlang(true), $this->langpacks->gettargetlang(true));
         return $data;
     }
 }

@@ -78,6 +78,8 @@ final class translate_test extends advanced_testcase {
      *
      * @covers \local_deepler\local\data\course
      * @return void
+     * @throws \core\exception\moodle_exception
+     * @throws \moodle_exception
      */
     public function test_course_data(): void {
         global $CFG;

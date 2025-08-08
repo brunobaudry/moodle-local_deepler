@@ -1,19 +1,20 @@
 # Deepler, Multilang Machine Translator for Moodle
 
-[![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml?query=branch%3Amain++)
-[![Supported](https://img.shields.io/badge/Moodle-4.2--5.0-orange.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
-[![PHP Support](https://img.shields.io/badge/php-8.2_--_8.4-blue)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
+[![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
+[![Supported](https://img.shields.io/badge/Moodle-4.2--4.6-orange.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
+[![PHP Support](https://img.shields.io/badge/php-8.2_--_8.3-blue)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 [![License GPL-3.0](https://img.shields.io/github/license/brunobaudry/moodle-local_deepler?color=lightgrey)](https://github.com/brunobaudry/moodle-local_deepler/blob/main/LICENSE)
 
-Deepler is a local Moodle plugin that provides automatic machine translation or text improvement (not available with ©DeepL free api accounts) using the ©DeepL Pro Translation api.
+DeepLer is a local Moodle plugin that provides automatic machine translation or text improvement (not available with ©DeepL free api accounts) using the ©DeepL Pro Translation api.
 
 It is developed for those who want to translate or rephrase a course all on one page,
 without having to navigate to each module and update manually translations and the {mlang} tags.
 Translation workflow being the following:
 
-1. Set Moodle current language as your source language. 
+1. Upload your prefered terminologies (DeepL glossaries)
+2. Set Moodle current language as your source language. 
 0. Fine tune your ©DeepL's settings.
 2. Select the target language.
 3. Select the fields to translate and if need different source than the current main (Moodle's).
@@ -42,21 +43,37 @@ Translation workflow being the following:
       - [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
       - [Minimum textfield size](#minimum-textfield-size)
       - [Max length of breadcrumb's sub](#max-length-of-breadcrumbs-sub)
+    + [Additional admin pages for Token management and Glossaries.](#additional-admin-pages-for-token-management-and-glossaries)
   * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
+- [Glossaries' management (NEW since v1.9)](#glossaries-management-new-since-v19)
+  * [Admin glossaries](#admin-glossaries)
+    + [1. File naming and formating conventions](#1-file-naming-and-formating-conventions)
+      - [DeepLer does not manage bi directional glossaries.](#deepler-does-not-manage-bi-directional-glossaries)
+    + [2. Select and upload](#2-select-and-upload)
+    + [3. Name and Glossary ID](#3-name-and-glossary-id)
+    + [4. Source > Target](#4-source--target)
+    + [5. Entries](#5-entries)
+    + [6. Visibility](#6-visibility)
+    + [7. Pool](#7-pool)
+    + [8. Last time it was used](#8-last-time-it-was-used)
+    + [9. Actions](#9-actions)
+  * [Users' glossaries](#users-glossaries)
+    + [Public and Pool glossaries](#public-and-pool-glossaries)
+    + [Private glossaries](#private-glossaries)
 - [Translating](#translating)
   * [Advanced settings](#advanced-settings)
     + [Deepl API setting](#deepl-api-setting)
-      - [Glossaries](#glossaries)
-      - [®Rephrase (NEW since v1.6)](#%C2%AErephrase-new-since-v16)
+      - [Glossaries (NEW since v1.9)](#glossaries-new-since-v19)
+      - [®Rephrase](#%C2%AErephrase)
     + [Other setting](#other-setting)
       - [Escape LaTeX and or PRE tags](#escape-latex-and-or-pre-tags)
-      - [Tell the browser not to render embed iframes. (NEW since v1.7)](#tell-the-browser-not-to-render-embed-iframes-new-since-v17)
-    + [Cookie (NEW since v1.6)](#cookie-new-since-v16)
+      - [Tell the browser not to render embed iframes.](#tell-the-browser-not-to-render-embed-iframes)
+    + [Cookie](#cookie)
   * [Language selection](#language-selection)
     + [Deepl language list vs Moodle's](#deepl-language-list-vs-moodles)
     + [Source language](#source-language)
     + [Target language](#target-language)
-    + [® Rephrasing (text improvement) (NEW since v1.6)](#%C2%AE-rephrasing-text-improvement-new-since-v16)
+    + [® Rephrasing (text improvement)](#%C2%AE-rephrasing-text-improvement)
     + [Unsupported languages](#unsupported-languages)
   * [Header](#header)
   * [Filters](#filters)
@@ -68,10 +85,10 @@ Translation workflow being the following:
   * [Translation process](#translation-process)
     + [Editing the source](#editing-the-source)
     + [Reviewing past translations and multilang's tags](#reviewing-past-translations-and-multilangs-tags)
-      - [List of mlang tags for each field (NEW since v1.6)](#list-of-mlang-tags-for-each-field-new-since-v16)
+      - [List of mlang tags for each field](#list-of-mlang-tags-for-each-field)
     + [Images and medias.](#images-and-medias)
   * [Performing translations](#performing-translations)
-    + [Saving to sub-languages (new since v1.6)](#saving-to-sub-languages-new-since-v16)
+    + [Saving to sub-languages](#saving-to-sub-languages)
   * [Structure](#structure)
 - [User tour (inline tutorial)](#user-tour-inline-tutorial)
 - [WARNINGS](#warnings)
@@ -162,6 +179,8 @@ Set to zero if you'd prefer no limiting.
 
 ![](pix/admin.png)
 
+#### Additional admin pages for Token management and Glossaries. 
+
 ### Token manager (mapping user to DeepL's API keys)
 
 DeepL API allows you to generate several API keys mainly for cost control and reporting.
@@ -177,6 +196,145 @@ To map, navigate to **Site Administration -> Plugins -> Local plugins -> Deepler
 Now a user having the required capability, when translating a course will get affected a token.
 
 ![](pix/token_manager.png)
+
+## Glossaries' management (NEW since v1.9)
+
+Glossaries are added to your Moodle instance in 3 different ways:
+- Downloaded from your DeepL API account.
+  - This is done automatically.
+  - Admin can make these Glossaries 'public' meaning every translator will be able to use them.
+- Uploaded by Moodle admins.
+  - Admin can make these Glossaries 'public' meaning every translator will be able to use them.
+  - Once uploaded they will be just as the ones downloaded from DeepL.
+- Uploaded by translators via their user's preferences.
+  - Can be made available to the translators in the same pool (sharing the same token as seen above).
+  - Can be kept private (only available to the translator that uploaded it).
+
+### Admin glossaries
+
+Once the admin has set the main api key, 2 additional links will display.
+![](pix/admin_additionaltabs.png)
+
+Click on "Deepler glossaries" to manage them.
+
+![](pix/glossaries_admin.png)
+
+#### 1. File naming and formating conventions
+
+In order to simplify the process you must follow the file naming conventions below.
+_(The ? help icon will help you remember the instructions listed below)_
+
+1.  File extension must be .csv (no .tsv)
+2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
+4.  Name it meaningfully but not too long (for a nice display in tables).
+5.  No header in the csv file. 
+6.  SOURCE and TARGET must be 2 character language code.
+  1. (Sub languages for target are not allowed)
+4.  DeepL does not manage bi directional glossaries.
+
+**Expl OK:**
+
+*   私の用語集**_en-ja.csv**
+*   Tech\_jargon**\_FR-ES.CSV**
+
+**Expl NOT OK:**
+
+*   myGlossary**-**en-fr.csv
+*   Tech\_jargon\_**FRA-SPA**.CSV
+*   myHistoricalGlo_fr-es.**tsv**
+
+##### DeepLer does not manage bi directional glossaries.
+
+Expl When translating FR > ES
+
+**File: 'litérature\_fr-es.csv**'
+
+|||
+|---|---|
+| belle | hermosa |
+| delicieux | exquisito |
+| mouse | mouse |
+
+Expl When translating ES > FR
+
+**File: 'litérature\_es-fr.csv**'
+
+|||
+|---|---|
+| hermosa | belle |
+| exquisito | delicieux |
+| mouse | mouse |
+
+#### 2. Select and upload
+
+Select here a file on your file system and upload it.
+If the file does not match the above conventions error messages will display.
+
+Upon successful upload, the Glossary is transmitted to DeepL, its metadata stored in Moodle DB and listed in the same page below.
+
+#### 3. Name and Glossary ID
+
+The first column displays the name of both Glossaries retrieved from DeepL and those uploaded from Moodle:
+
+- The one you gave the CSV file without the suffix.
+- The name given when created in DeepL's interface.
+
+Below the name is DeepL's glossary uuid, this what will be transmitted when calling the translations.
+
+#### 4. Source > Target
+
+Displays the glossary's source and target language.
+
+#### 5. Entries
+
+Clicking on the +magnifier will display all the pairs defined. 
+
+#### 6. Visibility
+
+Here you can set who can use the glossary.
+
+1. Private
+   2. Only the user that uploaded it.
+   3. Glossaries uploaded via your DeepL.com account have no user, so setting it 'private' would be like disabling it.
+4. Pool
+   5. All users mapped to a DeepL API token will have access to that glossary (see token management).
+   6. Glossaries uploaded via your DeepL.com account are mapped to the main API token (id 0). So only admin or users that are not mapped to a sub token (providing you set 
+      "Allow fallback key" to true) will have access to that glossary.
+7. Public
+   8. Public glossaries are accessible by any user.
+   9. Only Admins can set this visibility.
+
+#### 7. Pool
+
+The is the DB id of the token the user that uploaded is affiliated with.
+When you set the visibility to 'Pool' all users in mapped to the same token will access the glossary.
+
+#### 8. Last time it was used
+
+Each time a translator uses a Glossary (by selecting it in the advanced settings) a time stamp is stored in DB.
+This is usefull mainly to cleanup unused glossaries.
+
+#### 9. Actions
+
+For now only deletion.  
+__Deleting a glossary here will delete it from DeepL.com too__
+
+### Users' glossaries
+Non admin users, hence translators, can manage their won set of glossaries.
+
+![](pix/glossaries_userprefs.png)
+
+#### Public and Pool glossaries
+
+These are Glossaries shared by the site admin or one of the translators sharing the same API token as the current user.
+
+#### Private glossaries
+
+Are the ones uploaded by the current user.
+The **visibility** can be:
+
+- Private: not shared
+- Pool: shared with other translators sharing the same token.
 
 ## Translating
 
@@ -195,10 +353,24 @@ You will be sent to the translation page for the course.
 There you can fine tune [©DeepL's commands](https://developers.deepl.com/docs).
 Usually the default as set below should work fine with Moodle activity content.
 
-##### Glossaries
-*Glossaries' content have to be sent by other means than this plugin, but it is in our todo list to add an interface for that here.*
+![](pix/advanced_settings_deepl_all.png)
 
-##### ®Rephrase (NEW since v1.6)
+##### Glossaries (NEW since v1.9)
+
+Glossaries (DeepL's) are managed by the plugin.
+**ONLY single source>target glossaries (v2) can be used with the plugin** 
+
+Available glossaries are added to a dropdown list if they match the current language pair.
+Once you select a glossary it will be stored in the course/source/target cookie.
+
+![](pix/glossaries_user_advancedsettings.png)
+
+Clicking on the magnifier icon will display glossary mappings:
+![](pix/glossaries_user_advancedsettings_entries.png)
+
+
+
+##### ®Rephrase
 This is a Pro feature that will rephrase the source text.
 __This is not available with the free API key.__
 
@@ -221,13 +393,10 @@ When this is set, Deepler will seek $$...$$ string, replace by a token, send to 
 upon return.
 This setting's default in the editor can be set in the plugin [admin page](#admin).
 
-##### Tell the browser not to render embed iframes. (NEW since v1.7)
+##### Tell the browser not to render embed iframes.
 Toggle this to show/hide iframes in the source texts.
 
-![](pix/advanced_settings.png)
-
-
-#### Cookie (NEW since v1.6)
+#### Cookie
 All of the advanced settings are saved by course id + source/target lang pairs in the Cookie for one month (each call for sevices resets it).
 
 ### Language selection
@@ -256,7 +425,7 @@ But will then save it as the main language in the DB.
 
 For example if you have a EN package you will be able to choose either EN-GB or EN-US as your target language, but it will save it as {mlang en}
 
-Make sure you set the correct multilangv2 setting for that matter.
+Make sure you set the correct Multilang-V2 setting for that matter.
 
 #### Source language
 
@@ -277,7 +446,7 @@ Please check out the [mlang docs](https://moodle.org/plugins/filter_multilang2) 
 To change the language you want to translate to, choose a language from the **Target language {mlang XX}** dropdown.
 Note: indeed you cannot translate from and to the same language so buttons and checkboxes would be disabled if so.
 
-#### ® Rephrasing (text improvement) (NEW since v1.6)
+#### ® Rephrasing (text improvement)
 
 DeepL API pro account can now use the rephrase feature to improve the source text.
 
@@ -321,13 +490,13 @@ They appear with the RED DOT indicator when they were never translated.
 They appear with the ORANGE DOT indicator when they were already translated but the source text change since.
 
 #### Hidden:
-**NEW since 1.5.0**
+
 Toggle this filter to show/hide hidden (to users) sections or modules.
 ![](pix/hidden_filter.png)
 ![](pix/hidden_tag.png)
 
 ### Breadcrumbs
-**NEW since 1.5.0**
+
 
 When you scroll down the breadcrumbs status give you an indication on where you are in the course.
 
@@ -363,7 +532,7 @@ Clicking on the TRANSLATION icon will toggle the display of multilang tags and a
 ![](pix/multilang_toggle_off.png)
 ![](pix/multilang_toggle_on.png)
 
-##### List of mlang tags for each field (NEW since v1.6)
+##### List of mlang tags for each field
 Hovering the button shows you all the tags/languages already present in the field.
 ![](pix/list_of_tags_in_field.png)
 
@@ -412,7 +581,7 @@ The original content **has already MLANG tag** and the source lang is different 
 
 `{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-#### Saving to sub-languages (new since v1.6)
+#### Saving to sub-languages
 If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
 ![](pix/save_as_target.png)
 
@@ -427,6 +596,7 @@ underneath you can see it available for translation.
 
 _Note that: for now, the naming of the instances as well ads the fields are the DB ones,
 it will soon be replaced by the one used in Moodle's course layout for a better usability._
+
 
 ## User tour (inline tutorial)
 
