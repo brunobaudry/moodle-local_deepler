@@ -228,8 +228,7 @@ class utils {
 
         // Add custom profile fields.
         foreach ($DB->get_records('user_info_field') as $field) {
-            $fields['profile_field_' . $field->shortname] =
-                    $field->name . ' (' . get_string('customprofilefield', 'admin') . ')';
+            $fields['profile_field_' . $field->shortname] = $field->name;
         }
         return $fields;
     }

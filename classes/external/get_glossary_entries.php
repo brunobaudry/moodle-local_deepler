@@ -24,6 +24,10 @@ use core_external\external_value;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
+
 /**
  * Simple service to fetch glossary's entries.
  *

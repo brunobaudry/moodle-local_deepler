@@ -49,14 +49,24 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
         allGlossarriesEntry.forEach((e)=>{
             e.addEventListener('click',
                 (e)=>{
+                if (e.target.dataset.length !== 0 && e.target.dataset.glossary !== undefined) {
+                    Log.info(e.target.dataset.glossary);
+                    Api.getGlossariesEntries(
+                        e.target.dataset.glossary,
+                        e.target.dataset.source,
+                        e.target.dataset.target
+                    );
+                } else if (e.target.parentNode.dataset && e.target.parentNode.dataset.glossary) {
                     Log.info(e.target.parentNode.dataset.glossary);
                     Api.getGlossariesEntries(
                         e.target.parentNode.dataset.glossary,
                         e.target.parentNode.dataset.source,
-                        e.target.parentNode.dataset.target,
+                        e.target.parentNode.dataset.target
                     );
-                    // Api.updateGlossariesVisibility(evt.target.dataset.glossary, evt.target.value);
+                } else {
+                  Log.error('Cannot not find glossary ID');
                 }
+            }
             );
         });
         Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);

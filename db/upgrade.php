@@ -115,7 +115,7 @@ function xmldb_local_deepler_upgrade($oldversion) {
         // Upgrade savepoint.
         upgrade_plugin_savepoint(true, 2025070202, 'local', 'deepler');
     }
-    if ($oldversion < 2025080501) {
+    if ($oldversion < 2025080800) {
 
         // Define table local_deepler_glossaries.
         $table = new xmldb_table('local_deepler_glossaries');
@@ -139,23 +139,23 @@ function xmldb_local_deepler_upgrade($oldversion) {
         }
 
         // Define table local_deepler_user_glossary.
-        $table = new xmldb_table('local_deepler_user_glossary');
+        $table2 = new xmldb_table('local_deepler_user_glossary');
 
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', true, XMLDB_NOTNULL, null, null);
-        $table->add_field('glossaryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('isactive', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table2->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table2->add_field('userid', XMLDB_TYPE_INTEGER, '10', true, XMLDB_NOTNULL, null, null);
+        $table2->add_field('glossaryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table2->add_field('isactive', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
 
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-        $table->add_key('course_glossary_idx', XMLDB_KEY_UNIQUE, ['userid', 'glossaryid']);
+        $table2->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table2->add_key('course_glossary_idx', XMLDB_KEY_UNIQUE, ['userid', 'glossaryid']);
 
         // Create table if it doesn't exist.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
+        if (!$dbman->table_exists($table2)) {
+            $dbman->create_table($table2);
         }
 
         // Upgrade savepoint.
-        upgrade_plugin_savepoint(true, 2025080501, 'local', 'deepler');
+        upgrade_plugin_savepoint(true, 2025080800, 'local', 'deepler');
     }
     return true;
 }

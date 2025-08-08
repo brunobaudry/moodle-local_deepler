@@ -139,7 +139,7 @@ $string['glossary:upload:file:explb'] =
 *   Tech\_jargon\_**FRA-SPA**.CSV
 *   myHistoricalGlo_fr-es.**tsv**
 ";
-$string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: {$a}';
+$string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: no file found';
 $string['glossary:upload:fileerror:title'] = 'File error';
 $string['glossary:upload:invalidsesskey:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:invalidsesskey:title'] = 'Invalid session key';

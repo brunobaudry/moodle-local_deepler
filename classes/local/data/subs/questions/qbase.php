@@ -17,6 +17,7 @@
 namespace local_deepler\local\data\subs\questions;
 
 use database_manager;
+use Exception;
 use lang_string;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\editable_interface;
@@ -25,9 +26,6 @@ use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 use question_definition;
 
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/vendor/autoload.php');
 
 /**
  * Base class for question types.
@@ -166,13 +164,16 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      */
     protected function getadditionalsubs(): array {
         global $DB;
-
         $qtypefields = [];
-        $yamldef = field::$additionals[$this->qtype];
-        if ($yamldef === null) {
+        $yamldef = [];
+        try {
+            $yamldef = field::$additionals[$this->qtype];
+            if ($yamldef === null) {
+                return $qtypefields;
+            }
+        } catch (Exception $e) {
             return $qtypefields;
         }
-
         foreach ($yamldef as $modnamesub => $colnames) {
             $id = $colnames['id'] ?? 'questionid'; // Normal plugin behaviour.
             $yamlfields = $colnames['fields'] ?? [];
@@ -185,11 +186,14 @@ abstract class qbase implements translatable_interface, editable_interface, icon
                 foreach ($yamlfields as $col => $clauses) {
                     $content = $row->{$col} ?? '';
                     $editable = true;
-                    if ($clauses['exclude'] === $content || '' === trim($content)) {
-                        continue;
-                    }
-                    if ($clauses['editable']) {
-                        $editable = $clauses['editable'];
+                    if (isset($clauses)) {
+                        if (isset($clauses['exclude']) &&
+                                ($clauses['exclude'] === $content || '' === trim($content))) {
+                            continue;
+                        }
+                        if (isset($clauses['editable']) && $clauses['editable']) {
+                            $editable = $clauses['editable'];
+                        }
                     }
                     $format = $row->{"{$col}format"} ?? 0;
                     if (trim($content) !== '') {
