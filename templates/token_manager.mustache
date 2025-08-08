@@ -1,0 +1,123 @@
+{{!
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_deepler/token_manager
+
+    Classes required for JS:
+    #deepler-valuefilter
+    #deepler-token
+
+    Data attributes required for JS: none
+
+    Context variables required for this template:
+    - description
+    - mappingsheading
+    - addnewheading
+    - attribute
+    - valuefilter
+    - token
+    - actions
+    - formaction
+    - sesskey
+    - userattributeselect
+    - valuefilterplaceholder
+    - tokenplaceholder
+    - addbutton
+    - settingsurl
+    - backtosettings
+
+    Example context (json):
+    {
+        "description": "Select a user attribute, give it a filter (you can use *,% or _) and match that to a token.",
+        "mappingsheading": "Token table",
+        "addnewheading": "Add a new token filter",
+        "attribute": "User Attribute",
+        "valuefilter": "Value Filter",
+        "token": "Token",
+        "actions": "Actions",
+        "formaction":"https://yourmoodle.test/local/deepler/tokenmanager.php",
+        "sesskey": "9879-189023",
+        "userattributeselect": "<select class='select form-select custom-select mr-2' id='deepler-attribute' name='attribute'><option selected='selected' value=''>Choose</option><option value='username'>Username</option><option value='email'>Email address</option></select>",
+        "valuefilterplaceholder": "Add a filter value",
+        "tokenplaceholder": "Token",
+        "addbutton": "Add token map",
+        "settingsurl": "https://yourmoodle.test/admin/settings.php?section=local_deepler",
+        "backtosettings": "Manage settings"
+    }
+}}
+{{#errors}}
+    <div class="alert alert-danger">{{.}}</div>
+{{/errors}}
+<p>
+    {{#str}}tokenmanager_desc,local_deepler{{/str}}
+</p>
+{{#apikeyisset}}
+
+<h3>{{mappingsheading}}</h3>
+
+<table class="generaltable">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>{{attribute}}</th>
+        <th>{{valuefilter}}</th>
+        <th>{{token}}</th>
+        <th>{{actions}}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#records}}
+        <tr>
+            <td>{{id}}</td>
+            <td>{{attribute}}</td>
+            <td>{{valuefilter}}</td>
+            <td>{{token}}</td>
+            <td>{{{action}}}</td>
+        </tr>
+    {{/records}}
+    </tbody>
+</table>
+
+<h4>{{addnewheading}}</h4>
+<div class="adminpage-description mb-2">{{{description}}}</div>
+<form method="post" action="{{formaction}}" class="mform PT-2">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+
+    <div class="form-inline">
+        {{{userattributeselect}}}
+
+        <input type="text" name="valuefilter" class="form-control mr-2" id="deepler-valuefilter"
+               placeholder="{{valuefilterplaceholder}}">
+
+        <input type="text" name="token" class="form-control mr-2" id="deepler-token"
+               placeholder="{{tokenplaceholder}}" size="40">
+
+        <input type="submit" name="addtoken" value="{{addbutton}}" class="btn btn-primary">
+    </div>
+</form>
+{{/apikeyisset}}
+{{^apikeyisset}}
+    <div class="alert alert-warning">
+        {{#str}}missingmainapikey,local_deepler{{/str}}
+    </div>
+{{/apikeyisset}}
+
+<div class="pt-2" id="deepler-form-errors"></div>
+
+<div class="mb-3 pt-4">
+    <a href="{{settingsurl}}" target="_self">{{backtosettings}}</a><br><a href="{{glossariesurl}}" target="_self">{{glossarymanagetitle}}</a>
+</div>

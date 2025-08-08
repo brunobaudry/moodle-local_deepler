@@ -15,9 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -28,6 +25,9 @@ use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 /**
  * External service to call DeepL's text improvement API.
  *

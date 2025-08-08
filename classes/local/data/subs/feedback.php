@@ -51,7 +51,7 @@ class feedback extends subbase {
                     $table,
                     $this->cm->id
             );
-            if ($entry->label) {
+            if ($entry->definition) {
                 $fields[] = new field(
                         $entry->id,
                         $entry->label,

@@ -253,8 +253,14 @@ define([
          */
         const onTranslateSuccess = (response)=>{
             Log.info(response);
+            const glossaries = [];
             response.forEach((tr) => {
                 if (tr.error === '') {
+                    // For now used glossary_id should, be the same for the batch,
+                    // but it would make sense to use a single glossary for each text.
+                    if (glossaries.indexOf(tr.glossary_id) === -1) {
+                        glossaries.push(tr.glossary_id);
+                    }
                     let key = tr.key;
                     let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
                     tempTranslations[key].editor.innerHTML = translation;
@@ -264,6 +270,7 @@ define([
                     Events.emit(ON_TRANSLATION_FAILED, tr.error);
                 }
             });
+            Api.updateGlossariesUsage(glossaries);
         };
         /**
          * When rephrasing went good.
@@ -308,7 +315,8 @@ define([
          * @returns {{}}
          */
         const prepareTranslationSettings = (settings)=>{
-            const trSelectors = [Selectors.deepl.tagHandling,
+            const trSelectors = [
+                Selectors.deepl.tagHandling,
                 Selectors.deepl.context,
                 Selectors.deepl.splitSentences,
                 Selectors.deepl.preserveFormatting,

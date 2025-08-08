@@ -16,11 +16,10 @@
 
 namespace local_deepler\output;
 
-use html_table;
+
 use html_writer;
 use local_deepler\local\services\utils;
 use moodle_url;
-use pix_icon;
 use plugin_renderer_base;
 
 /**
@@ -35,38 +34,28 @@ class tokens_renderer extends plugin_renderer_base {
     /**
      * Renders the token manager UI: table of attribute-token mappings and add form.
      *
-     * @return string HTML output
+     * @return string
+     * @throws \coding_exception
+     * @throws \core\exception\moodle_exception
+     * @throws \dml_exception
      */
-    public function render_token_manager() {
-        global $DB;
-        global $SESSION;
-        $html = '';
+    public function render_token_manager(): string {
+        global $DB, $SESSION;
 
+        $data = [];
+
+        // Errors.
         if (!empty($SESSION->local_deepler_errors)) {
-            foreach ($SESSION->local_deepler_errors as $error) {
-                $html .= html_writer::div($error, 'alert alert-danger');
-            }
+            $data['errors'] = $SESSION->local_deepler_errors;
             unset($SESSION->local_deepler_errors);
         }
 
-        // Standard and custom fields for the dropdown.
+        // User fields.
         $userfields = utils::all_user_fields();
 
-        // Fetch existing mappings from the DB.
+        // Records from DB.
         $records = $DB->get_records('local_deepler_tokens');
-
-        // Build the HTML output.
-        $html = '';
-
-        // Table of existing mappings (attributes-tokens).
-        $table = new html_table();
-        $table->head = [
-                get_string('tokenattribute', 'local_deepler'),
-                get_string('tokenvaluefilter', 'local_deepler'),
-                get_string('tokentoken', 'local_deepler'),
-                get_string('tokenactions', 'local_deepler'),
-        ];
-        $table->data = [];
+        $data['records'] = [];
 
         foreach ($records as $record) {
             $deleteurl = new moodle_url('/admin/settings.php', [
@@ -74,72 +63,42 @@ class tokens_renderer extends plugin_renderer_base {
                     'deletetoken' => $record->id,
                     'sesskey' => sesskey(),
             ]);
-            $table->data[] = [
-                    isset($userfields[$record->attribute]) ? $userfields[$record->attribute] : s($record->attribute),
-                    s($record->valuefilter),
-                    s($record->token),
-                    $this->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete'))),
+
+            $data['records'][] = [
+                    'id' => $record->id,
+                    'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
+                    'valuefilter' => s($record->valuefilter),
+                    'token' => s($record->token),
+                    'action' => utils::local_deepler_get_action_icon($deleteurl, 't/delete', get_string('delete')),
             ];
         }
 
-        // Add a comment or description.
-        $html .= html_writer::div(get_string('tokenadminpagedescription', 'local_deepler'), 'adminpage-description');
-
-        $html .= html_writer::tag('h3', get_string('tokentokenmanager_mappings', 'local_deepler'));
-        $html .= html_writer::table($table);
-
-        // Add new mapping form (as a separate section below the table).
-        $html .= html_writer::tag('h4', get_string('tokentokenmanager_addnew', 'local_deepler'));
-        $html .= html_writer::start_tag('form', [
-                'method' => 'post',
-                'action' => new moodle_url('/local/deepler/tokenmanager.php'),
-                'class' => 'mform',
-        ]);
-        $html .= html_writer::empty_tag('input', [
-                'type' => 'hidden',
-                'name' => 'sesskey',
-                'value' => sesskey(),
-        ]);
-
-        $html .= html_writer::start_div('form-inline');
-        $html .= html_writer::select($userfields, 'attribute', '', ['' => get_string('choose')],
-                ['class' => 'custom-select mr-2', 'id' => 'deepler-attribute']);
-        $html .= html_writer::empty_tag('input', [
-                'type' => 'text',
-                'name' => 'valuefilter',
-                'class' => 'form-control mr-2',
-                'id' => 'deepler-valuefilter',
-                'placeholder' => get_string('tokenfiltervalue', 'local_deepler'),
-        ]);
-        $html .= html_writer::empty_tag('input', [
-                'type' => 'text',
-                'name' => 'token',
-                'class' => 'form-control mr-2',
-                'id' => 'deepler-token',
-                'placeholder' => get_string('tokentoken', 'local_deepler'),
-                'size' => 40, // Or 36 for exact UUID length.
-        ]);
-
-        $html .= html_writer::empty_tag('input', [
-                'type' => 'submit',
-                'name' => 'addtoken',
-                'value' => get_string('tokenadd', 'local_deepler'),
-                'class' => 'btn btn-primary',
-        ]);
-        $html .= html_writer::end_div();
-
-        $html .= html_writer::end_tag('form');
-        $html .= html_writer::div(' ', 'pt-2', ['id' => 'deepler-form-errors']);
-        $html .= html_writer::div(
-                html_writer::link(
-                        new moodle_url('/admin/settings.php', ['section' => 'local_deepler']),
-                        get_string('tokengobacktosettings', 'local_deepler'),
-                        ['target' => '_self']
-                ),
-                'mb-3 pt-4'
-        );
+        // Strings and form data.
+        $data += [
+                'apikeyisset' => get_config('local_deepler', 'apikey'),
+                'description' => get_string('tokenadminpagedescription', 'local_deepler'),
+                'mappingsheading' => get_string('tokentokenmanager_mappings', 'local_deepler'),
+                'addnewheading' => get_string('tokentokenmanager_addnew', 'local_deepler'),
+                'attribute' => get_string('tokenattribute', 'local_deepler'),
+                'valuefilter' => get_string('tokenvaluefilter', 'local_deepler'),
+                'token' => get_string('tokentoken', 'local_deepler'),
+                'actions' => get_string('tokenactions', 'local_deepler'),
+                'formaction' => (new moodle_url('/local/deepler/tokenmanager.php'))->out(),
+                'sesskey' => sesskey(),
+                'userattributeselect' => html_writer::select($userfields, 'attribute', '', ['' => get_string('choose')],
+                        ['class' => 'custom-select mr-2', 'id' => 'deepler-attribute']),
+                'valuefilterplaceholder' => get_string('tokenfiltervalue', 'local_deepler'),
+                'tokenplaceholder' => get_string('tokentoken', 'local_deepler'),
+                'addbutton' => get_string('tokenadd', 'local_deepler'),
+                'settingsurl' => (new moodle_url('/admin/settings.php', ['section' => 'local_deepler']))->out(),
+                'backtosettings' => get_string('tokengobacktosettings', 'local_deepler'),
+                'glossariesurl' => (new moodle_url('/local/deepler/glossarymanageradmin.php', ['section' => 'local_deepler']))
+                        ->out(),
+                'glossarymanagetitle' => get_string('glossary:manage:title', 'local_deepler'),
+        ];
 
         $this->page->requires->js_call_amd('local_deepler/formvalidation', 'init');
-        return $html;
+
+        return $this->render_from_template('local_deepler/token_manager', $data);
     }
 }
