@@ -43,7 +43,7 @@ class behat_local_deepler extends behat_base {
         $driver = $session->getDriver();
         $element = $session->getPage()->find('css', $cssselector);
         if (null === $element) {
-            throw new \Exception('Element not found');
+            throw new Exception('Element not found');
         }
         $driver->executeScript("document.querySelector('$cssselector').scrollIntoView(true);");
     }
@@ -55,6 +55,18 @@ class behat_local_deepler extends behat_base {
      */
     public function i_dump_the_deepl_api_token(): void {
         echo "DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
+    }
+
+    /**
+     * Then the environment variable 'NAME' should be set
+     * @Then /^the environment variable '([^']+)' should be set$/
+     */
+    public function the_environment_variable_should_be_set(string $name): void {
+        $value = getenv($name);
+        if ($value === false || $value === '') {
+            // Use a plain exception to fail the step.
+            throw new Exception("Environment variable '{$name}' is not set.");
+        }
     }
 
     /**

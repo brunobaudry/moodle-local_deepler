@@ -1,4 +1,4 @@
-@local @local_deepler @javascript @envtest
+@local @local_deepler @envtest
 Feature: Test env loading
-  Scenario: Debug env
-    Then I dump the DEEPL_API_TOKEN
+  Scenario: Env is available
+    Then the environment variable 'DEEPL_API_TOKEN' should be set
