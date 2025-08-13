@@ -36,6 +36,16 @@ final class spreadsheetglossaryparser {
     public static array $supportedextensions = ['csv', 'tsv', 'xlsx', 'xls', 'ods'];
 
     /**
+     * Map the extension array to a valid mimetype string.
+     *
+     * @return string
+     */
+    public static function mapextentions_to_mimetype(): string {
+        // Map extension.
+        return implode(',', array_map(fn($ext) => '.' . $ext, self::$supportedextensions));
+    }
+
+    /**
      * Parse a given spreadsheet into a normalized two-column CSV (UTF-8, comma-delimited).
      * Optionally detect and consume the first row as language codes if it contains two-letter codes.
      *

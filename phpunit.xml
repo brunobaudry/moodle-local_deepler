@@ -13,7 +13,6 @@
         stopOnSkipped="false"
         beStrictAboutTestsThatDoNotTestAnything="false"
         beStrictAboutOutputDuringTests="true"
-        displayDetailsOnTestsThatTriggerDeprecations="true"
 >
 
     <php>

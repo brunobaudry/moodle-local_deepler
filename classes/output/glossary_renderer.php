@@ -188,7 +188,8 @@ class glossary_renderer extends plugin_renderer_base {
                 'glossaryuploadbtn' => get_string('glossary:upload:btn', 'local_deepler'),
                 'glossaryhelpmodaltitle' => get_string('glossary:helpmodal:title', 'local_deepler'),
                 'close' => get_string('ok'),
-                'fileaccept' => implode(',', spreadsheetglossaryparser::$supportedextensions),
+
+                'fileaccept' => spreadsheetglossaryparser::mapextentions_to_mimetype(),
         ];
 
         return $this->render_from_template('local_deepler/glossary_uploader', $data);
