@@ -55,7 +55,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 fail: (jqXHR, status, error) => {
                     Log.error(`api/updateGlossariesUsage/fail::jqXHR`);
                     Log.error(jqXHR);
-                    Events.emit(GLOSSARY_DB_ALL_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
+                    Events.emit(GLOSSARY_DB_ALL_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
                 }
             }
         ]);
@@ -77,7 +77,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 fail: (jqXHR, status, error) => {
                     Log.error(`api/updateGlossariesVisibility/fail::jqXHR`);
                     Log.error(jqXHR);
-                    Events.emit(GLOSSARY_DB_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
+                    Events.emit(GLOSSARY_DB_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
                 }
             }
         ]);
@@ -98,7 +98,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 fail: (jqXHR, status, error) => {
                     Log.error(`api/getGlossariesEntries/fail::jqXHR`);
                     Log.error(jqXHR);
-                    Events.emit(GLOSSARY_ENTRIES_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
+                    Events.emit(GLOSSARY_ENTRIES_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
                 }
             }
         ]);
@@ -130,7 +130,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 fail: (jqXHR, status, error) => {
                     Log.error(`api/updateTranslationsInDb/fail::jqXHR`);
                     Log.error(jqXHR);
-                     Events.emit(TR_DB_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
+                     Events.emit(TR_DB_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
                 }
             }]
         );
@@ -153,7 +153,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             fail: (jqXHR, status, error) => {
                 Log.debug(`${endPoint} api/translate/fail::jqXHR`);
                 Log.debug(jqXHR);
-                Events.emit(failedEvent, status ?? '', error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode);
+                Events.emit(failedEvent, jqXHR.debuginfo ?? jqXHR.message ?? error ?? jqXHR.errorcode ?? '');
             }
         }]);
     };

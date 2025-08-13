@@ -8,6 +8,7 @@ $baseDir = dirname(dirname($vendorDir));
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'SebastianBergmann\\Comparator\\ArrayComparator' => $vendorDir . '/sebastian/comparator/src/ArrayComparator.php',
+    'SebastianBergmann\\Comparator\\ClosureComparator' => $vendorDir . '/sebastian/comparator/src/ClosureComparator.php',
     'SebastianBergmann\\Comparator\\Comparator' => $vendorDir . '/sebastian/comparator/src/Comparator.php',
     'SebastianBergmann\\Comparator\\ComparisonFailure' => $vendorDir . '/sebastian/comparator/src/ComparisonFailure.php',
     'SebastianBergmann\\Comparator\\DOMNodeComparator' => $vendorDir . '/sebastian/comparator/src/DOMNodeComparator.php',

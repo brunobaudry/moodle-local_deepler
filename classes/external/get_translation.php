@@ -73,9 +73,12 @@ class get_translation extends external_api {
                     'translated_text' => '',
             ]];
         }
-
+        // Deepl-php's API is a bit painful sometimes.
         $tragetlang = $params['options']['target_lang'];
         unset($params['options']['target_lang']);
+        $glo = $params['options']['glossary_id'];
+        unset($params['options']['glossary_id']);
+        $params['options']['glossary'] = $glo;
 
         $groupedtranslations = [];
         foreach ($params['translations'] as $t) {

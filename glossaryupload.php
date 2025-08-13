@@ -26,6 +26,8 @@ use DeepL\DeepLException;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
 use local_deepler\local\services\lang_helper;
+use local_deepler\local\services\spreadsheetglossaryparser;
+
 require_once(__DIR__ . '/../../config.php');
 require_login();
 
@@ -46,6 +48,7 @@ $langhelper = new lang_helper();
 $langhelper->initdeepl($USER);
 $status = 'failed';
 $message = '';
+
 if ($uploadinglossary) {
     if (!confirm_sesskey()) {
         $status = 'invalidsesskey';
@@ -57,52 +60,98 @@ if ($uploadinglossary) {
         // Proceed with glossary management.
         $tmpfile = $_FILES['glossaryfile']['tmp_name'];
         $filename = $_FILES['glossaryfile']['name'];
-        $file = file_get_contents($tmpfile);
-        try {
-            // Parse file name conventions.
-            $filenameext = explode('.', $filename);
-            $ext = strtolower(end($filenameext));
-            $namearray = explode('_', reset($filenameext));
-            $langpair = explode('-', array_pop($namearray));
-            $glossaryname = str_replace(' ', '_', implode('_', $namearray));
-            $source = $langpair[0];
-            $target = $langpair[1];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $parser = new spreadsheetglossaryparser();
+        if (!spreadsheetglossaryparser::is_supported($ext)) {
+            $status = 'filetypeunsupported';
+            $message = $ext;
+            // Handle return early as appropriate!
+        } else {
 
-            if (isset($source) && isset($target)) {
-                $sourceok = $langhelper->islangsupported($source);
-                $targetok = $langhelper->islangsupported($target);
-                if (!$sourceok) {
-                    $status = 'sourcenotsupported';
-                    $message = $source;
-                } else if (!$targetok) {
-                    $status = 'targetnotsupported';
-                    $message = $target;
+            try {
+                // Parse file name conventions.
+                $filenameext = explode('.', $filename);
+                $namearray = explode('_', reset($filenameext));
+                $langpair = explode('-', array_pop($namearray));
+                $glossaryname = str_replace(' ', '_', implode('_', $namearray));
+                $source = $langpair[0];
+                $target = $langpair[1];
+                $headerlangs = [];
+                $sourceok = $targetok = false;
+                if (isset($source) && isset($target)) {
+                    // First check of the file convention found lang pair.
+                    $sourceok = $langhelper->islangsupported($source);
+                    $targetok = $langhelper->islangsupported($target);
+                }
+                // If not using convention or source target not supported.
+                $usehedarelangs = !isset($source) || !isset($target) || !($sourceok && $targetok);
+                $csvcontent = $parser->parse_to_csv($tmpfile, $ext, $usehedarelangs, $headerlangs);
+                if ($usehedarelangs) {
+                    // Get the headers.
+                    $source = $headerlangs['source'];
+                    $target = $headerlangs['target'];
+                    // Set the name to the whole name without extention.
+                    $glossaryname = $filenameext[0];
                 } else {
-                    $glossaryinfo = $langhelper->gettranslator()->createGlossaryFromCsv($glossaryname, $source, $target, $file);
-                    $gid = glossary::create(new glossary(
-                            $glossaryinfo->glossaryId,
-                            $glossaryinfo->name,
-                            $glossaryinfo->sourceLang,
-                            $glossaryinfo->targetLang,
-                            $glossaryinfo->entryCount,
-                            $langhelper->getdbtokenid()
-                    ));
-                    $guid = user_glossary::create(new user_glossary($USER->id, $gid));
-                    $status = 'success';
-                    $message = $filename;
+                    // Set the name stripping the suffix and without extention.
+                    $glossaryname = str_replace(' ', '_', implode('_', $namearray));
+                }
+                if (isset($source) && isset($target)) {
+                    $sourceok = $langhelper->islangsupported($source);
+                    $targetok = $langhelper->islangsupported($target);
+                    if (!$sourceok) {
+                        $status = 'sourcenotsupported';
+                        $message = $source;
+                    } else if (!$targetok) {
+                        $status = 'targetnotsupported';
+                        $message = $target;
+                    } else {
+                        if ($csvcontent === '') {
+                            $status = 'fileempty';
+                        } else {
+                            $glossaryinfo = $langhelper->gettranslator()->createGlossaryFromCsv(
+                                    $glossaryname,
+                                    $source,
+                                    $target,
+                                    $csvcontent
+                            );
+                            $gid = glossary::create(new glossary(
+                                    $glossaryinfo->glossaryId,
+                                    $glossaryinfo->name,
+                                    $glossaryinfo->sourceLang,
+                                    $glossaryinfo->targetLang,
+                                    $glossaryinfo->entryCount,
+                                    $langhelper->getdbtokenid()
+                            ));
+
+                            if ($gid) {
+                                user_glossary::create(new user_glossary(
+                                        $USER->id,
+                                        $gid
+                                ));
+                                $status = 'success';
+                            } else {
+                                $status = 'failed';
+                            }
+
+                        }
+                    }
+                } else {
+                    $status = 'langpair:notresolved';
                 }
 
-            } else {
-                $status = 'suffixerror';
-                $message = 'suffix is unreadible.';
+            } catch (DeepLException $e) {
+                $status = 'deeplissue';
+                $message = $e->getMessage();
+            } catch (dml_exception $e) {
+                $status = 'databaseerror';
+                $message = $e->getMessage();
+            } catch (Exception $e) {
+                $status = 'unknownerror';
+                $message = $e->getMessage();
             }
-        } catch (DeepLException $e) {
-            $status = 'deeplissue';
-            $message = $e->getMessage();
-        } catch (Exception $e) {
-            $status = 'unknownerror';
-            $message = $e->getMessage();
         }
+
     }
     unset($uploadinglossary);
 }

@@ -8,6 +8,7 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
     );
 
@@ -15,6 +16,14 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         'p' => 
         array (
             'phpDocumentor\\Reflection\\' => 25,
+        ),
+        'l' => 
+        array (
+            'local_deepler\\' => 14,
+        ),
+        'Z' => 
+        array (
+            'ZipStream\\' => 10,
         ),
         'W' => 
         array (
@@ -30,16 +39,22 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         ),
         'P' => 
         array (
+            'Psr\\SimpleCache\\' => 16,
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
             'Psr\\Container\\' => 14,
             'Prophecy\\' => 9,
+            'PhpOffice\\PhpSpreadsheet\\' => 25,
             'PHPStan\\PhpDocParser\\' => 21,
         ),
         'N' => 
         array (
             'Nyholm\\Psr7\\' => 12,
+        ),
+        'M' => 
+        array (
+            'Matrix\\' => 7,
         ),
         'H' => 
         array (
@@ -52,6 +67,11 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
             'Doctrine\\Deprecations\\' => 22,
             'DeepL\\' => 6,
         ),
+        'C' => 
+        array (
+            'Composer\\Pcre\\' => 14,
+            'Complex\\' => 8,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -60,6 +80,14 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
+        ),
+        'local_deepler\\' => 
+        array (
+            0 => __DIR__ . '/../../..' . '/classes',
+        ),
+        'ZipStream\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
         ),
         'Webmozart\\Assert\\' => 
         array (
@@ -85,6 +113,10 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         array (
             0 => __DIR__ . '/..' . '/symfony/http-client',
         ),
+        'Psr\\SimpleCache\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/simple-cache/src',
+        ),
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
@@ -106,6 +138,10 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
         ),
+        'PhpOffice\\PhpSpreadsheet\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
+        ),
         'PHPStan\\PhpDocParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
@@ -113,6 +149,10 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         'Nyholm\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/nyholm/psr7/src',
+        ),
+        'Matrix\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
         ),
         'Http\\Message\\MultipartStream\\' => 
         array (
@@ -134,11 +174,30 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         array (
             0 => __DIR__ . '/..' . '/deeplcom/deepl-php/src',
         ),
+        'Composer\\Pcre\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/pcre/src',
+        ),
+        'Complex\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'H' => 
+        array (
+            'HTMLPurifier' => 
+            array (
+                0 => __DIR__ . '/..' . '/ezyang/htmlpurifier/library',
+            ),
+        ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'SebastianBergmann\\Comparator\\ArrayComparator' => __DIR__ . '/..' . '/sebastian/comparator/src/ArrayComparator.php',
+        'SebastianBergmann\\Comparator\\ClosureComparator' => __DIR__ . '/..' . '/sebastian/comparator/src/ClosureComparator.php',
         'SebastianBergmann\\Comparator\\Comparator' => __DIR__ . '/..' . '/sebastian/comparator/src/Comparator.php',
         'SebastianBergmann\\Comparator\\ComparisonFailure' => __DIR__ . '/..' . '/sebastian/comparator/src/ComparisonFailure.php',
         'SebastianBergmann\\Comparator\\DOMNodeComparator' => __DIR__ . '/..' . '/sebastian/comparator/src/DOMNodeComparator.php',
@@ -181,6 +240,7 @@ class ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6::$prefixesPsr0;
             $loader->classMap = ComposerStaticInita4a4ef17d41f41d48b7a9ca68073ece6::$classMap;
 
         }, null, ClassLoader::class);

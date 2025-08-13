@@ -39,6 +39,8 @@ class env_loader {
         if (!file_exists($path)) {
             echo "WARNING: .env $path does not exist.\n";
             return;
+        } else {
+            echo "Env $path loaded ok";
         }
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {

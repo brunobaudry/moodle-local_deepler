@@ -41,6 +41,19 @@ define([
         const ON_REPHRASE_FAILED = 'onRephraseFailed';
         const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
         const ON_DB_FAILED = 'onDbFailed';
+        const trSelectors = [
+            Selectors.deepl.tagHandling,
+            Selectors.deepl.context,
+            Selectors.deepl.splitSentences,
+            Selectors.deepl.preserveFormatting,
+            Selectors.deepl.formality,
+            Selectors.deepl.glossaryId,
+            Selectors.deepl.outlineDetection,
+            Selectors.deepl.nonSplittingTags,
+            Selectors.deepl.splittingTags,
+            Selectors.deepl.ignoreTags,
+            Selectors.deepl.modelType
+        ];
         /**
          * Prepare the langaue settings.
          *
@@ -315,19 +328,6 @@ define([
          * @returns {{}}
          */
         const prepareTranslationSettings = (settings)=>{
-            const trSelectors = [
-                Selectors.deepl.tagHandling,
-                Selectors.deepl.context,
-                Selectors.deepl.splitSentences,
-                Selectors.deepl.preserveFormatting,
-                Selectors.deepl.formality,
-                Selectors.deepl.glossaryId,
-                Selectors.deepl.outlineDetection,
-                Selectors.deepl.nonSplittingTags,
-                Selectors.deepl.splittingTags,
-                Selectors.deepl.ignoreTags,
-                Selectors.deepl.modelType
-            ];
             const s = filterSetting(settings, trSelectors);
             // eslint-disable-next-line camelcase
             s.target_lang = targetLang.toUpperCase();

@@ -20,6 +20,7 @@ use core\output\html_writer;
 use local_deepler\local\services\utils;
 use moodle_url;
 use plugin_renderer_base;
+use local_deepler\local\services\spreadsheetglossaryparser;
 
 /**
  * Sub renderer for Glossary stuff.
@@ -128,7 +129,7 @@ class glossary_renderer extends plugin_renderer_base {
                     'entrycount' => format_string($glo->entrycount),
                     'entrycountlink' => $this->generateentrieslink($glo),
                     'shared' => $this->dovisibilityoptions($glo->shared),
-                    'tokenid' => format_string($glo->tokenid),
+                    'tokenid' => $glo->tokenid === 0 ? get_string('glossary:pool:admin', 'local_deepler') : $glo->tokenid,
                     'lastused' => $glo->lastused === 0 ? get_string('glossary:neverused', 'local_deepler') :
                             userdate($glo->lastused),
                     'actions' =>
@@ -187,6 +188,7 @@ class glossary_renderer extends plugin_renderer_base {
                 'glossaryuploadbtn' => get_string('glossary:upload:btn', 'local_deepler'),
                 'glossaryhelpmodaltitle' => get_string('glossary:helpmodal:title', 'local_deepler'),
                 'close' => get_string('ok'),
+                'fileaccept' => implode(',', spreadsheetglossaryparser::$supportedextensions),
         ];
 
         return $this->render_from_template('local_deepler/glossary_uploader', $data);

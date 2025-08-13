@@ -60,8 +60,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <input type="hidden" name="redirect" value="{{redirect}}" class="form-control">
         <div class="form-row">
             <div class="col">
-                <input type="file" id="fileElem" name="glossaryfile"
-                accept=".csv" class="form-control">
+                <input type="file"
+                       id="fileElem"
+                       name="glossaryfile"
+                       accept="{{fileaccept}}"
+                       class="form-control"
+                       required>
+                <small class="form-text text-muted">
+                    {{#str}} glossary:upload:file:supported, local_deepler {{/str}}
+                </small>
+
             </div>
             <div class="col">
                 <button class="btn btn-primary">{{glossaryuploadbtn}}</button>
@@ -82,6 +90,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             <div class="modal-body">
                 <div class="d-flex flex-row mb-3">
                     <div class="p-2 flex-fill">{{{glossaryexplcol1}}}</div>
+                </div>
+                <div class="d-flex flex-row mb-3">
+
                     <div class="p-2 flex-fill">{{{glossaryexplcol2}}}</div>
                     <div class="p-2 flex-fill">{{{glossaryexplcol3}}}</div>
                 </div>

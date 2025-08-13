@@ -663,7 +663,7 @@ class lang_helper {
      * @return array
      * @throws \DeepL\DeepLException
      */
-    public function getalldeeplglossaries(): array {
+    private function getalldeeplglossaries(): array {
         return $this->translator->listGlossaries();
     }
 
@@ -739,16 +739,60 @@ class lang_helper {
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public function deleteglossary(int $glossarydbid): ?bool {
+    public function deleteglossary(int $glossarydbid, bool $dbonly = false): ?bool {
         $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
+        $success = $dbonly;
         if ($guid) {
             // Public glossaries downloaded from DeepL do not have users.
             $delete = user_glossary::delete($guid->id);
         }
         $glo = glossary::getbyid($glossarydbid);
-        $success = $this->translator->deleteglossary($glo->glossaryid);
+        if (!$dbonly) {
+            $success = $this->translator->deleteglossary($glo->glossaryid);
+        }
         $deleted = glossary::delete($glossarydbid);
         return $success && $deleted;
+    }
+
+    /**
+     * Get All from DeepL add missing, remove deleted return all.
+     *
+     *
+     * @return glossary[]
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function syncdeeplglossaries(): array {
+        $deeplglossaries = $this->getalldeeplglossaries();
+        // Array of db IDs and DeepL's Glossary IDs.
+        $glossariesallids = glossary::getall_ids();
+        // Flatten Glossary IDs in DB.
+        $pluginsgloids = array_map(fn($o) => $o->glossaryid, $glossariesallids);
+        // Add those added from DeepL UI if missing.
+        foreach ($deeplglossaries as $deeplglossary) {
+            if (!in_array($deeplglossary->glossaryId, $pluginsgloids)) {
+                glossary::create(new glossary(
+                        $deeplglossary->glossaryId,
+                        $deeplglossary->name,
+                        $deeplglossary->sourceLang,
+                        $deeplglossary->targetLang,
+                        $deeplglossary->entryCount
+                ));
+            }
+        }
+        // Flatten DeepL's glo IDs.
+        $deeplsids = array_map(fn($o) => $o->glossaryId, $deeplglossaries);
+        // Delete those deleted from DeepL's UI.
+        $pluginidsotindeepl = array_filter($glossariesallids, function($obj) use ($deeplsids) {
+            if (!in_array($obj->glossaryid, $deeplsids)) {
+                return $obj->id;
+            }
+        });
+        $idstodelete = array_map(fn($o) => $o->id, $pluginidsotindeepl);
+        foreach ($idstodelete as $deleteme) {
+            $this->deleteglossary($deleteme, true);
+        }
+        return glossary::getall('', '');
     }
 
     /**

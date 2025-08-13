@@ -23,8 +23,11 @@
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/classes/vendor/autoload.php');
+
 /**
- * Add Translate Course to course settings menu.
+ * Add Translate Course to the course settings menu.
  *
  * @param mixed $navigation
  * @param mixed $course
