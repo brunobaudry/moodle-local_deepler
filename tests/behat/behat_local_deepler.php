@@ -58,7 +58,9 @@ class behat_local_deepler extends behat_base {
     }
 
     /**
-     * Then the environment variable 'NAME' should be set
+     * Then the environment variable 'NAME' should be set.
+     *
+     * @param string $name
      * @Then /^the environment variable '([^']+)' should be set$/
      */
     public function the_environment_variable_should_be_set(string $name): void {

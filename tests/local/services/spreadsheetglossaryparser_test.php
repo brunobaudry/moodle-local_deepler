@@ -18,8 +18,10 @@ namespace local_deepler\local\services;
 
 use advanced_testcase;
 use local_deepler\local\services\spreadsheetglossaryparser;
+use PhpOffice\PhpSpreadsheet\Settings;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use ZipArchive;
 
 /**
  * Test cases.
@@ -30,6 +32,43 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 final class spreadsheetglossaryparser_test extends advanced_testcase {
+    /** @var mixed */
+    private $originalzipclass = null;
+
+    /**
+     * This method is called before each test.
+     *
+     * @codeCoverageIgnore
+     */
+    protected function setUp(): void {
+        parent::setUp();
+
+        // Remember the current Zip class, if available.
+        if (method_exists(Settings::class, 'getZipClass')) {
+            $this->originalzipclass = Settings::getZipClass();
+        }
+
+        // Prefer ZipArchive to avoid ZipStream API differences on older PHP.
+        if (class_exists(ZipArchive::class) && defined(Settings::class . '::ZIPARCHIVE')) {
+            Settings::setZipClass(Settings::ZIPARCHIVE);
+        } else {
+            $this->markTestSkipped('ZipArchive (ext-zip) is not available; skipping XLSX writer test.');
+        }
+    }
+
+    /**
+     * This method is called after each test.
+     *
+     * @codeCoverageIgnore
+     */
+    protected function tearDown(): void {
+        // Restore the previous Zip class setting if we changed it.
+        if ($this->originalzipclass !== null && method_exists(Settings::class, 'setZipClass')) {
+            Settings::setZipClass($this->originalzipclass);
+        }
+        parent::tearDown();
+    }
+
     /**
      * Creates a fake spreadsheet, save and test parsing.
      *
@@ -38,9 +77,6 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
      */
     public function test_convert_xlsx_to_csv(): void {
         $this->resetAfterTest(true);
-        if ($this->is_below_four_tree()) {
-            return;
-        }
         // Build an XLSX in temp.
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -60,20 +96,6 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
         $this->assertStringContainsString("Hello,Bonjour", $csv);
 
         @unlink($tmp);
-    }
-
-    /**
-     * Check if Moodle is prior to 4.3.
-     *
-     * @return boolean
-     */
-    protected function is_below_four_tree(): bool {
-        global $CFG;
-        if (version_compare($CFG->version, '2023100900', '<')) {
-            $this->markTestSkipped('This test is only for Moodle 4.0.3 and above.');
-            return true;
-        }
-        return false;
     }
 
 }
