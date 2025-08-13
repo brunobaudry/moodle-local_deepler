@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Admin can fetch DeepL's glossaries (from your DeepL'a API account) and edit glossaries' visibilty scope.
 
 ### Fixed
-- Some advanced settings were not correctly sent with translation to DeepL.
+- Some advanced settings were not correctly sent with translation to DeepL (like the correct Glossary_id... see ![](https://github.com/DeepLcom/deepl-php/issues/68)).
 
 ## [1.8.5]
 ### Deprecated

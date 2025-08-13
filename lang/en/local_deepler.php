@@ -86,6 +86,7 @@ $string['glossary:nbentries'] = 'Entries';
 $string['glossary:neverused'] = 'Never';
 $string['glossary:notselected'] = 'No Glossary selected';
 $string['glossary:pool'] = 'Pool';
+$string['glossary:pool:admin'] = 'Admin owned';
 $string['glossary:pool:title'] = 'Pool\'s glossaries';
 $string['glossary:private:title'] = 'Private glossaries';
 $string['glossary:public:title'] = 'Public glossaries';
@@ -97,27 +98,29 @@ $string['glossary:upload'] = 'Upload';
 $string['glossary:upload:btn'] = 'Create glossary';
 $string['glossary:upload:deeplissue:body'] = 'Could not upload the glossary because: {$a}';
 $string['glossary:upload:deeplissue:title'] = 'DeepL issue';
-$string['glossary:upload:file:supported'] = 'Supported file types: CSV, TSV, XLSX, XLS, ODS';
 $string['glossary:upload:failed:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:failed:title'] = 'Upload error';
 
 $string['glossary:upload:file'] = "#### Rules
 
-The spreadsheet must contain a single sheet with 2 columns and either but not both (1):
+Bidirectional glossaries are not allowed yet.
 
-- Valid 2 letter code column headers (expl EN and JA) in upper or lowercase letters.
+The spreadsheet must contain a single sheet with 2 columns and either (1):
+
+- Valid 2-letter code column headers (expl EN and JA) in upper or lowercase letters.
 - Valid file name following the conventions below.
 
 (1)_The file naming has priority.
 So if you want to use the header way and add the lang pairs in the file name,
  make sure the name has no suffixe like \_SOURCE-TARGET, avoid using a '\_' folowed by a '-'.
  Do something like GLOSSARYNAME-SOURCE-TARGET.EXTENSION for example._
-##### File naming conventions:  
+
+##### File naming conventions:
+
 2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.EXTENSION
 4.  Name it meaningfully but not too long (for a nice display in tables).
 5.  No header in the csv file.
 3.  SOURCE and TARGET in the file name must be 2 character language code.
-4. DeepL does not manage bi directional glossaries.
 
 ";
 $string['glossary:upload:file:expla'] = "##### FR > ES (file naming conventions)
@@ -154,12 +157,15 @@ $string['glossary:upload:file:explb'] = "##### File naming convention examples :
 *   Tech\_jargon\_**FRA-SPA**.ods (3 letter codes, but will not search for the header row)
 *   myHistoricalGlo_fr-es.**txt** (unsupported extension)
 ";
+$string['glossary:upload:file:supported'] = 'Supported file types: CSV, TSV, XLSX, XLS, ODS';
 $string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: no file found';
 $string['glossary:upload:fileerror:title'] = 'File error';
 $string['glossary:upload:filetypeunsupported:body'] = 'Unsupported file type';
 $string['glossary:upload:filetypeunsupported:title'] = '${a} is not valid. Please upload CSV, TSV, XLSX, XLS, or ODS.';
 $string['glossary:upload:invalidsesskey:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:invalidsesskey:title'] = 'Invalid session key';
+$string['glossary:upload:langpair:notresolved:body'] = 'Neither in the file title, nor in the headers.';
+$string['glossary:upload:langpair:notresolved:title'] = 'Could ne resolve the source-target language pair';
 $string['glossary:upload:sourcenotsupported:body'] = '{$a} is not a supported source language';
 $string['glossary:upload:sourcenotsupported:title'] = 'DeepL not supported source language';
 $string['glossary:upload:success:body'] = '{$a} has been uploaded!';

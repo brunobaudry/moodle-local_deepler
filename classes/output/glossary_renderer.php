@@ -129,7 +129,7 @@ class glossary_renderer extends plugin_renderer_base {
                     'entrycount' => format_string($glo->entrycount),
                     'entrycountlink' => $this->generateentrieslink($glo),
                     'shared' => $this->dovisibilityoptions($glo->shared),
-                    'tokenid' => format_string($glo->tokenid),
+                    'tokenid' => $glo->tokenid === 0 ? get_string('glossary:pool:admin', 'local_deepler') : $glo->tokenid,
                     'lastused' => $glo->lastused === 0 ? get_string('glossary:neverused', 'local_deepler') :
                             userdate($glo->lastused),
                     'actions' =>

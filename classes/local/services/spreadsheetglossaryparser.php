@@ -36,7 +36,7 @@ final class spreadsheetglossaryparser {
     public static array $supportedextensions = ['csv', 'tsv', 'xlsx', 'xls', 'ods'];
 
     /**
-     * Parse given spreadsheet into a normalized two-column CSV (UTF-8, comma-delimited).
+     * Parse a given spreadsheet into a normalized two-column CSV (UTF-8, comma-delimited).
      * Optionally detect and consume the first row as language codes if it contains two-letter codes.
      *
      * @param string $filepath absolute path to the uploaded file
@@ -99,7 +99,7 @@ final class spreadsheetglossaryparser {
                 $l1 = strtolower($cell1);
                 $l2 = strtolower($cell2);
                 if ($l1 === 'source' && $l2 === 'target') {
-                    $startindex = 1; // Skip header row with "source,target".
+                    $startindex = 1; // Skip the header row with "source,target".
                 }
             }
         }
@@ -132,7 +132,7 @@ final class spreadsheetglossaryparser {
     }
 
     /**
-     * Check if extension is supported.
+     * Check if the extension is supported.
      */
     public static function is_supported(string $ext): bool {
         $ext = strtolower(ltrim($ext, '.'));
@@ -140,6 +140,8 @@ final class spreadsheetglossaryparser {
     }
 
     /**
+     * Create reader.
+     *
      * @param string $ext
      * @return \PhpOffice\PhpSpreadsheet\Reader\IReader
      */
@@ -157,6 +159,8 @@ final class spreadsheetglossaryparser {
     }
 
     /**
+     * Normalize cell.
+     *
      * @param mixed $value
      * @return string
      */
@@ -172,6 +176,8 @@ final class spreadsheetglossaryparser {
     }
 
     /**
+     * Checks if row is blank.
+     *
      * @param array $row
      * @return bool
      */
@@ -185,6 +191,8 @@ final class spreadsheetglossaryparser {
     }
 
     /**
+     * Checks if celle is empty.
+     *
      * @param string|null $s
      * @return bool
      */
@@ -193,6 +201,8 @@ final class spreadsheetglossaryparser {
     }
 
     /**
+     * Checks if 1st 2 are empty.
+     *
      * @param array $row
      * @return array|null[]
      */
@@ -220,6 +230,12 @@ final class spreadsheetglossaryparser {
         return (bool) preg_match('/^[a-z]{2}$/i', $s);
     }
 
+    /**
+     * Converts the given string to UTF-8 encoding if it is not already in UTF-8.
+     *
+     * @param string $s The input string to be checked and converted.
+     * @return string The string encoded in UTF-8.
+     */
     private function to_utf8(string $s): string {
         // Normalize to UTF-8 if needed.
         if (!mb_detect_encoding($s, 'UTF-8', true)) {

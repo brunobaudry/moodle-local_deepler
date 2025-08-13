@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local\services;
+namespace local_deepler\local\services;
 
 use advanced_testcase;
 use local_deepler\local\services\spreadsheetglossaryparser;
@@ -39,7 +39,7 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
     public function test_convert_xlsx_to_csv(): void {
         $this->resetAfterTest(true);
 
-        // Build an XLSX in temp
+        // Build an XLSX in temp.
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'source');
@@ -52,7 +52,7 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
         $writer->save($tmp);
 
         $parser = new spreadsheetglossaryparser();
-        $csv = $parser->convertfiletocsv($tmp, 'xlsx');
+        $csv = $parser->parse_to_csv($tmp, 'xlsx');
 
         $this->assertNotEmpty($csv);
         $this->assertStringContainsString("Hello,Bonjour", $csv);

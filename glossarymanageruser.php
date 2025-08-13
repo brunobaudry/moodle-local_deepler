@@ -37,6 +37,7 @@ $PAGE->set_context($context);
 // Load glossary manager.
 $langhelper = new lang_helper();
 $langhelper->initdeepl($USER);
+/** @var local_deepler\output\glossary_renderer $renderer */
 $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
 $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
 $title = get_string('glossary:manage:title', 'local_deepler');

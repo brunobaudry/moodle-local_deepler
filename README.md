@@ -123,7 +123,7 @@ upgrade process.
 ### Dependencies
 
 You need a [©DeepL API](https://www.deepl.com/en/pro-api)  Free or Pro account when you want to translate your content from one source to a distinct target.
-You need a [©DeepL API Improve text](https://developers.deepl.com/docs/api-reference/improve-text) Pro account should your need be to rephrase your source in the same language.
+You need a [©DeepL API Improve text](https://developers.deepl.com/docs/api-reference/improve-text) **Pro** account should your need be to rephrase your source in the same language.
 [Multi-Language Content (v2)](https://moodle.org/plugins/filter_multilang2) is a dependency of this plugin and will not work without it.
 
 
@@ -185,7 +185,7 @@ Set to zero if you'd prefer no limiting.
 
 DeepL API allows you to generate several API keys mainly for cost control and reporting.
 
-To map, navigate to **Site Administration -> Plugins -> Local plugins -> Deepler Token manager.**
+To map, You need to save a main API key/token first, then the additional page links will display:
 
 ![](pix/token_manager_go.png)
 
@@ -199,9 +199,13 @@ Now a user having the required capability, when translating a course will get af
 
 ## Glossaries' management (NEW since v1.9)
 
+### Overview
 Glossaries are added to your Moodle instance in 3 different ways:
 - Downloaded from your DeepL API account.
-  - This is done automatically.
+  - The plugin will synchronise the glossaries automatically.
+    - If a Glossary is added via DeepL.com's UI, then it will be added to Moodle. 
+    - Should you delete a Glossary via the DeepL.com the plugin will delete it from the plugin upon admin visting the plugin page? So it might be better to only Delete 
+      glossary from the plugin and not from DeepL's UI.
   - Admin can make these Glossaries 'public' meaning every translator will be able to use them.
 - Uploaded by Moodle admins.
   - Admin can make these Glossaries 'public' meaning every translator will be able to use them.
@@ -209,6 +213,85 @@ Glossaries are added to your Moodle instance in 3 different ways:
 - Uploaded by translators via their user's preferences.
   - Can be made available to the translators in the same pool (sharing the same token as seen above).
   - Can be kept private (only available to the translator that uploaded it).
+
+### File formats to upload.
+You can upload glossaries in the following formats 'csv', 'tsv', 'xlsx', 'xls', 'ods' 
+
+### Rules-Process
+
+Bidirectional glossaries are not allowed yet.
+
+The spreadsheet must contain a single sheet with 2 columns and either (1):
+
+- Valid 2-letter code column headers (expl EN and JA) in upper or lowercase letters.
+- Valid file name following the conventions below.
+
+(1)_The file naming has priority.
+So if you want to use the header way and add the lang pairs in the file name,
+make sure the name has no suffixe like \_SOURCE-TARGET, avoid using a '\_' folowed by a '-'.
+Do something like GLOSSARYNAME-SOURCE-TARGET.EXTENSION for example._
+
+#### File naming conventions:
+_This has priority when assigning the Glossary's language pair_.
+
+2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.EXTENSION
+4.  Name it meaningfully but not too long (for a nice display in tables).
+5.  No header in the csv file.
+3.  SOURCE and TARGET in the file name must be 2 character language code.
+4. DeepL does not manage bi directional glossaries.
+
+#### Spreadsheet headers for language pair detection.
+
+_(When not using the file naming conventions describde above)_
+
+Simply add valid 2-letter code in the first row of your spreadsheet.
+
+| ES        | FR        |
+|-----------|-----------|
+| hermosa   | belle     |
+| exquisito | delicieux |
+| mouse     | mouse     |
+
+| FR        | ES        |
+|-----------|-----------|
+| belle     | hermosa   |
+| delicieux | exquisito |
+| mouse     | mouse     |
+
+#### Examples
+
+##### FR > ES (file naming conventions)
+
+**File: 'litérature\_fr-es.csv**'
+
+|           |           |
+|-----------|-----------|
+| belle     | hermosa   |
+| delicieux | exquisito |
+| mouse     | mouse     |
+
+##### ES > FR (using headers)
+**File: 'literatura-es-francia.csv**'
+
+| ES        | FR        |
+|-----------|-----------|
+| hermosa   | belle     |
+| exquisito | delicieux |
+| mouse     | mouse     |
+
+##### File naming convention examples :
+
+**Expl OK**
+
+*   私の用語集**_en-ja.xls**
+*   Tech\_jargon**\_FR-ES.CSV**
+*   myGlossary**-**en-fr.csv (ok only if it has EN FR header row)
+
+**Expl NOT OK (when not using the headers)**
+
+*   myGlossary**-**en-fr.csv (here it will search for langs in the header row)
+*   Tech\_jargon\_**FRA-SPA**.ods (3-letter codes, but will not search for the header row)
+*   myHistoricalGlo_fr-es.**txt** (unsupported extension)
 
 ### Admin glossaries
 
@@ -219,77 +302,37 @@ Click on "Deepler glossaries" to manage them.
 
 ![](pix/glossaries_admin.png)
 
-#### 1. File naming and formating conventions
+#### Steps
 
-In order to simplify the process you must follow the file naming conventions below.
-_(The ? help icon will help you remember the instructions listed below)_
+##### 1. Review the instructions (optional)
 
-1.  File extension must be .csv (no .tsv)
-2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.
-4.  Name it meaningfully but not too long (for a nice display in tables).
-5.  No header in the csv file. 
-6.  SOURCE and TARGET must be 2 character language code.
-  1. (Sub languages for target are not allowed)
-4.  DeepL does not manage bi directional glossaries.
+Unless you remember it.
 
-**Expl OK:**
-
-*   私の用語集**_en-ja.csv**
-*   Tech\_jargon**\_FR-ES.CSV**
-
-**Expl NOT OK:**
-
-*   myGlossary**-**en-fr.csv
-*   Tech\_jargon\_**FRA-SPA**.CSV
-*   myHistoricalGlo_fr-es.**tsv**
-
-##### DeepLer does not manage bi directional glossaries.
-
-Expl When translating FR > ES
-
-**File: 'litérature\_fr-es.csv**'
-
-|||
-|---|---|
-| belle | hermosa |
-| delicieux | exquisito |
-| mouse | mouse |
-
-Expl When translating ES > FR
-
-**File: 'litérature\_es-fr.csv**'
-
-|||
-|---|---|
-| hermosa | belle |
-| exquisito | delicieux |
-| mouse | mouse |
-
-#### 2. Select and upload
+##### 2. Select and upload
 
 Select here a file on your file system and upload it.
-If the file does not match the above conventions error messages will display.
+If the file does not match the conventions, or no lang pair header is found, error messages will display.
 
-Upon successful upload, the Glossary is transmitted to DeepL, its metadata stored in Moodle DB and listed in the same page below.
+Upon successful upload, the Glossary is transmitted to DeepL, its metadata stored in Moodle DB and listed on the same page below.
 
-#### 3. Name and Glossary ID
+##### 3. Name and Glossary ID
 
-The first column displays the name of both Glossaries retrieved from DeepL and those uploaded from Moodle:
+The first column displays the names of both Glossaries retrieved from DeepL and those uploaded from Moodle:
 
 - The one you gave the CSV file without the suffix.
 - The name given when created in DeepL's interface.
 
-Below the name is DeepL's glossary uuid, this what will be transmitted when calling the translations.
+Below the name is DeepL's glossary uuid, this is what will be transmitted when calling the translations.
 
-#### 4. Source > Target
+##### 4. Source > Target
 
 Displays the glossary's source and target language.
 
-#### 5. Entries
+##### 5. Entries
 
 Clicking on the +magnifier will display all the pairs defined. 
 
-#### 6. Visibility
+##### 6. Visibility
 
 Here you can set who can use the glossary.
 
@@ -304,17 +347,17 @@ Here you can set who can use the glossary.
    8. Public glossaries are accessible by any user.
    9. Only Admins can set this visibility.
 
-#### 7. Pool
+##### 7. Pool
 
 The is the DB id of the token the user that uploaded is affiliated with.
 When you set the visibility to 'Pool' all users in mapped to the same token will access the glossary.
 
-#### 8. Last time it was used
+##### 8. Last time it was used
 
 Each time a translator uses a Glossary (by selecting it in the advanced settings) a time stamp is stored in DB.
 This is usefull mainly to cleanup unused glossaries.
 
-#### 9. Actions
+##### 9. Actions
 
 For now only deletion.  
 __Deleting a glossary here will delete it from DeepL.com too__

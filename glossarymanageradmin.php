@@ -36,7 +36,7 @@ require_login();
 require_capability('local/deepler:edittranslations', $context);
 
 $PAGE->set_context($context);
-
+/** @var local_deepler\output\glossary_renderer $renderer */
 $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
 $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
 $title = get_string('glossary:manage:title', 'local_deepler');
@@ -49,20 +49,11 @@ echo $OUTPUT->header();
 $apikey = get_config('local_deepler', 'apikey');
 if ($apikey) {
     $langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
+    $langhelper->initdeepl($USER);
     // Prepare content.
-    $deeplglossaries = $langhelper->getalldeeplglossaries();
-    foreach ($deeplglossaries as $deeplglossary) {
-        if (!glossary::exists($deeplglossary->glossaryId)) {
-            glossary::create(new glossary(
-                    $deeplglossary->glossaryId,
-                    $deeplglossary->name,
-                    $deeplglossary->sourceLang,
-                    $deeplglossary->targetLang,
-                    $deeplglossary->entryCount
-            ));
-        }
-    }
-    $pluginsglossaries = glossary::getall('', '');
+
+    $pluginsglossaries = $langhelper->syncdeeplglossaries();
+
     // Handle glossary deletion status.
     if (isset($_REQUEST['deletestatus'])) {
         // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.

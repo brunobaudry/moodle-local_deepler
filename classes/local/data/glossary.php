@@ -28,6 +28,7 @@ namespace local_deepler\local\data;
 
 use coding_exception;
 use stdClass;
+use DeepL\GlossaryInfo;
 
 /**
  * Class glossary
@@ -280,6 +281,17 @@ class glossary {
     }
 
     /**
+     * Fetch all glossaries ids.
+     *
+     * @return array
+     * @throws \dml_exception
+     */
+    public static function getall_ids(): array {
+        global $DB;
+        return $DB->get_records(self::TABLE, null, '', 'id, glossaryid');
+    }
+
+    /**
      * Updates an existing glossary record.
      *
      * @param self $glossary
@@ -317,4 +329,5 @@ class glossary {
         return $DB->record_exists(self::TABLE, ['glossaryid' => $deeplid]);
 
     }
+
 }

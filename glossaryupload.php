@@ -48,18 +48,6 @@ $langhelper = new lang_helper();
 $langhelper->initdeepl($USER);
 $status = 'failed';
 $message = '';
-/**
- * @param \local_deepler\local\services\lang_helper $langhelper
- * @param array|string $glossaryname
- * @param string $source
- * @param string $target
- * @param false|string $file
- * @param object $USER
- * @param mixed $filename
- * @return array
- * @throws \DeepL\DeepLException
- * @throws \dml_exception
- */
 
 if ($uploadinglossary) {
     if (!confirm_sesskey()) {
@@ -72,37 +60,43 @@ if ($uploadinglossary) {
         // Proceed with glossary management.
         $tmpfile = $_FILES['glossaryfile']['tmp_name'];
         $filename = $_FILES['glossaryfile']['name'];
-        //$file = file_get_contents($tmpfile);
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         $parser = new spreadsheetglossaryparser();
-        if (!$parser->parse_to_csv($ext)) {
+        if (!spreadsheetglossaryparser::is_supported($ext)) {
             $status = 'filetypeunsupported';
             $message = $ext;
-            // ... handle/return early as appropriate ...
+            // Handle return early as appropriate!
         } else {
 
             try {
                 // Parse file name conventions.
                 $filenameext = explode('.', $filename);
-                $ext = strtolower(end($filenameext));
                 $namearray = explode('_', reset($filenameext));
                 $langpair = explode('-', array_pop($namearray));
                 $glossaryname = str_replace(' ', '_', implode('_', $namearray));
                 $source = $langpair[0];
                 $target = $langpair[1];
-                $usehedarelangs = true;
                 $headerlangs = [];
+                $sourceok = $targetok = false;
                 if (isset($source) && isset($target)) {
-                    $usehedarelangs = false;
+                    // First check of the file convention found lang pair.
+                    $sourceok = $langhelper->islangsupported($source);
+                    $targetok = $langhelper->islangsupported($target);
                 }
+                // If not using convention or source target not supported.
+                $usehedarelangs = !isset($source) || !isset($target) || !($sourceok && $targetok);
                 $csvcontent = $parser->parse_to_csv($tmpfile, $ext, $usehedarelangs, $headerlangs);
                 if ($usehedarelangs) {
-                    $source = $langpair[0];
-                    $target = $langpair[1];
+                    // Get the headers.
+                    $source = $headerlangs['source'];
+                    $target = $headerlangs['target'];
+                    // Set the name to the whole name without extention.
+                    $glossaryname = $filenameext[0];
+                } else {
+                    // Set the name stripping the suffix and without extention.
+                    $glossaryname = str_replace(' ', '_', implode('_', $namearray));
                 }
                 if (isset($source) && isset($target)) {
-                    $status = 'filetypeunsupported';
-                } else {
                     $sourceok = $langhelper->islangsupported($source);
                     $targetok = $langhelper->islangsupported($target);
                     if (!$sourceok) {
@@ -142,6 +136,8 @@ if ($uploadinglossary) {
 
                         }
                     }
+                } else {
+                    $status = 'langpair:notresolved';
                 }
 
             } catch (DeepLException $e) {
