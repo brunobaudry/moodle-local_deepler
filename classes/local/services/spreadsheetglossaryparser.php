@@ -133,6 +133,9 @@ final class spreadsheetglossaryparser {
 
     /**
      * Check if the extension is supported.
+     *
+     * @param string $ext
+     * @return bool
      */
     public static function is_supported(string $ext): bool {
         $ext = strtolower(ltrim($ext, '.'));
@@ -140,7 +143,7 @@ final class spreadsheetglossaryparser {
     }
 
     /**
-     * Create reader.
+     * Create a reader.
      *
      * @param string $ext
      * @return \PhpOffice\PhpSpreadsheet\Reader\IReader

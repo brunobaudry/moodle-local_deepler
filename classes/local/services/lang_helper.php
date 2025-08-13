@@ -735,6 +735,7 @@ class lang_helper {
      * Delete user's glossary.
      *
      * @param int $glossarydbid
+     * @param bool $dbonly
      * @return bool|null
      * @throws \DeepL\DeepLException
      * @throws \dml_exception

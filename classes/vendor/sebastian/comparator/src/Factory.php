@@ -9,29 +9,32 @@
  */
 namespace SebastianBergmann\Comparator;
 
-use const PHP_VERSION;
 use function array_unshift;
-use function extension_loaded;
-use function version_compare;
 
 /**
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for sebastian/comparator
+ * Factory for comparators which compare values for equality.
  */
-final class Factory
+class Factory
 {
-    private static ?Factory $instance = null;
+    /**
+     * @var Factory
+     */
+    private static $instance;
 
     /**
-     * @var array<non-negative-int, Comparator>
+     * @var Comparator[]
      */
-    private array $customComparators = [];
+    private $customComparators = [];
 
     /**
-     * @var list<Comparator>
+     * @var Comparator[]
      */
-    private array $defaultComparators = [];
+    private $defaultComparators = [];
 
-    public static function getInstance(): self
+    /**
+     * @return Factory
+     */
+    public static function getInstance()
     {
         if (self::$instance === null) {
             self::$instance = new self; // @codeCoverageIgnore
@@ -40,12 +43,23 @@ final class Factory
         return self::$instance;
     }
 
+    /**
+     * Constructs a new factory.
+     */
     public function __construct()
     {
         $this->registerDefaultComparators();
     }
 
-    public function getComparatorFor(mixed $expected, mixed $actual): Comparator
+    /**
+     * Returns the correct comparator for comparing two values.
+     *
+     * @param mixed $expected The first value to compare
+     * @param mixed $actual   The second value to compare
+     *
+     * @return Comparator
+     */
+    public function getComparatorFor($expected, $actual)
     {
         foreach ($this->customComparators as $comparator) {
             if ($comparator->accepts($expected, $actual)) {
@@ -59,9 +73,7 @@ final class Factory
             }
         }
 
-        // @codeCoverageIgnoreStart
         throw new RuntimeException('No suitable Comparator implementation found');
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -71,8 +83,10 @@ final class Factory
      * returns TRUE for the compared values. It has higher priority than the
      * existing comparators, meaning that its accept() method will be invoked
      * before those of the other comparators.
+     *
+     * @param Comparator $comparator The comparator to be registered
      */
-    public function register(Comparator $comparator): void
+    public function register(Comparator $comparator)/*: void*/
     {
         array_unshift($this->customComparators, $comparator);
 
@@ -83,8 +97,10 @@ final class Factory
      * Unregisters a comparator.
      *
      * This comparator will no longer be considered by getComparatorFor().
+     *
+     * @param Comparator $comparator The comparator to be unregistered
      */
-    public function unregister(Comparator $comparator): void
+    public function unregister(Comparator $comparator)/*: void*/
     {
         foreach ($this->customComparators as $key => $_comparator) {
             if ($comparator === $_comparator) {
@@ -93,25 +109,21 @@ final class Factory
         }
     }
 
-    public function reset(): void
+    /**
+     * Unregisters all non-default comparators.
+     */
+    public function reset()/*: void*/
     {
         $this->customComparators = [];
     }
 
     private function registerDefaultComparators(): void
     {
-        $this->registerDefaultComparator(new ClosureComparator);
         $this->registerDefaultComparator(new MockObjectComparator);
         $this->registerDefaultComparator(new DateTimeComparator);
         $this->registerDefaultComparator(new DOMNodeComparator);
         $this->registerDefaultComparator(new SplObjectStorageComparator);
         $this->registerDefaultComparator(new ExceptionComparator);
-        $this->registerDefaultComparator(new EnumerationComparator);
-
-        if (extension_loaded('bcmath') && version_compare(PHP_VERSION, '8.4.0', '>=')) {
-            $this->registerDefaultComparator(new NumberComparator);
-        }
-
         $this->registerDefaultComparator(new ObjectComparator);
         $this->registerDefaultComparator(new ResourceComparator);
         $this->registerDefaultComparator(new ArrayComparator);

@@ -15,11 +15,12 @@ use function array_reverse;
 use function array_slice;
 use function count;
 use function in_array;
+use function max;
 
 final class MemoryEfficientLongestCommonSubsequenceCalculator implements LongestCommonSubsequenceCalculator
 {
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function calculate(array $from, array $to): array
     {
@@ -60,7 +61,7 @@ final class MemoryEfficientLongestCommonSubsequenceCalculator implements Longest
 
         return array_merge(
             $this->calculate($fromStart, $toStart),
-            $this->calculate($fromEnd, $toEnd),
+            $this->calculate($fromEnd, $toEnd)
         );
     }
 
@@ -77,11 +78,7 @@ final class MemoryEfficientLongestCommonSubsequenceCalculator implements Longest
                 if ($from[$i] === $to[$j]) {
                     $current[$j + 1] = $prev[$j] + 1;
                 } else {
-                    /**
-                     * @noinspection PhpConditionCanBeReplacedWithMinMaxCallInspection
-                     *
-                     * We do not use max() here to avoid the function call overhead
-                     */
+                    // don't use max() to avoid function call overhead
                     if ($current[$j] > $prev[$j + 1]) {
                         $current[$j + 1] = $current[$j];
                     } else {
