@@ -38,7 +38,9 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
      */
     public function test_convert_xlsx_to_csv(): void {
         $this->resetAfterTest(true);
-
+        if ($this->is_below_four_tree()) {
+            return;
+        }
         // Build an XLSX in temp.
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -58,6 +60,20 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
         $this->assertStringContainsString("Hello,Bonjour", $csv);
 
         @unlink($tmp);
+    }
+
+    /**
+     * Check if Moodle is prior to 4.3.
+     *
+     * @return boolean
+     */
+    protected function is_below_four_tree(): bool {
+        global $CFG;
+        if (version_compare($CFG->version, '2023100900', '<')) {
+            $this->markTestSkipped('This test is only for Moodle 4.0.3 and above.');
+            return true;
+        }
+        return false;
     }
 
 }

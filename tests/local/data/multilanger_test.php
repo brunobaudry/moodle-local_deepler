@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data;
+
 use advanced_testcase;
 use coding_exception;
 use lang_string;
