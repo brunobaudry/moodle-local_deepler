@@ -72,19 +72,4 @@ class behat_local_deepler extends behat_base {
             throw new Exception("Environment variable '{$name}' is not set.");
         }
     }
-
-    /**
-     * Helper static to load the env before launching tests.
-     *
-     * @return void
-     */
-    #[BeforeSuite]
-    public static function load_env() {
-        if (self::$loaded) {
-            return;
-        }
-        require_once(__DIR__ . '/env_loader.php');
-        $loaded = env_loader::load(__DIR__ . '/../../.env');
-        self::$loaded = true;
-    }
 }
