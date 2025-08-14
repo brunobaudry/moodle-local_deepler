@@ -128,33 +128,20 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
-      - name: Setup test environment
+      - name: Setup Chrome
         run: |
-          # Start Chrome in background
-          google-chrome --headless --disable-gpu --remote-debugging-port=9222 &
-          # Start PHP server
-          php -S localhost:8000 &
-          # Wait for services to be ready
-          for i in {1..30}; do
-            if curl -s http://localhost:8000/ > /dev/null && curl -s http://localhost:9222/json/version > /dev/null; then
-              echo "Services are ready!"
-              break
-            fi
-            echo "Waiting for services... ($i/30)"
-            sleep 1
-          done
-
+          # Start Chrome with more conservative options
+          google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage &
+          sleep 5  # Give Chrome time to start properly
       - name: Behat features
-        uses: nick-invision/retry@v2
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-          CHROME_HEADLESS: "1"
           BEHAT_INCREASE_TIMELIMIT: "10"
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: moodle-plugin-ci behat --profile chrome --tags='@local_deepler' || (cat $MOODLEDATA/behat/behat_server.log && false)
+          BEHAT_RETRIES: "3"
+        run: |
+          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --rerun || (cat $MOODLEDATA/behat/behat_server.log && false)
+
 
   testPG:
     runs-on: ubuntu-latest
@@ -279,12 +266,16 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
+      - name: Setup Chrome
+        run: |
+          # Start Chrome with more conservative options
+          google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage &
+          sleep 5  # Give Chrome time to start properly
       - name: Behat features
-        uses: nick-invision/retry@v2
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: moodle-plugin-ci behat --profile chrome --tags='@local_deepler'
+          BEHAT_INCREASE_TIMELIMIT: "10"
+          BEHAT_RETRIES: "3"
+        run: |
+          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --rerun || (cat $MOODLEDATA/behat/behat_server.log && false)
