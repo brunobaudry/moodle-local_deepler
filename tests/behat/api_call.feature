@@ -1,4 +1,4 @@
-@local @local_deepler @javascript @deepl_api
+@local @local_deepler @javascript @deepl_api @envtest
 Feature: Test external API call with dynamic token
   Scenario: Make an authenticated API call to Deepl
     Given I set the DeepL api token to "{{DEEPL_API_TOKEN}}"
