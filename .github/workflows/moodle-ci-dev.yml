@@ -1,4 +1,4 @@
-name: Moodle Plugin CI DEV or DEBUG
+name: Moodle Plugin CI DEV
 on:
   push:
     branches: [ dev ]
