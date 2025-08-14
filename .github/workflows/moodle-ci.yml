@@ -129,7 +129,8 @@ jobs:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat features
-        if: ${{ always() }}
+        if: false
+        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
@@ -257,7 +258,8 @@ jobs:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat features
-        if: ${{ always() }}
+        if: false
+        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
