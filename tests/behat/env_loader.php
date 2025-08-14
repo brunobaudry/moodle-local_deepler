@@ -26,19 +26,20 @@
  * Class env_loader
  * Loads environment variables from a .env file.
  *
- * @package local_myplugin
+ * @package local_deepler
  */
 class env_loader {
     /**
-     * Load environment variables from a .env file.
+     * Load environment variables from an .env file.
      * If file not found will fail gracefully.
      *
      * @param string $path Path to the .env file.
+     * @return bool
      */
-    public static function load($path): void {
+    public static function load(string $path): bool {
         if (!file_exists($path)) {
             echo "WARNING: .env $path does not exist.\n";
-            return;
+            return false;
         }
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
@@ -48,5 +49,6 @@ class env_loader {
             }
             putenv(trim($line));
         }
+        return true;
     }
 }

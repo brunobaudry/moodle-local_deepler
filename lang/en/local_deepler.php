@@ -74,7 +74,7 @@ $string['glossary:delete:invalidsesskey:body'] = 'Failed to delete the glossary:
 $string['glossary:delete:invalidsesskey:title'] = 'Invalid session key';
 $string['glossary:delete:success:body'] = '{$a} has been removed!';
 $string['glossary:delete:success:title'] = 'Deletion successful';
-$string['glossary:helpmodal:title'] = 'Simple 2 columns csv file';
+$string['glossary:upload:helpmodal:title'] = 'Simple 2 columns csv file';
 $string['glossary:id'] = 'Glossary id';
 $string['glossary:id_placeholder'] = 'Glossary id should you have one...';
 $string['glossary:lastused'] = 'Last time it was used';
@@ -100,30 +100,7 @@ $string['glossary:upload:deeplissue:body'] = 'Could not upload the glossary beca
 $string['glossary:upload:deeplissue:title'] = 'DeepL issue';
 $string['glossary:upload:failed:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:failed:title'] = 'Upload error';
-
-$string['glossary:upload:file'] = "#### Rules
-
-Bidirectional glossaries are not allowed yet.
-
-The spreadsheet must contain a single sheet with 2 columns and either (1):
-
-- Valid 2-letter code column headers (expl EN and JA) in upper or lowercase letters.
-- Valid file name following the conventions below.
-
-(1)_The file naming has priority.
-So if you want to use the header way and add the lang pairs in the file name,
- make sure the name has no suffixe like \_SOURCE-TARGET, avoid using a '\_' folowed by a '-'.
- Do something like GLOSSARYNAME-SOURCE-TARGET.EXTENSION for example._
-
-##### File naming conventions:
-
-2.  Rename the GLOSSARYNAME\_SOURCE-TARGET.EXTENSION
-4.  Name it meaningfully but not too long (for a nice display in tables).
-5.  No header in the csv file.
-3.  SOURCE and TARGET in the file name must be 2 character language code.
-
-";
-$string['glossary:upload:file:expla'] = "##### FR > ES (file naming conventions)
+$string['glossary:upload:helpmodal:col1'] = "##### FR > ES (file naming conventions)
 
 **File: 'litérature\_fr-es.csv**'
 
@@ -143,7 +120,7 @@ hermosa   , belle
 exquisito , delicieux
 
 mouse     , mouse  ";
-$string['glossary:upload:file:explb'] = "##### File naming convention examples :
+$string['glossary:upload:helpmodal:col2'] = "##### File naming convention examples :
 
 **Expl OK**
 
@@ -157,6 +134,28 @@ $string['glossary:upload:file:explb'] = "##### File naming convention examples :
 *   Tech\_jargon\_**FRA-SPA**.ods (3 letter codes, but will not search for the header row)
 *   myHistoricalGlo_fr-es.**txt** (unsupported extension)
 ";
+$string['glossary:upload:helpmodal:intro'] = "#### Rules
+
+Bidirectional (v3) glossaries are not yet allowed.
+
+The spreadsheet must contain a single sheet with two columns and either (1):
+
+- Valid 2-letter code column headers (expl EN and JA) in upper or lowercase letters.
+- Valid file name following the conventions below.
+
+##### File naming conventions:
+
+1.  Rename the GLOSSARYNAME\_SOURCE-TARGET.EXTENSION
+2.  Name it meaningfully but not too long (for a nice display in tables).
+3.  No header in the csv file.
+4.  SOURCE and TARGET in the file name must be 2 character language code.
+
+(1)_The file naming has precedence over headers.
+So if you want to use the header way but add the lang pairs in the file name,
+ make sure the name has no suffixe like \_SOURCE-TARGET, avoid using a '\_' folowed by a '-'.
+ Do something like GLOSSARYNAME-SOURCE-TARGET.EXTENSION for example._
+";
+$string['glossary:upload:helpmodal:title'] = 'Upload a simple Source|Target 2 columns spreadsheet';
 $string['glossary:upload:file:supported'] = 'Supported file types: CSV, TSV, XLSX, XLS, ODS';
 $string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: no file found';
 $string['glossary:upload:fileerror:title'] = 'File error';

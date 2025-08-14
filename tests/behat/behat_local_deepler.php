@@ -31,6 +31,8 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
  */
 class behat_local_deepler extends behat_base {
+    /** @var bool */
+    private static bool $loaded = false; // Flag to prevent reload.
 
     /**
      * Behat helper for css selector.
@@ -38,7 +40,7 @@ class behat_local_deepler extends behat_base {
      * @When I scroll to the element with css selector :cssselector
      * @param string $cssselector
      */
-    public function i_scroll_to_element_with_css($cssselector): void {
+    public function i_scroll_to_element_with_css(string $cssselector): void {
         $session = $this->getSession();
         $driver = $session->getDriver();
         $element = $session->getPage()->find('css', $cssselector);
@@ -78,19 +80,11 @@ class behat_local_deepler extends behat_base {
      */
     #[BeforeSuite]
     public static function load_env() {
+        if (self::$loaded) {
+            return;
+        }
         require_once(__DIR__ . '/env_loader.php');
-        env_loader::load(__DIR__ . '/../../.env');
-        echo "Loaded .env: DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
+        $loaded = env_loader::load(__DIR__ . '/../../.env');
+        self::$loaded = true;
     }
-
-    /**
-     * Test
-     *
-     * @return void
-     */
-    #[BeforeScenario]
-    public static function test() {
-        echo 'DEEPLER SUITE';
-    }
-
 }
