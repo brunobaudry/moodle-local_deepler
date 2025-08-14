@@ -31,8 +31,6 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
  */
 class behat_local_deepler extends behat_base {
-    /** @var bool */
-    private static bool $loaded = false; // Flag to prevent reload.
 
     /**
      * Behat helper for css selector.
@@ -45,9 +43,9 @@ class behat_local_deepler extends behat_base {
         $driver = $session->getDriver();
 
         // More robust retry logic with exponential backoff.
-        $maxAttempts = 5;
+        $maxattempts = 5;
         $attempt = 0;
-        $waitTime = 1;
+        $waittime = 1;
 
         do {
             try {
@@ -61,15 +59,15 @@ class behat_local_deepler extends behat_base {
                 }
             } catch (Exception $e) {
                 // Log the error but continue retrying.
-                error_log("Attempt $attempt failed: " . $e->getMessage());
+                debugging("Attempt $attempt failed: " . $e->getMessage());
             }
 
-            sleep($waitTime);
-            $waitTime *= 2; // Exponential backoff.
+            sleep($waittime);
+            $waittime *= 2; // Exponential backoff.
             $attempt++;
-        } while ($attempt < $maxAttempts);
+        } while ($attempt < $maxattempts);
 
-        throw new Exception("Element with CSS selector '$cssselector' not found or not visible after $maxAttempts attempts");
+        throw new Exception("Element with CSS selector '$cssselector' not found or not visible after $maxattempts attempts");
     }
 
 }
