@@ -138,9 +138,8 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
           BEHAT_INCREASE_TIMELIMIT: "10"
-          BEHAT_RETRIES: "3"
         run: |
-          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat behat/behat_server.log && false)
+          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat $HOME/moodledata/behat/behat_server.log && false)
 
 
   testPG:
@@ -276,6 +275,5 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
           BEHAT_INCREASE_TIMELIMIT: "10"
-          BEHAT_RETRIES: "3"
         run: |
-          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat behat/behat_server.log && false)
+          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat $HOME/moodledata/behat/behat_server.log && false)
