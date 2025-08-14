@@ -74,7 +74,6 @@ $string['glossary:delete:invalidsesskey:body'] = 'Failed to delete the glossary:
 $string['glossary:delete:invalidsesskey:title'] = 'Invalid session key';
 $string['glossary:delete:success:body'] = '{$a} has been removed!';
 $string['glossary:delete:success:title'] = 'Deletion successful';
-$string['glossary:upload:helpmodal:title'] = 'Simple 2 columns csv file';
 $string['glossary:id'] = 'Glossary id';
 $string['glossary:id_placeholder'] = 'Glossary id should you have one...';
 $string['glossary:lastused'] = 'Last time it was used';
@@ -100,6 +99,11 @@ $string['glossary:upload:deeplissue:body'] = 'Could not upload the glossary beca
 $string['glossary:upload:deeplissue:title'] = 'DeepL issue';
 $string['glossary:upload:failed:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:failed:title'] = 'Upload error';
+$string['glossary:upload:file:supported'] = 'Supported file types: CSV, TSV, XLSX, XLS, ODS';
+$string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: no file found';
+$string['glossary:upload:fileerror:title'] = 'File error';
+$string['glossary:upload:filetypeunsupported:body'] = 'Unsupported file type';
+$string['glossary:upload:filetypeunsupported:title'] = '${a} is not valid. Please upload CSV, TSV, XLSX, XLS, or ODS.';
 $string['glossary:upload:helpmodal:col1'] = "##### FR > ES (file naming conventions)
 
 **File: 'litérature\_fr-es.csv**'
@@ -156,11 +160,6 @@ So if you want to use the header way but add the lang pairs in the file name,
  Do something like GLOSSARYNAME-SOURCE-TARGET.EXTENSION for example._
 ";
 $string['glossary:upload:helpmodal:title'] = 'Upload a simple Source|Target 2 columns spreadsheet';
-$string['glossary:upload:file:supported'] = 'Supported file types: CSV, TSV, XLSX, XLS, ODS';
-$string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: no file found';
-$string['glossary:upload:fileerror:title'] = 'File error';
-$string['glossary:upload:filetypeunsupported:body'] = 'Unsupported file type';
-$string['glossary:upload:filetypeunsupported:title'] = '${a} is not valid. Please upload CSV, TSV, XLSX, XLS, or ODS.';
 $string['glossary:upload:invalidsesskey:body'] = 'Failed to upload the glossary because: {$a}';
 $string['glossary:upload:invalidsesskey:title'] = 'Invalid session key';
 $string['glossary:upload:langpair:notresolved:body'] = 'Neither in the file title, nor in the headers.';
