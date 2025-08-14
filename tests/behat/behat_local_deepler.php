@@ -49,27 +49,4 @@ class behat_local_deepler extends behat_base {
         }
         $driver->executeScript("document.querySelector('$cssselector').scrollIntoView(true);");
     }
-
-    /**
-     * Used mainly debug and check if token was loaded.
-     *
-     * @Then I dump the DEEPL_API_TOKEN
-     */
-    public function i_dump_the_deepl_api_token(): void {
-        echo "DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
-    }
-
-    /**
-     * Then the environment variable 'NAME' should be set.
-     *
-     * @param string $name
-     * @Then /^the environment variable '([^']+)' should be set$/
-     */
-    public function the_environment_variable_should_be_set(string $name): void {
-        $value = getenv($name);
-        if ($value === false || $value === '') {
-            // Use a plain exception to fail the step.
-            throw new Exception("Environment variable '{$name}' is not set.");
-        }
-    }
 }
