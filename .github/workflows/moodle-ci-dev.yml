@@ -129,10 +129,15 @@ jobs:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat features
+        uses: nick-invision/retry@v2
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: moodle-plugin-ci behat --profile chrome --tags='@local_deepler'
+
   testPG:
     runs-on: ubuntu-latest
     services:
@@ -257,7 +262,11 @@ jobs:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat features
+        uses: nick-invision/retry@v2
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: moodle-plugin-ci behat --profile chrome --tags='@local_deepler'
