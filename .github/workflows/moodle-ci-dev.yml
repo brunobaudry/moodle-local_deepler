@@ -140,7 +140,7 @@ jobs:
           BEHAT_INCREASE_TIMELIMIT: "10"
           BEHAT_RETRIES: "3"
         run: |
-          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --rerun || (cat $MOODLEDATA/behat/behat_server.log && false)
+          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat behat/behat_server.log && false)
 
 
   testPG:
@@ -278,4 +278,4 @@ jobs:
           BEHAT_INCREASE_TIMELIMIT: "10"
           BEHAT_RETRIES: "3"
         run: |
-          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --rerun || (cat $MOODLEDATA/behat/behat_server.log && false)
+          moodle-plugin-ci behat --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat behat/behat_server.log && false)
