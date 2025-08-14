@@ -43,25 +43,33 @@ class behat_local_deepler extends behat_base {
     public function i_scroll_to_element_with_css(string $cssselector): void {
         $session = $this->getSession();
         $driver = $session->getDriver();
-        // Add retry logic.
-        $timeout = time() + 10; // Ten second timeout.
-        $element = null;
 
-        while (time() < $timeout) {
+        // More robust retry logic with exponential backoff.
+        $maxAttempts = 5;
+        $attempt = 0;
+        $waitTime = 1;
+
+        do {
             try {
                 $element = $session->getPage()->find('css', $cssselector);
-                if ($element !== null) {
-                    break;
+                if ($element !== null && $element->isVisible()) {
+                    $driver->executeScript(
+                            "arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});",
+                            [$element]
+                    );
+                    return;
                 }
             } catch (Exception $e) {
-                // Wait and retry.
-                sleep(1);
+                // Log the error but continue retrying.
+                error_log("Attempt $attempt failed: " . $e->getMessage());
             }
-        }
-        if (null === $element) {
-            throw new Exception("Element with CSS selector '$cssselector' not found after 10 seconds");
-        }
 
-        $driver->executeScript("document.querySelector('$cssselector').scrollIntoView(true);");
+            sleep($waitTime);
+            $waitTime *= 2; // Exponential backoff.
+            $attempt++;
+        } while ($attempt < $maxAttempts);
+
+        throw new Exception("Element with CSS selector '$cssselector' not found or not visible after $maxAttempts attempts");
     }
+
 }
