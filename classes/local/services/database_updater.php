@@ -38,13 +38,25 @@ class database_updater {
         global $DB;
 
         $dataobject = ['id' => $data['id'], $data['field'] => $data['text']];
-        $DB->update_record($data['table'], (object) $dataobject);
+        try {
+            $DB->update_record($data['table'], (object) $dataobject);
+            $timemodified = time();
+            $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
 
-        $timemodified = time();
-        $DB->update_record('local_deepler', ['id' => $data['tid'], 't_lastmodified' => $timemodified]);
+            $response['t_lastmodified'] = $timemodified; // Translation last modified time.
+            $response['text'] = $data['text'];
+        } catch (dml_exception $e) {
+            $errortoolong = get_string('errortoolong', 'local_deepler');
+            $textlength = strlen($data['text']);
+            $columns = $DB->get_columns($data['table']);
+            $maxlength = $columns[$data['field']]->max_length;
+            if ($textlength > $maxlength) {
+                $response['error'] = "$textlength max=$maxlength $errortoolong";
+            } else {
+                $response['error'] = $e->getMessage();
+            }
+        }
 
-        $response['t_lastmodified'] = $timemodified; // Translation last modified time.
-        $response['text'] = $data['text'];
     }
 
     /**

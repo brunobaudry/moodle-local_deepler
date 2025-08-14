@@ -166,9 +166,34 @@ define([], () => {
        return atob(cook);
     };
     /**
+     * Limit the size of a String.
+     *
+     * @param {string} str
+     * @param {int} maxLength
+     * @returns {*|string}
+     */
+    const smartTruncate = (str, maxLength) =>{
+        if (str.length <= maxLength || maxLength == 0) {
+ return str;
+}
+
+        const ellipsis = '…';
+        const trimmed = str.slice(0, maxLength - ellipsis.length);
+
+        // Try to cut at the last space within the limit
+        const lastSpace = trimmed.lastIndexOf(' ');
+        if (lastSpace > 0) {
+            return trimmed.slice(0, lastSpace) + ellipsis;
+        }
+
+        // If no space found, just hard cut
+        return trimmed + ellipsis;
+    };
+    /**
      * Api to be used by the other modules.
      */
     return {
+        smartTruncate: smartTruncate,
         getCookie: getCookie,
         getEncodedCookie: getEncodedCookie,
         setCookie: setCookie,

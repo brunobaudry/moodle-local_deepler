@@ -17,6 +17,7 @@
 namespace local_deepler\local\data\subs\questions;
 
 use database_manager;
+use Exception;
 use lang_string;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\editable_interface;
@@ -24,6 +25,7 @@ use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 use question_definition;
+
 
 /**
  * Base class for question types.
@@ -51,6 +53,8 @@ abstract class qbase implements translatable_interface, editable_interface, icon
     private string|lang_string $pluginname;
     /** @var int|mixed */
     protected int $cmid;
+    /** @var array
+     * protected static array $additionals;*/
 
     /**
      * Constructor.
@@ -60,6 +64,7 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      */
     public function __construct(array $params) {
         global $DB, $OUTPUT;
+
         $this->question = $params['question'];
         $this->cmid = $params['cmid'];
 
@@ -78,7 +83,11 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      * @return array
      */
     private function getmain(): array {
-        $columns = field::filterdbtextfields('question');
+        $columns = [
+                'name' => [],
+                'questiontext' => [],
+                'generalfeedback' => [],
+        ];
         return field::getfieldsfromcolumns($this->question, 'question', $columns, $this->cmid);
     }
 
@@ -87,19 +96,13 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      *
      * @return array
      */
-    private function getoptions(): array {
+    private function gethints(): array {
         $fields = [];
-        $tables = [$this->qtype . '_options', $this->qtype . '_choice'];
-        foreach ($tables as $table) {
-            if ($this->dbmanager->table_exists($table)) {
-                $fields = array_merge($fields,
-                        field::getfieldsfromcolumns($this->question, $table, field::filterdbtextfields($table), $this->cmid));
-            }
-        }
         if (count($this->question->hints)) {
             foreach ($this->question->hints as $hint) {
-                $fields = array_merge($fields, field::getfieldsfromcolumns($hint, 'question_hints',
-                        field::filterdbtextfields('question_hints'), $this->cmid));
+                $hintfield = field::getfieldsfromcolumns($hint, 'question_hints',
+                        ['hint' => []], $this->cmid);
+                $fields = array_merge($fields, $hintfield);
             }
 
         }
@@ -113,7 +116,7 @@ abstract class qbase implements translatable_interface, editable_interface, icon
      */
     public function getfields(): array {
         $fields = $this->getmain();
-        $fields = array_merge($fields, $this->getoptions());
+        $fields = array_merge($fields, $this->gethints());
         return array_merge($fields, $this->getsubs());
     }
 
@@ -154,10 +157,75 @@ abstract class qbase implements translatable_interface, editable_interface, icon
     }
 
     /**
-     * Get the childs.
+     * Find qtype's sub table fields.
      *
      * @return array
+     * @throws \dml_exception
      */
-    abstract protected function getsubs(): array;
+    protected function getadditionalsubs(): array {
+        global $DB;
+        $qtypefields = [];
+        $yamldef = [];
+        try {
+            $yamldef = field::$additionals[$this->qtype];
+            if ($yamldef === null) {
+                return $qtypefields;
+            }
+        } catch (Exception $e) {
+            return $qtypefields;
+        }
+        foreach ($yamldef as $modnamesub => $colnames) {
+            $id = $colnames['id'] ?? 'questionid'; // Normal plugin behaviour.
+            $yamlfields = $colnames['fields'] ?? [];
+            if (empty($yamlfields)) {
+                continue;
+            }
+            $fields = implode(', ', array_merge(['id'], array_keys($yamlfields)));
+            $rows = $DB->get_records("$modnamesub", [$id => $this->question->id], '', $fields);
+            foreach ($rows as $row) {
+                foreach ($yamlfields as $col => $clauses) {
+                    $content = $row->{$col} ?? '';
+                    $editable = true;
+                    if (isset($clauses)) {
+                        if (isset($clauses['exclude']) &&
+                                ($clauses['exclude'] === $content || '' === trim($content))) {
+                            continue;
+                        }
+                        if (isset($clauses['editable']) && $clauses['editable']) {
+                            $editable = $clauses['editable'];
+                        }
+                    }
+                    $format = $row->{"{$col}format"} ?? 0;
+                    if (trim($content) !== '') {
+                        $qtypefields[] = new field(
+                                $row->id,
+                                $content,
+                                $format,
+                                $col,
+                                $modnamesub,
+                                $this->cmid,
+                                $editable
+                        );
+                    }
+                }
+            }
+        }
+        return $qtypefields;
+    }
 
+    /**
+     * Preparewhereclause
+     *
+     * @param array $fields
+     * @return array
+     */
+    private function preparewhereclause(array $fields): array {
+        $where = [];
+        foreach ($fields as $field => $clauses) {
+            if ($clauses['where']) {
+                $where[$field] = $clauses['where'];
+            }
+        }
+        return $where;
+    }
 }

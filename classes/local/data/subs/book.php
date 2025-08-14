@@ -18,7 +18,6 @@ namespace local_deepler\local\data\subs;
 defined('MOODLE_INTERNAL') || die();
 
 use local_deepler\local\data\field;
-use stdClass;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/book/locallib.php');
@@ -30,22 +29,7 @@ require_once($CFG->dirroot . '/mod/book/locallib.php');
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class book {
-    /** @var array array of id=>chapter */
-    private array $chapters;
-    /** @var \stdClass book db record */
-    private stdClass $book;
-
-    /**
-     * Book wrapper constructor.
-     *
-     * @param \stdClass $book
-     */
-    public function __construct(stdClass $book) {
-        $this->book = $book;
-        $this->chapters = book_preload_chapters($book);
-    }
-
+class book extends subbase {
     /**
      * Get the fields to be translated.
      *
@@ -54,11 +38,12 @@ class book {
     public function getfields() {
         $fields = [];
         $table = 'book_chapters';
-        foreach ($this->chapters as $c) {
+        $chapters = book_preload_chapters($this->record);
+        foreach ($chapters as $c) {
             $fields[] = new field($c->id,
-                    $c->title, 0, 'title', $table, $this->book->id);
+                    $c->title, 0, 'title', $table, $this->cm->id);
             $fields[] = new field($c->id,
-                    $c->content, 1, 'content', $table, $this->book->id);
+                    $c->content, 1, 'content', $table, $this->cm->id);
         }
         return $fields;
     }

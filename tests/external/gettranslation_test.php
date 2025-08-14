@@ -82,6 +82,7 @@ final class gettranslation_test extends base_external {
 
         // Set the environment variable.
         putenv('DEEPL_APIKEY=testapikey');
+        set_config('apikey', 'testapikey', 'local_deepler');
 
         // Call the method.
         $apikey = get_translation::setdeeplapikey();

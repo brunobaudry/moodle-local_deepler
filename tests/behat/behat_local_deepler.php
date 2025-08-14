@@ -31,6 +31,8 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
  */
 class behat_local_deepler extends behat_base {
+    /** @var bool */
+    private static bool $loaded = false; // Flag to prevent reload.
 
     /**
      * Behat helper for css selector.
@@ -38,13 +40,36 @@ class behat_local_deepler extends behat_base {
      * @When I scroll to the element with css selector :cssselector
      * @param string $cssselector
      */
-    public function i_scroll_to_element_with_css($cssselector): void {
+    public function i_scroll_to_element_with_css(string $cssselector): void {
         $session = $this->getSession();
         $driver = $session->getDriver();
         $element = $session->getPage()->find('css', $cssselector);
         if (null === $element) {
-            throw new \Exception('Element not found');
+            throw new Exception('Element not found');
         }
         $driver->executeScript("document.querySelector('$cssselector').scrollIntoView(true);");
+    }
+
+    /**
+     * Used mainly debug and check if token was loaded.
+     *
+     * @Then I dump the DEEPL_API_TOKEN
+     */
+    public function i_dump_the_deepl_api_token(): void {
+        echo "DEEPL_API_TOKEN = " . getenv('DEEPL_API_TOKEN') . "\n";
+    }
+
+    /**
+     * Then the environment variable 'NAME' should be set.
+     *
+     * @param string $name
+     * @Then /^the environment variable '([^']+)' should be set$/
+     */
+    public function the_environment_variable_should_be_set(string $name): void {
+        $value = getenv($name);
+        if ($value === false || $value === '') {
+            // Use a plain exception to fail the step.
+            throw new Exception("Environment variable '{$name}' is not set.");
+        }
     }
 }

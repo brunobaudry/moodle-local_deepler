@@ -5,10 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0]
+### Added
+- Glossary management.
+  - User can upload and share own glossaries.
+  - Admin can fetch DeepL's glossaries (from your DeepL'a API account) and edit glossaries' visibilty scope.
+
+### Fixed
+- Some advanced settings were not correctly sent with translation to DeepL (like the correct Glossary_id... see ![](https://github.com/DeepLcom/deepl-php/issues/68)).
+
+## [1.8.5]
+### Deprecated
+- php 8.1 and Moodle 401 (due to dependencies of DeepL libs)
+
+### Added
+- Ready for Moodle 5 and BS5
+
+## [1.8.2]
+### Added
+- **Lesson** mod type was missing.
+- **URL** external url cannot be multilang. Removed from translatable fields but left it to help translators getting the context.
+- **Wiki** page title are now displayed but not translatable as it would break the links.
+- Added API **multiple token mapping**. An additional admin page is there for you to create a rule to map a user's Moodle user attribute (including custom profiles) to one of your 
+  DeepL api key. 
+- Added non core questions:
+  - qtype_calculatedmulti
+  - qtype_calculatedsimple
+  - qtype_ddwtos
+  - qtype_formulas
+  - qtype_fileresponse
+  - qtype_kprime
+  - qtype_mtf
+  - qtype_multichoiceset
+  - qtype_pmatch
+  - ... more to come
+- Prepared a new YAML definition so you could grab you custom mods and qtypes db field to be scanned (next release)
+
+### Fixed
+- Session modules were scanned twice.
+- Less DB calls for field discovery.
+
+## [1.7.3]
+### Added
+- Non core Kprime qtype.
+
+### Fixed
+- silly cmid jam in book and wiki parsing.
+- tiny preload, only only loads after text is retrieved from Deepl, as it would not inject translation into the loaded tiny.
+
+## [1.7.2]
+### Added
+- Breadcrumb's subs limit. (issue #73)
+
+
+## [1.7.1]
+### Fixed
+- Sections' id generated from header text for breadcrumb could break the html.
+- TinyMCE slowing down the pages on initial load. Now it will be loaded only if the user wants to modify the translation. If TinyMCE is your prefered editor the plugin will initiate the page with a simple editable div. Only should you need to modify the recieved translation from
+  DeepL, the plugin will load a basic TinyMCE for you to do so upon clicking inside the field.
+
+### Added.
+- TinyMCE load on demand.
+
 ## [1.7] 2025-05-21
 ### Fixed
 - Book chapter title wrong db field.
-### Added source text iFrame toggler.
+### Added 
+- source text iFrame toggler.
 
 ## [1.6.9.2] 2025-05-08
 ### Fixed

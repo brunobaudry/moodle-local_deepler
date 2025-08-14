@@ -89,6 +89,9 @@ class translateform extends deeplerform {
      * @return void
      */
     private function fieldrowcolumn3(string $key, field $field): void {
+        if (!$field->iseditable()) {
+            return;
+        }
         // Column 3 settings.
         $translatededitor = "<div
             class='col-5 px-0 local_deepler__translation'
@@ -196,7 +199,7 @@ class translateform extends deeplerform {
         $multilangtextarea .= DIV_CLOSE;
         // Column 2 layout.
         $this->_form->addElement('html', $sourcetextdiv);
-        if (!$isdbkey) {
+        if (!$isdbkey && $field->iseditable()) {
             $this->_form->addElement('html', $mutlilangspantag);
             $this->_form->addElement('html', $sourceselect);
         }
@@ -254,14 +257,18 @@ class translateform extends deeplerform {
             data-action='local_deepler/checkbox'
             disabled/>";
         // Open translation item.
+        $editable = $field->iseditable() ? $status : 'local_deepler/disabled';
+        if (!$field->iseditable()) {
+            $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
+        }
         $this->_form->addElement('html',
                 "<div title='$rowtitle' class='$cssclass d-flex align-items-start py-2' data-row-id='$isdbkey$key'
-                    data-status='$status'>");
+                    data-status='$editable'>");
         // Column 1 layout.
         $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
         $fieldtranslation = multilanger::findfieldstring($field);
         $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>$fieldtranslation</small><br/>");
-        if (!$isdbkey) {
+        if (!$isdbkey && $field->iseditable()) {
             $this->_form->addElement('html', $bulletstatus);
             $this->_form->addElement('html', $checkbox);
         }

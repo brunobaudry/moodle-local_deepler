@@ -43,6 +43,8 @@ final class translateform_test extends advanced_testcase {
     protected $langhelper;
     /** @var \filter_multilang2 */
     protected $mlangfilter;
+    /** @var \stdClass */
+    protected $user;
 
     /**
      * Set it up.
@@ -54,6 +56,10 @@ final class translateform_test extends advanced_testcase {
     public function setUp(): void {
         parent::setUp();
         $this->resetAfterTest();
+        $this->user = $this->getDataGenerator()->create_user([
+                'username' => 'testuser',
+                'email' => 'testuser@example.com',
+        ]);
         $this->course = $this->getDataGenerator()->create_course();
         $this->mlangfilter = $this->createMock(filter_multilang2::class);
         $this->langhelper = $this->createMock(lang_helper::class);
@@ -63,7 +69,7 @@ final class translateform_test extends advanced_testcase {
                 '<option value="en">English</option><option value="fr">Français</option>');
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
-        $this->langhelper->initdeepl();
+        $this->langhelper->initdeepl($this->user);
     }
 
     /**

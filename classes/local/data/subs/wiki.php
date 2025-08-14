@@ -20,7 +20,6 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/wiki/locallib.php');
 
 use local_deepler\local\data\field;
-use stdClass;
 
 /**
  * Subclass of wiki as it has sub wikis (subs).
@@ -29,30 +28,18 @@ use stdClass;
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class wiki {
-    /** @var \stdClass wiki db */
-    private stdClass $wiki;
-    /** @var array  wiki_subwikis */
-    private array $wikis;
-
-    /**
-     * Constructor.
-     *
-     * @param \stdClass $wiki
-     */
-    public function __construct(stdClass $wiki) {
-        $this->wiki = $wiki;
-        $this->wikis = wiki_get_subwikis($this->wiki->id);
-    }
+class wiki extends subbase {
 
     /**
      * Get fields.
      *
      * @return array
+     * @throws \moodle_exception
      */
     public function getfields(): array {
         $fields = [];
-        foreach (array_keys($this->wikis) as $wid) {
+        $wikis = wiki_get_subwikis($this->record->id);
+        foreach (array_keys($wikis) as $wid) {
             $pages = wiki_get_page_list($wid);
             $pagesorphaned = array_map(function($op) {
                 return $op->id;
@@ -60,9 +47,9 @@ class wiki {
             foreach ($pages as $p) {
                 if (!in_array($p->id, $pagesorphaned)) {
                     $fields[] = new field($p->id,
-                            $p->title, 0, 'chapter', 'wiki_pages', $this->wiki->id);
+                            $p->title, 0, 'chapter', 'wiki_pages', $this->cm->id, false);
                     $fields[] = new field($p->id,
-                            $p->cachedcontent, 1, 'cachedcontent', 'wiki_pages', $this->wiki->id);
+                            $p->cachedcontent, 1, 'cachedcontent', 'wiki_pages', $this->cm->id);
                 }
             }
         }

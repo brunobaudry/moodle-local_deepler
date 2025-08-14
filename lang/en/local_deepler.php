@@ -25,15 +25,24 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+$string['allowfallbackkey'] = 'Allow fallback key.';
+$string['allowfallbackkey_desc'] =
+        'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
 Check with your Moodle admin.';
+$string['breadcrumblength'] = 'Max length of breadcrumb\'s sub';
+$string['breadcrumblength_desc'] =
+        'Set it to limit the size of the breadcrumb\'s subs. Set it to zero should you want no limiting.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
 $string['canttranslatesame'] = 'Both languages are the same:';
 $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
         'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
+$string['cookieduration'] = 'Advanced setting storage duration';
+$string['cookieduration_desc'] =
+        'The advanced settings are saved (in a cookie) on a per course and language pair. Set duration value in days here.';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['deeplapidoctitle'] = 'DeepL\'s API settings';
 $string['deeplapiexception'] = 'DeepL\'s API returned an error';
@@ -52,8 +61,123 @@ $string['formalityless'] = 'less';
 $string['formalitymore'] = 'more';
 $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
-$string['glossaryid'] = 'Glossary id';
-$string['glossaryid_placeholder'] = 'Glossary id should you have one...';
+$string['glossary:actions'] = 'Actions';
+$string['glossary:deepl:link'] = 'DeepL API documentation';
+$string['glossary:deeplid'] = 'UUID';
+$string['glossary:delete:deeplissue:body'] = 'Could not delete the glossary: {$a}';
+$string['glossary:delete:deeplissue:title'] = 'DeepL issue';
+$string['glossary:delete:failed:body'] = 'Failed to delete the glossary: {$a}';
+$string['glossary:delete:failed:title'] = 'Deletion failed';
+$string['glossary:delete:idmissing:body'] = 'Failed to delete the glossary: {$a}';
+$string['glossary:delete:idmissing:title'] = 'Missing ID';
+$string['glossary:delete:invalidsesskey:body'] = 'Failed to delete the glossary: {$a}';
+$string['glossary:delete:invalidsesskey:title'] = 'Invalid session key';
+$string['glossary:delete:success:body'] = '{$a} has been removed!';
+$string['glossary:delete:success:title'] = 'Deletion successful';
+$string['glossary:id'] = 'Glossary id';
+$string['glossary:id_placeholder'] = 'Glossary id should you have one...';
+$string['glossary:lastused'] = 'Last time it was used';
+$string['glossary:listempty'] =
+        'There are no glossaries available with for language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
+$string['glossary:manage:title'] = 'DeepLer glossaries';
+$string['glossary:name'] = 'Name';
+$string['glossary:nbentries'] = 'Entries';
+$string['glossary:neverused'] = 'Never';
+$string['glossary:notselected'] = 'No Glossary selected';
+$string['glossary:pool'] = 'Pool';
+$string['glossary:pool:admin'] = 'Admin owned';
+$string['glossary:pool:title'] = 'Pool\'s glossaries';
+$string['glossary:private:title'] = 'Private glossaries';
+$string['glossary:public:title'] = 'Public glossaries';
+$string['glossary:select'] = 'Select a glossary';
+$string['glossary:selectplaceholder'] = 'Enter a glossary name';
+$string['glossary:sourcelang'] = 'Source';
+$string['glossary:targetlang'] = 'Target';
+$string['glossary:upload'] = 'Upload';
+$string['glossary:upload:btn'] = 'Create glossary';
+$string['glossary:upload:deeplissue:body'] = 'Could not upload the glossary because: {$a}';
+$string['glossary:upload:deeplissue:title'] = 'DeepL issue';
+$string['glossary:upload:failed:body'] = 'Failed to upload the glossary because: {$a}';
+$string['glossary:upload:failed:title'] = 'Upload error';
+$string['glossary:upload:file:supported'] = 'Supported file types: CSV, TSV, XLSX, XLS, ODS';
+$string['glossary:upload:fileerror:body'] = 'Failed to upload the glossary because: no file found';
+$string['glossary:upload:fileerror:title'] = 'File error';
+$string['glossary:upload:filetypeunsupported:body'] = 'Unsupported file type';
+$string['glossary:upload:filetypeunsupported:title'] = '${a} is not valid. Please upload CSV, TSV, XLSX, XLS, or ODS.';
+$string['glossary:upload:helpmodal:col1'] = "##### FR > ES (file naming conventions)
+
+**File: 'litérature\_fr-es.csv**'
+
+belle      , hermosa
+
+delicieux  , exquisito
+
+mouse      , mouse
+
+##### ES > FR (using headers)
+**File: 'litérature-es-fr.csv**'
+
+ES   , FR
+
+hermosa   , belle
+
+exquisito , delicieux
+
+mouse     , mouse  ";
+$string['glossary:upload:helpmodal:col2'] = "##### File naming convention examples :
+
+**Expl OK**
+
+*   私の用語集**_en-ja.xls**
+*   Tech\_jargon**\_FR-ES.CSV**
+*   myGlossary**-**en-fr.csv (ok only if it has EN FR header row)
+
+**Expl NOT OK (when not using the headers)**
+
+*   myGlossary**-**en-fr.csv (here it will search for langs in the header row)
+*   Tech\_jargon\_**FRA-SPA**.ods (3 letter codes, but will not search for the header row)
+*   myHistoricalGlo_fr-es.**txt** (unsupported extension)
+";
+$string['glossary:upload:helpmodal:intro'] = "#### Rules
+
+Bidirectional (v3) glossaries are not yet allowed.
+
+The spreadsheet must contain a single sheet with two columns and either (1):
+
+- Valid 2-letter code column headers (expl EN and JA) in upper or lowercase letters.
+- Valid file name following the conventions below.
+
+##### File naming conventions:
+
+1.  Rename the GLOSSARYNAME\_SOURCE-TARGET.EXTENSION
+2.  Name it meaningfully but not too long (for a nice display in tables).
+3.  No header in the csv file.
+4.  SOURCE and TARGET in the file name must be 2 character language code.
+
+(1)_The file naming has precedence over headers.
+So if you want to use the header way but add the lang pairs in the file name,
+ make sure the name has no suffixe like \_SOURCE-TARGET, avoid using a '\_' folowed by a '-'.
+ Do something like GLOSSARYNAME-SOURCE-TARGET.EXTENSION for example._
+";
+$string['glossary:upload:helpmodal:title'] = 'Upload a simple Source|Target 2 columns spreadsheet';
+$string['glossary:upload:invalidsesskey:body'] = 'Failed to upload the glossary because: {$a}';
+$string['glossary:upload:invalidsesskey:title'] = 'Invalid session key';
+$string['glossary:upload:langpair:notresolved:body'] = 'Neither in the file title, nor in the headers.';
+$string['glossary:upload:langpair:notresolved:title'] = 'Could ne resolve the source-target language pair';
+$string['glossary:upload:sourcenotsupported:body'] = '{$a} is not a supported source language';
+$string['glossary:upload:sourcenotsupported:title'] = 'DeepL not supported source language';
+$string['glossary:upload:success:body'] = '{$a} has been uploaded!';
+$string['glossary:upload:success:title'] = 'Upload successful';
+$string['glossary:upload:suffixerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
+$string['glossary:upload:suffixerror:title'] = 'Incorrect suffix';
+$string['glossary:upload:targetnotsupported:body'] = '{$a} is not a supported target language';
+$string['glossary:upload:targetnotsupported:title'] = 'DeepL not supported target language';
+$string['glossary:upload:unknownerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
+$string['glossary:upload:unknownerror:title'] = 'Incorrect suffix';
+$string['glossary:visibility'] = 'Visibility';
+$string['glossary:visibility:pool'] = 'Pool';
+$string['glossary:visibility:private'] = 'Private';
+$string['glossary:visibility:public'] = 'Public';
 $string['hideiframes'] = 'Render embed iframes in source text.';
 $string['hideiframesadmin'] = 'Select this if you want rendering embed iframes be the default.';
 $string['hideiframesadmin_desc'] =
@@ -64,7 +188,8 @@ $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to transl
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
-Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler\'s performances.';
+Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve DeepLer\'s performances.';
+$string['missingmainapikey'] = 'First add a default API key to use this feature';
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
@@ -85,7 +210,7 @@ $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
 $string['preserveformatting'] = 'Preserve formatting';
-$string['privacy:metadata'] = 'The Deepler plugin does not store any personal data.';
+$string['privacy:metadata'] = 'The DeepLer plugin does not store any personal data.';
 $string['rephraseinfos'] =
         'Text improvement is beta and currently supported for the following target languages: <strong>{$a}</strong>.';
 $string['rephraseoptionsinfos'] =
@@ -124,6 +249,31 @@ $string['statuswait'] = 'Not selected';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
 $string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
+$string['tokenactions'] = 'Actions';
+$string['tokenadd'] = 'Add token map';
+$string['tokenaddtoken'] = 'Add Token';
+$string['tokenadminpagedescription'] =
+        'Select a user attribute, give it a filter (you can use *,% or _ wildcards) and match that to a token.';
+$string['tokenattribute'] = 'User Attribute';
+$string['tokenchoose'] = 'Select an attribute';
+$string['tokendeletetoken'] = 'Delete Token';
+$string['tokenedittoken'] = 'Edit Token';
+$string['tokenerror_invaliduuid'] = 'Invalid token format';
+$string['tokenerror_noattribute'] = 'You must select an attribute to filter.';
+$string['tokenerror_nofilter'] = 'You must ad a value to filter.';
+$string['tokenfiltervalue'] = 'Add a filter value';
+$string['tokengobacktosettings'] = 'Manage DeepLer\'s settings';
+$string['tokengototokenmanager'] = 'Manage DeepL\'s tokens';
+$string['tokenmanager'] = 'DeepLer Token manager';
+$string['tokenmanager_desc'] =
+        'Here you can map your DeepL api keys to user\'s attributes in order to create pools of translators. This can be useful should you need to measure and control consumption for each API key.';
+$string['tokennotokens'] = 'No tokens found.';
+$string['tokensettings'] = 'API Token Settings';
+$string['tokentabletitle'] = 'Token table';
+$string['tokentoken'] = 'Token';
+$string['tokentokenmanager_addnew'] = 'Add a new token filter';
+$string['tokentokenmanager_mappings'] = 'Token table';
+$string['tokenvaluefilter'] = 'Value Filter';
 $string['toneconfident'] = 'Confident tone';
 $string['tonediplomatic'] = 'Diplomatic tone';
 $string['toneenthusiastic'] = 'Enthusiastic tone';

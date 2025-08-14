@@ -18,9 +18,15 @@ namespace local_deepler\local\data;
 
 use core_courseformat\base;
 use course_modinfo;
+use local_deepler\local\services\utils;
 use moodle_exception;
 use moodle_url;
 use stdClass;
+use Symfony\Component\Yaml\Yaml;
+
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/vendor/autoload.php');
 
 /**
  * Class course wraps a course object and provides a way to access its fields.
@@ -54,6 +60,11 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      */
     public function __construct(stdClass $course) {
         global $CFG;
+        // Load yaml config of known  field definitions.
+        if (empty(field::$additionals)) {
+            $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
+            field::$additionals = Yaml::parseFile($configfile);
+        }
         $this->sections = [];
         $this->course = get_fast_modinfo($course);
         $this->format = course_get_format($course);
@@ -92,7 +103,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     public function getfields(): array {
         $info = $this->course->get_course();
         $table = 'course';
-        $collumns = ['fullname', 'shortname', 'summary'];
+        $collumns = ['fullname' => [], 'shortname' => [], 'summary' => []];
 
         return field::getfieldsfromcolumns($info, $table, $collumns);
     }
@@ -113,7 +124,8 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @throws \core\exception\moodle_exception
      */
     private function populatesections(): void {
-        foreach ($this->course->get_section_info_all() as $sectioninfo) {
+        $sections = $this->course->get_section_info_all();
+        foreach ($sections as $sectioninfo) {
             $this->sections[$sectioninfo->section] = new section($sectioninfo, $this->format);
         }
     }

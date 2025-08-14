@@ -44,9 +44,9 @@ done
 
 # Define the Behat command
 if [ -z "$tag" ]; then
-  behat_cmd="../../vendor/bin/behat --config ../../../behat_moodle/behatrun/behat/behat.yml --tags=@local_deepler"
+  behat_cmd="../../vendor/bin/behat --config ../../../behat_moodle/behatrun/behat/behat.yml -vvv --tags=@local_deepler"
 else
-  behat_cmd="../../vendor/bin/behat --config ../../../behat_moodle/behatrun/behat/behat.yml --tags=$tag"
+  behat_cmd="../../vendor/bin/behat --config ../../../behat_moodle/behatrun/behat/behat.yml -vvv --tags=$tag"
 fi
 
 # Run the Behat command and capture the output

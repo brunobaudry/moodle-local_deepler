@@ -117,7 +117,7 @@ final class section_test extends advanced_testcase {
     /**
      * Test getmodules method.
      *
-     * @covers \local_deepler\local\data\section::getmodules
+     * @covers \local_deepler\local\data\section::populatemodules
      * @return void
      */
     public function test_getmodules(): void {
@@ -125,7 +125,7 @@ final class section_test extends advanced_testcase {
 
         $section = new section($this->sectioninfos[0], $this->courseformat);
 
-        $modules = $section->getmodules();
+        $modules = $section->populatemodules();
         $this->assertIsArray($modules);
     }
 

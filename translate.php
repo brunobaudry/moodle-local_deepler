@@ -28,6 +28,7 @@
  */
 
 // Get libs.
+use core\plugin_manager;
 use DeepL\AuthorizationException;
 use DeepL\DeepLException;
 use local_deepler\local\data\course;
@@ -40,14 +41,12 @@ use local_deepler\output\translate_page;
 
 
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/version.php');
 
 global $CFG;
 global $PAGE;
 global $DB;
 global $USER;
-
-require_once(__DIR__ . '/version.php');
-
 
 // Needed vars for processing.
 try {
@@ -85,8 +84,8 @@ echo $output->heading($mlangfilter->filter($course->fullname));
 $languagepack = new lang_helper();
 try {
     field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
-    $languagepack->initdeepl();
-    if ($languagepack->iscurrentsupported()) {
+    $initok = $languagepack->initdeepl($USER);
+    if ($initok && $languagepack->iscurrentsupported()) {
         // Set js data.
         $jsconfig = new stdClass();
         // We get the version from the version dot php file.
@@ -103,6 +102,9 @@ try {
         $jsconfig->debug = $CFG->debug;
         // Adds the language settings strings to the jsconfig.
         $jsconfig = $languagepack->prepareconfig($jsconfig);
+        // Pass the breadcrumbs subs max length to JS.
+        $jsconfig->crumbsmaxlen = get_config('local_deepler', 'breadcrumblength');
+        $jsconfig->cookieduration = get_config('local_deepler', 'cookieduration');
         // Adding page JS.
         $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
         // Create the structure.

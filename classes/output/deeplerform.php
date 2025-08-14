@@ -17,6 +17,7 @@
 namespace local_deepler\output;
 
 use core_filters\text_filter;
+use Exception;
 use filter_multilang2\text_filter as Multilang2TextFilter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\iconic_interface;
@@ -144,7 +145,7 @@ abstract class deeplerform extends moodleform {
      */
     protected function makesection(section $section): void {
         $sectionfields = $section->getfields();
-        $sectionmodules = $section->getmodules();
+        $sectionmodules = $section->get_modules();
         if (!empty($sectionmodules) || !empty($sectionfields)) {
             // Open section container for the course settings course__settings section-item.
             $visibilityclass = $this->getitemvisibilityclass($section);
@@ -284,7 +285,11 @@ abstract class deeplerform extends moodleform {
                 }
                 /** @var field $f */
                 foreach ($child->getfields() as $f) {
-                    $this->makefieldrow($f);
+                    try {
+                        $this->makefieldrow($f);
+                    } catch (Exception $e) {
+                        continue;
+                    }
                 }
                 // Close section container.
                 $this->_form->addElement('html', DIV_CLOSE);

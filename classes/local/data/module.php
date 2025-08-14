@@ -117,9 +117,7 @@ class module implements translatable_interface, editable_interface, iconic_inter
             $quiz = new $class($this->cm);
             $this->childs = $quiz->getchilds();
         } else {
-            global $DB;
-            $record = $DB->get_record($this->modname, ['id' => $this->cm->instance]);
-            $item = field::createclassfromstring($this->modname, $record);
+            $item = field::createclassfromstring($this->modname, $this->cm);
             if ($item) {
                 $this->childs = [$item];
             }
@@ -152,7 +150,6 @@ class module implements translatable_interface, editable_interface, iconic_inter
     public function getfields(): array {
         return $this->getmainfields();
     }
-
     /**
      * Get the link to edit the module.
      *

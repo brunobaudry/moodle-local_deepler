@@ -23,8 +23,11 @@
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/classes/vendor/autoload.php');
+
 /**
- * Add Translate Course to course settings menu.
+ * Add Translate Course to the course settings menu.
  *
  * @param mixed $navigation
  * @param mixed $course
@@ -51,6 +54,36 @@ function local_deepler_extend_navigation_course(mixed $navigation, mixed $course
     // Do not show in menu if no capability.
     $navigation->add_node($translatecontent);
     $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
+}
+
+/**
+ * Add entry in user prefs.
+ *
+ * @param mixed $navigation
+ * @param mixed $user
+ * @param mixed $usercontext
+ * @param mixed $course
+ * @param mixed $coursecontext
+ * @return array
+ * @throws \coding_exception
+ */
+function local_deepler_extend_navigation_user_settings($navigation, $user, $usercontext, $course, $coursecontext) {
+    $prefs = [];
+    global $PAGE;
+    // Only inject if user is on the preferences page.
+    $onpreferencepage = $PAGE->url->compare(new moodle_url('/user/preferences.php'), URL_MATCH_BASE);
+    if (!$onpreferencepage) {
+        return null;
+    }
+    if (has_capability('local/deepler:edittranslations', $usercontext)) {
+        $url = new moodle_url('/local/deepler/glossarymanageruser.php');
+        $node = navigation_node::create(get_string('glossary:manage:title', 'local_deepler'), $url,
+                navigation_node::TYPE_SETTING);
+        $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
+        $usernode->add_node($node);
+    }
+
+    return $prefs;
 }
 
 /**
@@ -94,4 +127,15 @@ function local_deepler_pluginfile(object $course, object $cm, \core\context $con
 
     send_stored_file($file, 86400, 0, $forcedownload, $options);
     return true;
+}
+
+/**
+ * Fetchall tokens mappings
+ *
+ * @return array
+ * @throws \dml_exception
+ */
+function get_all_tokens() {
+    global $DB;
+    return $DB->get_records('local_deepler_tokens');
 }

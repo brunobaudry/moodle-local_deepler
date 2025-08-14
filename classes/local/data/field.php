@@ -19,6 +19,7 @@ namespace local_deepler\local\data;
 use cm_info;
 use coding_exception;
 use local_deepler\local\services\utils;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class filed
@@ -38,15 +39,19 @@ class field {
     /**
      * @var int settings for the minimum text field size.
      */
-    static public int $mintxtfieldsize = 254;
+    public static int $mintxtfieldsize = 254;
     /**
      * @var array customs columns to skip.
      */
-    static private array $usercolstoskip = [];
+    private static array $usercolstoskip = [];
     /**
      * @var array filtered table fields.
      */
-    static private array $filteredtablefields = [];
+    public static array $filteredtablefields = [];
+    /**
+     * @var mixed yaml additional db field config.
+     */
+    public static mixed $additionals;
     /** @var string */
     private string $text;
     /** @var string */
@@ -66,6 +71,8 @@ class field {
     private string $displaytext;
     /** @var status */
     private status $status;
+    /** @var bool */
+    private bool $editable;
 
     /**
      * Create a new field to use as atomic source for translations.
@@ -76,7 +83,8 @@ class field {
      * @param string $field
      * @param string $table
      * @param int $cmid
-     * @throws \moodle_exception
+     * @param bool $editable
+     * @throws \dml_exception
      */
     public function __construct(
             int $id,
@@ -84,9 +92,15 @@ class field {
             int $format,
             string $field,
             string $table,
-            int $cmid = 0
+            int $cmid = 0,
+            bool $editable = true,
     ) {
+        if (empty(self::$additionals)) {
+            $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
+            self::$additionals = Yaml::parseFile($configfile);
+        }
         $this->id = $id;
+        $this->editable = $editable;
         $this->field = $field;
         $this->table = $table;
         $this->format = $format;
@@ -99,6 +113,15 @@ class field {
             self::$countsimplefields++;
         }
         $this->init_db();
+    }
+
+    /**
+     * Is false use it to display only (cannot translate)
+     *
+     * @return bool
+     */
+    public function iseditable(): bool {
+        return $this->editable;
     }
 
     /**
@@ -283,11 +306,21 @@ class field {
      */
     public static function getfieldsfromcolumns(mixed $info, string $table, array $collumns, int $cmid = 0): array {
         $infos = [];
-        foreach ($collumns as $collumn) {
+        foreach ($collumns as $collumn => $clauses) {
             $fieldtextformat = "{$collumn}format";
+            $editable = true;
             if (!isset($info->{$collumn})) {
                 continue;
             }
+            if ($clauses) {
+                if ($clauses['exclude'] && (trim($info->{$collumn}) === trim($clauses['exclude']))) {
+                    continue;
+                }
+                if (isset($clauses['editable'])) {
+                    $editable = $clauses['editable'];
+                }
+            }
+
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
                 $infos[] = new field(
                         $info->id,
@@ -295,7 +328,8 @@ class field {
                         $info->{$fieldtextformat} ?? 0,
                         $collumn,
                         $table,
-                        $cmid
+                        $cmid,
+                        $editable
                 );
             }
         }
@@ -312,8 +346,24 @@ class field {
         global $DB;
         $mod = $cminfo->modname;
         // Get all the fields as CMINFO does not carry them all.
+        $filters = [];
+        if (isset(self::$additionals['mod_' . $mod])
+                && isset(self::$additionals['mod_' . $mod][$mod])
+                && isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
+            $filters = self::$additionals['mod_' . $mod][$mod]['fields'];
+        }
         $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);
-        return self::getfieldsfromcolumns($activitydbrecord, $mod, self::filterdbtextfields($cminfo->modname), $cminfo->id);
+        $infocols = self::filterdbtextfields($cminfo->modname);
+        $filteredfileds = [];
+        foreach ($infocols as $infocol) {
+            if (isset($filters[$infocol])) {
+                $filteredfileds[$infocol] = $filters[$infocol];
+            } else {
+                $filteredfileds[$infocol] = [];
+            }
+        }
+        $infofields = self::getfieldsfromcolumns($activitydbrecord, $mod, $filteredfileds, $cminfo->id);
+        return $infofields;
     }
 
     /**

@@ -30,6 +30,6 @@ class qtype_basic extends qbase {
      * @return array
      */
     protected function getsubs(): array {
-        return [];
+        return $this->getadditionalsubs();
     }
 }

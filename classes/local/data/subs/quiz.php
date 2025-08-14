@@ -104,19 +104,7 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
                     'question' => $question,
                     'cmid' => $this->quiz->id,
             ];
-            $name = $question->qtype->plugin_name();
-            $class = $this->findclass($name);
-
-            $item = field::createclassfromstring($class, $params);
-            if ($item === null) {
-                // Case 'qtype_description'.
-                // Case 'qtype_randomsamatch'.
-                // Case 'qtype_essay'.
-                // Case 'qtype_multianswer'.
-                // Other cases.
-                $item = field::createclassfromstring('questions\qtype_basic', $params);
-            }
-            $childs[] = $item;
+            $childs[] = field::createclassfromstring('questions\qtype_basic', $params);
         }
         return $childs;
     }
@@ -173,35 +161,5 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         foreach ($questions as $question) {
             $this->questions[] = question_bank::load_question($question);
         }
-    }
-
-    /**
-     * Guess the class name
-     *
-     * @param string $name
-     * @return string
-     */
-    private function findclass(string $name): string {
-        $class = "questions\\{$name}";
-
-        switch ($name) {
-            case 'qtype_shortanswer':
-            case 'qtype_calculatedmulti':
-            case 'qtype_multichoice':
-                $class = 'questions\qtype_multi';
-                break;
-            case 'qtype_numerical':
-            case 'qtype_calculated':
-            case 'qtype_calculatedsimple':
-                $class = 'questions\qtype_calculated';
-                break;
-            case 'qtype_ddwtos':
-                $class = 'questions\qtype_gapselect'; // Same as qtype_gapselect obviously.
-                break;
-            case 'qtype_ddmarker':
-                $class = 'questions\qtype_ddimageortext'; // Same as qtype_ddimageortext obviously.
-                break;
-        }
-        return $class;
     }
 }

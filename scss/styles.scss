@@ -67,14 +67,20 @@ $secondary: $gray-400 !default;
         position: relative;
         top: -4px;
     }
-
+    .caret-icons .fa-caret-down {
+        display: none;
+    }
+    .caret-icons .fa-caret-right {
+        display: inline;
+    }
+    a[aria-expanded="true"] .fa-caret-down {
+        display: inline;
+    }
     a[aria-expanded="true"] .fa-caret-right {
         display: none;
     }
 
-    a[aria-expanded="false"] .fa-caret-down {
-        display: none;
-    }
+
 
     .local_deepler__source-text img,
     .local_deepler__translation img {
@@ -110,7 +116,7 @@ $secondary: $gray-400 !default;
     }
 
     .local_deepler__selectorbox {
-        margin-top: -1.4rem;
+        margin-top: 0rem;
     }
 
     div[data-table^='question'] {
@@ -158,7 +164,6 @@ $secondary: $gray-400 !default;
         iframe {
             max-width: 100%; /* responsive iframes */
         }
-
         [data-action="local_deepler/editor"],
         [data-fieldtype="editor"] {
             width: 100%; /* editor tweaks */

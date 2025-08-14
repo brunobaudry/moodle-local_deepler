@@ -21,12 +21,88 @@
  */
 define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils, Events) => {
     const TR_DB_SUCCESS = 'onDbUpdateSuccess';
+    const GLOSSARY_ENTRIES_SUCCESS = 'onGlossaryEntriesSuccess';
+    const GLOSSARY_ENTRIES_FAILED = 'onGlossaryEntriesFailed';
+    const GLOSSARY_DB_SUCCESS = 'onDbGlossaryUpdateSuccess';
     const TR_DB_FAILED = 'onDbUpdateFailed';
+    const GLOSSARY_DB_FAILED = 'onDbGlossaryUpdateFailed';
+    const GLOSSARY_DB_ALL_FAILED = 'onDbGlossaryUpdateAllFailed';
     const DEEPL_SUCCESS = 'onDeeplTrSuccess';
     const DEEPL_RF_SUCCESS = 'onDeeplRfSuccess';
     const DEEPL_FAILED = 'onDeeplTrFailed';
     const DEEPL_RF_FAILED = 'onDeeplRfFailed';
     let APP_VERSION = '';
+    /**
+     * Service to update used glossary timestamp.
+     *
+     * @param {object} glossaries
+     */
+    const updateGlossariesUsage = (glossaries)=>{
+        Ajax.call([
+            {
+                methodname: "local_deepler_update_glossary",
+                args: {'glossaryids': glossaries},
+                done: (response)=>{
+
+                    response.forEach((r)=>{
+                        if (r.sattus === 'error') {
+                            Events.emit(GLOSSARY_DB_FAILED, r);
+                        } else {
+                            Events.emit(GLOSSARY_DB_SUCCESS, r);
+                        }
+                    });
+                },
+                fail: (jqXHR, status, error) => {
+                    Log.error(`api/updateGlossariesUsage/fail::jqXHR`);
+                    Log.error(jqXHR);
+                    Events.emit(GLOSSARY_DB_ALL_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
+                }
+            }
+        ]);
+    };
+    /**
+     * Service to update used glossary visibility.
+     *
+     * @param {string} glossaryId
+     * @param {int} visibility
+     */
+    const updateGlossariesVisibility = (glossaryId, visibility)=>{
+        Ajax.call([
+            {
+                methodname: "local_deepler_update_glossary_visibility",
+                args: {'glossaryid': glossaryId, 'shared': visibility},
+                done: (response)=>{
+                    Events.emit(GLOSSARY_DB_SUCCESS, response);
+                },
+                fail: (jqXHR, status, error) => {
+                    Log.error(`api/updateGlossariesVisibility/fail::jqXHR`);
+                    Log.error(jqXHR);
+                    Events.emit(GLOSSARY_DB_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
+                }
+            }
+        ]);
+    };
+    /**
+     * Service to update used glossary visibility.
+     *
+     * @param {string} glossaryId
+     */
+    const getGlossariesEntries = (glossaryId)=>{
+        Ajax.call([
+            {
+                methodname: "local_deepler_get_glossary_entries",
+                args: {'glossaryid': glossaryId},
+                done: (response)=>{
+                    Events.emit(GLOSSARY_ENTRIES_SUCCESS, response);
+                },
+                fail: (jqXHR, status, error) => {
+                    Log.error(`api/getGlossariesEntries/fail::jqXHR`);
+                    Log.error(jqXHR);
+                    Events.emit(GLOSSARY_ENTRIES_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
+                }
+            }
+        ]);
+    };
     /**
      *
      * @param {object} data
@@ -54,7 +130,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                 fail: (jqXHR, status, error) => {
                     Log.error(`api/updateTranslationsInDb/fail::jqXHR`);
                     Log.error(jqXHR);
-                     Events.emit(TR_DB_FAILED, error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status);
+                     Events.emit(TR_DB_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
                 }
             }]
         );
@@ -77,7 +153,7 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             fail: (jqXHR, status, error) => {
                 Log.debug(`${endPoint} api/translate/fail::jqXHR`);
                 Log.debug(jqXHR);
-                Events.emit(failedEvent, status ?? '', error ?? jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode);
+                Events.emit(failedEvent, jqXHR.debuginfo ?? jqXHR.message ?? error ?? jqXHR.errorcode ?? '');
             }
         }]);
     };
@@ -114,12 +190,20 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
      */
     return {
         APP_VERSION: APP_VERSION,
+        GLOSSARY_ENTRIES_SUCCESS: GLOSSARY_ENTRIES_SUCCESS,
+        GLOSSARY_ENTRIES_FAILED: GLOSSARY_ENTRIES_FAILED,
+        GLOSSARY_DB_SUCCESS: GLOSSARY_DB_SUCCESS,
+        GLOSSARY_DB_FAILED: GLOSSARY_DB_FAILED,
+        GLOSSARY_DB_ALL_FAILED: GLOSSARY_DB_ALL_FAILED,
         TR_DB_SUCCESS: TR_DB_SUCCESS,
         TR_DB_FAILED: TR_DB_FAILED,
         DEEPL_SUCCESS: DEEPL_SUCCESS,
         DEEPL_RF_SUCCESS: DEEPL_RF_SUCCESS,
         DEEPL_FAILED: DEEPL_FAILED,
         DEEPL_RF_FAILED: DEEPL_RF_FAILED,
+        getGlossariesEntries: getGlossariesEntries,
+        updateGlossariesUsage: updateGlossariesUsage,
+        updateGlossariesVisibility: updateGlossariesVisibility,
         updateTranslationsInDb: updateTranslationsInDb,
         translate: translate,
         rephrase: rephrase

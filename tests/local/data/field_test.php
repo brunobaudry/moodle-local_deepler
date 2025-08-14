@@ -161,7 +161,7 @@ final class field_test extends advanced_testcase {
                 'empty' => '',
         ];
 
-        $columns = ['name', 'description', 'empty'];
+        $columns = ['name' => [], 'description' => [], 'empty' => []];
         $result = field::getfieldsfromcolumns($info, 'testtable', $columns);
 
         $this->assertCount(2, $result);

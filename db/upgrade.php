@@ -30,6 +30,7 @@
  *
  * @param integer $oldversion
  * @return boolean
+ * @throws \ddl_exception
  */
 function xmldb_local_deepler_upgrade($oldversion) {
     global $DB;
@@ -87,6 +88,74 @@ function xmldb_local_deepler_upgrade($oldversion) {
         $dbman->add_index($table, $langindex);
         // Coursetranslator savepoint reached.
         upgrade_plugin_savepoint(true, 2025043004, 'local', 'deepler');
+    }
+    if ($oldversion < 2025070202) {
+
+        // Define table local_deepler_tokens to be created.
+        $table = new xmldb_table('local_deepler_tokens');
+
+        // Add fields.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('attribute', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('valuefilter', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('token', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+
+        // Add keys.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Add indexes.
+        $table->add_index('token_attribute_index', XMLDB_INDEX_NOTUNIQUE, ['attribute']);
+        $table->add_index('token_valuefilter_index', XMLDB_INDEX_NOTUNIQUE, ['valuefilter']);
+
+        // Conditionally launch create table.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Upgrade savepoint.
+        upgrade_plugin_savepoint(true, 2025070202, 'local', 'deepler');
+    }
+    if ($oldversion < 2025080800) {
+
+        // Define table local_deepler_glossaries.
+        $table = new xmldb_table('local_deepler_glossaries');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('glossaryid', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('sourcelang', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('targetlang', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('entrycount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('shared', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('tokenid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('lastused', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Create table if it doesn't exist.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table local_deepler_user_glossary.
+        $table2 = new xmldb_table('local_deepler_user_glossary');
+
+        $table2->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table2->add_field('userid', XMLDB_TYPE_INTEGER, '10', true, XMLDB_NOTNULL, null, null);
+        $table2->add_field('glossaryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table2->add_field('isactive', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+
+        $table2->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table2->add_key('course_glossary_idx', XMLDB_KEY_UNIQUE, ['userid', 'glossaryid']);
+
+        // Create table if it doesn't exist.
+        if (!$dbman->table_exists($table2)) {
+            $dbman->create_table($table2);
+        }
+
+        // Upgrade savepoint.
+        upgrade_plugin_savepoint(true, 2025080800, 'local', 'deepler');
     }
     return true;
 }

@@ -15,80 +15,127 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Local Course Translator Settings Page.
+ * Local Deepler plugin settings.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @copyright  2022 Kaleb Heitzman
+ * @copyright  2024 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @see        https://docs.moodle.org/dev/Admin_settings
  */
+
+use local_deepler\lib\admin_setting_deeplapikey_configtext;
 
 defined('MOODLE_INTERNAL') || die();
 
-if (has_capability('moodle/site:config', context_system::instance())) {
+// Plugin version display.
+require_once(__DIR__ . '/version.php');
+if (!isset($hassiteconfig)) {
+    $hassiteconfig = false;
+}
+
+if ($hassiteconfig) {
     global $ADMIN;
-    // Create new settings page.
+
+    // Main settings page.
     $settings = new admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
 
-    // DeepL apikey.
-    $settings->add(
-            new admin_setting_configtext(
-                    'local_deepler/apikey',
-                    get_string('apikeytitle', 'local_deepler'),
-                    get_string('apikeytitle_desc', 'local_deepler'),
-                    '',
-                    PARAM_RAW_TRIMMED,
-                    40
-            )
-    );
-    // Do set if escaping hidding iframes is default.
-    $settings->add(
-            new admin_setting_configcheckbox(
-                    'local_deepler/hideiframesadmin',
-                    get_string('hideiframesadmin', 'local_deepler'),
-                    get_string('hideiframesadmin_desc', 'local_deepler'),
-                    false
-            )
-    );
-    // Do set if escaping LaTeX tag is default.
-    $settings->add(
-            new admin_setting_configcheckbox(
-                    'local_deepler/latexescapeadmin',
-                    get_string('latexescapeadmin', 'local_deepler'),
-                    get_string('latexescapeadmin_desc', 'local_deepler'),
-                    true
-            )
-    );
-    // Do set if escaping PRE tag is default.
-    $settings->add(
-            new admin_setting_configcheckbox(
-                    'local_deepler/preescapeadmin',
-                    get_string('preescapeadmin', 'local_deepler'),
-                    get_string('preescapeadmin_desc', 'local_deepler'),
-                    1
-            )
-    );
-    // Min size of scanned fields.
-    $settings->add(
-            new admin_setting_configtext(
-                    'local_deepler/scannedfieldsize',
-                    get_string('scannedfieldsize', 'local_deepler'),
-                    get_string('scannedfieldsize_desc', 'local_deepler'),
-                    254,
-                    PARAM_INT,
-                    4
-            )
-    );
-    // Plugin's version.
-    require_once(__DIR__ . '/version.php');
-    $settings->add(
-            new admin_setting_description(
-                    'local_deepler/pluginversion',
-                    get_string('pluginversion', 'local_deepler'),
-                    $plugin->release ?? 'version'
-            )
-    );
-    // Add to admin menu.
+    // Key setting.
+    $settings->add(new admin_setting_deeplapikey_configtext(
+            'local_deepler/apikey',
+            get_string('apikeytitle', 'local_deepler'),
+            get_string('apikeytitle_desc', 'local_deepler'),
+            '',
+            PARAM_RAW_TRIMMED,
+            40
+    ));
+
+    // Allow non found token to fall back to the common API key (might be smart to use a free key for that).
+    $settings->add(new admin_setting_configcheckbox(
+            'local_deepler/allowfallbackkey',
+            get_string('allowfallbackkey', 'local_deepler'),
+            get_string('allowfallbackkey_desc', 'local_deepler'),
+            true
+    ));
+
+    // Hide iframes setting.
+    $settings->add(new admin_setting_configcheckbox(
+            'local_deepler/hideiframesadmin',
+            get_string('hideiframesadmin', 'local_deepler'),
+            get_string('hideiframesadmin_desc', 'local_deepler'),
+            false
+    ));
+
+    // Escape LaTeX setting.
+    $settings->add(new admin_setting_configcheckbox(
+            'local_deepler/latexescapeadmin',
+            get_string('latexescapeadmin', 'local_deepler'),
+            get_string('latexescapeadmin_desc', 'local_deepler'),
+            true
+    ));
+
+    // Escape <pre> tags setting.
+    $settings->add(new admin_setting_configcheckbox(
+            'local_deepler/preescapeadmin',
+            get_string('preescapeadmin', 'local_deepler'),
+            get_string('preescapeadmin_desc', 'local_deepler'),
+            true
+    ));
+
+    // Minimum scanned field size.
+    $settings->add(new admin_setting_configtext(
+            'local_deepler/scannedfieldsize',
+            get_string('scannedfieldsize', 'local_deepler'),
+            get_string('scannedfieldsize_desc', 'local_deepler'),
+            254,
+            PARAM_INT,
+            4
+    ));
+
+    // Breadcrumb max length.
+    $settings->add(new admin_setting_configtext(
+            'local_deepler/breadcrumblength',
+            get_string('breadcrumblength', 'local_deepler'),
+            get_string('breadcrumblength_desc', 'local_deepler'),
+            30,
+            PARAM_INT,
+            4
+    ));
+    // Cookie duration.
+    $settings->add(new admin_setting_configtext(
+            'local_deepler/cookieduration',
+            get_string('cookieduration', 'local_deepler'),
+            get_string('cookieduration_desc', 'local_deepler'),
+            703,
+            PARAM_INT,
+            4
+    ));
+
+    $settings->add(new admin_setting_description(
+            'local_deepler/pluginversion',
+            get_string('pluginversion', 'local_deepler'),
+            $plugin->release ?? 'version'
+    ));
+    if (get_config('local_deepler', 'apikey')) {
+        // Token manager.
+        $settings->add(new admin_setting_description(
+                'local_deepler/tokenmanagerlink',
+                get_string('tokenmanager', 'local_deepler'),
+                html_writer::link(
+                        new moodle_url('/local/deepler/tokenmanager.php'),
+                        get_string('tokengototokenmanager', 'local_deepler'),
+                        ['target' => '_self']
+                )
+        ));
+        $settings->add(new admin_setting_description(
+                'local_deepler/glossaryadminlink',
+                get_string('glossary:manage:title', 'local_deepler'),
+                html_writer::link(
+                        new moodle_url('/local/deepler/glossarymanageradmin.php'),
+                        get_string('glossary:manage:title', 'local_deepler'),
+                        ['target' => '_self']
+                )
+        ));
+    }
+    // Add the settings page to the admin menu.
     $ADMIN->add('localplugins', $settings);
 }

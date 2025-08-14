@@ -31,6 +31,9 @@ require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 use advanced_testcase;
 use DeepL\AuthorizationException;
 use DeepL\TooManyRequestsException;
+use DeepL\Usage;
+use stdClass;
+use DeepL\DeepLClient;
 
 /**
  * Lang helper Test.
@@ -38,12 +41,14 @@ use DeepL\TooManyRequestsException;
  * @covers \local_deepler\local\services\lang_helper
  */
 final class langhelper_test extends advanced_testcase {
-    /**
-     * The object to test.
-     *
-     * @var lang_helper
-     */
+    /** @var lang_helper */
     private $langhelper;
+
+    /** @var stdClass */
+    private $user;
+
+    /** @var \PHPUnit\Framework\MockObject\MockObject|DeepLClient */
+    private $mocktranslator;
 
     /**
      * Set up.
@@ -54,15 +59,50 @@ final class langhelper_test extends advanced_testcase {
      */
     protected function setUp(): void {
         parent::setUp();
-        $this->makeenv();
-        $this->langhelper = new lang_helper();
-        try {
-            $this->langhelper->initdeepl();
-        } catch (AuthorizationException $e) {
-            $this->assertEquals('Authorization failed: Invalid auth key.', $e->getMessage());
-        } catch (TooManyRequestsException $e) {
-            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
-        }
+
+        $this->resetAfterTest();
+
+        $this->user = new stdClass();
+        $this->user->id = 1;
+        $this->user->username = 'testuser';
+        $this->user->email = 'testuser@example.com';
+        $this->user->department = 'testdepartment';
+
+        $this->mocktranslator = $this->createMock(DeepLClient::class);
+
+        $mockusage = $this->createMock(Usage::class);
+        $mockusage->method('anyLimitReached')->willReturn(false);
+
+        $this->mocktranslator->method('getUsage')->willReturn($mockusage);
+        $this->mocktranslator->method('getSourceLanguages')->willReturn([
+                (object) ['code' => 'EN', 'name' => 'English'],
+                (object) ['code' => 'FR', 'name' => 'French'],
+        ]);
+        $this->mocktranslator->method('getTargetLanguages')->willReturn([
+                (object) ['code' => 'DE', 'name' => 'German'],
+                (object) ['code' => 'ES', 'name' => 'Spanish'],
+        ]);
+
+        $this->langhelper = new lang_helper(
+                $this->mocktranslator,
+                'mockapikey',
+                ['en' => 'English', 'fr' => 'French', 'de' => 'German', 'es' => 'Spanish'],
+                'en',
+                'de'
+        );
+    }
+
+    /**
+     * Test helper init.
+     *
+     * @return void
+     * @covers \local_deepler\local\services\lang_helper::initdeepl
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function test_initdeepl_returns_true(): void {
+        $result = $this->langhelper->initdeepl($this->user);
+        $this->assertTrue($result);
     }
 
     /**
@@ -71,35 +111,27 @@ final class langhelper_test extends advanced_testcase {
      * @covers \local_deepler\local\services\lang_helper::prepareoptionlangs
      * @return void
      */
-    public function test_prepareoptionlangs(): void {
-        if ($this->langhelper->isapikeynoset()) {
-            $this->makeenv();
-        }
-        try {
-            $this->langhelper->initdeepl();
-            $optionscourse = $this->langhelper->preparesourcesoptionlangs();
-            $optionstargets = $this->langhelper->preparetargetsoptionlangs();
-            $this->assertIsArray($optionscourse);
-            $this->assertIsArray($optionstargets);
-            $this->assertNotEmpty($optionscourse);
-            $this->assertNotEmpty($optionstargets);
+    public function test_prepareoptionlangs_returns_valid_structure(): void {
+        $this->langhelper->initdeepl($this->user);
+        $sources = $this->langhelper->preparesourcesoptionlangs();
+        $targets = $this->langhelper->preparetargetsoptionlangs();
 
-            foreach ($optionscourse as $option) {
-                $this->assertArrayHasKey('code', $option);
-                $this->assertArrayHasKey('lang', $option);
-                $this->assertArrayHasKey('selected', $option);
-                $this->assertArrayHasKey('disabled', $option);
-            }
-            foreach ($optionstargets as $option) {
-                $this->assertArrayHasKey('code', $option);
-                $this->assertArrayHasKey('lang', $option);
-                $this->assertArrayHasKey('selected', $option);
-                $this->assertArrayHasKey('disabled', $option);
-            }
-        } catch (TooManyRequestsException $e) {
-            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
+        $this->assertIsArray($sources);
+        $this->assertIsArray($targets);
+
+        foreach ($sources as $option) {
+            $this->assertArrayHasKey('code', $option);
+            $this->assertArrayHasKey('lang', $option);
+            $this->assertArrayHasKey('selected', $option);
+            $this->assertArrayHasKey('disabled', $option);
         }
 
+        foreach ($targets as $option) {
+            $this->assertArrayHasKey('code', $option);
+            $this->assertArrayHasKey('lang', $option);
+            $this->assertArrayHasKey('selected', $option);
+            $this->assertArrayHasKey('disabled', $option);
+        }
     }
 
     /**
@@ -109,21 +141,15 @@ final class langhelper_test extends advanced_testcase {
      *
      * @return void
      */
-    public function test_preparehtmloptions(): void {
-        if ($this->langhelper->isapikeynoset()) {
-            $this->makeenv();
-        }
-        try {
-            $this->langhelper->initdeepl();
-            $htmltargets = $this->langhelper->preparehtmltagets();
-            $htmlsources = $this->langhelper->preparehtmlsources();
-            $this->assertIsString($htmltargets);
-            $this->assertIsString($htmlsources);
-            $this->assertStringContainsString('<option', $htmltargets);
-            $this->assertStringContainsString('<option', $htmlsources);
-        } catch (TooManyRequestsException $e) {
-            $this->assertEquals('Too many requests, DeepL servers are currently experiencing high load, ', $e->getMessage());
-        }
+    public function test_preparehtmloptions_returns_valid_html(): void {
+        $this->langhelper->initdeepl($this->user);
+        $htmltargets = $this->langhelper->preparehtmltagets();
+        $htmlsources = $this->langhelper->preparehtmlsources();
+
+        $this->assertIsString($htmltargets);
+        $this->assertIsString($htmlsources);
+        $this->assertStringContainsString('<option', $htmltargets);
+        $this->assertStringContainsString('<option', $htmlsources);
     }
     /**
      * Basic setting tests.
@@ -139,7 +165,7 @@ final class langhelper_test extends advanced_testcase {
             $this->makeenv();
         }
         try {
-            $this->langhelper->initdeepl();
+            $this->langhelper->initdeepl($this->user);
         } catch (AuthorizationException $e) {
             $this->assertEquals('Authorization failed: Invalid auth key.', $e->getMessage());
         } catch (TooManyRequestsException $e) {

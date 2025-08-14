@@ -17,13 +17,35 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   @template local_deepler/translate_page
 
   Provides translation form header and controls
-{#@todo correct doc with data attributes#}
   Classes required for JS:
-  * local_deepler__localeswitcher
-  * local_deepler__select-all
-  * local_deepler__show-updated
-  * local_deepler__show-needsupdate
-  * local_deepler__autotranslate-btn
+  * DeepL's
+  - context: '[data-id="local_deepler/context"]',
+  - nonSplittingTags: '[data-id="local_deepler/non_splitting_tags"]',
+  - splittingTags: '[data-id="local_deepler/splitting_tags"]',
+  - ignoreTags: '[data-id="local_deepler/ignore_tags"]',
+  - preserveFormatting: '[data-id="local_deepler/preserve_formatting"]',
+  - formality: '[name="local_deepler/formality"]',
+  - glossaryId: '[data-id="local_deepler/glossary_id"]',
+  - tagHandling: '[data-id="local_deepler/tag_handling"]',
+  - outlineDetection: '[data-id="local_deepler/outline_detection"]',
+  - splitSentences: '[name="local_deepler/split_sentences"]',
+  - modelType: '[name="local_deepler/model_type"]',
+  - toneorstyle: '[name="local_deepler/toneorstyle"]',
+  * UI
+  - #local_deepler__footer
+  - #local_deepler__settings
+  - sourceselect: '[data-action="local_deepler/sourceselect"]',
+  - selectAllCk: '[data-action="local_deepler/select-all"]',
+  - saveAll: '[data-action="local_deepler/saveall-btn"]',
+  - autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+  - targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+  - targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
+  - showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
+  - showUpdated: '[data-action="local_deepler/show-updated"]',
+  - showHidden: '[data-action="local_deepler/show-hidden"]',
+  - escapeLatex: '[data-id="local_deepler/latexeascape"]',
+  - escapePre: '[data-id="local_deepler/preescape"]',
+  - #local_deepler-translate-header-usage
 
   Data attributes required for JS:
   * none
@@ -34,6 +56,24 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * wordcount
   * charcount
   * charcountspaces
+  * langstrings
+  * glossayselector
+  * canimprove
+  * supportedlangs
+  * rephrasesymbol
+  * deeplsource
+  * target_lang
+  * notarget
+  * target_langs_htmloptions
+  * targetlangs
+  * showhiddenforstudents
+  * escapelatexbydefault
+  * escapeprebydefault
+  * hideiframesdefault
+  * hidecompatible
+  * compatiblelangs
+  * mform
+  * version
 
   Example context (json):
   {
@@ -53,16 +93,24 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     "charcountspaces": 25
   }
 }}
+
 <div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
     <!-- This is a hidden container for the strings that are used in the JS -->
 </div>
 <div class="text-right">
     <a id="local_deepler__settings"
-       role="button" class="link link-underline" data-toggle="collapse"
-       data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{#str}}seesetting,local_deepler{{/str}}
+       class="link link-underline"
+       data-toggle="collapse" data-bs-toggle="collapse"
+       href="#collapseExample"
+       role="button"
+       aria-expanded="false"
+       aria-controls="collapseExample">
+        <i class="fa fa-caret-right collapse show"></i>
+        <i class="fa fa-caret-down collapse"></i>
+        {{#str}}seesetting,local_deepler{{/str}}
     </a>
 </div>
+
 <div class="container-fluid collapse card bg-primary-light" id="collapseExample">
     <div class="text-right">
         <h4>{{#str}}deeplapidoctitle,local_deepler{{/str}}</h4>
@@ -136,9 +184,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             </div>
         </div>
         <div class="col-5" id="local_deepler__glossarycontext">
-            <label class="" for="local_deepler__glossary">{{#str}}glossaryid,local_deepler{{/str}}</label>
-            <input type="text" class="w-50 form-control mb-2 mr-sm-2" id="local_deepler__glossary" placeholder="{{#str}}glossaryid_placeholder,local_deepler{{/str}}"
-                   data-id="local_deepler/glossary_id">
+            {{{glossayselector}}}
             <label for="local_deepler__context">{{#str}}contextdeepl,local_deepler{{/str}}</label>
             <textarea class="form-control" id="local_deepler__context" data-id="local_deepler/context" rows="3"
                       placeholder="{{#str}}contextdeepl_placeholder,local_deepler{{/str}}"></textarea>
@@ -255,14 +301,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div class="container-fluid">
     <div class="row py-4" id="local_deepler__sourcetarget">
         <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h4></div>
-        <!--div class="col-2">
-            <select class="form-control w-25" id="source_lang"
-                    data-action="local_deepler/source-switcher">
-                {{#langs}}
-                    <option value="{{ code }}" {{selected}} {{disabled}}>{{ lang }}</option>
-                {{/langs}}
-            </select>
-        </div-->
         <div class="col-1 h4 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
         <div class="col-3"><h4 id="local_deepler__targetlang">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h4></div>
@@ -286,29 +324,30 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     </div>
 </div>
 <div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">
-    <div class="row pl-5 pt-2 pb-0" id="local_deepler-translate-header-filter">
-        <span>{{#str}}filters,local_deepler{{/str}}:</span>
-        <div class="custom-control custom-switch ml-3">
+    <div class="d-flex flex-wrap align-items-center pl-5 pt-2 pb-0" id="local_deepler-translate-header-filter">
+        <span class="mr-3">{{#str}}filters,local_deepler{{/str}}:</span>
+
+        <div class="custom-control custom-switch mr-3">
             <input id="show-updated" class="custom-control-input local_deepler__show-updated" type="checkbox"
                    data-action="local_deepler/show-updated">
             <label class="custom-control-label" for="show-updated">{{#str}}uptodate,local_deepler{{/str}}</label>
         </div>
-        <div class="custom-control custom-switch ml-3">
+
+        <div class="custom-control custom-switch mr-3">
             <input id="show-needsupdate" checked="checked" type="checkbox"
                    class="custom-control-input local_deepler__show-needsupdate"
-                   data-action="local_deepler/show-needsupdate"
-            >
+                   data-action="local_deepler/show-needsupdate">
             <label class="custom-control-label" for="show-needsupdate">{{#str}}needsupdate,local_deepler{{/str}}</label>
         </div>
-        <div class="custom-control custom-switch ml-3">
+
+        <div class="custom-control custom-switch mr-3">
             <input id="show-hidden" checked="checked" type="checkbox"
                    class="custom-control-input local_deepler__show-hidden"
-                   data-action="local_deepler/show-hidden"
-            >
+                   data-action="local_deepler/show-hidden">
             <label class="custom-control-label" for="show-hidden">{{showhiddenforstudents}}</label>
         </div>
-
     </div>
+
     <div class="row pb-2 pt-3 align-items-center">
         <div class="col-1 px-5">
             <div class="form-check" id="local_deepler-translate-header-select-all">
@@ -326,11 +365,13 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </label>
             </div>
         </div>
+
         <div class="col-6 text-center">
-                <span id="local_deepler-translate-header-usage" class="ml-2 p-1 alert">
-                    {{#str}}wordcountsentence,local_deepler{{/str}}
+            <span id="local_deepler-translate-header-usage" class="ml-2 p-1 alert">
+                {{#str}}wordcountsentence,local_deepler{{/str}}
             </span>
         </div>
+
         <div class="col-2 px-0">
             <div class="text-center">
                 <button
@@ -339,11 +380,12 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         type="button"
                         class="float-right mr-2 btn btn-primary local_deepler__autotranslate-btn"
                         data-action="local_deepler/autotranslate-btn"
-                        disabled
-                >{{#str}}translatebutton,local_deepler,{{target_lang}} {{/str}}
+                        disabled>
+                    {{#str}}translatebutton,local_deepler,{{target_lang}} {{/str}}
                 </button>
             </div>
         </div>
+
         <div class="col-2 pr-2 text-right">
             <button
                     id="local_deepler-translate-header-saveallbutton"
@@ -351,43 +393,40 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     type="button"
                     class="btn btn-success local_deepler__saveall-btn"
                     data-action="local_deepler/saveall-btn"
-                    disabled
-            ><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>
+                    disabled>
+                <i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
+            </button>
         </div>
+
         <div class="col-1">
             {{^hidecompatible}}
-            <select style='display:inherit' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}' class="local_deepler__tartgetcompatible form-control"
-                    data-action="local_deepler/tartgetcompatible-switcher">
-                {{#compatiblelangs}}
-                    <option value="{{.}}">{{.}}</option>
-                {{/compatiblelangs}}
-            </select>
+                <select style='display:inherit' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
+                        class="local_deepler__tartgetcompatible form-control"
+                        data-action="local_deepler/tartgetcompatible-switcher">
+                    {{#compatiblelangs}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/compatiblelangs}}
+                </select>
             {{/hidecompatible}}
-{{#hidecompatible}}
-            <select style='display:none' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}' class="local_deepler__tartgetcompatible form-control"
-                    data-action="local_deepler/tartgetcompatible-switcher">
-                {{#compatiblelangs}}
-                    <option value="{{.}}">{{.}}</option>
-                {{/compatiblelangs}}
-            </select>
 
-    {{/hidecompatible}}
+            {{#hidecompatible}}
+                <select style='display:none' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
+                        class="local_deepler__tartgetcompatible form-control"
+                        data-action="local_deepler/tartgetcompatible-switcher">
+                    {{#compatiblelangs}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/compatiblelangs}}
+                </select>
+            {{/hidecompatible}}
         </div>
     </div>
+
     <div id='local_deepler-scrollspy' class="row p-1 pl-3 bg-primary-light"></div>
 </div>
+
 <div class="course-section">
     {{{mform}}}
 </div>
 <div id="local_deepler__footer" class="text-center">
     <small id="local_deepler__version">{{version}}</small>
 </div>
-<!--<button
-        id="local_deepler-translate-header-saveallbutton"
-        title="{{#str}}saveallexplain,local_deepler{{/str}}"
-        type="button"
-        class="btn btn-success local_deepler__saveall-btn"
-        data-action="local_deepler/saveall-btn"
-        disabled
-        hidden
-><i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}</button>-->

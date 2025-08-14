@@ -39,6 +39,15 @@ class section implements translatable_interface, editable_interface, visibility_
 
     /** @var module[] array of module */
     private array $modules;
+
+    /**
+     * Getter for modules.
+     *
+     * @return array|\local_deepler\local\data\module[]
+     */
+    public function get_modules(): array {
+        return $this->modules;
+    }
     /**
      * @var \moodle_url
      */
@@ -57,7 +66,7 @@ class section implements translatable_interface, editable_interface, visibility_
         $this->link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $this->si->id]);
         $this->courseformat = $courseformat;
         $this->modules = [];
-        $this->getmodules();
+        $this->populatemodules();
     }
 
     /**
@@ -92,7 +101,7 @@ class section implements translatable_interface, editable_interface, visibility_
      */
     public function getfields(): array {
         $table = 'course_sections';
-        $collumns = ['name', 'summary'];
+        $collumns = ['name' => [], 'summary' => []];
         return field::getfieldsfromcolumns($this->si, $table, $collumns);
     }
 
@@ -102,7 +111,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return array
      * @throws \coding_exception
      */
-    public function getmodules(): array {
+    public function populatemodules(): array {
         if (method_exists($this->si, 'get_sequence_cm_infos')) {
             // Moodle 405.
             $sectioncms = $this->si->get_sequence_cm_infos();

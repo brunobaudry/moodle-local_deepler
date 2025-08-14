@@ -119,4 +119,9 @@ export default {
     config: {
         langstrings: '#local_deepler__stringscontainer',
     },
+    glossary: {
+        visibilityDropdown: '[data-id="local_deepler/glossary_visibility"]',
+        entriesviewer: '[data-id="local_deepler/glossary_entriesviewer"]',
+        entriesviewerPage: '[data-id="local_deepler/glossary_entriesviewer_page"]',
+    }
 };

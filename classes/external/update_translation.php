@@ -15,9 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -140,8 +137,7 @@ class update_translation extends external_api {
         } catch (restricted_context_exception $rce) {
             $response['error'] = "CONTEXT " . $rce->getMessage();
         } catch (Exception $e) {
-            $errortoolong = get_string('errortoolong', 'local_deepler');
-            $response['error'] = "Unexpected error: " . $e->getMessage() . " $errortoolong";
+            $response['error'] = "Unexpected error: " . $e->getMessage();
         } catch (Throwable $t) {
             $response['error'] = "Critical error: " . $t->getMessage();
         }
