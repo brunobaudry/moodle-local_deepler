@@ -35,7 +35,7 @@ class admin_setting_deeplapikey_configtext extends admin_setting_configtext {
      * @return string|\lang_string|true true if ok string if error found
      */
     public function validate($data): string|lang_string|true {
-
+        global $CFG;
         // Skip validation during install or PHPUnit init.
         if (empty($CFG->version) || during_initial_install()) {
             return true;
