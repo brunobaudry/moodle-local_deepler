@@ -1,0 +1,165 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template 'local_deepler/translate_field'; // Full name of the plugin (used for diagnostics)./translate_field
+
+    Template purpose and description.
+
+    Classes required for JS:
+    * .local_deepler__source-text
+    * #toggleMultilang
+    * .local_deepler__translation
+
+    Data attributes required for JS:
+    * data-action="local_deepler/checkbox"
+    * data-action="local_deepler/sourceselect"
+    * data-action="local_deepler/editor"
+    * data-key="key"
+    * data-table="{{table"
+    * data-cmid="{{cmid"
+    * data-id="{{id"
+    * data-field="{{tablefield"
+    * data-tid="tid"
+    * data-key-validator="key"
+    * data-sourcetext-key="key"
+    * data-sourcetext-raw="rawsourcetext"
+    * data-filedtext-raw="rawunfilterdtext"
+    * data-status="local_deepler/wait"
+
+    Context variables required for this template:
+    * rowtitle
+    * cssclass
+    * flagandkey
+    * status
+    * fieldtranslation
+    * titlestring
+    * buttonclass
+    * key
+    * multilangtitlestring
+    * keyid
+    * iseditable
+    * badgeclass
+    * multilangdisabled
+    * selecttitle
+    * sourceoptions
+    * rawsourcetext
+    * rawunfilterdtext
+    * mlangfiltered
+    * trimedtext
+    * table
+    * cmid
+    * id
+    * tablefield
+    * tid
+    * fieldformat
+    * plaintextinput
+    * istiny
+    * nottiny
+
+
+    Example context (json):
+    {
+    }
+}}
+<div title="{{rowtitle}}"
+     class="{{cssclass}} d-flex align-items-start py-2"
+     data-row-id="{{flagandkey}}"
+     data-status="{{status}}">
+<!--    col1 -->
+    <div class="col-1 px-0 local_deepler__selectorbox">
+        <small class="local_deepler__activityfield lh-sm">{{fieldtranslation}}</small><br>
+        {{#iseditable}}
+            <span id="previousTranslationStatus"
+                  title="{{titlestring}}"
+                  class="badge badge-pill {{buttonclass}}">&nbsp;</span>
+            <input title="{{titlestring}}"
+                   type="checkbox"
+                   data-key="{{key}}"
+                   class="mx-2"
+                   data-action="local_deepler/checkbox"
+                   disabled="">
+        {{/iseditable}}
+
+    </div>
+<!--    col2 -->
+    <div class="col-5 px-0 pr-5 local_deepler__source-text"
+         data-key="{{key}}">
+        <span title="{{multilangtitlestring}}"
+              id="toggleMultilang"
+              aria-controls="{{keyid}}"
+              aria-pressed="false"
+              data-toggle="button"
+              role="button"
+              class="mx-1 p-2 btn btn-sm btn-outline-{{badgeclass}} {{multilangdisabled}}">
+                    <i class="fa fa-language" aria-hidden="true"></i>
+        </span>
+        <select class="custom-select w-auto"
+                title="{{selecttitle}}"
+                data-key="{{key}}"
+                data-action="local_deepler/sourceselect">
+                {{{sourceoptions}}}
+        </select>
+        <div class="collapse show" 
+             data-sourcetext-key="{{key}}" 
+             data-sourcetext-raw="{{rawsourcetext}}"
+             data-filedtext-raw="{{rawunfilterdtext}}">{{{mlangfiltered}}}
+        </div>
+        <div class="collapse" id="{{keyid}}">
+            <div data-key="{{key}}" 
+                 data-action="local_deepler/textarea">{{{trimedtext}}}</div>
+        </div>
+    </div>
+<!--    col3 -->
+    {{#iseditable}}
+        <div class="col-5 px-0 local_deepler__translation"
+             data-action="local_deepler/editor"
+             data-key="{{key}}"
+             data-table="{{table}}"
+             data-cmid="{{cmid}}"
+             data-id="{{id}}"
+             data-field="{{tablefield}}"
+             data-tid="{{tid}}">
+            {{#plaintextinput}}
+                <div class="format-{{fieldformat}} border py-2 px-3"
+                     contenteditable="true"
+                     data-format="{{fieldformat}}">
+                </div>
+            {{/plaintextinput}}
+            {{#istiny}}
+                <div class="format-{{fieldformat}} border py-2 px-3"
+                     id="tiny_{{key}}"
+                     contenteditable="true"
+                     data-format="{{fieldformat}}">
+                </div>
+            {{/istiny}}
+            {{^istiny}}
+                {{{cteditor}}}
+            {{/istiny}}
+
+        </div>
+        <!--    status div-->
+        <div class="col-1 text-center"
+             data-key-validator="{{key}}">
+        <span class="disabled"
+              data-status="local_deepler/wait"
+              role="status"
+              aria-disabled="true">
+            <i class="fa"></i>
+        </span>
+        </div>
+    {{/iseditable}}
+</div>

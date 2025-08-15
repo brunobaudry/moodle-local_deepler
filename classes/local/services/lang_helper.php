@@ -480,7 +480,6 @@ class lang_helper {
                 $list .= ' disabled ';
             }
             $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
-            $list .= $item['lang'] . '</option>';
         }
         return $list;
     }

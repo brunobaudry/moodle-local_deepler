@@ -115,7 +115,7 @@ class translateform extends deeplerform {
                 data-format='{$fieldformat}'>" . DIV_CLOSE; // Tiny editor text fields (initialize after focus).
 
         // Column 3 Layout.
-        $this->_form->addElement('html', $translatededitor); // Open $translatededitor.
+        $this->_form->addElement('html', $translatededitor); // Open translatededitor.
         if ($fieldformat === 0) { // Plain text input.
             $this->_form->addElement('html', $nowisiwig);
         } else if ($this->editor !== 'tiny') {
@@ -154,20 +154,20 @@ class translateform extends deeplerform {
         if ($alreadyhasmultilang) {
             if ($hasotherandsourcetag) {
                 $badgeclass = 'danger';
-                $titlestring = get_string('warningsource', 'local_deepler',
+                $multilangtitlestring = get_string('warningsource', 'local_deepler',
                         strtoupper($this->langpack->currentlang));
             } else {
-                $titlestring = get_string('viewsource', 'local_deepler');
+                $multilangtitlestring = get_string('viewsource', 'local_deepler');
                 $badgeclass = 'info';
             }
-            $titlestring .= ' (' . implode(', ', $alllancodes) . ')';
+            $multilangtitlestring .= ' (' . implode(', ', $alllancodes) . ')';
         } else {
-            $titlestring = get_string('viewsourcedisabled', 'local_deepler');
+            $multilangtitlestring = get_string('viewsourcedisabled', 'local_deepler');
             $badgeclass = 'secondary';
         }
         $mutlilangspantag =
                 "<span
-                    title='$titlestring'
+                    title='$multilangtitlestring'
                     id='toggleMultilang'
                     aria-controls='$keyid'
                     aria-pressed='false'
@@ -228,6 +228,7 @@ class translateform extends deeplerform {
         $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
         $canrephrase = $this->langpack->get_canimprove();
         $sametargetassource = $this->langpack->isrephrase();
+        $iseditable = $field->iseditable();
         if ((!$canrephrase && $sametargetassource) || $this->langpack->targetlang === '') {
             $buttonclass = 'badge-dark';
             $titlestring =
@@ -257,8 +258,9 @@ class translateform extends deeplerform {
             data-action='local_deepler/checkbox'
             disabled/>";
         // Open translation item.
-        $editable = $field->iseditable() ? $status : 'local_deepler/disabled';
-        if (!$field->iseditable()) {
+
+        $editable = $iseditable ? $status : 'local_deepler/disabled';
+        if (!$iseditable) {
             $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
         }
         $this->_form->addElement('html',
@@ -268,7 +270,7 @@ class translateform extends deeplerform {
         $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
         $fieldtranslation = multilanger::findfieldstring($field);
         $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>$fieldtranslation</small><br/>");
-        if (!$isdbkey && $field->iseditable()) {
+        if (!$isdbkey && $iseditable) {
             $this->_form->addElement('html', $bulletstatus);
             $this->_form->addElement('html', $checkbox);
         }
@@ -284,7 +286,7 @@ class translateform extends deeplerform {
      */
     protected function makefieldrow(field $field) {
 
-        $key = $field->getkey();
+        /*$key = $field->getkey();
         $keyid = $field->getkeyid();
 
         // Hacky Special cases where the content is a db key (should never be translated).
@@ -299,6 +301,13 @@ class translateform extends deeplerform {
         }
         // Close translation item.
         $this->_form->addElement('html', DIV_CLOSE);
+        */
+        global $PAGE;
+        $renderer = $PAGE->get_renderer('local_deepler', 'translate');
+        $this->_form->addElement('html', $renderer->makefieldrow($field,
+                $this->langpack,
+                $this->mlangfilter,
+                $this->editor));
 
     }
 
