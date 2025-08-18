@@ -25,8 +25,8 @@ use DeepL\DeepLClient;
 use DeepL\DeepLException;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
+
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 /**
  * Simple service to fetch glossary's entries.

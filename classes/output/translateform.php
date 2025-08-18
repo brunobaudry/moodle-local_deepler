@@ -25,8 +25,8 @@ use local_deepler\local\services\lang_helper;
 use MoodleQuickForm;
 
 // Load the files we're going to need.
-require_once("$CFG->libdir/form/editor.php");
-require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_cteditor.php");
+require_once($CFG->libdir . '/form/editor.php');
+require_once(__DIR__ . '/../editor/MoodleQuickForm_cteditor.php');
 
 /**
  * Translate Form Output.

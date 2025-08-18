@@ -25,8 +25,7 @@
 
 namespace local_deepler;
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/observer.php');
+require_once(__DIR__ . '/../classes/observer.php');
 
 use advanced_testcase;
 use core\event\course_module_updated;

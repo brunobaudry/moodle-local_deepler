@@ -27,7 +27,7 @@ use ReflectionClass;
 use renderer_base;
 
 // Include the filter_multilang2 class manually.
-require_once($CFG->dirroot . '/filter/multilang2/filter.php');
+require_once(__DIR__ . '/../../../../filter/multilang2/filter.php');
 
 /**
  * Unit tests for the translate_page class.

@@ -19,8 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_deepler\local\data\field;
 
-global $CFG;
-require_once($CFG->dirroot . '/mod/book/locallib.php');
+require_once(__DIR__ . '/../../../../../../mod/book/locallib.php');
 
 /**
  * Subclass of book as it has chapters (subs).

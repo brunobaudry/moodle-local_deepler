@@ -62,9 +62,8 @@ final class translate_test extends advanced_testcase {
      * @return void
      */
     public function test_mlang_filter(): void {
-        global $CFG;
-        $this->assertFileExists($CFG->dirroot . '/filter/multilang2/filter.php');
-        require_once($CFG->dirroot . '/filter/multilang2/filter.php');
+        $this->assertFileExists(__DIR__ . '/../../../filter/multilang2/filter.php');
+        require_once(__DIR__ . '/../../../filter/multilang2/filter.php');
         $course = $this->getDataGenerator()->create_course();
         $context = context_course::instance($course->id);
         $mlangfilter = new filter_multilang2($context, []);
@@ -83,8 +82,8 @@ final class translate_test extends advanced_testcase {
      */
     public function test_course_data(): void {
         global $CFG;
-        $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/output/translate_page.php');
-        $this->assertFileExists($CFG->dirroot . '/local/deepler/classes/local/data/course.php');
+        $this->assertFileExists(__DIR__ . '/../classes/output/translate_page.php');
+        $this->assertFileExists(__DIR__ . '/../classes/local/data/course.php');
         $course = $this->getDataGenerator()->create_course();
         $coursedata = new course($course);
         $this->assertNotNull($coursedata);

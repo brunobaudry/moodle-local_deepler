@@ -26,8 +26,8 @@ use DeepL\DeepLException;
 use Exception;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
+
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 /**
  * External service to call DeepL's translation API.

@@ -181,7 +181,7 @@ final class langhelper_test extends advanced_testcase {
     private function makeenv() {
         global $CFG;
         // Define the path to the .env file.
-        $envfilepath = $CFG->dirroot . '/local/deepler/.env';
+        $envfilepath = __DIR__ . '/../../../.env';
 
         // Check if the .env file exists.
         if (file_exists($envfilepath)) {

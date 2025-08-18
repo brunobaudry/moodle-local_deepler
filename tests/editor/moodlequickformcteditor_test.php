@@ -40,8 +40,7 @@ final class moodlequickformcteditor_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor(): void {
-        global $CFG;
-        require_once($CFG->dirroot . '/lib/form/editor.php');
+        require_once(__DIR__ . '/../../../../lib/form/editor.php');
 
         $elementname = 'testelement';
         $elementlabel = 'Test Element';

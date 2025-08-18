@@ -16,8 +16,7 @@
 
 namespace local_deepler\local\data\subs;
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/mod/wiki/locallib.php');
+require_once(__DIR__ . '/../../../../../../mod/wiki/locallib.php');
 
 use local_deepler\local\data\field;
 

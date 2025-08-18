@@ -62,8 +62,7 @@ final class settings_test extends \advanced_testcase {
      * @throws \dml_exception
      */
     public function test_settings(): void {
-        global $CFG;
-        require_once($CFG->dirroot . '/lib/adminlib.php');
+        require_once(__DIR__ . '/../../../lib/adminlib.php');
         require_once(__DIR__ . '/../settings.php');
         $settings1 = new \admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
         set_config('apikey', 'testvalue', 'local_deepler');
@@ -71,7 +70,7 @@ final class settings_test extends \advanced_testcase {
         $this->assertEquals($settings1->visiblename, get_string('pluginname', 'local_deepler'));
         $this->assertEquals($settings1->req_capability[0], 'moodle/site:config');
         $this->assertIsArray($settings1->req_capability);
-        $this->assertFileExists($CFG->dirroot . '/lib/adminlib.php');
+        $this->assertFileExists(__DIR__ . '/../../../lib/adminlib.php');
         $this->assertFileExists(__DIR__ . '/../settings.php');
         $this->assertFalse(has_capability('moodle/site:config', \context_system::instance()));
         $this->setAdminUser();

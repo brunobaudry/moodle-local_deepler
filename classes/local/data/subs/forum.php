@@ -20,8 +20,7 @@ use context_module;
 use local_deepler\local\data\field;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . "/mod/forum/lib.php");
+require_once(__DIR__ . '/../../../../../../mod/forum/lib.php');
 
 /**
  * Sub for Forum activities.

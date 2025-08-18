@@ -20,8 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 use advanced_testcase;
 use local_deepler\local\data\field;
 
-global $CFG;
-require_once($CFG->dirroot . '/mod/book/locallib.php');
+require_once(__DIR__ . '/../../../../../../mod/book/locallib.php');
 
 /**
  * Unit tests for book class.
