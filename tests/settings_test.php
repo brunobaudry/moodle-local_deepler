@@ -62,7 +62,8 @@ final class settings_test extends \advanced_testcase {
      * @throws \dml_exception
      */
     public function test_settings(): void {
-        require_once(__DIR__ . '/../../../lib/adminlib.php');
+        global $CFG;
+        require_once($CFG->dirroot . '/lib/adminlib.php');
         require_once(__DIR__ . '/../settings.php');
         $settings1 = new \admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
         set_config('apikey', 'testvalue', 'local_deepler');
