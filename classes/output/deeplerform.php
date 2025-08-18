@@ -59,6 +59,51 @@ abstract class deeplerform extends moodleform {
     }
 
     /**
+     * @param array $childs
+     * @return void
+     * @throws \coding_exception
+     */
+    public function makchilds(array $childs): void {
+        /** @var \local_deepler\local\data\interfaces\translatable_interface $child */
+        foreach ($childs as $child) {
+            /* $interfaces = class_implements($child);
+             $isiconic = in_array('local_deepler\local\data\interfaces\iconic_interface', $interfaces);
+             $iseditable = in_array('local_deepler\local\data\interfaces\editable_interface', $interfaces);
+             // Open section container for the course settings course__settings section-item.
+             $this->_form->addElement('html', "<div class='section-item'>");
+             if ($isiconic && $iseditable) {
+                 // Open header div.
+                 $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
+                 // Add a header for the child.
+                 $activitydesc = $this->makeactivitydesc($child);
+                 $childlink = $child->getlink();
+                 $childicon = $this->makeicon($child);
+                 $header = $this->makeheader($activitydesc, $childlink, 5, $childicon);
+                 $this->_form->addElement('html', $header);
+
+                 $this->_form->addElement('html', DIV_CLOSE);
+             }
+
+
+             foreach ($child->getfields() as $f) {
+                 try {
+                     $this->makefieldrow($f);
+                 } catch (Exception $e) {
+                     continue;
+                 }
+             }
+             // Close section container.
+             $this->_form->addElement('html', DIV_CLOSE);*/
+            ///////////////////////////////////////////////////////////////
+            global $PAGE;
+            $renderer = $PAGE->get_renderer('local_deepler', 'translate');
+            $childdata = new child_data($child, $this->langpack,
+                    $this->mlangfilter,
+                    $this->editor);
+            $this->_form->addElement('html', $renderer->makechild($childdata));
+        }
+    }
+    /**
      * Main data definition function.
      *
      * @return void
@@ -155,7 +200,8 @@ abstract class deeplerform extends moodleform {
             // Open header div.
             $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
             $this->_form->addElement('html',
-                    $this->makeheader($this->mlangfilter->filter($section->getsectionname()), $section->getlink(), 3));
+                    $this->makeheader($this->mlangfilter->filter($section->getsectionname()),
+                            $section->getlink(), 3));
             $this->_form->addElement('html', DIV_CLOSE); // Close header div.
             // Section fields.
             $this->makesettings($sectionfields, $section->getid());
@@ -236,6 +282,7 @@ abstract class deeplerform extends moodleform {
     protected function makemodules(array $sectionmodules): void {
         /** @var \local_deepler\local\data\module $module */
         foreach ($sectionmodules as $module) {
+            /** @todo replace with css */
             $this->_form->addElement('html', '<div class="divider"><hr/></div>');
             $this->makemodule($module);
         }
@@ -249,53 +296,34 @@ abstract class deeplerform extends moodleform {
      * @throws \coding_exception
      */
     protected function makemodule(module $module): void {
-        $this->_form->addElement('html',
-                "<div id='{$module->getpluginname()}'
-                    class='activity-item local_deepler__activity py-2 {$this->getitemvisibilityclass($module)}'>");
-        $this->buildhiddenftomstudent();
-        $icon = $this->makeicon($module, "class='activityicon' data-region='activity-icon'");
-        $header = $this->makeheader($this->makeactivitydesc($module), $module->getlink(), 4, $icon);
-        $this->_form->addElement('html', $header);
-        $fields = $module->getfields();
-        $childs = $module->getchilds();
-        // Basic common fields.
-        if (!empty($fields)) {
-            /** @var field $field */
-            foreach ($fields as $field) {
-                $this->makefieldrow($field);
-            }
-        }
-        // Childs (like book pages or quiz questions).
-        if (!empty($childs)) {
-            /** @var \local_deepler\local\data\interfaces\translatable_interface $child */
-            foreach ($childs as $child) {
-                $interfaces = class_implements($child);
-                $isiconic = in_array('local_deepler\local\data\interfaces\iconic_interface', $interfaces);
-                $iseditable = in_array('local_deepler\local\data\interfaces\editable_interface', $interfaces);
-                // Open section container for the course settings course__settings section-item.
-                $this->_form->addElement('html', "<div class='section-item'>");
-                if ($isiconic && $iseditable) {
-                    // Open header div.
-                    $this->_form->addElement('html', "<div class='course-section-header d-flex'>");
-                    // Add a header for the child.
-                    $this->_form->addElement('html',
-                            $this->makeheader($this->makeactivitydesc($child), $child->getlink(), 5, $this->makeicon($child)));
-
-                    $this->_form->addElement('html', DIV_CLOSE);
-                }
-                /** @var field $f */
-                foreach ($child->getfields() as $f) {
-                    try {
-                        $this->makefieldrow($f);
-                    } catch (Exception $e) {
-                        continue;
-                    }
-                }
-                // Close section container.
-                $this->_form->addElement('html', DIV_CLOSE);
-            }
-        }
-        $this->_form->addElement('html', DIV_CLOSE);
+        //$this->_form->addElement('html',
+        //        "<div id='{$module->getpluginname()}'
+        //            class='activity-item local_deepler__activity py-2 {$this->getitemvisibilityclass($module)}'>");
+        //$this->buildhiddenftomstudent();
+        //$icon = $this->makeicon($module, "class='activityicon' data-region='activity-icon'");
+        //$header = $this->makeheader($this->makeactivitydesc($module), $module->getlink(), 4, $icon);
+        //$this->_form->addElement('html', $header);
+        //$fields = $module->getfields();
+        //$childs = $module->getchilds();
+        //// Basic common fields.
+        //if (!empty($fields)) {
+        //    /** @var field $field */
+        //    foreach ($fields as $field) {
+        //        $this->makefieldrow($field);
+        //    }
+        //}
+        //// Childs (like book pages or quiz questions).
+        //if (!empty($childs)) {
+        //    $this->makchilds($childs);
+        //}
+        ///////////////////////////////////////////////////////////////
+        global $PAGE;
+        $renderer = $PAGE->get_renderer('local_deepler', 'translate');
+        $moduledata = new module_data($module, $this->langpack,
+                $this->mlangfilter,
+                $this->editor);
+        $this->_form->addElement('html', $renderer->makemodule($moduledata));
+        //$this->_form->addElement('html', DIV_CLOSE);
     }
 
     /**

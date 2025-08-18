@@ -24,6 +24,7 @@ use core\output\pix_icon;
 use core_plugin_manager;
 use Exception;
 use local_deepler\local\data\field;
+use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 
 /**

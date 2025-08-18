@@ -484,23 +484,7 @@ class lang_helper {
         return $list;
     }
 
-    /**
-     * Prepare dropdown options for targets.
-     *
-     * @return string
-     */
-    public function preparehtmltagets(): string {
-        return $this->preparehtmlotions($this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false));
-    }
 
-    /**
-     * Prepare dropdown options for sources.
-     *
-     * @return string
-     */
-    public function preparehtmlsources(): string {
-        return $this->preparehtmlotions($this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false));
-    }
 
     /**
      * Creates props for html selects.
@@ -525,7 +509,7 @@ class lang_helper {
      * @return array
      */
     public function preparesourcesoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources));
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
     }
 
     /**

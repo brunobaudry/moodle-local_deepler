@@ -141,16 +141,16 @@ final class langhelper_test extends advanced_testcase {
      *
      * @return void
      */
-    public function test_preparehtmloptions_returns_valid_html(): void {
-        $this->langhelper->initdeepl($this->user);
-        $htmltargets = $this->langhelper->preparehtmltagets();
-        $htmlsources = $this->langhelper->preparehtmlsources();
+    /*    public function test_preparehtmloptions_returns_valid_html(): void {
+            $this->langhelper->initdeepl($this->user);
+            $htmltargets = $this->langhelper->preparehtmltagets();
+            $htmlsources = $this->langhelper->preparehtmlsources();
 
-        $this->assertIsString($htmltargets);
-        $this->assertIsString($htmlsources);
-        $this->assertStringContainsString('<option', $htmltargets);
-        $this->assertStringContainsString('<option', $htmlsources);
-    }
+            $this->assertIsString($htmltargets);
+            $this->assertIsString($htmlsources);
+            $this->assertStringContainsString('<option', $htmltargets);
+            $this->assertStringContainsString('<option', $htmlsources);
+        }*/
     /**
      * Basic setting tests.
      *

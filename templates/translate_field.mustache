@@ -111,7 +111,9 @@
                 title="{{selecttitle}}"
                 data-key="{{key}}"
                 data-action="local_deepler/sourceselect">
-                {{{sourceoptions}}}
+            {{#sourceoptions}}
+                <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
+            {{/sourceoptions}}
         </select>
         <div class="collapse show" 
              data-sourcetext-key="{{key}}" 
@@ -133,22 +135,27 @@
              data-id="{{id}}"
              data-field="{{tablefield}}"
              data-tid="{{tid}}">
+            <!--    plaintextinput {{plaintextinput}} -->
             {{#plaintextinput}}
                 <div class="format-{{fieldformat}} border py-2 px-3"
                      contenteditable="true"
                      data-format="{{fieldformat}}">
                 </div>
             {{/plaintextinput}}
-            {{#istiny}}
-                <div class="format-{{fieldformat}} border py-2 px-3"
-                     id="tiny_{{key}}"
-                     contenteditable="true"
-                     data-format="{{fieldformat}}">
-                </div>
-            {{/istiny}}
-            {{^istiny}}
-                {{{cteditor}}}
-            {{/istiny}}
+
+            {{^plaintextinput}}
+                <!--    istiny {{istiny}} -->
+                {{#istiny}}
+                    <div class="format-{{fieldformat}} border py-2 px-3"
+                         id="tiny_{{key}}"
+                         contenteditable="true"
+                         data-format="{{fieldformat}}">
+                    </div>
+                {{/istiny}}
+                {{^istiny}}
+                    {{{cteditor}}}
+                {{/istiny}}
+            {{/plaintextinput}}
 
         </div>
         <!--    status div-->

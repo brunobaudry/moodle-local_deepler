@@ -16,6 +16,9 @@
 
 namespace local_deepler\output;
 defined('MOODLE_INTERNAL') || die();
+/**
+ *
+ */
 define('DIV_CLOSE', '</div>');
 global $CFG;
 
@@ -44,13 +47,10 @@ class translateform extends deeplerform {
      *
      * @var lang_helper
      */
-    private lang_helper $langpack;
-    /**
-     * @var string dropdown options for source language.
-     */
-    private string $sourceoptions;
+    protected lang_helper $langpack;
+
     /** @var string */
-    private string $editor;
+    protected string $editor;
     /**
      * Define Moodle Form.
      *
@@ -63,8 +63,6 @@ class translateform extends deeplerform {
         $this->editor = $this->_customdata['editor'];
         $this->langpack = $this->_customdata['langpack'];
         field::$targetlangdeepl = $this->langpack->targetlang;
-        // Get source options.
-        $this->sourceoptions = $this->langpack->preparehtmlsources();
         // Start moodle form.
         $this->_form->disable_form_change_checker();
         MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
@@ -88,51 +86,51 @@ class translateform extends deeplerform {
      * @param \local_deepler\local\data\field $field
      * @return void
      */
-    private function fieldrowcolumn3(string $key, field $field): void {
-        if (!$field->iseditable()) {
-            return;
-        }
-        // Column 3 settings.
-        $translatededitor = "<div
-            class='col-5 px-0 local_deepler__translation'
-            data-action='local_deepler/editor'
-            data-key='$key'
-            data-table='{$field->get_table()}'
-            data-cmid='{$field->get_cmid()}'
-            data-id='{$field->get_id()}'
-            data-field='{$field->get_tablefield()}'
-            data-tid='{$field->get_tid()}'>"; // Translation Input div.
+    /*  private function fieldrowcolumn3(string $key, field $field): void {
+          if (!$field->iseditable()) {
+              return;
+          }
+          // Column 3 settings.
+          $translatededitor = "<div
+              class='col-5 px-0 local_deepler__translation'
+              data-action='local_deepler/editor'
+              data-key='$key'
+              data-table='{$field->get_table()}'
+              data-cmid='{$field->get_cmid()}'
+              data-id='{$field->get_id()}'
+              data-field='{$field->get_tablefield()}'
+              data-tid='{$field->get_tid()}'>"; // Translation Input div.
 
-        $fieldformat = $field->get_format();
-        $nowisiwig = "<div
-                class='format-{$fieldformat} border py-2 px-3'
-                contenteditable='true'
-                data-format='{$fieldformat}'>" . DIV_CLOSE; // No wisiwig editor text fields.
-        $unloadedtiny = "<div
-                id='tiny_{$key}'
-                class='format-{$fieldformat} border py-2 px-3'
-                contenteditable='true'
-                data-format='{$fieldformat}'>" . DIV_CLOSE; // Tiny editor text fields (initialize after focus).
+          $fieldformat = $field->get_format();
+          $nowisiwig = "<div
+                  class='format-{$fieldformat} border py-2 px-3'
+                  contenteditable='true'
+                  data-format='{$fieldformat}'>" . DIV_CLOSE; // No wisiwig editor text fields.
+          $unloadedtiny = "<div
+                  id='tiny_{$key}'
+                  class='format-{$fieldformat} border py-2 px-3'
+                  contenteditable='true'
+                  data-format='{$fieldformat}'>" . DIV_CLOSE; // Tiny editor text fields (initialize after focus).
 
-        // Column 3 Layout.
-        $this->_form->addElement('html', $translatededitor); // Open translatededitor.
-        if ($fieldformat === 0) { // Plain text input.
-            $this->_form->addElement('html', $nowisiwig);
-        } else if ($this->editor !== 'tiny') {
-            $this->_form->addElement('cteditor', $key);
-            $this->_form->setType($key, PARAM_RAW);
-        } else {
-            $this->_form->addElement('html', $unloadedtiny);
-        }
-        $this->_form->addElement('html', DIV_CLOSE); // Closing $translatededitor.
-        // Status button.
-        $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
-                role='status' aria-disabled='true'><i class='fa'
-                ></i></span>";  // Status icon/button.
-        // Status surrounding div.
-        $statusdiv = "<div class='col-1 text-center' data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
-        $this->_form->addElement('html', $statusdiv);// Adding validator btn.
-    }
+          // Column 3 Layout.
+          $this->_form->addElement('html', $translatededitor); // Open translatededitor.
+          if ($fieldformat === 0) { // Plain text input.
+              $this->_form->addElement('html', $nowisiwig);
+          } else if ($this->editor !== 'tiny') {
+              $this->_form->addElement('cteditor', $key);
+              $this->_form->setType($key, PARAM_RAW);
+          } else {
+              $this->_form->addElement('html', $unloadedtiny);
+          }
+          $this->_form->addElement('html', DIV_CLOSE); // Closing $translatededitor.
+          // Status button.
+          $savetogglebtn = "<span class='disabled' data-status='local_deepler/wait'
+                  role='status' aria-disabled='true'><i class='fa'
+                  ></i></span>";  // Status icon/button.
+          // Status surrounding div.
+          $statusdiv = "<div class='col-1 text-center' data-key-validator='$key'>$savetogglebtn" . DIV_CLOSE;
+          $this->_form->addElement('html', $statusdiv);// Adding validator btn.
+      }*/
 
     /**
      * Build the middle column of the translation form that includes source text and source lang selector.
@@ -144,73 +142,74 @@ class translateform extends deeplerform {
      * @return void
      * @throws \coding_exception
      */
-    public function fieldrowcolumn2(field $field, string $keyid, string $key, bool $isdbkey): void {
-        $multilanger = new multilanger($field->get_text());
-        $alllancodes = $multilanger->findmlangcodes();
-        $this->gatherlangcodes($alllancodes);
-        $hasotherandsourcetag = $multilanger->has_multilandcode_and_others($this->langpack->currentlang);
-        $alreadyhasmultilang = $multilanger->has_multilangs();
-        $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
-        if ($alreadyhasmultilang) {
-            if ($hasotherandsourcetag) {
-                $badgeclass = 'danger';
-                $multilangtitlestring = get_string('warningsource', 'local_deepler',
-                        strtoupper($this->langpack->currentlang));
-            } else {
-                $multilangtitlestring = get_string('viewsource', 'local_deepler');
-                $badgeclass = 'info';
-            }
-            $multilangtitlestring .= ' (' . implode(', ', $alllancodes) . ')';
-        } else {
-            $multilangtitlestring = get_string('viewsourcedisabled', 'local_deepler');
-            $badgeclass = 'secondary';
-        }
-        $mutlilangspantag =
-                "<span
-                    title='$multilangtitlestring'
-                    id='toggleMultilang'
-                    aria-controls='$keyid'
-                    aria-pressed='false'
-                    data-toggle='button'
-                    role='button'
-                    class='mx-1 p-2 btn btn-sm btn-outline-$badgeclass $multilangdisabled'
-                    >
-                    <i class='fa fa-language' aria-hidden='true'></i></span>";
-        // Source lang select.
+    /* public function fieldrowcolumn2(field $field, string $keyid, string $key, bool $isdbkey): void {
+         $multilanger = new multilanger($field->get_text());
 
-        $selecttitle = get_string('specialsourcetext', 'local_deepler', strtoupper($this->langpack->currentlang));
-        $sourceselect =
-                "<select class='custom-select w-auto' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
-                    {$this->sourceoptions}</select>";
-        // Source Text.
-        $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
-        // Source texts.
-        $fieldtext = $field->get_text();
-        $rawsourcetext = base64_encode($this->mlangfilter->filter($fieldtext) ?? '');
-        $trimedtext = trim($fieldtext);
-        $rawunfilterdtext = base64_encode($trimedtext);
-        $mlangfiltered = $this->mlangfilter->filter($field->get_displaytext());
-        $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
-                data-sourcetext-raw='$rawsourcetext' data-filedtext-raw='$rawunfilterdtext' >$mlangfiltered" . DIV_CLOSE;
-        // Collapsible multilang textarea.
-        $multilangtextarea = "<div class='collapse' id='$keyid'>";
-        $multilangtextarea .= "<div data-key='$key'
-            data-action='local_deepler/textarea'>$trimedtext" . DIV_CLOSE;
-        $multilangtextarea .= DIV_CLOSE;
-        // Column 2 layout.
-        $this->_form->addElement('html', $sourcetextdiv);
-        if (!$isdbkey && $field->iseditable()) {
-            $this->_form->addElement('html', $mutlilangspantag);
-            $this->_form->addElement('html', $sourceselect);
-        }
-        $this->_form->addElement('html', $sourcetextarea);
-        if (!$isdbkey) {
-            $this->_form->addElement('html', $multilangtextarea);
-        }
+         $alllancodes = $multilanger->findmlangcodes();
+         $codes = $this->gatherlangcodes($alllancodes);
+         $hasotherandsourcetag = $multilanger->has_multilandcode_and_others($this->langpack->currentlang);
+         $alreadyhasmultilang = $multilanger->has_multilangs();
+         $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
+         if ($alreadyhasmultilang) {
+             if ($hasotherandsourcetag) {
+                 $badgeclass = 'danger';
+                 $multilangtitlestring = get_string('warningsource', 'local_deepler',
+                         strtoupper($this->langpack->currentlang));
+             } else {
+                 $multilangtitlestring = get_string('viewsource', 'local_deepler');
+                 $badgeclass = 'info';
+             }
+             $multilangtitlestring .= ' (' . implode(', ', $alllancodes) . ')';
+         } else {
+             $multilangtitlestring = get_string('viewsourcedisabled', 'local_deepler');
+             $badgeclass = 'secondary';
+         }
+         $mutlilangspantag =
+                 "<span
+                     title='$multilangtitlestring'
+                     id='toggleMultilang'
+                     aria-controls='$keyid'
+                     aria-pressed='false'
+                     data-toggle='button'
+                     role='button'
+                     class='mx-1 p-2 btn btn-sm btn-outline-$badgeclass $multilangdisabled'
+                     >
+                     <i class='fa fa-language' aria-hidden='true'></i></span>";
+         // Source lang select.
 
-        // Closing sourcetext div.
-        $this->_form->addElement('html', DIV_CLOSE);
-    }
+         $selecttitle = get_string('specialsourcetext', 'local_deepler', strtoupper($this->langpack->currentlang));
+         $sourceselect =
+                 "<select class='custom-select w-auto' title='$selecttitle' data-key='$key' data-action='local_deepler/sourceselect'>
+                     {$this->sourceoptions}</select>";
+         // Source Text.
+         $sourcetextdiv = "<div class='col-5 px-0 pr-5 local_deepler__source-text' data-key='$key'>";
+         // Source texts.
+         $fieldtext = $field->get_text();
+         $rawsourcetext = base64_encode($this->mlangfilter->filter($fieldtext) ?? '');
+         $trimedtext = trim($fieldtext);
+         $rawunfilterdtext = base64_encode($trimedtext);
+         $mlangfiltered = $this->mlangfilter->filter($field->get_displaytext());
+         $sourcetextarea = "<div class='collapse show' data-sourcetext-key='$key'
+                 data-sourcetext-raw='$rawsourcetext' data-filedtext-raw='$rawunfilterdtext' >$mlangfiltered" . DIV_CLOSE;
+         // Collapsible multilang textarea.
+         $multilangtextarea = "<div class='collapse' id='$keyid'>";
+         $multilangtextarea .= "<div data-key='$key'
+             data-action='local_deepler/textarea'>$trimedtext" . DIV_CLOSE;
+         $multilangtextarea .= DIV_CLOSE;
+         // Column 2 layout.
+         $this->_form->addElement('html', $sourcetextdiv);
+         if (!$isdbkey && $field->iseditable()) {
+             $this->_form->addElement('html', $mutlilangspantag);
+             $this->_form->addElement('html', $sourceselect);
+         }
+         $this->_form->addElement('html', $sourcetextarea);
+         if (!$isdbkey) {
+             $this->_form->addElement('html', $multilangtextarea);
+         }
+
+         // Closing sourcetext div.
+         $this->_form->addElement('html', DIV_CLOSE);
+     }*/
 
     /**
      * Build the first column of the translation form that includes the checkbox and the status badge.
@@ -221,61 +220,61 @@ class translateform extends deeplerform {
      * @return void
      * @throws \coding_exception
      */
-    public function fieldrowcolumn1(field $field, string $key, bool $isdbkey): void {
-        $cssclass = '';
-        $tneeded = $field->get_status()->istranslationneeded();
-        $status = $tneeded ? 'needsupdate' : 'updated';
-        $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
-        $canrephrase = $this->langpack->get_canimprove();
-        $sametargetassource = $this->langpack->isrephrase();
-        $iseditable = $field->iseditable();
-        if ((!$canrephrase && $sametargetassource) || $this->langpack->targetlang === '') {
-            $buttonclass = 'badge-dark';
-            $titlestring =
-                    get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler', $this->langpack->targetlang);
-        } else if ($tneeded) {
-            if (str_contains($field->get_text(), "{mlang " . $this->langpack->targetlang)) {
-                $buttonclass = 'badge-warning';
-                $titlestring = get_string('needsupdate', 'local_deepler');
-            } else {
-                $buttonclass = $canrephrase && $sametargetassource ? 'badge-primary' : 'badge-danger';
-                $titlestring = get_string($canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
-                        'local_deepler',
-                        $this->langpack->targetlang);
-            }
+    /*   public function fieldrowcolumn1(field $field, string $key, bool $isdbkey): void {
+           $cssclass = '';
+           $tneeded = $field->get_status()->istranslationneeded();
+           $status = $tneeded ? 'needsupdate' : 'updated';
+           $rowtitle = $isdbkey ? get_string('translationdisabled', 'local_deepler') : '';
+           $canrephrase = $this->langpack->get_canimprove();
+           $sametargetassource = $this->langpack->isrephrase();
+           $iseditable = $field->iseditable();
+           if ((!$canrephrase && $sametargetassource) || $this->langpack->targetlang === '') {
+               $buttonclass = 'badge-dark';
+               $titlestring =
+                       get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler', $this->langpack->targetlang);
+           } else if ($tneeded) {
+               if (str_contains($field->get_text(), "{mlang " . $this->langpack->targetlang)) {
+                   $buttonclass = 'badge-warning';
+                   $titlestring = get_string('needsupdate', 'local_deepler');
+               } else {
+                   $buttonclass = $canrephrase && $sametargetassource ? 'badge-primary' : 'badge-danger';
+                   $titlestring = get_string($canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
+                           'local_deepler',
+                           $this->langpack->targetlang);
+               }
 
-        } else {
-            $buttonclass = 'badge-success';
-            $titlestring = get_string('uptodate', 'local_deepler');
-        }
-        $titlestring = htmlentities($titlestring, ENT_HTML5);
-        // Thew little badge showing the status of the translations.
-        $bulletstatus = '<span id="previousTranslationStatus" title="' . $titlestring .
-                '" class="badge badge-pill ' . $buttonclass . '">&nbsp;</span>';
-        // The checkbox to select items for batch actions.
-        $checkbox = '<input title="' . $titlestring . '"' . " type='checkbox' data-key='$key'
-            class='mx-2'
-            data-action='local_deepler/checkbox'
-            disabled/>";
-        // Open translation item.
+           } else {
+               $buttonclass = 'badge-success';
+               $titlestring = get_string('uptodate', 'local_deepler');
+           }
+           $titlestring = htmlentities($titlestring, ENT_HTML5);
+           // Thew little badge showing the status of the translations.
+           $bulletstatus = '<span id="previousTranslationStatus" title="' . $titlestring .
+                   '" class="badge badge-pill ' . $buttonclass . '">&nbsp;</span>';
+           // The checkbox to select items for batch actions.
+           $checkbox = '<input title="' . $titlestring . '"' . " type='checkbox' data-key='$key'
+               class='mx-2'
+               data-action='local_deepler/checkbox'
+               disabled/>";
+           // Open translation item.
 
-        $editable = $iseditable ? $status : 'local_deepler/disabled';
-        if (!$iseditable) {
-            $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
-        }
-        $this->_form->addElement('html',
-                "<div title='$rowtitle' class='$cssclass d-flex align-items-start py-2' data-row-id='$isdbkey$key'
-                    data-status='$editable'>");
-        // Column 1 layout.
-        $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
-        $fieldtranslation = multilanger::findfieldstring($field);
-        $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>$fieldtranslation</small><br/>");
-        if (!$isdbkey && $iseditable) {
-            $this->_form->addElement('html', $bulletstatus);
-            $this->_form->addElement('html', $checkbox);
-        }
-        $this->_form->addElement('html', DIV_CLOSE);
-    }
+           $editable = $iseditable ? $status : 'local_deepler/disabled';
+           if (!$iseditable) {
+               $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
+           }
+           $this->_form->addElement('html',
+                   "<div title='$rowtitle' class='$cssclass d-flex align-items-start py-2' data-row-id='$isdbkey$key'
+                       data-status='$editable'>");
+           // Column 1 layout.
+           $this->_form->addElement('html', '<div class="col-1 px-0 local_deepler__selectorbox">');
+           $fieldtranslation = multilanger::findfieldstring($field);
+           $this->_form->addElement('html', "<small class='local_deepler__activityfield lh-sm'>$fieldtranslation</small><br/>");
+           if (!$isdbkey && $iseditable) {
+               $this->_form->addElement('html', $bulletstatus);
+               $this->_form->addElement('html', $checkbox);
+           }
+           $this->_form->addElement('html', DIV_CLOSE);
+       }*/
 
     /**
      * Granular row creation.
@@ -304,10 +303,11 @@ class translateform extends deeplerform {
         */
         global $PAGE;
         $renderer = $PAGE->get_renderer('local_deepler', 'translate');
-        $this->_form->addElement('html', $renderer->makefieldrow($field,
+        $data = new row_data($field,
                 $this->langpack,
                 $this->mlangfilter,
-                $this->editor));
+                $this->editor);
+        $this->_form->addElement('html', $renderer->makefieldrow($data));
 
     }
 

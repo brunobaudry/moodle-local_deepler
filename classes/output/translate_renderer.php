@@ -18,10 +18,12 @@ namespace local_deepler\output;
 
 use core_filters\text_filter;
 use local_deepler\local\data\field;
+use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\multilanger;
 use local_deepler\local\services\lang_helper;
+use local_deepler\local\services\utils;
 use renderer_base;
-
+use filter_multilang2\text_filter as Multilang2TextFilter;
 /**
  * Sub renderer for translate page stuff.
  *
@@ -33,114 +35,58 @@ class translate_renderer extends renderer_base {
     /**
      * Render field row.
      *
-     * @param \local_deepler\local\data\field $field
-     * @param \local_deepler\local\services\lang_helper $languagepack
-     * @param \core_filters\text_filter|\local_deepler\output\Multilang2TextFilter $mlangfilter
-     * @param string $editor
+     * @param \local_deepler\output\row_data $data
      * @return bool|string
-     * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      */
-    public function makefieldrow(field $field,
-            lang_helper $languagepack,
-            text_filter|Multilang2TextFilter $mlangfilter,
-            string $editor): bool|string {
-        $key = $field->getkey();
-        $keyid = $field->getkeyid();
-        $cssclass = '';
-        $tneeded = $field->get_status()->istranslationneeded();
-        $status = $tneeded ? 'needsupdate' : 'updated';
-        $iseditable = $field->iseditable();
-        if (!$iseditable) {
-            $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
-        }
-        // Hacky Special cases where the content is a db key (should never be translated).
-        $isdbkey = str_contains($field->get_table(), 'wiki_pages') && $field->get_tablefield() === 'title';
-        $buttonclass = '';
-        $titlestring = '';
-        $canrephrase = $languagepack->get_canimprove();
-        $sametargetassource = $languagepack->isrephrase();
-        $targetlang = $languagepack->targetlang;
-        $currentlang = $languagepack->currentlang;
-        if ((!$canrephrase && $sametargetassource) || $targetlang === '') {
-            $buttonclass = 'badge-dark';
-            $titlestring =
-                    get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler',
-                            $targetlang);
-        } else if ($tneeded) {
-            if (str_contains($field->get_text(), "{mlang " . $targetlang)) {
-                $buttonclass = 'badge-warning';
-                $titlestring = get_string('needsupdate', 'local_deepler');
-            } else {
-                $buttonclass = $canrephrase && $sametargetassource ? 'badge-primary' : 'badge-danger';
-                $titlestring = get_string($canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
-                        'local_deepler',
-                        $targetlang);
-            }
-
-        } else {
-            $buttonclass = 'badge-success';
-            $titlestring = get_string('uptodate', 'local_deepler');
-        }
-        // col 2
-        $multilanger = new multilanger($field->get_text());
-        $alllancodes = $multilanger->findmlangcodes();
-        $langcodes = [];
-        foreach ($alllancodes as $code) {
-            if (!in_array($code, $langcodes)) {
-                $langcodes[] = $code;
-            }
-        }
-        $hasotherandsourcetag = $multilanger->has_multilandcode_and_others($currentlang);
-        $alreadyhasmultilang = $multilanger->has_multilangs();
-        $multilangdisabled = $alreadyhasmultilang ? '' : 'disabled';
-        if ($alreadyhasmultilang) {
-            if ($hasotherandsourcetag) {
-                $badgeclass = 'danger';
-                $multilangtitlestring = get_string('warningsource', 'local_deepler',
-                        strtoupper($currentlang));
-            } else {
-                $multilangtitlestring = get_string('viewsource', 'local_deepler');
-                $badgeclass = 'info';
-            }
-            $multilangtitlestring .= ' (' . implode(', ', $alllancodes) . ')';
-        } else {
-            $multilangtitlestring = get_string('viewsourcedisabled', 'local_deepler');
-            $badgeclass = 'secondary';
-        }
-        $fieldtext = $field->get_text();
-        $trimedtext = trim($fieldtext);
-        $fieldformat = $field->get_format();
-        $data = [
-                'rowtitle' => $isdbkey ? get_string('translationdisabled', 'local_deepler') : '',
-                'cssclass' => $cssclass,
-                'flagandkey' => "$isdbkey$key",
-                'status' => $iseditable ? $status : 'local_deepler/disabled',
-                'fieldtranslation' => multilanger::findfieldstring($field),
-                'titlestring' => htmlentities($titlestring, ENT_HTML5),
-                'buttonclass' => $buttonclass,
-                'key' => $key,
-                'multilangtitlestring' => $multilangtitlestring,
-                'keyid' => $keyid,
-                'iseditable' => $iseditable,
-                'badgeclass' => $badgeclass,
-                'multilangdisabled' => $multilangdisabled,
-                'selecttitle' => get_string('specialsourcetext', 'local_deepler',
-                        strtoupper($currentlang)),
-                'sourceoptions' => $languagepack->preparehtmlsources(),
-                'rawsourcetext' => base64_encode($mlangfilter->filter($fieldtext) ?? ''),
-                'rawunfilterdtext' => base64_encode($trimedtext),
-                'mlangfiltered' => $mlangfilter->filter($field->get_displaytext()),
-                'trimedtext' => $trimedtext,
-                'table' => $field->get_table(),
-                'cmid' => $field->get_cmid(),
-                'id' => $field->get_id(),
-                'tablefield' => $field->get_tablefield(),
-                'tid' => $field->get_tid(),
-                'fieldformat' => $fieldformat,
-                'plaintextinput' => $fieldformat === 0,
-                'istiny' => $this->editor === 'tiny',
-        ];
-        return $this->render_from_template('local_deepler/translate_field', $data);
+    public function makefieldrow(row_data $data): bool|string {
+        return $this->render_from_template('local_deepler/translate_field', $data->export_for_template($this));
     }
+
+    /**
+     * @param \local_deepler\output\child_data $data
+     * @return bool|string
+     * @throws \core\exception\moodle_exception
+     */
+    public function makechild(child_data $data): bool|string {
+        /*$fields = $child->getfields();
+        $interfaces = class_implements($child);
+        $isiconic = in_array('local_deepler\local\data\interfaces\iconic_interface', $interfaces);
+        $iseditable = in_array('local_deepler\local\data\interfaces\editable_interface', $interfaces);
+        $istranslatable = in_array('local_deepler\local\data\interfaces\translatable_interface', $interfaces);
+        $childs = '';
+        $activitydesc = $istranslatable ? $this->makeactivitydesc($child, $mlangfilter) : '';
+
+
+        foreach ($child->getfields() as $f) {
+            try {
+                $rowdata = new row_data($f, $languagepack, $mlangfilter, $editor);
+                $childs .= $this->makefieldrow($rowdata);
+            } catch (Exception $e) {
+                continue;
+            }
+        }
+        $data = [
+                'hasheader' => $isiconic && $iseditable,
+                'fields' => $fields,
+                'id' => Utils::makehtmlid($activitydesc),
+                'link' => $iseditable ? $child->getlink() : '',
+                'itempurpose' => $isiconic ? $child->getpurpose() : '',
+                'icon' => $isiconic ? $child->geticon() : '',
+                'pluginname' => $isiconic ? $child->getpluginname() : '',
+                'activitydesc' => $activitydesc,
+                'childs' => $childs,
+        ];*/
+        return $this->render_from_template('local_deepler/translate_child', $data->export_for_template($this));
+    }
+
+    /**
+     * @param \local_deepler\output\module_data $data
+     * @return bool|string
+     * @throws \core\exception\moodle_exception
+     */
+    public function makemodule(module_data $data): bool|string {
+        return $this->render_from_template('local_deepler/translate_module', $data->export_for_template($this));
+    }
+
 }

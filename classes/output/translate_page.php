@@ -102,16 +102,15 @@ class translate_page implements renderable, templatable {
         $data = new stdClass();
         // Data for mustache template.
         $data->langstrings = $this->langpacks->preparestrings();
-        $data->targethtmloptions = $this->langpacks->preparehtmltagets();
+        // $data->targethtmloptions = $this->langpacks->preparehtmltagets();
         $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
-        $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
 
         // Hacky fix but the only way to adjust html...
         // This could be overridden in css and I might look at that fix for the future.
         $renderedform = $this->mform->render();
         $renderedform = str_replace('col-md-9', 'col-md-12', $renderedform);
         $data->mform = $renderedform;
-        $data->codes = $this->mform->get_langcodes();
+        // $data->codes = $this->mform->get_langcodes();
         // Set langs.
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
