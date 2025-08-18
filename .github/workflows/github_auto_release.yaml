@@ -22,7 +22,7 @@ jobs:
           node-version: '14'
       - name: Auto Release
         id: auto_release
-        uses: CupOfTea696/gh-action-auto-release@master
+        uses: CupOfTea696/gh-action-auto-release@a8f57f49a805d334ac7abe31b689e7ea24e1ee40
         with:
           title: "Release: v${{ env.VERSION }}"
           tag: "v${{ env.VERSION }}"
