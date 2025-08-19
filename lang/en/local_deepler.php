@@ -229,6 +229,8 @@ $string['scannedfieldsize_desc'] = 'Small text field are often limited in the da
  After translation, if the text is too big, the DB will through an error. Size this here based on your main language properties and
  the number on languages your Moodle supports';
 $string['seesetting'] = 'Advanced settings';
+$string['section:coursesettings'] = 'Course settings';
+$string['sectionall'] = 'ALL SECTIONS';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
 $string['showhiddenforstudents'] = 'Show "{$a}"';

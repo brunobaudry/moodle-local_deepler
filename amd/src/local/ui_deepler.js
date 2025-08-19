@@ -361,6 +361,9 @@ define(['core/log',
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
         }
+        if (e.target.closest(Selectors.actions.sectionSwitcher)) {
+            switchSection(e);
+        }
         if (e.target.closest(Selectors.actions.sourceSwitcher)) {
             switchSource(e);
         }
@@ -858,6 +861,19 @@ define(['core/log',
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
         searchParams.set("target_lang", e.target.value.replace(config.rephrasesymbol, '').trim());
+        window.location = url.toString();
+    };
+    /**
+     * Event listener to switch target lang.
+     * @param {Event} e
+     */
+    const switchSection = (e) => {
+        window.console.log('switchSection');
+        window.console.log(e.target.value);
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("section_id", e.target.value.trim());
         window.location = url.toString();
     };
     /**

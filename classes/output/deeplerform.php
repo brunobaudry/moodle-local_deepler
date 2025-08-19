@@ -41,7 +41,7 @@ abstract class deeplerform extends moodleform {
      */
     protected array $langcodes;
     /**
-     * @var mixed
+     * @var course
      */
     protected mixed $coursedata;
     /**

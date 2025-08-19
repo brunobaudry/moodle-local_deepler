@@ -34,6 +34,7 @@ export default {
         autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
         autoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span',
         targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+        sectionSwitcher: '[data-action="local_deepler/section-switcher"]',
         targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
         sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',

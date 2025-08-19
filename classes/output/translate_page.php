@@ -95,14 +95,15 @@ class translate_page implements renderable, templatable {
      * @param renderer_base $output
      * @return object
      * @throws \DeepL\DeepLException
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(renderer_base $output): stdClass {
 
         $this->output = $output;
         $data = new stdClass();
         // Data for mustache template.
         $data->langstrings = $this->langpacks->preparestrings();
-        $data->targethtmloptions = $this->langpacks->preparehtmltagets();
         $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
         $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
 
@@ -113,6 +114,10 @@ class translate_page implements renderable, templatable {
         $data->mform = $renderedform;
         $data->codes = $this->mform->get_langcodes();
         // Set langs.
+        $loadedsection = $this->coursedata->get_loadedsection();
+        $data->nosectionsloaded = $loadedsection === -99;
+        $data->allselected = $loadedsection === -1;
+        $data->sessionidnames = $this->coursedata->get_sections_id_name();
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
         $data->target_lang = $this->langpacks->targetlang === '' ? '?' : $this->langpacks->targetlang;
