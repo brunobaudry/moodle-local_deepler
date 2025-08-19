@@ -95,9 +95,12 @@ class section_data extends translate_data implements renderable, templatable {
         $title = $this->mlangfilter->filter($this->section->getsectionname());
 
         return [
+                'hasicon' => false,
+                'hasheader' => true,
+                'level' => '3',
                 'id' => 'local_deepler__section' . $sectionid,
                 'sectionid' => $sectionid,
-                'title' => $title,
+                'activitydesc' => $title,
                 'link' => $this->section->getlink(),
                 'visibilityclass' => 'local_deepler' . ($this->section->isvisible() ? 'visible' : 'invisible'),
                 'fields' => $fieldsrendered,

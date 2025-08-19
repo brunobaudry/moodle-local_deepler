@@ -38,12 +38,9 @@ class coursesettings_data extends translate_data implements renderable, templata
     private string $title;
     /** @var string */
     private string $link;
-    /** @var string */
-    private string $hclass;
+
     /** @var field[] */
     private array $fields;
-    /** @var string */
-    private string $index;
 
     /**
      * Construct.
@@ -54,23 +51,17 @@ class coursesettings_data extends translate_data implements renderable, templata
      * @param lang_helper $languagepack
      * @param Multilang2TextFilter|text_filter $mlangfilter
      * @param string $editor
-     * @param int $level Header level (e.g. 3)
-     * @param string $index Sectiondata index (default '0')
      */
     public function __construct(string $title,
             string $link,
             array $fields,
             lang_helper $languagepack,
             Multilang2TextFilter|text_filter $mlangfilter,
-            string $editor,
-            int $level = 3,
-            string $index = '0') {
+            string $editor) {
         parent::__construct($languagepack, $mlangfilter, $editor);
         $this->title = $title;
         $this->link = $link;
-        $this->hclass = 'h' . $level;
         $this->fields = $fields;
-        $this->index = $index;
     }
 
     /**
@@ -95,10 +86,11 @@ class coursesettings_data extends translate_data implements renderable, templata
         }
 
         return [
-            'title' => $this->title,
+                'hasicon' => false,
+                'level' => '3',
+                'activitydesc' => $this->title,
             'link' => $this->link,
             'id' => utils::makehtmlid($this->title),
-            'hclass' => $this->hclass,
             'index' => $this->index,
             'fields' => $fieldsrendered,
         ];

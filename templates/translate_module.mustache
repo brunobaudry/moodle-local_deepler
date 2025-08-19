@@ -36,19 +36,10 @@
     <small class="badge rounded-pill bg-secondary text-dark" data-action="local_deepler__hiddenfromstudents">
         <i class="fa fa-eye-slash" aria-hidden="true"></i>&nbsp;<small>{{#str}}hiddenfromstudents{{/str}}</small>
     </small>
-    <span id='{{id}}' class='h4 sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
-
-        <span class='{{itempurpose}} activity-icon activityiconcontainer smaller courseicon align-self-start mr-2'>
-            <img src='{{{icon}}}' alt='icon for {{pluginname}}' loading='lazy' decoding='async'/>
-        </span>
+    <span id='{{id}}' class='h{{level}} sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
+        {{> local_deepler/activity_icon }}
         {{activitydesc}}
-        <a class='small p-2'
-           id='local_deepler__sourcelink_{{id}}'
-           href='{{{link}}}'
-           target='_blank'
-           title='{{#str}}editbutton, local_deepler{{/str}}'>
-                    <i class='icon fa fa-pen fa-fw' aria-hidden='true'></i>
-                    </a>
+        {{> local_deepler/translate_editbutton }}
     </span>
     {{{fields}}}
     {{{childs}}}

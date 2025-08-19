@@ -85,6 +85,8 @@ class child_data extends translate_data implements renderable, templatable {
             }
         }
         return [
+                'hasicon' => true,
+                'level' => '5',
                 'hasheader' => $isiconic && $iseditable,
                 'id' => Utils::makehtmlid($activitydesc),
                 'link' => $iseditable ? $this->child->getlink() : '',

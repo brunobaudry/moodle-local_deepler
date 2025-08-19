@@ -86,6 +86,8 @@ class module_data extends translate_data implements templatable, renderable {
             }
         }
         return [
+                'hasicon' => true,
+                'level' => '4',
                 'childs' => $childsrendered,
                 'fields' => $fieldsrendered,
                 'activitydesc' => $activitydesc,

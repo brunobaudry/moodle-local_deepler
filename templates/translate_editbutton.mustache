@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template 'local_deepler'; // Full name of the plugin (used for diagnostics)./translate_childs
+    @template 'local_deepler'; // Full name of the plugin (used for diagnostics)./translate_editbutton
 
     Template purpose and description.
 
@@ -32,11 +32,10 @@
     {
     }
 }}
-{{#childs}}
-    <div class='section-item'>
-        {{#hasheader}}
-            {{> local_deepler/translate_header }}
-        {{/hasheader}}
-        {{{childs}}}
-    </div>
-{{/childs}}
+<a class='small p-2'
+   id='local_deepler__sourcelink'
+   href='{{{link}}}'
+   target='_blank'
+   title='{{#str}}editbutton, local_deepler{{/str}}'>
+    <i class='icon fa fa-pen fa-fw' aria-hidden='true'></i>
+</a>

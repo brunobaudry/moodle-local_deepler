@@ -62,23 +62,19 @@ abstract class deeplerform extends moodleform {
         // Get mlangfilter to filter text.
         $this->mlangfilter = $this->_customdata['mlangfilter'];
     }
+
     /**
      * Course first section (Course settings block).
      *
      * @param string $title Header title
      * @param string $link Edit link URL
      * @param array $settingfields Field items to render
-     * @param int $level Header level (default 3)
-     * @param string $index Sectiondata index (default '0')
      * @return void
-     * @throws \coding_exception
      */
-    protected function makecoursesetting(string $title, string $link, array $settingfields, int $level = 3,
-            string $index = '0'): void {
+    protected function makecoursesetting(string $title, string $link, array $settingfields): void {
         global $PAGE;
         $renderer = $PAGE->get_renderer('local_deepler', 'translate');
-        $data = new coursesettings_data($title, $link, $settingfields, $this->langpack, $this->mlangfilter, $this->editor, $level,
-                $index);
+        $data = new coursesettings_data($title, $link, $settingfields, $this->langpack, $this->mlangfilter, $this->editor);
         $this->_form->addElement('html', $renderer->makecoursesetting($data));
     }
 

@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template 'local_deepler'; // Full name of the plugin (used for diagnostics)./translate_childs
+    @template 'local_deepler'; // Full name of the plugin (used for diagnostics)./translate_header
 
     Template purpose and description.
 
@@ -32,11 +32,12 @@
     {
     }
 }}
-{{#childs}}
-    <div class='section-item'>
-        {{#hasheader}}
-            {{> local_deepler/translate_header }}
-        {{/hasheader}}
-        {{{childs}}}
-    </div>
-{{/childs}}
+<div class='course-section-header d-flex'>
+        <span id='{{id}}' class='h{{level}} sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
+            {{#hasicon}}
+                {{> local_deepler/activity_icon }}
+            {{/hasicon}}
+            {{activitydesc}}
+            {{> local_deepler/translate_editbutton }}
+        </span>
+</div>
