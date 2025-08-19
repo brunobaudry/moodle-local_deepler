@@ -58,7 +58,7 @@ class tokens_renderer extends plugin_renderer_base {
         $data['records'] = [];
 
         foreach ($records as $record) {
-            $deleteurl = new moodle_url('/admin/settings.php', [
+            $deleteurl = new moodle_url('/local/deepler/tokenmanager.php', [
                     'section' => 'local_deepler',
                     'deletetoken' => $record->id,
                     'sesskey' => sesskey(),

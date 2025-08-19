@@ -25,7 +25,6 @@ use stdClass;
 use Symfony\Component\Yaml\Yaml;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
 require_once(__DIR__ . '/../../vendor/autoload.php');
 
 /**
