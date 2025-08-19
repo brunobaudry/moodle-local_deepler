@@ -64,22 +64,17 @@ class module_data extends translate_data implements templatable, renderable {
         $fields = $this->module->getfields();
         $fieldsrendered = '';
         if (!empty($fields)) {
-            /** @var field $field */
+            /** @var field $f */
             foreach ($fields as $f) {
-                $rowdata = new row_data($f, $this->languagepack, $this->mlangfilter, $this->editor);
-                $fieldsrendered .= $renderer->makefieldrow($rowdata);
+                try {
+                    $rowdata = new row_data($f, $this->languagepack, $this->mlangfilter, $this->editor);
+                    $fieldsrendered .= $renderer->makefieldrow($rowdata);
+                } catch (Exception $e) {
+                    continue;
+                }
             }
         }
 
-        /** @var field $f */
-        foreach ($fields as $f) {
-            try {
-                $rowdata = new row_data($f, $this->languagepack, $this->mlangfilter, $this->editor);
-                $childs .= $renderer->makefieldrow($rowdata);
-            } catch (Exception $e) {
-                continue;
-            }
-        }
         $childs = $this->module->getchilds();
         $childsrendered = '';
         foreach ($childs as $c) {
@@ -91,16 +86,15 @@ class module_data extends translate_data implements templatable, renderable {
             }
         }
         return [
-                'childs ' => $childsrendered,
-                'fields ' => $fieldsrendered,
+                'childs' => $childsrendered,
+                'fields' => $fieldsrendered,
                 'activitydesc' => $activitydesc,
                 'link' => $this->module->getlink(),
                 'id' => Utils::makehtmlid($activitydesc),
                 'itempurpose' => $this->module->getpurpose(),
                 'icon' => $this->module->geticon(),
                 'pluginname' => $this->module->getpluginname(),
-                'visibilityclass' => 'local_deepler' . ($this->module
-                                ->isvisible() ? 'visible' : 'invisible'),
+                'visibilityclass' => 'local_deepler' . ($this->module->isvisible() ? 'visible' : 'invisible'),
         ];
     }
 }

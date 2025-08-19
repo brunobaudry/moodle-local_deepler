@@ -49,34 +49,6 @@ class translate_renderer extends renderer_base {
      * @throws \core\exception\moodle_exception
      */
     public function makechild(child_data $data): bool|string {
-        /*$fields = $child->getfields();
-        $interfaces = class_implements($child);
-        $isiconic = in_array('local_deepler\local\data\interfaces\iconic_interface', $interfaces);
-        $iseditable = in_array('local_deepler\local\data\interfaces\editable_interface', $interfaces);
-        $istranslatable = in_array('local_deepler\local\data\interfaces\translatable_interface', $interfaces);
-        $childs = '';
-        $activitydesc = $istranslatable ? $this->makeactivitydesc($child, $mlangfilter) : '';
-
-
-        foreach ($child->getfields() as $f) {
-            try {
-                $rowdata = new row_data($f, $languagepack, $mlangfilter, $editor);
-                $childs .= $this->makefieldrow($rowdata);
-            } catch (Exception $e) {
-                continue;
-            }
-        }
-        $data = [
-                'hasheader' => $isiconic && $iseditable,
-                'fields' => $fields,
-                'id' => Utils::makehtmlid($activitydesc),
-                'link' => $iseditable ? $child->getlink() : '',
-                'itempurpose' => $isiconic ? $child->getpurpose() : '',
-                'icon' => $isiconic ? $child->geticon() : '',
-                'pluginname' => $isiconic ? $child->getpluginname() : '',
-                'activitydesc' => $activitydesc,
-                'childs' => $childs,
-        ];*/
         return $this->render_from_template('local_deepler/translate_child', $data->export_for_template($this));
     }
 
@@ -89,4 +61,21 @@ class translate_renderer extends renderer_base {
         return $this->render_from_template('local_deepler/translate_module', $data->export_for_template($this));
     }
 
+    /**
+     * @param \local_deepler\output\section_data $data
+     * @return bool|string
+     * @throws \core\exception\moodle_exception
+     */
+    public function makesection(section_data $data): bool|string {
+        return $this->render_from_template('local_deepler/translate_section', $data->export_for_template($this));
+    }
+
+    /**
+     * @param \local_deepler\output\coursesettings_data $data
+     * @return bool|string
+     * @throws \core\exception\moodle_exception
+     */
+    public function makecoursesetting(coursesettings_data $data): bool|string {
+        return $this->render_from_template('local_deepler/translate_coursesettings', $data->export_for_template($this));
+    }
 }

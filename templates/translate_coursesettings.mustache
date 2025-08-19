@@ -1,0 +1,46 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template 'local_deepler/translate_coursesettings'
+
+    Renders the course settings block at the top of the translate page.
+
+    Context variables required for this template:
+    * title - header title
+    * link - edit link
+    * id - header id attribute
+    * hclass - header level class (e.g. h3)
+    * index - the sectiondata index (typically "0")
+    * fields (HTML) - rendered field rows
+}}
+<div class='section-item'>
+    <div class='course-section-header d-flex'>
+        <span id='{{id}}' class='{{hclass}} sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
+            {{title}}
+            <a class='small p-2'
+               id='local_deepler__sourcelink'
+               href='{{{link}}}'
+               target='_blank'
+               title='{{#str}}editbutton, local_deepler{{/str}}'>
+                <i class='icon fa fa-pen fa-fw' aria-hidden='true'></i>
+            </a>
+        </span>
+    </div>
+    <div id='sectiondata[{{index}}]' class='local_deepler__sectiondata'>
+        {{{fields}}}
+    </div>
+</div>
