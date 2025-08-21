@@ -74,6 +74,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * compatiblelangs
   * mform
   * version
+  * sessionidnames
 
   Example context (json):
   {
@@ -344,6 +345,23 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                    class="custom-control-input local_deepler__show-hidden"
                    data-action="local_deepler/show-hidden">
             <label class="custom-control-label" for="show-hidden">{{showhiddenforstudents}}</label>
+        </div>
+        <div class="custom-control custom-switch mr-3">
+            <select
+                    id="select-target-language"
+                    name="select-target-language"
+                    class="local_deepler__sectionswitcher form-control"
+                    data-action="local_deepler/section-switcher"
+            >
+
+
+
+                <option value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
+                <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>{{#str}}section:coursesettings, local_deepler{{/str}}</option>
+                {{#sessionidnames}}
+                    <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                {{/sessionidnames}}
+            </select>
         </div>
     </div>
 

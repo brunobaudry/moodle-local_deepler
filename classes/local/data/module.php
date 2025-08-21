@@ -34,6 +34,10 @@ use moodle_url;
 class module implements translatable_interface, editable_interface, iconic_interface, visibility_interface {
     /** @var \cm_info */
     private cm_info $cm;
+
+    public function get_cm(): cm_info {
+        return $this->cm;
+    }
     /** @var string */
     private string $modname;
     /** @var \moodle_url */

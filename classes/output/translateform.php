@@ -16,9 +16,6 @@
 
 namespace local_deepler\output;
 defined('MOODLE_INTERNAL') || die();
-/**
- *
- */
 define('DIV_CLOSE', '</div>');
 global $CFG;
 
@@ -76,6 +73,15 @@ class translateform extends deeplerform {
                 $this->coursedata->getfields(),
                 3,
                 '0');
+        // Create course settings section only if no section is selected.
+        if ($this->coursedata->get_loadedsection() < 0) {
+            $this->makecoursesetting(
+                    get_string('settings'),
+                    $this->coursedata->getlink(),
+                    $this->coursedata->getfields(),
+                    3,
+                    '0');
+        }
         // Create sections.
         $this->makesections($this->coursedata->getsections());
         // Close form.
