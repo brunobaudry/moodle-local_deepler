@@ -54,9 +54,6 @@ try {
 } catch (moodle_exception $exception) {
     $courseid = required_param('course_id', PARAM_INT);
 }
-// Section -99 is one selected. Section -1 is all else proper section id.
-$sectionid = optional_param('section_id', -99, PARAM_INT);
-$moduleid = optional_param('module_id', -99, PARAM_INT);
 // Load the cours in DB.
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 // Setup page.
@@ -111,7 +108,7 @@ try {
         // Adding page JS.
         $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
         // Create the structure.
-        $coursedata = new course($course, $sectionid, $moduleid);
+        $coursedata = new course($course);
         // Build the page.
         $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release, $jsconfig->userPrefs);
         echo $output->render($renderable);

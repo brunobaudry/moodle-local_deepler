@@ -49,16 +49,6 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     private base $format;
     /** @var section[] of sections titles (and id / order) for display */
     private array $sections;
-    /**
-     * @var \section_info[]
-     */
-    private array $section_info_all;
-    /** @var int */
-    private int $loadedsectionid;
-    /** @var int */
-    private int $loadeddmoduleid;
-    /** @var \local_deepler\local\data\section */
-    private section $loadedsection;
 
     /**
      * Constructor.
@@ -67,10 +57,8 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @throws \core\exception\moodle_exception
      * @throws \moodle_exception
      */
-    public function __construct(stdClass $course, int $lodadedsection = -99, int $loadeddmodule = -99) {
+    public function __construct(stdClass $course) {
         global $CFG;
-        $this->loadeddmodule = $loadeddmodule;
-        $this->loadedsectionid = $lodadedsection;
         // Load yaml config of known field definitions.
         if (empty(field::$additionals)) {
             $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
@@ -135,44 +123,10 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @throws \core\exception\moodle_exception
      */
     private function populatesections(): void {
-        $this->section_info_all = $this->course->get_section_info_all();
+        $section_info_all = $this->course->get_section_info_all();
         /** @var section_info $sessioninfo */
-        foreach ($this->section_info_all as $sectioninfo) {
-            // If selected section is -1 then load all, if -99 none else load single.
-            if ($this->loadedsectionid !== -1 && $sectioninfo->id != $this->loadedsectionid) {
-                continue;
-            }
-            $this->sections[$sectioninfo->sectionnum] = new section($sectioninfo, $this->format, $this->loadeddmodule);
-            if ($this->loadedsectionid >= 0) {
-                $this->loadedsection = $this->sections[$sectioninfo->sectionnum];
-            }
+        foreach ($section_info_all as $sectioninfo) {
+            $this->sections[$sectioninfo->section] = new section($sectioninfo, $this->format);
         }
-    }
-
-    /**
-     * Map the names of sections to ids.
-     *
-     * @return array
-     */
-    public function get_sections_id_name(): array {
-        $idnames = [];
-        /** @var section_info $sessioninfo */
-        foreach ($this->section_info_all as $sessioninfo) {
-            $idnames[$sessioninfo->sectionnum] =
-                    ['name' => $sessioninfo->name ?? $this->format->get_default_section_name($sessioninfo),
-                            'id' => $sessioninfo->id,
-                            'selected' => $sessioninfo->id == $this->loadedsectionid,
-                    ];
-        }
-        return $idnames;
-    }
-
-    /**
-     * Getter for loadedsection.
-     *
-     * @return int
-     */
-    public function get_loadedsection(): int {
-        return $this->loadedsectionid;
     }
 }

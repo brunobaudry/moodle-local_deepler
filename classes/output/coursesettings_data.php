@@ -87,6 +87,7 @@ class coursesettings_data extends translate_data implements renderable, templata
         }
 
         return [
+                'hasheader' => true,
                 'hasicon' => false,
                 'level' => '3',
                 'activitydesc' => $this->title,

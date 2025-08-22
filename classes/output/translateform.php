@@ -67,12 +67,10 @@ class translateform extends deeplerform {
         // Open Form local_deepler__form.
         $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
         // Create course settings section only if no section is selected.
-        if ($this->coursedata->get_loadedsection() < 0) {
-            $this->makecoursesetting(
-                    get_string('settings'),
-                    $this->coursedata->getlink(),
-                    $this->coursedata->getfields());
-        }
+        $this->makecoursesetting(
+                get_string('settings'),
+                $this->coursedata->getlink(),
+                $this->coursedata->getfields());
         // Create sections.
         $this->makesections($this->coursedata->getsections());
         // Close form.
