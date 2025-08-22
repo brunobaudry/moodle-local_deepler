@@ -60,12 +60,13 @@ class section implements translatable_interface, editable_interface, visibility_
      *
      * @param \section_info $sectioninfo
      * @param \core_courseformat\base $courseformat
+     * @param int $loadeddmodule
      * @throws \coding_exception
      * @throws \core\exception\moodle_exception
-     * @throws \dml_exception
      */
-    public function __construct(section_info $sectioninfo, base $courseformat) {
+    public function __construct(section_info $sectioninfo, base $courseformat, int $loadeddmodule) {
         global $CFG;
+        $this->loadeddmoduleid = $loadeddmodule;
         $this->si = $sectioninfo;
         $this->link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $this->si->id]);
         $this->courseformat = $courseformat;
@@ -144,6 +145,10 @@ class section implements translatable_interface, editable_interface, visibility_
             $sectioncms = self::get_sequence_cm_infos($this->si);
         }
         foreach ($sectioncms as $cmid => $coursemodule) {
+            // Filter modules to load.
+            if ($this->loadeddmoduleid != -1 && $this->loadeddmoduleid != $cmid) {
+                continue;
+            }
             $this->modules[$cmid] = new module($coursemodule);
         }
         return $this->modules;

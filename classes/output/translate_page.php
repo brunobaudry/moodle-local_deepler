@@ -114,6 +114,10 @@ class translate_page implements renderable, templatable {
         $data->mform = $renderedform;
         // $data->codes = $this->mform->get_langcodes();
         // Set langs.
+        $loadedsection = $this->coursedata->get_loadedsection();
+        $data->nosectionsloaded = $loadedsection === -99;
+        $data->allselected = $loadedsection === -1;
+        $data->sessionidnames = $this->coursedata->get_sections_id_name();
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
         $data->target_lang = $this->langpacks->targetlang === '' ? '?' : $this->langpacks->targetlang;
