@@ -52,7 +52,8 @@ class coursesettings_data extends translate_data implements renderable, templata
      * @param Multilang2TextFilter|text_filter $mlangfilter
      * @param string $editor
      */
-    public function __construct(string $title,
+    public function __construct(
+            string $title,
             string $link,
             array $fields,
             lang_helper $languagepack,
