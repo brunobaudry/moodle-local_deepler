@@ -56,7 +56,7 @@ try {
 }
 // Section -99 is one selected. Section -1 is all else proper section id.
 $sectionid = optional_param('section_id', -99, PARAM_INT);
-$moduleid = optional_param('module_id', -99, PARAM_INT);
+$moduleid = optional_param('module_id', -1, PARAM_INT);
 // Load the cours in DB.
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 // Setup page.

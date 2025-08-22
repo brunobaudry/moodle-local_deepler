@@ -56,6 +56,15 @@ class section implements translatable_interface, editable_interface, visibility_
     private int $loadeddmoduleid;
 
     /**
+     * Getter.
+     *
+     * @return int
+     */
+    public function get_loadeddmoduleid(): int {
+        return $this->loadeddmoduleid;
+    }
+
+    /**
      * Constructor
      *
      * @param \section_info $sectioninfo
@@ -109,11 +118,11 @@ class section implements translatable_interface, editable_interface, visibility_
         /** @var \local_deepler\local\data\module $module */
         foreach ($this->modules as $module) {
             $cm = $module->get_cm();
-            $cmid = $cm->id;
-            $idnames[$cmid] =
+            $idnames[] =
                     [
+                            'id' => $cm->id,
                             'name' => $cm->name,
-                            'selected' => $cmid == $this->loadeddmoduleid,
+                            'selected' => $cm->id == $this->loadeddmoduleid,
                     ];
         }
         return $idnames;

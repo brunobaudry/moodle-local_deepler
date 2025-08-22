@@ -57,8 +57,17 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     private int $loadedsectionid;
     /** @var int */
     private int $loadeddmoduleid;
-    /** @var \local_deepler\local\data\section */
-    private section $loadedsection;
+    /** @var int */
+    private int $loadedsectionnum;
+
+    /**
+     * Getter.
+     *
+     * @return int
+     */
+    public function get_loadedsectionnum(): int {
+        return $this->loadedsectionnum;
+    }
 
     /**
      * Constructor.
@@ -70,7 +79,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     public function __construct(stdClass $course, int $lodadedsection = -99, int $loadeddmodule = -99) {
         global $CFG;
         $this->loadeddmodule = $loadeddmodule;
-        $this->loadedsectionid = $lodadedsection;
+        $this->loadedsectionnum = $this->loadedsectionid = $lodadedsection;
         // Load yaml config of known field definitions.
         if (empty(field::$additionals)) {
             $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
@@ -144,7 +153,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
             }
             $this->sections[$sectioninfo->sectionnum] = new section($sectioninfo, $this->format, $this->loadeddmodule);
             if ($this->loadedsectionid >= 0) {
-                $this->loadedsection = $this->sections[$sectioninfo->sectionnum];
+                $this->loadedsectionnum = $sectioninfo->sectionnum;
             }
         }
     }

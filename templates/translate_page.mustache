@@ -75,6 +75,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * mform
   * version
   * sessionidnames
+  * modulesidnames
 
   Example context (json):
   {
@@ -348,8 +349,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div class="custom-control custom-switch mr-3">
             <select
-                    id="select-target-language"
-                    name="select-target-language"
+                    id="select-section"
+                    name="select-section"
                     class="local_deepler__sectionswitcher form-control"
                     data-action="local_deepler/section-switcher"
             >
@@ -359,7 +360,23 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
                 {{/sessionidnames}}
             </select>
+
         </div>
+        {{#hasmodulelist}}
+            <div class="custom-control custom-switch mr-3">
+                <select
+                        id="select-module"
+                        name="select-module"
+                        class="local_deepler__moduleswitcher form-control"
+                        data-action="local_deepler/module-switcher"
+                >
+                    <option value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
+                    {{#modulesidnames}}
+                        <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                    {{/modulesidnames}}
+                </select>
+            </div>
+        {{/hasmodulelist}}
     </div>
 
     <div class="row pb-2 pt-3 align-items-center">

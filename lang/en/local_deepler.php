@@ -194,6 +194,7 @@ $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
 $string['modeltypequalityoptimized'] = 'quality optimized';
+$string['moduleall'] = 'ALL MODULES';
 $string['needsupdate'] = 'Needs update';
 $string['neverrephrased'] = 'This text was never improved';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';

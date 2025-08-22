@@ -364,6 +364,9 @@ define(['core/log',
         if (e.target.closest(Selectors.actions.sectionSwitcher)) {
             switchSection(e);
         }
+        if (e.target.closest(Selectors.actions.moduleSwitcher)) {
+            switchModules(e);
+        }
         if (e.target.closest(Selectors.actions.sourceSwitcher)) {
             switchSource(e);
         }
@@ -864,7 +867,7 @@ define(['core/log',
         window.location = url.toString();
     };
     /**
-     * Event listener to switch target lang.
+     * Event listener to filter sections.
      * @param {Event} e
      */
     const switchSection = (e) => {
@@ -874,6 +877,22 @@ define(['core/log',
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
         searchParams.set("section_id", e.target.value.trim());
+        if (searchParams.has("module_id")) {
+            searchParams.delete("module_id");
+        }
+        window.location = url.toString();
+    };
+    /**
+     * Event listener to filter modules.
+     * @param {Event} e
+     */
+    const switchModules = (e) => {
+        window.console.log('switchModules');
+        window.console.log(e.target.value);
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("module_id", e.target.value.trim());
         window.location = url.toString();
     };
     /**
