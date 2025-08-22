@@ -194,6 +194,7 @@ $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
 $string['modeltypequalityoptimized'] = 'quality optimized';
+$string['module:select:label'] = 'Select activities';
 $string['moduleall'] = 'ALL MODULES';
 $string['needsupdate'] = 'Needs update';
 $string['neverrephrased'] = 'This text was never improved';
@@ -231,6 +232,7 @@ $string['scannedfieldsize_desc'] = 'Small text field are often limited in the da
  the number on languages your Moodle supports';
 $string['seesetting'] = 'Advanced settings';
 $string['section:coursesettings'] = 'Course settings';
+$string['section:select:label'] = 'Select sections';
 $string['sectionall'] = 'ALL SECTIONS';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';

@@ -877,8 +877,8 @@ define(['core/log',
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
         searchParams.set("section_id", e.target.value.trim());
-        if (searchParams.has("module_id")) {
-            searchParams.delete("module_id");
+        if (searchParams.has("cmid")) {
+            searchParams.delete("cmid");
         }
         window.location = url.toString();
     };
@@ -892,7 +892,7 @@ define(['core/log',
         let url = new URL(window.location.href);
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
-        searchParams.set("module_id", e.target.value.trim());
+        searchParams.set("cmid", e.target.value.trim());
         window.location = url.toString();
     };
     /**

@@ -65,7 +65,7 @@ final class section_test extends advanced_testcase {
     public function test_constructor(): void {
         $this->resetAfterTest(true);
 
-        $section = new section($this->sectioninfos[0], $this->courseformat);
+        $section = new section($this->sectioninfos[0], $this->courseformat, -1);
 
         $this->assertInstanceOf(section::class, $section);
     }
@@ -79,7 +79,7 @@ final class section_test extends advanced_testcase {
     public function test_isvisible(): void {
         $this->resetAfterTest(true);
 
-        $section = new section($this->sectioninfos[0], $this->courseformat);
+        $section = new section($this->sectioninfos[0], $this->courseformat, -1);
 
         $this->assertTrue($section->isvisible());
     }
@@ -94,7 +94,7 @@ final class section_test extends advanced_testcase {
     public function test_getsectionname(): void {
         $this->resetAfterTest(true);
 
-        $section = new section($this->sectioninfos[1], $this->courseformat);
+        $section = new section($this->sectioninfos[1], $this->courseformat, -1);
 
         $this->assertEquals('', $section->getsectionname());
     }
@@ -108,7 +108,7 @@ final class section_test extends advanced_testcase {
     public function test_getfields(): void {
         $this->resetAfterTest(true);
 
-        $section = new section($this->sectioninfos[0], $this->courseformat);
+        $section = new section($this->sectioninfos[0], $this->courseformat, -1);
 
         $fields = $section->getfields();
         $this->assertIsArray($fields);
@@ -123,7 +123,7 @@ final class section_test extends advanced_testcase {
     public function test_getmodules(): void {
         $this->resetAfterTest(true);
 
-        $section = new section($this->sectioninfos[0], $this->courseformat);
+        $section = new section($this->sectioninfos[0], $this->courseformat, -1);
 
         $modules = $section->populatemodules();
         $this->assertIsArray($modules);
@@ -142,7 +142,7 @@ final class section_test extends advanced_testcase {
         global $CFG;
         $CFG->wwwroot = 'http://localhost';
         $sectionid = $this->sectioninfos[0]->id;
-        $section = new section($this->sectioninfos[0], $this->courseformat);
+        $section = new section($this->sectioninfos[0], $this->courseformat, -1);
 
         $link = $section->getlink();
         $this->assertEquals('http://localhost/course/editsection.php?id=' . $sectionid, $link);
@@ -158,8 +158,8 @@ final class section_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $sectionid = $this->sectioninfos[0]->id;
         $sectionid1 = $this->sectioninfos[1]->id;
-        $section = new section($this->sectioninfos[0], $this->courseformat);
-        $section1 = new section($this->sectioninfos[1], $this->courseformat);
+        $section = new section($this->sectioninfos[0], $this->courseformat, -1);
+        $section1 = new section($this->sectioninfos[1], $this->courseformat, -1);
 
         $this->assertEquals($sectionid, $section->getid());
         $this->assertEquals($sectionid1, $section1->getid());

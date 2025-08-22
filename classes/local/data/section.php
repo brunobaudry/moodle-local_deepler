@@ -39,6 +39,17 @@ class section implements translatable_interface, editable_interface, visibility_
 
     /** @var module[] array of module */
     private array $modules;
+    /**
+     * @var \cm_info[]
+     */
+    private array $sectioncms;
+
+    /**
+     * @return \cm_info[]
+     */
+    public function get_sectioncms(): array {
+        return $this->sectioncms;
+    }
 
     /**
      * Getter for modules.
@@ -148,14 +159,14 @@ class section implements translatable_interface, editable_interface, visibility_
     public function populatemodules(): array {
         if (method_exists($this->si, 'get_sequence_cm_infos')) {
             // Moodle 405.
-            $sectioncms = $this->si->get_sequence_cm_infos();
+            $this->sectioncms = $this->si->get_sequence_cm_infos();
         } else {
             // Moodle 401 to 404.
-            $sectioncms = self::get_sequence_cm_infos($this->si);
+            $this->sectioncms = self::get_sequence_cm_infos($this->si);
         }
-        foreach ($sectioncms as $cmid => $coursemodule) {
+        foreach ($this->sectioncms as $cmid => $coursemodule) {
             // Filter modules to load.
-            if ($this->loadeddmoduleid != -1 && $this->loadeddmoduleid != $cmid) {
+            if ($this->loadeddmoduleid != -1 && $this->loadeddmoduleid != $coursemodule->id) {
                 continue;
             }
             $this->modules[$cmid] = new module($coursemodule);

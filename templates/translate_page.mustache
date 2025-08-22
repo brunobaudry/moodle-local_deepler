@@ -324,6 +324,45 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
     </div>
 </div>
+
+<div class="container-fluid bg-secondary">
+    <div class="row">
+        <div class="custom-control custom-switch col-6">
+            <label for="select-section" class="form-label">{{#str}}section:select:label, local_deepler{{/str}}</label>
+            <select
+                    id="select-section"
+                    name="select-section"
+                    class="local_deepler__sectionswitcher form-control"
+                    data-action="local_deepler/section-switcher"
+            >
+                <option value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
+                <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>{{#str}}section:coursesettings, local_deepler{{/str}}</option>
+                {{#sessionidnames}}
+                    <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                {{/sessionidnames}}
+            </select>
+
+        </div>
+        {{#hasmodulelist}}
+            <div class="custom-control custom-switch col-6">
+                <label for="select-module" class="form-label">{{#str}}module:select:label, local_deepler{{/str}}</label>
+                <select
+                        id="select-module"
+                        name="select-module"
+                        class="local_deepler__moduleswitcher form-control"
+                        data-action="local_deepler/module-switcher"
+                >
+                    <option value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
+                    {{#modulesidnames}}
+                        <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                    {{/modulesidnames}}
+                </select>
+            </div>
+        {{/hasmodulelist}}
+    </div>
+
+</div>
+
 <div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">
     <div class="d-flex flex-wrap align-items-center pl-5 pt-2 pb-0" id="local_deepler-translate-header-filter">
         <span class="mr-3">{{#str}}filters,local_deepler{{/str}}:</span>
@@ -347,39 +386,11 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                    data-action="local_deepler/show-hidden">
             <label class="custom-control-label" for="show-hidden">{{showhiddenforstudents}}</label>
         </div>
-        <div class="custom-control custom-switch mr-3">
-            <select
-                    id="select-section"
-                    name="select-section"
-                    class="local_deepler__sectionswitcher form-control"
-                    data-action="local_deepler/section-switcher"
-            >
-                <option value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
-                <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>{{#str}}section:coursesettings, local_deepler{{/str}}</option>
-                {{#sessionidnames}}
-                    <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
-                {{/sessionidnames}}
-            </select>
 
-        </div>
-        {{#hasmodulelist}}
-            <div class="custom-control custom-switch mr-3">
-                <select
-                        id="select-module"
-                        name="select-module"
-                        class="local_deepler__moduleswitcher form-control"
-                        data-action="local_deepler/module-switcher"
-                >
-                    <option value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
-                    {{#modulesidnames}}
-                        <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
-                    {{/modulesidnames}}
-                </select>
-            </div>
-        {{/hasmodulelist}}
     </div>
-
+    <hr>
     <div class="row pb-2 pt-3 align-items-center">
+
         <div class="col-1 px-5">
             <div class="form-check" id="local_deepler-translate-header-select-all">
                 <input

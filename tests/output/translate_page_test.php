@@ -22,6 +22,7 @@ use advanced_testcase;
 use core_filters\text_filter;
 use filter_multilang2;
 use local_deepler\local\data\course;
+use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
 use ReflectionClass;
 use renderer_base;
@@ -90,6 +91,15 @@ final class translate_page_test extends advanced_testcase {
         }
         $coursedata = $this->createMock(course::class);
         $languagepack = $this->createMock(lang_helper::class);
+        $sectionclass = $this->createMock(section::class);
+        $section1 = $this->createMock(section::class);
+        $section1->method('get_loadeddmoduleid')->willReturn(1);
+
+        $section2 = $this->createMock(section::class);
+        $section2->method('get_loadeddmoduleid')->willReturn(2);
+
+        $coursedata->method('getsections')->willReturn([$section1, $section2]);
+
         $languagepack->currentlang = 'en';
         $languagepack->targetlang = 'fr';
 
@@ -102,7 +112,6 @@ final class translate_page_test extends advanced_testcase {
 
         $this->assertIsObject($data);
         $this->assertTrue(property_exists($data, 'langstrings'));
-        $this->assertTrue(property_exists($data, 'targethtmloptions'));
         $this->assertTrue(property_exists($data, 'targetlangs'));
         $this->assertTrue(property_exists($data, 'sourcelangs'));
         $this->assertTrue(property_exists($data, 'mform'));
@@ -113,7 +122,21 @@ final class translate_page_test extends advanced_testcase {
         $this->assertTrue(property_exists($data, 'mlangfilter'));
         $this->assertTrue(property_exists($data, 'escapelatexbydefault'));
         $this->assertTrue(property_exists($data, 'escapeprebydefault'));
+        $this->assertTrue(property_exists($data, 'hideiframesdefault'));
+        $this->assertTrue(property_exists($data, 'canimprove'));
+        $this->assertTrue(property_exists($data, 'supportedlangs'));
+        $this->assertTrue(property_exists($data, 'rephrasesymbol'));
+        $this->assertTrue(property_exists($data, 'hidecompatible'));
+        $this->assertTrue(property_exists($data, 'compatiblelangs'));
+        $this->assertTrue(property_exists($data, 'showhiddenforstudents'));
         $this->assertTrue(property_exists($data, 'version'));
+        $this->assertTrue(property_exists($data, 'nosectionsloaded'));
+        $this->assertTrue(property_exists($data, 'allselected'));
+        $this->assertTrue(property_exists($data, 'sessionidnames'));
+        $this->assertTrue(property_exists($data, 'hasmodulelist'));
+        $this->assertTrue(property_exists($data, 'modulesidnames'));
+        $this->assertTrue(property_exists($data, 'anymoduleselected'));
+        $this->assertTrue(property_exists($data, 'glossayselector'));
     }
 
     /**

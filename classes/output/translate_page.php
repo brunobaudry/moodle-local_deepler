@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use core_courseformat\base;
 use local_deepler\local\data\course;
 use local_deepler\local\services\lang_helper;
 use renderable;
@@ -117,7 +118,8 @@ class translate_page implements renderable, templatable {
         $loadedsection = $this->coursedata->get_loadedsection();
         $data->nosectionsloaded = $loadedsection === -99;
         $data->allselected = $loadedsection === -1;
-        $data->sessionidnames = $this->prepare_sectionmenu($this->coursedata->getsections(), $loadedsection);
+        $data->sessionidnames = $this->prepare_sectionmenu($this->coursedata->get_section_info_all(), $loadedsection,
+                $this->coursedata->get_format());
         $data->hasmodulelist = false;
         $data->modulesidnames = null;
         $data->anymoduleselected = false;
@@ -125,15 +127,9 @@ class translate_page implements renderable, templatable {
             $data->hasmodulelist = true;
             $selectedsection = $this->coursedata->getsections()[$this->coursedata->get_loadedsectionnum()];
             $data->anymoduleselected = $selectedsection->get_loadeddmoduleid() >= 0;
-            $data->modulesidnames = $this->prepare_modulemenu($selectedsection->get_modules(),
+            $data->modulesidnames = $this->prepare_modulemenu($selectedsection->get_sectioncms(),
                     $selectedsection->get_loadeddmoduleid());
         }
-        //$sectionsloaded = $this->coursedata->getsections();
-        //foreach ($sectionsloaded as $section) {
-        //    $id = $section->getid();
-        //    $name = $section->getsectionname();
-        //}
-        //$data->modulesidnames = $this->coursedata->get_loadedsection()->;
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
         $data->target_lang = $this->langpacks->targetlang === '' ? '?' : $this->langpacks->targetlang;
@@ -163,38 +159,35 @@ class translate_page implements renderable, templatable {
     }
 
     /**
-     * @param \local_deepler\local\data\section[] $sections
+     * @param \section_info[] $sections
      * @param int $selectedid
      * @return array
      */
-    private function prepare_sectionmenu(array $sections, int $selectedid): array {
+    private function prepare_sectionmenu(array $sections, int $selectedid, base $format): array {
         $menu = [];
         foreach ($sections as $section) {
-            $id = $section->getid();
             $menu[] = [
-                    'id' => $id,
-                    'name' => $this->mlangfilter->filter($section->getsectionname()),
-                    'selected' => $id == $selectedid,
+                    'id' => $section->id,
+                    'name' => $this->mlangfilter->filter($section->name ?? $format->get_default_section_name($section)),
+                    'selected' => $section->id == $selectedid,
             ];
         }
         return $menu;
     }
 
     /**
-     * @param array $modules
+     * @param \cm_info[] $modules
      * @param int $selectedid
      * @return array
      */
     private function prepare_modulemenu(array $modules, int $selectedid): array {
         $menu = [];
-        /** @var \local_deepler\local\data\module $module */
         foreach ($modules as $module) {
-            $cm = $module->get_cm();
             $menu[] =
                     [
-                            'id' => $cm->id,
-                            'name' => $this->mlangfilter->filter($cm->name),
-                            'selected' => $cm->id == $selectedid,
+                            'id' => $module->id,
+                            'name' => $this->mlangfilter->filter($module->name),
+                            'selected' => $module->id == $selectedid,
                     ];
         }
         return $menu;

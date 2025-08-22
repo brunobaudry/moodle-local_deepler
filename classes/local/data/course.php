@@ -47,12 +47,23 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @var \core_courseformat\base
      */
     private base $format;
+
+    /**
+     * @return \core_courseformat\base
+     */
+    public function get_format(): base {
+        return $this->format;
+    }
     /** @var section[] of sections titles (and id / order) for display */
     private array $sections;
     /**
      * @var \section_info[]
      */
     private array $section_info_all;
+
+    public function get_section_info_all(): array {
+        return $this->section_info_all;
+    }
     /** @var int */
     private int $loadedsectionid;
     /** @var int */
@@ -156,24 +167,6 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
                 $this->loadedsectionnum = $sectioninfo->sectionnum;
             }
         }
-    }
-
-    /**
-     * Map the names of sections to ids.
-     *
-     * @return array
-     */
-    public function get_sections_id_name(): array {
-        $idnames = [];
-        /** @var section_info $sessioninfo */
-        foreach ($this->section_info_all as $sessioninfo) {
-            $idnames[$sessioninfo->sectionnum] =
-                    ['name' => $sessioninfo->name ?? $this->format->get_default_section_name($sessioninfo),
-                            'id' => $sessioninfo->id,
-                            'selected' => $sessioninfo->id == $this->loadedsectionid,
-                    ];
-        }
-        return $idnames;
     }
 
     /**

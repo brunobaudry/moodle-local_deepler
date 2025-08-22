@@ -141,7 +141,7 @@ final class course_test extends advanced_testcase {
         $this->resetAfterTest(true);
 
         $course = $this->getDataGenerator()->create_course();
-        $courseobj = new course($course);
+        $courseobj = new course($course, -1);
 
         $sections = $courseobj->getsections();
         $this->assertIsArray($sections);
