@@ -223,8 +223,10 @@ class utils {
     /**
      * Returns an array of all available user fields (standard + custom profile fields).
      *
+     * @param \core\context $context
      * @return array
      * @throws \coding_exception
+     * @throws \dml_exception
      */
     public static function all_user_fields(context $context): array {
         global $DB;

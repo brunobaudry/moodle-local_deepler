@@ -17,6 +17,7 @@
 namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 
+use context_user;
 use core\user;
 use DeepL\AuthorizationException;
 use DeepL\DeepLClient;
@@ -246,7 +247,7 @@ class lang_helper {
     private function find_first_matching_token($user) {
         global $DB;
         $foundtoken = false;
-        $alluserfields = array_keys(utils::all_user_fields());
+        $alluserfields = array_keys(utils::all_user_fields(context_user::instance($this->user->id, MUST_EXIST)));
 
         // Build a map of custom profile fields for DB fallback.
         $customfields = [];
@@ -291,7 +292,7 @@ class lang_helper {
                                 (strpos($pattern, '*') !== false) ||
                                 (strpos($pattern, '_') !== false)
                         ) {
-                            if (local_deepler_wildcard_match($pattern, $uservalue)) {
+                            if (utils::wildcard_match($pattern, $uservalue)) {
                                 $foundtoken = $token;
                             }
                         } else if ($pattern === $uservalue) {

@@ -30,8 +30,10 @@ require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
 use DeepL\AuthorizationException;
+use DeepL\GlossaryInfo;
 use DeepL\TooManyRequestsException;
 use DeepL\Usage;
+use ReflectionClass;
 use stdClass;
 use DeepL\DeepLClient;
 
@@ -207,4 +209,167 @@ final class langhelper_test extends advanced_testcase {
             $this->assertNotEmpty(getenv('DEEPL_API_TOKEN'));
         }
     }
+
+    /**
+     * Test find_first_matching_token_returns_token.
+     *
+     * @covers \local_deepler\local\services\lang_helper::find_first_matching_token
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \ReflectionException
+     * @throws \dml_exception
+     */
+    public function test_find_first_matching_token_returns_token(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        // Create a test user.
+        $user = $this->getDataGenerator()->create_user([
+                'username' => 'matchuser',
+                'email' => 'match@example.com',
+                'department' => 'matchdepartment',
+        ]);
+
+        // Create a custom profile field.
+        $field = (object) [
+                'shortname' => 'customfield',
+                'name' => 'Custom Field',
+                'datatype' => 'text',
+        ];
+        $field->id = $DB->insert_record('user_info_field', $field);
+
+        // Assign a value to the custom profile field.
+        $data = (object) [
+                'userid' => $user->id,
+                'fieldid' => $field->id,
+                'data' => 'customvalue',
+        ];
+        $DB->insert_record('user_info_data', $data);
+
+        // Insert a matching token.
+        $token = (object) [
+                'attribute' => 'profile_field_customfield',
+                'valuefilter' => 'customvalue',
+        ];
+        $token->id = $DB->insert_record('local_deepler_tokens', $token);
+
+        // Inject user and run method.
+        $this->langhelper->initdeepl($user);
+        $reflection = new ReflectionClass($this->langhelper);
+        $method = $reflection->getMethod('find_first_matching_token');
+        $method->setAccessible(true);
+        $result = $method->invoke($this->langhelper, $user);
+
+        $this->assertNotFalse($result);
+        $this->assertEquals($token->id, $result->id);
+    }
+
+    /**
+     * Test getusersglossaries.
+     *
+     * @covers \local_deepler\local\services\lang_helper::getusersglossaries
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function test_getusersglossaries_returns_user_glossaries(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        // Create glossary and user_glossary entries.
+        $glossary = (object) [
+                'glossaryid' => 'glo123',
+                'name' => 'Test Glossary',
+                'sourcelang' => 'EN',
+                'targetlang' => 'DE',
+                'entrycount' => 10,
+        ];
+        $glossary->id = $DB->insert_record('local_deepler_glossaries', $glossary);
+
+        $userglossary = (object) [
+                'userid' => $this->user->id,
+                'glossaryid' => $glossary->id,
+        ];
+        $DB->insert_record('local_deepler_user_glossary', $userglossary);
+
+        $this->langhelper->initdeepl($this->user);
+        $result = $this->langhelper->getusersglossaries();
+
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+        $this->assertEquals('Test Glossary', $result[0]->name);
+    }
+
+    /**
+     * Test getpublicglossaries.
+     *
+     * @covers \local_deepler\local\services\lang_helper::getpublicglossaries
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+
+    public function test_getpublicglossaries_excludes_token_bound(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        // Insert glossary with token ID.
+        $glossary = (object) [
+                'glossaryid' => 'glo456',
+                'name' => 'Public Glossary',
+                'sourcelang' => 'EN',
+                'targetlang' => 'FR',
+                'entrycount' => 5,
+                'tokenid' => 999, // Simulate token-bound glossary.
+        ];
+        $DB->insert_record('local_deepler_glossaries', $glossary);
+
+        $this->langhelper->initdeepl($this->user);
+        $result = $this->langhelper->getpublicglossaries();
+
+        $this->assertIsArray($result);
+        foreach ($result as $glo) {
+            $this->assertNotEquals(999, $glo->tokenid);
+        }
+    }
+
+    /**
+     * Test syncdeeplglossaries.
+     *
+     * @covers \local_deepler\local\services\lang_helper::syncdeeplglossaries
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_syncdeeplglossaries_adds_missing_and_removes_deleted(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        // Mock glossary from DeepL.
+        $deeplglossary = $this->createMock(GlossaryInfo::class);
+        $deeplglossary->glossaryId = 'glo789';
+        $deeplglossary->name = 'Synced Glossary';
+        $deeplglossary->sourceLang = 'EN';
+        $deeplglossary->targetLang = 'ES';
+        $deeplglossary->entryCount = 3;
+
+        // Inject mock translator.
+        $this->mocktranslator->method('listGlossaries')->willReturn([$deeplglossary]);
+        $this->langhelper = new lang_helper($this->mocktranslator, 'mockapikey', null, 'en', 'es');
+        $this->langhelper->initdeepl($this->user);
+
+        $result = $this->langhelper->syncdeeplglossaries();
+
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
+        $this->assertEquals('Synced Glossary', $result[0]->name);
+    }
+
 }
