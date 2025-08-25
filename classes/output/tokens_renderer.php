@@ -16,7 +16,7 @@
 
 namespace local_deepler\output;
 
-
+use core\context;
 use html_writer;
 use local_deepler\local\services\utils;
 use moodle_url;
@@ -34,12 +34,13 @@ class tokens_renderer extends plugin_renderer_base {
     /**
      * Renders the token manager UI: table of attribute-token mappings and add form.
      *
+     * @param \core\context $context
      * @return string
      * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      * @throws \dml_exception
      */
-    public function render_token_manager(): string {
+    public function render_token_manager(context $context): string {
         global $DB, $SESSION;
 
         $data = [];
@@ -51,7 +52,7 @@ class tokens_renderer extends plugin_renderer_base {
         }
 
         // User fields.
-        $userfields = utils::all_user_fields();
+        $userfields = utils::all_user_fields($context);
 
         // Records from DB.
         $records = $DB->get_records('local_deepler_tokens');
