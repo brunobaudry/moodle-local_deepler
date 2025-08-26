@@ -44,6 +44,8 @@ class translate_renderer extends renderer_base {
     }
 
     /**
+     * Render childs.
+     *
      * @param \local_deepler\output\child_data $data
      * @return bool|string
      * @throws \core\exception\moodle_exception
@@ -53,6 +55,8 @@ class translate_renderer extends renderer_base {
     }
 
     /**
+     * Render activities.
+     *
      * @param \local_deepler\output\module_data $data
      * @return bool|string
      * @throws \core\exception\moodle_exception
@@ -62,6 +66,8 @@ class translate_renderer extends renderer_base {
     }
 
     /**
+     * Render sections.
+     *
      * @param \local_deepler\output\section_data $data
      * @return bool|string
      * @throws \core\exception\moodle_exception
@@ -71,6 +77,8 @@ class translate_renderer extends renderer_base {
     }
 
     /**
+     * Render course.
+     *
      * @param \local_deepler\output\coursesettings_data $data
      * @return bool|string
      * @throws \core\exception\moodle_exception

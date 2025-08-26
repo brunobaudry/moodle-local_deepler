@@ -113,12 +113,11 @@ class translate_page implements renderable, templatable {
         $renderedform = $this->mform->render();
         $renderedform = str_replace('col-md-9', 'col-md-12', $renderedform);
         $data->mform = $renderedform;
-        // $data->codes = $this->mform->get_langcodes();
         // Set langs.
         $loadedsection = $this->coursedata->get_loadedsection();
         $data->nosectionsloaded = $loadedsection === -99;
         $data->allselected = $loadedsection === -1;
-        $data->sessionidnames = $this->prepare_sectionmenu($this->coursedata->get_section_info_all(), $loadedsection,
+        $data->sessionidnames = $this->prepare_sectionmenu($this->coursedata->get_sectioninfoall(), $loadedsection,
                 $this->coursedata->get_format());
         $data->hasmodulelist = false;
         $data->modulesidnames = null;
@@ -159,8 +158,11 @@ class translate_page implements renderable, templatable {
     }
 
     /**
+     * Data for building the option for the section selector.
+     *
      * @param \section_info[] $sections
      * @param int $selectedid
+     * @param \core_courseformat\base $format
      * @return array
      */
     private function prepare_sectionmenu(array $sections, int $selectedid, base $format): array {
@@ -176,6 +178,8 @@ class translate_page implements renderable, templatable {
     }
 
     /**
+     * Data for building the option for the activity selector.
+     *
      * @param \cm_info[] $modules
      * @param int $selectedid
      * @return array

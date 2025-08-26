@@ -70,7 +70,9 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
             );
         });
         Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);
-        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>window.console.error(e));
+        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>{
+         Log.error(Api.GLOSSARY_ENTRIES_FAILED); Log.error(e);
+        });
     };
     const showEntriesModal = (ajaxResponse)=>{
         const glossaryid = ajaxResponse.glossaryid;

@@ -40,6 +40,8 @@ abstract class translate_data {
     protected string $editor;
 
     /**
+     * Constructor.
+     *
      * @param \local_deepler\local\services\lang_helper $languagepack
      * @param text_filter|Multilang2TextFilter $mlangfilter
      * @param string $editor

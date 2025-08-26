@@ -39,7 +39,38 @@ define(['./local/ui_deepler', 'core/log'], (UI, Log) => {
         }
         Log.setConfig({level: level});
         Log.info(`09.04.2025 : 15:08 ` + cfg.version);
-        window.addEventListener("DOMContentLoaded", UI.init(cfg));
+
+        let activeRequests = 0;
+        let ajaxStopFired = false;
+
+        const onAjaxStop = ()=> {
+            // This runs only once when all AJAX requests are finished after a batch
+            const preloader = document.getElementById('local_deepler_preloaderModal');
+            if (preloader) {
+                preloader.classList.remove('show', 'd-block');
+                preloader.classList.add('d-none');
+            }
+            ajaxStopFired = true;
+        };
+
+        const originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(...args) {
+            activeRequests++;
+            ajaxStopFired = false; // New requests reset the flag
+            this.addEventListener('readystatechange', function() {
+                if (this.readyState === 4) { // Request completed
+                    activeRequests--;
+                    if (activeRequests === 0 && !ajaxStopFired) {
+ onAjaxStop();
+}
+                }
+            }, false);
+            originalOpen.apply(this, args);
+        };
+
+
+        // Window.addEventListener("DOMContentLoaded", UI.init(cfg));
+        window.addEventListener('load', UI.init(cfg));
     };
     return {
         init: init

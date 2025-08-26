@@ -45,6 +45,8 @@ class section implements translatable_interface, editable_interface, visibility_
     private array $sectioncms;
 
     /**
+     * Getter for sessions' activity cms.
+     *
      * @return \cm_info[]
      */
     public function get_sectioncms(): array {

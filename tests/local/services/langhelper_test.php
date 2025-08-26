@@ -135,24 +135,6 @@ final class langhelper_test extends advanced_testcase {
             $this->assertArrayHasKey('disabled', $option);
         }
     }
-
-    /**
-     * Tests the values returned as object ready to be transformed as HTM dropdown option list.
-     *
-     * @covers \local_deepler\local\services\lang_helper::preparehtmlotions
-     *
-     * @return void
-     */
-    /*    public function test_preparehtmloptions_returns_valid_html(): void {
-            $this->langhelper->initdeepl($this->user);
-            $htmltargets = $this->langhelper->preparehtmltagets();
-            $htmlsources = $this->langhelper->preparehtmlsources();
-
-            $this->assertIsString($htmltargets);
-            $this->assertIsString($htmlsources);
-            $this->assertStringContainsString('<option', $htmltargets);
-            $this->assertStringContainsString('<option', $htmlsources);
-        }*/
     /**
      * Basic setting tests.
      *

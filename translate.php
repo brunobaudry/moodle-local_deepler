@@ -56,7 +56,7 @@ try {
 }
 // Section -99 is one selected. Section -1 is all else proper section id.
 $sectionid = optional_param('section_id', -99, PARAM_INT);
-$activity_id = optional_param('activity_id', -1, PARAM_INT);
+$activityid = optional_param('activity_id', -1, PARAM_INT);
 // Load the cours in DB.
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 // Setup page.
@@ -111,7 +111,7 @@ try {
         // Adding page JS.
         $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
         // Create the structure.
-        $coursedata = new course($course, $sectionid, $activity_id);
+        $coursedata = new course($course, $sectionid, $activityid);
         // Build the page.
         $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release, $jsconfig->userPrefs);
         echo $output->render($renderable);

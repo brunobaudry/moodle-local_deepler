@@ -85,7 +85,7 @@
         {{#iseditable}}
             <span id="previousTranslationStatus"
                   title="{{titlestring}}"
-                  class="badge badge-pill {{buttonclass}}">&nbsp;</span>
+                  class="badge badge-pill {{buttonclass}}">&nbsp;&nbsp;</span>
             <input title="{{titlestring}}"
                    type="checkbox"
                    data-key="{{key}}"
@@ -143,7 +143,6 @@
             {{/plaintextinput}}
 
             {{^plaintextinput}}
-                <!--    istiny {{istiny}} -->
                 {{#istiny}}
                     <div class="format-{{fieldformat}} border py-2 px-3"
                          id="tiny_{{key}}"

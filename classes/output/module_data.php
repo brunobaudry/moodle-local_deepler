@@ -29,6 +29,7 @@ use local_deepler\output\translate_data;
 /**
  * Module data.
  *
+ * @package local_deepler
  * @copyright 2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -54,12 +55,14 @@ class module_data extends translate_data implements templatable, renderable {
     }
 
     /**
-     * @inheritDoc
+     * Export for template.
+     *
+     * @param \core\output\renderer_base $output
+     * @return array
      */
     public function export_for_template(renderer_base $output) {
         global $PAGE;
         $renderer = $PAGE->get_renderer('local_deepler', 'translate');
-        // TODO: Implement export_for_template() method.
         $activitydesc = $this->makeactivitydesc($this->module);
         $fields = $this->module->getfields();
         $fieldsrendered = '';

@@ -56,9 +56,9 @@ class row_data extends translate_data implements renderable, templatable {
      *
      * @param renderer_base $output Used to do a final render of any components that need to be rendered for export.
      * @return \stdClass|array
+     * @throws \coding_exception
      */
     public function export_for_template(renderer_base $output) {
-        // TODO: Implement export_for_template() method.
         $key = $this->field->getkey();
         $keyid = $this->field->getkeyid();
         $cssclass = '';
@@ -97,15 +97,7 @@ class row_data extends translate_data implements renderable, templatable {
             $buttonclass = 'badge-success';
             $titlestring = get_string('uptodate', 'local_deepler');
         }
-        // col 2
         $multilanger = new multilanger($fieldtext);
-
-        /*$langcodes = [];
-        foreach ($alllancodes as $code) {
-            if (!in_array($code, $langcodes)) {
-                $langcodes[] = $code;
-            }
-        }*/
         $alreadyhasmultilang = $multilanger->has_multilangs();
         $multilangdisabled = 'disabled';
         if ($alreadyhasmultilang) {
@@ -139,22 +131,25 @@ class row_data extends translate_data implements renderable, templatable {
                 'istiny' => $this->editor === 'tiny',
                 'key' => $key,
                 'keyid' => $keyid,
+            // Do Ajax.
                 'mlangfiltered' => $this->mlangfilter->filter($this->field->get_displaytext()),
                 'multilangdisabled' => $multilangdisabled,
                 'multilangtitlestring' => $multilangtitlestring,
                 'plaintextinput' => $fieldformat === 0,
+            // Do Ajax.
                 'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
+            // Do Ajax.
                 'rawunfilterdtext' => base64_encode($trimedtext),
                 'rowtitle' => $isdbkey ? get_string('translationdisabled', 'local_deepler') : '',
                 'selecttitle' => get_string('specialsourcetext', 'local_deepler',
                         strtoupper($currentlang)),
-            //'sourceoptions' => $languagepack->preparehtmlsources(),
                 'sourceoptions' => $this->languagepack->preparesourcesoptionlangs(),
                 'status' => $iseditable ? $status : 'local_deepler/disabled',
                 'table' => $this->field->get_table(),
                 'tablefield' => $this->field->get_tablefield(),
                 'tid' => $this->field->get_tid(),
                 'titlestring' => htmlentities($titlestring, ENT_HTML5),
+            // Do Ajax.
                 'trimedtext' => $trimedtext,
         ];
     }

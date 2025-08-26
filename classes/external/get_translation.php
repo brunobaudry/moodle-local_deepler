@@ -40,81 +40,150 @@ class get_translation extends external_api {
     use deeplapi_trait;
 
     /**
-     * External service to call DeepL's API.
+     * Executes translation requests to DeepL, chunking them to respect payload limits.
      *
-     * @param array $translations
-     * @param array $options
-     * @param string $version
-     * @return array
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
-     * @throws \invalid_parameter_exception
+     * @param array $translations Array of translation requests.
+     * @param array $options Translation options.
+     * @param string $version Plugin version.
+     * @return array Translated results or error messages.
+     * @throws DeepLException If API key is missing.
      */
     public static function execute(array $translations, array $options, string $version): array {
-        // Set the api with env so that it can be unit tested.
         $key = self::setdeeplapikey();
         $appinfo = self::setdeeplappinfo($version);
+
         if (empty($key)) {
             throw new DeepLException('authKey must be a non-empty string');
         }
-        $params = self::validate_parameters(self::execute_parameters(),
-                ['translations' => $translations, 'options' => $options, 'version' => $version]);
+
+        $params = self::validate_parameters(self::execute_parameters(), [
+                'translations' => $translations,
+                'options' => $options,
+                'version' => $version,
+        ]);
+
         try {
-            $translator = new DeepLClient(
-                    $key,
-                    [
-                            'send_platform_info' => true,
-                            'app_info' => $appinfo,
-                    ]
-            );
+            $translator = new DeepLClient($key, [
+                    'send_platform_info' => true,
+                    'app_info' => $appinfo,
+            ]);
         } catch (DeepLException $exception) {
-            return [['error' => 'Exception ' . $exception->getMessage(),
-                    'key' => '',
-                    'translated_text' => '',
-            ]];
+            return [
+                    [
+                            'error' => 'Exception ' . $exception->getMessage(),
+                            'key' => '',
+                            'translated_text' => '',
+                    ],
+            ];
         }
-        // Deepl-php's API is a bit painful sometimes.
-        $tragetlang = $params['options']['target_lang'];
+
+        $targetlang = $params['options']['target_lang'];
         unset($params['options']['target_lang']);
-        $glo = $params['options']['glossary_id'];
+
+        $glossaryid = $params['options']['glossary_id'];
         unset($params['options']['glossary_id']);
-        $params['options']['glossary'] = $glo;
+
+        $params['options']['glossary'] = $glossaryid;
 
         $groupedtranslations = [];
-        foreach ($params['translations'] as $t) {
-            $groupedtranslations[$t['source_lang']][] = $t;
+        foreach ($params['translations'] as $translation) {
+            $groupedtranslations[$translation['source_lang']][] = $translation;
         }
 
         $translatedtexts = [];
-        foreach ($groupedtranslations as $sourcelang => $translations) {
-            $texts = array_map(function($t) {
-                return $t['text'];
-            }, $translations);
+        $maxbytes = 100000;
+        $bufferbytes = 1024 * 16;
 
-            try {
-                $results = $translator->translateText($texts, $sourcelang, $tragetlang, $params['options']);
-                foreach ($results as $index => $result) {
-                    $translatedtexts[] = [
-                            'key' => $translations[$index]['key'],
-                            'translated_text' => $result->text,
-                            'glossary_id' => $params['options']['glossary_id'],
-                            'error' => '',
-                    ];
+        foreach ($groupedtranslations as $sourcelang => $translationsgroup) {
+            $chunk = [];
+
+            $basepayload = json_encode($params['options']) .
+                    $sourcelang .
+                    $targetlang;
+
+            $chunkbytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes;
+
+            foreach ($translationsgroup as $translation) {
+                $text = $translation['text'];
+                $textbytes = strlen(mb_convert_encoding($text, 'UTF-8'));
+
+                if ($chunkbytes + $textbytes > $maxbytes && !empty($chunk)) {
+                    $translatedtexts = array_merge(
+                            $translatedtexts,
+                            self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)
+                    );
+
+                    $chunk = [$translation];
+                    $chunkbytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes + $textbytes;
+                } else {
+                    $chunk[] = $translation;
+                    $chunkbytes += $textbytes;
                 }
-            } catch (DeepLException $e) {
-                return [[
-                        'error' => 'Deepl exception ' . $e->getMessage(),
-                        'key' => '',
-                        'translated_text' => '',
-                ]];
-            } catch (Exception $e) {
-                return [['error' => 'Exception ' . $e->getMessage(),
-                        'key' => '',
-                        'translated_text' => '',
-                ]];
+            }
+
+            if (!empty($chunk)) {
+                $translatedtexts = array_merge(
+                        $translatedtexts,
+                        self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)
+                );
             }
         }
+
         return $translatedtexts;
+    }
+
+    /**
+     * Processes a chunk of translations and returns translated results.
+     *
+     * @param DeepLClient $translator The DeepL client instance.
+     * @param array $chunk The chunk of translations.
+     * @param string $sourcelang The source language.
+     * @param string $targetlang The target language.
+     * @param array $options Translation options.
+     * @param string $glossaryid The glossary ID.
+     * @return array Translated results or error.
+     */
+    private static function process_chunk(DeepLClient $translator, array $chunk, string $sourcelang,
+            string $targetlang, array $options, string $glossaryid): array {
+
+        $texts = array_map(function($t) {
+            return $t['text'];
+        }, $chunk);
+
+        try {
+            $results = $translator->translateText($texts, $sourcelang, $targetlang, $options);
+            $translated = [];
+
+            foreach ($results as $index => $result) {
+                $translated[] = [
+                        'key' => $chunk[$index]['key'],
+                        'translated_text' => $result->text,
+                        'glossary_id' => $glossaryid,
+                        'error' => '',
+                ];
+            }
+
+            return $translated;
+
+        } catch (DeepLException $e) {
+            return [
+                    [
+                            'glossary_id' => $glossaryid,
+                            'error' => 'Deepl exception ' . $e->getMessage(),
+                            'key' => '',
+                            'translated_text' => '',
+                    ],
+            ];
+        } catch (Exception $e) {
+            return [
+                    [
+                            'error' => 'Exception ' . $e->getMessage(),
+                            'key' => '',
+                            'translated_text' => '',
+                            'glossary_id' => $glossaryid,
+                    ],
+            ];
+        }
     }
 
     /**
@@ -176,4 +245,5 @@ class get_translation extends external_api {
                 )
         );
     }
+
 }

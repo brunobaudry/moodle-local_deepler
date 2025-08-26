@@ -26,10 +26,11 @@
     * none
 
     Context variables required for this template:
-    * none
+    * link
 
     Example context (json):
     {
+        'link':'<a href="https://test.org">link</a>'
     }
 }}
 <a class='small p-2'
@@ -37,5 +38,5 @@
    href='{{{link}}}'
    target='_blank'
    title='{{#str}}editbutton, local_deepler{{/str}}'>
-    <i class='icon fa fa-pen fa-fw' aria-hidden='true'></i>
+    <i class='icon fa fa-pen fa-fw fa-xs' aria-hidden='true'></i>
 </a>

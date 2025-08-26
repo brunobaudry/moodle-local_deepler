@@ -66,7 +66,6 @@ class child_data extends translate_data implements renderable, templatable {
     public function export_for_template(renderer_base $output): array {
         global $PAGE;
         $renderer = $PAGE->get_renderer('local_deepler', 'translate');
-        // TODO: Implement export_for_template() method.
         $fields = $this->child->getfields();
         $interfaces = class_implements($this->child);
         $isiconic = in_array('local_deepler\local\data\interfaces\iconic_interface', $interfaces);

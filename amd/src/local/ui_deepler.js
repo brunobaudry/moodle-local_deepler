@@ -747,6 +747,7 @@ define(['core/log',
      * @param {boolean} selected
      */
     const showRows = (selector, selected) => {
+
         const items = domQueryAll(selector);
         const allSelected = domQuery(Selectors.actions.selectAllBtn).checked;
         const shoudlcheck = allSelected && selected;
@@ -764,19 +765,19 @@ define(['core/log',
                     single.checked = shoudlcheck;
                     toggleStatus(k, false);
                 }
-                const allchilds = domQueryAll(Selectors.editors.multiples.checkBoxesWithKeyHidden, k);
-                if (allchilds !== null && allchilds.length > 0) {
-                    allchilds.forEach(c => {
-                        const key = c.getAttribute('data-key');
-                        c.checked = shoudlcheck;
-                        toggleStatus(key, false);
-                    });
-                }
             } catch (e) {
                 Log.warn(`${k} translation is disalbled`);
             }
 
         });
+        const allchilds = domQueryAll(Selectors.editors.multiples.checkBoxesWithKeyHidden);
+        if (allchilds !== null && allchilds.length > 0) {
+            allchilds.forEach(c => {
+                const key = c.getAttribute('data-key');
+                c.checked = false;
+                toggleStatus(key, false);
+            });
+        }
         toggleAutotranslateButton();
         countWordAndChar();
     };
@@ -871,8 +872,6 @@ define(['core/log',
      * @param {Event} e
      */
     const switchSection = (e) => {
-        window.console.log('switchSection');
-        window.console.log(e.target.value);
         let url = new URL(window.location.href);
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
@@ -887,8 +886,6 @@ define(['core/log',
      * @param {Event} e
      */
     const switchModules = (e) => {
-        window.console.log('switchModules');
-        window.console.log(e.target.value);
         let url = new URL(window.location.href);
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
@@ -1066,6 +1063,7 @@ define(['core/log',
      * @param {*} cfg
      */
     const init = (cfg) => {
+
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100, crumbsmaxlen: cfg.crumbsmaxlen});
         Translation.init(cfg);
@@ -1082,6 +1080,7 @@ define(['core/log',
         });
         showRows(Selectors.statuses.updated, domQuery(Selectors.actions.showUpdated).checked);
         showRows(Selectors.statuses.needsupdate, domQuery(Selectors.actions.showNeedUpdate).checked);
+        showRows(Selectors.statuses.hidden, domQuery(Selectors.actions.showHidden).checked);
     };
     /**
      * Api to be used by the other modules.

@@ -48,22 +48,15 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      */
     private base $format;
 
-    /**
-     * @return \core_courseformat\base
-     */
-    public function get_format(): base {
-        return $this->format;
-    }
+
     /** @var section[] of sections titles (and id / order) for display */
     private array $sections;
     /**
      * @var \section_info[]
      */
-    private array $section_info_all;
+    private array $sectioninfoall;
 
-    public function get_section_info_all(): array {
-        return $this->section_info_all;
-    }
+
     /** @var int */
     private int $loadedsectionid;
     /** @var int */
@@ -72,7 +65,24 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     private int $loadedsectionnum;
 
     /**
-     * Getter.
+     * Getter for the session info.
+     *
+     * @return \section_info[]
+     */
+    public function get_sectioninfoall(): array {
+        return $this->sectioninfoall;
+    }
+
+    /**
+     * Getter for the current format.
+     *
+     * @return \core_courseformat\base
+     */
+    public function get_format(): base {
+        return $this->format;
+    }
+    /**
+     * Getter for the session rank.
      *
      * @return int
      */
@@ -84,6 +94,8 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * Constructor.
      *
      * @param \stdClass $course
+     * @param int $lodadedsection
+     * @param int $loadeddmodule
      * @throws \core\exception\moodle_exception
      * @throws \moodle_exception
      */
@@ -155,9 +167,9 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @throws \core\exception\moodle_exception
      */
     private function populatesections(): void {
-        $this->section_info_all = $this->course->get_section_info_all();
-        /** @var section_info $sessioninfo */
-        foreach ($this->section_info_all as $sectioninfo) {
+        $this->sectioninfoall = $this->course->get_section_info_all();
+        /** @var section_info $sectioninfo */
+        foreach ($this->sectioninfoall as $sectioninfo) {
             // If selected section is -1 then load all, if -99 none else load single.
             if ($this->loadedsectionid !== -1 && $sectioninfo->id != $this->loadedsectionid) {
                 continue;

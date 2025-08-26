@@ -271,7 +271,7 @@ define([
                 if (tr.error === '') {
                     // For now used glossary_id should, be the same for the batch,
                     // but it would make sense to use a single glossary for each text.
-                    if (glossaries.indexOf(tr.glossary_id) === -1) {
+                    if (glossaries.indexOf(tr.glossary_id) === -1 && tr.glossary_id.trim() !== '') {
                         glossaries.push(tr.glossary_id);
                     }
                     let key = tr.key;
@@ -283,7 +283,9 @@ define([
                     Events.emit(ON_TRANSLATION_FAILED, tr.error);
                 }
             });
-            Api.updateGlossariesUsage(glossaries);
+            if (glossaries.length > 0) {
+                Api.updateGlossariesUsage(glossaries);
+            }
         };
         /**
          * When rephrasing went good.

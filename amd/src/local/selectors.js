@@ -80,7 +80,7 @@ export default {
         targetarea: '[data-format="1"]',
         multiples: {
             checkBoxesWithKey: 'input[type="checkbox"][data-key="<KEY>"]',
-            checkBoxesWithKeyHidden: '.local_deeplerinvisible input[type="checkbox"][data-key]',
+            checkBoxesWithKeyHidden: '.local_deepler__form .d-none input[type="checkbox"][data-key]',
             editorChilds: '[data-action="local_deepler/editor"][data-key="<KEY>"] > *',
             textAreas: '[data-action="local_deepler/textarea"][data-key="<KEY>"]',
             editorsWithKey: '[data-action="local_deepler/editor"][data-key="<KEY>"]',
