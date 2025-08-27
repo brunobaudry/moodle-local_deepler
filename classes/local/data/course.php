@@ -100,7 +100,6 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      */
     public function __construct(stdClass $course, int $lodadedsection = -99, int $loadeddmodule = -99) {
         global $CFG;
-        $this->loadeddmodule = $loadeddmodule;
         $this->loadedsectionnum = $this->loadedsectionid = $lodadedsection;
         // Load yaml config of known field definitions.
         if (empty(field::$additionals)) {
@@ -175,7 +174,8 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
             if ($this->loadedsectionid !== -1 && $sectioninfo->id != $this->loadedsectionid) {
                 continue;
             }
-            $this->sections[$sectioninfo->sectionnum] = new section($sectioninfo, $this->format, $loadeddmodule);
+            $this->sections[$sectioninfo->sectionnum ?? $sectioninfo->id] =
+                    new section($sectioninfo, $this->format, $loadeddmodule);
             if ($this->loadedsectionid >= 0) {
                 $this->loadedsectionnum = $sectioninfo->sectionnum;
             }
