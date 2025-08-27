@@ -93,7 +93,7 @@ class coursesettings_data extends translate_data implements renderable, templata
                 'activitydesc' => $this->title,
             'link' => $this->link,
             'id' => utils::makehtmlid($this->title),
-            'index' => $this->index,
+                'index' => '0',
             'fields' => $fieldsrendered,
         ];
     }

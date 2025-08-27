@@ -186,15 +186,15 @@ final class gettranslation_test extends base_external {
     /**
      * Reflection helper.
      *
-     * @param $class
-     * @param $methodname
+     * @param mixed $class
+     * @param string $methodname
      * @param array $args
      * @return mixed
      * @throws \ReflectionException
      */
-    protected static function callprotectedstaticmethod($class, $methodname, array $args = []): mixed {
-        $reflectionClass = new ReflectionClass($class);
-        $method = $reflectionClass->getMethod($methodname);
+    protected static function callprotectedstaticmethod(mixed $class, string $methodname, array $args = []): mixed {
+        $reflectionclass = new ReflectionClass($class);
+        $method = $reflectionclass->getMethod($methodname);
         $method->setAccessible(true);
         // For static methods, pass null as the object.
         return $method->invokeArgs(null, $args);

@@ -213,11 +213,11 @@ class lang_helper {
      * Initialise the Deepl object.
      * Return a Boolean of the cnx status.
      *
-     * @param $version
+     * @param string $version
      * @return bool
      * @throws \DeepL\DeepLException
      */
-    private function inittranslator($version): bool {
+    private function inittranslator(string $version): bool {
         if (!isset($this->translator)) {
             try {
                 $this->translator = new DeepLClient($this->apikey, [
