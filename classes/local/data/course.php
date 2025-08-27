@@ -60,9 +60,8 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     /** @var int */
     private int $loadedsectionid;
     /** @var int */
-    private int $loadeddmoduleid;
-    /** @var int */
     private int $loadedsectionnum;
+
 
     /**
      * Getter for the session info.
@@ -113,7 +112,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         $this->format = course_get_format($course);
         $this->link = new moodle_url($CFG->wwwroot . "/course/edit.php", ['id' => $this->course->get_course_id()]);
         try {
-            $this->populatesections();
+            $this->populatesections($loadeddmodule);
         } catch (moodle_exception $ex) {
             debugging($ex);
         }
@@ -163,10 +162,12 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     /**
      * Populate the sections of the course.
      *
+     * @param int $loadeddmodule
      * @return void
+     * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      */
-    private function populatesections(): void {
+    private function populatesections(int $loadeddmodule): void {
         $this->sectioninfoall = $this->course->get_section_info_all();
         /** @var section_info $sectioninfo */
         foreach ($this->sectioninfoall as $sectioninfo) {
@@ -174,7 +175,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
             if ($this->loadedsectionid !== -1 && $sectioninfo->id != $this->loadedsectionid) {
                 continue;
             }
-            $this->sections[$sectioninfo->sectionnum] = new section($sectioninfo, $this->format, $this->loadeddmodule);
+            $this->sections[$sectioninfo->sectionnum] = new section($sectioninfo, $this->format, $loadeddmodule);
             if ($this->loadedsectionid >= 0) {
                 $this->loadedsectionnum = $sectioninfo->sectionnum;
             }

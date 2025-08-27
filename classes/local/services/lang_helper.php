@@ -167,6 +167,7 @@ class lang_helper {
      * Initialise the Deepl object.
      *
      * @param \stdClass $user
+     * @param string $version
      * @return bool
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
@@ -212,6 +213,7 @@ class lang_helper {
      * Initialise the Deepl object.
      * Return a Boolean of the cnx status.
      *
+     * @param $version
      * @return bool
      * @throws \DeepL\DeepLException
      */
@@ -220,7 +222,7 @@ class lang_helper {
             try {
                 $this->translator = new DeepLClient($this->apikey, [
                         'send_platform_info' => true,
-                        'app_info' => new AppInfo('Moodle-Deepler', $version)
+                        'app_info' => new AppInfo('Moodle-Deepler', $version),
                 ]);
             } catch (AuthorizationException $e) {
                 return false;
@@ -382,7 +384,7 @@ class lang_helper {
      * @return bool
      * @throws \DeepL\DeepLException
      */
-    public function islangsupported(string $lang) {
+    public function islangsupported(string $lang): bool {
         $list = $this->deeplsources;
         $len = count($list);
         while ($len--) {

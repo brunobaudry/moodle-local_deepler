@@ -34,12 +34,12 @@ trait deeplapi_trait {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @param $version
+     * @param string $version
      * @return \DeepL\DeepLClient|null
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public static function setdeeplapikey($version): DeepLClient|null {
+    public static function setdeeplapikey(string $version): DeepLClient|null {
         global $USER;
         $languagepack = new lang_helper();
         $initok = $languagepack->initdeepl($USER, $version);

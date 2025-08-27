@@ -50,7 +50,6 @@ class get_translation extends external_api {
      * @throws \invalid_parameter_exception
      */
     public static function execute(array $translations, array $options, string $version): array {
-
         $params = self::validate_parameters(self::execute_parameters(), [
                 'translations' => $translations,
                 'options' => $options,
@@ -68,27 +67,19 @@ class get_translation extends external_api {
                     ],
             ];
         }
-
         $targetlang = $params['options']['target_lang'];
         unset($params['options']['target_lang']);
-
         $glossaryid = $params['options']['glossary_id'];
         unset($params['options']['glossary_id']);
-
         $params['options']['glossary'] = $glossaryid;
-
         $groupedtranslations = [];
         foreach ($params['translations'] as $translation) {
             $groupedtranslations[$translation['source_lang']][] = $translation;
         }
-
         $translatedtexts = [];
-
-
         foreach ($groupedtranslations as $sourcelang => $translationsgroup) {
             $staticparts = [$params['options'], $sourcelang, $targetlang];
             $chunks = self::chunk_payload($translationsgroup, $staticparts);
-
             foreach ($chunks as $chunk) {
                 $translatedtexts = array_merge(
                         $translatedtexts,
@@ -96,7 +87,6 @@ class get_translation extends external_api {
                 );
             }
         }
-
         return $translatedtexts;
     }
 

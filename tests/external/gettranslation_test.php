@@ -45,7 +45,6 @@ final class gettranslation_test extends base_external {
         if ($this->is_below_four_one()) {
             return;
         }
-
         $params = get_translation::execute_parameters();
         $paramsreph = get_rephrase::execute_parameters();
         $this->assertInstanceOf(external_function_parameters::class, $params);
@@ -131,7 +130,7 @@ final class gettranslation_test extends base_external {
         for ($i = 0; $i < 4; $i++) {
             $items[] = ['text' => str_repeat('a', 35000)];
         }
-        // Call the static chunk_payload directly
+        // Call the static chunk_payload directly.
         $result = self::callprotectedstaticmethod(
                 get_translation::class,
                 'chunk_payload',
@@ -152,7 +151,7 @@ final class gettranslation_test extends base_external {
     public function test_chunkpayloadhandlesemptyitems(): void {
         $staticparts = ['foo' => 'bar'];
         $items = [];
-        // Call the static chunk_payload directly
+        // Call the static chunk_payload directly.
         $result = self::callprotectedstaticmethod(
                 get_translation::class,
                 'chunk_payload',
@@ -172,7 +171,7 @@ final class gettranslation_test extends base_external {
         $staticparts = ['meta' => 'info'];
         $items = [
                 ['text' => str_repeat('x', 100000)],
-                ['text' => 'y']
+                ['text' => 'y'],
         ];
         // The first 'text' exceeds $maxbytes, should yield separate chunk per item.
         $result = self::callprotectedstaticmethod(
@@ -188,14 +187,14 @@ final class gettranslation_test extends base_external {
      * Reflection helper.
      *
      * @param $class
-     * @param $methodName
+     * @param $methodname
      * @param array $args
      * @return mixed
      * @throws \ReflectionException
      */
-    protected static function callprotectedstaticmethod($class, $methodName, array $args = []) {
+    protected static function callprotectedstaticmethod($class, $methodname, array $args = []): mixed {
         $reflectionClass = new ReflectionClass($class);
-        $method = $reflectionClass->getMethod($methodName);
+        $method = $reflectionClass->getMethod($methodname);
         $method->setAccessible(true);
         // For static methods, pass null as the object.
         return $method->invokeArgs(null, $args);

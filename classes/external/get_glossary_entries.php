@@ -42,6 +42,7 @@ class get_glossary_entries extends external_api {
      * Execute.
      *
      * @param string $glossaryid
+     * @param string $version
      * @return array
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
