@@ -75,8 +75,8 @@ if ($tokenid = optional_param('deletetoken', 0, PARAM_INT)) {
 $PAGE->requires->js_call_amd('local_deepler/formvalidation', 'init');
 
 echo $OUTPUT->header();
-
+/** @var \local_deepler\output\tokens_renderer $renderer */
 $renderer = $PAGE->get_renderer('local_deepler', 'tokens');
-echo $renderer->render_token_manager();
+echo $renderer->render_token_manager(context_system::instance());
 
 echo $OUTPUT->footer();

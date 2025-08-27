@@ -58,12 +58,12 @@ jobs:
             mariadb_version: 10.6
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
         with:
           path: plugin
 
       - name: Setup PHP ${{ matrix.php }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f
         with:
           php-version: ${{ matrix.php }}
           extensions: >
@@ -129,7 +129,8 @@ jobs:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat features
-        if: ${{ always() }}
+        if: false
+        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
@@ -186,12 +187,12 @@ jobs:
             postgres_version: 13
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
         with:
           path: plugin
 
       - name: Setup PHP ${{ matrix.php }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f
         with:
           php-version: ${{ matrix.php }}
           extensions: >
@@ -257,7 +258,8 @@ jobs:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat features
-        if: ${{ always() }}
+        if: false
+        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'

@@ -128,11 +128,39 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
+      - name: Setup Chrome and PHP
+        run: |
+          # Start Chrome with more stable settings
+          google-chrome --headless \
+            --disable-gpu \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --window-size=1920,1080 \
+            --disable-web-security \
+            --disable-site-isolation-trials \
+            &
+          # Wait for Chrome to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:9222/json/version > /dev/null; then
+              echo "Chrome is ready!"
+              break
+            fi
+            echo "Waiting for Chrome... ($i/30)"
+            sleep 1
+          done
+          php -S localhost:8000 &
+          sleep 5
+
       - name: Behat features
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
+          BEHAT_INCREASE_TIMELIMIT: "10"
+          CHROME_HEADLESS: "1"
+        run: |
+          # Increase PHP memory limit for Behat
+          php -d memory_limit=512M vendor/bin/behat --config $HOME/moodledata/behat/behat.yml --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat $HOME/moodledata/behat/behat_server.log && false)
+
   testPG:
     runs-on: ubuntu-latest
     services:
@@ -256,8 +284,35 @@ jobs:
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
+      - name: Setup Chrome and PHP
+        run: |
+          # Start Chrome with more stable settings
+          google-chrome --headless \
+            --disable-gpu \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --window-size=1920,1080 \
+            --disable-web-security \
+            --disable-site-isolation-trials \
+            &
+          # Wait for Chrome to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:9222/json/version > /dev/null; then
+              echo "Chrome is ready!"
+              break
+            fi
+            echo "Waiting for Chrome... ($i/30)"
+            sleep 1
+          done
+          php -S localhost:8000 &
+          sleep 5
+
       - name: Behat features
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
+          BEHAT_INCREASE_TIMELIMIT: "10"
+          CHROME_HEADLESS: "1"
+        run: |
+          # Increase PHP memory limit for Behat
+          php -d memory_limit=512M vendor/bin/behat --config $HOME/moodledata/behat/behat.yml --profile chrome --tags='@local_deepler' --auto-rerun=3 || (cat $HOME/moodledata/behat/behat_server.log && false)

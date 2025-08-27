@@ -17,7 +17,9 @@
 namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 
+use context_user;
 use core\user;
+use DeepL\AppInfo;
 use DeepL\AuthorizationException;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
@@ -169,11 +171,11 @@ class lang_helper {
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public function initdeepl(stdClass $user): bool {
+    public function initdeepl(stdClass $user, string $version): bool {
         $this->user = $user;
         if (!$this->translator) {
             $this->setdeeplapi();
-            $this->inittranslator();
+            $this->inittranslator($version);
         }
 
         try {
@@ -213,10 +215,13 @@ class lang_helper {
      * @return bool
      * @throws \DeepL\DeepLException
      */
-    private function inittranslator(): bool {
+    private function inittranslator($version): bool {
         if (!isset($this->translator)) {
             try {
-                $this->translator = new DeepLClient($this->apikey, ['send_platform_info' => false]);
+                $this->translator = new DeepLClient($this->apikey, [
+                        'send_platform_info' => true,
+                        'app_info' => new AppInfo('Moodle-Deepler', $version)
+                ]);
             } catch (AuthorizationException $e) {
                 return false;
             }
@@ -246,7 +251,7 @@ class lang_helper {
     private function find_first_matching_token($user) {
         global $DB;
         $foundtoken = false;
-        $alluserfields = array_keys(utils::all_user_fields());
+        $alluserfields = array_keys(utils::all_user_fields(context_user::instance($this->user->id, MUST_EXIST)));
 
         // Build a map of custom profile fields for DB fallback.
         $customfields = [];
@@ -291,7 +296,7 @@ class lang_helper {
                                 (strpos($pattern, '*') !== false) ||
                                 (strpos($pattern, '_') !== false)
                         ) {
-                            if (local_deepler_wildcard_match($pattern, $uservalue)) {
+                            if (utils::wildcard_match($pattern, $uservalue)) {
                                 $foundtoken = $token;
                             }
                         } else if ($pattern === $uservalue) {
@@ -363,6 +368,8 @@ class lang_helper {
         $config->uistrings->errordbtitle = get_string('errordbtitle', 'local_deepler');
         $config->uistrings->errortoolong = get_string('errortoolong', 'local_deepler');
         $config->uistrings->saveallmodaltitle = get_string('saveallmodaltitle', 'local_deepler');
+        $config->uistrings->translatemodaltitle = get_string('translate:modal:title', 'local_deepler');
+        $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
         $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
         return json_encode($config);
@@ -480,28 +487,11 @@ class lang_helper {
                 $list .= ' disabled ';
             }
             $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
-            $list .= $item['lang'] . '</option>';
         }
         return $list;
     }
 
-    /**
-     * Prepare dropdown options for targets.
-     *
-     * @return string
-     */
-    public function preparehtmltagets(): string {
-        return $this->preparehtmlotions($this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false));
-    }
 
-    /**
-     * Prepare dropdown options for sources.
-     *
-     * @return string
-     */
-    public function preparehtmlsources(): string {
-        return $this->preparehtmlotions($this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false));
-    }
 
     /**
      * Creates props for html selects.
@@ -526,7 +516,7 @@ class lang_helper {
      * @return array
      */
     public function preparesourcesoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources));
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
     }
 
     /**

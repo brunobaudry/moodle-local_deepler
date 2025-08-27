@@ -18,12 +18,16 @@ namespace local_deepler\local\services;
 
 use context_course;
 use context_module;
+use core\context;
 use core\output\action_icon;
+use filter_multilang2;
+use filter_multilang2\text_filter;
 use html_writer;
 use core\output\pix_icon;
 use core_plugin_manager;
 use Exception;
 use local_deepler\local\data\field;
+use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 
 /**
@@ -219,16 +223,22 @@ class utils {
     /**
      * Returns an array of all available user fields (standard + custom profile fields).
      *
+     * @param \core\context $context
      * @return array
      * @throws \coding_exception
+     * @throws \dml_exception
      */
-    public static function all_user_fields(): array {
+    public static function all_user_fields(context $context): array {
         global $DB;
         $fields = self::standard_user_fields();
-
+        try {
+            $mlangfilter = new text_filter($context, []);
+        } catch (Exception $e) {
+            $mlangfilter = new filter_multilang2($context, []);
+        }
         // Add custom profile fields.
         foreach ($DB->get_records('user_info_field') as $field) {
-            $fields['profile_field_' . $field->shortname] = $field->name;
+            $fields['profile_field_' . $field->shortname] = $mlangfilter->filter($field->name);
         }
         return $fields;
     }

@@ -34,6 +34,7 @@ use moodle_url;
 class module implements translatable_interface, editable_interface, iconic_interface, visibility_interface {
     /** @var \cm_info */
     private cm_info $cm;
+
     /** @var string */
     private string $modname;
     /** @var \moodle_url */
@@ -47,6 +48,14 @@ class module implements translatable_interface, editable_interface, iconic_inter
     /** @var array */
     private array $childs;
 
+    /**
+     * Getter fo CM.
+     *
+     * @return \cm_info
+     */
+    public function get_cm(): cm_info {
+        return $this->cm;
+    }
     /**
      * Constructor
      *

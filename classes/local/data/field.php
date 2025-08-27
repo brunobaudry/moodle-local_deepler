@@ -320,7 +320,6 @@ class field {
                     $editable = $clauses['editable'];
                 }
             }
-
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
                 $infos[] = new field(
                         $info->id,
@@ -347,9 +346,7 @@ class field {
         $mod = $cminfo->modname;
         // Get all the fields as CMINFO does not carry them all.
         $filters = [];
-        if (isset(self::$additionals['mod_' . $mod])
-                && isset(self::$additionals['mod_' . $mod][$mod])
-                && isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
+        if (isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
             $filters = self::$additionals['mod_' . $mod][$mod]['fields'];
         }
         $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);

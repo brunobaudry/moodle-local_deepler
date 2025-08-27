@@ -62,6 +62,9 @@ define(['core/log',
      * @param {int} status
      */
     const onDBFailed = (error, status) => {
+        if (saveAllModal !== null && saveAllModal.isVisible) {
+            saveAllModal.hide();
+        }
         showModal(`${errordbtitle} ${status}`, `DB failed to save translations. ${error}`, 'Alert');
     };
     /**
@@ -92,6 +95,7 @@ define(['core/log',
         // Translation events.
         Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
         Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
+        Events.on(Translation.ON_TRANSLATION_DONE, onTranslationDone);
         Events.on(Translation.ON_REPHRASE_FAILED, onTranslationFailed);
         Events.on(Translation.ON_DB_SAVE_SUCCESS, onDbSavedSuccess);
         Events.on(Translation.ON_DB_FAILED, onDBFailed);
@@ -268,13 +272,11 @@ define(['core/log',
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
+     * @param {object} messageObject
      * @returns {Promise<void>}
      */
-    const launchModal = async() => {
-        saveAllModal = await Modal.create({
-            title: langstrings.uistrings.saveallmodaltitle,
-            body: langstrings.uistrings.saveallmodalbody,
-        });
+    const launchModal = async(messageObject) => {
+        saveAllModal = await Modal.create(messageObject);
         await saveAllModal.show();
     };
     const handleFocusEvent = (e)=>{
@@ -360,6 +362,12 @@ define(['core/log',
         }
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
+        }
+        if (e.target.closest(Selectors.actions.sectionSwitcher)) {
+            switchSection(e);
+        }
+        if (e.target.closest(Selectors.actions.moduleSwitcher)) {
+            switchModules(e);
         }
         if (e.target.closest(Selectors.actions.sourceSwitcher)) {
             switchSource(e);
@@ -450,7 +458,10 @@ define(['core/log',
         }
         // Prepare the UI for the save process.
         saveAllBtn.disabled = true;
-        launchModal().then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
+        launchModal({
+            title: langstrings.uistrings.saveallmodaltitle,
+            body: langstrings.uistrings.saveallmodalbody,
+        }).then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
             Log.error(reason);
         });
         // Prepare the data to be saved.
@@ -613,7 +624,16 @@ define(['core/log',
      */
     const onTranslationFailed = (error) => {
         let s = langstrings.uistrings.deeplapiexception;
+        onTranslationDone();
         showModal(s, error, 'Alert');
+    };
+    /**
+     * Event Listener when DeepL API call finished.
+     */
+    const onTranslationDone = () => {
+        if (saveAllModal !== null && saveAllModal.isVisible) {
+            saveAllModal.hide();
+        }
     };
     /**
      * Event listener for the translations process to dispaly the status.
@@ -628,6 +648,12 @@ define(['core/log',
      * Launch deepl services.
      */
     const callDeeplServices = () => {
+        saveAllModal = launchModal(
+            {
+                title: langstrings.uistrings.translatemodaltitle,
+                body: langstrings.uistrings.translatemodalbody,
+            }
+        );
         const keys = [];
         const [cookie, settings] = prepareSettingsAndCookieValues();
         saveAllBtn.disabled = false;
@@ -741,38 +767,43 @@ define(['core/log',
      * @param {boolean} selected
      */
     const showRows = (selector, selected) => {
+
         const items = domQueryAll(selector);
         const allSelected = domQuery(Selectors.actions.selectAllBtn).checked;
         const shoudlcheck = allSelected && selected;
         items.forEach((item) => {
-            let k = item.getAttribute('data-row-id');
             if (selected) {
                 item.classList.remove("d-none");
             } else {
                 item.classList.add("d-none");
             }
             // When a row is toggled then we don't want it to be selected and sent from translation.
-            try {
-                const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, k);
-                if (single !== null) {
-                    single.checked = shoudlcheck;
-                    toggleStatus(k, false);
-                }
-                const allchilds = domQueryAll(Selectors.editors.multiples.checkBoxesWithKeyHidden, k);
-                if (allchilds !== null && allchilds.length > 0) {
-                    allchilds.forEach(c => {
-                        const key = c.getAttribute('data-key');
-                        c.checked = shoudlcheck;
-                        toggleStatus(key, false);
-                    });
-                }
-            } catch (e) {
-                Log.warn(`${k} translation is disalbled`);
+            let k = item.getAttribute('data-row-id');
+            if (k === null) {
+                // Search for item's childs.
+                const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
+                childs.forEach(e=>{
+                    k = e.getAttribute('data-row-id');
+                    toggleChildCheckBoxSelection(k, shoudlcheck);
+                });
+            } else {
+                toggleChildCheckBoxSelection(k, shoudlcheck);
             }
-
         });
+
         toggleAutotranslateButton();
         countWordAndChar();
+    };
+    /**
+     * Manages selection and icon status of fields.
+     *
+     * @param {string} key
+     * @param {bool} shouldBeChecked
+     */
+    const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
+        const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+        single.checked = shouldBeChecked;
+        toggleStatus(key, false);
     };
     /**
      * Displays error message and icon.
@@ -858,6 +889,31 @@ define(['core/log',
         let searchParams = url.searchParams;
         // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
         searchParams.set("target_lang", e.target.value.replace(config.rephrasesymbol, '').trim());
+        window.location = url.toString();
+    };
+    /**
+     * Event listener to filter sections.
+     * @param {Event} e
+     */
+    const switchSection = (e) => {
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("section_id", e.target.value.trim());
+        if (searchParams.has("activity_id")) {
+            searchParams.delete("activity_id");
+        }
+        window.location = url.toString();
+    };
+    /**
+     * Event listener to filter modules.
+     * @param {Event} e
+     */
+    const switchModules = (e) => {
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("activity_id", e.target.value.trim());
         window.location = url.toString();
     };
     /**
@@ -1031,6 +1087,7 @@ define(['core/log',
      * @param {*} cfg
      */
     const init = (cfg) => {
+
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100, crumbsmaxlen: cfg.crumbsmaxlen});
         Translation.init(cfg);
@@ -1047,6 +1104,7 @@ define(['core/log',
         });
         showRows(Selectors.statuses.updated, domQuery(Selectors.actions.showUpdated).checked);
         showRows(Selectors.statuses.needsupdate, domQuery(Selectors.actions.showNeedUpdate).checked);
+        showRows(Selectors.statuses.hidden, domQuery(Selectors.actions.showHidden).checked);
     };
     /**
      * Api to be used by the other modules.
