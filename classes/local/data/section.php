@@ -106,6 +106,15 @@ class section implements translatable_interface, editable_interface, visibility_
     }
 
     /**
+     * Tells if section is leer.
+     *
+     * @return bool
+     */
+    public function is_empty(): bool {
+        return empty($this->get_modules()) && empty($this->getfields());
+    }
+
+    /**
      * This method is used to get the section name.
      * Will return the default name if the section name is empty.
      *

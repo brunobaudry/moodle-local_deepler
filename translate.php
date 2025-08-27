@@ -83,16 +83,17 @@ try {
 }
 
 echo $output->heading($mlangfilter->filter($course->fullname));
+$version = $plugin->release;
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
     field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
-    $initok = $languagepack->initdeepl($USER);
+    $initok = $languagepack->initdeepl($USER, $version);
     if ($initok && $languagepack->iscurrentsupported()) {
         // Set js data.
         $jsconfig = new stdClass();
         // We get the version from the version dot php file.
-        $jsconfig->version = $plugin->release;
+        $jsconfig->version = $version;
         // Adds user ID for security checks in external calls.
         $jsconfig->userid = $USER->id;
         // Adds the user's prefered editor to the jsconfig.
@@ -113,7 +114,7 @@ try {
         // Create the structure.
         $coursedata = new course($course, $sectionid, $activityid);
         // Build the page.
-        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release, $jsconfig->userPrefs);
+        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
         echo $output->render($renderable);
     } else {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));

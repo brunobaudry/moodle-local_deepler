@@ -100,9 +100,7 @@ abstract class deeplerform extends moodleform {
      * @throws \coding_exception
      */
     protected function makesection(section $section): void {
-        $sectionfields = $section->getfields();
-        $sectionmodules = $section->get_modules();
-        if (!empty($sectionmodules) || !empty($sectionfields)) {
+        if (!$section->is_empty()) {
             global $PAGE;
             $sectiondata = new section_data($section, $this->langpack,
                     $this->mlangfilter,

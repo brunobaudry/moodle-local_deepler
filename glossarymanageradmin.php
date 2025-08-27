@@ -27,6 +27,7 @@ use local_deepler\local\services\lang_helper;
 use local_deepler\local\data\glossary;
 
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/version.php');
 require_login();
 
 global $USER, $PAGE, $OUTPUT;
@@ -49,7 +50,7 @@ echo $OUTPUT->header();
 $apikey = get_config('local_deepler', 'apikey');
 if ($apikey) {
     $langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
-    $langhelper->initdeepl($USER);
+    $langhelper->initdeepl($USER, $plugin->release);
     // Prepare content.
 
     $pluginsglossaries = $langhelper->syncdeeplglossaries();
@@ -77,5 +78,5 @@ if ($apikey) {
 }
 
 // Add js.
-$PAGE->requires->js_call_amd('local_deepler/glossary', 'init', []);
+$PAGE->requires->js_call_amd('local_deepler/glossary', 'init', ['version' => $plugin->release]);
 echo $OUTPUT->footer();

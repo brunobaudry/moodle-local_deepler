@@ -46,15 +46,10 @@ class get_translation extends external_api {
      * @param array $options Translation options.
      * @param string $version Plugin version.
      * @return array Translated results or error messages.
-     * @throws DeepLException If API key is missing.
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
      */
     public static function execute(array $translations, array $options, string $version): array {
-        $key = self::setdeeplapikey();
-        $appinfo = self::setdeeplappinfo($version);
-
-        if (empty($key)) {
-            throw new DeepLException('authKey must be a non-empty string');
-        }
 
         $params = self::validate_parameters(self::execute_parameters(), [
                 'translations' => $translations,
@@ -63,10 +58,7 @@ class get_translation extends external_api {
         ]);
 
         try {
-            $translator = new DeepLClient($key, [
-                    'send_platform_info' => true,
-                    'app_info' => $appinfo,
-            ]);
+            $translator = self::setdeeplapikey($params['version']);
         } catch (DeepLException $exception) {
             return [
                     [
@@ -91,37 +83,13 @@ class get_translation extends external_api {
         }
 
         $translatedtexts = [];
-        $maxbytes = 100000;
-        $bufferbytes = 1024 * 16;
+
 
         foreach ($groupedtranslations as $sourcelang => $translationsgroup) {
-            $chunk = [];
+            $staticparts = [$params['options'], $sourcelang, $targetlang];
+            $chunks = self::chunk_payload($translationsgroup, $staticparts);
 
-            $basepayload = json_encode($params['options']) .
-                    $sourcelang .
-                    $targetlang;
-
-            $chunkbytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes;
-
-            foreach ($translationsgroup as $translation) {
-                $text = $translation['text'];
-                $textbytes = strlen(mb_convert_encoding($text, 'UTF-8'));
-
-                if ($chunkbytes + $textbytes > $maxbytes && !empty($chunk)) {
-                    $translatedtexts = array_merge(
-                            $translatedtexts,
-                            self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)
-                    );
-
-                    $chunk = [$translation];
-                    $chunkbytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes + $textbytes;
-                } else {
-                    $chunk[] = $translation;
-                    $chunkbytes += $textbytes;
-                }
-            }
-
-            if (!empty($chunk)) {
+            foreach ($chunks as $chunk) {
                 $translatedtexts = array_merge(
                         $translatedtexts,
                         self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)

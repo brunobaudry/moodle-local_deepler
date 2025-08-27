@@ -18,6 +18,7 @@ namespace local_deepler\output;
 
 use core_courseformat\base;
 use local_deepler\local\data\course;
+use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
 use renderable;
 use renderer_base;
@@ -117,7 +118,7 @@ class translate_page implements renderable, templatable {
         $loadedsection = $this->coursedata->get_loadedsection();
         $data->nosectionsloaded = $loadedsection === -99;
         $data->allselected = $loadedsection === -1;
-        $data->sessionidnames = $this->prepare_sectionmenu($this->coursedata->get_sectioninfoall(), $loadedsection,
+        $data->sectionidnames = $this->prepare_sectionmenu($this->coursedata->get_sectioninfoall(), $loadedsection,
                 $this->coursedata->get_format());
         $data->hasmodulelist = false;
         $data->modulesidnames = null;
@@ -168,6 +169,11 @@ class translate_page implements renderable, templatable {
     private function prepare_sectionmenu(array $sections, int $selectedid, base $format): array {
         $menu = [];
         foreach ($sections as $section) {
+            $tmp = new section($section, $format, 0);
+            if ($tmp->is_empty()) {
+                continue;
+            }
+            unset($tmp);
             $menu[] = [
                     'id' => $section->id,
                     'name' => $this->mlangfilter->filter($section->name ?? $format->get_default_section_name($section)),

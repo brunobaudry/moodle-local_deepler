@@ -65,7 +65,7 @@ final class translateform_test extends advanced_testcase {
         $this->langhelper = $this->createMock(lang_helper::class);
         $this->langhelper->currentlang = 'en';
         $this->langhelper->targetlang = 'fr';
-        $this->langhelper->initdeepl($this->user);
+        $this->langhelper->initdeepl($this->user, 'v1.0');
     }
 
     /**

@@ -38,6 +38,7 @@ define([
         const ON_ITEM_SAVED = 'onItemSaved';
         const ON_ITEM_NOT_SAVED = 'onItemNotSaved';
         const ON_TRANSLATION_FAILED = 'onTranslationFailed';
+        const ON_TRANSLATION_DONE = 'onTranslationDone';
         const ON_REPHRASE_FAILED = 'onRephraseFailed';
         const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
         const ON_DB_FAILED = 'onDbFailed';
@@ -286,6 +287,7 @@ define([
             if (glossaries.length > 0) {
                 Api.updateGlossariesUsage(glossaries);
             }
+            Events.emit(ON_TRANSLATION_DONE);
         };
         /**
          * When rephrasing went good.
@@ -304,6 +306,7 @@ define([
                     Events.emit(ON_REPHRASE_FAILED, tr.error);
                 }
             });
+             Events.emit(ON_TRANSLATION_DONE);
         };
         /**
          * When translation failed.
@@ -417,6 +420,7 @@ define([
             ON_ITEM_SAVED: ON_ITEM_SAVED,
             ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
             ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
+            ON_TRANSLATION_DONE: ON_TRANSLATION_DONE,
             ON_REPHRASE_FAILED: ON_REPHRASE_FAILED,
             ON_DB_SAVE_SUCCESS: ON_DB_SAVE_SUCCESS,
     };

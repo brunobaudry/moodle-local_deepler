@@ -320,7 +320,6 @@ class field {
                     $editable = $clauses['editable'];
                 }
             }
-
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
                 $infos[] = new field(
                         $info->id,

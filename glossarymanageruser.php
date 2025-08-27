@@ -25,6 +25,7 @@
 use local_deepler\local\services\lang_helper;
 
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/version.php');
 require_login();
 
 global $USER, $PAGE, $OUTPUT;
@@ -36,7 +37,7 @@ require_capability('local/deepler:edittranslations', $context);
 $PAGE->set_context($context);
 // Load glossary manager.
 $langhelper = new lang_helper();
-$langhelper->initdeepl($USER);
+$langhelper->initdeepl($USER, $plugin->release);
 /** @var local_deepler\output\glossary_renderer $renderer */
 $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
 $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
@@ -77,5 +78,5 @@ echo $renderer->glossary_table($glossaries);
 echo $renderer->glossary_uploader('user');
 
 // Add js.
-$PAGE->requires->js_call_amd('local_deepler/glossary', 'init', []);
+$PAGE->requires->js_call_amd('local_deepler/glossary', 'init', ['version' => $plugin->release]);
 echo $OUTPUT->footer();

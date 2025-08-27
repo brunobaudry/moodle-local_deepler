@@ -22,7 +22,10 @@
  */
 define(['./local/selectors', './local/api', './local/customevents', 'core/modal', 'core/log'],
     function(Selectors, Api, Events, Modal, Log) {
-    const initCode = ()=> {
+    let version = '';
+    const initCode = (cfg)=> {
+        version = cfg;
+        window.console.log(version);
         const fileInput = document.getElementById('fileElem');
         const fileNameDisplay = document.getElementById('filename-display');
 
@@ -53,15 +56,13 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
                     Log.info(e.target.dataset.glossary);
                     Api.getGlossariesEntries(
                         e.target.dataset.glossary,
-                        e.target.dataset.source,
-                        e.target.dataset.target
+                        version
                     );
                 } else if (e.target.parentNode.dataset && e.target.parentNode.dataset.glossary) {
                     Log.info(e.target.parentNode.dataset.glossary);
                     Api.getGlossariesEntries(
                         e.target.parentNode.dataset.glossary,
-                        e.target.parentNode.dataset.source,
-                        e.target.parentNode.dataset.target
+                        version
                     );
                 } else {
                   Log.error('Cannot not find glossary ID');
@@ -116,10 +117,10 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
     };
 
     return {
-        init: function() {
+        init: function(cfg) {
             if (document.readyState !== 'loading') {
                 // DOM is already ready.
-                initCode();
+                initCode(cfg);
                 registerEventListeners();
             } else {
                 // Wait for DOMContentLoaded.

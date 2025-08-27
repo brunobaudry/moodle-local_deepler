@@ -132,7 +132,7 @@ final class translate_page_test extends advanced_testcase {
         $this->assertTrue(property_exists($data, 'version'));
         $this->assertTrue(property_exists($data, 'nosectionsloaded'));
         $this->assertTrue(property_exists($data, 'allselected'));
-        $this->assertTrue(property_exists($data, 'sessionidnames'));
+        $this->assertTrue(property_exists($data, 'sectionidnames'));
         $this->assertTrue(property_exists($data, 'hasmodulelist'));
         $this->assertTrue(property_exists($data, 'modulesidnames'));
         $this->assertTrue(property_exists($data, 'anymoduleselected'));

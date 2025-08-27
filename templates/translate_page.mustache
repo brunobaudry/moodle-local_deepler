@@ -74,7 +74,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   * compatiblelangs
   * mform
   * version
-  * sessionidnames
+  * sectionidnames
   * modulesidnames
 
   Example context (json):
@@ -103,10 +103,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center border-0 bg-transparent" style="opacity:1 !important;">
             <div class="d-flex justify-content-center align-items-center">
-                <div class="spinner-grow text-info" role="status" style="width: 5rem; height: 5rem;opacity: 1;">
+                <div class="spinner-border text-info" role="status" style="width: 4rem; height: 4rem;opacity: 1;">
                 </div>
             </div>
-            <span class="text-info fs-2 text-capitalize">{{#str}}loading{{/str}} ☕︎</span>
+            <span class="text-info fs-1 text-capitalize">☕︎ {{#str}}loading{{/str}} ☕︎</span>
         </div>
     </div>
 </div>
@@ -313,11 +313,11 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 </div>
 <div class="container-fluid">
-    <div class="row py-4" id="local_deepler__sourcetarget">
-        <div class="col-5 text-right"><h4 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h4></div>
-        <div class="col-1 h4 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
+    <div class="row py-4 align-items-center" id="local_deepler__sourcetarget">
+        <div class="col-5 text-right"><h5 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h5></div>
+        <div class="col-1 h5 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
-        <div class="col-3"><h4 id="local_deepler__targetlang">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h4></div>
+        <div class="col-3"><h5 id="local_deepler__targetlang">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h5></div>
         <div class="col-2">
             <select
                     id="select-target-language"
@@ -337,6 +337,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     </div>
 </div>
 
+
 <div class="container-fluid bg-secondary pb-1">
     <div class="row">
         <div class="custom-control custom-switch col-5 pt-2">
@@ -349,14 +350,14 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             >
                 <option value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
                 <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>{{#str}}section:coursesettings, local_deepler{{/str}}</option>
-                {{#sessionidnames}}
+                {{#sectionidnames}}
                     <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
-                {{/sessionidnames}}
+                {{/sectionidnames}}
             </select>
 
         </div>
         {{#hasmodulelist}}
-            <div class="col-2 h4 text-center align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>
+            <div class="col-2 h3 text-center text-white align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>
             <div class="custom-control custom-switch col-5 pt-2">
                 <label for="select-module" class="form-label">{{#str}}module:select:label, local_deepler{{/str}}</label>
                 <select

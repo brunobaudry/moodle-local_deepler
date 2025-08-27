@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use context_user;
 use core\user;
+use DeepL\AppInfo;
 use DeepL\AuthorizationException;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
@@ -170,11 +171,11 @@ class lang_helper {
      * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public function initdeepl(stdClass $user): bool {
+    public function initdeepl(stdClass $user, string $version): bool {
         $this->user = $user;
         if (!$this->translator) {
             $this->setdeeplapi();
-            $this->inittranslator();
+            $this->inittranslator($version);
         }
 
         try {
@@ -214,10 +215,13 @@ class lang_helper {
      * @return bool
      * @throws \DeepL\DeepLException
      */
-    private function inittranslator(): bool {
+    private function inittranslator($version): bool {
         if (!isset($this->translator)) {
             try {
-                $this->translator = new DeepLClient($this->apikey, ['send_platform_info' => false]);
+                $this->translator = new DeepLClient($this->apikey, [
+                        'send_platform_info' => true,
+                        'app_info' => new AppInfo('Moodle-Deepler', $version)
+                ]);
             } catch (AuthorizationException $e) {
                 return false;
             }
@@ -364,6 +368,8 @@ class lang_helper {
         $config->uistrings->errordbtitle = get_string('errordbtitle', 'local_deepler');
         $config->uistrings->errortoolong = get_string('errortoolong', 'local_deepler');
         $config->uistrings->saveallmodaltitle = get_string('saveallmodaltitle', 'local_deepler');
+        $config->uistrings->translatemodaltitle = get_string('translate:modal:title', 'local_deepler');
+        $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
         $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
         return json_encode($config);
