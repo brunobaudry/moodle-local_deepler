@@ -16,9 +16,9 @@
 
 namespace local_deepler\output;
 
-use core\output\renderable;
+use renderable;
 use core\output\renderer_base;
-use core\output\templatable;
+use templatable;
 use core_filters\text_filter;
 use Exception;
 use filter_multilang2\text_filter as Multilang2TextFilter;
