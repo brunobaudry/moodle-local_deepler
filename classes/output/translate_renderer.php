@@ -16,12 +16,6 @@
 
 namespace local_deepler\output;
 
-use core_filters\text_filter;
-use local_deepler\local\data\field;
-use local_deepler\local\data\interfaces\translatable_interface;
-use local_deepler\local\data\multilanger;
-use local_deepler\local\services\lang_helper;
-use local_deepler\local\services\utils;
 use renderer_base;
 use filter_multilang2\text_filter as Multilang2TextFilter;
 /**

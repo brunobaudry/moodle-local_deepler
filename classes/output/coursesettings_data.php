@@ -17,7 +17,7 @@
 namespace local_deepler\output;
 
 use renderable;
-use core\output\renderer_base;
+use renderer_base;
 use templatable;
 use core_filters\text_filter;
 use Exception;

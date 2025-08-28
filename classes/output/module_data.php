@@ -16,9 +16,9 @@
 
 namespace local_deepler\output;
 
-use core\output\renderable;
-use core\output\renderer_base;
-use core\output\templatable;
+use renderable;
+use renderer_base;
+use templatable;
 use core_filters\text_filter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\module;
