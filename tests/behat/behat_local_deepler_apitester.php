@@ -163,19 +163,4 @@ class behat_local_deepler_apitester implements Context {
             throw new Exception("Response does not contain expected text: $text");
         }
     }
-
-    /**
-     * Before scenario hook to check if the API secret token is set.
-     *
-     * @param BeforeScenarioScope $scope The scenario scope.
-     * @return void
-     * @throws PendingException If the API secret token is not set.
-     */
-    public function before_scenario(BeforeScenarioScope $scope): void {
-        echo("SCOPE: " . $scope->getName()); // Debug statement.
-        echo("API_SECRET_TOKEN: " . $_ENV['API_SECRET_TOKEN']); // Debug statement.
-        if (empty($_ENV['API_SECRET_TOKEN'])) {
-            throw new PendingException('API_SECRET_TOKEN is not set. Skipping scenario.');
-        }
-    }
 }
