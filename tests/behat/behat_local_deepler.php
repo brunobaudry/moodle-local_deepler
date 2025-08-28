@@ -47,7 +47,7 @@ class behat_local_deepler extends behat_base {
         $attempt = 0;
         $waittime = 1;
 
-        /*do {
+        do {
             try {
                 $element = $session->getPage()->find('css', $cssselector);
                 if ($element !== null && $element->isVisible()) {
@@ -65,51 +65,9 @@ class behat_local_deepler extends behat_base {
             sleep($waittime);
             $waittime *= 2; // Exponential backoff.
             $attempt++;
-        } while ($attempt < $maxattempts);*/
-        for ($attempt = 1; $attempt <= $maxattempts; $attempt++) {
-            $element = $session->getPage()->find('css', $cssselector);
+        } while ($attempt < $maxattempts);
 
-            if ($element !== null && $element->isVisible()) {
-                // Re-fetch the element using the driver to avoid stale element issues
-                $xpath = $element->getXpath();
-                $webelements = $driver->find($xpath);
-
-                if (!empty($webelements)) {
-                    $webelement = $webelements[0];
-
-                    // Try scrolling with full options
-                    try {
-                        //debugging("Attempting scroll with full options on attempt $attempt");
-                        $driver->executeScript(
-                                "arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});",
-                                [$webelement]
-                        );
-                        //debugging("Scroll executed successfully.");
-                        return;
-                    } catch (Exception $e) {
-                        //debugging("Scroll with full options failed: " . $e->getMessage());
-                        // Try fallback scroll
-                        try {
-                            //debugging("Attempting fallback scroll on attempt $attempt");
-                            $driver->executeScript("arguments[0].scrollIntoView(true);", [$webelement]);
-                            //debugging("Fallback scroll executed successfully.");
-                            return;
-                        } catch (Exception $e2) {
-                            debugging("Fallback scroll failed: " . $e2->getMessage());
-                        }
-                    }
-                } else {
-                    debugging("Element found but could not re-fetch via driver.");
-                }
-            } else {
-                debugging("Element not found or not visible on attempt $attempt.");
-            }
-
-            sleep($waittime);
-            $waittime *= 2;
-        }
-
-        throw new Exception("Failed to scroll to element with selector '$cssselector' after $maxattempts attempts.");
+        throw new Exception("Element with CSS selector '$cssselector' not found or not visible after $maxattempts attempts");
     }
 
 }
