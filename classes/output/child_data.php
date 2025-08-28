@@ -21,10 +21,8 @@ use core\output\renderer_base;
 use core\output\templatable;
 use core_filters\text_filter;
 use local_deepler\local\data\field;
-use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\utils;
-use local_deepler\output\translate_data;
 
 /**
  * Child data.

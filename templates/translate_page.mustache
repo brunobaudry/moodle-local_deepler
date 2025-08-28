@@ -349,7 +349,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     data-action="local_deepler/section-switcher"
             >
                 <option value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
-                <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>{{#str}}section:coursesettings, local_deepler{{/str}}</option>
+                <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>* {{#str}}settings{{/str}}</option>
                 {{#sectionidnames}}
                     <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
                 {{/sectionidnames}}

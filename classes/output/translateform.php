@@ -16,12 +16,13 @@
 
 namespace local_deepler\output;
 defined('MOODLE_INTERNAL') || die();
-define('DIV_CLOSE', '</div>');
 global $CFG;
 
+use core_filters\text_filter;
 use local_deepler\local\data\field;
-use local_deepler\local\data\multilanger;
+use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
+use moodleform;
 use MoodleQuickForm;
 
 // Load the files we're going to need.
@@ -37,7 +38,7 @@ require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_ctedito
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class translateform extends deeplerform {
+class translateform extends moodleform {
 
     /**
      * Available langs.
@@ -54,11 +55,32 @@ class translateform extends deeplerform {
      * @return void
      * @throws \coding_exception
      */
-    public function definition(): void {
-        parent::definition();
+    /**
+     * @var string[]
+     */
+    protected array $langcodes;
+    /**
+     * @var course
+     */
+    protected mixed $coursedata;
+    /**
+     * @var text_filter|Multilang2TextFilter
+     */
+    protected text_filter|Multilang2TextFilter $mlangfilter;
+
+    /**
+     * Main data definition function.
+     *
+     * @return void
+     */
+    protected function definition(): void {
         global $CFG;
         $this->editor = $this->_customdata['editor'];
         $this->langpack = $this->_customdata['langpack'];
+        // Get course data.
+        $this->coursedata = $this->_customdata['coursedata'];
+        // Get mlangfilter to filter text.
+        $this->mlangfilter = $this->_customdata['mlangfilter'];
         field::$targetlangdeepl = $this->langpack->targetlang;
         // Start moodle form.
         $this->_form->disable_form_change_checker();
@@ -76,7 +98,53 @@ class translateform extends deeplerform {
         // Create sections.
         $this->makesections($this->coursedata->getsections());
         // Close form.
-        $this->_form->addElement('html', DIV_CLOSE);
+        $this->_form->addElement('html', '</div>');
+
     }
 
+    /**
+     * Course first section (Course settings block).
+     *
+     * @param string $title Header title
+     * @param string $link Edit link URL
+     * @param array $settingfields Field items to render
+     * @return void
+     */
+    protected function makecoursesetting(string $title, string $link, array $settingfields): void {
+        global $PAGE;
+        $renderer = $PAGE->get_renderer('local_deepler', 'translate');
+        $data = new coursesettings_data($title, $link, $settingfields, $this->langpack, $this->mlangfilter, $this->editor);
+        $this->_form->addElement('html', $renderer->makecoursesetting($data));
+    }
+
+    /**
+     * Create sections.
+     *
+     * @param array $sections
+     * @return void
+     * @throws \coding_exception
+     */
+    protected function makesections(array $sections) {
+        foreach ($sections as $section) {
+            $this->makesection($section);
+        }
+    }
+
+    /**
+     * Create a section
+     *
+     * @param \local_deepler\local\data\section $section
+     * @return void
+     * @throws \coding_exception
+     */
+    protected function makesection(section $section): void {
+        if (!$section->is_empty()) {
+            global $PAGE;
+            $sectiondata = new section_data($section, $this->langpack,
+                    $this->mlangfilter,
+                    $this->editor);
+            $renderer = $PAGE->get_renderer('local_deepler', 'translate');
+            $this->_form->addElement('html', $renderer->makesection($sectiondata));
+        }
+    }
 }
