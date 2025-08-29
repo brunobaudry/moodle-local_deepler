@@ -25,7 +25,6 @@
 require_once(__DIR__ . '/env_loader.php');
 
 use Behat\Behat\Context\Context;
-use Behat\DebugExtension\Message;
 use Behat\Gherkin\Node\PyStringNode;
 
 /**

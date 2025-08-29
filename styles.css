@@ -69,7 +69,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     position: absolute;
 }
 #page-local-deepler-translate .local_deepler__selectorbox {
-    margin-top: 0rem;
+    margin-top: 0;
 }
 #page-local-deepler-translate div[data-table^=question] {
     background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
