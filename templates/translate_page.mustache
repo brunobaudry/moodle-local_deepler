@@ -103,7 +103,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center border-0 bg-transparent" style="opacity:1 !important;">
             <div class="d-flex justify-content-center align-items-center">
-                <div class="spinner-border text-info" role="status" style="width: 4rem; height: 4rem;opacity: 1;">
+                <div class="spinner-grow text-info" role="status" style="width: 4rem; height: 4rem;opacity: 1;">
                 </div>
             </div>
             <span class="text-info fs-1 text-capitalize">☕︎ {{#str}}loading{{/str}} ☕︎</span>
@@ -312,17 +312,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     </div>
 
 </div>
-<div class="container-fluid">
+<div class="container-fluid bg-primary-subtle">
     <div class="row py-4 align-items-center" id="local_deepler__sourcetarget">
-        <div class="col-5 text-right"><h5 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h5></div>
-        <div class="col-1 h5 text-center"><i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <div class="col-5 text-right text-primary"><h5 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h5></div>
+        <div class="col-1 h5 text-center text-primary"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
-        <div class="col-3"><h5 id="local_deepler__targetlang">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h5></div>
-        <div class="col-2">
+        <div class="col-3"><h5 id="local_deepler__targetlang" class="text-left text-primary">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h5></div>
+        <div class="col-3">
             <select
                     id="select-target-language"
                     name="select-target-language"
-                    class="local_deepler__localeswitcher form-control"
+                    class="local_deepler__localeswitcher form-control text-primary"
                     data-action="local_deepler/target-switcher"
             >
                 {{#notarget}}
@@ -338,37 +338,37 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 </div>
 
 
-<div class="container-fluid bg-secondary pb-1">
+<div class="container-fluid text-primary bg-secondary-subtle pb-1">
     <div class="row">
         <div class="custom-control custom-switch col-5 pt-2">
             <label for="select-section" class="form-label">{{#str}}section:select:label, local_deepler{{/str}}</label>
             <select
                     id="select-section"
                     name="select-section"
-                    class="local_deepler__sectionswitcher form-control"
+                    class="local_deepler__sectionswitcher form-control text-primary"
                     data-action="local_deepler/section-switcher"
             >
-                <option value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
-                <option value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>* {{#str}}settings{{/str}}</option>
+                <option class="text-primary" value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
+                <option class="text-primary" value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>* {{#str}}settings{{/str}}</option>
                 {{#sectionidnames}}
-                    <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                    <option class="text-primary" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
                 {{/sectionidnames}}
             </select>
 
         </div>
         {{#hasmodulelist}}
-            <div class="col-2 h3 text-center text-white align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>
+            <div class="col-2 h3 text-center text-secondary align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>
             <div class="custom-control custom-switch col-5 pt-2">
                 <label for="select-module" class="form-label">{{#str}}module:select:label, local_deepler{{/str}}</label>
                 <select
                         id="select-module"
                         name="select-module"
-                        class="local_deepler__moduleswitcher form-control"
+                        class="local_deepler__moduleswitcher form-control text-primary"
                         data-action="local_deepler/module-switcher"
                 >
-                    <option value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
+                    <option class="text-primary" value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
                     {{#modulesidnames}}
-                        <option value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                        <option class="text-primary" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
                     {{/modulesidnames}}
                 </select>
             </div>
@@ -377,7 +377,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 </div>
 
-<div class="bg-secondary container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">
+<div class="text-primary bg-secondary-subtle container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">
     <div class="d-flex flex-wrap align-items-center pl-5 pt-2 pb-0" id="local_deepler-translate-header-filter">
         <span class="mr-3">{{#str}}filters,local_deepler{{/str}}:</span>
 
@@ -423,9 +423,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         </div>
 
         <div class="col-6 text-center">
-            <span id="local_deepler-translate-header-usage" class="ml-2 p-1 alert">
+            <div id="local_deepler-translate-header-usage" class="p-2 bg-primary-light text-sm-center text-primary">
                 {{#str}}wordcountsentence,local_deepler{{/str}}
-            </span>
+            </div>
         </div>
 
         <div class="col-2 px-0">

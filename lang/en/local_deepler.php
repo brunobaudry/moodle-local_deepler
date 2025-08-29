@@ -436,7 +436,7 @@ $string['viewsourcedisabled'] = 'No multilingual content yet.';
 $string['warningsource'] =
         'Watch out ! The current source language &quot;{$a}&quot; is already as a multilang tag along side with the fallback tag &quot;OTHER&quot;. Note that both will be merge as the &quot;OTHER&quot; multilang tag.';
 $string['wordcountsentence'] =
-        'Total <span id="local_deepler__wc">0</span> words, <span id="local_deepler__wosc">0</span> characters (<span id="local_deepler__wsc">0</span> chars including spaces) DeepL\'s usage = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
+        'Total <span id="local_deepler__wc">0</span> words, <span id="local_deepler__wosc">0</span> characters (<span id="local_deepler__wsc">0</span> chars including spaces). DeepL\'s&nbsp;usage&nbsp;= <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
 $string['writingstyleacademic'] = 'Academic writing style';
 $string['writingstylebusiness'] = 'Business writing style';
 $string['writingstylecasual'] = 'Casual writing style';

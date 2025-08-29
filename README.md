@@ -522,18 +522,34 @@ Also if you have a Free account, you cannot select a same source and target lang
 
 ### Filters
 
+In order to organise your translations, there 2 types filters :
+- Course's sections and Activities.
+- Translation status.
+
 You can filter the rows to hide/show the ones that need to be translated as wished.
 Clicking on the "Status" checkbox will select all visible.
-
 These filter show/hide the textual content found in the course.
 
-#### Up to date:
+#### Sections and activities selections
+By **default** the plugin will start by showing the course's settings only as with heavy courses loading all activity text fields in a single page can bloat the browser.
+
+![](pix/filter_section_activities.png)
+
+Then you can either display **ALL SECTIONS**
+
+![](pix/filter_all_sections.png)
+
+Or select one of your course section and narrow down to an activity.
+
+![](pix/filter_section_activities.png)
+
+#### Up to date filter:
 
 These are the content that are already translated and that no change were made in the source.
 
 They will appear with the GREEN DOT indicator.
 
-#### Needs update:
+#### Needs update filter:
 
 These are the textual contents that were never translated or that were modified after being translated.
 
