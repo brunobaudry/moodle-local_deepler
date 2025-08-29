@@ -23,6 +23,7 @@ define([], () => {
     const COOKIE_PREFIX = 'moodle_deepler_glossary_';
     const COOKIE_PREFIX_NEW = 'moodle_deepler_settings_';
     const MAX_INPUT_LENGTH = 256;
+    const parser = new DOMParser();
     /**
      * Simple helper to manage selectors
      * @param {string} s
@@ -76,7 +77,7 @@ define([], () => {
      * @returns {string}
      */
     const decodeHTML = (encodedStr) => {
-        const parser = new DOMParser();
+
         const doc = parser.parseFromString(encodedStr, 'text/html');
         return doc.documentElement.textContent;
     };

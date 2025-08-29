@@ -340,6 +340,7 @@ class field {
      *
      * @param \cm_info $cminfo
      * @return array
+     * @throws \dml_exception
      */
     public static function getfieldsfrominfo(cm_info $cminfo): array {
         global $DB;

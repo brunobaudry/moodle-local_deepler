@@ -55,6 +55,7 @@ define(['core/log',
     let settingsUI = {};
     let allDataFormatOne = [];
     let glossaryDetailViewr;
+    let filterTimeout;
     /**
      * When a main error with the DB occurs.
      *
@@ -372,7 +373,19 @@ define(['core/log',
         if (e.target.closest(Selectors.actions.sourceSwitcher)) {
             switchSource(e);
         }
-        if (e.target.closest(Selectors.actions.showUpdated)) {
+        clearTimeout(filterTimeout);
+        filterTimeout = setTimeout(() => {
+            if (e.target.closest(Selectors.actions.showUpdated)) {
+                showRows();
+            }
+            if (e.target.closest(Selectors.actions.showNeedUpdate)) {
+                showRows();
+            }
+            if (e.target.closest(Selectors.actions.showHidden)) {
+                showRows();
+            }
+        }, 30);
+        /* If (e.target.closest(Selectors.actions.showUpdated)) {
             showRows(Selectors.statuses.updated, e.target.checked);
         }
         if (e.target.closest(Selectors.actions.showNeedUpdate)) {
@@ -380,7 +393,7 @@ define(['core/log',
         }
         if (e.target.closest(Selectors.actions.showHidden)) {
             showRows(Selectors.statuses.hidden, e.target.checked);
-        }
+        }*/
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
         }
@@ -533,34 +546,35 @@ define(['core/log',
      * @param {Event} e Event
      */
     const toggleAllCheckboxes = (e) => {
-        // Check/uncheck checkboxes
-        if (e.target.checked) {
-            checkboxes.forEach((i) => {
-                // Toggle check box upon visibility
-                i.checked = !getParentRow(i).classList.contains('d-none');
-                toggleStatus(i.getAttribute('data-key'), i.checked);
+        const checked = e.target.checked;
+        const updates = [];
+
+        // Prepare all updates without applying immediately.
+        checkboxes.forEach(checkbox => {
+            const shouldCheck = checked ? !getParentRow(checkbox).classList.contains('d-none') : false;
+
+            if (checkbox.checked !== shouldCheck) {
+                updates.push({checkbox, shouldCheck});
+            }
+        });
+
+        // Apply updates in the next animation frame, batching DOM writes.
+        requestAnimationFrame(() => {
+            updates.forEach(({checkbox, shouldCheck}) => {
+                checkbox.checked = shouldCheck;
+                toggleStatus(checkbox.getAttribute('data-key'), shouldCheck);
             });
-        } else {
-            checkboxes.forEach((i) => {
-                i.checked = false;
-                toggleStatus(i.getAttribute('data-key'), false);
-            });
-        }
-        toggleAutotranslateButton();
-        countWordAndChar();
+
+            toggleAutotranslateButton();
+            countWordAndChar();
+        });
     };
     /**
      * Toggle Autotranslate Button
      */
     const toggleAutotranslateButton = () => {
-        autotranslateButton.disabled = true;
-        for (let i in checkboxes) {
-            let e = checkboxes[i];
-            if (e.checked) {
-                autotranslateButton.disabled = false;
-                break;
-            }
-        }
+        // Use Array.some() for early exit when a checked checkbox is found
+        autotranslateButton.disabled = !Array.from(checkboxes).some(e => e.checked);
     };
     /**
      * Get the translation row status icon.
@@ -730,11 +744,9 @@ define(['core/log',
                 Translation.initTemp(key); // Reset the translation.
                 if (checked) {
                     setIconStatus(key, Selectors.statuses.totranslate);
-                    // RefreshTempTranslation(key);
                 }
                 break;
             case Selectors.statuses.totranslate :
-                // If (checked && Translation.tempTranslations[key]?.translation?.length > 0) {
                 if (checked && Translation.translated[key]) {
                     setIconStatus(key, Selectors.statuses.tosave, true);
                 } else {
@@ -763,34 +775,54 @@ define(['core/log',
     };
     /**
      * Shows/hides rows.
-     * @param {string} selector
-     * @param {boolean} selected
      */
-    const showRows = (selector, selected) => {
+    const showRows = () => {
+        // Map each selector to its corresponding checkbox checked state
+        const selectorMap = {
+            [Selectors.statuses.updated]: domQuery(Selectors.actions.showUpdated).checked,
+            [Selectors.statuses.needsupdate]: domQuery(Selectors.actions.showNeedUpdate).checked,
+            [Selectors.statuses.hidden]: domQuery(Selectors.actions.showHidden).checked
+        };
 
-        const items = domQueryAll(selector);
+        // Combine all selectors into one comma-separated string for batch querying.
+        const mergedSelector = Object.keys(selectorMap).join(",");
+
+        // Query all items matching any of the selectors once.
+        const allItems = domQueryAll(mergedSelector);
+
+        // Cache the global "select all" button checked state once.
         const allSelected = domQuery(Selectors.actions.selectAllBtn).checked;
-        const shoudlcheck = allSelected && selected;
-        items.forEach((item) => {
-            if (selected) {
-                item.classList.remove("d-none");
-            } else {
-                item.classList.add("d-none");
+
+        allItems.forEach(item => {
+            // Determine which selector this item matches so we can apply the right checkbox state.
+            let shouldShow = false;
+            let shouldCheck = false;
+            for (const [selector, checked] of Object.entries(selectorMap)) {
+                if (item.matches(selector)) {
+                    shouldShow = checked;
+                    shouldCheck = allSelected && checked;
+                    break;
+                }
             }
-            // When a row is toggled then we don't want it to be selected and sent from translation.
-            let k = item.getAttribute('data-row-id');
-            if (k === null) {
-                // Search for item's childs.
+
+            // Show or hide item based on checkbox state.
+            item.classList.toggle("d-none", !shouldShow);
+
+            // Handle checkbox selection for this item or its children.
+            let rowId = item.getAttribute('data-row-id');
+            if (rowId === null) {
+                // For items without row-id, toggle checkboxes of their child rows.
                 const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
-                childs.forEach(e=>{
-                    k = e.getAttribute('data-row-id');
-                    toggleChildCheckBoxSelection(k, shoudlcheck);
+                childs.forEach(child => {
+                    const childId = child.getAttribute('data-row-id');
+                    toggleChildCheckBoxSelection(childId, shouldCheck);
                 });
             } else {
-                toggleChildCheckBoxSelection(k, shoudlcheck);
+                toggleChildCheckBoxSelection(rowId, shouldCheck);
             }
         });
 
+        // Call global UI update functions once
         toggleAutotranslateButton();
         countWordAndChar();
     };
@@ -931,36 +963,43 @@ define(['core/log',
      * Launch, display count of Words And Chars.
      */
     const countWordAndChar = () => {
-        let wrdsc = 0;
-        let cws = 0;
-        let cwos = 0;
-        domQueryAll(Selectors.statuses.checkedCheckBoxes)
-            .forEach((ckBox) => {
-                let key = ckBox.getAttribute("data-key");
-                let results = getCount(key);
-                wrdsc += results.wordCount;
-                cwos += results.charNumWithOutSpace;
-                cws += results.charNumWithSpace;
-            });
+        let wrdsc = 0,
+        cws = 0,
+        cwos = 0;
+
+        // Cache checkboxes matching selector once, convert to array if needed.
+        const checkedBoxes = Array.from(domQueryAll(Selectors.statuses.checkedCheckBoxes));
+
+        // Aggregate counts in one loop.
+        checkedBoxes.forEach(ckBox => {
+            const key = ckBox.getAttribute("data-key");
+            const results = getCount(key);
+            wrdsc += results.wordCount;
+            cws += results.charNumWithSpace;
+            cwos += results.charNumWithOutSpace;
+        });
+
+        // Cache DOM elements once for output instead of querying repeatedly.
         const wordCount = domQuery(Selectors.statuses.wordcount);
         const charWithSpace = domQuery(Selectors.statuses.charNumWithSpace);
         const charWOSpace = domQuery(Selectors.statuses.charNumWithOutSpace);
         const deeplUseSpan = domQuery(Selectors.statuses.deeplUsage);
         const deeplMaxSpan = domQuery(Selectors.statuses.deeplMax);
         const parent = domQuery(Selectors.statuses.deeplStatusContainer);
-        let current = cws + config.usage.character.count;
+
+        // Calculate current usage once.
+        const current = cws + config.usage.character.count;
+
+        // Update UI in one batch (minimizes layout thrashing).
         wordCount.innerText = wrdsc;
         charWithSpace.innerText = cws;
         charWOSpace.innerText = cwos;
         deeplUseSpan.innerText = format.format(current);
         deeplMaxSpan.innerText = config.usage.character.limit === null ? '∞' : format.format(config.usage.character.limit);
-        if (current >= config.usage.character.limit) {
-            parent.classList.remove('alert-success');
-            parent.classList.add('alert-danger');
-        } else {
-            parent.classList.add('alert-success');
-            parent.classList.remove('alert-danger');
-        }
+
+        // Toggle classes efficiently.
+        parent.classList.toggle('alert-success', current < config.usage.character.limit || config.usage.character.limit === null);
+        parent.classList.toggle('alert-danger', current >= config.usage.character.limit && config.usage.character.limit !== null);
     };
     /**
      * Get the editor container based on recieved current user's editor preference.
@@ -1102,9 +1141,7 @@ define(['core/log',
         checkboxes.forEach((node) => {
             node.disabled = selectAllBtn.disabled;
         });
-        showRows(Selectors.statuses.updated, domQuery(Selectors.actions.showUpdated).checked);
-        showRows(Selectors.statuses.needsupdate, domQuery(Selectors.actions.showNeedUpdate).checked);
-        showRows(Selectors.statuses.hidden, domQuery(Selectors.actions.showHidden).checked);
+        showRows();
     };
     /**
      * Api to be used by the other modules.
