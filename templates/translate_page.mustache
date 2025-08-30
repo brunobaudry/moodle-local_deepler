@@ -348,8 +348,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     class="local_deepler__sectionswitcher form-control text-primary"
                     data-action="local_deepler/section-switcher"
             >
-                <option class="text-primary" value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
                 <option class="text-primary" value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>* {{#str}}settings{{/str}}</option>
+                <option class="text-primary" value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
                 {{#sectionidnames}}
                     <option class="text-primary" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
                 {{/sectionidnames}}

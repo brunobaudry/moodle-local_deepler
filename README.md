@@ -533,7 +533,7 @@ These filter show/hide the textual content found in the course.
 #### Sections and activities selections
 By **default** the plugin will start by showing the course's settings only as with heavy courses loading all activity text fields in a single page can bloat the browser.
 
-![](pix/filter_section_activities.png)
+![](pix/filter_default_settings.png)
 
 Then you can either display **ALL SECTIONS**
 

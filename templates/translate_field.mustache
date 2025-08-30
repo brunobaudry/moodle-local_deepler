@@ -69,6 +69,8 @@
     * plaintextinput
     * istiny
     * nottiny
+    * totalchar
+    * maxlength
 
 
     Example context (json):
@@ -105,7 +107,9 @@
   "plaintextinput": false,
   "istiny": true,
   "nottiny": false,
-  "cteditor": "<textarea id='editor_summary'></textarea>"
+  "cteditor": "<textarea id='editor_summary'></textarea>",
+  "totalchar": 10,
+  "maxlength": 255
 }
 
 
@@ -150,7 +154,14 @@
                 <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
             {{/sourceoptions}}
         </select>
-        <div class="collapse show" 
+        {{#warnmaxlength}}
+                        <span class="p-2">
+                    <i class="fa fa-warning text-{{warntextcolor}}" aria-hidden="true"></i>&nbsp;
+                            {{#str}}fieldmaxlengtha,local_deepler, {{totalchar}}{{/str}}&nbsp;
+                            {{#str}}fieldmaxlengthb,local_deepler, {{maxlength}}{{/str}}
+            {{/warnmaxlength}}
+
+        <div class="collapse show"
              data-sourcetext-key="{{key}}" 
              data-sourcetext-raw="{{rawsourcetext}}"
              data-filedtext-raw="{{rawunfilterdtext}}">{{{mlangfiltered}}}

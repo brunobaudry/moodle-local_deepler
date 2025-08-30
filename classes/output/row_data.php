@@ -36,6 +36,10 @@ class row_data extends translate_data implements renderable, templatable {
      * @var \local_deepler\local\data\field
      */
     private field $field;
+    /**
+     * @var int
+     */
+    private static $mlangtagadditional = 20;
 
     /**
      * Construct.
@@ -115,9 +119,18 @@ class row_data extends translate_data implements renderable, templatable {
             $multilangtitlestring = get_string('viewsourcedisabled', 'local_deepler');
             $badgeclass = 'secondary';
         }
-
-        $trimedtext = trim($fieldtext);
+        $mlangfilteredtext = $this->mlangfilter->filter($this->field->get_displaytext());
         $fieldformat = $this->field->get_format();
+        $trimedtext = trim($fieldtext);
+        $totalschar = strlen($trimedtext);
+        $maxlength = $this->field->get_maxlength() ?? -1;
+        $forcast = strlen($mlangfilteredtext) + $totalschar + self::$mlangtagadditional;
+        $warnmaxlength = $maxlength > 0 && ($forcast >= $maxlength);
+        $warntextcolor = 'warning';
+        $charratio = $totalschar * 2 / $maxlength;
+        if ($charratio > (2 / 3)) {
+            $warntextcolor = 'danger';
+        }
         return [
                 'badgeclass' => $badgeclass,
                 'buttonclass' => $buttonclass,
@@ -132,7 +145,7 @@ class row_data extends translate_data implements renderable, templatable {
                 'key' => $key,
                 'keyid' => $keyid,
             // Do Ajax.
-                'mlangfiltered' => $this->mlangfilter->filter($this->field->get_displaytext()),
+                'mlangfiltered' => $mlangfilteredtext,
                 'multilangdisabled' => $multilangdisabled,
                 'multilangtitlestring' => $multilangtitlestring,
                 'plaintextinput' => $fieldformat === 0,
@@ -151,6 +164,10 @@ class row_data extends translate_data implements renderable, templatable {
                 'titlestring' => htmlentities($titlestring, ENT_HTML5),
             // Do Ajax.
                 'trimedtext' => $trimedtext,
+                'warnmaxlength' => $warnmaxlength,
+                'warntextcolor' => $warntextcolor,
+                'maxlength' => $maxlength > 0 ? $maxlength : null,
+                'totalchar' => strlen($trimedtext),
         ];
     }
 }
