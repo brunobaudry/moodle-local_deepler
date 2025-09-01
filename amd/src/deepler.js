@@ -20,7 +20,7 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/ui_deepler', 'core/log'], (UI, Log) => {
+define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
     const debug = {
         NONE: 0, // Level 5 silent.
         MINIMAL: 5, // Level 3 no trace, debug or info.
@@ -38,11 +38,12 @@ define(['./local/ui_deepler', 'core/log'], (UI, Log) => {
         };
         const level = levelMap[cfg.debug] ?? 5;
         Log.setConfig({level});
-        Log.info(`09.04.2025 : 15:08 ` + cfg.version);
 
         let activeRequests = 0;
         let ajaxStopFired = false;
-
+        /**
+         * Remove preloader.
+         */
         const onAjaxStop = ()=> {
             // This runs only once when all AJAX requests are finished after a batch
             const preloader = document.getElementById('local_deepler_preloaderModal');
@@ -52,24 +53,70 @@ define(['./local/ui_deepler', 'core/log'], (UI, Log) => {
             }
             ajaxStopFired = true;
         };
+        /**
+         * Get ajax laoded and fire when done, the native way.
+         */
+        const useXMLHttpRequestTracking = () =>{
+            const originalOpen = XMLHttpRequest.prototype.open;
+            // Check if XMLHttpRequest.prototype.open is native or already overridden
+            let isNative = true;
+            try {
+                isNative = originalOpen.toString().includes('[native code]');
+            } catch (e) {
+                Log.log('unable to determine if native');
+                return false;
+            }
+            if (!isNative) {
+                Log.log('Theme already overrides XMLHttpRequest. Skipping custom tracking.');
+                return false;
+            }
+            Log.log('useXMLHttpRequestTracking');
+            XMLHttpRequest.prototype.open = function(...args) {
+                activeRequests++;
+                ajaxStopFired = false;
+                this.addEventListener('readystatechange', function() {
+                    Log.log('readystatechange', this.readyState);
+                    if (this.readyState === 4) {
+                        activeRequests--;
+                        Log.log('readystatechange', activeRequests, ajaxStopFired);
+                        if (activeRequests === 0 && !ajaxStopFired) {
+                            ajaxStopFired = true;
+                            onAjaxStop();
+                        }
+                    }
+                }, false);
 
-        const originalOpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(...args) {
-            activeRequests++;
-            ajaxStopFired = false; // New requests reset the flag
-            this.addEventListener('readystatechange', function() {
-                if (this.readyState === 4) { // Request completed
-                    activeRequests--;
-                    if (activeRequests === 0 && !ajaxStopFired) {
- onAjaxStop();
-}
-                }
-            }, false);
-            originalOpen.apply(this, args);
+                originalOpen.apply(this, args);
+            };
+
+            Log.log('Using custom XMLHttpRequest tracking.');
+            return true;
         };
 
+        /**
+         * Get ajax laoded and fire when done, JQuery way.
+         */
+        const useJQueryTracking = ()=> {
+            $(document).ajaxStart(function() {
+                activeRequests++;
+                ajaxStopFired = false;
+                Log.log('ajaxStart', activeRequests, ajaxStopFired);
+            });
+            $(document).ajaxStop(function() {
+                activeRequests = 0;
+                if (!ajaxStopFired) {
+                    ajaxStopFired = true;
+                    Log.log('ajaxStop', activeRequests, ajaxStopFired);
+                    onAjaxStop();
+                }
+            });
+            Log.log('Using jQuery AJAX tracking.');
+        };
 
-        // Window.addEventListener("DOMContentLoaded", UI.init(cfg));
+        // Try XMLHttpRequest tracking first.
+        if (!useXMLHttpRequestTracking()) {
+            useJQueryTracking();
+        }
         window.addEventListener('load', UI.init(cfg));
     };
     return {
