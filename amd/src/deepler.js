@@ -29,15 +29,15 @@ define(['./local/ui_deepler', 'core/log'], (UI, Log) => {
         DEVELOPER: 32767 // Level 0 all.
     };
     const init = (cfg) => {
-        let level = 5;
-        switch (cfg.debug) {
-            case debug.NONE : level = 5; break;
-            case debug.MINIMAL : level = 3; break;
-            case debug.NORMAL : level = 2; break;
-            case debug.ALL : level = 1; break;
-            case debug.DEVELOPER : level = 0; break;
-        }
-        Log.setConfig({level: level});
+        const levelMap = {
+            [debug.NONE]: 5,
+            [debug.MINIMAL]: 3,
+            [debug.NORMAL]: 2,
+            [debug.ALL]: 1,
+            [debug.DEVELOPER]: 0
+        };
+        const level = levelMap[cfg.debug] ?? 5;
+        Log.setConfig({level});
         Log.info(`09.04.2025 : 15:08 ` + cfg.version);
 
         let activeRequests = 0;

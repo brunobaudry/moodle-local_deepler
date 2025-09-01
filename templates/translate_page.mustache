@@ -103,7 +103,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center border-0 bg-transparent" style="opacity:1 !important;">
             <div class="d-flex justify-content-center align-items-center">
-                <div class="spinner-grow text-info" role="status" style="width: 4rem; height: 4rem;opacity: 1;">
+                <div class="spinner-grow text-info" role="status" style="width: 3rem; height: 3rem;opacity: 1;">
+                    <span class="text-info fs-1">☕︎</span>
                 </div>
             </div>
             <span class="text-info fs-1 text-capitalize">☕︎ {{#str}}loading{{/str}} ☕︎</span>
@@ -313,7 +314,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 </div>
 <div class="container-fluid bg-primary-subtle">
-    <div class="row py-4 align-items-center" id="local_deepler__sourcetarget">
+    <div class="row py-3 align-items-center" id="local_deepler__sourcetarget">
         <div class="col-5 text-right text-primary"><h5 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h5></div>
         <div class="col-1 h5 text-center text-primary"><i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
@@ -403,7 +404,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
     </div>
     <hr>
-    <div class="row pb-2 pt-3 align-items-center">
+    <div class="row pb-2 pt-2 align-items-center">
 
         <div class="col-1 px-5">
             <div class="form-check" id="local_deepler-translate-header-select-all">
@@ -422,36 +423,33 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             </div>
         </div>
 
-        <div class="col-6 text-center">
-            <div id="local_deepler-translate-header-usage" class="p-2 bg-primary-light text-sm-center text-primary">
+        <div class="col-7">
+            <div id="local_deepler-translate-header-usage" class="p-1 bg-primary-light text-center text-primary fs-6">
                 {{#str}}wordcountsentence,local_deepler{{/str}}
             </div>
         </div>
 
-        <div class="col-2 px-0">
+        <div class="col-3 px-0">
             <div class="text-center">
                 <button
                         id="local_deepler-translate-header-translatebutton"
                         title="{{#str}}translateexplain,local_deepler{{/str}}"
                         type="button"
-                        class="float-right mr-2 btn btn-primary local_deepler__autotranslate-btn"
+                        class="mr-4 btn btn-primary local_deepler__autotranslate-btn"
                         data-action="local_deepler/autotranslate-btn"
                         disabled>
                     {{#str}}translatebutton,local_deepler,{{target_lang}} {{/str}}
                 </button>
+                <button
+                        id="local_deepler-translate-header-saveallbutton"
+                        title="{{#str}}saveallexplain,local_deepler{{/str}}"
+                        type="button"
+                        class="btn btn-success local_deepler__saveall-btn"
+                        data-action="local_deepler/saveall-btn"
+                        disabled>
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
+                </button>
             </div>
-        </div>
-
-        <div class="col-2 pr-2 text-right">
-            <button
-                    id="local_deepler-translate-header-saveallbutton"
-                    title="{{#str}}saveallexplain,local_deepler{{/str}}"
-                    type="button"
-                    class="btn btn-success local_deepler__saveall-btn"
-                    data-action="local_deepler/saveall-btn"
-                    disabled>
-                <i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
-            </button>
         </div>
 
         <div class="col-1">

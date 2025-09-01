@@ -124,13 +124,20 @@ class row_data extends translate_data implements renderable, templatable {
         $trimedtext = trim($fieldtext);
         $totalschar = strlen($trimedtext);
         $maxlength = $this->field->get_maxlength() ?? -1;
-        $forcast = strlen($mlangfilteredtext) + $totalschar + self::$mlangtagadditional;
-        $warnmaxlength = $maxlength > 0 && ($forcast >= $maxlength);
+        $warnmaxlength = $maxlength > 0;
         $warntextcolor = 'warning';
-        $charratio = $totalschar * 2 / $maxlength;
-        if ($charratio > (2 / 3)) {
-            $warntextcolor = 'danger';
+        if ($warnmaxlength) {
+            $charratio = $totalschar / $maxlength;
+            if (($charratio > 2 / 3)) {
+                $warnmaxlength = true;
+                $warntextcolor = 'danger';
+            } else if (($charratio > 3 / 5)) {
+                $warnmaxlength = true;
+            } else {
+                $warnmaxlength = false;
+            }
         }
+
         return [
                 'badgeclass' => $badgeclass,
                 'buttonclass' => $buttonclass,

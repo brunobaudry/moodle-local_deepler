@@ -111,7 +111,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return bool
      */
     public function is_empty(): bool {
-        return empty($this->get_modules()) && empty($this->getfields());
+        return empty ($this->get_modules()) && empty($this->getfields());
     }
 
     /**

@@ -169,7 +169,7 @@ class translate_page implements renderable, templatable {
     private function prepare_sectionmenu(array $sections, int $selectedid, base $format): array {
         $menu = [];
         foreach ($sections as $section) {
-            $tmp = new section($section, $format, 0);
+            $tmp = new section($section, $format, -1);
             if ($tmp->is_empty()) {
                 continue;
             }

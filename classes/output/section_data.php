@@ -83,7 +83,6 @@ class section_data extends translate_data implements renderable, templatable {
         /** @var module $m */
         foreach ($this->section->get_modules() as $m) {
             try {
-                $modulesrendered .= '<div class="divider"><hr/></div>';
                 $modulesrendered .= $renderer->makemodule(new module_data($m, $this->languagepack, $this->mlangfilter,
                         $this->editor));
             } catch (Exception $e) {

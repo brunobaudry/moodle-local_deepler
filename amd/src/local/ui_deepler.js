@@ -39,6 +39,42 @@ define(['core/log',
     Events,
     ScrollSpy,
     Api) => {
+
+    /**
+     * Debounce for performance
+     *
+     * @param {function} fn
+     * @param {int} delay
+     * @returns {(function(...[*]): void)|*}
+     */
+    const debounce = (fn, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+            };
+    };
+
+    /**
+     *
+     * @type {(function(...[*]): void)|*}
+     */
+    const debouncedShowRows = debounce(() => {
+ showRows();
+}, 100);
+
+
+// Cached DOM elements
+const cachedSelectors = {
+    wordCount: document.querySelector(Selectors.statuses.wordcount),
+    charWithSpace: document.querySelector(Selectors.statuses.charNumWithSpace),
+    charWOSpace: document.querySelector(Selectors.statuses.charNumWithOutSpace),
+    deeplUseSpan: document.querySelector(Selectors.statuses.deeplUsage),
+    deeplMaxSpan: document.querySelector(Selectors.statuses.deeplMax),
+    deeplStatusContainer: document.querySelector(Selectors.statuses.deeplStatusContainer)
+};
+
+
     let hideiframes = {};
     // Store removed iframes and their parent/next sibling for restoration.
     let removedIframes = [];
@@ -200,7 +236,11 @@ define(['core/log',
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
             autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
             checkboxes = domQueryAll(Selectors.actions.checkBoxes);
-            glossaryDetailViewr = domQuery(Selectors.glossary.entriesviewerPage);
+
+if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesviewerPage)) {
+    glossaryDetailViewr = document.querySelector(Selectors.glossary.entriesviewerPage);
+}
+
             settingsUI[Selectors.deepl.glossaryId] = domQuery(Selectors.deepl.glossaryId);
             settingsUI[Selectors.deepl.context] = domQuery(Selectors.deepl.context);
             settingsUI[Selectors.deepl.formality] = domQuery(Selectors.deepl.formality);
@@ -376,13 +416,13 @@ define(['core/log',
         clearTimeout(filterTimeout);
         filterTimeout = setTimeout(() => {
             if (e.target.closest(Selectors.actions.showUpdated)) {
-                showRows();
+                debouncedShowRows();
             }
             if (e.target.closest(Selectors.actions.showNeedUpdate)) {
-                showRows();
+                debouncedShowRows();
             }
             if (e.target.closest(Selectors.actions.showHidden)) {
-                showRows();
+                debouncedShowRows();
             }
         }, 30);
         /* If (e.target.closest(Selectors.actions.showUpdated)) {
@@ -980,12 +1020,12 @@ define(['core/log',
         });
 
         // Cache DOM elements once for output instead of querying repeatedly.
-        const wordCount = domQuery(Selectors.statuses.wordcount);
-        const charWithSpace = domQuery(Selectors.statuses.charNumWithSpace);
-        const charWOSpace = domQuery(Selectors.statuses.charNumWithOutSpace);
-        const deeplUseSpan = domQuery(Selectors.statuses.deeplUsage);
-        const deeplMaxSpan = domQuery(Selectors.statuses.deeplMax);
-        const parent = domQuery(Selectors.statuses.deeplStatusContainer);
+        const wordCount = cachedSelectors.wordCount;
+        const charWithSpace = cachedSelectors.charWithSpace;
+        const charWOSpace = cachedSelectors.charWOSpace;
+        const deeplUseSpan = cachedSelectors.deeplUseSpan;
+        const deeplMaxSpan = cachedSelectors.deeplMaxSpan;
+        const parent = cachedSelectors.deeplStatusContainer;
 
         // Calculate current usage once.
         const current = cws + config.usage.character.count;
@@ -1141,7 +1181,7 @@ define(['core/log',
         checkboxes.forEach((node) => {
             node.disabled = selectAllBtn.disabled;
         });
-        showRows();
+        debouncedShowRows();
     };
     /**
      * Api to be used by the other modules.
