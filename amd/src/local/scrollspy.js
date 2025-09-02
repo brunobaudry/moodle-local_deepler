@@ -28,6 +28,7 @@ define(['./utils'], (Utils) => {
     let OFFSET_TOP;
     let ARTICLE;
     let CONTAINER;
+    let PARENT;
     let END_OF_ARTICLE;
     let HIGHEST_LEVEL;
     let FADING_DISTANCE;
@@ -41,9 +42,9 @@ define(['./utils'], (Utils) => {
     const makeBreadcrumbs = (headingsPerLevel)=>{
         CONTAINER.innerHTML = getBreadcrumbs(headingsPerLevel, scrollTop());
         if (CONTAINER.innerHTML.trim() === '') {
-            CONTAINER.style.display = 'none';
+            PARENT.style.display = 'none';
         } else {
-            CONTAINER.style.display = 'block';
+            PARENT.style.display = 'block';
         }
     };
 
@@ -178,7 +179,8 @@ define(['./utils'], (Utils) => {
     const init = (article, breadcrumbsContainer, options) =>{
         MAX_SUB_LENGTH = options.crumbsmaxlen || 30;
         ARTICLE = document.querySelector(article);
-        CONTAINER = document.querySelector(breadcrumbsContainer);
+        PARENT = document.querySelector(breadcrumbsContainer);
+        CONTAINER = PARENT.querySelector('#local_deepler__breadcrumbs');
         END_OF_ARTICLE = ARTICLE.offsetTop + ARTICLE.offsetHeight;
         HIGHEST_LEVEL = options.highestLevel || 2;
         FADING_DISTANCE = options.fadingDistance == 0 ? 1 : options.fadingDistance || 100;

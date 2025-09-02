@@ -48,6 +48,7 @@ export default {
         removeRadios: '[name="local_mlangremover/removehow"]', //
         removehow: '[name="local_mlangremover/removehow"]:checked', //
         hideiframes: '#local_deepler__hideiframes #hideiframes',
+        tothetop: '#local_deepler__tothetop',
     },
     statuses: {
         sourceTextWarings: '[data-status="sourceTextWarings"]',

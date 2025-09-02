@@ -74,7 +74,7 @@ const cachedSelectors = {
     deeplStatusContainer: document.querySelector(Selectors.statuses.deeplStatusContainer)
 };
 
-
+    let offsetTop; // Highest point of the usable plugin UI.
     let hideiframes = {};
     // Store removed iframes and their parent/next sibling for restoration.
     let removedIframes = [];
@@ -372,6 +372,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         }
         if (e.target.closest(Selectors.actions.selectAllBtn)) {
             toggleAllCheckboxes(e);
+        }
+        if (e.target.closest(Selectors.actions.tothetop)) {
+            window.scrollTo({top: offsetTop - 5, behavior: 'smooth'});
         }
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             toggleAutotranslateButton();
@@ -1166,7 +1169,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {*} cfg
      */
     const init = (cfg) => {
-
+        offsetTop = domQuery(Selectors.config.langstrings).offsetTop;
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100, crumbsmaxlen: cfg.crumbsmaxlen});
         Translation.init(cfg);
