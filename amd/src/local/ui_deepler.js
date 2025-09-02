@@ -413,9 +413,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         if (e.target.closest(Selectors.actions.moduleSwitcher)) {
             switchModules(e);
         }
-        if (e.target.closest(Selectors.actions.sourceSwitcher)) {
+        /* If (e.target.closest(Selectors.actions.sourceSwitcher)) {
             switchSource(e);
-        }
+        }*/
         clearTimeout(filterTimeout);
         filterTimeout = setTimeout(() => {
             if (e.target.closest(Selectors.actions.showUpdated)) {
@@ -440,9 +440,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
         }
-        if (e.target.closest(Selectors.actions.sourceselect)) {
+        /* If (e.target.closest(Selectors.actions.sourceselect)) {
             onSourceChange(e);
-        }
+        }*/
         if (e.target.closest(Selectors.deepl.glossaryId)) {
             if (settingsUI[Selectors.deepl.glossaryId].value !== '') {
                 glossaryDetailViewr.style.display = 'block';
@@ -567,11 +567,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      *
      * @param {event} e
      */
-    const onSourceChange = (e) => {
+    /* const onSourceChange = (e) => {
         // Do check source and target and propose rephrase if PRO.
         Log.info('source changed');
         Log.info(e.target.getAttribute('data-key'));
-    };
+    };*/
     /**
      * Event listener for selection checkboxes.
      * @param {Event} e

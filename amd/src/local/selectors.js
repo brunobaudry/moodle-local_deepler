@@ -37,7 +37,7 @@ export default {
         sectionSwitcher: '[data-action="local_deepler/section-switcher"]',
         moduleSwitcher: '[data-action="local_deepler/module-switcher"]',
         targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
-        sourceSwitcher: '[data-action="local_deepler/source-switcher"]',
+        // SourceSwitcher: '[data-action="local_deepler/source-switcher"]',
         showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
         showUpdated: '[data-action="local_deepler/show-updated"]',
         showHidden: '[data-action="local_deepler/show-hidden"]',
