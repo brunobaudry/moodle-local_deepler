@@ -398,6 +398,7 @@ You will be sent to the translation page for the course.
 
 ![](pix/translation_overview.png)
 
+
 ### Advanced settings
 
 #### Deepl API setting
@@ -518,7 +519,7 @@ Also if you have a Free account, you cannot select a same source and target lang
 
 ### Header
 
-![](pix/header.png)
+![](pix/header.png) 
 
 ### Filters
 
@@ -649,6 +650,18 @@ The original content **has already MLANG tag** and the source lang is different 
 
 `{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
+#### Field size warning (DB max char)
+Moodle has this script limitation of field sizes. (understandable for db optimization)
+When translating you can find yourself generating more characters than the Database can handle.
+Then the Plugin would yield a "Database error".
+But this can be annoying if you already called the DeepL API as you would have consumed the translation.
+To warn you the plugin will display a message with the actual character count and the DB mas field size.
+![](pix/max_char_warning.png)
+
+_Soon the plugin will compute this base on the source/target expansion ratio to roughly predict the resulting size.
+You will also be able to see the total size once the translated content will be returned from DeepL and receive a warning should the total length exceed the database capacity 
+so that you could shrink it accordingly._
+
 #### Saving to sub-languages
 If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
 ![](pix/save_as_target.png)
@@ -734,10 +747,7 @@ translate your content. When you backup and restore courses, your translations w
 message on the course translation page.
 
 ## Future (todos)
-- Add a glossary import interface.
-- Display images in editors field.
-- Translations versioning.
-- Multiple API key setting and user mapping.
+See [Enhancements](https://github.com/brunobaudry/moodle-local_deepler/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)
 
 ## Submit an issue
 

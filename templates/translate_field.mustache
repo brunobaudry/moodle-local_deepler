@@ -154,7 +154,13 @@
                 <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
             {{/sourceoptions}}
         </select>
-
+        {{#warnmaxlength}}
+            <span class="p-2 text-sm-right">
+                <i class="fa fa-warning text-{{warntextcolor}}" aria-hidden="true"></i>&nbsp;
+                {{#str}}fieldmaxlengtha,local_deepler, {{totalchar}}{{/str}}&nbsp;
+                {{#str}}fieldmaxlengthb,local_deepler, {{maxlength}}{{/str}}
+            </span>
+        {{/warnmaxlength}}
 
         <div class="collapse show"
              data-sourcetext-key="{{key}}" 
@@ -195,13 +201,7 @@
                     {{{cteditor}}}
                 {{/istiny}}
             {{/plaintextinput}}
-            {{#warnmaxlength}}
-                <div class="p-2 text-sm-right">
-                    <i class="fa fa-warning text-{{warntextcolor}}" aria-hidden="true"></i>&nbsp;
-                    {{#str}}fieldmaxlengtha,local_deepler, {{totalchar}}{{/str}}&nbsp;
-                    {{#str}}fieldmaxlengthb,local_deepler, {{maxlength}}{{/str}}
-                </div>
-            {{/warnmaxlength}}
+
 
         </div>
         <!--    status div-->
