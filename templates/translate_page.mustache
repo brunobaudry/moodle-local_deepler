@@ -1,0 +1,489 @@
+{{!
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}{{!
+  @template local_deepler/translate_page
+
+  Provides translation form header and controls
+  Classes required for JS:
+  * DeepL's
+  - context: '[data-id="local_deepler/context"]',
+  - nonSplittingTags: '[data-id="local_deepler/non_splitting_tags"]',
+  - splittingTags: '[data-id="local_deepler/splitting_tags"]',
+  - ignoreTags: '[data-id="local_deepler/ignore_tags"]',
+  - preserveFormatting: '[data-id="local_deepler/preserve_formatting"]',
+  - formality: '[name="local_deepler/formality"]',
+  - glossaryId: '[data-id="local_deepler/glossary_id"]',
+  - tagHandling: '[data-id="local_deepler/tag_handling"]',
+  - outlineDetection: '[data-id="local_deepler/outline_detection"]',
+  - splitSentences: '[name="local_deepler/split_sentences"]',
+  - modelType: '[name="local_deepler/model_type"]',
+  - toneorstyle: '[name="local_deepler/toneorstyle"]',
+  * UI
+  - #local_deepler__footer
+  - #local_deepler__settings
+  - sourceselect: '[data-action="local_deepler/sourceselect"]',
+  - selectAllCk: '[data-action="local_deepler/select-all"]',
+  - saveAll: '[data-action="local_deepler/saveall-btn"]',
+  - autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+  - targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+  - targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
+  - showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
+  - showUpdated: '[data-action="local_deepler/show-updated"]',
+  - showHidden: '[data-action="local_deepler/show-hidden"]',
+  - escapeLatex: '[data-id="local_deepler/latexeascape"]',
+  - escapePre: '[data-id="local_deepler/preescape"]',
+  - #local_deepler-translate-header-usage
+
+  Data attributes required for JS:
+  * none
+
+  Context variables required for this template:
+  * lang
+  * langs
+  * wordcount
+  * charcount
+  * charcountspaces
+  * langstrings
+  * glossayselector
+  * canimprove
+  * supportedlangs
+  * rephrasesymbol
+  * deeplsource
+  * target_lang
+  * notarget
+  * target_langs_htmloptions
+  * targetlangs
+  * showhiddenforstudents
+  * escapelatexbydefault
+  * escapeprebydefault
+  * hideiframesdefault
+  * hidecompatible
+  * compatiblelangs
+  * mform
+  * version
+  * sectionidnames
+  * modulesidnames
+
+  Example context (json):
+  {
+    "lang": "en",
+    "langs": [
+      {
+        "code": "other",
+        "lang": "Other (other)"
+      },
+      {
+        "code": "en",
+        "lang": "English (en)"
+      }
+    ],
+    "wordcount": 4,
+    "charcount": 20,
+    "charcountspaces": 25
+  }
+}}
+
+<div id="local_deepler__stringscontainer" data-langstrings="{{langstrings}}">
+    <!-- This is a hidden container for the strings that are used in the JS -->
+</div>
+<div id="local_deepler_preloaderModal" class="modal show d-block bg-body-tertiary" tabindex="-1" aria-hidden="true" style="opacity: 0.85;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center border-0 bg-transparent" style="opacity:1 !important;">
+            <div class="d-flex justify-content-center align-items-center">
+                <div class="spinner-grow shadow-lg text-primary" role="status" style="width: 3.5rem; height: 3.5rem;opacity: 1;">
+                    <span class="text-white fs-1 shadow-lg">☕︎</span>
+                </div>
+            </div>
+            <span class="text-primary fs-2 mt-4">{{#str}}loading{{/str}}</span>
+        </div>
+    </div>
+</div>
+
+<div class="text-right">
+    <a id="local_deepler__settings"
+       class="link link-underline"
+       data-toggle="collapse" data-bs-toggle="collapse"
+       href="#collapseExample"
+       role="button"
+       aria-expanded="false"
+       aria-controls="collapseExample">
+        <i class="fa fa-caret-right collapse show"></i>
+        <i class="fa fa-caret-down collapse"></i>
+        {{#str}}seesetting,local_deepler{{/str}}
+    </a>
+</div>
+
+<div class="container-fluid collapse card bg-primary-light" id="collapseExample">
+    <div class="text-right">
+        <h4>{{#str}}deeplapidoctitle,local_deepler{{/str}}</h4>
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+        <a href=" https://www.deepl.com/docs-api/translate-text/translate-text" id="local_deepler__moresettings">{{#str}}
+            deeplapidoc,local_deepler{{/str}}</a>
+    </div>
+    <div class="row py-3">
+        <div class="col-2" id="local_deepler__modeltype">
+            {{#str}}modeltype,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="prefer_quality_optimized" checked="checked" id="modeltype1" name="local_deepler/model_type" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype1">{{#str}}modeltpreferqualityoptimized,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="quality_optimized" id="modeltype2" name="local_deepler/model_type" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype2">{{#str}}modeltypequalityoptimized,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="latency_optimized" id="modeltype3" name="local_deepler/model_type" class="custom-control-input">
+                <label class="custom-control-label" for="modeltype3">{{#str}}modeltypelatencyoptimized  ,local_deepler{{/str}}</label>
+            </div>
+        </div>
+        <div class="col-2" id="local_deepler__formality">
+            {{#str}}formality,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="default" checked="checked" id="formality1" name="local_deepler/formality" class="custom-control-input">
+                <label class="custom-control-label" for="formality1">{{#str}}formalitydefault,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="less" id="formality2" name="local_deepler/formality" class="custom-control-input">
+                <label class="custom-control-label" for="formality2">{{#str}}formalityless,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="more" id="formality3" name="local_deepler/formality" class="custom-control-input">
+                <label class="custom-control-label" for="formality3">{{#str}}formalitymore,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="prefer_less" id="formality4" name="local_deepler/formality" class="custom-control-input">
+                <label class="custom-control-label" for="formality4">{{#str}}formalitypreferless,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="prefer_more" id="formality5" name="local_deepler/formality" class="custom-control-input">
+                <label class="custom-control-label" for="formality5">{{#str}}formalityprefermore,local_deepler{{/str}}</label>
+            </div>
+        </div>
+        <div class="col-3">
+            <div id="local_deepler__splitsentences">
+                {{#str}}splitsentences,local_deepler{{/str}}
+                <div class="custom-control custom-radio">
+                    <input type="radio" checked="checked" id="split_sentences1" name="local_deepler/split_sentences" class="custom-control-input" value="0">
+                    <label class="custom-control-label" for="split_sentences1">{{#str}}splitsentences0,local_deepler{{/str}}</label>
+                </div>
+                <div class="custom-control custom-radio">
+                    <input type="radio" id="split_sentences2" name="local_deepler/split_sentences" class="custom-control-input" value="1">
+                    <label class="custom-control-label" for="split_sentences2">{{#str}}splitsentences1,local_deepler{{/str}}</label>
+                </div>
+                <div class="custom-control custom-radio">
+                    <input type="radio" id="split_sentences3"
+                           name="local_deepler/split_sentences"
+                           class="custom-control-input"
+                           value="nonewlines">
+                    <label class="custom-control-label" for="split_sentences3">{{#str}}splitsentencesnonewlines,local_deepler{{/str}}</label>
+                </div>
+            </div>
+            <div id="local_deepler__preserveformating">
+                <div class="mt-4 custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="preserve_formatting" data-id="local_deepler/preserve_formatting">
+                    <label class="custom-control-label" for="preserve_formatting">{{#str}}preserveformatting,local_deepler{{/str}}</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-5" id="local_deepler__glossarycontext">
+            {{{glossayselector}}}
+            <label for="local_deepler__context">{{#str}}contextdeepl,local_deepler{{/str}}</label>
+            <textarea class="form-control" id="local_deepler__context" data-id="local_deepler/context" rows="3"
+                      placeholder="{{#str}}contextdeepl_placeholder,local_deepler{{/str}}"></textarea>
+        </div>
+    </div>
+
+    <div class="row py-3" id="local_deepler__tags">
+        <div class="col-5" id="local_deepler__xmlhtml">
+            <div class="d-flex my-switch">
+                <div class="form-text text-1"> {{#str}}taghandling,local_deepler{{/str}}XML&nbsp;</div>
+                <div class="custom-control custom-switch">
+                    <input id="tag_handling" class="custom-control-input" type="checkbox" data-id="local_deepler/tag_handling" checked>
+                    <label class="custom-control-label" for="tag_handling">&nbsp;HTML</label></div>
+            </div>
+
+            <div class="custom-control custom-switch mt-3" id="local_deepler__outilinedetection">
+                <input id="outline_detection" class="custom-control-input" type="checkbox" data-id="local_deepler/outline_detection">
+                <label class="custom-control-label" for="outline_detection">{{#str}}outlinedetection,local_deepler{{/str}}</label>
+            </div>
+            <div class="mt-3" id="local_deepler__tagsignore">
+                <label for="ignore_tags">{{#str}}ignoretags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="ignore_tags" data-id="local_deepler/ignore_tags"
+                          placeholder="{{#str}}ignoretags,local_deepler{{/str}}"></textarea>
+            </div>
+
+        </div>
+        <div class="col-7 py-3">
+            <div class="col" id="local_deepler__tagsnosplitting">
+                <label for="non_splitting_tags">{{#str}}nonsplittingtags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="non_splitting_tags" data-id="local_deepler/non_splitting_tags"
+                          placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
+            <div class="col" id="local_deepler__tagssplitting"><label for="splitting_tags">{{#str}}splittingtags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="splitting_tags" data-id="local_deepler/splitting_tags"
+                          placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
+        </div>
+    </div>
+    {{#canimprove}}
+    <div class="text-right">
+        <h5>{{#str}}rephrasetitle,local_deepler,{{rephrasesymbol}}{{/str}}</h5>
+        <p>{{#str}}rephraseinfos,local_deepler, {{supportedlangs}}{{/str}}</p>
+    </div>
+    <div class="row py-3">
+        <div class="text-right col-5">
+            <em>{{#str}}rephraseoptionsinfos,local_deepler, {{supportedlangs}}{{/str}}</em>
+        </div>
+        <div class="col-7" id="local_deepler__toneorstyle">
+            {{#str}}toneorstyle,local_deepler{{/str}}
+            <div class="custom-control custom-radio">
+                <input type="radio" value="default" id="toneorstyle0" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="toneorstyle0">{{#str}}formalitydefault  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="writing_style|prefer_simple" id="writingstyle9" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle9">{{#str}}writingstylesimple  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="writing_style|prefer_business" id="writingstyle7" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle7">{{#str}}writingstylebusiness  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" checked="checked" value="writing_style|prefer_academic" id="writingstyle5" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle5">{{#str}}writingstyleacademic  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="writing_style|prefer_casual" id="writingstyle6" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="writingstyle6">{{#str}}writingstylecasual  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_enthusiastic" id="tone6" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone6">{{#str}}toneenthusiastic,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_friendly" id="tone7" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone7">{{#str}}tonefriendly,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_confident" id="tone8" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone8">{{#str}}toneconfident,local_deepler{{/str}}</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" value="tone|prefer_diplomatic" id="tone9" name="local_deepler/toneorstyle" class="custom-control-input">
+                <label class="custom-control-label" for="tone9">{{#str}}tonediplomatic,local_deepler{{/str}}</label>
+            </div>
+        </div>
+    </div>
+    {{/canimprove}}<hr class="hr hr-blurry">
+    <div class="text-right">
+        <h4>{{#str}}othersettingstitle,local_deepler{{/str}}</h4>
+    </div>
+    <div class="row pb-3" id="local_deepler__nondeepl">
+        <div class="col-12" id="local_deepler__othersettings">
+            <div id="local_deepler__latexeascape">
+                <div class="mt-1 custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="latexeascape" data-id="local_deepler/latexeascape" {{escapelatexbydefault}}>
+                    <label class="custom-control-label" for="latexeascape">{{#str}}latexeascape,local_deepler{{/str}}</label>
+                </div>
+            </div>
+            <div id="local_deepler__preescape">
+                <div class="mt-1 custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="preescape" data-id="local_deepler/preescape" {{escapeprebydefault}}>
+                    <label class="custom-control-label" for="preescape">{{#str}}preescape,local_deepler{{/str}}</label>
+                </div>
+            </div>
+            <div id="local_deepler__hideiframes">
+                <div class="mt-1 custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="hideiframes" data-id="local_deepler/hideiframes" {{hideiframesdefault}}>
+                    <label class="custom-control-label" for="hideiframes">{{#str}}hideiframes,local_deepler{{/str}}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="container-fluid bg-primary-subtle">
+    <div class="row py-3 align-items-center" id="local_deepler__sourcetarget">
+        <div class="col-5 text-right text-primary"><h5 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h5></div>
+        <div class="col-1 h5 text-center text-primary"><i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </div>
+        <div class="col-3"><h5 id="local_deepler__targetlang" class="text-left text-primary">{{#str}}selecttargetlanguage,local_deepler,{{target_lang}}{{/str}}</h5></div>
+        <div class="col-3">
+            <select
+                    id="select-target-language"
+                    name="select-target-language"
+                    class="local_deepler__localeswitcher form-control text-primary"
+                    data-action="local_deepler/target-switcher"
+            >
+                {{#notarget}}
+                    <option value="" selected disabled>{{#str}}choose{{/str}}...</option>
+                {{/notarget}}
+                {{#targetlangs}}
+                    <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
+                {{/targetlangs}}
+            </select>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="container-fluid text-primary bg-secondary-subtle pb-1">
+    <div class="row">
+        <div class="custom-control custom-switch col-5 pt-2">
+            <label for="select-section" class="form-label">{{#str}}section:select:label, local_deepler{{/str}}</label>
+            <select
+                    id="select-section"
+                    name="select-section"
+                    class="local_deepler__sectionswitcher form-control text-primary"
+                    data-action="local_deepler/section-switcher"
+            >
+                <option class="text-primary" value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>* {{#str}}settings{{/str}}</option>
+                <option class="text-primary" value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
+                {{#sectionidnames}}
+                    <option class="text-primary" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                {{/sectionidnames}}
+            </select>
+
+        </div>
+        {{#hasmodulelist}}
+            <div class="col-2 h3 text-center text-secondary align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>
+            <div class="custom-control custom-switch col-5 pt-2">
+                <label for="select-module" class="form-label">{{#str}}module:select:label, local_deepler{{/str}}</label>
+                <select
+                        id="select-module"
+                        name="select-module"
+                        class="local_deepler__moduleswitcher form-control text-primary"
+                        data-action="local_deepler/module-switcher"
+                >
+                    <option class="text-primary" value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
+                    {{#modulesidnames}}
+                        <option class="text-primary" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                    {{/modulesidnames}}
+                </select>
+            </div>
+        {{/hasmodulelist}}
+    </div>
+
+</div>
+
+<div class="text-primary bg-secondary-subtle container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">
+    <div class="d-flex flex-wrap align-items-center pl-5 pt-2 pb-0" id="local_deepler-translate-header-filter">
+        <span class="mr-3">{{#str}}filters,local_deepler{{/str}}:</span>
+
+        <div class="custom-control custom-switch mr-3">
+            <input id="show-updated" class="custom-control-input local_deepler__show-updated" type="checkbox"
+                   data-action="local_deepler/show-updated">
+            <label class="custom-control-label" for="show-updated">{{#str}}uptodate,local_deepler{{/str}}</label>
+        </div>
+
+        <div class="custom-control custom-switch mr-3">
+            <input id="show-needsupdate" checked="checked" type="checkbox"
+                   class="custom-control-input local_deepler__show-needsupdate"
+                   data-action="local_deepler/show-needsupdate">
+            <label class="custom-control-label" for="show-needsupdate">{{#str}}needsupdate,local_deepler{{/str}}</label>
+        </div>
+
+        <div class="custom-control custom-switch mr-3">
+            <input id="show-hidden" checked="checked" type="checkbox"
+                   class="custom-control-input local_deepler__show-hidden"
+                   data-action="local_deepler/show-hidden">
+            <label class="custom-control-label" for="show-hidden">{{showhiddenforstudents}}</label>
+        </div>
+
+    </div>
+    <hr>
+    <div class="row pb-2 pt-2 align-items-center">
+
+        <div class="col-1 px-5">
+            <div class="form-check" id="local_deepler-translate-header-select-all">
+                <input
+                        class="form-check-input local_deepler__select-all"
+                        data-action="local_deepler/select-all"
+                        type="checkbox"
+                        aria-label="{{#str}}selectall,local_deepler{{/str}}"
+                        title="{{#str}}selectall,local_deepler{{/str}}"
+                        name="select-all"
+                        id="select-all"
+                        disabled>
+                <label class="form-check-label" for="select-all">
+                    {{#str}}selectall,local_deepler{{/str}}
+                </label>
+            </div>
+        </div>
+
+        <div class="col-7">
+            <div id="local_deepler-translate-header-usage" class="p-1 bg-primary-light text-center text-primary fs-6">
+                {{#str}}wordcountsentence,local_deepler{{/str}}
+            </div>
+        </div>
+
+        <div class="col-3 px-0">
+            <div class="text-center">
+                <button
+                        id="local_deepler-translate-header-translatebutton"
+                        title="{{#str}}translateexplain,local_deepler{{/str}}"
+                        type="button"
+                        class="mr-4 btn btn-primary local_deepler__autotranslate-btn"
+                        data-action="local_deepler/autotranslate-btn"
+                        disabled>
+                    {{#str}}translatebutton,local_deepler,{{target_lang}} {{/str}}
+                </button>
+                <button
+                        id="local_deepler-translate-header-saveallbutton"
+                        title="{{#str}}saveallexplain,local_deepler{{/str}}"
+                        type="button"
+                        class="btn btn-success local_deepler__saveall-btn"
+                        data-action="local_deepler/saveall-btn"
+                        disabled>
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
+                </button>
+            </div>
+        </div>
+
+        <div class="col-1">
+            {{^hidecompatible}}
+                <select style='display:inherit' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
+                        class="local_deepler__tartgetcompatible form-control"
+                        data-action="local_deepler/tartgetcompatible-switcher">
+                    {{#compatiblelangs}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/compatiblelangs}}
+                </select>
+            {{/hidecompatible}}
+
+            {{#hidecompatible}}
+                <select style='display:none' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
+                        class="local_deepler__tartgetcompatible form-control"
+                        data-action="local_deepler/tartgetcompatible-switcher">
+                    {{#compatiblelangs}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/compatiblelangs}}
+                </select>
+            {{/hidecompatible}}
+        </div>
+    </div>
+
+    <div id='local_deepler-scrollspy' class="row p-1 pl-3 bg-primary-light">
+        <span id="local_deepler__tothetop" class="col-1" role="button"><i class="fa fa-home" aria-hidden="true"></i></span>
+        <span id="local_deepler__breadcrumbs" class="col-11"></span>
+    </div>
+</div>
+
+<div class="course-section">
+    {{{mform}}}
+</div>
+<div id="local_deepler__footer" class="text-center">
+    <small id="local_deepler__version">{{version}}</small>
+</div>

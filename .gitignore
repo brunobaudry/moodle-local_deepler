@@ -1,0 +1,12 @@
+# System Files
+.DS_Store
+
+# Libraries
+node_modules
+# ide
+.idea/*
+.env
+indentor.py
+*.csv
+language_expansion_ratio_matrix_iso.csv
+language_expansion_ratio_matrix_iso_updated.csv
