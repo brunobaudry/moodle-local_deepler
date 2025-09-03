@@ -39,6 +39,42 @@ define(['core/log',
     Events,
     ScrollSpy,
     Api) => {
+
+    /**
+     * Debounce for performance
+     *
+     * @param {function} fn
+     * @param {int} delay
+     * @returns {(function(...[*]): void)|*}
+     */
+    const debounce = (fn, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+            };
+    };
+
+    /**
+     *
+     * @type {(function(...[*]): void)|*}
+     */
+    const debouncedShowRows = debounce(() => {
+ showRows();
+}, 100);
+
+
+// Cached DOM elements
+const cachedSelectors = {
+    wordCount: document.querySelector(Selectors.statuses.wordcount),
+    charWithSpace: document.querySelector(Selectors.statuses.charNumWithSpace),
+    charWOSpace: document.querySelector(Selectors.statuses.charNumWithOutSpace),
+    deeplUseSpan: document.querySelector(Selectors.statuses.deeplUsage),
+    deeplMaxSpan: document.querySelector(Selectors.statuses.deeplMax),
+    deeplStatusContainer: document.querySelector(Selectors.statuses.deeplStatusContainer)
+};
+
+    let offsetTop; // Highest point of the usable plugin UI.
     let hideiframes = {};
     // Store removed iframes and their parent/next sibling for restoration.
     let removedIframes = [];
@@ -55,6 +91,7 @@ define(['core/log',
     let settingsUI = {};
     let allDataFormatOne = [];
     let glossaryDetailViewr;
+    let filterTimeout;
     /**
      * When a main error with the DB occurs.
      *
@@ -62,6 +99,9 @@ define(['core/log',
      * @param {int} status
      */
     const onDBFailed = (error, status) => {
+        if (saveAllModal !== null && saveAllModal.isVisible) {
+            saveAllModal.hide();
+        }
         showModal(`${errordbtitle} ${status}`, `DB failed to save translations. ${error}`, 'Alert');
     };
     /**
@@ -92,6 +132,7 @@ define(['core/log',
         // Translation events.
         Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
         Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
+        Events.on(Translation.ON_TRANSLATION_DONE, onTranslationDone);
         Events.on(Translation.ON_REPHRASE_FAILED, onTranslationFailed);
         Events.on(Translation.ON_DB_SAVE_SUCCESS, onDbSavedSuccess);
         Events.on(Translation.ON_DB_FAILED, onDBFailed);
@@ -195,7 +236,11 @@ define(['core/log',
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
             autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
             checkboxes = domQueryAll(Selectors.actions.checkBoxes);
-            glossaryDetailViewr = domQuery(Selectors.glossary.entriesviewerPage);
+
+if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesviewerPage)) {
+    glossaryDetailViewr = document.querySelector(Selectors.glossary.entriesviewerPage);
+}
+
             settingsUI[Selectors.deepl.glossaryId] = domQuery(Selectors.deepl.glossaryId);
             settingsUI[Selectors.deepl.context] = domQuery(Selectors.deepl.context);
             settingsUI[Selectors.deepl.formality] = domQuery(Selectors.deepl.formality);
@@ -268,13 +313,11 @@ define(['core/log',
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
+     * @param {object} messageObject
      * @returns {Promise<void>}
      */
-    const launchModal = async() => {
-        saveAllModal = await Modal.create({
-            title: langstrings.uistrings.saveallmodaltitle,
-            body: langstrings.uistrings.saveallmodalbody,
-        });
+    const launchModal = async(messageObject) => {
+        saveAllModal = await Modal.create(messageObject);
         await saveAllModal.show();
     };
     const handleFocusEvent = (e)=>{
@@ -330,6 +373,9 @@ define(['core/log',
         if (e.target.closest(Selectors.actions.selectAllBtn)) {
             toggleAllCheckboxes(e);
         }
+        if (e.target.closest(Selectors.actions.tothetop)) {
+            window.scrollTo({top: offsetTop - 5, behavior: 'smooth'});
+        }
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             toggleAutotranslateButton();
         }
@@ -361,10 +407,28 @@ define(['core/log',
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
             switchTarget(e);
         }
+        if (e.target.closest(Selectors.actions.sectionSwitcher)) {
+            switchSection(e);
+        }
+        if (e.target.closest(Selectors.actions.moduleSwitcher)) {
+            switchModules(e);
+        }
         if (e.target.closest(Selectors.actions.sourceSwitcher)) {
             switchSource(e);
         }
-        if (e.target.closest(Selectors.actions.showUpdated)) {
+        clearTimeout(filterTimeout);
+        filterTimeout = setTimeout(() => {
+            if (e.target.closest(Selectors.actions.showUpdated)) {
+                debouncedShowRows();
+            }
+            if (e.target.closest(Selectors.actions.showNeedUpdate)) {
+                debouncedShowRows();
+            }
+            if (e.target.closest(Selectors.actions.showHidden)) {
+                debouncedShowRows();
+            }
+        }, 30);
+        /* If (e.target.closest(Selectors.actions.showUpdated)) {
             showRows(Selectors.statuses.updated, e.target.checked);
         }
         if (e.target.closest(Selectors.actions.showNeedUpdate)) {
@@ -372,7 +436,7 @@ define(['core/log',
         }
         if (e.target.closest(Selectors.actions.showHidden)) {
             showRows(Selectors.statuses.hidden, e.target.checked);
-        }
+        }*/
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
         }
@@ -450,7 +514,10 @@ define(['core/log',
         }
         // Prepare the UI for the save process.
         saveAllBtn.disabled = true;
-        launchModal().then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
+        launchModal({
+            title: langstrings.uistrings.saveallmodaltitle,
+            body: langstrings.uistrings.saveallmodalbody,
+        }).then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
             Log.error(reason);
         });
         // Prepare the data to be saved.
@@ -522,34 +589,35 @@ define(['core/log',
      * @param {Event} e Event
      */
     const toggleAllCheckboxes = (e) => {
-        // Check/uncheck checkboxes
-        if (e.target.checked) {
-            checkboxes.forEach((i) => {
-                // Toggle check box upon visibility
-                i.checked = !getParentRow(i).classList.contains('d-none');
-                toggleStatus(i.getAttribute('data-key'), i.checked);
+        const checked = e.target.checked;
+        const updates = [];
+
+        // Prepare all updates without applying immediately.
+        checkboxes.forEach(checkbox => {
+            const shouldCheck = checked ? !getParentRow(checkbox).classList.contains('d-none') : false;
+
+            if (checkbox.checked !== shouldCheck) {
+                updates.push({checkbox, shouldCheck});
+            }
+        });
+
+        // Apply updates in the next animation frame, batching DOM writes.
+        requestAnimationFrame(() => {
+            updates.forEach(({checkbox, shouldCheck}) => {
+                checkbox.checked = shouldCheck;
+                toggleStatus(checkbox.getAttribute('data-key'), shouldCheck);
             });
-        } else {
-            checkboxes.forEach((i) => {
-                i.checked = false;
-                toggleStatus(i.getAttribute('data-key'), false);
-            });
-        }
-        toggleAutotranslateButton();
-        countWordAndChar();
+
+            toggleAutotranslateButton();
+            countWordAndChar();
+        });
     };
     /**
      * Toggle Autotranslate Button
      */
     const toggleAutotranslateButton = () => {
-        autotranslateButton.disabled = true;
-        for (let i in checkboxes) {
-            let e = checkboxes[i];
-            if (e.checked) {
-                autotranslateButton.disabled = false;
-                break;
-            }
-        }
+        // Use Array.some() for early exit when a checked checkbox is found
+        autotranslateButton.disabled = !Array.from(checkboxes).some(e => e.checked);
     };
     /**
      * Get the translation row status icon.
@@ -613,7 +681,16 @@ define(['core/log',
      */
     const onTranslationFailed = (error) => {
         let s = langstrings.uistrings.deeplapiexception;
+        onTranslationDone();
         showModal(s, error, 'Alert');
+    };
+    /**
+     * Event Listener when DeepL API call finished.
+     */
+    const onTranslationDone = () => {
+        if (saveAllModal !== null && saveAllModal.isVisible) {
+            saveAllModal.hide();
+        }
     };
     /**
      * Event listener for the translations process to dispaly the status.
@@ -628,6 +705,12 @@ define(['core/log',
      * Launch deepl services.
      */
     const callDeeplServices = () => {
+        saveAllModal = launchModal(
+            {
+                title: langstrings.uistrings.translatemodaltitle,
+                body: langstrings.uistrings.translatemodalbody,
+            }
+        );
         const keys = [];
         const [cookie, settings] = prepareSettingsAndCookieValues();
         saveAllBtn.disabled = false;
@@ -704,11 +787,9 @@ define(['core/log',
                 Translation.initTemp(key); // Reset the translation.
                 if (checked) {
                     setIconStatus(key, Selectors.statuses.totranslate);
-                    // RefreshTempTranslation(key);
                 }
                 break;
             case Selectors.statuses.totranslate :
-                // If (checked && Translation.tempTranslations[key]?.translation?.length > 0) {
                 if (checked && Translation.translated[key]) {
                     setIconStatus(key, Selectors.statuses.tosave, true);
                 } else {
@@ -737,42 +818,67 @@ define(['core/log',
     };
     /**
      * Shows/hides rows.
-     * @param {string} selector
-     * @param {boolean} selected
      */
-    const showRows = (selector, selected) => {
-        const items = domQueryAll(selector);
+    const showRows = () => {
+        // Map each selector to its corresponding checkbox checked state
+        const selectorMap = {
+            [Selectors.statuses.updated]: domQuery(Selectors.actions.showUpdated).checked,
+            [Selectors.statuses.needsupdate]: domQuery(Selectors.actions.showNeedUpdate).checked,
+            [Selectors.statuses.hidden]: domQuery(Selectors.actions.showHidden).checked
+        };
+
+        // Combine all selectors into one comma-separated string for batch querying.
+        const mergedSelector = Object.keys(selectorMap).join(",");
+
+        // Query all items matching any of the selectors once.
+        const allItems = domQueryAll(mergedSelector);
+
+        // Cache the global "select all" button checked state once.
         const allSelected = domQuery(Selectors.actions.selectAllBtn).checked;
-        const shoudlcheck = allSelected && selected;
-        items.forEach((item) => {
-            let k = item.getAttribute('data-row-id');
-            if (selected) {
-                item.classList.remove("d-none");
-            } else {
-                item.classList.add("d-none");
-            }
-            // When a row is toggled then we don't want it to be selected and sent from translation.
-            try {
-                const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, k);
-                if (single !== null) {
-                    single.checked = shoudlcheck;
-                    toggleStatus(k, false);
+
+        allItems.forEach(item => {
+            // Determine which selector this item matches so we can apply the right checkbox state.
+            let shouldShow = false;
+            let shouldCheck = false;
+            for (const [selector, checked] of Object.entries(selectorMap)) {
+                if (item.matches(selector)) {
+                    shouldShow = checked;
+                    shouldCheck = allSelected && checked;
+                    break;
                 }
-                const allchilds = domQueryAll(Selectors.editors.multiples.checkBoxesWithKeyHidden, k);
-                if (allchilds !== null && allchilds.length > 0) {
-                    allchilds.forEach(c => {
-                        const key = c.getAttribute('data-key');
-                        c.checked = shoudlcheck;
-                        toggleStatus(key, false);
-                    });
-                }
-            } catch (e) {
-                Log.warn(`${k} translation is disalbled`);
             }
 
+            // Show or hide item based on checkbox state.
+            item.classList.toggle("d-none", !shouldShow);
+
+            // Handle checkbox selection for this item or its children.
+            let rowId = item.getAttribute('data-row-id');
+            if (rowId === null) {
+                // For items without row-id, toggle checkboxes of their child rows.
+                const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
+                childs.forEach(child => {
+                    const childId = child.getAttribute('data-row-id');
+                    toggleChildCheckBoxSelection(childId, shouldCheck);
+                });
+            } else {
+                toggleChildCheckBoxSelection(rowId, shouldCheck);
+            }
         });
+
+        // Call global UI update functions once
         toggleAutotranslateButton();
         countWordAndChar();
+    };
+    /**
+     * Manages selection and icon status of fields.
+     *
+     * @param {string} key
+     * @param {bool} shouldBeChecked
+     */
+    const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
+        const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+        single.checked = shouldBeChecked;
+        toggleStatus(key, false);
     };
     /**
      * Displays error message and icon.
@@ -861,6 +967,31 @@ define(['core/log',
         window.location = url.toString();
     };
     /**
+     * Event listener to filter sections.
+     * @param {Event} e
+     */
+    const switchSection = (e) => {
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("section_id", e.target.value.trim());
+        if (searchParams.has("activity_id")) {
+            searchParams.delete("activity_id");
+        }
+        window.location = url.toString();
+    };
+    /**
+     * Event listener to filter modules.
+     * @param {Event} e
+     */
+    const switchModules = (e) => {
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set("activity_id", e.target.value.trim());
+        window.location = url.toString();
+    };
+    /**
      * Event listener to switch source lang,
      * Hence reload the page and change the site main lang.
      * @param {Event} e
@@ -875,36 +1006,43 @@ define(['core/log',
      * Launch, display count of Words And Chars.
      */
     const countWordAndChar = () => {
-        let wrdsc = 0;
-        let cws = 0;
-        let cwos = 0;
-        domQueryAll(Selectors.statuses.checkedCheckBoxes)
-            .forEach((ckBox) => {
-                let key = ckBox.getAttribute("data-key");
-                let results = getCount(key);
-                wrdsc += results.wordCount;
-                cwos += results.charNumWithOutSpace;
-                cws += results.charNumWithSpace;
-            });
-        const wordCount = domQuery(Selectors.statuses.wordcount);
-        const charWithSpace = domQuery(Selectors.statuses.charNumWithSpace);
-        const charWOSpace = domQuery(Selectors.statuses.charNumWithOutSpace);
-        const deeplUseSpan = domQuery(Selectors.statuses.deeplUsage);
-        const deeplMaxSpan = domQuery(Selectors.statuses.deeplMax);
-        const parent = domQuery(Selectors.statuses.deeplStatusContainer);
-        let current = cws + config.usage.character.count;
+        let wrdsc = 0,
+        cws = 0,
+        cwos = 0;
+
+        // Cache checkboxes matching selector once, convert to array if needed.
+        const checkedBoxes = Array.from(domQueryAll(Selectors.statuses.checkedCheckBoxes));
+
+        // Aggregate counts in one loop.
+        checkedBoxes.forEach(ckBox => {
+            const key = ckBox.getAttribute("data-key");
+            const results = getCount(key);
+            wrdsc += results.wordCount;
+            cws += results.charNumWithSpace;
+            cwos += results.charNumWithOutSpace;
+        });
+
+        // Cache DOM elements once for output instead of querying repeatedly.
+        const wordCount = cachedSelectors.wordCount;
+        const charWithSpace = cachedSelectors.charWithSpace;
+        const charWOSpace = cachedSelectors.charWOSpace;
+        const deeplUseSpan = cachedSelectors.deeplUseSpan;
+        const deeplMaxSpan = cachedSelectors.deeplMaxSpan;
+        const parent = cachedSelectors.deeplStatusContainer;
+
+        // Calculate current usage once.
+        const current = cws + config.usage.character.count;
+
+        // Update UI in one batch (minimizes layout thrashing).
         wordCount.innerText = wrdsc;
         charWithSpace.innerText = cws;
         charWOSpace.innerText = cwos;
         deeplUseSpan.innerText = format.format(current);
         deeplMaxSpan.innerText = config.usage.character.limit === null ? '∞' : format.format(config.usage.character.limit);
-        if (current >= config.usage.character.limit) {
-            parent.classList.remove('alert-success');
-            parent.classList.add('alert-danger');
-        } else {
-            parent.classList.add('alert-success');
-            parent.classList.remove('alert-danger');
-        }
+
+        // Toggle classes efficiently.
+        parent.classList.toggle('alert-success', current < config.usage.character.limit || config.usage.character.limit === null);
+        parent.classList.toggle('alert-danger', current >= config.usage.character.limit && config.usage.character.limit !== null);
     };
     /**
      * Get the editor container based on recieved current user's editor preference.
@@ -1031,6 +1169,7 @@ define(['core/log',
      * @param {*} cfg
      */
     const init = (cfg) => {
+        offsetTop = domQuery(Selectors.config.langstrings).offsetTop;
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100, crumbsmaxlen: cfg.crumbsmaxlen});
         Translation.init(cfg);
@@ -1045,8 +1184,7 @@ define(['core/log',
         checkboxes.forEach((node) => {
             node.disabled = selectAllBtn.disabled;
         });
-        showRows(Selectors.statuses.updated, domQuery(Selectors.actions.showUpdated).checked);
-        showRows(Selectors.statuses.needsupdate, domQuery(Selectors.actions.showNeedUpdate).checked);
+        debouncedShowRows();
     };
     /**
      * Api to be used by the other modules.

@@ -50,62 +50,73 @@ class get_rephrase extends external_api {
      * @throws \invalid_parameter_exception
      */
     public static function execute(array $rephrasings, array $options, string $version): array {
-        // Set the api with env so that it can be unit tested.
-        $key = self::setdeeplapikey();
-        $appinfo = self::setdeeplappinfo($version);
-        if (empty($key)) {
-            throw new DeepLException('authKey must be a non-empty string');
+        $params = self::validate_parameters(self::execute_parameters(), [
+                'rephrasings' => $rephrasings,
+                'options' => $options,
+                'version' => $version,
+        ]);
+        try {
+            $improver = self::setdeeplapikey($params['version']);
+        } catch (DeepLException $exception) {
+            return [[
+                    'error' => 'Exception ' . $exception->getMessage(),
+                    'key' => '',
+                    'text' => '',
+                    'target_language' => '',
+                    'detected_source_language' => '',
+            ]];
         }
-        $params = self::validate_parameters(self::execute_parameters(),
-                ['rephrasings' => $rephrasings, 'options' => $options, 'version' => $version]);
-        $improver = new DeepLClient(
-                $key,
-                [
-                        'send_platform_info' => true,
-                        'app_info' => $appinfo,
-                ]
-        );
         // Have the params cleaned by Deepl lib.
         $style = $tone = null;
         if ($params['options']['toneorstyle'] !== 'default') {
-            $rephreaseotions = explode('|', $params['options']['toneorstyle']);
-            $tone = $rephreaseotions[0] === 'tone' ? $rephreaseotions[1] : null;
-            $style = $rephreaseotions[0] === 'writing_style' ? $rephreaseotions[1] : null;
+            $rephraseoptions = explode("\n", $params['options']['toneorstyle']);
+            $tone = $rephraseoptions[0] === 'tone' ? $rephraseoptions[1] : null;
+            $style = $rephraseoptions[0] === 'writing_style' ? $rephraseoptions[1] : null;
         }
-        $validatedparams =
-                $improver->buildRephraseBodyParams($params['options']['target_lang'], $style, $tone);
+
+        $validatedparams = $improver->buildRephraseBodyParams(
+                $params['options']['target_lang'], $style, $tone
+        );
         // Get the target.
         $targetlang = $validatedparams['target_lang'];
         // Remove target from arrray to pass just the options.
         unset($validatedparams['target_lang']);
+
+        $staticparts = [$validatedparams, $targetlang];
+        $chunks = self::chunk_payload($params['rephrasings'], $staticparts);
         // Prepare the texts.
         // Results.
         $improvedtexts = [];
-        // Extract the texts.
-        $texts = array_map(function($t) {
-            return $t['text'];
-        }, $params['rephrasings']);
-        try {
-            $results = $improver->rephraseText($texts, $targetlang, $validatedparams);
-            foreach ($results as $index => $result) {
-                $key = $params['rephrasings'][$index]['key']; // Map the key in the to the results.
-                $improvedtexts[] = [
-                        'error' => '',
-                        'key' => $key,
-                        'text' => $result->text,
-                        'target_language' => $result->targetLanguage,
-                        'detected_source_language' => $result->detectedSourceLanguage,
-                ];
+
+        foreach ($chunks as $chunk) {
+            // Extract the texts for each chunk.
+            $texts = array_map(function($t) {
+                return $t['text'];
+            }, $chunk);
+
+            try {
+                $results = $improver->rephraseText($texts, $targetlang, $validatedparams);
+                foreach ($results as $index => $result) {
+                    $key = $chunk[$index]['key'];
+                    $improvedtexts[] = [
+                            'error' => '',
+                            'key' => $key,
+                            'text' => $result->text,
+                            'target_language' => $result->targetLanguage,
+                            'detected_source_language' => $result->detectedSourceLanguage,
+                    ];
+                }
+            } catch (DeepLException $e) {
+                return [[
+                        'error' => 'Exception ' . $e->getMessage(),
+                        'key' => '',
+                        'text' => '',
+                        'target_language' => '',
+                        'detected_source_language' => '',
+                ]];
             }
-        } catch (DeepLException $e) {
-            return
-                    [['error' => 'Exception ' . $e->getMessage(),
-                            'key' => '',
-                            'text' => '',
-                            'target_language' => '',
-                            'detected_source_language' => '',
-                    ]];
         }
+
         return $improvedtexts;
     }
 

@@ -16,13 +16,14 @@
 
 namespace local_deepler\external;
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
 
-require_once($CFG->dirroot . '/local/deepler/tests/external/base_external.php');
+require_once(__DIR__ . '/base_external.php');
 
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use DeepL\AppInfo;
+use DeepL\DeepLClient;
+use ReflectionClass;
 
 /**
  * PHPUnit tests for get_translation external service.
@@ -44,7 +45,6 @@ final class gettranslation_test extends base_external {
         if ($this->is_below_four_one()) {
             return;
         }
-
         $params = get_translation::execute_parameters();
         $paramsreph = get_rephrase::execute_parameters();
         $this->assertInstanceOf(external_function_parameters::class, $params);
@@ -85,10 +85,10 @@ final class gettranslation_test extends base_external {
         set_config('apikey', 'testapikey', 'local_deepler');
 
         // Call the method.
-        $apikey = get_translation::setdeeplapikey();
+        $translator = get_translation::setdeeplapikey('v1.0');
 
         // Assert the API key is returned correctly.
-        $this->assertEquals('testapikey', $apikey);
+        $this->assertInstanceOf(DeepLClient::class, $translator);
     }
 
     /**
@@ -114,5 +114,89 @@ final class gettranslation_test extends base_external {
         $this->assertEquals('Moodle-Deepler', $appinforephraz->appName);
         $this->assertEquals('1.0', $appinfo->appVersion);
         $this->assertEquals('1.0', $appinforephraz->appVersion);
+    }
+
+    /**
+     * Correct split.
+     *
+     * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
+     * @return void
+     */
+    public function test_chunkpayloadsplitsitemscorrectly(): void {
+        $staticparts = ['partA' => 'value1', 'partB' => 'value2'];
+        $items = [];
+        // Each 'text' is 35,000 bytes, so >2 will exceed the chunk size.
+        for ($i = 0; $i < 4; $i++) {
+            $items[] = ['text' => str_repeat('a', 35000)];
+        }
+        // Call the static chunk_payload directly.
+        $result = self::callprotectedstaticmethod(
+                get_translation::class,
+                'chunk_payload',
+                [$items, $staticparts]
+        );
+        // Expect 2 chunks: first includes 3 items, second has 1 item.
+        $this->assertCount(2, $result);
+        $this->assertCount(2, $result[1]);
+    }
+
+    /**
+     * Loads empty item.
+     *
+     * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
+     * @return void
+     */
+    public function test_chunkpayloadhandlesemptyitems(): void {
+        $staticparts = ['foo' => 'bar'];
+        $items = [];
+        // Call the static chunk_payload directly.
+        $result = self::callprotectedstaticmethod(
+                get_translation::class,
+                'chunk_payload',
+                [$items, $staticparts]
+        );
+        $this->assertCount(0, $result);
+    }
+
+    /**
+     * Respects max bytes for large payload.
+     *
+     * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
+     * @return void
+     */
+    public function test_chunkpayloadrespectsmaxbytesforlargepayloads(): void {
+        $staticparts = ['meta' => 'info'];
+        $items = [
+                ['text' => str_repeat('x', 100000)],
+                ['text' => 'y'],
+        ];
+        // The first 'text' exceeds $maxbytes, should yield separate chunk per item.
+        $result = self::callprotectedstaticmethod(
+                get_translation::class,
+                'chunk_payload',
+                [$items, $staticparts]
+        );
+        $this->assertCount(2, $result);
+        $this->assertCount(1, $result[1]);
+    }
+
+    /**
+     * Reflection helper.
+     *
+     * @param mixed $class
+     * @param string $methodname
+     * @param array $args
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    protected static function callprotectedstaticmethod(mixed $class, string $methodname, array $args = []): mixed {
+        $reflectionclass = new ReflectionClass($class);
+        $method = $reflectionclass->getMethod($methodname);
+        $method->setAccessible(true);
+        // For static methods, pass null as the object.
+        return $method->invokeArgs(null, $args);
     }
 }

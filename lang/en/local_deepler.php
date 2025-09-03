@@ -54,6 +54,8 @@ $string['editbutton'] = 'Edit source in place';
 $string['errordbpartial'] = '{$a} of the fields NOT saved in the database. Check manually in place';
 $string['errordbtitle'] = 'Database error';
 $string['errortoolong'] = '(could be that the text is too long for the field... Check manually in place)';
+$string['fieldmaxlengtha'] = '{$a} characters';
+$string['fieldmaxlengthb'] = '(max {$a})';
 $string['filters'] = 'Filters';
 $string['formality'] = 'Formality';
 $string['formalitydefault'] = 'default';
@@ -194,6 +196,8 @@ $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
 $string['modeltypelatencyoptimized'] = 'latency optimized';
 $string['modeltypequalityoptimized'] = 'quality optimized';
+$string['module:select:label'] = 'Select activities';
+$string['moduleall'] = 'ALL ACTIVITIES';
 $string['needsupdate'] = 'Needs update';
 $string['neverrephrased'] = 'This text was never improved';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
@@ -228,6 +232,9 @@ $string['scannedfieldsize_desc'] = 'Small text field are often limited in the da
  (plus the mlang tags) at each translation steps.
  After translation, if the text is too big, the DB will through an error. Size this here based on your main language properties and
  the number on languages your Moodle supports';
+$string['section:coursesettings'] = 'Course settings';
+$string['section:select:label'] = 'Select sections';
+$string['sectionall'] = 'ALL SECTIONS';
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
 $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
@@ -420,6 +427,8 @@ $string['tour_advancedsettings23saveall'] =
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
+$string['translate:modal:body'] = 'It might take a little while, if you have a lot of content.';
+$string['translate:modal:title'] = 'Called DeepL';
 $string['translatebutton'] = 'Translate &rarr; {$a}';
 $string['translateexplain'] = 'Translate all selected rows to {$a}';
 $string['translationdisabled'] = 'Translation is disabled because this is used as a link in database';
@@ -429,7 +438,7 @@ $string['viewsourcedisabled'] = 'No multilingual content yet.';
 $string['warningsource'] =
         'Watch out ! The current source language &quot;{$a}&quot; is already as a multilang tag along side with the fallback tag &quot;OTHER&quot;. Note that both will be merge as the &quot;OTHER&quot; multilang tag.';
 $string['wordcountsentence'] =
-        'Total <span id="local_deepler__wc">0</span> words, <span id="local_deepler__wosc">0</span> characters (<span id="local_deepler__wsc">0</span> chars including spaces) DeepL\'s usage = <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
+        'Total <span id="local_deepler__wc">0</span> words, <span id="local_deepler__wosc">0</span> characters (<span id="local_deepler__wsc">0</span> chars including spaces). DeepL\'s&nbsp;usage&nbsp;= <span id="local_deepler__used">0</span>/<span id="local_deepler__max">0</span>';
 $string['writingstyleacademic'] = 'Academic writing style';
 $string['writingstylebusiness'] = 'Business writing style';
 $string['writingstylecasual'] = 'Casual writing style';

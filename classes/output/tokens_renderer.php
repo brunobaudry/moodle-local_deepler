@@ -53,6 +53,11 @@ class tokens_renderer extends plugin_renderer_base {
 
         // User fields.
         $userfields = utils::all_user_fields($context);
+        $mappeduserfields = array_map(
+                fn($key, $value) => ['key' => $key, 'value' => $value],
+                array_keys($userfields),
+                $userfields
+        );
 
         // Records from DB.
         $records = $DB->get_records('local_deepler_tokens');
@@ -86,8 +91,7 @@ class tokens_renderer extends plugin_renderer_base {
                 'actions' => get_string('tokenactions', 'local_deepler'),
                 'formaction' => (new moodle_url('/local/deepler/tokenmanager.php'))->out(),
                 'sesskey' => sesskey(),
-                'userattributeselect' => html_writer::select($userfields, 'attribute', '', ['' => get_string('choose')],
-                        ['class' => 'custom-select mr-2', 'id' => 'deepler-attribute']),
+                'userattributeselect' => $mappeduserfields,
                 'valuefilterplaceholder' => get_string('tokenfiltervalue', 'local_deepler'),
                 'tokenplaceholder' => get_string('tokentoken', 'local_deepler'),
                 'addbutton' => get_string('tokenadd', 'local_deepler'),

@@ -19,9 +19,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#page-local-deepler-translate .sticky-offset {
-    top: 20px;
-}
 #page-local-deepler-translate #local_deepler-translate-header {
     z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
 }
@@ -66,13 +63,13 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     margin-top: 3rem;
 }
 #page-local-deepler-translate .local_deepler__sectiondata {
-    margin-top: 3rem;
+    margin-top: 1rem;
 }
 #page-local-deepler-translate .local_deepler__activitysmalltitle {
     position: absolute;
 }
 #page-local-deepler-translate .local_deepler__selectorbox {
-    margin-top: 0rem;
+    margin-top: 0;
 }
 #page-local-deepler-translate div[data-table^=question] {
     background-color: #fff !important; /* stylelint-disable-line declaration-no-important */

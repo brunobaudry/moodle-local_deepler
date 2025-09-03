@@ -17,6 +17,10 @@
 namespace local_deepler\external;
 
 use DeepL\AppInfo;
+use DeepL\AuthorizationException;
+use DeepL\DeepLClient;
+use DeepL\DeepLException;
+use local_deepler\local\services\lang_helper;
 
 /**
  * Simple trait to reuse Deepl api key settings.
@@ -30,15 +34,31 @@ trait deeplapi_trait {
      * Set the key string.
      * If empty, it will try to get it from the .env useful for tests runs.
      *
-     * @return string
+     * @param string $version
+     * @return \DeepL\DeepLClient|null
+     * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
-    public static function setdeeplapikey(): string {
-        $configkey = get_config('local_deepler', 'apikey');
-        if ($configkey === '') {
-            $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
+    public static function setdeeplapikey(string $version): DeepLClient|null {
+        global $USER;
+        $languagepack = new lang_helper();
+        $initok = $languagepack->initdeepl($USER, $version);
+        if ($initok) {
+            return $languagepack->gettranslator();
+        } else {
+            $configkey = get_config('local_deepler', 'apikey');
+            if ($configkey === '') {
+                $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
+            }
+            try {
+                return new DeepLClient($configkey, [
+                        'send_platform_info' => true,
+                        'app_info' => self::setdeeplappinfo($version),
+                ]);
+            } catch (DeepLException $e) {
+                return null;
+            }
         }
-        return $configkey;
     }
 
     /**
@@ -50,6 +70,46 @@ trait deeplapi_trait {
      */
     public static function setdeeplappinfo(string $version): AppInfo {
         return new AppInfo('Moodle-Deepler', $version);
+    }
+
+    /**
+     * Splits texts into chunks respecting DeepL's payload size limit.
+     *
+     * @param array $items Array of items with 'text' and 'key'.
+     * @param array $staticparts Static parts of the payload (e.g. options, lang).
+     * @return array Array of chunks.
+     * @todo MDL-0000 Make maxbytes and buffer admin settings.
+     */
+    protected static function chunk_payload(array $items, array $staticparts): array {
+        $chunks = [];
+        $chunk = [];
+        $maxbytes = 100000;
+        $bufferbytes = 1024 * 16;
+        $basepayload = implode('', array_map(function($part) {
+            return json_encode($part);
+        }, $staticparts));
+
+        $basebytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes;
+        $chunkbytes = $basebytes;
+
+        foreach ($items as $item) {
+            $textbytes = strlen(mb_convert_encoding($item['text'], 'UTF-8'));
+
+            if ($chunkbytes + $textbytes > $maxbytes && !empty($chunk)) {
+                $chunks[] = $chunk;
+                $chunk = [$item];
+                $chunkbytes = $basebytes + $textbytes;
+            } else {
+                $chunk[] = $item;
+                $chunkbytes += $textbytes;
+            }
+        }
+
+        if (!empty($chunk)) {
+            $chunks[] = $chunk;
+        }
+
+        return $chunks;
     }
 
 }

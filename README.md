@@ -86,8 +86,9 @@ Translation workflow being the following:
     + [Unsupported languages](#unsupported-languages)
   * [Header](#header)
   * [Filters](#filters)
-    + [Up to date:](#up-to-date)
-    + [Needs update:](#needs-update)
+    + [Sections and activities selections](#sections-and-activities-selections)
+    + [Up to date filter:](#up-to-date-filter)
+    + [Needs update filter:](#needs-update-filter)
     + [Hidden:](#hidden)
   * [Breadcrumbs](#breadcrumbs)
   * [Status indicator](#status-indicator)
@@ -97,6 +98,7 @@ Translation workflow being the following:
       - [List of mlang tags for each field](#list-of-mlang-tags-for-each-field)
     + [Images and medias.](#images-and-medias)
   * [Performing translations](#performing-translations)
+    + [Field size warning (DB max char)](#field-size-warning-db-max-char)
     + [Saving to sub-languages](#saving-to-sub-languages)
   * [Structure](#structure)
 - [User tour (inline tutorial)](#user-tour-inline-tutorial)
@@ -398,6 +400,7 @@ You will be sent to the translation page for the course.
 
 ![](pix/translation_overview.png)
 
+
 ### Advanced settings
 
 #### Deepl API setting
@@ -518,22 +521,38 @@ Also if you have a Free account, you cannot select a same source and target lang
 
 ### Header
 
-![](pix/header.png)
+![](pix/header.png) 
 
 ### Filters
 
+In order to organise your translations, there 2 types filters :
+- Course's sections and Activities.
+- Translation status.
+
 You can filter the rows to hide/show the ones that need to be translated as wished.
 Clicking on the "Status" checkbox will select all visible.
-
 These filter show/hide the textual content found in the course.
 
-#### Up to date:
+#### Sections and activities selections
+By **default** the plugin will start by showing the course's settings only as with heavy courses loading all activity text fields in a single page can bloat the browser.
+
+![](pix/filter_default_settings.png)
+
+Then you can either display **ALL SECTIONS**
+
+![](pix/filter_all_sections.png)
+
+Or select one of your course section and narrow down to an activity.
+
+![](pix/filter_section_activities.png)
+
+#### Up to date filter:
 
 These are the content that are already translated and that no change were made in the source.
 
 They will appear with the GREEN DOT indicator.
 
-#### Needs update:
+#### Needs update filter:
 
 These are the textual contents that were never translated or that were modified after being translated.
 
@@ -633,6 +652,18 @@ The original content **has already MLANG tag** and the source lang is different 
 
 `{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
+#### Field size warning (DB max char)
+Moodle has this script limitation of field sizes. (understandable for db optimization)
+When translating you can find yourself generating more characters than the Database can handle.
+Then the Plugin would yield a "Database error".
+But this can be annoying if you already called the DeepL API as you would have consumed the translation.
+To warn you the plugin will display a message with the actual character count and the DB mas field size.
+![](pix/max_char_warning.png)
+
+_Soon the plugin will compute this base on the source/target expansion ratio to roughly predict the resulting size.
+You will also be able to see the total size once the translated content will be returned from DeepL and receive a warning should the total length exceed the database capacity 
+so that you could shrink it accordingly._
+
 #### Saving to sub-languages
 If you have sub-languages installed in your Moodle instance, you can select one of them so that when you will save the translation it will be stored in the relative mlang tag.
 ![](pix/save_as_target.png)
@@ -718,10 +749,7 @@ translate your content. When you backup and restore courses, your translations w
 message on the course translation page.
 
 ## Future (todos)
-- Add a glossary import interface.
-- Display images in editors field.
-- Translations versioning.
-- Multiple API key setting and user mapping.
+See [Enhancements](https://github.com/brunobaudry/moodle-local_deepler/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement)
 
 ## Submit an issue
 

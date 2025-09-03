@@ -94,12 +94,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 <h4>{{addnewheading}}</h4>
 <div class="adminpage-description mb-2">{{{description}}}</div>
-<form method="post" action="{{formaction}}" class="mform PT-2">
+<form method="post" action="{{formaction}}" class="mform pt-2">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
 
-    <div class="form-inline">
-        {{{userattributeselect}}}
-
+    <div class="form-inline d-flex align-items-center">
+        <select class="form-select custom-select mr-2" id="deepler-attribute" name="attribute" data-initial-value="">
+                <option selected="selected" value="">Choose</option>
+            {{#userattributeselect}}
+                <option value="{{key}}">{{value}}</option>
+            {{/userattributeselect}}
+        </select>
         <input type="text" name="valuefilter" class="form-control mr-2" id="deepler-valuefilter"
                placeholder="{{valuefilterplaceholder}}">
 

@@ -39,6 +39,19 @@ class section implements translatable_interface, editable_interface, visibility_
 
     /** @var module[] array of module */
     private array $modules;
+    /**
+     * @var \cm_info[]
+     */
+    private array $sectioncms;
+
+    /**
+     * Getter for sessions' activity cms.
+     *
+     * @return \cm_info[]
+     */
+    public function get_sectioncms(): array {
+        return $this->sectioncms;
+    }
 
     /**
      * Getter for modules.
@@ -52,16 +65,30 @@ class section implements translatable_interface, editable_interface, visibility_
      * @var \moodle_url
      */
     private moodle_url $link;
+    /** @var int */
+    private int $loadeddmoduleid;
+
+    /**
+     * Getter.
+     *
+     * @return int
+     */
+    public function get_loadeddmoduleid(): int {
+        return $this->loadeddmoduleid;
+    }
 
     /**
      * Constructor
      *
      * @param \section_info $sectioninfo
      * @param \core_courseformat\base $courseformat
+     * @param int $loadeddmodule
+     * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      */
-    public function __construct(section_info $sectioninfo, base $courseformat) {
+    public function __construct(section_info $sectioninfo, base $courseformat, int $loadeddmodule) {
         global $CFG;
+        $this->loadeddmoduleid = $loadeddmodule;
         $this->si = $sectioninfo;
         $this->link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $this->si->id]);
         $this->courseformat = $courseformat;
@@ -76,6 +103,15 @@ class section implements translatable_interface, editable_interface, visibility_
      */
     public function isvisible(): bool {
         return $this->si->visible == true;
+    }
+
+    /**
+     * Tells if section is leer.
+     *
+     * @return bool
+     */
+    public function is_empty(): bool {
+        return empty ($this->get_modules()) && empty($this->getfields());
     }
 
     /**
@@ -95,6 +131,26 @@ class section implements translatable_interface, editable_interface, visibility_
     }
 
     /**
+     * Map the names of section's module to ids.
+     *
+     * @return array
+     */
+    public function get_modules_id_name(): array {
+        $idnames = [];
+        /** @var \local_deepler\local\data\module $module */
+        foreach ($this->modules as $module) {
+            $cm = $module->get_cm();
+            $idnames[] =
+                    [
+                            'id' => $cm->id,
+                            'name' => $cm->name,
+                            'selected' => $cm->id == $this->loadeddmoduleid,
+                    ];
+        }
+        return $idnames;
+    }
+
+    /**
      * Fields of the section.
      *
      * @return array
@@ -109,17 +165,21 @@ class section implements translatable_interface, editable_interface, visibility_
      * Get the modules of the section.
      *
      * @return array
-     * @throws \coding_exception
+     * @throws \coding_exception|\dml_exception
      */
     public function populatemodules(): array {
         if (method_exists($this->si, 'get_sequence_cm_infos')) {
             // Moodle 405.
-            $sectioncms = $this->si->get_sequence_cm_infos();
+            $this->sectioncms = $this->si->get_sequence_cm_infos();
         } else {
             // Moodle 401 to 404.
-            $sectioncms = self::get_sequence_cm_infos($this->si);
+            $this->sectioncms = self::get_sequence_cm_infos($this->si);
         }
-        foreach ($sectioncms as $cmid => $coursemodule) {
+        foreach ($this->sectioncms as $cmid => $coursemodule) {
+            // Filter modules to load.
+            if ($this->loadeddmoduleid != -1 && $this->loadeddmoduleid != $coursemodule->id) {
+                continue;
+            }
             $this->modules[$cmid] = new module($coursemodule);
         }
         return $this->modules;
@@ -161,4 +221,5 @@ class section implements translatable_interface, editable_interface, visibility_
         }
         return $result;
     }
+
 }

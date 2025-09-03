@@ -42,18 +42,20 @@ class get_glossary_entries extends external_api {
      * Execute.
      *
      * @param string $glossaryid
+     * @param string $version
      * @return array
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
-    public static function execute(string $glossaryid): array {
-        global $DB;
+    public static function execute(string $glossaryid, string $version): array {
 
-        $params = self::validate_parameters(self::execute_parameters(), ['glossaryid' => $glossaryid]);
-        $key = self::setdeeplapikey();
+        $params = self::validate_parameters(self::execute_parameters(), [
+                'glossaryid' => $glossaryid,
+                'version' => $version,
+        ]);
         try {
+            $translator = self::setdeeplapikey($params['version']);
             $glossaryid = $params['glossaryid'];
-            $translator = new DeepLClient($key);
             $glo = $translator->getGlossary($glossaryid);
             $sourcelang = $glo->sourceLang;
             $targetlang = $glo->targetLang;
@@ -85,7 +87,10 @@ class get_glossary_entries extends external_api {
      * @return \external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters(['glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID')]);
+        return new external_function_parameters([
+                'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
+                'version' => new external_value(PARAM_TEXT, 'Plugin\'s release'),
+        ]);
     }
 
     /**

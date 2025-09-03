@@ -16,7 +16,9 @@
 
 namespace local_deepler\output;
 
+use core_courseformat\base;
 use local_deepler\local\data\course;
+use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
 use renderable;
 use renderer_base;
@@ -95,14 +97,15 @@ class translate_page implements renderable, templatable {
      * @param renderer_base $output
      * @return object
      * @throws \DeepL\DeepLException
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(renderer_base $output): stdClass {
 
         $this->output = $output;
         $data = new stdClass();
         // Data for mustache template.
         $data->langstrings = $this->langpacks->preparestrings();
-        $data->targethtmloptions = $this->langpacks->preparehtmltagets();
         $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
         $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
 
@@ -111,8 +114,22 @@ class translate_page implements renderable, templatable {
         $renderedform = $this->mform->render();
         $renderedform = str_replace('col-md-9', 'col-md-12', $renderedform);
         $data->mform = $renderedform;
-        $data->codes = $this->mform->get_langcodes();
         // Set langs.
+        $loadedsection = $this->coursedata->get_loadedsection();
+        $data->nosectionsloaded = $loadedsection === -99;
+        $data->allselected = $loadedsection === -1;
+        $data->sectionidnames = $this->prepare_sectionmenu($this->coursedata->get_sectioninfoall(), $loadedsection,
+                $this->coursedata->get_format());
+        $data->hasmodulelist = false;
+        $data->modulesidnames = null;
+        $data->anymoduleselected = false;
+        if ($loadedsection >= 0) {
+            $data->hasmodulelist = true;
+            $selectedsection = $this->coursedata->getsections()[$this->coursedata->get_loadedsectionnum()];
+            $data->anymoduleselected = $selectedsection->get_loadeddmoduleid() >= 0;
+            $data->modulesidnames = $this->prepare_modulemenu($selectedsection->get_sectioncms(),
+                    $selectedsection->get_loadeddmoduleid());
+        }
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
         $data->target_lang = $this->langpacks->targetlang === '' ? '?' : $this->langpacks->targetlang;
@@ -139,5 +156,50 @@ class translate_page implements renderable, templatable {
         $data->glossayselector = $glorenderer->glossay_selector_deepl($glo,
                 $this->langpacks->getcurrentlang(true), $this->langpacks->gettargetlang(true));
         return $data;
+    }
+
+    /**
+     * Data for building the option for the section selector.
+     *
+     * @param \section_info[] $sections
+     * @param int $selectedid
+     * @param \core_courseformat\base $format
+     * @return array
+     */
+    private function prepare_sectionmenu(array $sections, int $selectedid, base $format): array {
+        $menu = [];
+        foreach ($sections as $section) {
+            $tmp = new section($section, $format, -1);
+            if ($tmp->is_empty()) {
+                continue;
+            }
+            unset($tmp);
+            $menu[] = [
+                    'id' => $section->id,
+                    'name' => $this->mlangfilter->filter($section->name ?? $format->get_default_section_name($section)),
+                    'selected' => $section->id == $selectedid,
+            ];
+        }
+        return $menu;
+    }
+
+    /**
+     * Data for building the option for the activity selector.
+     *
+     * @param \cm_info[] $modules
+     * @param int $selectedid
+     * @return array
+     */
+    private function prepare_modulemenu(array $modules, int $selectedid): array {
+        $menu = [];
+        foreach ($modules as $module) {
+            $menu[] =
+                    [
+                            'id' => $module->id,
+                            'name' => $this->mlangfilter->filter($module->name),
+                            'selected' => $module->id == $selectedid,
+                    ];
+        }
+        return $menu;
     }
 }

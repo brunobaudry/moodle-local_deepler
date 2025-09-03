@@ -54,8 +54,11 @@ try {
 } catch (moodle_exception $exception) {
     $courseid = required_param('course_id', PARAM_INT);
 }
+// Section -99 is one selected. Section -1 is all else proper section id.
+$sectionid = optional_param('section_id', -99, PARAM_INT);
+$activityid = optional_param('activity_id', -1, PARAM_INT);
+// Load the cours in DB.
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-
 // Setup page.
 $context = context_course::instance($courseid);
 $PAGE->set_context($context);
@@ -80,16 +83,17 @@ try {
 }
 
 echo $output->heading($mlangfilter->filter($course->fullname));
+$version = $plugin->release;
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
     field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
-    $initok = $languagepack->initdeepl($USER);
+    $initok = $languagepack->initdeepl($USER, $version);
     if ($initok && $languagepack->iscurrentsupported()) {
         // Set js data.
         $jsconfig = new stdClass();
         // We get the version from the version dot php file.
-        $jsconfig->version = $plugin->release;
+        $jsconfig->version = $version;
         // Adds user ID for security checks in external calls.
         $jsconfig->userid = $USER->id;
         // Adds the user's prefered editor to the jsconfig.
@@ -108,9 +112,9 @@ try {
         // Adding page JS.
         $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
         // Create the structure.
-        $coursedata = new course($course);
+        $coursedata = new course($course, $sectionid, $activityid);
         // Build the page.
-        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $plugin->release, $jsconfig->userPrefs);
+        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
         echo $output->render($renderable);
     } else {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));

@@ -52,9 +52,6 @@ $danger: $red !default;
 $secondary: $gray-400 !default;
 
 #page-local-deepler-translate {
-    .sticky-offset {
-        top: 20px;
-    }
 
     #local_deepler-translate-header {
         z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
@@ -108,7 +105,7 @@ $secondary: $gray-400 !default;
     }
 
     .local_deepler__sectiondata {
-        margin-top: 3rem;
+        margin-top: 1rem;
     }
 
     .local_deepler__activitysmalltitle {
@@ -116,7 +113,7 @@ $secondary: $gray-400 !default;
     }
 
     .local_deepler__selectorbox {
-        margin-top: 0rem;
+        margin-top: 0;
     }
 
     div[data-table^='question'] {

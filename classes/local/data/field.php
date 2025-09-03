@@ -29,6 +29,12 @@ use Symfony\Component\Yaml\Yaml;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class field {
+
+    /** @var array */
+    private static array $fieldlengths = [];
+
+    /** @var int|null */
+    private ?int $maxlength = null;
     /** @var int */
     public static int $countsimplefields = 0;
     /** @var int */
@@ -122,6 +128,15 @@ class field {
      */
     public function iseditable(): bool {
         return $this->editable;
+    }
+
+    /**
+     * Getter
+     *
+     * @return int|null
+     */
+    public function get_maxlength(): ?int {
+        return $this->maxlength;
     }
 
     /**
@@ -283,14 +298,19 @@ class field {
             // We build an array of all Text fields for this record.
             $columns = $DB->get_columns($tablename);
             // Just get db collumns we need (texts content).
-            $textcols = array_filter($columns, function($field) use ($tablename) {
-                // Only scan the main text types that are above minîmum text field size.
-                return (($field->meta_type === "C" && $field->max_length > self::$mintxtfieldsize)
-                                || $field->meta_type === "X")
-                        && !in_array('*_' . $field->name, ['*_displayoptions', '*_stamp'])
-                        && !in_array($tablename . '_' . $field->name, self::getcolstoskip());
-            });
-            self::$filteredtablefields[$tablename] = array_keys($textcols);
+            $filtered = [];
+            foreach ($columns as $name => $field) {
+                if (
+                        (($field->meta_type === "C" && $field->max_length > self::$mintxtfieldsize) ||
+                                $field->meta_type === "X") &&
+                        !in_array('*_' . $field->name, ['*_displayoptions', '*_stamp']) &&
+                        !in_array($tablename . '_' . $field->name, self::getcolstoskip())
+                ) {
+                    $filtered[] = $field->name;
+                    self::$fieldlengths[$tablename][$field->name] = $field->max_length ?? null;
+                }
+            }
+            self::$filteredtablefields[$tablename] = $filtered;
         }
         return self::$filteredtablefields[$tablename];
     }
@@ -320,9 +340,8 @@ class field {
                     $editable = $clauses['editable'];
                 }
             }
-
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
-                $infos[] = new field(
+                $fieldobject = new field(
                         $info->id,
                         $info->{$collumn},
                         $info->{$fieldtextformat} ?? 0,
@@ -331,6 +350,10 @@ class field {
                         $cmid,
                         $editable
                 );
+
+                $fieldobject->maxlength = self::$fieldlengths[$table][$collumn] ?? null;
+
+                $infos[] = $fieldobject;
             }
         }
         return $infos;
@@ -341,15 +364,14 @@ class field {
      *
      * @param \cm_info $cminfo
      * @return array
+     * @throws \dml_exception
      */
     public static function getfieldsfrominfo(cm_info $cminfo): array {
         global $DB;
         $mod = $cminfo->modname;
         // Get all the fields as CMINFO does not carry them all.
         $filters = [];
-        if (isset(self::$additionals['mod_' . $mod])
-                && isset(self::$additionals['mod_' . $mod][$mod])
-                && isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
+        if (isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
             $filters = self::$additionals['mod_' . $mod][$mod]['fields'];
         }
         $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);

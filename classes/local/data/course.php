@@ -47,19 +47,61 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @var \core_courseformat\base
      */
     private base $format;
+
+
     /** @var section[] of sections titles (and id / order) for display */
     private array $sections;
+    /**
+     * @var \section_info[]
+     */
+    private array $sectioninfoall;
+
+
+    /** @var int */
+    private int $loadedsectionid;
+    /** @var int */
+    private int $loadedsectionnum;
+
+
+    /**
+     * Getter for the session info.
+     *
+     * @return \section_info[]
+     */
+    public function get_sectioninfoall(): array {
+        return $this->sectioninfoall;
+    }
+
+    /**
+     * Getter for the current format.
+     *
+     * @return \core_courseformat\base
+     */
+    public function get_format(): base {
+        return $this->format;
+    }
+    /**
+     * Getter for the session rank.
+     *
+     * @return int
+     */
+    public function get_loadedsectionnum(): int {
+        return $this->loadedsectionnum;
+    }
 
     /**
      * Constructor.
      *
      * @param \stdClass $course
+     * @param int $lodadedsection
+     * @param int $loadeddmodule
      * @throws \core\exception\moodle_exception
      * @throws \moodle_exception
      */
-    public function __construct(stdClass $course) {
+    public function __construct(stdClass $course, int $lodadedsection = -99, int $loadeddmodule = -99) {
         global $CFG;
-        // Load yaml config of known  field definitions.
+        $this->loadedsectionnum = $this->loadedsectionid = $lodadedsection;
+        // Load yaml config of known field definitions.
         if (empty(field::$additionals)) {
             $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
             field::$additionals = Yaml::parseFile($configfile);
@@ -69,7 +111,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         $this->format = course_get_format($course);
         $this->link = new moodle_url($CFG->wwwroot . "/course/edit.php", ['id' => $this->course->get_course_id()]);
         try {
-            $this->populatesections();
+            $this->populatesections($loadeddmodule);
         } catch (moodle_exception $ex) {
             debugging($ex);
         }
@@ -119,13 +161,33 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     /**
      * Populate the sections of the course.
      *
+     * @param int $loadeddmodule
      * @return void
+     * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      */
-    private function populatesections(): void {
-        $sections = $this->course->get_section_info_all();
-        foreach ($sections as $sectioninfo) {
-            $this->sections[$sectioninfo->section] = new section($sectioninfo, $this->format);
+    private function populatesections(int $loadeddmodule): void {
+        $this->sectioninfoall = $this->course->get_section_info_all();
+        /** @var section_info $sectioninfo */
+        foreach ($this->sectioninfoall as $sectioninfo) {
+            // If selected section is -1 then load all, if -99 none else load single.
+            if ($this->loadedsectionid !== -1 && $sectioninfo->id != $this->loadedsectionid) {
+                continue;
+            }
+            $this->sections[$sectioninfo->sectionnum ?? $sectioninfo->id] =
+                    new section($sectioninfo, $this->format, $loadeddmodule);
+            if ($this->loadedsectionid >= 0) {
+                $this->loadedsectionnum = $sectioninfo->sectionnum;
+            }
         }
+    }
+
+    /**
+     * Getter for loadedsection.
+     *
+     * @return int
+     */
+    public function get_loadedsection(): int {
+        return $this->loadedsectionid;
     }
 }

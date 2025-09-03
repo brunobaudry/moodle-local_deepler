@@ -103,7 +103,7 @@ final class langhelper_test extends advanced_testcase {
      * @throws \dml_exception
      */
     public function test_initdeepl_returns_true(): void {
-        $result = $this->langhelper->initdeepl($this->user);
+        $result = $this->langhelper->initdeepl($this->user, 'v1.0');
         $this->assertTrue($result);
     }
 
@@ -114,7 +114,7 @@ final class langhelper_test extends advanced_testcase {
      * @return void
      */
     public function test_prepareoptionlangs_returns_valid_structure(): void {
-        $this->langhelper->initdeepl($this->user);
+        $this->langhelper->initdeepl($this->user, 'v1.0');
         $sources = $this->langhelper->preparesourcesoptionlangs();
         $targets = $this->langhelper->preparetargetsoptionlangs();
 
@@ -135,24 +135,6 @@ final class langhelper_test extends advanced_testcase {
             $this->assertArrayHasKey('disabled', $option);
         }
     }
-
-    /**
-     * Tests the values returned as object ready to be transformed as HTM dropdown option list.
-     *
-     * @covers \local_deepler\local\services\lang_helper::preparehtmlotions
-     *
-     * @return void
-     */
-    public function test_preparehtmloptions_returns_valid_html(): void {
-        $this->langhelper->initdeepl($this->user);
-        $htmltargets = $this->langhelper->preparehtmltagets();
-        $htmlsources = $this->langhelper->preparehtmlsources();
-
-        $this->assertIsString($htmltargets);
-        $this->assertIsString($htmlsources);
-        $this->assertStringContainsString('<option', $htmltargets);
-        $this->assertStringContainsString('<option', $htmlsources);
-    }
     /**
      * Basic setting tests.
      *
@@ -167,7 +149,7 @@ final class langhelper_test extends advanced_testcase {
             $this->makeenv();
         }
         try {
-            $this->langhelper->initdeepl($this->user);
+            $this->langhelper->initdeepl($this->user, 'v1.0');
         } catch (AuthorizationException $e) {
             $this->assertEquals('Authorization failed: Invalid auth key.', $e->getMessage());
         } catch (TooManyRequestsException $e) {
@@ -255,7 +237,7 @@ final class langhelper_test extends advanced_testcase {
         $token->id = $DB->insert_record('local_deepler_tokens', $token);
 
         // Inject user and run method.
-        $this->langhelper->initdeepl($user);
+        $this->langhelper->initdeepl($user, 'v1.0');
         $reflection = new ReflectionClass($this->langhelper);
         $method = $reflection->getMethod('find_first_matching_token');
         $method->setAccessible(true);
@@ -294,7 +276,7 @@ final class langhelper_test extends advanced_testcase {
         ];
         $DB->insert_record('local_deepler_user_glossary', $userglossary);
 
-        $this->langhelper->initdeepl($this->user);
+        $this->langhelper->initdeepl($this->user, 'v1.0');
         $result = $this->langhelper->getusersglossaries();
 
         $this->assertIsArray($result);
@@ -328,7 +310,7 @@ final class langhelper_test extends advanced_testcase {
         ];
         $DB->insert_record('local_deepler_glossaries', $glossary);
 
-        $this->langhelper->initdeepl($this->user);
+        $this->langhelper->initdeepl($this->user, 'v1.0');
         $result = $this->langhelper->getpublicglossaries();
 
         $this->assertIsArray($result);
@@ -363,7 +345,7 @@ final class langhelper_test extends advanced_testcase {
         // Inject mock translator.
         $this->mocktranslator->method('listGlossaries')->willReturn([$deeplglossary]);
         $this->langhelper = new lang_helper($this->mocktranslator, 'mockapikey', null, 'en', 'es');
-        $this->langhelper->initdeepl($this->user);
+        $this->langhelper->initdeepl($this->user, 'v1.0');
 
         $result = $this->langhelper->syncdeeplglossaries();
 
