@@ -25,6 +25,47 @@ define([], () => {
     const MAX_INPUT_LENGTH = 256;
     const parser = new DOMParser();
     /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {element} target
+     * @returns {element}
+     */
+    const domQuery = (selector, key = '', target = null) => {
+        const el = target ?? document;
+        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        return el.querySelector(q);
+    };
+
+    /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {element} target
+     * @returns {NodeList}
+     */
+    const domQueryAll = (selector, key = '', target = null) => {
+        const el = target ?? document;
+        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        return el.querySelectorAll(q);
+    };
+    /**
+     * Debounce for performance
+     *
+     * @param {function} fn
+     * @param {int} delay
+     * @returns {(function(...[*]): void)|*}
+     */
+    const debounce = (fn, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+        };
+    };
+    /**
      * Simple helper to manage selectors
      * @param {string} s
      * @param {string} k
@@ -175,8 +216,8 @@ define([], () => {
      */
     const smartTruncate = (str, maxLength) =>{
         if (str.length <= maxLength || maxLength == 0) {
- return str;
-}
+            return str;
+        }
 
         const ellipsis = '…';
         const trimmed = str.slice(0, maxLength - ellipsis.length);
@@ -194,6 +235,9 @@ define([], () => {
      * Api to be used by the other modules.
      */
     return {
+        domQuery: domQuery,
+        domQueryAll: domQueryAll,
+        debounce: debounce,
         smartTruncate: smartTruncate,
         getCookie: getCookie,
         getEncodedCookie: getEncodedCookie,

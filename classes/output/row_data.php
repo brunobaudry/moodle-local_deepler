@@ -76,7 +76,7 @@ class row_data extends translate_data implements renderable, templatable {
         $isdbkey = str_contains($this->field->get_table(), 'wiki_pages') && $this->field->get_tablefield() === 'title';
         $buttonclass = '';
         $titlestring = '';
-        $canrephrase = $this->languagepack->get_canimprove();
+        $canrephrase = $this->languagepack->canimprove();
         $sametargetassource = $this->languagepack->isrephrase();
         $targetlang = $this->languagepack->targetlang;
         $currentlang = $this->languagepack->currentlang;

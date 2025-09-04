@@ -46,11 +46,13 @@ require_capability('local/deepler:edittranslations', $context);
 
 // Load glossary manager.
 $langhelper = new lang_helper();
-$langhelper->initdeepl($USER, $plugin->release);
+$initok = $langhelper->initdeepl($USER, $plugin->release);
 $status = 'failed';
 $message = '';
-
-if ($uploadinglossary) {
+if (!$initok) {
+    $status = 'deeplissue';
+    $message = $langhelper->get_deeplexception();
+} else if ($uploadinglossary) {
     if (!confirm_sesskey()) {
         $status = 'invalidsesskey';
         throw new moodle_exception('invalidsesskey');

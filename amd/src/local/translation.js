@@ -240,7 +240,7 @@ define([
             // We parse and check if it is a tranlsation or text improvment.
             keys.forEach((key) => {
                 const t = prepareTranslation(key);
-                if (config.canimprove && t.source_lang.includes(rephrasesymbol)) {
+                if (!config.isfree && t.source_lang.includes(rephrasesymbol)) {
                     delete t.source_lang;
                     Log.debug(`translation/x/callTranslations::t`);
                     Log.debug(t);

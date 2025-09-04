@@ -23,6 +23,7 @@
  */
 
 use local_deepler\local\services\lang_helper;
+use local_deepler\output\badsettings_page;
 
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/version.php');
@@ -37,46 +38,52 @@ require_capability('local/deepler:edittranslations', $context);
 $PAGE->set_context($context);
 // Load glossary manager.
 $langhelper = new lang_helper();
-$langhelper->initdeepl($USER, $plugin->release);
-/** @var local_deepler\output\glossary_renderer $renderer */
-$renderer = $PAGE->get_renderer('local_deepler', 'glossary');
-$PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
-$title = get_string('glossary:manage:title', 'local_deepler');
-$PAGE->set_title($title);
-$PAGE->set_heading($title);
-$PAGE->set_pagelayout('base');
+$initok = $langhelper->initdeepl($USER, $plugin->release);
+if ($initok) {
+    /** @var local_deepler\output\glossary_renderer $renderer */
+    $renderer = $PAGE->get_renderer('local_deepler', 'glossary');
+    $PAGE->set_url(new moodle_url('/local/deepler/glossarymanager.php'));
+    $title = get_string('glossary:manage:title', 'local_deepler');
+    $PAGE->set_title($title);
+    $PAGE->set_heading($title);
+    $PAGE->set_pagelayout('base');
 
-echo $OUTPUT->header();
-// Prepare content.
-$glossaries = $langhelper->getusersglossaries();
-$poolglossaries = $langhelper->getpoolglossaries($glossaries);
-$publicglossaries = $langhelper->getpublicglossaries();
+    echo $OUTPUT->header();
+    // Prepare content.
+    $glossaries = $langhelper->getusersglossaries();
+    $poolglossaries = $langhelper->getpoolglossaries($glossaries);
+    $publicglossaries = $langhelper->getpublicglossaries();
 
-// Handle glossary deletion status.
-if (isset($_REQUEST['deletestatus'])) {
-    // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
-    $status = $_REQUEST['deletestatus'];
-    $glossary = $_REQUEST['name'] . ' (' . $_REQUEST['token'] . ')';
-    echo $renderer->handle_glossary_status('delete', $status, $glossary);
+    // Handle glossary deletion status.
+    if (isset($_REQUEST['deletestatus'])) {
+        // Statuses are: deeplissue, failed, idmissing, invalidsesskey, success.
+        $status = $_REQUEST['deletestatus'];
+        $glossary = $_REQUEST['name'] . ' (' . $_REQUEST['token'] . ')';
+        echo $renderer->handle_glossary_status('delete', $status, $glossary);
+    }
+
+    // Handle glossary upload status.
+    if (isset($_REQUEST['uploadstatus'])) {
+        // Statuses are: deeplissue, failed, fileerror, invalidsesskey, success, suffixerror, unknownerror.
+        $status = $_REQUEST['uploadstatus'];
+        $message = $_REQUEST['message'] ?? '';
+        echo $renderer->handle_glossary_status('upload', $status, $message);
+    }
+    // Glossary table.
+    if (!empty($publicglossaries)) {
+        echo $renderer->glossary_table_view($publicglossaries, get_string('glossary:public:title', 'local_deepler'));
+    }
+    if (!empty($poolglossaries)) {
+        echo $renderer->glossary_table_view($poolglossaries, get_string('glossary:pool:title', 'local_deepler'));
+    }
+    echo $renderer->glossary_table($glossaries);
+    echo $renderer->glossary_uploader('user');
+
+    // Add js.
+    $PAGE->requires->js_call_amd('local_deepler/glossary', 'init', ['version' => $plugin->release]);
+} else {
+    $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
+    echo $OUTPUT->render($renderable);
 }
 
-// Handle glossary upload status.
-if (isset($_REQUEST['uploadstatus'])) {
-    // Statuses are: deeplissue, failed, fileerror, invalidsesskey, success, suffixerror, unknownerror.
-    $status = $_REQUEST['uploadstatus'];
-    $message = $_REQUEST['message'] ?? '';
-    echo $renderer->handle_glossary_status('upload', $status, $message);
-}
-// Glossary table.
-if (!empty($publicglossaries)) {
-    echo $renderer->glossary_table_view($publicglossaries, get_string('glossary:public:title', 'local_deepler'));
-}
-if (!empty($poolglossaries)) {
-    echo $renderer->glossary_table_view($poolglossaries, get_string('glossary:pool:title', 'local_deepler'));
-}
-echo $renderer->glossary_table($glossaries);
-echo $renderer->glossary_uploader('user');
-
-// Add js.
-$PAGE->requires->js_call_amd('local_deepler/glossary', 'init', ['version' => $plugin->release]);
 echo $OUTPUT->footer();

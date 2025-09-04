@@ -20,7 +20,8 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
+define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
+// Define(['./local/main', 'core/log', 'jquery'], (UI, Log, $) => {
     const debug = {
         NONE: 0, // Level 5 silent.
         MINIMAL: 5, // Level 3 no trace, debug or info.
@@ -117,7 +118,7 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
         if (!useXMLHttpRequestTracking()) {
             useJQueryTracking();
         }
-        window.addEventListener('load', UI.init(cfg));
+        window.addEventListener('load', Main.init(cfg));
     };
     return {
         init: init

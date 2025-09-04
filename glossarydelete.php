@@ -48,9 +48,9 @@ require_login();
 require_capability('local/deepler:edittranslations', $context);
 // Load glossary manager.
 $langhelper = new lang_helper();
-$langhelper->initdeepl($USER);
+$initok = $langhelper->initdeepl($USER);
 
-if ($deletingglossary) {
+if ($initok && $deletingglossary) {
     if (!confirm_sesskey()) {
         $status = 'invalidsesskey';
         redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php'),
@@ -62,6 +62,8 @@ if ($deletingglossary) {
     } catch (DeepLException $e) {
         $status = 'deeplissue';
     }
+} else {
+    $status = 'deeplissue';
 }
 // Redirect.
 redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php?deletestatus=' . $status . '&deleteglossary=' .
