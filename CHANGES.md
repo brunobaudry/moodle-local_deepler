@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Improved template caching.
 - Map to token when calling DeepL.
-- Layout fixing.
+- Passed the Adaptable Theme adding workaraounds for XMLHttpRequest overridings.
+- Fixed regression with gloassaries uploader.
+- Some JS loops consumed too much.
 
 ### Added
+- Layout improvements.
 - Section and activity filter/selector.
   - By default the plugin loads the settings only now.
   - User can then choose to load either a section or ALL SECTIONS.
