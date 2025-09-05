@@ -716,12 +716,12 @@ define(['core/modal',
     const enableSaveButton = ()=>{
         saveAllBtn.disabled = false;
     };
-    // Const disableSelectAllButton = ()=>{
-    //     selectAllBtn.disabled = true;
-    // };
-    // const enableSelectAllButton = ()=>{
-    //     selectAllBtn.disabled = true;
-    // };
+    const disableTranslateButton = ()=>{
+        autotranslateButton.disabled = true;
+    };
+    const enableTranslateButton = ()=>{
+        autotranslateButton.disabled = true;
+    };
     const registerUI = () => {
         if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesviewerPage)) {
             glossaryDetailViewr = document.querySelector(Selectors.glossary.entriesviewerPage);
@@ -756,7 +756,9 @@ define(['core/modal',
         dbErrorModal: dbErrorModal,
         dbErrorPartialModal: dbErrorPartialModal,
         disableSaveButton: disableSaveButton,
+        disableTranslateButton: disableTranslateButton,
         enableSaveButton: enableSaveButton,
+        enableTranslateButton: enableTranslateButton,
         debouncedShowRows: debouncedShowRows,
         deeplErrorModal: deeplErrorModal,
         doHideiframes: doHideiframes,

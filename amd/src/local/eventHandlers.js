@@ -211,6 +211,7 @@ define([
      * @param {string} error
      */
     const onTranslationFailed = (error) => {
+        UI.disableTranslateButton();
         onTranslationDone();
         UI.deeplErrorModal(error);
     };
@@ -219,6 +220,7 @@ define([
      */
     const onTranslationDone = () => {
         // UI.saveAllBtn.disabled = false;
+        UI.disableTranslateButton();
         UI.enableSaveButton();
         UI.hideModal();
     };
