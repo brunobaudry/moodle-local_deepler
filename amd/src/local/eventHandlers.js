@@ -117,7 +117,8 @@ define([
             UI.launchTranslatingModal();
             const keys = [];
             const [cookie, settings] = Settings.prepareSettingsAndCookieValues();
-            UI.saveAllBtn.disabled = false;
+            // UI.saveAllBtn.disabled = false;
+            UI.disableSaveButton();
             Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes)
                 .forEach((ckBox) => {
                     const key = ckBox.getAttribute("data-key");
@@ -217,6 +218,8 @@ define([
      * Event Listener when DeepL API call finished.
      */
     const onTranslationDone = () => {
+        // UI.saveAllBtn.disabled = false;
+        UI.enableSaveButton();
         UI.hideModal();
     };
     /**
@@ -281,7 +284,6 @@ define([
      * @param {array} errors
      */
     const onDbSavedSuccess = (errors) => {
-        UI.saveAllBtn.disabled = false;
         UI.hideModal();
         if (errors.length > 0) {
             UI.dbErrorPartialModal(errors.length);
@@ -355,14 +357,8 @@ define([
                 return;
             }
             // Prepare the UI for the save process.
-            UI.saveAllBtn.disabled = true;
+            UI.disableSaveButton();
             UI.launchSaveAllModal();
-/*            LaunchModal({
-                title: langstrings.uistrings.saveallmodaltitle,
-                body: langstrings.uistrings.saveallmodalbody,
-            }).then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
-                Log.error(reason);
-            });*/
             // Prepare the data to be saved.
             const data = [];
             const keys = Array.from(selectedCheckboxes).map((e) => e.dataset.key);

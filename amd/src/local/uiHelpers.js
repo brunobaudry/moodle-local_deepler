@@ -710,6 +710,18 @@ define(['core/modal',
             );
         }
     };
+    const disableSaveButton = ()=>{
+        saveAllBtn.disabled = true;
+    };
+    const enableSaveButton = ()=>{
+        saveAllBtn.disabled = false;
+    };
+    // Const disableSelectAllButton = ()=>{
+    //     selectAllBtn.disabled = true;
+    // };
+    // const enableSelectAllButton = ()=>{
+    //     selectAllBtn.disabled = true;
+    // };
     const registerUI = () => {
         if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesviewerPage)) {
             glossaryDetailViewr = document.querySelector(Selectors.glossary.entriesviewerPage);
@@ -729,7 +741,8 @@ define(['core/modal',
         resizeEditors();
         doHideiframes();
         toggleAutotranslateButton();
-        saveAllBtn.disabled = true;
+        // SaveAllBtn.disabled = true;
+        disableSaveButton();
         selectAllBtn.disabled = config.targetlang === '';
         checkboxes.forEach((node) => {
             node.disabled = selectAllBtn.disabled;
@@ -738,12 +751,12 @@ define(['core/modal',
     };
     return {
         ON_STATUS_CHANGED: ON_STATUS_CHANGED,
-        saveAllBtn: saveAllBtn,
-        selectAllBtn: selectAllBtn,
         backToBase: backToBase,
         countWordAndChar: countWordAndChar,
         dbErrorModal: dbErrorModal,
         dbErrorPartialModal: dbErrorPartialModal,
+        disableSaveButton: disableSaveButton,
+        enableSaveButton: enableSaveButton,
         debouncedShowRows: debouncedShowRows,
         deeplErrorModal: deeplErrorModal,
         doHideiframes: doHideiframes,

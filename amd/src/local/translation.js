@@ -306,7 +306,7 @@ define([
                     Events.emit(ON_REPHRASE_FAILED, tr.error);
                 }
             });
-             Events.emit(ON_TRANSLATION_DONE);
+            Events.emit(ON_TRANSLATION_DONE);
         };
         /**
          * When translation failed.
