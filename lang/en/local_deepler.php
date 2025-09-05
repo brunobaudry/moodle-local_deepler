@@ -36,7 +36,7 @@ $string['breadcrumblength'] = 'Max length of breadcrumb\'s sub';
 $string['breadcrumblength_desc'] =
         'Set it to limit the size of the breadcrumb\'s subs. Set it to zero should you want no limiting.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
-$string['canttranslatesame'] = 'Both languages are the same:';
+
 $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
         'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
@@ -443,3 +443,5 @@ $string['writingstyleacademic'] = 'Academic writing style';
 $string['writingstylebusiness'] = 'Business writing style';
 $string['writingstylecasual'] = 'Casual writing style';
 $string['writingstylesimple'] = 'Simple writing style';
+// Deprecated since local_deepler v1.9.8
+$string['canttranslatesame'] = 'Both languages are the same:';

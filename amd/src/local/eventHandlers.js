@@ -20,17 +20,26 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['translation',
-        'api', 'customevents', 'selectors',
-        'editor_tiny/loader', 'editor_tiny/editor',
-        'uiHelpers',
-    'core/log'
+define([
+        'core/log',
+        './utils',
+        './translation',
+        './api',
+        './customevents',
+        './selectors',
+        './uiHelpers',
+        './settings'
     ],
-    (Translation,
-     Api, Events, Selectors,
-     TinyMCEinit, TinyMCE,
+    (
+     Log,
+     Utils,
+     Translation,
+     Api,
+     Events,
+     Selectors,
      UI,
-     Log)=>{
+     Settings
+    )=>{
         let config = {};
         let filterTimeout;
     /**
@@ -50,6 +59,7 @@ define(['translation',
         Events.on(Translation.ON_DB_FAILED, onDBFailed);
         Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
         Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
+        Events.on(UI.ON_STATUS_CHANGED, onIconStatusChanged);
         Events.on(Api.GLOSSARY_DB_ALL_FAILED, onGlossaryDbAllfailed);
         Events.on(Api.GLOSSARY_DB_FAILED, onGlossaryDbfailed);
         Events.on(Api.GLOSSARY_DB_SUCCESS, onGlossaryDbSuccess);
@@ -59,36 +69,7 @@ define(['translation',
 
     const handleFocusEvent = (e)=>{
         if (e.target.closest(Selectors.editors.targetarea)) {
-            if (UI.getIconStatus(e.target.id.replace('tiny_', '')) === Selectors.statuses.tosave) {
-                const options = {
-                    subdirs: false,
-                    maxbytes: 10240,
-                    maxfiles: 0,
-                    noclean: true,
-                    trusttext: true,
-                    // eslint-disable-next-line camelcase
-                    enable_filemanagement: false,
-                    autosave: false,
-                    removeorphaneddrafts: true,
-                    plugins: []
-                };
-                // eslint-disable-next-line promise/catch-or-return
-                TinyMCEinit.getTinyMCE().then(
-                    // eslint-disable-next-line promise/always-return
-                    ()=>{
-                        // eslint-disable-next-line promise/no-nesting
-                        TinyMCE.setupForTarget(e.target, options)
-                            // eslint-disable-next-line promise/always-return
-                            .then(()=>{
-                                Log.info('tiny loaded for ' + e.target.id);
-                            })
-                            .catch((r)=>{
-                                Log.error(r);
-                            });
-                    }
-                );
-            }
-
+            UI.wrapTinyOnTarget(e.target);
         }
     };
     /**
@@ -101,20 +82,17 @@ define(['translation',
             onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
         }
         if (e.target.closest(Selectors.actions.autoTranslateBtn)) {
-            if ((config.isfree && config.deeplsourcelang === config.targetlang) || config.targetlang === undefined) {
-                showModal('Cannot call deepl', `<p>${langstrings.uistrings.canttranslatesame} ${config.targetlang}</p>`);
-            } else {
-                callDeeplServices();
-            }
+            callDeeplServices();
         }
         if (e.target.closest(Selectors.actions.selectAllBtn)) {
-            toggleAllCheckboxes(e);
+            // Here.
+            UI.toggleAllCheckboxes(e.target.checked);
         }
         if (e.target.closest(Selectors.actions.tothetop)) {
             UI.backToBase();
         }
         if (e.target.closest(Selectors.actions.checkBoxes)) {
-            toggleAutotranslateButton();
+            UI.toggleAutotranslateButton();
         }
         if (e.target.closest(Selectors.actions.saveAll)) {
             saveTranslations();
@@ -124,33 +102,82 @@ define(['translation',
         }
         if (e.target.closest(Selectors.glossary.entriesviewerPage)) {
             Log.info('CLICK');
-            Log.info(settingsUI[Selectors.deepl.glossaryId].value);
+            Log.info(Settings.getValue(Selectors.deepl.glossaryId));
             Api.getGlossariesEntries(
-                settingsUI[Selectors.deepl.glossaryId].value,
+                Settings.getValue(Selectors.deepl.glossaryId),
                 config.deeplsourcelang,
                 config.targetlang
             );
         }
     };
+        /**
+         * Launch deepl services.
+         */
+        const callDeeplServices = () => {
+            UI.launchTranslatingModal();
+            const keys = [];
+            const [cookie, settings] = Settings.prepareSettingsAndCookieValues();
+            UI.saveAllBtn.disabled = false;
+            Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes)
+                .forEach((ckBox) => {
+                    const key = ckBox.getAttribute("data-key");
+                    const sourceText = Utils.domQuery(Selectors.sourcetexts.keys, key);
+                    const editor = UI.findEditor(key);
+                    Translation.initTempForKey(
+                        key, editor,
+                        sourceText.getAttribute("data-sourcetext-raw"),
+                        sourceText.getAttribute("data-filedtext-raw"),
+                        Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key).value
+                    );
+                    keys.push(key);
+                });
+            const newCookiename = Utils.COOKIE_PREFIX_NEW + config.currentlang + config.targetlang + config.courseid;
+            Utils.setEncodedCookie(newCookiename, JSON.stringify(cookie), config.cookieduration);
+            Translation.callTranslations(keys, config, settings);
+        };
     /**
      * Event listener for change events.
      * @param {event} e
      */
     const handleChangeEvent = (e) => {
         if (e.target.closest(Selectors.actions.hideiframes)) {
-            doHideiframes(hideiframes.checked);
+            UI.doHideiframes();
         }
         if (e.target.closest(Selectors.actions.targetSwitcher)) {
-            switchTarget(e);
+            // SwitchTarget(e);
+            Utils.switchLocation(
+                {
+                    key: 'target_lang',
+                    value: e.target.value.replace(config.rephrasesymbol, ''),
+                }
+            );
         }
         if (e.target.closest(Selectors.actions.sectionSwitcher)) {
-            switchSection(e);
+            // SwitchSection(e);
+            Utils.switchLocation(
+                {
+                    key: 'section_id',
+                    value: e.target.value,
+                }, 'activity_id'
+            );
         }
         if (e.target.closest(Selectors.actions.moduleSwitcher)) {
-            switchModules(e);
+            // SwitchModules(e);
+            Utils.switchLocation(
+                {
+                    key: 'activity_id',
+                    value: e.target.value,
+                }
+            );
         }
         if (e.target.closest(Selectors.actions.sourceSwitcher)) {
-            switchSource(e);
+            // SwitchSource(e);
+            Utils.switchLocation(
+                {
+                    key: 'lang',
+                    value: e.target.value,
+                }
+            );
         }
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
@@ -159,34 +186,32 @@ define(['translation',
             onSourceChange(e);
         }
         if (e.target.closest(Selectors.deepl.glossaryId)) {
-            if (settingsUI[Selectors.deepl.glossaryId].value !== '') {
-                glossaryDetailViewr.style.display = 'block';
-            } else {
-                glossaryDetailViewr.style.display = 'none';
-            }
+            UI.toggleGlossaryDetails(Settings.getValue(Selectors.deepl.glossaryId));
         }
         clearTimeout(filterTimeout);
         filterTimeout = setTimeout(() => {
             if (e.target.closest(Selectors.actions.showUpdated)) {
-                debouncedShowRows();
+                UI.debouncedShowRows();
             }
             if (e.target.closest(Selectors.actions.showNeedUpdate)) {
-                debouncedShowRows();
+                UI.debouncedShowRows();
             }
             if (e.target.closest(Selectors.actions.showHidden)) {
-                debouncedShowRows();
+                UI.debouncedShowRows();
             }
             }, 30);
     };
-
+    const onIconStatusChanged = (key)=>{
+        // Reset the translation.
+        Translation.initTemp(key);
+    };
     /**
      * Event Listener when DeepL API call failed.
      * @param {string} error
      */
     const onTranslationFailed = (error) => {
-        let s = langstrings.uistrings.deeplapiexception;
         onTranslationDone();
-        UI.showModal(s, error, 'Alert');
+        UI.deeplErrorModal(error);
     };
     /**
      * Event Listener when DeepL API call finished.
@@ -201,7 +226,7 @@ define(['translation',
      */
     const onItemTranslated = (key) => {
         // Add saved indicator.
-        setIconStatus(key, Selectors.statuses.tosave, true);
+        UI.setIconStatus(key, Selectors.statuses.tosave, true);
     };
     /**
      * Displays error message and icon.
@@ -215,15 +240,8 @@ define(['translation',
         Log.warn(error);
         const editor = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
         editor.classList.add("local_deepler__error");
-        setIconStatus(key, Selectors.statuses.failed);
-        // Display granular error messages.
-        const indexOfSET = error.indexOf("Data too long");// Probably a text too long for the field if not -1.
-        if (indexOfSET === -1) {
-            showErrorMessageForEditor(key, error);
-        } else {
-            let s = langstrings.uistrings.errortoolong;
-            showErrorMessageForEditor(key, `${error.substring(0, error.indexOf('WHERE id=?'))} ${s}`);
-        }
+        UI.setIconStatus(key, Selectors.statuses.failed);
+        UI.showErrorMessageForEditor(key, error);
     };
     /**
      * Listener for individual source change.
@@ -243,8 +261,9 @@ define(['translation',
     const onItemChecked = (e) => {
         // Check/uncheck checkboxes changes the charcount and icon status.
         if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
-            toggleStatus(e.target.getAttribute('data-key'), e.target.checked);
-            countWordAndChar();
+            const key = e.target.getAttribute('data-key');
+            UI.toggleStatus(key, e.target.checked, Translation.translated(key));
+            UI.countWordAndChar();
         }
     };
     /**
@@ -254,23 +273,17 @@ define(['translation',
      * @param {int} status
      */
     const onDBFailed = (error, status) => {
-        if (saveAllModal !== null && saveAllModal.isVisible) {
-            saveAllModal.hide();
-        }
-        showModal(`${errordbtitle} ${status}`, `DB failed to save translations. ${error}`, 'Alert');
+        UI.hideModal();
+        UI.dbErrorModal(error, status);
     };
     /**
      *
      * @param {array} errors
      */
     const onDbSavedSuccess = (errors) => {
-        if (saveAllModal !== null && saveAllModal.isVisible) {
-            saveAllModal.hide();
-        }
+        UI.hideModal();
         if (errors.length > 0) {
-            let s = langstrings.uistrings.errordbpartial;
-            s = s.replace('{$a}', errors.length);
-            showModal(errordbtitle, s, 'Alert');
+            UI.dbErrorPartialModal(errors.length);
         }
     };
 
@@ -315,7 +328,7 @@ define(['translation',
         Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key)
             .classList.add("local_deepler__success");
         // Add saved indicator.
-        setIconStatus(key, Selectors.statuses.success);
+        UI.setIconStatus(key, Selectors.statuses.success, Translation.translated(key));
         // Replace text in the multilang textarea.
         const multilangTextarea = Utils.domQuery(Selectors.editors.multiples.textAreas, key);
         multilangTextarea.innerHTML = savedText;
@@ -329,13 +342,57 @@ define(['translation',
             if (multilangPill.classList.contains("disabled")) {
                 multilangPill.classList.remove('disabled');
             }
-            setIconStatus(key, Selectors.statuses.saved);
+            UI.setIconStatus(key, Selectors.statuses.saved, Translation.translated(key));
         });
+    };
+        /**
+         * @returns void
+         */
+        const saveTranslations = () => {
+            const selectedCheckboxes = Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes);
+            if (selectedCheckboxes.length === 0) {
+                return;
+            }
+            // Prepare the UI for the save process.
+            UI.saveAllBtn.disabled = true;
+            UI.launchSaveAllModal();
+/*            LaunchModal({
+                title: langstrings.uistrings.saveallmodaltitle,
+                body: langstrings.uistrings.saveallmodalbody,
+            }).then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
+                Log.error(reason);
+            });*/
+            // Prepare the data to be saved.
+            const data = [];
+            const keys = Array.from(selectedCheckboxes).map((e) => e.dataset.key);
+            keys.forEach((key) => {
+                    // @todo MDL-0000: should not rely on UI (add a flag in temptranslations object) .
+                    if (UI.getIconStatus(key) === Selectors.statuses.tosave) {
+                        UI.hideErrorMessage(key);
+                        const dbItem = Utils.prepareDBitem(key, Selectors.editors.multiples.editorsWithKey, config.courseid);
+                        data.push(dbItem);
+                    }
+                }
+            );
+            Translation.saveTranslations(data, config.userPrefs === 'textarea');
+        };
+    /**
+     * Saving a single translation to DB.
+     * @param {Event} e
+     */
+    const saveSingleTranslation = (e)=> {
+        const key = e.target.closest(Selectors.actions.validatorsBtns).dataset.keyValidator;
+        if (UI.getIconStatus(key) === Selectors.statuses.tosave) {
+            UI.hideErrorMessage(key);
+            const dbItem = Utils.prepareDBitem(key, Selectors.editors.multiples.editorsWithKey, config.courseid);
+            Translation.saveTranslations([dbItem], config.userPrefs === 'textarea');
+        }
     };
     const init = (cfg) => {
         config = cfg;
+        registerEventListeners();
     };
     return {
-        registerEventListeners: registerEventListeners
+        init: init
     };
 });

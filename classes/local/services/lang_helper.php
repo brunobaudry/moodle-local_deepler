@@ -391,7 +391,6 @@ class lang_helper {
         $config->uistrings->translatemodaltitle = get_string('translate:modal:title', 'local_deepler');
         $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
-        $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
         return json_encode($config);
     }
 

@@ -52,6 +52,15 @@ define([], () => {
         return el.querySelectorAll(q);
     };
     /**
+     * Fetch the parent row of the translation.
+     * @param {Node} node
+     * @param {string} selector
+     * @returns {*}
+     */
+    const getParentRow = (node, selector) => {
+        return node.closest(replaceKey(selector, node.getAttribute('data-key')));
+    };
+    /**
      * Debounce for performance
      *
      * @param {function} fn
@@ -232,22 +241,54 @@ define([], () => {
         return trimmed + ellipsis;
     };
     /**
+     *
+     * @param {string} key
+     * @param {string} selector
+     * @param {int} courseId
+     * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
+     */
+    const prepareDBitem = (key, selector, courseId) => {
+        const element = domQuery(selector, key);
+        return {
+            key: key,
+            courseid: courseId,
+            id: parseInt(element.getAttribute("data-id")),
+            tid: element.getAttribute("data-tid"),
+            table: element.getAttribute("data-table"),
+            field: element.getAttribute("data-field"),
+            cmid: element.getAttribute("data-cmid"),
+        };
+    };
+    const switchLocation = (addParam, removeParam)=>{
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set(addParam.key, addParam.value.trim());
+        if (removeParam && removeParam !== '' && searchParams.has(removeParam)) {
+            searchParams.delete(removeParam);
+        }
+        window.location = url.toString();
+    };
+    /**
      * Api to be used by the other modules.
      */
     return {
+        debounce: debounce,
+        decodeHTML: decodeHTML,
         domQuery: domQuery,
         domQueryAll: domQueryAll,
-        debounce: debounce,
-        smartTruncate: smartTruncate,
         getCookie: getCookie,
         getEncodedCookie: getEncodedCookie,
+        getParentRow: getParentRow,
+        fromBase64: fromBase64,
+        keyidToKey: keyidToKey,
+        prepareDBitem: prepareDBitem,
+        replaceKey: replaceKey,
         setCookie: setCookie,
         setEncodedCookie: setEncodedCookie,
-        replaceKey: replaceKey,
-        keyidToKey: keyidToKey,
-        decodeHTML: decodeHTML,
+        smartTruncate: smartTruncate,
         stripHTMLTags: stripHTMLTags,
-        fromBase64: fromBase64,
+        switchLocation: switchLocation,
         toJsonArray: toJsonArray
     };
 });

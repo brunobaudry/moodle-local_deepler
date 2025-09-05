@@ -76,10 +76,11 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
                 activeRequests++;
                 ajaxStopFired = false;
                 this.addEventListener('readystatechange', function() {
-                    Log.log('readystatechange', this.readyState);
+                    // Log.log(this.readyState);
+                    // Log.log(this.readyState === 4);
                     if (this.readyState === 4) {
+                        window.console.log('readystatechange', activeRequests, ajaxStopFired);
                         activeRequests--;
-                        Log.log('readystatechange', activeRequests, ajaxStopFired);
                         if (activeRequests === 0 && !ajaxStopFired) {
                             ajaxStopFired = true;
                             onAjaxStop();
@@ -118,6 +119,7 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
         if (!useXMLHttpRequestTracking()) {
             useJQueryTracking();
         }
+        // Window.addEventListener('load', Log.log('Deepler loaded'));
         window.addEventListener('load', Main.init(cfg));
     };
     return {

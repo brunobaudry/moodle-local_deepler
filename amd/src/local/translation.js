@@ -106,10 +106,10 @@ define([
         /**
          * Save translations to the DB.
          * @param {array} items
-         * @param {object} config
+         * @param {bool} userEditorIsTextarea
          */
-        const saveTranslations = (items, config) => {
-            const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
+        const saveTranslations = (items, userEditorIsTextarea) => {
+            const data = items.map(item => prepareDbUpdateItem(item, userEditorIsTextarea));
             Log.debug(`translation/x/saveTranslations::data`);
             Log.debug(data);
             Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
@@ -367,12 +367,6 @@ define([
             return se;
         };
         /**
-         * Check if the item is translatable.
-         */
-        const isTranslatable = () =>{
-            return targetLang !== '';
-        };
-        /**
          * Checks if translation is done.
          *
          * @param {string} key
@@ -413,7 +407,6 @@ define([
             initTempForKey: initTempForKey,
             initTemp: initTemp,
             setMainLangs: setMainLangs,
-            isTranslatable: isTranslatable,
             translated: translated,
             ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
             ON_DB_FAILED: ON_DB_FAILED,
