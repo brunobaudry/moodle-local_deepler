@@ -37,6 +37,7 @@ define(['core/modal',
         Selectors,
         Events,
         Translation)=>{
+    // Let preloader;
     let config = {};
     let format = new Intl.NumberFormat();
     let autotranslateButton = {};
@@ -48,6 +49,7 @@ define(['core/modal',
     let allDataFormatOne = [];
     let checkboxes = [];
     let glossaryDetailViewr;
+    let checkBoxParentMap = new Map();
     const optionsForTiny = {
         subdirs: false,
         maxbytes: 10240,
@@ -301,14 +303,110 @@ define(['core/modal',
             "charNumWithOutSpace": trimmedVal.replace(/\s+/g, '').length
         };
     };
+
     /**
      * Factory to display process' statuses for each item.
      *
      * @param {String} key
      * @param {Boolean} checked
      * @param {Boolean} translated
+     * @todo MDL-0000 optimize
      */
     const toggleStatus = (key, checked, translated) => {
+        const icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
+        const status = icon?.dataset.status;
+
+        if (!status) {
+            return;
+        }
+
+        switch (status) {
+            case Selectors.statuses.wait:
+                Events.emit(ON_STATUS_CHANGED, key);
+                if (checked) {
+                    setIconElementStatus(icon, Selectors.statuses.totranslate);
+                }
+                break;
+
+            case Selectors.statuses.totranslate:
+                if (checked && translated) {
+                    setIconElementStatus(icon, Selectors.statuses.tosave, true);
+                } else {
+                    setIconElementStatus(icon, Selectors.statuses.wait);
+                }
+                break;
+
+            case Selectors.statuses.tosave:
+                if (!checked) {
+                    setIconElementStatus(icon, Selectors.statuses.totranslate);
+                }
+                break;
+
+            case Selectors.statuses.failed:
+                if (checked) {
+                    setIconElementStatus(icon, Selectors.statuses.totranslate);
+                }
+                break;
+
+            case Selectors.statuses.success:
+                break;
+
+            case Selectors.statuses.saved:
+                if (checked) {
+                    setIconElementStatus(icon, Selectors.statuses.totranslate);
+                }
+                Events.emit(ON_STATUS_CHANGED, key);
+                break;
+        }
+    };
+    /**
+     * Change translation process status icon.
+     *
+     * @param {element} icon
+     * @param {string} status
+     * @param {boolean} isBtn
+     * @todo MDL-0000 optimize
+     */
+    const setIconElementStatus = (icon, status = Selectors.statuses.wait, isBtn = false) => {
+        if (!icon) {
+         return;
+        }
+
+        const classList = icon.classList;
+
+        // Update classes only if needed
+        if (isBtn) {
+            if (!classList.contains('btn')) {
+                classList.add('btn', 'btn-outline-secondary');
+            }
+            if (classList.contains('disable')) {
+                classList.remove('disable');
+            }
+        } else {
+            if (!classList.contains('disable')) {
+                classList.add('disable');
+            }
+            if (classList.contains('btn')) {
+                classList.remove('btn', 'btn-outline-secondary');
+            }
+        }
+
+        // Update attributes only if changed
+        if (icon.getAttribute('role') !== (isBtn ? 'button' : 'status')) {
+            icon.setAttribute('role', isBtn ? 'button' : 'status');
+        }
+
+        if (icon.dataset.status !== status) {
+            icon.setAttribute('data-status', status);
+        }
+
+        const title = langstrings.statusstrings[status.replace('local_deepler/', '')];
+        if (icon.getAttribute('title') !== title) {
+            icon.setAttribute('title', title);
+        }
+    };
+
+   /* Const toggleStatus = (key, checked, translated) => {
         const status = Utils.domQuery(Selectors.actions.validatorBtn, key).dataset.status;
         switch (status) {
             case Selectors.statuses.wait :
@@ -318,7 +416,6 @@ define(['core/modal',
                 }
                 break;
             case Selectors.statuses.totranslate :
-                // If (checked && Translation.translated[key]) {
                 if (checked && translated) {
                     setIconStatus(key, Selectors.statuses.tosave, true);
                 } else {
@@ -342,29 +439,14 @@ define(['core/modal',
                     setIconStatus(key, Selectors.statuses.totranslate);
                 }
                 Events.emit(ON_STATUS_CHANGED, key);
-
                 break;
         }
-    };
-    /**
-     * Get the translation row status icon.
-     *
-     * @param {string} key
-     * @returns {*}
-     */
-    const getIconStatus = (key)=> {
-        return Utils.domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
-    };
-    /**
-     * Change translation process status icon.
-     *
-     * @param {string} key
-     * @param {string} status
-     * @param {boolean} isBtn
-     */
+    };*/
+
     const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
         let icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
-        if (!isBtn) {
+        setIconElementStatus(icon, status, isBtn);
+       /* If (!isBtn) {
             if (!icon.classList.contains('disable')) {
                 icon.classList.add('disable');
             }
@@ -383,7 +465,16 @@ define(['core/modal',
         }
         icon.setAttribute('role', isBtn ? 'button' : 'status');
         icon.setAttribute('data-status', status);
-        icon.setAttribute('title', langstrings.statusstrings[status.replace('local_deepler/', '')]);
+        icon.setAttribute('title', langstrings.statusstrings[status.replace('local_deepler/', '')]);*/
+    };
+    /**
+     * Get the translation row status icon.
+     *
+     * @param {string} key
+     * @returns {*}
+     */
+    const getIconStatus = (key)=> {
+        return Utils.domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
@@ -395,7 +486,7 @@ define(['core/modal',
         await saveAllModal.show();
     };
     const launchTranslatingModal = ()=>{
-        launchModal(
+        return launchModal(
             {
                 title: langstrings.uistrings.translatemodaltitle,
                 body: langstrings.uistrings.translatemodalbody,
@@ -483,20 +574,23 @@ define(['core/modal',
      * @param {Boolean} checked
      */
     const toggleAllCheckboxes = (checked) => {
-
         const updates = [];
-
         // Prepare all updates without applying immediately.
         checkboxes.forEach(checkbox => {
             // Parent row.
-            const parent = Utils.getParentRow(checkbox, Selectors.sourcetexts.parentrow);
+            let parent;
+            if (!checkBoxParentMap.has(checkbox)) {
+                parent = Utils.getParentRow(checkbox, Selectors.sourcetexts.parentrow);
+                checkBoxParentMap.set(checkbox, parent);
+            } else {
+                parent = checkBoxParentMap.get(checkbox);
+            }
             // If the row is checked, verifiy that the parent is not hidden else do not select.
             const shouldCheck = checked ? !parent.classList.contains('d-none') : false;
             if (checkbox.checked !== shouldCheck) {
                 updates.push({checkbox, shouldCheck});
             }
         });
-
         // Apply updates in the next animation frame, batching DOM writes.
         requestAnimationFrame(() => {
             updates.forEach(({checkbox, shouldCheck}) => {
@@ -504,7 +598,6 @@ define(['core/modal',
                 const key = checkbox.getAttribute('data-key');
                 toggleStatus(key, shouldCheck, Translation.translated(key));
             });
-
             toggleAutotranslateButton();
             countWordAndChar();
         });
@@ -587,6 +680,16 @@ define(['core/modal',
         single.checked = shouldBeChecked;
         toggleStatus(key, false, Translation.translated(key));
     };
+/*    Const togglePreloader = () => {
+        if (preloader?.classList.contains('show') || preloader?.classList.contains('d-block')) {
+            preloader.classList.remove('show', 'd-block');
+            preloader.classList.add('d-none');
+        } else {
+            preloader.classList.remove('d-none');
+            preloader.classList.add('show', 'd-block');
+        }
+    };*/
+
     const wrapTinyOnTarget = (element)=>{
         const status = getIconStatus(element.id.replace('tiny_', ''));
         if (status === Selectors.statuses.tosave) {
@@ -619,6 +722,7 @@ define(['core/modal',
         langstrings = JSON.parse(Utils.domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
     };
     const init = (cfg) => {
+        // Preloader = pr;
         config = cfg;
         registerUI();
         // Make the main UI adjustments

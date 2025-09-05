@@ -281,6 +281,7 @@ define([
      * @param {array} errors
      */
     const onDbSavedSuccess = (errors) => {
+        UI.saveAllBtn.disabled = false;
         UI.hideModal();
         if (errors.length > 0) {
             UI.dbErrorPartialModal(errors.length);

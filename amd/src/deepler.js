@@ -42,12 +42,12 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
 
         let activeRequests = 0;
         let ajaxStopFired = false;
+        const preloader = document.getElementById('local_deepler_preloaderModal');
         /**
          * Remove preloader.
          */
         const onAjaxStop = ()=> {
             // This runs only once when all AJAX requests are finished after a batch
-            const preloader = document.getElementById('local_deepler_preloaderModal');
             if (preloader) {
                 preloader.classList.remove('show', 'd-block');
                 preloader.classList.add('d-none');
@@ -79,7 +79,7 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
                     // Log.log(this.readyState);
                     // Log.log(this.readyState === 4);
                     if (this.readyState === 4) {
-                        window.console.log('readystatechange', activeRequests, ajaxStopFired);
+                        Log.log('readystatechange', activeRequests, ajaxStopFired);
                         activeRequests--;
                         if (activeRequests === 0 && !ajaxStopFired) {
                             ajaxStopFired = true;
