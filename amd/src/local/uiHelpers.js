@@ -315,6 +315,7 @@ define(['core/modal',
     const toggleStatus = (key, checked, translated) => {
         const icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
         const status = icon?.dataset.status;
+        let disaptchStatus = Selectors.statuses.wait;
 
         if (!status) {
             return;
@@ -322,15 +323,17 @@ define(['core/modal',
 
         switch (status) {
             case Selectors.statuses.wait:
-                Events.emit(ON_STATUS_CHANGED, key);
+                // Events.emit(ON_STATUS_CHANGED, key );
                 if (checked) {
                     setIconElementStatus(icon, Selectors.statuses.totranslate);
+                    disaptchStatus = Selectors.statuses.totranslate;
                 }
                 break;
 
             case Selectors.statuses.totranslate:
                 if (checked && translated) {
                     setIconElementStatus(icon, Selectors.statuses.tosave, true);
+                    disaptchStatus = Selectors.statuses.tosave;
                 } else {
                     setIconElementStatus(icon, Selectors.statuses.wait);
                 }
@@ -339,25 +342,29 @@ define(['core/modal',
             case Selectors.statuses.tosave:
                 if (!checked) {
                     setIconElementStatus(icon, Selectors.statuses.totranslate);
+                    disaptchStatus = Selectors.statuses.totranslate;
                 }
                 break;
 
             case Selectors.statuses.failed:
                 if (checked) {
                     setIconElementStatus(icon, Selectors.statuses.totranslate);
+                    disaptchStatus = Selectors.statuses.totranslate;
                 }
                 break;
 
             case Selectors.statuses.success:
+                disaptchStatus = Selectors.statuses.success;
                 break;
 
             case Selectors.statuses.saved:
                 if (checked) {
                     setIconElementStatus(icon, Selectors.statuses.totranslate);
+                    disaptchStatus = Selectors.statuses.totranslate;
                 }
-                Events.emit(ON_STATUS_CHANGED, key);
                 break;
         }
+        Events.emit(ON_STATUS_CHANGED, key, disaptchStatus);
     };
     /**
      * Change translation process status icon.
@@ -406,66 +413,10 @@ define(['core/modal',
         }
     };
 
-   /* Const toggleStatus = (key, checked, translated) => {
-        const status = Utils.domQuery(Selectors.actions.validatorBtn, key).dataset.status;
-        switch (status) {
-            case Selectors.statuses.wait :
-                Events.emit(ON_STATUS_CHANGED, key);
-                if (checked) {
-                    setIconStatus(key, Selectors.statuses.totranslate);
-                }
-                break;
-            case Selectors.statuses.totranslate :
-                if (checked && translated) {
-                    setIconStatus(key, Selectors.statuses.tosave, true);
-                } else {
-                    setIconStatus(key, Selectors.statuses.wait);
-                }
-                break;
-            case Selectors.statuses.tosave :
-                if (!checked) {
-                    setIconStatus(key, Selectors.statuses.totranslate);
-                }
-                break;
-            case Selectors.statuses.failed :
-                if (checked) {
-                    setIconStatus(key, Selectors.statuses.totranslate);
-                }
-                break;
-            case Selectors.statuses.success :
-                break;
-            case Selectors.statuses.saved :
-                if (checked) {
-                    setIconStatus(key, Selectors.statuses.totranslate);
-                }
-                Events.emit(ON_STATUS_CHANGED, key);
-                break;
-        }
-    };*/
 
     const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
         let icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
         setIconElementStatus(icon, status, isBtn);
-       /* If (!isBtn) {
-            if (!icon.classList.contains('disable')) {
-                icon.classList.add('disable');
-            }
-            if (icon.classList.contains('btn')) {
-                icon.classList.remove('btn');
-                icon.classList.remove('btn-outline-secondary');
-            }
-        } else {
-            if (!icon.classList.contains('btn')) {
-                icon.classList.add('btn');
-                icon.classList.add('btn-outline-secondary');
-            }
-            if (icon.classList.contains('disable')) {
-                icon.classList.remove('disable');
-            }
-        }
-        icon.setAttribute('role', isBtn ? 'button' : 'status');
-        icon.setAttribute('data-status', status);
-        icon.setAttribute('title', langstrings.statusstrings[status.replace('local_deepler/', '')]);*/
     };
     /**
      * Get the translation row status icon.

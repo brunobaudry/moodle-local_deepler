@@ -1,0 +1,140 @@
+<html>
+
+<script>
+    // alert('yo');
+window.addEventListener('load',(e)=>{
+    console.info('loaded',e.target);
+    const logObject = (o)=>{
+        const select = o?.querySelector('select[data-action="local_deepler/sourceselect"]');
+        const selectedValue = select?.value;
+
+        console.log(o.getAttribute('data-row-id'));
+        console.log(o.getAttribute('data-table'));
+        console.log(o.getAttribute('data-cmid'));
+        console.log(o.getAttribute('data-field'));
+        console.log(o.getAttribute('data-status'));
+        console.log(o.getAttribute('data-id'));
+        console.log(selectedValue);
+    }
+    document.body.addEventListener('mouseup', (e) => {
+        console.info('click', e.target);
+        const checkbox = e.target.closest('input[type="checkbox"][data-action="local_deepler/checkbox"]');
+        const rowContainer = e.target.closest('[data-row-id]');
+        if (rowContainer) {
+            // const rowId = rowContainer.getAttribute('data-row-id');
+            // handle event
+            logObject(rowContainer);
+            // console.log(e.target.getAttribute('data-key'), rowId);
+        }
+    });
+    /*document.body.addEventListener('change', (e) => {
+        const changeFilter = [
+            '',
+            ''
+        ];
+        console.info('change', e.target);
+        const row = e.target.closest('[data-row-id]');
+        if(row)
+        {
+            logObject(row);
+        }
+            // const checkbox = e.target.closest('input[type="checkbox"][data-action="local_deepler/checkbox"]');
+        // const dd = e.target.closest('select[data-action="local_deepler/sourceselect"]');
+        // const rowContainer = dd?.closest('[data-row-id]');
+        // if (rowContainer) {
+        //     logObject(rowContainer);
+        //     // const rowId = rowContainer.getAttribute('data-row-id');
+        //     // handle event
+        //     // console.log(e.target.getAttribute('data-key'), rowId);
+        // }
+    });*/
+})
+
+
+
+</script>
+<body>
+
+
+<div data-row-id="forum[20][intro][271]"
+     data-table="forum"
+     data-cmid="271"
+     data-id="20"
+     data-field="intro"
+     data-status="needsupdate"
+    data-process="wait">
+    <!--    col1 -->
+    <div class="local_deepler__selectorbox col-1">
+<!--        <small class="local_deepler__activityfield lh-sm">Description</small><br>-->
+        <span id="previousTranslationStatus" class="badge badge-pill badge-danger">&nbsp;&nbsp;</span>
+        <input type="checkbox" data-action="local_deepler/checkbox">
+
+    </div>
+    <!--    col2 -->
+    <div class="local_deepler__source-text col-5" data-key="forum[20][intro][271]">
+        <span id="toggleMultilang" aria-controls="forum-20-intro-271" aria-pressed="false" data-toggle="button" role="button" class="mx-1 p-2 btn btn-sm btn-outline-info ">
+                    <i class="fa fa-language" aria-hidden="true"></i>
+        </span>
+        <select
+                class="custom-select w-auto"
+                data-key="forum[20][intro][271]"
+                data-action="local_deepler/sourceselect">
+            <option value="® de">® de</option>
+            <option value="en" selected="">en</option>
+            <option value="fr">fr</option>
+            <option value="it">it</option>
+        </select>
+        <div class="collapse show"
+             data-sourcetext-key="forum[20][intro][271]"
+             data-sourcetext-raw="PHA+PC9wPgo8cD5WZXJzY2hpZWRlbmUgTmFjaHJpY2h0ZW4gdW5kIEFua8O8bmRpZ3VuZ2VuPC9wPgo8cD48L3A+"
+             data-filedtext-raw="PHA+e21sYW5nIGZyfU5vdXZlbGxlcyBkaXZlcnNlcyBldCBhbm5vbmNlc3ttbGFuZ317bWxhbmcgb3RoZXJ9PC9wPgo8cD5WZXJzY2hpZWRlbmUgTmFjaHJpY2h0ZW4gdW5kIEFua8O8bmRpZ3VuZ2VuPC9wPgo8cD57bWxhbmd9PC9wPg=="><p></p>
+            <p>Verschiedene Nachrichten und Ankündigungen</p>
+
+        </div>
+        <div class="collapse" id="forum-20-intro-271">
+            <div data-key="forum[20][intro][271]" data-action="local_deepler/textarea">
+                <p>{mlang fr}Nouvelles diverses et annonces{mlang}{mlang other}</p>
+                <p>Verschiedene Nachrichten und Ankündigungen</p>
+                <p>{mlang}</p></div>
+        </div>
+    </div>
+    <div class="col-1">
+        <span class="disabled disable"
+              role="btun"
+              aria-disabled="true"
+              title="Not selected">
+            <i class="fa">button</i>
+        </span>
+    </div>
+    <!--    col3 -->
+    <div class="col-5 px-0 local_deepler__translation"
+         data-action="local_deepler/editor"
+         data-key="forum[20][intro][271]"
+         data-table="forum"
+         data-cmid="271"
+         data-id="20"
+         data-field="intro"
+         data-tid="8844">
+        <div
+                class="format-1 border py-2 px-3"
+             id="tiny_forum[20][intro][271]"
+                contenteditable="true"
+                data-format="1"
+                style="height: 172px;">
+        </div>
+
+
+    </div>
+    <!--    status div-->
+    <div class="col-1 text-center">
+        <span class="disabled disable"
+              role="status"
+              data-process='local_deepler/wait'
+              aria-disabled="true"
+              title="Not selected">
+            <i class="fa">button</i>
+        </span>
+    </div>
+</div>
+</body>
+</html>

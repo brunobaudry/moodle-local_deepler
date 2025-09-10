@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use local_deepler\editor\MoodleQuickForm_cteditor;
 use renderable;
 use renderer_base;
 use templatable;
@@ -137,11 +138,12 @@ class row_data extends translate_data implements renderable, templatable {
                 $warnmaxlength = false;
             }
         }
-
+        $cteditor = new MoodleQuickForm_cteditor($key, 'label',);
         return [
                 'badgeclass' => $badgeclass,
                 'buttonclass' => $buttonclass,
                 'cmid' => $this->field->get_cmid(),
+                'cteditor' => $cteditor->toHtml(),
                 'cssclass' => $cssclass,
                 'fieldformat' => $fieldformat,
                 'fieldtranslation' => multilanger::findfieldstring($this->field),

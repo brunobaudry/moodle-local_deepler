@@ -20,7 +20,26 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
+define([
+    // './local/main',
+    'core/log',
+    'jquery',
+        './local/translation',
+        './local/scrollspy',
+        './local/eventHandlers',
+        './local/uiHelpers',
+        './local/settings'
+    ],
+    (
+        // Main,
+     Log,
+     $,
+     Translation,
+     ScrollSpy,
+     EventHandler,
+     UI,
+     Settings
+     ) => {
 // Define(['./local/main', 'core/log', 'jquery'], (UI, Log, $) => {
     const debug = {
         NONE: 0, // Level 5 silent.
@@ -29,7 +48,25 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
         ALL: 30719, // Level 1 no trace.
         DEVELOPER: 32767 // Level 0 all.
     };
+    let config;
+        const launch = (cfg) => {
+            ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
+                {
+                    highestLevel: 3,
+                    fadingDistance: 60,
+                    offsetEndOfScope: 1,
+                    offsetTop: 100,
+                    crumbsmaxlen: cfg.crumbsmaxlen
+                }
+            );
+            Settings.init(cfg);
+            Translation.init(cfg);
+            UI.init(cfg);
+            EventHandler.init(cfg);
+            Log.info(cfg);
+        };
     const init = (cfg) => {
+        config = cfg;
         const levelMap = {
             [debug.NONE]: 5,
             [debug.MINIMAL]: 3,
@@ -37,7 +74,7 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
             [debug.ALL]: 1,
             [debug.DEVELOPER]: 0
         };
-        const level = levelMap[cfg.debug] ?? 5;
+        const level = levelMap[config.debug] ?? 5;
         Log.setConfig({level});
 
         let activeRequests = 0;
@@ -119,8 +156,10 @@ define(['./local/main', 'core/log', 'jquery'], (Main, Log, $) => {
         if (!useXMLHttpRequestTracking()) {
             useJQueryTracking();
         }
-        // Window.addEventListener('load', Log.log('Deepler loaded'));
-        window.addEventListener('load', Main.init(cfg));
+        // Window.addEventListener('load', Main.init(cfg));
+        window.addEventListener('load',
+            launch(cfg)
+        );
     };
     return {
         init: init

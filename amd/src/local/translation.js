@@ -221,7 +221,7 @@ define([
             return {
                 text: tempTranslations[key].source,
                 // eslint-disable-next-line camelcase
-                source_lang: tempTranslations[key].sourceLang,
+                    source_lang: tempTranslations[key].sourceLang,
                 key: key
             };
         };
@@ -385,6 +385,7 @@ define([
             Log.debug(key);
             Log.debug(tempTranslations[key]);
         };
+
         /**
          * IOne to start them all.
          *

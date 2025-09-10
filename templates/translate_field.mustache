@@ -132,7 +132,6 @@
                    data-action="local_deepler/checkbox"
                    disabled="">
         {{/iseditable}}
-
     </div>
 <!--    col2 -->
     <div class="col-5 px-0 pr-5 local_deepler__source-text"
@@ -191,16 +190,8 @@
             {{/plaintextinput}}
 
             {{^plaintextinput}}
-                {{#istiny}}
-                    <div class="format-{{fieldformat}} border py-2 px-3"
-                         id="tiny_{{key}}"
-                         contenteditable="true"
-                         data-format="{{fieldformat}}">
-                    </div>
-                {{/istiny}}
-                {{^istiny}}
-                    {{{cteditor}}}
-                {{/istiny}}
+                {{{cteditor}}}
+
             {{/plaintextinput}}
 
 
