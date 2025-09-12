@@ -117,7 +117,9 @@
 <div title="{{rowtitle}}"
      class="{{cssclass}} d-flex align-items-start py-2"
      data-row-id="{{flagandkey}}"
-     data-status="{{status}}">
+     data-status="{{status}}"
+     data-process="{{process}}"
+>
 <!--    col1 -->
     <div class="col-1 px-0 local_deepler__selectorbox">
         <small class="local_deepler__activityfield lh-sm">{{fieldtranslation}}</small><br>
@@ -190,21 +192,29 @@
             {{/plaintextinput}}
 
             {{^plaintextinput}}
-                {{{cteditor}}}
+                {{#istiny}}
+                    <div class="format-{{fieldformat}} border py-2 px-3"
+                         id="tiny_{{key}}"
+                         contenteditable="true"
+                         data-format="{{fieldformat}}">
+                    </div>
+                {{/istiny}}
+                {{^istiny}}
+                    {{{cteditor}}}
+                {{/istiny}}
 
             {{/plaintextinput}}
-
-
         </div>
         <!--    status div-->
+             <!--data-key-validator="{{key}}"-->
         <div class="col-1 text-center"
-             data-key-validator="{{key}}">
-        <span class="disabled"
-              data-status="local_deepler/wait"
-              role="status"
-              aria-disabled="true">
-            <i class="fa"></i>
-        </span>
+             data-action="local_deepler/validator">
+                  <!--data-status="local_deepler/wait"-->
+            <span class="disabled"
+                  role="status"
+                  aria-disabled="true">
+                <i class="fa"></i>
+            </span>
         </div>
     {{/iseditable}}
 </div>

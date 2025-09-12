@@ -59,7 +59,7 @@ define([
             Events.on(Translation.ON_DB_FAILED, onDBFailed);
             Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
             Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
-            Events.on(UI.ON_STATUS_CHANGED, onIconStatusChanged);
+            // Events.on(UI.ON_STATUS_CHANGED, onIconStatusChanged);
             Events.on(Api.GLOSSARY_DB_ALL_FAILED, onGlossaryDbAllfailed);
             Events.on(Api.GLOSSARY_DB_FAILED, onGlossaryDbfailed);
             Events.on(Api.GLOSSARY_DB_SUCCESS, onGlossaryDbSuccess);
@@ -73,7 +73,10 @@ define([
          */
         const handleFocusEvent = (e)=>{
             if (e.target.closest(Selectors.editors.targetarea)) {
-                UI.wrapTinyOnTarget(e.target);
+                window.console.group('handleFocusEvent');
+                window.console.log(e, e.target);
+                window.console.groupEnd();
+                // UI.wrapTinyOnTarget(e.target);
             }
         };
         /**

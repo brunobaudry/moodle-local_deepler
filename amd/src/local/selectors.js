@@ -23,16 +23,17 @@
 export default {
     actions: {
         radioValues: '<RADIO>:checked',
-        validatorsBtns: 'div[data-key-validator]',
-        validator: '[data-key-validator="<KEY>"]',
-        validatorIcon: '[data-key-validator="<KEY>"] i',
-        validatorBtn: '[data-key-validator="<KEY>"] span',
+        validatorsBtns: 'div[data-action="local_deepler/validator"]',
+        // ValidatorsBtns: 'div[data-key-validator]',
+        // Validator: '[data-key-validator="<KEY>"]', // Unused in AMD folder
+        // validatorIcon: '[data-key-validator="<KEY>"] i', // Unused in AMD folder
+        validatorBtn: '[data-process="<KEY>"] [data-action="local_deepler/validator"] span',
         checkBoxes: '[data-action="local_deepler/checkbox"]',
         sourceselect: '[data-action="local_deepler/sourceselect"]',
         selectAllBtn: '[data-action="local_deepler/select-all"]',
         saveAll: '[data-action="local_deepler/saveall-btn"]',
         autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
-        autoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span',
+        // AutoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span', // Unused in AMD folder
         targetSwitcher: '[data-action="local_deepler/target-switcher"]',
         sectionSwitcher: '[data-action="local_deepler/section-switcher"]',
         moduleSwitcher: '[data-action="local_deepler/module-switcher"]',
@@ -44,22 +45,22 @@ export default {
         escapeLatex: '[data-id="local_deepler/latexeascape"]',
         escapePre: '[data-id="local_deepler/preescape"]',
         toggleMultilang: '#toggleMultilang',
-        letsdobutton: '[data-action="local_mlangremover/letsdobutton"]', //
-        removeRadios: '[name="local_mlangremover/removehow"]', //
-        removehow: '[name="local_mlangremover/removehow"]:checked', //
+        // Letsdobutton: '[data-action="local_mlangremover/letsdobutton"]', // Unused in AMD folder
+        // removeRadios: '[name="local_mlangremover/removehow"]', // Unused in AMD folder
+        // removehow: '[name="local_mlangremover/removehow"]:checked', // Unused in AMD folder
         hideiframes: '#local_deepler__hideiframes #hideiframes',
         tothetop: '#local_deepler__tothetop',
     },
     statuses: {
-        sourceTextWarings: '[data-status="sourceTextWarings"]',
+        // SourceTextWarings: '[data-status="sourceTextWarings"]', // Unused in AMD folder
         checkedCheckBoxes: '[data-action="local_deepler/checkbox"]:checked',
         updated: '[data-status="updated"]',
         needsupdate: '[data-status="needsupdate"]',
         hidden: '.local_deeplerinvisible',
-        hiddenForStudentCheckboxes: '.local_deeplerinvisible input[type="checkbox"]',
+        // HiddenForStudentCheckboxes: '.local_deeplerinvisible input[type="checkbox"]', // Unused in AMD folder
         hiddenForStudentRows: '.local_deeplerinvisible [data-row-id]',
-        keys: '[data-status-key="<KEY>"',
-        successMessages: '[data-status="local_deepler/success-message"][data-key="<KEY>"]',
+        // Keys: '[data-status-key="<KEY>"', // Unused in AMD folder
+        // successMessages: '[data-status="local_deepler/success-message"][data-key="<KEY>"]', // Unused in AMD folder
         prevTransStatus: '[data-row-id="<KEY>"] span#previousTranslationStatus',
         multilang: '[data-row-id="<KEY>"] span#toggleMultilang',
         wait: 'local_deepler/wait',
@@ -74,35 +75,35 @@ export default {
         deeplUsage: '#local_deepler__used',
         deeplMax: '#local_deepler__max',
         deeplStatusContainer: '#local_deepler-translate-header-usage',
-        allMLangCkboxes: '#local_mlangremover__mlangtags', //
-        allMLangCkboxesNames: '[name="mlangsselected[]"]', //
-        selectedMLangCkboxes: '#local_mlangremover__mlangtags input[type="checkbox"]:checked', //
-        removetag: '#local_mlangremover__removetag', //
+        // AllMLangCkboxes: '#local_mlangremover__mlangtags', // Unused in AMD folder
+        // allMLangCkboxesNames: '[name="mlangsselected[]"]', // Unused in AMD folder
+        // selectedMLangCkboxes: '#local_mlangremover__mlangtags input[type="checkbox"]:checked', // Unused in AMD folder
+        // removetag: '#local_mlangremover__removetag', // Unused in AMD folder
     },
     editors: {
         targetarea: '[data-format="1"]',
         multiples: {
             checkBoxesWithKey: 'input[type="checkbox"][data-key="<KEY>"]',
             checkBoxesWithKeyHidden: '.local_deepler__form .d-none input[type="checkbox"][data-key]',
-            editorChilds: '[data-action="local_deepler/editor"][data-key="<KEY>"] > *',
+            // EditorChilds: '[data-action="local_deepler/editor"][data-key="<KEY>"] > *', // Unused in AMD folder
             textAreas: '[data-action="local_deepler/textarea"][data-key="<KEY>"]',
             editorsWithKey: '[data-action="local_deepler/editor"][data-key="<KEY>"]',
             contentEditableKeys: '[data-key="<KEY>"] [contenteditable="true"]',
-            textAreasResults: 'div[data-result-key="<KEY>"]', //
+            // TextAreasResults: 'div[data-result-key="<KEY>"]', // Unused in AMD folder
         },
         types: {
             basic: '[data-action="local_deepler/editor"][data-key="<KEY>"] [contenteditable="true"]',
             atto: '[data-action="local_deepler/editor"][data-key="<KEY>"] [contenteditable="true"]',
             other: '[data-action="local_deepler/editor"][data-key="<KEY>"] textarea[name="<KEY>[text]"]',
-            tiny: '[data-action="local_deepler/editor"][data-key="<KEY>"] iframe'
+            // Tiny: '[data-action="local_deepler/editor"][data-key="<KEY>"] iframe' // Unused in AMD folder
         }
     },
     sourcetexts: {
         keys: '[data-sourcetext-key="<KEY>"]',
-        sourcelangs: '[data-key="<KEY>"].local_deepler__source-text select',
+        // Sourcelangs: '[data-key="<KEY>"].local_deepler__source-text select', // Unused in AMD folder
         sourcelangdd: '[data-key="<KEY>"][data-action="local_deepler/sourceselect"]',
-        sourcelang: '#local_deepler__sourcelang strong',
-        targetlang: '#local_deepler__targetlang strong',
+        // Sourcelang: '#local_deepler__sourcelang strong', // Unused in AMD folder
+        // targetlang: '#local_deepler__targetlang strong', // Unused in AMD folder
         multilangs: '#<KEY>',
         parentrow: '[data-row-id="<KEY>"]',
         iframes: '.local_deepler__source-text iframe'

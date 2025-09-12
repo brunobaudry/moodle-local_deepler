@@ -41,6 +41,8 @@ class row_data extends translate_data implements renderable, templatable {
      * @var int
      */
     private static $mlangtagadditional = 20;
+    /** @var \local_deepler\editor\MoodleQuickForm_cteditor */
+    public static MoodleQuickForm_cteditor $cteditor;
 
     /**
      * Construct.
@@ -53,6 +55,7 @@ class row_data extends translate_data implements renderable, templatable {
     public function __construct(field $field, lang_helper $languagepack, Multilang2TextFilter|text_filter $mlangfilter,
             string $editor) {
         parent::__construct($languagepack, $mlangfilter, $editor);
+
         $this->field = $field;
     }
 
@@ -138,12 +141,13 @@ class row_data extends translate_data implements renderable, templatable {
                 $warnmaxlength = false;
             }
         }
-        $cteditor = new MoodleQuickForm_cteditor($key, 'label',);
+        self::$cteditor->setAttributes(['id' => $key]);
+        $htmleditor = self::$cteditor->toHtml();
         return [
                 'badgeclass' => $badgeclass,
                 'buttonclass' => $buttonclass,
                 'cmid' => $this->field->get_cmid(),
-                'cteditor' => $cteditor->toHtml(),
+                'cteditor' => $htmleditor,
                 'cssclass' => $cssclass,
                 'fieldformat' => $fieldformat,
                 'fieldtranslation' => multilanger::findfieldstring($this->field),

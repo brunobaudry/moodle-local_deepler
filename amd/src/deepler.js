@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
  * @module     local_deepler/deepler
  * @file       amd/src/deepler.js
@@ -34,10 +35,15 @@ define([
         // Main,
      Log,
      $,
+        // eslint-disable-next-line no-unused-vars
      Translation,
+        // eslint-disable-next-line no-unused-vars
      ScrollSpy,
+        // eslint-disable-next-line no-unused-vars
      EventHandler,
+        // eslint-disable-next-line no-unused-vars
      UI,
+        // eslint-disable-next-line no-unused-vars
      Settings
      ) => {
 // Define(['./local/main', 'core/log', 'jquery'], (UI, Log, $) => {
@@ -49,8 +55,9 @@ define([
         DEVELOPER: 32767 // Level 0 all.
     };
     let config;
+        // eslint-disable-next-line no-unused-vars
         const launch = (cfg) => {
-            ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
+           /* ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
                 {
                     highestLevel: 3,
                     fadingDistance: 60,
@@ -58,12 +65,12 @@ define([
                     offsetTop: 100,
                     crumbsmaxlen: cfg.crumbsmaxlen
                 }
-            );
-            Settings.init(cfg);
+            );*/
+/*            Settings.init(cfg);
             Translation.init(cfg);
             UI.init(cfg);
             EventHandler.init(cfg);
-            Log.info(cfg);
+            Log.info(cfg);*/
         };
     const init = (cfg) => {
         config = cfg;
@@ -116,7 +123,7 @@ define([
                     // Log.log(this.readyState);
                     // Log.log(this.readyState === 4);
                     if (this.readyState === 4) {
-                        Log.log('readystatechange', activeRequests, ajaxStopFired);
+                        // Log.log('readystatechange', activeRequests, ajaxStopFired);
                         activeRequests--;
                         if (activeRequests === 0 && !ajaxStopFired) {
                             ajaxStopFired = true;

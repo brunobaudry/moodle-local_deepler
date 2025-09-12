@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 use core_filters\text_filter;
+use local_deepler\editor\MoodleQuickForm_cteditor;
 use local_deepler\local\data\field;
 use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
@@ -84,8 +85,10 @@ class translateform extends moodleform {
         field::$targetlangdeepl = $this->langpack->targetlang;
         // Start moodle form.
         $this->_form->disable_form_change_checker();
-        MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
-                '\local_deepler\editor\MoodleQuickForm_cteditor');
+        // Register editor.
+        row_data::$cteditor = new MoodleQuickForm_cteditor($this->editor);
+        //MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
+        //        '\local_deepler\editor\MoodleQuickForm_cteditor');
         // Open Form local_deepler__form.
         $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
         // Create course settings section only if no section is selected.
