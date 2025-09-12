@@ -141,13 +141,16 @@ class row_data extends translate_data implements renderable, templatable {
                 $warnmaxlength = false;
             }
         }
-        self::$cteditor->setAttributes(['id' => $key]);
-        $htmleditor = self::$cteditor->toHtml();
+        if ($this->editor !== 'tiny' && $fieldformat != 0) {
+            self::$cteditor->setAttributes(['id' => $key]);
+            $htmleditor = self::$cteditor->toHtml();
+        }
         return [
                 'badgeclass' => $badgeclass,
                 'buttonclass' => $buttonclass,
                 'cmid' => $this->field->get_cmid(),
-                'cteditor' => $htmleditor,
+            //'cteditor' => '$htmleditor',
+                'cteditor' => $htmleditor ?? '',
                 'cssclass' => $cssclass,
                 'fieldformat' => $fieldformat,
                 'fieldtranslation' => multilanger::findfieldstring($this->field),

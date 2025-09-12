@@ -27,7 +27,7 @@ export default {
         // ValidatorsBtns: 'div[data-key-validator]',
         // Validator: '[data-key-validator="<KEY>"]', // Unused in AMD folder
         // validatorIcon: '[data-key-validator="<KEY>"] i', // Unused in AMD folder
-        validatorBtn: '[data-process="<KEY>"] [data-action="local_deepler/validator"] span',
+        validatorBtn: '[data-row-id="<KEY>"] [data-action="local_deepler/validator"] span',
         checkBoxes: '[data-action="local_deepler/checkbox"]',
         sourceselect: '[data-action="local_deepler/sourceselect"]',
         selectAllBtn: '[data-action="local_deepler/select-all"]',
