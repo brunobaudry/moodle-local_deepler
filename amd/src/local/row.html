@@ -16,8 +16,8 @@ window.addEventListener('load',(e)=>{
         console.log(o.getAttribute('data-id'));
         console.log(selectedValue);
     }
-    document.body.addEventListener('mouseup', (e) => {
-        console.info('click', e.target);
+    document.body.addEventListener('change', (e) => {
+        console.info('change', e.target);
         const checkbox = e.target.closest('input[type="checkbox"][data-action="local_deepler/checkbox"]');
         const rowContainer = e.target.closest('[data-row-id]');
         if (rowContainer) {

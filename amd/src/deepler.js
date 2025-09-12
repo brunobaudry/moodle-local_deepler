@@ -22,7 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([
-    // './local/main',
     'core/log',
     'jquery',
         './local/translation',
@@ -32,7 +31,6 @@ define([
         './local/settings'
     ],
     (
-        // Main,
      Log,
      $,
 

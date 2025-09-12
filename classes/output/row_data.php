@@ -165,6 +165,7 @@ class row_data extends translate_data implements renderable, templatable {
                 'multilangdisabled' => $multilangdisabled,
                 'multilangtitlestring' => $multilangtitlestring,
                 'plaintextinput' => $fieldformat === 0,
+                'process' => 'local_deepler/wait',
             // Do Ajax.
                 'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
             // Do Ajax.

@@ -23,29 +23,31 @@
 define(
     ['./selectors',
     './utils',
-    'core/log'],
+        './uiHelpers',
+    'core/log'
+    ],
     (Selectors,
-    Utils, Log)=>{
+    Utils, UI, Log)=>{
         let config;
         let settingsUI = {};
         const registerUI = () => {
             try {
-            settingsUI[Selectors.deepl.glossaryId] = Utils.domQuery(Selectors.deepl.glossaryId);
-            settingsUI[Selectors.deepl.context] = Utils.domQuery(Selectors.deepl.context);
-            settingsUI[Selectors.deepl.formality] = Utils.domQuery(Selectors.deepl.formality);
-            settingsUI[Selectors.deepl.modelType] = Utils.domQuery(Selectors.deepl.modelType);
-            settingsUI[Selectors.deepl.ignoreTags] = Utils.domQuery(Selectors.deepl.ignoreTags);
-            settingsUI[Selectors.deepl.nonSplittingTags] = Utils.domQuery(Selectors.deepl.nonSplittingTags);
-            settingsUI[Selectors.deepl.outlineDetection] = Utils.domQuery(Selectors.deepl.outlineDetection);
-            settingsUI[Selectors.deepl.preserveFormatting] = Utils.domQuery(Selectors.deepl.preserveFormatting);
-            settingsUI[Selectors.deepl.splitSentences] = Utils.domQuery(Selectors.deepl.splitSentences);
-            settingsUI[Selectors.deepl.splittingTags] = Utils.domQuery(Selectors.deepl.splittingTags);
-            settingsUI[Selectors.deepl.tagHandling] = Utils.domQuery(Selectors.deepl.tagHandling);
+            settingsUI[Selectors.deepl.glossaryId] = UI.settingsQuery(Selectors.deepl.glossaryId);
+            settingsUI[Selectors.deepl.context] = UI.settingsQuery(Selectors.deepl.context);
+            settingsUI[Selectors.deepl.formality] = UI.settingsQuery(Selectors.deepl.formality);
+            settingsUI[Selectors.deepl.modelType] = UI.settingsQuery(Selectors.deepl.modelType);
+            settingsUI[Selectors.deepl.ignoreTags] = UI.settingsQuery(Selectors.deepl.ignoreTags);
+            settingsUI[Selectors.deepl.nonSplittingTags] = UI.settingsQuery(Selectors.deepl.nonSplittingTags);
+            settingsUI[Selectors.deepl.outlineDetection] = UI.settingsQuery(Selectors.deepl.outlineDetection);
+            settingsUI[Selectors.deepl.preserveFormatting] = UI.settingsQuery(Selectors.deepl.preserveFormatting);
+            settingsUI[Selectors.deepl.splitSentences] = UI.settingsQuery(Selectors.deepl.splitSentences);
+            settingsUI[Selectors.deepl.splittingTags] = UI.settingsQuery(Selectors.deepl.splittingTags);
+            settingsUI[Selectors.deepl.tagHandling] = UI.settingsQuery(Selectors.deepl.tagHandling);
             if (!config.isfree) {
-                settingsUI[Selectors.deepl.toneorstyle] = Utils.domQuery(Selectors.deepl.toneorstyle);
+                settingsUI[Selectors.deepl.toneorstyle] = UI.settingsQuery(Selectors.deepl.toneorstyle);
             }
-            settingsUI[Selectors.actions.escapeLatex] = Utils.domQuery(Selectors.actions.escapeLatex);
-            settingsUI[Selectors.actions.escapePre] = Utils.domQuery(Selectors.actions.escapePre);
+            settingsUI[Selectors.actions.escapeLatex] = UI.settingsQuery(Selectors.actions.escapeLatex);
+            settingsUI[Selectors.actions.escapePre] = UI.settingsQuery(Selectors.actions.escapePre);
         } catch (e) {
             if (config.debug) {
                 Log.error(e.message);
@@ -74,7 +76,7 @@ define(
                                 settingsUI[selector].checked = settingsCookie[selector];
                                 break;
                             case 'radio' :
-                                Utils.domQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
+                                UI.settingsQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
                                 break;
                             default:
                                 settingsUI[selector].value = settingsCookie[selector];
@@ -122,7 +124,7 @@ define(
                             }
                             break;
                         case 'radio':
-                            cookie[selector] = Utils.domQuery(Selectors.actions.radioValues.replace("<RADIO>", selector)).value;
+                            cookie[selector] = UI.settingsQuery(Selectors.actions.radioValues.replace("<RADIO>", selector)).value;
                             settings[selector] = cookie[selector];
                             break;
                         default: // Text.
@@ -141,7 +143,7 @@ define(
          * @param {string} value
          */
         const setOptionFromCookie = (value)=>{
-            let optionToSelect = Utils.domQuery(`option[value="${value}"]`);
+            let optionToSelect = UI.settingsQuery(`option[value="${value}"]`);
             if (optionToSelect) {
                 optionToSelect.selected = true;
             }

@@ -37,6 +37,12 @@ define(['core/modal',
         Selectors,
         Events,
         Translation)=>{
+    let mainContainer;
+    let formContainer;
+    let settingsContainer;
+    let sourcetargetContainer;
+    let activityfilterContainer;
+    let statusfilterContainer;
     // Let preloader;
     let config = {};
     let format = new Intl.NumberFormat();
@@ -48,6 +54,7 @@ define(['core/modal',
     let removedIframes = [];
     let allDataFormatOne = [];
     let checkboxes = [];
+    let allRows = [];
     let glossaryDetailViewr;
     let checkBoxParentMap = new Map();
     const optionsForTiny = {
@@ -62,7 +69,7 @@ define(['core/modal',
         removeorphaneddrafts: true,
         plugins: []
     };
-    const ON_STATUS_CHANGED = 'onStatusChanged';
+    // Const ON_STATUS_CHANGED = 'onStatusChanged';
     // Cached DOM elements
     const cachedSelectors = {
         wordCount: document.querySelector(Selectors.statuses.wordcount),
@@ -76,8 +83,8 @@ define(['core/modal',
      * Toggle iFrames in sourcetexts.
      */
     function doHideiframes() {
-        const isChecked = Utils.domQuery(Selectors.actions.hideiframes);
-        const allIframes = Utils.domQueryAll(Selectors.sourcetexts.iframes);
+        const isChecked = settingsQuery(Selectors.actions.hideiframes);
+        const allIframes = formQueryAll(Selectors.sourcetexts.iframes);
         if (!isChecked && allIframes.length > 0) {
             removedIframes = [];
             allIframes.forEach(iframe => {
@@ -109,9 +116,10 @@ define(['core/modal',
      * Get the editor container based on recieved current user's editor preference.
      *
      * @param {string} key Translation Key
+     * @param {HTMLElement} row
      */
-    const findEditor = (key) => {
-        let e = Utils.domQuery(Selectors.editors.types.basic, key);
+    const findEditor = (key, row) => {
+        let e = formQuery(Selectors.editors.types.basic, key, row);
         let et = 'basic';
         if (e === null) {
             let r = null;
@@ -121,7 +129,7 @@ define(['core/modal',
             } else {
                 // First let's try the current editor.
                 try {
-                    r = findEditorByType(key, config.userPrefs);
+                    r = findEditorByType(key, config.userPrefs, row);
                 } catch (error) {
                     // Content was edited by another editor.
                     Log.trace(`Editor not found: ${config.userPrefs} for key ${key}`);
@@ -135,15 +143,16 @@ define(['core/modal',
     /**
      * @param {string} key
      * @param {object} editorType
-     * @returns {{editor: object, editorType: string}}
+     * @param {HTMLElement} row
+     * @returns {{editor: HTMLElement, editorType: string}}
      */
-    const findEditorByType = (key, editorType) => {
+    const findEditorByType = (key, editorType, row) => {
         let et = 'basic';
         let ed = null;
         switch (editorType) {
             case "atto" :
                 et = 'iframe';
-                ed = Utils.domQuery(Selectors.editors.types.atto, key);
+                ed = formQuery(Selectors.editors.types.atto, key, row);
                 break;
             case "tiny":
                 et = 'iframe';
@@ -151,7 +160,7 @@ define(['core/modal',
                 break;
             case 'marklar':
             case "textarea" :
-                ed = Utils.domQuery(Selectors.editors.types.other, key);
+                ed = formQuery(Selectors.editors.types.other, key, row);
                 break;
         }
         return {editor: ed, editorType: et};
@@ -177,11 +186,22 @@ define(['core/modal',
      *
      * @param {String} key
      */
-    const hideErrorMessage = (key) => {
-        let parent = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
-        let alertChild = Utils.domQuery('.alert-danger', '', parent);
+/*    const hideErrorMessage = (key) => {
+        let parent = formQuery(Selectors.editors.multiples.editorsWithKey, key);
+        let alertChild = domQuery('.alert-danger', '', parent);
         if (alertChild) {
             parent.removeChild(alertChild);
+        }
+    };*/
+    /**
+     * Hides an item's error message.
+     *
+     * @param {HTMLElement} row
+     */
+    const hideErrorMessageForRow = (row) => {
+        let alertChild = domQuery('.alert-danger', '', row);
+        if (alertChild) {
+            row.removeChild(alertChild);
         }
     };
     /**
@@ -190,7 +210,7 @@ define(['core/modal',
      * @param {String} message
      */
     const showErrorMessageForEditor = (key, message) => {
-        let parent = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
+        let parent = formQuery(Selectors.editors.multiples.editorsWithKey, key);
         const errorMsg = document.createElement('div');
         const indexOfSET = message.indexOf("Data too long");// Probably a text too long for the field if not -1.
         // Display granular error messages.
@@ -253,7 +273,7 @@ define(['core/modal',
             cwos = 0;
 
         // Cache checkboxes matching selector once, convert to array if needed.
-        const checkedBoxes = Array.from(Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes));
+        const checkedBoxes = Array.from(formQueryAll(Selectors.statuses.checkedCheckBoxes));
 
         // Aggregate counts in one loop.
         checkedBoxes.forEach(ckBox => {
@@ -293,7 +313,7 @@ define(['core/modal',
      * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
      */
     const getCount = (key) => {
-        const item = Utils.domQuery(Selectors.sourcetexts.keys, key);
+        const item = formQuery(Selectors.sourcetexts.singlelangkeys, key);
         const raw = item.getAttribute("data-sourcetext-raw");
         // Cleaned sourceText.
         const trimmedVal = Utils.stripHTMLTags(Utils.fromBase64(raw)).trim();
@@ -307,64 +327,65 @@ define(['core/modal',
     /**
      * Factory to display process' statuses for each item.
      *
-     * @param {String} key
+     * @param {HTMLElement} row
      * @param {Boolean} checked
-     * @param {Boolean} translated
      * @todo MDL-0000 optimize
      */
-    const toggleStatus = (key, checked, translated) => {
-        const icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
+    const toggleStatus = (row, checked) => {
+        const key = row.getAttribute('data-row-id');
+        const translated = Translation.translated(key);
+        const icon = formQuery(Selectors.actions.validatorBtn, key);
         const status = icon?.dataset.status;
-        let disaptchStatus = Selectors.statuses.wait;
+        // Let disaptchStatus = Selectors.process.wait;
 
         if (!status) {
             return;
         }
 
         switch (status) {
-            case Selectors.statuses.wait:
+            case Selectors.process.wait:
                 // Events.emit(ON_STATUS_CHANGED, key );
                 if (checked) {
-                    setIconElementStatus(icon, Selectors.statuses.totranslate);
-                    disaptchStatus = Selectors.statuses.totranslate;
+                    setIconElementStatus(icon, Selectors.process.totranslate);
+                    // DisaptchStatus = Selectors.process.totranslate;
                 }
                 break;
 
-            case Selectors.statuses.totranslate:
+            case Selectors.process.totranslate:
                 if (checked && translated) {
-                    setIconElementStatus(icon, Selectors.statuses.tosave, true);
-                    disaptchStatus = Selectors.statuses.tosave;
+                    setIconElementStatus(icon, Selectors.process.tosave, true);
+                    // DisaptchStatus = Selectors.process.tosave;
                 } else {
-                    setIconElementStatus(icon, Selectors.statuses.wait);
+                    setIconElementStatus(icon, Selectors.process.wait);
                 }
                 break;
 
-            case Selectors.statuses.tosave:
+            case Selectors.process.tosave:
                 if (!checked) {
-                    setIconElementStatus(icon, Selectors.statuses.totranslate);
-                    disaptchStatus = Selectors.statuses.totranslate;
+                    setIconElementStatus(icon, Selectors.process.totranslate);
+                    // DisaptchStatus = Selectors.process.totranslate;
                 }
                 break;
 
-            case Selectors.statuses.failed:
+            case Selectors.process.failed:
                 if (checked) {
-                    setIconElementStatus(icon, Selectors.statuses.totranslate);
-                    disaptchStatus = Selectors.statuses.totranslate;
+                    setIconElementStatus(icon, Selectors.process.totranslate);
+                    // DisaptchStatus = Selectors.process.totranslate;
                 }
                 break;
 
-            case Selectors.statuses.success:
-                disaptchStatus = Selectors.statuses.success;
+            case Selectors.process.success:
+                // DisaptchStatus = Selectors.process.success;
                 break;
 
-            case Selectors.statuses.saved:
+            case Selectors.process.saved:
                 if (checked) {
-                    setIconElementStatus(icon, Selectors.statuses.totranslate);
-                    disaptchStatus = Selectors.statuses.totranslate;
+                    setIconElementStatus(icon, Selectors.process.totranslate);
+                    // DisaptchStatus = Selectors.process.totranslate;
                 }
                 break;
         }
-        Events.emit(ON_STATUS_CHANGED, key, disaptchStatus);
+        // Events.emit(ON_STATUS_CHANGED, key, disaptchStatus);
     };
     /**
      * Change translation process status icon.
@@ -374,7 +395,7 @@ define(['core/modal',
      * @param {boolean} isBtn
      * @todo MDL-0000 optimize
      */
-    const setIconElementStatus = (icon, status = Selectors.statuses.wait, isBtn = false) => {
+    const setIconElementStatus = (icon, status = Selectors.process.wait, isBtn = false) => {
         if (!icon) {
          return;
         }
@@ -414,8 +435,8 @@ define(['core/modal',
     };
 
 
-    const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
-        let icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
+    const setIconStatus = (key, status = Selectors.process.wait, isBtn = false) => {
+        let icon = formQuery(Selectors.actions.validatorBtn, key);
         setIconElementStatus(icon, status, isBtn);
     };
     /**
@@ -425,7 +446,7 @@ define(['core/modal',
      * @returns {*}
      */
     const getIconStatus = (key)=> {
-        return Utils.domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
+        return formQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
     };
     /**
      * Opens a modal infobox to warn user trunks of fields are saving.
@@ -484,30 +505,27 @@ define(['core/modal',
         }
     };
     const backToBase = () => {
-        const offsetTop = Utils.domQuery(Selectors.config.langstrings).offsetTop;
+        const offsetTop = domQuery(Selectors.config.langstrings).offsetTop;
         window.scrollTo({top: offsetTop - 5, behavior: 'smooth'});
     };
+
     const resizeEditors = ()=>{
-
         allDataFormatOne.forEach((editable)=>{
-            const key = editable.id.replace('tiny_', '');
-            const selector = `[data-sourcetext-key="${key}"]`;
-            let parent = Utils.domQuery(selector);
-            const grandparent = parent.parentElement;
-
-            const updateEditableHeight = ()=> {
-                const totalHeight = grandparent.offsetHeight + 80; // Tiny header average height is 80.
+            const grandparent = editable.closest('[data-row-id]');
+            const sourceTextSinglelang = formQuery(Selectors.sourcetexts.singlelang, '', grandparent);
+            const sourceTextMultilang = formQuery(Selectors.sourcetexts.multilangs, '', grandparent);
+             const updateEditableHeight = ()=> {
+                 const offsetElement = sourceTextMultilang.classList.contains('show') ? sourceTextMultilang : sourceTextSinglelang;
+               const totalHeight = offsetElement.offsetHeight + 80; // Tiny header average height is 80.
                 editable.style.height = totalHeight + 'px';
             };
 
             // Observe size changes in parent and grandparent.
-            const resizeObserver = new ResizeObserver(() => {
+             const resizeObserver = new ResizeObserver(() => {
                 updateEditableHeight();
             });
-
-            resizeObserver.observe(parent);
-            resizeObserver.observe(grandparent);
-
+             resizeObserver.observe(sourceTextSinglelang);
+             resizeObserver.observe(sourceTextMultilang);
         });
     };
 
@@ -546,8 +564,8 @@ define(['core/modal',
         requestAnimationFrame(() => {
             updates.forEach(({checkbox, shouldCheck}) => {
                 checkbox.checked = shouldCheck;
-                const key = checkbox.getAttribute('data-key');
-                toggleStatus(key, shouldCheck, Translation.translated(key));
+                const rowEl = checkBoxParentMap.get(checkbox);
+                toggleStatus(rowEl, shouldCheck);
             });
             toggleAutotranslateButton();
             countWordAndChar();
@@ -573,19 +591,19 @@ define(['core/modal',
     const showRows = () => {
         // Map each selector to its corresponding checkbox checked state
         const selectorMap = {
-            [Selectors.statuses.updated]: Utils.domQuery(Selectors.actions.showUpdated).checked,
-            [Selectors.statuses.needsupdate]: Utils.domQuery(Selectors.actions.showNeedUpdate).checked,
-            [Selectors.statuses.hidden]: Utils.domQuery(Selectors.actions.showHidden).checked
+            [Selectors.statuses.updated]: statusFilterQuery(Selectors.actions.showUpdated).checked,
+            [Selectors.statuses.needsupdate]: statusFilterQuery(Selectors.actions.showNeedUpdate).checked,
+            [Selectors.statuses.hidden]: statusFilterQuery(Selectors.actions.showHidden).checked
         };
 
         // Combine all selectors into one comma-separated string for batch querying.
         const mergedSelector = Object.keys(selectorMap).join(",");
 
         // Query all items matching any of the selectors once.
-        const allItems = Utils.domQueryAll(mergedSelector);
+        const allItems = formQueryAll(mergedSelector);
 
         // Cache the global "select all" button checked state once.
-        const allSelected = Utils.domQuery(Selectors.actions.selectAllBtn).checked;
+        const allSelected = statusFilterQuery(Selectors.actions.selectAllBtn).checked;
 
         allItems.forEach(item => {
             // Determine which selector this item matches so we can apply the right checkbox state.
@@ -606,7 +624,7 @@ define(['core/modal',
             let rowId = item.getAttribute('data-row-id');
             if (rowId === null) {
                 // For items without row-id, toggle checkboxes of their child rows.
-                const childs = Utils.domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
+                const childs = formQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
                     const childId = child.getAttribute('data-row-id');
                     toggleChildCheckBoxSelection(childId, shouldCheck);
@@ -619,17 +637,25 @@ define(['core/modal',
         // Call global UI update functions once
         toggleAutotranslateButton();
         countWordAndChar();
+        resizeEditors();
     };
     /**
      * Manages selection and icon status of fields.
      *
-     * @param {string} key
+     * @param {HTMLElement} row
      * @param {bool} shouldBeChecked
      */
-    const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
-        const single = Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
-        single.checked = shouldBeChecked;
-        toggleStatus(key, false, Translation.translated(key));
+    const toggleChildCheckBoxSelection = (row, shouldBeChecked)=>{
+        // Normalize to element
+        const rowEl = typeof row === 'string' ? formQuery(Selectors.actions.corerowid, row) : row;
+        if (!rowEl) {
+            return;
+        }
+        const single = formQuery(Selectors.actions.checkBoxes, '', rowEl);
+        if (single) {
+            single.checked = shouldBeChecked;
+        }
+        toggleStatus(rowEl, false);
     };
 /*    Const togglePreloader = () => {
         if (preloader?.classList.contains('show') || preloader?.classList.contains('d-block')) {
@@ -643,7 +669,7 @@ define(['core/modal',
 
     const wrapTinyOnTarget = (element)=>{
         const status = getIconStatus(element.id.replace('tiny_', ''));
-        if (status === Selectors.statuses.tosave) {
+        if (status === Selectors.process.tosave) {
             // eslint-disable-next-line promise/catch-or-return
             TinyMCEinit.getTinyMCE().then(
                 // eslint-disable-next-line promise/always-return
@@ -671,25 +697,185 @@ define(['core/modal',
         autotranslateButton.disabled = true;
     };
     const enableTranslateButton = ()=>{
-        autotranslateButton.disabled = true;
+        autotranslateButton.disabled = false;
     };
     const registerUI = () => {
+        // Capture the main to restrict Dom queries.
+        mainContainer = document.querySelector(Selectors.config.main);
+        formContainer = mainContainer.querySelector(Selectors.config.form);
+        allRows = formQueryAll(Selectors.actions.corerowid);
+        settingsContainer = mainContainer.querySelector(Selectors.config.advancedsettings);
+        sourcetargetContainer = mainContainer.querySelector(Selectors.config.sourcetarget);
+        Log.log(sourcetargetContainer);
+        activityfilterContainer = mainContainer.querySelector(Selectors.config.activityfilter);
+        statusfilterContainer = mainContainer.querySelector(Selectors.config.statusfilter);
         if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesviewerPage)) {
             glossaryDetailViewr = document.querySelector(Selectors.glossary.entriesviewerPage);
         }
-        autotranslateButton = Utils.domQuery(Selectors.actions.autoTranslateBtn);
-        checkboxes = Utils.domQueryAll(Selectors.actions.checkBoxes);
-        allDataFormatOne = Utils.domQueryAll(Selectors.editors.targetarea);
-        selectAllBtn = Utils.domQuery(Selectors.actions.selectAllBtn);
-        saveAllBtn = Utils.domQuery(Selectors.actions.saveAll);
-        langstrings = JSON.parse(Utils.domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+        autotranslateButton = statusFilterQuery(Selectors.actions.autoTranslateBtn);
+        checkboxes = formQueryAll(Selectors.actions.checkBoxes);
+        allDataFormatOne = formQueryAll(Selectors.editors.targetarea);
+        selectAllBtn = statusFilterQuery(Selectors.actions.selectAllBtn);
+        saveAllBtn = statusFilterQuery(Selectors.actions.saveAll);
+        langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+    };
+    /**
+     *
+     * @param {string} key
+     * @param {string} selector
+     * @param {int} courseId
+     * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
+     */
+/*    const prepareDBitem = (key, selector, courseId) => {
+        const element = domQuery(selector, key);
+        return {
+            key: key,
+            courseid: courseId,
+            id: parseInt(element.getAttribute("data-id")),
+            tid: element.getAttribute("data-tid"),
+            table: element.getAttribute("data-table"),
+            field: element.getAttribute("data-field"),
+            cmid: element.getAttribute("data-cmid"),
+        };
+    };*/
+    /**
+     *
+     * @param {HTMLElement} row
+     * @param {int} courseId
+     */
+    const prepareRowForDB = (row, courseId)=>{
+        const key = row.getAttribute("data-row-id");
+        return {
+            key: key,
+            courseid: courseId,
+            tid: row.getAttribute("data-tid")
+        };
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {HTMLElement}
+     */
+    const formQuery = (selector, key = '', parent = null)=>{
+        return domQuery(selector, key, parent ?? formContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {HTMLElement}
+     */
+    const settingsQuery = (selector, key = '', parent = null)=>{
+        return domQuery(selector, key, parent ?? settingsContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {HTMLElement}
+     */
+/*    Const sourceTargetQuery = (selector, key = '', parent = null)=>{
+        return domQuery(selector, key, parent ?? sourcetargetContainer);
+    };*/
+    const activityFilterQuery = (selector, key = '', parent = null)=>{
+        return domQuery(selector, key, parent ?? activityfilterContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {HTMLElement}
+     */
+    const statusFilterQuery = (selector, key = '', parent = null)=>{
+        return domQuery(selector, key, parent ?? statusfilterContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {NodeList}
+     */
+    const formQueryAll = (selector, key = '', parent = null)=>{
+        return domQueryAll(selector, key, parent ?? formContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {NodeList}
+     */
+    const settingsQueryAll = (selector, key = '', parent = null)=>{
+        return domQueryAll(selector, key, parent ?? settingsContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {NodeList}
+     */
+/*    Const sourceTargetQueryAll = (selector, key = '', parent = null)=>{
+        return domQueryAll(selector, key , parent ?? sourcetargetContainer);
+    };*/
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {NodeList}
+     */
+    const activityFilterQueryAll = (selector, key = '', parent = null)=>{
+        return domQueryAll(selector, key, parent ?? activityfilterContainer);
+    };
+    /**
+     *
+     * @param {String} selector
+     * @param {String} key
+     * @param {HTMLElement} parent
+     * @returns {NodeList}
+     */
+    const statusFilterQueryAll = (selector, key = '', parent = null)=>{
+        return domQueryAll(selector, key, parent ?? statusfilterContainer);
+    };
+    /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {HTMLElement} target
+     * @returns {HTMLElement}
+     */
+    const domQuery = (selector, key = '', target = null) => {
+        const el = target ?? mainContainer;
+        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        return el.querySelector(q);
+    };
+
+    /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {HTMLElement} target
+     * @returns {NodeList}
+     */
+    const domQueryAll = (selector, key = '', target = null) => {
+        const el = target ?? mainContainer;
+        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        return el.querySelectorAll(q);
     };
     const init = (cfg) => {
         // Preloader = pr;
         config = cfg;
         registerUI();
         // Make the main UI adjustments
-        resizeEditors();
         doHideiframes();
         toggleAutotranslateButton();
         // SaveAllBtn.disabled = true;
@@ -698,10 +884,37 @@ define(['core/modal',
         checkboxes.forEach((node) => {
             node.disabled = selectAllBtn.disabled;
         });
+        // Initial edit.
+        allRows.forEach(
+            (row)=>{
+                const key = row.getAttribute('data-row-id');
+                const editor = findEditor(key, row);
+                const sourceEl = formQuery(Selectors.sourcetexts.singlelangkeys, key, row);
+                const srcRaw = sourceEl ? sourceEl.getAttribute('data-sourcetext-raw') : '';
+                const multiRaw = sourceEl ? sourceEl.getAttribute('data-filedtext-raw') : '';
+                Translation.initTemp(
+                    key,
+                    editor.editor,
+                    editor.editorType,
+                    srcRaw,
+                    multiRaw
+                );
+            }
+        );
         debouncedShowRows();
     };
     return {
-        ON_STATUS_CHANGED: ON_STATUS_CHANGED,
+        // ON_STATUS_CHANGED: ON_STATUS_CHANGED,
+        domQuery: domQuery,
+        formQuery: formQuery,
+        formQueryAll: formQueryAll,
+        settingsQuery: settingsQuery,
+        settingsQueryAll: settingsQueryAll,
+        statusFilterQuery: statusFilterQuery,
+        statusFilterQueryAll: statusFilterQueryAll,
+        activityFilterQuery: activityFilterQuery,
+        activityFilterQueryAll: activityFilterQueryAll,
+        domQueryAll: domQueryAll,
         backToBase: backToBase,
         countWordAndChar: countWordAndChar,
         dbErrorModal: dbErrorModal,
@@ -716,11 +929,13 @@ define(['core/modal',
         findEditor: findEditor,
         getIconStatus: getIconStatus,
         hideModal: hideModal,
-        hideErrorMessage: hideErrorMessage,
+        // HideErrorMessage: hideErrorMessage,
+        hideErrorMessageForRow: hideErrorMessageForRow,
         init: init,
         launchModal: launchModal,
         launchSaveAllModal: launchSaveAllModal,
         launchTranslatingModal: launchTranslatingModal,
+        prepareRowForDB: prepareRowForDB,
         presentDialogModal: presentDialogModal,
         setIconStatus: setIconStatus,
         showEntriesModal: showEntriesModal,

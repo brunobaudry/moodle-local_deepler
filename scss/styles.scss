@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*.local_deepler__translation img
+/**
  * @module     local_deepler/deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -125,7 +125,12 @@ $secondary: $gray-400 !default;
         background-color: $white !important; /* stylelint-disable-line declaration-no-important */
         margin-bottom: 1rem;
     }
-
+    div[data-row-id]:not([data-process="local_deepler/tosave"]) span[data-action="local_deepler/savesingle"]{
+        display: none !important;
+    }
+    div[data-row-id][data-process="local_deepler/tosave"] span[data-action="local_deepler/savesingle"]{
+        display: inline-block !important;
+    }
     .local_deepler__level0 {
         padding-left: 15px;
     }

@@ -24,33 +24,7 @@ define([], () => {
     const COOKIE_PREFIX_NEW = 'moodle_deepler_settings_';
     const MAX_INPUT_LENGTH = 256;
     const parser = new DOMParser();
-    /**
-     * Shortcut for dom querySelector.
-     *
-     * @param {string} selector
-     * @param {string} key
-     * @param {element} target
-     * @returns {element}
-     */
-    const domQuery = (selector, key = '', target = null) => {
-        const el = target ?? document;
-        const q = key === '' ? selector : selector.replace("<KEY>", key);
-        return el.querySelector(q);
-    };
 
-    /**
-     * Shortcut for dom querySelector.
-     *
-     * @param {string} selector
-     * @param {string} key
-     * @param {element} target
-     * @returns {NodeList}
-     */
-    const domQueryAll = (selector, key = '', target = null) => {
-        const el = target ?? document;
-        const q = key === '' ? selector : selector.replace("<KEY>", key);
-        return el.querySelectorAll(q);
-    };
     /**
      * Fetch the parent row of the translation.
      * @param {Node} node
@@ -240,25 +214,7 @@ define([], () => {
         // If no space found, just hard cut
         return trimmed + ellipsis;
     };
-    /**
-     *
-     * @param {string} key
-     * @param {string} selector
-     * @param {int} courseId
-     * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
-     */
-    const prepareDBitem = (key, selector, courseId) => {
-        const element = domQuery(selector, key);
-        return {
-            key: key,
-            courseid: courseId,
-            id: parseInt(element.getAttribute("data-id")),
-            tid: element.getAttribute("data-tid"),
-            table: element.getAttribute("data-table"),
-            field: element.getAttribute("data-field"),
-            cmid: element.getAttribute("data-cmid"),
-        };
-    };
+
     const switchLocation = (addParam, removeParam)=>{
         let url = new URL(window.location.href);
         let searchParams = url.searchParams;
@@ -275,14 +231,12 @@ define([], () => {
     return {
         debounce: debounce,
         decodeHTML: decodeHTML,
-        domQuery: domQuery,
-        domQueryAll: domQueryAll,
         getCookie: getCookie,
         getEncodedCookie: getEncodedCookie,
         getParentRow: getParentRow,
         fromBase64: fromBase64,
         keyidToKey: keyidToKey,
-        prepareDBitem: prepareDBitem,
+        /* PrepareDBitem: prepareDBitem,*/
         replaceKey: replaceKey,
         setCookie: setCookie,
         setEncodedCookie: setEncodedCookie,
