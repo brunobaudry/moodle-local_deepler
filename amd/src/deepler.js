@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
  * @module     local_deepler/deepler
  * @file       amd/src/deepler.js
@@ -20,7 +21,30 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
+define([
+    'core/log',
+    'jquery',
+        './local/translation',
+        './local/scrollspy',
+        './local/eventHandlers',
+        './local/uiHelpers',
+        './local/settings'
+    ],
+    (
+     Log,
+     $,
+
+     Translation,
+
+     ScrollSpy,
+
+     EventHandler,
+
+     UI,
+
+     Settings
+     ) => {
+// Define(['./local/main', 'core/log', 'jquery'], (UI, Log, $) => {
     const debug = {
         NONE: 0, // Level 5 silent.
         MINIMAL: 5, // Level 3 no trace, debug or info.
@@ -28,7 +52,26 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
         ALL: 30719, // Level 1 no trace.
         DEVELOPER: 32767 // Level 0 all.
     };
+    let config;
+
+        const launch = (cfg) => {
+           ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
+                {
+                    highestLevel: 3,
+                    fadingDistance: 60,
+                    offsetEndOfScope: 1,
+                    offsetTop: 100,
+                    crumbsmaxlen: cfg.crumbsmaxlen
+                }
+            );
+            Settings.init(cfg);
+            Translation.init(cfg);
+            UI.init(cfg);
+            EventHandler.init(cfg);
+            Log.info(cfg);
+        };
     const init = (cfg) => {
+        config = cfg;
         const levelMap = {
             [debug.NONE]: 5,
             [debug.MINIMAL]: 3,
@@ -36,17 +79,17 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
             [debug.ALL]: 1,
             [debug.DEVELOPER]: 0
         };
-        const level = levelMap[cfg.debug] ?? 5;
+        const level = levelMap[config.debug] ?? 5;
         Log.setConfig({level});
 
         let activeRequests = 0;
         let ajaxStopFired = false;
+        const preloader = document.getElementById('local_deepler_preloaderModal');
         /**
          * Remove preloader.
          */
         const onAjaxStop = ()=> {
             // This runs only once when all AJAX requests are finished after a batch
-            const preloader = document.getElementById('local_deepler_preloaderModal');
             if (preloader) {
                 preloader.classList.remove('show', 'd-block');
                 preloader.classList.add('d-none');
@@ -75,10 +118,11 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
                 activeRequests++;
                 ajaxStopFired = false;
                 this.addEventListener('readystatechange', function() {
-                    Log.log('readystatechange', this.readyState);
+                    // Log.log(this.readyState);
+                    // Log.log(this.readyState === 4);
                     if (this.readyState === 4) {
+                        // Log.log('readystatechange', activeRequests, ajaxStopFired);
                         activeRequests--;
-                        Log.log('readystatechange', activeRequests, ajaxStopFired);
                         if (activeRequests === 0 && !ajaxStopFired) {
                             ajaxStopFired = true;
                             onAjaxStop();
@@ -117,7 +161,10 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
         if (!useXMLHttpRequestTracking()) {
             useJQueryTracking();
         }
-        window.addEventListener('load', UI.init(cfg));
+        // Window.addEventListener('load', Main.init(cfg));
+        window.addEventListener('load',
+            launch(cfg)
+        );
     };
     return {
         init: init

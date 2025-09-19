@@ -24,6 +24,30 @@ define([], () => {
     const COOKIE_PREFIX_NEW = 'moodle_deepler_settings_';
     const MAX_INPUT_LENGTH = 256;
     const parser = new DOMParser();
+
+    /**
+     * Fetch the parent row of the translation.
+     * @param {Node} node
+     * @param {string} selector
+     * @returns {*}
+     */
+    const getParentRow = (node, selector) => {
+        return node.closest(replaceKey(selector, node.getAttribute('data-key')));
+    };
+    /**
+     * Debounce for performance
+     *
+     * @param {function} fn
+     * @param {int} delay
+     * @returns {(function(...[*]): void)|*}
+     */
+    const debounce = (fn, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+        };
+    };
     /**
      * Simple helper to manage selectors
      * @param {string} s
@@ -175,8 +199,8 @@ define([], () => {
      */
     const smartTruncate = (str, maxLength) =>{
         if (str.length <= maxLength || maxLength == 0) {
- return str;
-}
+            return str;
+        }
 
         const ellipsis = '…';
         const trimmed = str.slice(0, maxLength - ellipsis.length);
@@ -190,20 +214,35 @@ define([], () => {
         // If no space found, just hard cut
         return trimmed + ellipsis;
     };
+
+    const switchLocation = (addParam, removeParam)=>{
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
+        searchParams.set(addParam.key, addParam.value.trim());
+        if (removeParam && removeParam !== '' && searchParams.has(removeParam)) {
+            searchParams.delete(removeParam);
+        }
+        window.location = url.toString();
+    };
     /**
      * Api to be used by the other modules.
      */
     return {
-        smartTruncate: smartTruncate,
+        debounce: debounce,
+        decodeHTML: decodeHTML,
         getCookie: getCookie,
         getEncodedCookie: getEncodedCookie,
+        getParentRow: getParentRow,
+        fromBase64: fromBase64,
+        keyidToKey: keyidToKey,
+        /* PrepareDBitem: prepareDBitem,*/
+        replaceKey: replaceKey,
         setCookie: setCookie,
         setEncodedCookie: setEncodedCookie,
-        replaceKey: replaceKey,
-        keyidToKey: keyidToKey,
-        decodeHTML: decodeHTML,
+        smartTruncate: smartTruncate,
         stripHTMLTags: stripHTMLTags,
-        fromBase64: fromBase64,
+        switchLocation: switchLocation,
         toJsonArray: toJsonArray
     };
 });

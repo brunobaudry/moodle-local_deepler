@@ -47,10 +47,9 @@ $PAGE->set_pagelayout('base');
 
 echo $OUTPUT->header();
 // Load glossary manager.
-$apikey = get_config('local_deepler', 'apikey');
-if ($apikey) {
-    $langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
-    $langhelper->initdeepl($USER, $plugin->release);
+$langhelper = new lang_helper();
+$initok = $langhelper->initdeepl($USER, $plugin->release);
+if ($initok) {
     // Prepare content.
 
     $pluginsglossaries = $langhelper->syncdeeplglossaries();

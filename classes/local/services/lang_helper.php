@@ -21,6 +21,7 @@ use context_user;
 use core\user;
 use DeepL\AppInfo;
 use DeepL\AuthorizationException;
+use DeepL\ConnectionException;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use DeepL\Language;
@@ -45,6 +46,10 @@ class lang_helper {
      * Constant to display the lang as rephrasing.
      */
     const REPHRASESYMBOL = "® ";
+    /**
+     * @var array
+     */
+    private array $sourceoptions;
     /**
      * The current moodle language.
      *
@@ -110,6 +115,21 @@ class lang_helper {
     private array $deeplrephraselangs;
     /** @var \stdClass */
     private stdClass $user;
+    /**
+     * Deepl exception thrown class.
+     *
+     * @var string
+     */
+    private string $deeplexception;
+
+    /**
+     * Deepl exception thrown class.
+     *
+     * @return string
+     */
+    public function get_deeplexception(): string {
+        return $this->deeplexception;
+    }
 
     /**
      * Constructor.
@@ -132,8 +152,8 @@ class lang_helper {
     ) {
         $this->deeplsources = [];
         $this->deepltargets = [];
+        $this->sourceoptions = [];
         $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
-        $this->canimprove = false;
         $this->currentlang = $currentlang ?? optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = $targetlang ?? optional_param('target_lang', '', PARAM_NOTAGS);
         if ($this->targetlang !== '') {
@@ -174,20 +194,19 @@ class lang_helper {
      */
     public function initdeepl(stdClass $user, string $version): bool {
         $this->user = $user;
-        if (!$this->translator) {
-            $this->setdeeplapi();
-            $this->inittranslator($version);
-        }
-
         try {
+            if (!$this->translator) {
+                $this->setdeeplapi();
+                $this->inittranslator($version);
+            }
             $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
             $this->usage = $this->translator->getUsage();
-            $this->canimprove = !$this->keyisfree;
             $this->deeplsources = $this->translator->getSourceLanguages();
             $this->deepltargets = $this->translator->getTargetLanguages();
             $this->setcurrentlanguage();
             return true;
-        } catch (DeepLException $e) {
+        } catch (ConnectionException|AuthorizationException|DeepLException $e) {
+            $this->deeplexception = get_class($e);
             return false;
         }
     }
@@ -344,7 +363,6 @@ class lang_helper {
         $config->deeplsourcelang = $this->deeplsourcelang;
         $config->isfree = $this->keyisfree;
         $config->rephrasesymbol = self::REPHRASESYMBOL;
-        $config->canimprove = $this->canimprove;
         return $config;
     }
 
@@ -373,7 +391,6 @@ class lang_helper {
         $config->uistrings->translatemodaltitle = get_string('translate:modal:title', 'local_deepler');
         $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
-        $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
         return json_encode($config);
     }
 
@@ -453,12 +470,12 @@ class lang_helper {
 
         if ($issource) {
             $selected = $this->isrephrase($code, $this->deeplsourcelang);
-            $disable = !$selected && ($same && !$this->canimprove || $same && !$langisrephrasable);
+            $disable = !$selected && ($same && $this->keyisfree || $same && !$langisrephrasable);
         } else {
             $selected = $this->targetlang !== '' && $this->isrephrase($code, $this->targetlang);
-            $disable = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
+            $disable = ($same && !$langisrephrasable) || ($same && $this->keyisfree);
         }
-        if ($same && $this->canimprove) {
+        if ($same && !$this->keyisfree) {
             $text = self::REPHRASESYMBOL . $text;
             $code = self::REPHRASESYMBOL . $code;
         }
@@ -518,7 +535,10 @@ class lang_helper {
      * @return array
      */
     public function preparesourcesoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
+        if ($this->sourceoptions === []) {
+            $this->sourceoptions = $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
+        }
+        return $this->sourceoptions;
     }
 
     /**
@@ -531,12 +551,12 @@ class lang_helper {
     }
 
     /**
-     * Getter for canimprove.
+     * Can improve hence can rephrase (only API Pro).
      *
      * @return bool
      */
-    public function get_canimprove(): bool {
-        return $this->canimprove;
+    public function canimprove(): bool {
+        return !$this->keyisfree;
     }
 
     /**
@@ -638,15 +658,6 @@ class lang_helper {
      */
     public function gettargetlang(bool $mainlonly = false): string {
         return $mainlonly ? substr($this->targetlang, 0, 2) : $this->targetlang;
-    }
-
-    /**
-     * Getter for ability  to use the improve API.
-     *
-     * @return bool
-     */
-    public function getcanimprove(): bool {
-        return $this->canimprove;
     }
 
     /**

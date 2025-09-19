@@ -107,7 +107,7 @@ class translate_page implements renderable, templatable {
         // Data for mustache template.
         $data->langstrings = $this->langpacks->preparestrings();
         $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
-        $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
+        // $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
 
         // Hacky fix but the only way to adjust html...
         // This could be overridden in css and I might look at that fix for the future.
@@ -138,7 +138,7 @@ class translate_page implements renderable, templatable {
         $data->escapelatexbydefault = get_config('local_deepler', 'latexescapeadmin') ? 'checked' : '';
         $data->escapeprebydefault = get_config('local_deepler', 'preescapeadmin') ? 'checked' : '';
         $data->hideiframesdefault = get_config('local_deepler', 'hideiframesadmin') ? 'checked' : '';
-        $data->canimprove = $this->langpacks->get_canimprove();
+        $data->canimprove = $this->langpacks->canimprove();
         $data->supportedlangs = implode(', ', $this->langpacks->get_deeplrephraselangs());
         $data->rephrasesymbol = lang_helper::REPHRASESYMBOL;
         $data->hidecompatible = count($this->langpacks->findcompatiblelangs()) < 2;

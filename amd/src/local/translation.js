@@ -106,10 +106,10 @@ define([
         /**
          * Save translations to the DB.
          * @param {array} items
-         * @param {object} config
+         * @param {bool} userEditorIsTextarea
          */
-        const saveTranslations = (items, config) => {
-            const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
+        const saveTranslations = (items, userEditorIsTextarea) => {
+            const data = items.map(item => prepareDbUpdateItem(item, userEditorIsTextarea));
             Log.debug(`translation/x/saveTranslations::data`);
             Log.debug(data);
             Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
@@ -137,7 +137,7 @@ define([
             // TextTosave = getEditorText(key, maineditorIsTextArea);
             return {
                 tid: item.tid,
-                text: getEditorText(tempTranslations[key].editor, maineditorIsTextArea),
+                text: textTosave,
                 keyid: key,
                 mainsourcecode: mainSourceLang,
                 sourcecode: tempTranslations[key].sourceLang,
@@ -145,6 +145,7 @@ define([
                 sourcetext: getSourceText(key)
             };
         };
+
         /**
          * Editor's text content.
          *
@@ -180,7 +181,11 @@ define([
          * @param {string} multilangRawTextEncoded
          * @param {string} sourceLang
          */
-        const initTempForKey = (key, editorSettings, sourceTextEncoded, multilangRawTextEncoded, sourceLang) => {
+        const initTempForKey = (key,
+                                editorSettings,
+                                sourceTextEncoded,
+                                multilangRawTextEncoded,
+                                sourceLang) => {
             const sourceText = Utils.fromBase64(sourceTextEncoded);
             const fieldText = Utils.fromBase64(multilangRawTextEncoded);
             const tokenised = Tokeniser.preprocess(sourceText, escapePatterns);
@@ -190,25 +195,54 @@ define([
                 source: tokenised.tokenizedText,
                 sourceLang: sourceLang,
                 fieldText: fieldText,
-                status: Selectors.statuses.wait,
+                status: Selectors.process.wait,
                 translation: '',
                 tokens: tokenised.expressions
             };
         };
+        const updatTempStatusAll = (status)=>{
+            tempTranslations.map(
+                (item)=>{
+                    item.status = status;
+                }
+            );
+        };
+        const updateTempStatus = (key, status)=>{
+            tempTranslations[key].status = status;
+        };
+        const updateTempTokenized = (key, sourceText)=>{
+            const tokenised = Tokeniser.preprocess(sourceText, escapePatterns);
+            tempTranslations[key].source = tokenised.tokenizedText;
+            tempTranslations[key].tokens = tokenised.expressions;
+
+        };
+        const updateTempSourceLang = (key, lang)=>{
+            tempTranslations[key].sourceLang = lang;
+        };
         /**
-         * Wipe pout the temp.
-         * @param {string} key
+         * Initialize out the temp.
+         * @param {String} key
+         * @param {HTMLElement} editorNode
+         * @param {String} editorType
+         * @param {String} sourceTextEncoded
+         * @param {String} multilangRawTextEncoded
          */
-        const initTemp = (key)=>{
+        const initTemp = (key,
+                          editorNode,
+                          editorType,
+                          sourceTextEncoded,
+                          multilangRawTextEncoded)=>{
+            const sourceText = Utils.fromBase64(sourceTextEncoded);
+            const tokenised = Tokeniser.preprocess(sourceText, escapePatterns);
             tempTranslations[key] = {
-                editorType: null,
-                editor: null,
-                source: '',
-                sourceLang: '',
-                fieldText: '',
-                status: '',
+                editorType: editorType,
+                editor: editorNode,
+                source: tokenised.tokenizedText,
+                sourceLang: mainSourceLang,
+                fieldText: Utils.fromBase64(multilangRawTextEncoded),
+                status: Selectors.process.wait,
                 translation: '',
-                tokens: []
+                tokens: tokenised.expressions
             };
         };
         /**
@@ -237,10 +271,10 @@ define([
             rephrasesymbol = config.rephrasesymbol;
             const translations = [];
             const rephrases = [];
-            // We parse and check if it is a tranlsation or text improvment.
+            // We parse and check if it is a tranlsation or text improvement.
             keys.forEach((key) => {
                 const t = prepareTranslation(key);
-                if (config.canimprove && t.source_lang.includes(rephrasesymbol)) {
+                if (!config.isfree && t.source_lang.includes(rephrasesymbol)) {
                     delete t.source_lang;
                     Log.debug(`translation/x/callTranslations::t`);
                     Log.debug(t);
@@ -269,18 +303,20 @@ define([
             Log.info(response);
             const glossaries = [];
             response.forEach((tr) => {
+                let key = tr.key;
                 if (tr.error === '') {
                     // For now used glossary_id should, be the same for the batch,
                     // but it would make sense to use a single glossary for each text.
                     if (glossaries.indexOf(tr.glossary_id) === -1 && tr.glossary_id.trim() !== '') {
                         glossaries.push(tr.glossary_id);
                     }
-                    let key = tr.key;
                     let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
                     tempTranslations[key].editor.innerHTML = translation;
                     tempTranslations[key].translation = translation;
+                    tempTranslations[key].status = Selectors.process.tosave;
                     Events.emit(ON_ITEM_TRANSLATED, key);
                 } else {
+                    tempTranslations[key].status = Selectors.process.failed;
                     Events.emit(ON_TRANSLATION_FAILED, tr.error);
                 }
             });
@@ -301,12 +337,13 @@ define([
                     let rephrase = Tokeniser.postprocess(tr.text, tempTranslations[key].tokens);
                     tempTranslations[key].editor.innerHTML = rephrase;
                     tempTranslations[key].translation = rephrase;
+                    tempTranslations[key].status = Selectors.process.tosave;
                     Events.emit(ON_ITEM_TRANSLATED, key);
                 } else {
                     Events.emit(ON_REPHRASE_FAILED, tr.error);
                 }
             });
-             Events.emit(ON_TRANSLATION_DONE);
+            Events.emit(ON_TRANSLATION_DONE);
         };
         /**
          * When translation failed.
@@ -367,12 +404,6 @@ define([
             return se;
         };
         /**
-         * Check if the item is translatable.
-         */
-        const isTranslatable = () =>{
-            return targetLang !== '';
-        };
-        /**
          * Checks if translation is done.
          *
          * @param {string} key
@@ -391,6 +422,7 @@ define([
             Log.debug(key);
             Log.debug(tempTranslations[key]);
         };
+
         /**
          * IOne to start them all.
          *
@@ -413,8 +445,11 @@ define([
             initTempForKey: initTempForKey,
             initTemp: initTemp,
             setMainLangs: setMainLangs,
-            isTranslatable: isTranslatable,
             translated: translated,
+            updateTempSourceLang: updateTempSourceLang,
+            updateTempStatus: updateTempStatus,
+            updatTempStatusAll: updatTempStatusAll,
+            updateTempTokenized: updateTempTokenized,
             ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
             ON_DB_FAILED: ON_DB_FAILED,
             ON_ITEM_SAVED: ON_ITEM_SAVED,

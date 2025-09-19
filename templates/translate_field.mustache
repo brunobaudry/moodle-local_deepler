@@ -117,7 +117,10 @@
 <div title="{{rowtitle}}"
      class="{{cssclass}} d-flex align-items-start py-2"
      data-row-id="{{flagandkey}}"
-     data-status="{{status}}">
+     data-status="{{status}}"
+     data-process="{{process}}"
+     data-tid="{{tid}}"
+>
 <!--    col1 -->
     <div class="col-1 px-0 local_deepler__selectorbox">
         <small class="local_deepler__activityfield lh-sm">{{fieldtranslation}}</small><br>
@@ -132,13 +135,12 @@
                    data-action="local_deepler/checkbox"
                    disabled="">
         {{/iseditable}}
-
     </div>
 <!--    col2 -->
     <div class="col-5 px-0 pr-5 local_deepler__source-text"
          data-key="{{key}}">
         <span title="{{multilangtitlestring}}"
-              id="toggleMultilang"
+              data-action="local_deepler/toggleMultilang"
               aria-controls="{{keyid}}"
               aria-pressed="false"
               data-toggle="button"
@@ -162,13 +164,17 @@
             </span>
         {{/warnmaxlength}}
 
+
         <div class="collapse show"
-             data-sourcetext-key="{{key}}" 
+             data-action="local_deepler/sourcetext"
              data-sourcetext-raw="{{rawsourcetext}}"
              data-filedtext-raw="{{rawunfilterdtext}}">{{{mlangfiltered}}}
         </div>
-        <div class="collapse" id="{{keyid}}">
-            <div data-key="{{key}}" 
+<!--             id="{{keyid}}"-->
+        <div class="collapse" data-action="local_deepler/mlangsunfiltered"
+        >
+<!--                    data-key="{{key}}" -->
+            <div
                  data-action="local_deepler/textarea">{{{trimedtext}}}</div>
         </div>
     </div>
@@ -177,11 +183,7 @@
         <div class="col-5 px-0 local_deepler__translation"
              data-action="local_deepler/editor"
              data-key="{{key}}"
-             data-table="{{table}}"
-             data-cmid="{{cmid}}"
-             data-id="{{id}}"
-             data-field="{{tablefield}}"
-             data-tid="{{tid}}">
+             >
             {{#plaintextinput}}
                 <div class="format-{{fieldformat}} border py-2 px-3"
                      contenteditable="true"
@@ -200,19 +202,24 @@
                 {{^istiny}}
                     {{{cteditor}}}
                 {{/istiny}}
+
             {{/plaintextinput}}
-
-
         </div>
         <!--    status div-->
+             <!--data-key-validator="{{key}}"-->
         <div class="col-1 text-center"
-             data-key-validator="{{key}}">
-        <span class="disabled"
-              data-status="local_deepler/wait"
-              role="status"
-              aria-disabled="true">
-            <i class="fa"></i>
-        </span>
+             data-action="local_deepler/validator">
+                  <!--data-status="local_deepler/wait"-->
+            <span class="disabled"
+                  role="status"
+                  aria-disabled="true">
+                <i class="fa"></i>
+            </span>
+            <br/>
+            <span class="btn btn-outline-secondary"
+                  data-action="local_deepler/savesingle">
+                <i class="fa fa-save"></i>
+            </span>
         </div>
     {{/iseditable}}
 </div>

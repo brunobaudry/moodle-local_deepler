@@ -89,48 +89,58 @@ $languagepack = new lang_helper();
 try {
     field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
     $initok = $languagepack->initdeepl($USER, $version);
-    if ($initok && $languagepack->iscurrentsupported()) {
-        // Set js data.
-        $jsconfig = new stdClass();
-        // We get the version from the version dot php file.
-        $jsconfig->version = $version;
-        // Adds user ID for security checks in external calls.
-        $jsconfig->userid = $USER->id;
-        // Adds the user's prefered editor to the jsconfig.
-        $defaulteditor = strstr($CFG->texteditors, ',', true);
-        $userprefs = get_user_preferences();
-        $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
-        // Adds course id.
-        $jsconfig->courseid = $courseid;
-        // Add the debug setting for logger.
-        $jsconfig->debug = $CFG->debug;
-        // Adds the language settings strings to the jsconfig.
-        $jsconfig = $languagepack->prepareconfig($jsconfig);
-        // Pass the breadcrumbs subs max length to JS.
-        $jsconfig->crumbsmaxlen = get_config('local_deepler', 'breadcrumblength');
-        $jsconfig->cookieduration = get_config('local_deepler', 'cookieduration');
-        // Adding page JS.
-        $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
-        // Create the structure.
-        $coursedata = new course($course, $sectionid, $activityid);
-        // Build the page.
-        $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
-        echo $output->render($renderable);
+    if ($initok) {
+        if ($languagepack->iscurrentsupported()) {
+            // Set js data.
+            $jsconfig = new stdClass();
+            // We get the version from the version dot php file.
+            $jsconfig->version = $version;
+            // Adds user ID for security checks in external calls.
+            $jsconfig->userid = $USER->id;
+            // Adds the user's prefered editor to the jsconfig.
+            $defaulteditor = strstr($CFG->texteditors, ',', true);
+            $userprefs = get_user_preferences();
+            $jsconfig->userPrefs = $userprefs['htmleditor'] ?? $defaulteditor;
+            // Adds course id.
+            $jsconfig->courseid = $courseid;
+            // Add the debug setting for logger.
+            $jsconfig->debug = $CFG->debug;
+            // Adds the language settings strings to the jsconfig.
+            $jsconfig = $languagepack->prepareconfig($jsconfig);
+            // Pass the breadcrumbs subs max length to JS.
+            $jsconfig->crumbsmaxlen = get_config('local_deepler', 'breadcrumblength');
+            $jsconfig->cookieduration = get_config('local_deepler', 'cookieduration');
+            // Adding page JS.
+            $PAGE->requires->js_call_amd('local_deepler/deepler', 'init', [$jsconfig]);
+            // Create the structure.
+            $coursedata = new course($course, $sectionid, $activityid);
+            // Build the page.
+            $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
+            echo $output->render($renderable);
+        } else {
+            $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
+            echo $output->render($renderable);
+        }
     } else {
-        $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
-        echo $output->render($renderable);
+        switch ($languagepack->get_deeplexception()) {
+            case "AuthorizationException":
+                // Deepl could not be initialized.
+                $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
+                echo $output->render($renderable);
+                break;
+            default:
+                // Deepl cannot connect.
+                if ($languagepack->isapikeynoset()) {
+                    $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
+                } else {
+                    $renderable = new nodeepl_page(get_string('onomatopoeia', 'local_deepler'));
+                }
+                echo $output->render($renderable);
+                break;
+        }
     }
-} catch (AuthorizationException $e) {
-    // Deepl could not be initialized.
-    $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
-    echo $output->render($renderable);
 } catch (DeepLException $e) {
-    // Deepl cannot connect.
-    if ($languagepack->isapikeynoset()) {
-        $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
-    } else {
-        $renderable = new nodeepl_page(get_string('onomatopoeia', 'local_deepler'));
-    }
+    $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
     echo $output->render($renderable);
 }
 // Output footer.

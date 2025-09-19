@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use local_deepler\editor\MoodleQuickForm_cteditor;
 use renderable;
 use renderer_base;
 use templatable;
@@ -40,6 +41,8 @@ class row_data extends translate_data implements renderable, templatable {
      * @var int
      */
     private static $mlangtagadditional = 20;
+    /** @var \local_deepler\editor\MoodleQuickForm_cteditor */
+    public static MoodleQuickForm_cteditor $cteditor;
 
     /**
      * Construct.
@@ -52,6 +55,7 @@ class row_data extends translate_data implements renderable, templatable {
     public function __construct(field $field, lang_helper $languagepack, Multilang2TextFilter|text_filter $mlangfilter,
             string $editor) {
         parent::__construct($languagepack, $mlangfilter, $editor);
+
         $this->field = $field;
     }
 
@@ -76,7 +80,7 @@ class row_data extends translate_data implements renderable, templatable {
         $isdbkey = str_contains($this->field->get_table(), 'wiki_pages') && $this->field->get_tablefield() === 'title';
         $buttonclass = '';
         $titlestring = '';
-        $canrephrase = $this->languagepack->get_canimprove();
+        $canrephrase = $this->languagepack->canimprove();
         $sametargetassource = $this->languagepack->isrephrase();
         $targetlang = $this->languagepack->targetlang;
         $currentlang = $this->languagepack->currentlang;
@@ -137,11 +141,16 @@ class row_data extends translate_data implements renderable, templatable {
                 $warnmaxlength = false;
             }
         }
-
+        if ($this->editor !== 'tiny' && $fieldformat != 0) {
+            self::$cteditor->setAttributes(['id' => $key]);
+            $htmleditor = self::$cteditor->toHtml();
+        }
         return [
                 'badgeclass' => $badgeclass,
                 'buttonclass' => $buttonclass,
                 'cmid' => $this->field->get_cmid(),
+            //'cteditor' => '$htmleditor',
+                'cteditor' => $htmleditor ?? '',
                 'cssclass' => $cssclass,
                 'fieldformat' => $fieldformat,
                 'fieldtranslation' => multilanger::findfieldstring($this->field),
@@ -156,6 +165,7 @@ class row_data extends translate_data implements renderable, templatable {
                 'multilangdisabled' => $multilangdisabled,
                 'multilangtitlestring' => $multilangtitlestring,
                 'plaintextinput' => $fieldformat === 0,
+                'process' => 'local_deepler/wait',
             // Do Ajax.
                 'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
             // Do Ajax.

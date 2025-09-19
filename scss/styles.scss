@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*.local_deepler__translation img
+/**
  * @module     local_deepler/deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -125,7 +125,12 @@ $secondary: $gray-400 !default;
         background-color: $white !important; /* stylelint-disable-line declaration-no-important */
         margin-bottom: 1rem;
     }
-
+    div[data-row-id]:not([data-process="local_deepler/tosave"]) span[data-action="local_deepler/savesingle"]{
+        display: none !important;
+    }
+    div[data-row-id][data-process="local_deepler/tosave"] span[data-action="local_deepler/savesingle"]{
+        display: inline-block !important;
+    }
     .local_deepler__level0 {
         padding-left: 15px;
     }
@@ -190,7 +195,7 @@ $secondary: $gray-400 !default;
         border: 2px solid $green;
         border-radius: 6px;
     }
-
+/** REMOVE **/
     [data-status="local_deepler/success-message"] {
         background: $teal;
         font-size: 0.6rem;
@@ -202,39 +207,73 @@ $secondary: $gray-400 !default;
         right: 9px;
         border-radius: 4px;
     }
-
-    [data-status="local_deepler/wait"] i::before {
+    [data-process="local_deepler/wait"] [data-action="local_deepler/validator"] i::before {
         content: '\f141'; /*3 dots ellipse*/
         color: $gray-400;
     }
 
-    [data-status="local_deepler/totranslate"] i::before {
+    [data-process="local_deepler/totranslate"] [data-action="local_deepler/validator"] i::before {
         content: '\f251'; /* Sand icon*/
         color: $blue;
     }
 
-    [data-status="local_deepler/tosave"] i::before {
+    [data-process="local_deepler/tosave"] [data-action="local_deepler/validator"] i::before {
         content: '\f0c7'; /*floppy (save) icon*/
         color: $blue;
     }
 
-    [data-status="local_deepler/success"] i::before {
+    [data-process="local_deepler/success"] [data-action="local_deepler/validator"] i::before {
         content: '\f00c'; /*check  icon*/
         color: $green;
     }
 
-    [data-status="local_deepler/saved"] i::before {
+    [data-process="local_deepler/saved"] [data-action="local_deepler/validator"] i::before {
         content: '\f1c0'; /*database  icon*/
         color: $green;
     }
 
-    [data-status="local_deepler/failed"] i::before {
+    [data-process="local_deepler/failed"] [data-action="local_deepler/validator"] i::before {
         content: '\f071'; /*exclamation triangle icon*/
         color: $red;
     }
 
-    [data-status="local_deepler/error"] i::before {
+    [data-process="local_deepler/error"] [data-action="local_deepler/validator"] i::before {
         content: '\f1e2'; /*bomb icon*/
         color: $red;
     }
+   /* [data-status="local_deepler/wait"] i::before {
+        content: '\f141'; !*3 dots ellipse*!
+        color: $gray-400;
+    }
+
+    [data-status="local_deepler/totranslate"] i::before {
+        content: '\f251'; !* Sand icon*!
+        color: $blue;
+    }
+
+    [data-status="local_deepler/tosave"] i::before {
+        content: '\f0c7'; !*floppy (save) icon*!
+        color: $blue;
+    }
+
+    [data-status="local_deepler/success"] i::before {
+        content: '\f00c'; !*check  icon*!
+        color: $green;
+    }
+
+    [data-status="local_deepler/saved"] i::before {
+        content: '\f1c0'; !*database  icon*!
+        color: $green;
+    }
+
+    [data-status="local_deepler/failed"] i::before {
+        content: '\f071'; !*exclamation triangle icon*!
+        color: $red;
+    }
+
+    [data-status="local_deepler/error"] i::before {
+        content: '\f1e2'; !*bomb icon*!
+        color: $red;
+    }*/
+
 }

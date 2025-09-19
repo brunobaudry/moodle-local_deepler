@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use Exception;
 use renderable;
 use renderer_base;
 use templatable;
