@@ -6,10 +6,10 @@
     "grunt-contrib-sass": "^2.0.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-load-gruntfile": "^0.0.2",
-    "markdown-toc": "^1.2.0"
+    "markdown-toc": "^1.2.0",
+    "sass": "^1.92.1"
   },
   "dependencies": {
-    "caniuse-lite": "^1.0.30001737",
-    "sass": "^1.83.0"
+    "caniuse-lite": "^1.0.30001737"
   }
 }

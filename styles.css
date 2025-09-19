@@ -15,47 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
+ * Dedicated stylesheet v1.9.9 not loading.
  * @module     local_deepler/deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#page-local-deepler-translate {
-  /** REMOVE **/
-  /* [data-status="local_deepler/wait"] i::before {
-       content: '\f141'; !*3 dots ellipse*!
-       color: $gray-400;
-   }
-
-   [data-status="local_deepler/totranslate"] i::before {
-       content: '\f251'; !* Sand icon*!
-       color: $blue;
-   }
-
-   [data-status="local_deepler/tosave"] i::before {
-       content: '\f0c7'; !*floppy (save) icon*!
-       color: $blue;
-   }
-
-   [data-status="local_deepler/success"] i::before {
-       content: '\f00c'; !*check  icon*!
-       color: $green;
-   }
-
-   [data-status="local_deepler/saved"] i::before {
-       content: '\f1c0'; !*database  icon*!
-       color: $green;
-   }
-
-   [data-status="local_deepler/failed"] i::before {
-       content: '\f071'; !*exclamation triangle icon*!
-       color: $red;
-   }
-
-   [data-status="local_deepler/error"] i::before {
-       content: '\f1e2'; !*bomb icon*!
-       color: $red;
-   }*/
-}
 #page-local-deepler-translate #local_deepler-translate-header {
     z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
 }
@@ -174,6 +138,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     border: 2px solid #357a32;
     border-radius: 6px;
 }
+#page-local-deepler-translate {
+  /** REMOVE **/
+}
 #page-local-deepler-translate [data-status="local_deepler/success-message"] {
     background: #20c997;
     font-size: 0.6rem;
@@ -212,6 +179,42 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate [data-process="local_deepler/error"] [data-action="local_deepler/validator"] i::before {
     content: "\f1e2"; /*bomb icon*/
     color: #ca3120;
+}
+#page-local-deepler-translate {
+  /* [data-status="local_deepler/wait"] i::before {
+       content: '\f141'; !*3 dots ellipse*!
+       color: $gray-400;
+   }
+
+   [data-status="local_deepler/totranslate"] i::before {
+       content: '\f251'; !* Sand icon*!
+       color: $blue;
+   }
+
+   [data-status="local_deepler/tosave"] i::before {
+       content: '\f0c7'; !*floppy (save) icon*!
+       color: $blue;
+   }
+
+   [data-status="local_deepler/success"] i::before {
+       content: '\f00c'; !*check  icon*!
+       color: $green;
+   }
+
+   [data-status="local_deepler/saved"] i::before {
+       content: '\f1c0'; !*database  icon*!
+       color: $green;
+   }
+
+   [data-status="local_deepler/failed"] i::before {
+       content: '\f071'; !*exclamation triangle icon*!
+       color: $red;
+   }
+
+   [data-status="local_deepler/error"] i::before {
+       content: '\f1e2'; !*bomb icon*!
+       color: $red;
+   }*/
 }
 
 /*# sourceMappingURL=styles.css.map */

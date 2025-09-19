@@ -64,9 +64,9 @@ define([
                     crumbsmaxlen: cfg.crumbsmaxlen
                 }
             );
+            UI.init(cfg); // Register UI First.
             Settings.init(cfg);
             Translation.init(cfg);
-            UI.init(cfg);
             EventHandler.init(cfg);
             Log.info(cfg);
         };

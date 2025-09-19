@@ -21,13 +21,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(
-    ['./selectors',
+    [
+        './selectors',
     './utils',
         './uiHelpers',
     'core/log'
     ],
-    (Selectors,
-    Utils, UI, Log)=>{
+    (
+        Selectors,
+        Utils,
+        UI,
+        Log)=>{
         let config;
         let settingsUI = {};
         const registerUI = () => {
