@@ -19,7 +19,7 @@
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/version.php
  */
