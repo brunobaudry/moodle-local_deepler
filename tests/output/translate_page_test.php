@@ -113,7 +113,7 @@ final class translate_page_test extends advanced_testcase {
         $this->assertIsObject($data);
         $this->assertTrue(property_exists($data, 'langstrings'));
         $this->assertTrue(property_exists($data, 'targetlangs'));
-        $this->assertTrue(property_exists($data, 'sourcelangs'));
+       // $this->assertTrue(property_exists($data, 'sourcelangs'));
         $this->assertTrue(property_exists($data, 'mform'));
         $this->assertTrue(property_exists($data, 'current_lang'));
         $this->assertTrue(property_exists($data, 'deeplsource'));

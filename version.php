@@ -34,6 +34,6 @@ $plugin->version = 2025090300; // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires = 2023042400; // Requires Moodle 4.2.2.
 $plugin->supported = [402, 500]; // Supported Moodle Versions.
 $plugin->maturity = MATURITY_BETA; // Maturity level.
-$plugin->release = 'v1.9.7'; // Semantic Versioning for CHANGES.md.
+$plugin->release = 'v1.9.8'; // Semantic Versioning for CHANGES.md.
 // Dependencies.
 $plugin->dependencies = ['filter_multilang2' => 2020101300];
