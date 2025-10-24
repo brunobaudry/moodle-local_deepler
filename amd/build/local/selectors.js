@@ -1,0 +1,159 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * All UI selector strings.
+ * @module     local_deepler/deepler
+ * @file       amd/src/local/selectors.js
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+export default {
+    actions: {
+        corerowid: '[data-row-id]',
+        radioValues: '<RADIO>:checked',
+        validatorsBtns: 'div[data-action="local_deepler/validator"]',
+        // ValidatorsBtns: 'div[data-key-validator]',
+        // Validator: '[data-key-validator="<KEY>"]', // Unused in AMD folder
+        // validatorIcon: '[data-key-validator="<KEY>"] i', // Unused in AMD folder
+        validatorBtn: '[data-row-id="<KEY>"] [data-action="local_deepler/validator"] span',
+        checkBoxes: '[data-action="local_deepler/checkbox"]',
+        selectAllBtn: '[data-action="local_deepler/select-all"]',
+        saveSingle: '[data-action="local_deepler/savesingle"]',
+        sourceselect: '[data-action="local_deepler/sourceselect"]',
+        saveAll: '[data-action="local_deepler/saveall-btn"]',
+        autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+        // AutoTranslateBtnLang: '[data-action="local_deepler/autotranslate-btn"] span', // Unused in AMD folder
+        targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+        sectionSwitcher: '[data-action="local_deepler/section-switcher"]',
+        moduleSwitcher: '[data-action="local_deepler/module-switcher"]',
+        targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
+        // SourceSwitcher: '[data-action="local_deepler/source-switcher"]',
+        showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
+        showUpdated: '[data-action="local_deepler/show-updated"]',
+        showHidden: '[data-action="local_deepler/show-hidden"]',
+        escapeLatex: '[data-id="local_deepler/latexeascape"]',
+        escapePre: '[data-id="local_deepler/preescape"]',
+        // ToggleMultilang: '#toggleMultilang',
+        toggleMultilang: '[data-action="local_deepler/toggleMultilang"]',
+        // Letsdobutton: '[data-action="local_mlangremover/letsdobutton"]', // Unused in AMD folder
+        // removeRadios: '[name="local_mlangremover/removehow"]', // Unused in AMD folder
+        // removehow: '[name="local_mlangremover/removehow"]:checked', // Unused in AMD folder
+        hideiframes: '#local_deepler__hideiframes #hideiframes',
+        tothetop: '#local_deepler__tothetop',
+    },
+    process: {
+        wait: 'local_deepler/wait',
+        totranslate: 'local_deepler/totranslate',
+        tosave: 'local_deepler/tosave',
+        failed: 'local_deepler/failed',
+        success: 'local_deepler/success',
+        saved: 'local_deepler/saved'
+    },
+    statuses: {
+        // SourceTextWarings: '[data-status="sourceTextWarings"]', // Unused in AMD folder
+        checkedCheckBoxes: '[data-action="local_deepler/checkbox"]:checked',
+        updated: '[data-status="updated"]',
+        needsupdate: '[data-status="needsupdate"]',
+        hidden: '.local_deeplerinvisible',
+        // HiddenForStudentCheckboxes: '.local_deeplerinvisible input[type="checkbox"]', // Unused in AMD folder
+        hiddenForStudentRows: '.local_deeplerinvisible [data-row-id]',
+        // Keys: '[data-status-key="<KEY>"', // Unused in AMD folder
+        // successMessages: '[data-status="local_deepler/success-message"][data-key="<KEY>"]', // Unused in AMD folder
+        prevTransStatus: '[data-row-id="<KEY>"] span#previousTranslationStatus',
+        multilang: '[data-row-id="<KEY>"] span#toggleMultilang',
+        // Wait: 'local_deepler/wait',
+        // totranslate: 'local_deepler/totranslate',
+        // tosave: 'local_deepler/tosave',
+        // failed: 'local_deepler/failed',
+        // success: 'local_deepler/success',
+        // saved: 'local_deepler/saved',
+        wordcount: '#local_deepler__wc',
+        charNumWithOutSpace: '#local_deepler__wosc',
+        charNumWithSpace: '#local_deepler__wsc',
+        deeplUsage: '#local_deepler__used',
+        deeplMax: '#local_deepler__max',
+        deeplStatusContainer: '#local_deepler-translate-header-usage',
+        // AllMLangCkboxes: '#local_mlangremover__mlangtags', // Unused in AMD folder
+        // allMLangCkboxesNames: '[name="mlangsselected[]"]', // Unused in AMD folder
+        // selectedMLangCkboxes: '#local_mlangremover__mlangtags input[type="checkbox"]:checked', // Unused in AMD folder
+        // removetag: '#local_mlangremover__removetag', // Unused in AMD folder
+    },
+    editors: {
+        targetarea: '[data-format="1"]',
+        multiples: {
+            // CheckBoxesWithKey: 'input[type="checkbox"][data-key="<KEY>"]',
+            checkBoxesWithKey: '[data-row-id="<KEY>"] input[type="checkbox"][data-action="local_deepler/checkbox"]',
+            checkBoxesWithKeyHidden: '.local_deepler__form .d-none input[type="checkbox"][data-action="local_deepler/checkbox"]',
+            // EditorChilds: '[data-action="local_deepler/editor"][data-key="<KEY>"] > *', // Unused in AMD folder
+            // textAreas: '[data-action="local_deepler/textarea"][data-key="<KEY>"]',
+            textAreas: '[data-row-id="<KEY>"] [data-action="local_deepler/textarea"]',
+            // EditorsWithKey: '[data-action="local_deepler/editor"][data-key="<KEY>"]',
+            editorsWithKey: '[data-row-id="<KEY>"] [data-action="local_deepler/editor"]',
+            // ContentEditableKeys: '[data-key="<KEY>"] [contenteditable="true"]',
+            contentEditableKeys: '[data-row-id="<KEY>"] [data-action="local_deepler/editor"] [contenteditable="true"]',
+            // TextAreasResults: 'div[data-result-key="<KEY>"]', // Unused in AMD folder
+        },
+        types: {
+            basic: '[data-row-id="<KEY>"] [data-action="local_deepler/editor"] [contenteditable="true"]',
+            atto: '[data-row-id="<KEY>"] [data-action="local_deepler/editor"] [contenteditable="true"]',
+            other: '[data-row-id="<KEY>"] [data-action="local_deepler/editor"] textarea',
+            // Tiny: '[data-action="local_deepler/editor"][data-key="<KEY>"] iframe' // Unused in AMD folder
+        }
+    },
+    sourcetexts: {
+        // Keys: '[data-sourcetext-key="<KEY>"]',
+        singlelangkeys: '[data-row-id="<KEY>"] .local_deepler__source-text [data-action="local_deepler/sourcetext"]',
+        singlelang: '.local_deepler__source-text [data-action="local_deepler/sourcetext"]',
+        // Sourcelangs: '[data-key="<KEY>"].local_deepler__source-text select', // Unused in AMD folder
+        // sourcelangdd: '[data-key="<KEY>"][data-action="local_deepler/sourceselect"]',
+        sourcelangdd: '[data-row-id="<KEY>"] .local_deepler__source-text [data-action="local_deepler/sourceselect"]',
+        // Sourcelang: '#local_deepler__sourcelang strong', // Unused in AMD folder
+        // targetlang: '#local_deepler__targetlang strong', // Unused in AMD folder
+        // multilangs: '#<KEY>',
+        multilangskeys: '[data-row-id="<KEY>"] .local_deepler__source-text [data-action="local_deepler/mlangsunfiltered"]',
+        multilangs: '.local_deepler__source-text [data-action="local_deepler/mlangsunfiltered"]',
+        parentrow: '[data-row-id="<KEY>"]',
+        iframes: '.local_deepler__source-text iframe'
+    },
+    deepl: {
+        context: '[data-id="local_deepler/context"]',
+        nonSplittingTags: '[data-id="local_deepler/non_splitting_tags"]',
+        splittingTags: '[data-id="local_deepler/splitting_tags"]',
+        ignoreTags: '[data-id="local_deepler/ignore_tags"]',
+        preserveFormatting: '[data-id="local_deepler/preserve_formatting"]',
+        formality: '[name="local_deepler/formality"]',
+        glossaryId: '[data-id="local_deepler/glossary_id"]',
+        tagHandling: '[data-id="local_deepler/tag_handling"]',
+        outlineDetection: '[data-id="local_deepler/outline_detection"]',
+        splitSentences: '[name="local_deepler/split_sentences"]',
+        modelType: '[name="local_deepler/model_type"]',
+        toneorstyle: '[name="local_deepler/toneorstyle"]',
+    },
+    config: {
+        langstrings: '#local_deepler__stringscontainer',
+        main: '[role="main"]',
+        form: '.local_deepler__form',
+        advancedsettings: '[data-action="local_deepler/deepler_advancedsettings"]',
+        sourcetarget: '[data-action="local_deepler/deepler_sourcetarget"]',
+        activityfilter: '[data-action="local_deepler/deepler_activityfilter"]',
+        statusfilter: '[data-action="local_deepler/deepler_statusfilter"]',
+    },
+    glossary: {
+        visibilityDropdown: '[data-id="local_deepler/glossary_visibility"]',
+        entriesviewer: '[data-id="local_deepler/glossary_entriesviewer"]',
+        entriesviewerPage: '[data-id="local_deepler/glossary_entriesviewer_page"]',
+    }
+};
