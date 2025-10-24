@@ -18,58 +18,65 @@
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-/**
- * @type {[{regex: RegExp, type: string},{regex: RegExp, type: string}]}
- */
-const patterns = [
-    {regex: /<pre\b[^>]*>(.*?)<\/pre>/gs, type: 'PRETAG'}, // Pre HTML.
-    {regex: /\$\$.*?\$\$/g, type: 'LATEX'} // Display math.
-];
+define([], () => {
+    /**
+     * @type {[{regex: RegExp, type: string},{regex: RegExp, type: string}]}
+     */
+    const patterns = [
+        {regex: /<pre\b[^>]*>(.*?)<\/pre>/gs, type: 'PRETAG'}, // Pre HTML.
+        {regex: /\$\$.*?\$\$/g, type: 'LATEX'} // Display math.
+    ];
 
-/**
- * Function to replace expressions with tokens.
- * @param {String} text
- * @param {Object} escapePatterns
- * @returns {Object} {{expressions: *[], tokenizedText}}
- */
-export function preprocess(text, escapePatterns) {
-    const expressions = [];
-    let tokenizedText = text;
 
-    // Patterns for different environments.
-    // Replace each expression with a token.
-    patterns.forEach(pattern => {
-        if (escapePatterns[pattern.type]) {
-            tokenizedText = tokenizedText.replace(pattern.regex, match => {
-                const token = `__${pattern.type}_${expressions.length}__`;
-                expressions.push({token: token, expression: match});
-                return token;
-            });
-        }
-    });
+    /**
+     * Function to replace expressions with tokens.
+     * @param {String} text
+     * @param {Object} escapePatterns
+     * @returns {Object} {{expressions: *[], tokenizedText}}
+     */
+    const preprocess = (text, escapePatterns) => {
+        const expressions = [];
+        let tokenizedText = text;
 
-    return {tokenizedText, expressions: expressions};
-}
+        // Patterns for different environments.
+        // Replace each expression with a token.
+        patterns.forEach(pattern => {
+            if (escapePatterns[pattern.type]) {
+                tokenizedText = tokenizedText.replace(pattern.regex, match => {
+                    const token = `__${pattern.type}_${expressions.length}__`;
+                    expressions.push({token: token, expression: match});
+                    return token;
+                });
+            }
+        });
 
-/**
- * Function to replace tokens with original expressions.
- * @param {String} text
- * @param {Array} expressions
- * @returns {String}
- */
-export function postprocess(text, expressions) {
-    expressions.forEach((expr) => {
-        const token = new RegExp(expr.token, 'g');
-        text = text.replace(token, escapeReplacementString(expr.expression));
-    });
-    return text;
-}
+        return {tokenizedText, expressions: expressions};
+    };
 
-/**
- * Escape LaTeX tags.
- * @param {String} str
- * @returns {String}
- */
-export function escapeReplacementString(str) {
-    return str.replace(/\$/g, '$$$$');
-}
+    /**
+     * Function to replace tokens with original expressions.
+     * @param {String} text
+     * @param {Array} expressions
+     * @returns {String}
+     */
+    const postprocess = (text, expressions) => {
+        expressions.forEach((expr) => {
+            const token = new RegExp(expr.token, 'g');
+            text = text.replace(token, escapeReplacementString(expr.expression));
+        });
+        return text;
+    };
+
+    /**
+     * Escape LaTeX tags.
+     * @param {String} str
+     * @returns {String}
+     */
+    const escapeReplacementString = (str) => {
+        return str.replace(/\$/g, '$$$$');
+    };
+    return {
+        postprocess: postprocess,
+        preprocess: preprocess
+    };
+});
