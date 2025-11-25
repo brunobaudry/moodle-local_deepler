@@ -16,7 +16,7 @@
 
 namespace local_deepler\output;
 
-use core\output\html_writer;
+use html_writer;
 use local_deepler\local\services\utils;
 use moodle_url;
 use plugin_renderer_base;
@@ -150,7 +150,7 @@ class glossary_renderer extends plugin_renderer_base {
      * View entries link renderer.
      *
      * @param object $glo
-     * @return \core\output\action_icon|string
+     * @return \action_icon|string
      * @throws \coding_exception
      */
     private function generateentrieslink(object $glo) {

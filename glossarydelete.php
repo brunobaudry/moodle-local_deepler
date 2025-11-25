@@ -27,6 +27,7 @@ use DeepL\DeepLException;
 use local_deepler\local\services\lang_helper;
 
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/version.php');
 require_login();
 
 global $USER;
@@ -48,7 +49,7 @@ require_login();
 require_capability('local/deepler:edittranslations', $context);
 // Load glossary manager.
 $langhelper = new lang_helper();
-$langhelper->initdeepl($USER);
+$langhelper->initdeepl($USER, $plugin->release);
 
 if ($deletingglossary) {
     if (!confirm_sesskey()) {

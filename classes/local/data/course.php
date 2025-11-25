@@ -177,7 +177,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
             $this->sections[$sectioninfo->sectionnum ?? $sectioninfo->id] =
                     new section($sectioninfo, $this->format, $loadeddmodule);
             if ($this->loadedsectionid >= 0) {
-                $this->loadedsectionnum = $sectioninfo->sectionnum;
+                $this->loadedsectionnum = $sectioninfo->sectionnum??$sectioninfo->id;
             }
         }
     }

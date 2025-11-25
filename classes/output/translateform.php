@@ -24,6 +24,11 @@ use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
 use moodleform;
 use MoodleQuickForm;
+if (class_exists('\\core_filters\\text_filter')) {
+    class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+} else {
+    class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+}
 
 // Load the files we're going to need.
 require_once("$CFG->libdir/form/editor.php");
@@ -81,6 +86,7 @@ class translateform extends moodleform {
         $this->coursedata = $this->_customdata['coursedata'];
         // Get mlangfilter to filter text.
         $this->mlangfilter = $this->_customdata['mlangfilter'];
+
         field::$targetlangdeepl = $this->langpack->targetlang;
         // Start moodle form.
         $this->_form->disable_form_change_checker();

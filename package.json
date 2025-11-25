@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "caniuse-lite": "^1.0.30001737",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-eslint": "^26.0.0",
+    "grunt-shell": "^4.0.0",
     "sass": "^1.83.0"
   }
 }

@@ -116,8 +116,11 @@ try {
         // Build the page.
         $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
         echo $output->render($renderable);
-    } else {
+    } else if($initok) {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
+        echo $output->render($renderable);
+    }else{
+        $renderable = new badsettings_page(get_string('onomatopoeia', 'local_deepler'));
         echo $output->render($renderable);
     }
 } catch (AuthorizationException $e) {

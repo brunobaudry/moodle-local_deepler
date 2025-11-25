@@ -17,6 +17,7 @@
 namespace local_deepler\output;
 
 use core_courseformat\base;
+use core_filters\text_filter;
 use local_deepler\local\data\course;
 use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
@@ -24,7 +25,11 @@ use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
-
+if (class_exists('\\core_filters\\text_filter')) {
+    class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+} else {
+    class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+}
 /**
  * Translate Page Output.
  *
@@ -46,12 +51,13 @@ class translate_page implements renderable, templatable {
      * @var \local_deepler\local\data\course
      */
     private course $coursedata;
+
     /**
      * The current multilang filter object.
-     *
-     * @var mixed
+     * @var text_filter|Multilang2TextFilter
      */
-    private mixed $mlangfilter;
+    protected text_filter|Multilang2TextFilter $mlangfilter;
+
     /**
      * @var array|mixed
      */
@@ -125,7 +131,9 @@ class translate_page implements renderable, templatable {
         $data->anymoduleselected = false;
         if ($loadedsection >= 0) {
             $data->hasmodulelist = true;
-            $selectedsection = $this->coursedata->getsections()[$this->coursedata->get_loadedsectionnum()];
+            $coursedataloadedsectionnum = $this->coursedata->get_loadedsectionnum();
+            $coursedatasections = $this->coursedata->getsections();
+            $selectedsection = $coursedatasections[$coursedataloadedsectionnum];
             $data->anymoduleselected = $selectedsection->get_loadeddmoduleid() >= 0;
             $data->modulesidnames = $this->prepare_modulemenu($selectedsection->get_sectioncms(),
                     $selectedsection->get_loadeddmoduleid());
