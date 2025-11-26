@@ -61,6 +61,9 @@ module.exports = function(grunt) {
                 }
             },
             eslint: {
+                options: {
+                    overrideConfigFile: '.eslintrc.js' // Force Grunt to use this config
+                },
                 target: ['amd/src/**/*.js']
             },
             shell: {
