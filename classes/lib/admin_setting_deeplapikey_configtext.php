@@ -34,7 +34,7 @@ class admin_setting_deeplapikey_configtext extends admin_setting_configtext {
      * @param string $data
      * @return string|\lang_string|true true if ok string if error found
      */
-    public function validate($data): string|lang_string|boolean {
+    public function validate($data): string|lang_string|bool {
         // Skip validation during install/bootstrap phases.
         if (function_exists('during_initial_install') && during_initial_install()) {
             return true;
