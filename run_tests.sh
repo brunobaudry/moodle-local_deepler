@@ -37,7 +37,7 @@ for arg in "$@"; do
 done
 
 # Define the PHPUnit command
-phpunit_cmd="../../vendor/bin/phpunit --display-deprecated --colors --testsuite local_deepler_testsuite $show_deprecations"
+phpunit_cmd="../../vendor/bin/phpunit --colors --testsuite local_deepler_testsuite $show_deprecations"
 
 # Add filter if provided
 if [ -n "$test_filter" ]; then
