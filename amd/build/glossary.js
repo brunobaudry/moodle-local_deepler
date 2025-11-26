@@ -25,15 +25,18 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
     let version = '';
     const initCode = (cfg)=> {
         version = cfg;
-        window.console.log(version);
-        const fileInput = document.getElementById('fileElem');
-        const fileNameDisplay = document.getElementById('filename-display');
+        const fileInput = document.getElementById('local_deepler/fileElem');
+        const fileNameDisplay = document.getElementById('local_deepler/filename-display');
+        const createGloBtn = document.getElementById('local_deepler/createglossary');
 
         fileInput.addEventListener('change', function() {
+            Log.info("change");
             if (fileInput.files.length > 0) {
-                fileNameDisplay.textContent = `Selected file: ${fileInput.files[0].name}`;
+                fileNameDisplay.classList.remove('invisible');
+                createGloBtn.classList.remove('invisible');
             } else {
-                fileNameDisplay.textContent = '';
+                fileNameDisplay.classList.add('invisible');
+                createGloBtn.classList.add('invisible');
             }
         });
     };

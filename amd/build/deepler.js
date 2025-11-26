@@ -75,10 +75,8 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
                 activeRequests++;
                 ajaxStopFired = false;
                 this.addEventListener('readystatechange', function() {
-                    Log.log('readystatechange', this.readyState);
                     if (this.readyState === 4) {
                         activeRequests--;
-                        Log.log('readystatechange', activeRequests, ajaxStopFired);
                         if (activeRequests === 0 && !ajaxStopFired) {
                             ajaxStopFired = true;
                             onAjaxStop();

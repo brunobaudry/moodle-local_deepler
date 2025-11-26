@@ -39,13 +39,14 @@ use local_deepler\output\nodeepl_page;
 use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
-require_once(__DIR__ . '/../../config.php');
-require_once(__DIR__ . '/version.php');
-
 global $CFG;
 global $PAGE;
 global $DB;
 global $USER;
+
+require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/version.php');
+require_once($CFG->dirroot . '/filter/multilang2/filter.php'); // Ensure filter_multilang2 is available.
 
 // Needed vars for processing.
 try {
@@ -76,19 +77,19 @@ $output = $PAGE->get_renderer('local_deepler');
 echo $output->header();
 // Course name heading.
 
-// Normalize the filter class for all Moodle versions.
+
+// Normalize filter class.
 if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
     if (class_exists('\\core_filters\\text_filter')) {
         class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-    } else if (class_exists('\\moodle_text_filter')) {
-        class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-    } else {
+    } elseif (class_exists('\\filter_multilang2')) {
         class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
     }
 }
 
-// Now instantiate using the alias.
+// Instantiate the normalized class.
 $mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);
+
 
 echo $output->heading($mlangfilter->filter($course->fullname));
 $version = $plugin->release;

@@ -55,7 +55,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div class="glossary-upload">
     <h3>{{glossaryupload}} <i class="fas fa-question-circle"
                               data-bs-toggle="modal"
-                              data-bs-target="#helpModal" style="cursor: pointer;"></i>
+                              data-toggle="modal"
+                              data-bs-target="#helpModal"
+                              data-target="#helpModal"
+                              style="cursor: pointer;"></i>
     </h3>
     <form method="post" enctype="multipart/form-data" action="{{formaction}}">
         <input type="hidden" name="uploadinglossary" value="true" class="form-control">
@@ -64,7 +67,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <div class="form-row">
             <div class="col">
                 <input type="file"
-                       id="fileElem"
+                       id="local_deepler/fileElem"
                        name="glossaryfile"
                        accept="{{fileaccept}}"
                        class="form-control"
@@ -75,8 +78,11 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
             </div>
             <div class="col">
-                <button class="btn btn-primary">{{glossaryuploadbtn}}</button>
+                <span class="form-control-plaintext invisible" id="local_deepler/filename-display" ><i class="fas fa-check text-success"></i></span>
             </div>
+        </div>
+        <div class="form-row p-2">
+            <button class="btn btn-primary invisible" id="local_deepler/createglossary">{{glossaryuploadbtn}}</button>
         </div>
     </form>
 </div>
@@ -87,7 +93,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="helpModalLabel">{{glossaryhelpmodaltitle}}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">&times;</button>
             </div>
 
             <div class="modal-body">
@@ -105,7 +111,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{close}}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">{{close}}</button>
             </div>
         </div>
     </div>
