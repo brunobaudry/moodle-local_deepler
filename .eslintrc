@@ -1,5 +1,16 @@
 {
   "globals": {
     "tinymce": "readonly"
+  },
+  "env": {
+    "browser": true,
+    "amd": true
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "no-unused-vars": [
+      "warn"
+    ],
+    "no-undef": "error"
   }
 }
