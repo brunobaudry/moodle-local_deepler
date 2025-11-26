@@ -46,13 +46,23 @@ final class translate_page_test extends advanced_testcase {
     public function test_constructor(): void {
         $this->resetAfterTest();
         filter_set_global_state('multilang2', TEXTFILTER_ON);
-        if (!class_exists('\core_filters\text_filter')) {
-            // Create an alias for pre-4.5 versions.
-            class_alias(filter_multilang2::class, text_filter::class);
-            $mlangfilter = $this->createMock(filter_multilang2::class);
-        } else {
-            $mlangfilter = $this->createMock(text_filter::class);
+
+
+        // Normalize the filter class for all Moodle versions.
+        if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
+            if (class_exists('\\core_filters\\text_filter')) {
+                class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+            } elseif (class_exists('\\moodle_text_filter')) {
+                class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+            } else {
+                // Fallback for older versions using filter_multilang2.
+                class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+            }
         }
+
+        // Now always mock the alias, no need for version checks.
+        $mlangfilter = $this->createMock(\local_deepler\output\Multilang2TextFilter::class);
+
         $coursedata = $this->createMock(course::class);
         $languagepack = $this->createMock(lang_helper::class);
         $languagepack->currentlang = 'en';
