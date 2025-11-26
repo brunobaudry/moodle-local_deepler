@@ -40,12 +40,12 @@ class qtype_gapselect extends qbase {
         $choices = $DB->get_records('question_answers', ['question' => $this->question->id]);
         foreach ($choices as $answer) {
             $fields[] = new field(
-                    $answer->id,
-                    $answer->answer,
-                    0,
-                    'answer',
-                    'question_answers',
-                    $this->cmid
+                $answer->id,
+                $answer->answer,
+                0,
+                'answer',
+                'question_answers',
+                $this->cmid
             );
         }
         return $fields;

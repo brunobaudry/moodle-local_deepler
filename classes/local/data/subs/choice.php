@@ -18,7 +18,6 @@ namespace local_deepler\local\data\subs;
 
 use context_module;
 use local_deepler\local\data\field;
-use local_deepler\local\data\subs\subbase;
 
 /**
  * Sub for Choice activities.
@@ -42,12 +41,12 @@ class choice extends subbase {
         $choices = $DB->get_records($table, ['choiceid' => $this->cm->instance]);
         foreach ($choices as $choice) {
             $fields[] = new field(
-                    $choice->id,
-                    $choice->text,
-                    0,
-                    'text',
-                    $table,
-                    $this->cm->id
+                $choice->id,
+                $choice->text,
+                0,
+                'text',
+                $table,
+                $this->cm->id
             );
         }
         return $fields;

@@ -28,23 +28,10 @@ use lang_string;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class multilanger {
-    /**
-     * @var string[]
-     */
-    static public array $translatedfields = [];
-    /**
-     * @var string
-     */
+    /** @var string[] */
+    public static array $translatedfields = [];
+    /** @var string */
     private string $text;
-
-    /**
-     * Getter for main text
-     *
-     * @return string
-     */
-    public function get_text(): string {
-        return $this->text;
-    }
 
     /**
      * Constructor.
@@ -53,135 +40,6 @@ class multilanger {
      */
     public function __construct(string $field) {
         $this->text = $field;
-    }
-
-    /**
-     * As the title says.
-     *
-     * @return bool
-     */
-    public function has_multilangs(): bool {
-        return str_contains(mb_strtolower($this->text), '{mlang}');
-    }
-
-    /**
-     * Checks if field contains a mlang translation for the given code.
-     *
-     * @param string $code
-     * @return bool
-     */
-    public function has_multilangcode(string $code): bool {
-        $c = mb_strtolower($code);
-        return str_contains(mb_strtolower($this->text), "{mlang $c}");
-    }
-
-    /**
-     * Checks if field contains a mlang translation for the given code and 'other'.
-     *
-     * @param string $code
-     * @return bool
-     */
-    public function has_multilandcode_and_others(string $code): bool {
-        return $this->has_multilangcode($code) && $this->has_multilangcode('other');
-    }
-    /**
-     * Get the codes availables in the multilang filter.
-     *
-     * @return int[]|string[]
-     */
-    public function findmlangcodes(): array {
-        return array_keys($this->findmlangs());
-    }
-
-    /**
-     * Wraps code around initial text.
-     * Must not have mlang tags.
-     *
-     * @param string $code
-     * @throws \coding_exception
-     */
-    public function wrapmlang(string $code): void {
-        if ($this->has_multilangs()) {
-            throw new coding_exception('The field already has mlang tags. Use update_or_add_mlang instead.');
-        }
-        if ($this->has_multilangcode($code)) {
-            return;
-        }
-        $this->text = "{mlang $code}{$this->text}{mlang}";
-    }
-    /**
-     * Update the field text
-     *
-     * @param string $code
-     * @param string $text
-     * @return void
-     */
-    private function updatemlang(string $code, string $text): void {
-        $pattern = "/{mlang\s+{$code}\s*}(.*?){mlang\s*}/si";
-        $this->text = preg_replace($pattern, "{mlang $code}$text{mlang}", $this->text);
-    }
-
-    /**
-     * Only adds the mlang if it does not exist.
-     *
-     * @param string $code
-     * @param string $text
-     * @return void
-     */
-    public function update_or_add_mlang(string $code, string $text): void {
-        if ($this->has_multilangcode($code)) {
-            $this->updatemlang($code, $text);
-        } else {
-            $this->addmlang_ifothers($code, $text);
-        }
-    }
-
-    /**
-     * Add a mlang tag to the field text.
-     * Assuming the text filed already has mlangs but not this code's.
-     *
-     * @param string $code
-     * @param string $text
-     * @return void
-     */
-    private function addmlang_ifothers(string $code, string $text): void {
-        $needle = '{mlang}';
-        $pos = strrpos($this->text, $needle);
-        $update = "{mlang}{mlang $code}$text{mlang}";
-        $this->text = substr_replace($this->text, $update, $pos, strlen($needle));
-    }
-    /**
-     * Builds languages an array of string of iso codes or 'other'.
-     *
-     * @return array
-     */
-    public function findmlangs(): array {
-        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}.*?{mlang\s*})/si";
-        preg_match_all($pattern, $this->text, $matches);
-
-        $result = [];
-        foreach ($matches[2] as $index => $key) {
-            $result[$key] = $matches[1][$index];
-        }
-
-        return $result;
-    }
-
-    /**
-     * Builds languages an array of string of iso codes or 'other'.
-     *
-     * @return array
-     */
-    public function findmlangs_withouttags(): array {
-        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}(.*?){mlang\s*})/si";
-        preg_match_all($pattern, $this->text, $matches);
-
-        $result = [];
-        foreach ($matches[2] as $index => $key) {
-            $result[$key] = $matches[5][$index];
-        }
-
-        return $result;
     }
 
     /**
@@ -202,6 +60,41 @@ class multilanger {
             }
         }
         return $mlangs;
+    }
+
+    /**
+     * Getter for main text
+     *
+     * @return string
+     */
+    public function get_text(): string {
+        return $this->text;
+    }
+
+    /**
+     * Get the codes availables in the multilang filter.
+     *
+     * @return int[]|string[]
+     */
+    public function findmlangcodes(): array {
+        return array_keys($this->findmlangs());
+    }
+
+    /**
+     * Builds languages an array of string of iso codes or 'other'.
+     *
+     * @return array
+     */
+    public function findmlangs(): array {
+        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}.*?{mlang\s*})/si";
+        preg_match_all($pattern, $this->text, $matches);
+
+        $result = [];
+        foreach ($matches[2] as $index => $key) {
+            $result[$key] = $matches[1][$index];
+        }
+
+        return $result;
     }
 
     /**
@@ -272,16 +165,16 @@ class multilanger {
         $plugincomponent = isset($tableparts[1]) ? 'mod_' . $tableparts[0] : '';
 
         $candidates = [
-                ['identifier' => $fi, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
-                ['identifier' => $fi, 'component' => 'core'], // Standard Moodle core strings.
-                ['identifier' => $fi, 'component' => 'moodle'], // Standard Moodle core strings.
-                ['identifier' => $fi, 'component' => 'question'], // Standard Moodle core strings.
-                ['identifier' => $fi . 'n', 'component' => 'question'], // Standard Moodle core strings.
-                ['identifier' => $fi, 'component' => $ta], // Standard Moodle core strings.
-                ['identifier' => $ta . '_' . $fi, 'component' => $plugincomponent], // Common field patterns.
-                ['identifier' => $ta . '_' . $fi, 'component' => 'core'], // Common field patterns.
-                ['identifier' => $fi, 'component' => 'datafield_' . $fi], // Field type specific (data activity).
-                ['identifier' => $ta . $fi, 'component' => $plugincomponent], // Legacy patterns.
+            ['identifier' => $fi, 'component' => $plugincomponent], // Highest priority: Direct field name in plugin.
+            ['identifier' => $fi, 'component' => 'core'], // Standard Moodle core strings.
+            ['identifier' => $fi, 'component' => 'moodle'], // Standard Moodle core strings.
+            ['identifier' => $fi, 'component' => 'question'], // Standard Moodle core strings.
+            ['identifier' => $fi . 'n', 'component' => 'question'], // Standard Moodle core strings.
+            ['identifier' => $fi, 'component' => $ta], // Standard Moodle core strings.
+            ['identifier' => $ta . '_' . $fi, 'component' => $plugincomponent], // Common field patterns.
+            ['identifier' => $ta . '_' . $fi, 'component' => 'core'], // Common field patterns.
+            ['identifier' => $fi, 'component' => 'datafield_' . $fi], // Field type specific (data activity).
+            ['identifier' => $ta . $fi, 'component' => $plugincomponent], // Legacy patterns.
         ];
         foreach ($candidates as $candidate) {
             if (empty($candidate['component'])) {
@@ -293,6 +186,53 @@ class multilanger {
         }
 
         return $foundstring;
+    }
+
+    /**
+     * Checks if field contains a mlang translation for the given code and 'other'.
+     *
+     * @param string $code
+     * @return bool
+     */
+    public function has_multilandcode_and_others(string $code): bool {
+        return $this->has_multilangcode($code) && $this->has_multilangcode('other');
+    }
+
+    /**
+     * Checks if field contains a mlang translation for the given code.
+     *
+     * @param string $code
+     * @return bool
+     */
+    public function has_multilangcode(string $code): bool {
+        $c = mb_strtolower($code);
+        return str_contains(mb_strtolower($this->text), "{mlang $c}");
+    }
+
+    /**
+     * Wraps code around initial text.
+     * Must not have mlang tags.
+     *
+     * @param string $code
+     * @throws \coding_exception
+     */
+    public function wrapmlang(string $code): void {
+        if ($this->has_multilangs()) {
+            throw new coding_exception('The field already has mlang tags. Use update_or_add_mlang instead.');
+        }
+        if ($this->has_multilangcode($code)) {
+            return;
+        }
+        $this->text = "{mlang $code}{$this->text}{mlang}";
+    }
+
+    /**
+     * As the title says.
+     *
+     * @return bool
+     */
+    public function has_multilangs(): bool {
+        return str_contains(mb_strtolower($this->text), '{mlang}');
     }
 
     /**
@@ -317,4 +257,62 @@ class multilanger {
         $this->update_or_add_mlang($sourcecode, $text);
     }
 
+    /**
+     * Builds languages an array of string of iso codes or 'other'.
+     *
+     * @return array
+     */
+    public function findmlangs_withouttags(): array {
+        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}(.*?){mlang\s*})/si";
+        preg_match_all($pattern, $this->text, $matches);
+
+        $result = [];
+        foreach ($matches[2] as $index => $key) {
+            $result[$key] = $matches[5][$index];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Only adds the mlang if it does not exist.
+     *
+     * @param string $code
+     * @param string $text
+     * @return void
+     */
+    public function update_or_add_mlang(string $code, string $text): void {
+        if ($this->has_multilangcode($code)) {
+            $this->updatemlang($code, $text);
+        } else {
+            $this->addmlang_ifothers($code, $text);
+        }
+    }
+
+    /**
+     * Update the field text
+     *
+     * @param string $code
+     * @param string $text
+     * @return void
+     */
+    private function updatemlang(string $code, string $text): void {
+        $pattern = "/{mlang\s+{$code}\s*}(.*?){mlang\s*}/si";
+        $this->text = preg_replace($pattern, "{mlang $code}$text{mlang}", $this->text);
+    }
+
+    /**
+     * Add a mlang tag to the field text.
+     * Assuming the text filed already has mlangs but not this code's.
+     *
+     * @param string $code
+     * @param string $text
+     * @return void
+     */
+    private function addmlang_ifothers(string $code, string $text): void {
+        $needle = '{mlang}';
+        $pos = strrpos($this->text, $needle);
+        $update = "{mlang}{mlang $code}$text{mlang}";
+        $this->text = substr_replace($this->text, $update, $pos, strlen($needle));
+    }
 }

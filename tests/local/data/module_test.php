@@ -30,11 +30,6 @@ use ReflectionClass;
  * @covers     \local_deepler\local\data\module
  */
 final class module_test extends advanced_testcase {
-    /** @var \cm_info */
-    protected cm_info $cm;
-    /** @var \cm_info */
-    protected cm_info $cm2;
-
     /**
      * Test setup.
      *
@@ -169,4 +164,8 @@ final class module_test extends advanced_testcase {
 
         $this->assertEquals(get_string('pluginname', 'quiz'), $module->getpluginname());
     }
+    /** @var \cm_info */
+    protected cm_info $cm;
+    /** @var \cm_info */
+    protected cm_info $cm2;
 }

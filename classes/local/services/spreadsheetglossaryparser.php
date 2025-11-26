@@ -91,11 +91,12 @@ final class spreadsheetglossaryparser {
             $firstrow = $rows[0];
             [$cell1, $cell2] = $this->first_two_non_empty($firstrow);
 
-            if ($cell1 !== null && $cell2 !== null
-                    && $this->is_two_letter_code($cell1) && $this->is_two_letter_code($cell2)) {
+            if (
+                $cell1 !== null && $cell2 !== null && $this->is_two_letter_code($cell1) && $this->is_two_letter_code($cell2)
+            ) {
                 $languages = [
-                        'source' => strtolower($cell1),
-                        'target' => strtolower($cell2),
+                    'source' => strtolower($cell1),
+                    'target' => strtolower($cell2),
                 ];
                 $startindex = 1; // Skip header languages row.
             }

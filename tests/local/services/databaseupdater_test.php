@@ -26,7 +26,6 @@ use advanced_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class databaseupdater_test extends advanced_testcase {
-
     /**
      * Test update_records method.
      *
@@ -39,11 +38,11 @@ final class databaseupdater_test extends advanced_testcase {
         // Set up test data.
         $this->resetAfterTest(true);
         $data = [
-                'id' => 1,
-                'field' => 'fullname',
-                'text' => 'Updated Name',
-                'table' => 'course',
-                'tid' => 1,
+            'id' => 1,
+            'field' => 'fullname',
+            'text' => 'Updated Name',
+            'table' => 'course',
+            'tid' => 1,
         ];
         $response = [];
 

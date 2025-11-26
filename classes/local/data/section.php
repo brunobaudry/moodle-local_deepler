@@ -31,7 +31,7 @@ use section_info;
  * @copyright  2025 bruno.baudry@bfh.ch
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class section implements translatable_interface, editable_interface, visibility_interface {
+class section implements editable_interface, translatable_interface, visibility_interface {
     /** @var \section_info */
     private section_info $si;
     /** @var \core_courseformat\base */
@@ -111,7 +111,7 @@ class section implements translatable_interface, editable_interface, visibility_
      * @return bool
      */
     public function is_empty(): bool {
-        return empty ($this->get_modules()) && empty($this->getfields());
+        return empty($this->get_modules()) && empty($this->getfields());
     }
 
     /**
@@ -221,5 +221,4 @@ class section implements translatable_interface, editable_interface, visibility_
         }
         return $result;
     }
-
 }

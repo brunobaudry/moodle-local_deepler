@@ -25,11 +25,13 @@ use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
+
 if (class_exists('\\core_filters\\text_filter')) {
     class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
 } else {
     class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
 }
+
 /**
  * Translate Page Output.
  *
@@ -42,40 +44,6 @@ if (class_exists('\\core_filters\\text_filter')) {
  */
 class translate_page implements renderable, templatable {
     /**
-     * @var string
-     */
-    private string $version;
-    /**
-     * The data of the course parsed from mod_info.
-     *
-     * @var \local_deepler\local\data\course
-     */
-    private course $coursedata;
-
-    /**
-     * The current multilang filter object.
-     * @var text_filter|Multilang2TextFilter
-     */
-    protected text_filter|Multilang2TextFilter $mlangfilter;
-
-    /**
-     * @var array|mixed
-     */
-    private mixed $langpacks;
-    /**
-     * The form to display the row UI.
-     *
-     * @var translateform
-     */
-    private translateform $mform;
-    /**
-     * @var \renderer_base
-     */
-    private renderer_base $output;
-    /** @var string */
-    private string $editor;
-
-    /**
      * Class Construct.
      *
      * @param \local_deepler\local\data\course $coursedata
@@ -84,16 +52,22 @@ class translate_page implements renderable, templatable {
      * @param string $version
      * @param string $editor
      */
-    public function __construct(course $coursedata, mixed $mlangfilter, lang_helper $languagepack, string $version,
-            string $editor) {
+    public function __construct(
+        course $coursedata,
+        mixed $mlangfilter,
+        lang_helper $languagepack,
+        string $version,
+        string $editor
+    ) {
         $this->version = $version;
         $this->coursedata = $coursedata;
         $this->langpacks = $languagepack;
         $this->mlangfilter = $mlangfilter;
         // Moodle Form.
-        $mform = new translateform(null, ['coursedata' => $coursedata, 'mlangfilter' => $mlangfilter,
-                'langpack' => $languagepack, 'editor' => $editor,
-        ]);
+        $mform = new translateform(
+            null,
+            ['coursedata' => $coursedata, 'mlangfilter' => $mlangfilter, 'langpack' => $languagepack, 'editor' => $editor]
+        );
         $this->mform = $mform;
     }
 
@@ -107,10 +81,9 @@ class translate_page implements renderable, templatable {
      * @throws \dml_exception
      */
     public function export_for_template(renderer_base $output): stdClass {
-
         $this->output = $output;
         $data = new stdClass();
-        // Data for mustache template.
+        // Data for the mustache template.
         $data->langstrings = $this->langpacks->preparestrings();
         $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
         $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
@@ -124,8 +97,11 @@ class translate_page implements renderable, templatable {
         $loadedsection = $this->coursedata->get_loadedsection();
         $data->nosectionsloaded = $loadedsection === -99;
         $data->allselected = $loadedsection === -1;
-        $data->sectionidnames = $this->prepare_sectionmenu($this->coursedata->get_sectioninfoall(), $loadedsection,
-                $this->coursedata->get_format());
+        $data->sectionidnames = $this->prepare_sectionmenu(
+            $this->coursedata->get_sectioninfoall(),
+            $loadedsection,
+            $this->coursedata->get_format()
+        );
         $data->hasmodulelist = false;
         $data->modulesidnames = null;
         $data->anymoduleselected = false;
@@ -135,8 +111,10 @@ class translate_page implements renderable, templatable {
             $coursedatasections = $this->coursedata->getsections();
             $selectedsection = $coursedatasections[$coursedataloadedsectionnum];
             $data->anymoduleselected = $selectedsection->get_loadeddmoduleid() >= 0;
-            $data->modulesidnames = $this->prepare_modulemenu($selectedsection->get_sectioncms(),
-                    $selectedsection->get_loadeddmoduleid());
+            $data->modulesidnames = $this->prepare_modulemenu(
+                $selectedsection->get_sectioncms(),
+                $selectedsection->get_loadeddmoduleid()
+            );
         }
         $data->current_lang = $this->langpacks->currentlang;
         $data->deeplsource = $this->langpacks->get_deeplsourcelang();
@@ -161,8 +139,11 @@ class translate_page implements renderable, templatable {
         $poolglossaries = $this->langpacks->getpoolglossaries($glossaries) ?? [];
         $publicglossaries = $this->langpacks->getpublicglossaries() ?? [];
         $glo = array_merge($glossaries, $publicglossaries, $poolglossaries);
-        $data->glossayselector = $glorenderer->glossay_selector_deepl($glo,
-                $this->langpacks->getcurrentlang(true), $this->langpacks->gettargetlang(true));
+        $data->glossayselector = $glorenderer->glossay_selector_deepl(
+            $glo,
+            $this->langpacks->getcurrentlang(true),
+            $this->langpacks->gettargetlang(true)
+        );
         return $data;
     }
 
@@ -183,9 +164,9 @@ class translate_page implements renderable, templatable {
             }
             unset($tmp);
             $menu[] = [
-                    'id' => $section->id,
-                    'name' => $this->mlangfilter->filter($section->name ?? $format->get_default_section_name($section)),
-                    'selected' => $section->id == $selectedid,
+                'id' => $section->id,
+                'name' => $this->mlangfilter->filter($section->name ?? $format->get_default_section_name($section)),
+                'selected' => $section->id == $selectedid,
             ];
         }
         return $menu;
@@ -202,12 +183,45 @@ class translate_page implements renderable, templatable {
         $menu = [];
         foreach ($modules as $module) {
             $menu[] =
-                    [
-                            'id' => $module->id,
-                            'name' => $this->mlangfilter->filter($module->name),
-                            'selected' => $module->id == $selectedid,
-                    ];
+                [
+                    'id' => $module->id,
+                    'name' => $this->mlangfilter->filter($module->name),
+                    'selected' => $module->id == $selectedid,
+                ];
         }
         return $menu;
     }
+
+    /**
+     * @var string
+     */
+    private string $version;
+    /**
+     * The data of the course parsed from mod_info.
+     *
+     * @var \local_deepler\local\data\course
+     */
+    private course $coursedata;
+    /**
+     * The current multilang filter object.
+     *
+     * @var text_filter|Multilang2TextFilter
+     */
+    protected text_filter|Multilang2TextFilter $mlangfilter;
+    /**
+     * @var array|mixed
+     */
+    private mixed $langpacks;
+    /**
+     * The form to display the row UI.
+     *
+     * @var translateform
+     */
+    private translateform $mform;
+    /**
+     * @var \renderer_base
+     */
+    private renderer_base $output;
+    /** @var string */
+    private string $editor;
 }

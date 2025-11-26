@@ -70,7 +70,6 @@ function xmldb_local_deepler_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022050300, 'local', 'deepler');
     }
     if ($oldversion < 2025043004) {
-
         // Define table local_deepler to be created.
         $table = new xmldb_table('local_deepler');
         // Clear the index to update the field.
@@ -90,7 +89,6 @@ function xmldb_local_deepler_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025043004, 'local', 'deepler');
     }
     if ($oldversion < 2025070202) {
-
         // Define table local_deepler_tokens to be created.
         $table = new xmldb_table('local_deepler_tokens');
 
@@ -116,7 +114,6 @@ function xmldb_local_deepler_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025070202, 'local', 'deepler');
     }
     if ($oldversion < 2025080800) {
-
         // Define table local_deepler_glossaries.
         $table = new xmldb_table('local_deepler_glossaries');
 

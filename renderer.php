@@ -27,7 +27,6 @@ use plugin_renderer_base;
  * @see        https://docs.moodle.org/dev/Output_API
  */
 class renderer extends plugin_renderer_base {
-
     /**
      * Render Translate Content Page.
      *

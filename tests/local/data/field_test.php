@@ -29,7 +29,6 @@ use stdClass;
  * @coversDefaultClass \local_deepler\local\data\field
  */
 final class field_test extends advanced_testcase {
-
     /**
      * Test the constructor and basic getters.
      *
@@ -117,26 +116,26 @@ final class field_test extends advanced_testcase {
         $DB = $this->getMockBuilder(stdClass::class)->addMethods(['get_columns'])->getMock();
 
         $mockcolumns = [
-                'id' => (object) [
-                        'name' => 'id',
-                        'meta_type' => 'R',
-                        'max_length' => 10,
-                ],
-                'name' => (object) [
-                        'name' => 'name',
-                        'meta_type' => 'C',
-                        'max_length' => 255,
-                ],
-                'description' => (object) [
-                        'name' => 'description',
-                        'meta_type' => 'X',
-                        'max_length' => -1,
-                ],
-                'smalltext' => (object) [
-                        'name' => 'smalltext',
-                        'meta_type' => 'C',
-                        'max_length' => 50,
-                ],
+            'id' => (object) [
+                'name' => 'id',
+                'meta_type' => 'R',
+                'max_length' => 10,
+            ],
+            'name' => (object) [
+                'name' => 'name',
+                'meta_type' => 'C',
+                'max_length' => 255,
+            ],
+            'description' => (object) [
+                'name' => 'description',
+                'meta_type' => 'X',
+                'max_length' => -1,
+            ],
+            'smalltext' => (object) [
+                'name' => 'smalltext',
+                'meta_type' => 'C',
+                'max_length' => 50,
+            ],
         ];
 
         $DB->expects($this->once())->method('get_columns')->with('testtable')->willReturn($mockcolumns);
@@ -154,11 +153,11 @@ final class field_test extends advanced_testcase {
      */
     public function test_getfieldsfromcolumns(): void {
         $info = (object) [
-                'id' => 1,
-                'name' => 'Test Name',
-                'description' => 'Test Description',
-                'descriptionformat' => 1,
-                'empty' => '',
+            'id' => 1,
+            'name' => 'Test Name',
+            'description' => 'Test Description',
+            'descriptionformat' => 1,
+            'empty' => '',
         ];
 
         $columns = ['name' => [], 'description' => [], 'empty' => []];

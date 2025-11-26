@@ -18,7 +18,6 @@ namespace local_deepler\local\data\subs;
 
 use context_module;
 use local_deepler\local\data\field;
-use local_deepler\local\data\subs\subbase;
 
 /**
  * Sub for Glossary activities.
@@ -42,21 +41,22 @@ class glossary extends subbase {
         $entries = $DB->get_records($table, ['glossaryid' => $this->cm->instance]);
         foreach ($entries as $entry) {
             $fields[] = new field(
-                    $entry->id,
-                    $entry->concept,
-                    0,
-                    'concept',
-                    $table,
-                    $this->cm->id
+                $entry->id,
+                $entry->concept,
+                0,
+                'concept',
+                $table,
+                $this->cm->id
             );
             if ($entry->definition) {
                 $fields[] = new field(
-                        $entry->id,
-                        $entry->definition,
-                        1,
-                        'definition',
-                        $table,
-                        $this->cm->id);
+                    $entry->id,
+                    $entry->definition,
+                    1,
+                    'definition',
+                    $table,
+                    $this->cm->id
+                );
             }
         }
         return $fields;

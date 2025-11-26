@@ -20,14 +20,13 @@ use context_course;
 use context_module;
 use core\context;
 use core\output\action_icon;
-use filter_multilang2;
-use filter_multilang2\text_filter;
-use html_writer;
 use core\output\pix_icon;
 use core_plugin_manager;
 use Exception;
+use filter_multilang2;
+use filter_multilang2\text_filter;
+use html_writer;
 use local_deepler\local\data\field;
-use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 
 /**
@@ -46,14 +45,15 @@ class utils {
      * List of bg colors for highlighting.
      */
     const COLORS = [
-            'FloralWhite',
-            'Lavender',
-            'LightYellow',
-            'MintCream',
-            'Honeydew',
-            'AliceBlue', 'GhostWhite',
-            'Ivory',
+        'FloralWhite',
+        'Lavender',
+        'LightYellow',
+        'MintCream',
+        'Honeydew',
+        'AliceBlue', 'GhostWhite',
+        'Ivory',
     ];
+
     /**
      * Generate a color index for a given array.
      *
@@ -67,6 +67,7 @@ class utils {
         }
         return $t;
     }
+
     /**
      * Unified file URL resolver with context-aware processing.
      *
@@ -82,41 +83,40 @@ class utils {
             $filearea = $field->get_tablefield();
             // Get first valid file for metadata.
             $files = $fs->get_area_files(
-                    $contextinfo['contextid'],
-                    $contextinfo['component'],
-                    $contextinfo['filearea'] ?? $filearea,
-                    $contextinfo['itemid'],
-                    'id',
-                    false
+                $contextinfo['contextid'],
+                $contextinfo['component'],
+                $contextinfo['filearea'] ?? $filearea,
+                $contextinfo['itemid'],
+                'id',
+                false
             );
 
             if ($files) {
                 $firstfile = reset($files);
                 return file_rewrite_pluginfile_urls(
-                        $text,
-                        'pluginfile.php',
-                        $firstfile->get_contextid(),
-                        $firstfile->get_component(),
-                        $firstfile->get_filearea(),
-                        $firstfile->get_itemid()
+                    $text,
+                    'pluginfile.php',
+                    $firstfile->get_contextid(),
+                    $firstfile->get_component(),
+                    $firstfile->get_filearea(),
+                    $firstfile->get_itemid()
                 );
             } else {
                 // Fallback to context-based rewrite.
                 switch ($filearea) {
-                    case 'intro' :
+                    case 'intro':
                         $contextinfo['itemid'] = null;
                         break;
                 }
                 return file_rewrite_pluginfile_urls(
-                        $text,
-                        'pluginfile.php',
-                        $contextinfo['contextid'],
-                        $contextinfo['component'],
-                        $contextinfo['filearea'] ?? $filearea,
-                        $contextinfo['itemid']
+                    $text,
+                    'pluginfile.php',
+                    $contextinfo['contextid'],
+                    $contextinfo['component'],
+                    $contextinfo['filearea'] ?? $filearea,
+                    $contextinfo['itemid']
                 );
             }
-
         } catch (Exception $e) {
             return $text; // Fail gracefully.
         }
@@ -137,35 +137,35 @@ class utils {
             case 'course':
                 $context = context_course::instance($itemid);
                 return [
-                        'context' => $context,
-                        'contextid' => $context->id,
-                        'component' => 'course',
-                        'itemid' => null,
+                    'context' => $context,
+                    'contextid' => $context->id,
+                    'component' => 'course',
+                    'itemid' => null,
                 ];
 
             case 'course_sections':
                 $courseid = $DB->get_field('course_sections', 'course', ['id' => $itemid]);
                 return [
-                        'context' => context_course::instance($courseid),
-                        'contextid' => context_course::instance($courseid)->id,
-                        'component' => 'course',
-                        'filearea' => 'section',
-                        'itemid' => $itemid,
+                    'context' => context_course::instance($courseid),
+                    'contextid' => context_course::instance($courseid)->id,
+                    'component' => 'course',
+                    'filearea' => 'section',
+                    'itemid' => $itemid,
                 ];
             case 'question':
                 return [
-                        'context' => context_module::instance($cmid),
-                        'contextid' => $cmid,
-                        'component' => 'qtype_' . $table,
-                        'itemid' => $itemid,
+                    'context' => context_module::instance($cmid),
+                    'contextid' => $cmid,
+                    'component' => 'qtype_' . $table,
+                    'itemid' => $itemid,
                 ];
             default: // Activity modules.
                 $context = context_module::instance($cmid);
                 return [
-                        'context' => $context,
-                        'contextid' => $context->id,
-                        'component' => 'mod_' . $table,
-                        'itemid' => $cmid,
+                    'context' => $context,
+                    'contextid' => $context->id,
+                    'component' => 'mod_' . $table,
+                    'itemid' => $cmid,
                 ];
         }
     }
@@ -198,29 +198,6 @@ class utils {
     }
 
     /**
-     * Returns an array of standard user fields for token mapping.
-     *
-     * @return array
-     * @throws \coding_exception
-     */
-    public static function standard_user_fields(): array {
-        return [
-                'username' => get_string('username'),
-                'email' => get_string('email'),
-                'firstname' => get_string('firstname'),
-                'lastname' => get_string('lastname'),
-                'city' => get_string('city'),
-                'country' => get_string('country'),
-                'institution' => get_string('institution'),
-                'department' => get_string('department'),
-                'phone1' => get_string('phone1'),
-                'phone2' => get_string('phone2'),
-                'address' => get_string('address'),
-                'idnumber' => get_string('idnumber'),
-        ];
-    }
-
-    /**
      * Returns an array of all available user fields (standard + custom profile fields).
      *
      * @param \core\context $context
@@ -241,6 +218,29 @@ class utils {
             $fields['profile_field_' . $field->shortname] = $mlangfilter->filter($field->name);
         }
         return $fields;
+    }
+
+    /**
+     * Returns an array of standard user fields for token mapping.
+     *
+     * @return array
+     * @throws \coding_exception
+     */
+    public static function standard_user_fields(): array {
+        return [
+            'username' => get_string('username'),
+            'email' => get_string('email'),
+            'firstname' => get_string('firstname'),
+            'lastname' => get_string('lastname'),
+            'city' => get_string('city'),
+            'country' => get_string('country'),
+            'institution' => get_string('institution'),
+            'department' => get_string('department'),
+            'phone1' => get_string('phone1'),
+            'phone2' => get_string('phone2'),
+            'address' => get_string('address'),
+            'idnumber' => get_string('idnumber'),
+        ];
     }
 
     /**
@@ -290,9 +290,9 @@ class utils {
         } else {
             // Fallback for older Moodle versions.
             return html_writer::empty_tag('img', array_merge([
-                    'src' => $CFG->wwwroot . "/pix/$component/$icon.png",
-                    'alt' => $alt,
-                    'class' => 'icon',
+                'src' => $CFG->wwwroot . "/pix/$component/$icon.png",
+                'alt' => $alt,
+                'class' => 'icon',
             ], $attributes));
         }
     }
@@ -308,8 +308,13 @@ class utils {
      * @return \action_icon|string
      * @throws \core\exception\moodle_exception
      */
-    public static function local_deepler_get_action_icon(mixed $url,
-            string $iconname, string $tooltip = '', string $component = 'core', array $attributes = []) {
+    public static function local_deepler_get_action_icon(
+        mixed $url,
+        string $iconname,
+        string $tooltip = '',
+        string $component = 'core',
+        array $attributes = []
+    ) {
         global $OUTPUT;
 
         // Ensure $url is a moodle_url object.
@@ -324,13 +329,12 @@ class utils {
         } else {
             // Fallback for older Moodle versions.
             $iconhtml = html_writer::empty_tag('img', array_merge([
-                    'src' => $OUTPUT->image_url($iconname, $component),
-                    'alt' => $tooltip,
-                    'class' => 'icon',
+                'src' => $OUTPUT->image_url($iconname, $component),
+                'alt' => $tooltip,
+                'class' => 'icon',
             ], $attributes));
 
             return html_writer::link($url->out(false), $iconhtml, ['title' => $tooltip]);
         }
     }
-
 }

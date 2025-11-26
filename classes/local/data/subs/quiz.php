@@ -83,30 +83,11 @@ JOIN {question_references} qr ON qr.component = 'mod_quiz' AND qr.questionarea =
 JOIN {question_versions} qv ON qv.questionbankentryid = qr.questionbankentryid
 JOIN {question} q ON q.id = qv.questionid
 WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
-
         } else {
             $quizsettings = quiz_settings::create($quiz->instance);
             $structure = structure::create_for_quiz($quizsettings);
             return $structure->get_slots();
         }
-    }
-
-    /**
-     * Get the child fields.
-     *
-     * @return array
-     */
-    public function getchilds(): array {
-        $childs = [];
-        /** @var \question_definition $question */
-        foreach ($this->questions as $question) {
-            $params = [
-                    'question' => $question,
-                    'cmid' => $this->quiz->id,
-            ];
-            $childs[] = field::createclassfromstring('questions\qtype_basic', $params);
-        }
-        return $childs;
     }
 
     /**
@@ -120,23 +101,23 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         global $DB;
         // Retrieve category and filter parameters.
         $reference = $DB->get_record('question_set_references', [
-                'component' => 'mod_quiz',
-                'questionarea' => 'slot',
-                'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot',
+            'itemid' => $slotid,
         ], '*', MUST_EXIST);
         // Decode filter condition.
         $filter = json_decode($reference->filtercondition);
         // Initialize category information.
         $categoryconfig = [
-                'primary_category' => null,
-                'includesubcategories' => false,
+            'primary_category' => null,
+            'includesubcategories' => false,
         ];
 
         // Modern format detection.
         if (isset($filter->filter->category)) {
             $categoryconfig['primary_category'] = (int) $filter->filter->category->values[0];
             $categoryconfig['includesubcategories'] =
-                    (bool) ($filter->filter->category->filteroptions->includesubcategories ?? false);
+                (bool) ($filter->filter->category->filteroptions->includesubcategories ?? false);
         } else if (isset($filter->cat)) {
             // Legacy format fallback.
             $categories = array_map('intval', explode(',', $filter->cat));
@@ -145,21 +126,40 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         }
         // Output structure matches modern API.
         $result = [
-                'questioncategoryid' => $categoryconfig['primary_category'],
-                'includesubcategories' => $categoryconfig['includesubcategories'],
-                'tags' => $filter->tags ?? [],
+            'questioncategoryid' => $categoryconfig['primary_category'],
+            'includesubcategories' => $categoryconfig['includesubcategories'],
+            'tags' => $filter->tags ?? [],
         ];
 
         // Get all short-answer questions in target category.
         $finder = question_bank::get_finder();
         $questions = $finder->get_questions_from_categories(
-                $result['questioncategoryid'],
-                $result['includesubcategories'],
-                $result['tags']);
+            $result['questioncategoryid'],
+            $result['includesubcategories'],
+            $result['tags']
+        );
 
         // Load full question objects.
         foreach ($questions as $question) {
             $this->questions[] = question_bank::load_question($question);
         }
+    }
+
+    /**
+     * Get the child fields.
+     *
+     * @return array
+     */
+    public function getchilds(): array {
+        $childs = [];
+        /** @var \question_definition $question */
+        foreach ($this->questions as $question) {
+            $params = [
+                'question' => $question,
+                'cmid' => $this->quiz->id,
+            ];
+            $childs[] = field::createclassfromstring('questions\qtype_basic', $params);
+        }
+        return $childs;
     }
 }

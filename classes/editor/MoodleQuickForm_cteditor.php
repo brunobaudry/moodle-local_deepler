@@ -29,7 +29,6 @@ use MoodleQuickForm_editor;
  * TODO MDL-0 allow user to change default editor.
  */
 class MoodleQuickForm_cteditor extends MoodleQuickForm_editor {
-
     /**
      * Course Translation Editor Setup.
      *

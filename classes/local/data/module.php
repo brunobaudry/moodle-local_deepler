@@ -31,7 +31,7 @@ use moodle_url;
  * @copyright 2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class module implements translatable_interface, editable_interface, iconic_interface, visibility_interface {
+class module implements editable_interface, iconic_interface, translatable_interface, visibility_interface {
     /** @var \cm_info */
     private cm_info $cm;
 
@@ -48,14 +48,6 @@ class module implements translatable_interface, editable_interface, iconic_inter
     /** @var array */
     private array $childs;
 
-    /**
-     * Getter fo CM.
-     *
-     * @return \cm_info
-     */
-    public function get_cm(): cm_info {
-        return $this->cm;
-    }
     /**
      * Constructor
      *
@@ -78,6 +70,18 @@ class module implements translatable_interface, editable_interface, iconic_inter
     }
 
     /**
+     * Prepare the purpose of the module.
+     *
+     * @return void
+     */
+    private function makepurpose(): void {
+        $purpose = call_user_func($this->modname . '_supports', FEATURE_MOD_PURPOSE);
+        if ($purpose) {
+            $this->purpose = $purpose;
+        }
+    }
+
+    /**
      * Build the link to edit the module
      *
      * @return \moodle_url
@@ -93,24 +97,6 @@ class module implements translatable_interface, editable_interface, iconic_inter
             $params = ['update' => $this->cm->id];
         }
         return new moodle_url($path, $params);
-    }
-
-    /**
-     * This method is used to check if the module is visible.
-     *
-     * @return bool
-     */
-    public function isvisible(): bool {
-        return $this->cm->visible == true;
-    }
-
-    /**
-     * Get the main translatable fields of the module.
-     *
-     * @return array
-     */
-    public function getmainfields(): array {
-        return field::getfieldsfrominfo($this->cm);
     }
 
     /**
@@ -143,6 +129,24 @@ class module implements translatable_interface, editable_interface, iconic_inter
     }
 
     /**
+     * Getter fo CM.
+     *
+     * @return \cm_info
+     */
+    public function get_cm(): cm_info {
+        return $this->cm;
+    }
+
+    /**
+     * This method is used to check if the module is visible.
+     *
+     * @return bool
+     */
+    public function isvisible(): bool {
+        return $this->cm->visible == true;
+    }
+
+    /**
      * Check if the module has childs.
      *
      * @return bool
@@ -159,6 +163,16 @@ class module implements translatable_interface, editable_interface, iconic_inter
     public function getfields(): array {
         return $this->getmainfields();
     }
+
+    /**
+     * Get the main translatable fields of the module.
+     *
+     * @return array
+     */
+    public function getmainfields(): array {
+        return field::getfieldsfrominfo($this->cm);
+    }
+
     /**
      * Get the link to edit the module.
      *
@@ -193,17 +207,5 @@ class module implements translatable_interface, editable_interface, iconic_inter
      */
     public function getpluginname(): string {
         return $this->pluginname;
-    }
-
-    /**
-     * Prepare the purpose of the module.
-     *
-     * @return void
-     */
-    private function makepurpose(): void {
-        $purpose = call_user_func($this->modname . '_supports', FEATURE_MOD_PURPOSE);
-        if ($purpose) {
-            $this->purpose = $purpose;
-        }
     }
 }

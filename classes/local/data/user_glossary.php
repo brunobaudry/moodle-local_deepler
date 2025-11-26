@@ -59,10 +59,11 @@ class user_glossary {
      * @param int|null $id
      */
     public function __construct(
-            int $userid,
-            int $glossarydbid,
-            ?int $isactive = 1,
-            ?int $id = null) {
+        int $userid,
+        int $glossarydbid,
+        ?int $isactive = 1,
+        ?int $id = null
+    ) {
         $this->userid = $userid;
         $this->glossaryid = $glossarydbid;
         $this->isactive = $isactive ?? 1;
@@ -88,9 +89,9 @@ class user_glossary {
      */
     public function toobject(): stdClass {
         $obj = (object) [
-                'userid' => $this->userid,
-                'glossaryid' => $this->glossaryid,
-                'isactive' => $this->isactive,
+            'userid' => $this->userid,
+            'glossaryid' => $this->glossaryid,
+            'isactive' => $this->isactive,
         ];
         if ($this->id !== null) {
             $obj->id = $this->id;
@@ -109,10 +110,10 @@ class user_glossary {
         global $DB;
         $record = $DB->get_record(self::TABLE, ['id' => $id], '*', MUST_EXIST);
         return new self(
-                $record->userid,
-                $record->glossaryid,
-                $record->isactive,
-                $record->id
+            $record->userid,
+            $record->glossaryid,
+            $record->isactive,
+            $record->id
         );
     }
 
@@ -131,10 +132,10 @@ class user_glossary {
             return null;
         }
         return new self(
-                $record->userid,
-                $record->glossaryid,
-                $record->isactive,
-                $record->id
+            $record->userid,
+            $record->glossaryid,
+            $record->isactive,
+            $record->id
         );
     }
 
@@ -151,10 +152,10 @@ class user_glossary {
 
         foreach ($records as $record) {
             $mappings[] = new self(
-                    $record->userid,
-                    $record->glossaryid,
-                    $record->isactive,
-                    $record->id
+                $record->userid,
+                $record->glossaryid,
+                $record->isactive,
+                $record->id
             );
         }
         return $mappings;
@@ -174,10 +175,10 @@ class user_glossary {
 
         foreach ($records as $record) {
             $mappings[] = new self(
-                    $record->userid,
-                    $record->glossaryid,
-                    $record->isactive,
-                    $record->id
+                $record->userid,
+                $record->glossaryid,
+                $record->isactive,
+                $record->id
             );
         }
 

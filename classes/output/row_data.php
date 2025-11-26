@@ -16,13 +16,13 @@
 
 namespace local_deepler\output;
 
-use renderable;
-use renderer_base;
-use templatable;
 use core_filters\text_filter;
 use local_deepler\local\data\field;
 use local_deepler\local\data\multilanger;
 use local_deepler\local\services\lang_helper;
+use renderable;
+use renderer_base;
+use templatable;
 
 /**
  * Row page renderables
@@ -37,11 +37,6 @@ class row_data extends translate_data implements renderable, templatable {
      */
     private field $field;
     /**
-     * @var int
-     */
-    private static $mlangtagadditional = 20;
-
-    /**
      * Construct.
      *
      * @param \local_deepler\local\data\field $field
@@ -49,8 +44,12 @@ class row_data extends translate_data implements renderable, templatable {
      * @param \local_deepler\output\Multilang2TextFilter|\core_filters\text_filter $mlangfilter
      * @param string $editor
      */
-    public function __construct(field $field, lang_helper $languagepack, Multilang2TextFilter|text_filter $mlangfilter,
-            string $editor) {
+    public function __construct(
+        field $field,
+        lang_helper $languagepack,
+        Multilang2TextFilter|text_filter $mlangfilter,
+        string $editor
+    ) {
         parent::__construct($languagepack, $mlangfilter, $editor);
         $this->field = $field;
     }
@@ -74,8 +73,6 @@ class row_data extends translate_data implements renderable, templatable {
         }
         // Hacky Special cases where the content is a db key (should never be translated).
         $isdbkey = str_contains($this->field->get_table(), 'wiki_pages') && $this->field->get_tablefield() === 'title';
-        $buttonclass = '';
-        $titlestring = '';
         $canrephrase = $this->languagepack->get_canimprove();
         $sametargetassource = $this->languagepack->isrephrase();
         $targetlang = $this->languagepack->targetlang;
@@ -84,19 +81,19 @@ class row_data extends translate_data implements renderable, templatable {
         if ((!$canrephrase && $sametargetassource) || $targetlang === '') {
             $buttonclass = 'badge-dark';
             $titlestring =
-                    get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler',
-                            $targetlang);
+                get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler', $targetlang);
         } else if ($tneeded) {
             if (str_contains($fieldtext, "{mlang " . $targetlang)) {
                 $buttonclass = 'badge-warning';
                 $titlestring = get_string('needsupdate', 'local_deepler');
             } else {
                 $buttonclass = $canrephrase && $sametargetassource ? 'badge-primary' : 'badge-danger';
-                $titlestring = get_string($canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
-                        'local_deepler',
-                        $targetlang);
+                $titlestring = get_string(
+                    $canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
+                    'local_deepler',
+                    $targetlang
+                );
             }
-
         } else {
             $buttonclass = 'badge-success';
             $titlestring = get_string('uptodate', 'local_deepler');
@@ -108,8 +105,7 @@ class row_data extends translate_data implements renderable, templatable {
             $multilangdisabled = '';
             if ($multilanger->has_multilandcode_and_others($currentlang)) {
                 $badgeclass = 'danger';
-                $multilangtitlestring = get_string('warningsource', 'local_deepler',
-                        strtoupper($currentlang));
+                $multilangtitlestring = get_string('warningsource', 'local_deepler', strtoupper($currentlang));
             } else {
                 $multilangtitlestring = get_string('viewsource', 'local_deepler');
                 $badgeclass = 'info';
@@ -139,42 +135,41 @@ class row_data extends translate_data implements renderable, templatable {
         }
 
         return [
-                'badgeclass' => $badgeclass,
-                'buttonclass' => $buttonclass,
-                'cmid' => $this->field->get_cmid(),
-                'cssclass' => $cssclass,
-                'fieldformat' => $fieldformat,
-                'fieldtranslation' => multilanger::findfieldstring($this->field),
-                'flagandkey' => "$isdbkey$key",
-                'id' => $this->field->get_id(),
-                'iseditable' => $iseditable,
-                'istiny' => $this->editor === 'tiny',
-                'key' => $key,
-                'keyid' => $keyid,
+            'badgeclass' => $badgeclass,
+            'buttonclass' => $buttonclass,
+            'cmid' => $this->field->get_cmid(),
+            'cssclass' => $cssclass,
+            'fieldformat' => $fieldformat,
+            'fieldtranslation' => multilanger::findfieldstring($this->field),
+            'flagandkey' => "$isdbkey$key",
+            'id' => $this->field->get_id(),
+            'iseditable' => $iseditable,
+            'istiny' => $this->editor === 'tiny',
+            'key' => $key,
+            'keyid' => $keyid,
             // Do Ajax.
-                'mlangfiltered' => $mlangfilteredtext,
-                'multilangdisabled' => $multilangdisabled,
-                'multilangtitlestring' => $multilangtitlestring,
-                'plaintextinput' => $fieldformat === 0,
+            'mlangfiltered' => $mlangfilteredtext,
+            'multilangdisabled' => $multilangdisabled,
+            'multilangtitlestring' => $multilangtitlestring,
+            'plaintextinput' => $fieldformat === 0,
             // Do Ajax.
-                'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
+            'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
             // Do Ajax.
-                'rawunfilterdtext' => base64_encode($trimedtext),
-                'rowtitle' => $isdbkey ? get_string('translationdisabled', 'local_deepler') : '',
-                'selecttitle' => get_string('specialsourcetext', 'local_deepler',
-                        strtoupper($currentlang)),
-                'sourceoptions' => $this->languagepack->preparesourcesoptionlangs(),
-                'status' => $iseditable ? $status : 'local_deepler/disabled',
-                'table' => $this->field->get_table(),
-                'tablefield' => $this->field->get_tablefield(),
-                'tid' => $this->field->get_tid(),
-                'titlestring' => htmlentities($titlestring, ENT_HTML5),
+            'rawunfilterdtext' => base64_encode($trimedtext),
+            'rowtitle' => $isdbkey ? get_string('translationdisabled', 'local_deepler') : '',
+            'selecttitle' => get_string('specialsourcetext', 'local_deepler', strtoupper($currentlang)),
+            'sourceoptions' => $this->languagepack->preparesourcesoptionlangs(),
+            'status' => $iseditable ? $status : 'local_deepler/disabled',
+            'table' => $this->field->get_table(),
+            'tablefield' => $this->field->get_tablefield(),
+            'tid' => $this->field->get_tid(),
+            'titlestring' => htmlentities($titlestring, ENT_HTML5),
             // Do Ajax.
-                'trimedtext' => $trimedtext,
-                'warnmaxlength' => $warnmaxlength,
-                'warntextcolor' => $warntextcolor,
-                'maxlength' => $maxlength > 0 ? $maxlength : null,
-                'totalchar' => strlen($trimedtext),
+            'trimedtext' => $trimedtext,
+            'warnmaxlength' => $warnmaxlength,
+            'warntextcolor' => $warntextcolor,
+            'maxlength' => $maxlength > 0 ? $maxlength : null,
+            'totalchar' => strlen($trimedtext),
         ];
     }
 }

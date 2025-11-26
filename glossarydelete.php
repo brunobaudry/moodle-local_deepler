@@ -40,8 +40,12 @@ try {
 } catch (moodle_exception $exception) {
     $deletingglossary = null;
     $status = 'idmissing';
-    redirect(new moodle_url('/local/deepler/glossarymanager.php'),
-            'Could not delete, unset glossary ID', null, notification::NOTIFY_ERROR);
+    redirect(
+        new moodle_url('/local/deepler/glossarymanager.php'),
+        'Could not delete, unset glossary ID',
+        null,
+        notification::NOTIFY_ERROR
+    );
 }
 
 $context = context_user::instance($USER->id);
@@ -54,8 +58,12 @@ $langhelper->initdeepl($USER, $plugin->release);
 if ($deletingglossary) {
     if (!confirm_sesskey()) {
         $status = 'invalidsesskey';
-        redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php'),
-                'Session expired or invalid. Please try again.', null, notification::NOTIFY_ERROR);
+        redirect(
+            new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php'),
+            'Session expired or invalid. Please try again.',
+            null,
+            notification::NOTIFY_ERROR
+        );
     }
     try {
         $langhelper->deleteglossary($deletingglossary);
@@ -64,6 +72,7 @@ if ($deletingglossary) {
         $status = 'deeplissue';
     }
 }
+$url = '/local/deepler/glossarymanager' . $redirect . '.php?deletestatus=' . $status . '&deleteglossary=' .
+    $deletingglossary . '&name=' . $name . '&token=' . $token;
 // Redirect.
-redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php?deletestatus=' . $status . '&deleteglossary=' .
-        $deletingglossary . '&name=' . $name . '&token=' . $token));
+redirect(new moodle_url($url));

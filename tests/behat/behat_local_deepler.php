@@ -31,7 +31,6 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
  */
 class behat_local_deepler extends behat_base {
-
     /**
      * Behat helper for css selector.
      *
@@ -52,8 +51,8 @@ class behat_local_deepler extends behat_base {
                 $element = $session->getPage()->find('css', $cssselector);
                 if ($element !== null && $element->isVisible()) {
                     $driver->executeScript(
-                            "arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});",
-                            [$element]
+                        "arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});",
+                        [$element]
                     );
                     return;
                 }
@@ -69,5 +68,4 @@ class behat_local_deepler extends behat_base {
 
         throw new Exception("Element with CSS selector '$cssselector' not found or not visible after $maxattempts attempts");
     }
-
 }

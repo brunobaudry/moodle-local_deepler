@@ -16,14 +16,14 @@
 
 namespace local_deepler\output;
 
-use Exception;
-use renderable;
-use renderer_base;
-use templatable;
 use core_filters\text_filter;
+use Exception;
 use local_deepler\local\data\field;
 use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\utils;
+use renderable;
+use renderer_base;
+use templatable;
 
 /**
  * Child data.
@@ -37,7 +37,6 @@ class child_data extends translate_data implements renderable, templatable {
      * @var \local_deepler\local\data\interfaces\translatable_interface
      */
     private mixed $child;
-
     /**
      * Construct.
      *
@@ -46,9 +45,12 @@ class child_data extends translate_data implements renderable, templatable {
      * @param \local_deepler\output\Multilang2TextFilter|\core_filters\text_filter $mlangfilter
      * @param string $editor
      */
-    public function __construct(mixed $child, lang_helper $languagepack,
-            Multilang2TextFilter|text_filter $mlangfilter,
-            string $editor) {
+    public function __construct(
+        mixed $child,
+        lang_helper $languagepack,
+        Multilang2TextFilter|text_filter $mlangfilter,
+        string $editor
+    ) {
         parent::__construct($languagepack, $mlangfilter, $editor);
         $this->child = $child;
     }
@@ -83,17 +85,16 @@ class child_data extends translate_data implements renderable, templatable {
             }
         }
         return [
-                'hasicon' => true,
-                'level' => '5',
-                'hasheader' => $isiconic && $iseditable,
-                'id' => Utils::makehtmlid($activitydesc),
-                'link' => $iseditable ? $this->child->getlink() : '',
-                'itempurpose' => $isiconic ? $this->child->getpurpose() : '',
-                'icon' => $isiconic ? $this->child->geticon() : '',
-                'pluginname' => $isiconic && $istranslatable ? $this->child->getpluginname() : '',
-                'activitydesc' => $activitydesc,
-                'childs' => $childs,
+            'hasicon' => true,
+            'level' => '5',
+            'hasheader' => $isiconic && $iseditable,
+            'id' => Utils::makehtmlid($activitydesc),
+            'link' => $iseditable ? $this->child->getlink() : '',
+            'itempurpose' => $isiconic ? $this->child->getpurpose() : '',
+            'icon' => $isiconic ? $this->child->geticon() : '',
+            'pluginname' => $isiconic && $istranslatable ? $this->child->getpluginname() : '',
+            'activitydesc' => $activitydesc,
+            'childs' => $childs,
         ];
     }
-
 }

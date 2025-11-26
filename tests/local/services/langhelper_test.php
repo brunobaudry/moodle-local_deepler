@@ -30,12 +30,12 @@ require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
 use DeepL\AuthorizationException;
+use DeepL\DeepLClient;
 use DeepL\GlossaryInfo;
 use DeepL\TooManyRequestsException;
 use DeepL\Usage;
 use ReflectionClass;
 use stdClass;
-use DeepL\DeepLClient;
 
 /**
  * Lang helper Test.
@@ -43,57 +43,6 @@ use DeepL\DeepLClient;
  * @covers \local_deepler\local\services\lang_helper
  */
 final class langhelper_test extends advanced_testcase {
-    /** @var lang_helper */
-    private $langhelper;
-
-    /** @var stdClass */
-    private $user;
-
-    /** @var \PHPUnit\Framework\MockObject\MockObject|DeepLClient */
-    private $mocktranslator;
-
-    /**
-     * Set up.
-     *
-     * @return void
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
-     */
-    protected function setUp(): void {
-        parent::setUp();
-
-        $this->resetAfterTest();
-
-        $this->user = new stdClass();
-        $this->user->id = 1;
-        $this->user->username = 'testuser';
-        $this->user->email = 'testuser@example.com';
-        $this->user->department = 'testdepartment';
-
-        $this->mocktranslator = $this->createMock(DeepLClient::class);
-
-        $mockusage = $this->createMock(Usage::class);
-        $mockusage->method('anyLimitReached')->willReturn(false);
-
-        $this->mocktranslator->method('getUsage')->willReturn($mockusage);
-        $this->mocktranslator->method('getSourceLanguages')->willReturn([
-                (object) ['code' => 'EN', 'name' => 'English'],
-                (object) ['code' => 'FR', 'name' => 'French'],
-        ]);
-        $this->mocktranslator->method('getTargetLanguages')->willReturn([
-                (object) ['code' => 'DE', 'name' => 'German'],
-                (object) ['code' => 'ES', 'name' => 'Spanish'],
-        ]);
-
-        $this->langhelper = new lang_helper(
-                $this->mocktranslator,
-                'mockapikey',
-                ['en' => 'English', 'fr' => 'French', 'de' => 'German', 'es' => 'Spanish'],
-                'en',
-                'de'
-        );
-    }
-
     /**
      * Test helper init.
      *
@@ -135,6 +84,7 @@ final class langhelper_test extends advanced_testcase {
             $this->assertArrayHasKey('disabled', $option);
         }
     }
+
     /**
      * Basic setting tests.
      *
@@ -178,7 +128,7 @@ final class langhelper_test extends advanced_testcase {
                 }
 
                 // Parse the environment variable.
-                list($name, $value) = explode('=', $line, 2);
+                [$name, $value] = explode('=', $line, 2);
                 $name = trim($name);
                 $value = trim($value);
 
@@ -208,31 +158,31 @@ final class langhelper_test extends advanced_testcase {
 
         // Create a test user.
         $user = $this->getDataGenerator()->create_user([
-                'username' => 'matchuser',
-                'email' => 'match@example.com',
-                'department' => 'matchdepartment',
+            'username' => 'matchuser',
+            'email' => 'match@example.com',
+            'department' => 'matchdepartment',
         ]);
 
         // Create a custom profile field.
         $field = (object) [
-                'shortname' => 'customfield',
-                'name' => 'Custom Field',
-                'datatype' => 'text',
+            'shortname' => 'customfield',
+            'name' => 'Custom Field',
+            'datatype' => 'text',
         ];
         $field->id = $DB->insert_record('user_info_field', $field);
 
         // Assign a value to the custom profile field.
         $data = (object) [
-                'userid' => $user->id,
-                'fieldid' => $field->id,
-                'data' => 'customvalue',
+            'userid' => $user->id,
+            'fieldid' => $field->id,
+            'data' => 'customvalue',
         ];
         $DB->insert_record('user_info_data', $data);
 
         // Insert a matching token.
         $token = (object) [
-                'attribute' => 'profile_field_customfield',
-                'valuefilter' => 'customvalue',
+            'attribute' => 'profile_field_customfield',
+            'valuefilter' => 'customvalue',
         ];
         $token->id = $DB->insert_record('local_deepler_tokens', $token);
 
@@ -262,17 +212,17 @@ final class langhelper_test extends advanced_testcase {
 
         // Create glossary and user_glossary entries.
         $glossary = (object) [
-                'glossaryid' => 'glo123',
-                'name' => 'Test Glossary',
-                'sourcelang' => 'EN',
-                'targetlang' => 'DE',
-                'entrycount' => 10,
+            'glossaryid' => 'glo123',
+            'name' => 'Test Glossary',
+            'sourcelang' => 'EN',
+            'targetlang' => 'DE',
+            'entrycount' => 10,
         ];
         $glossary->id = $DB->insert_record('local_deepler_glossaries', $glossary);
 
         $userglossary = (object) [
-                'userid' => $this->user->id,
-                'glossaryid' => $glossary->id,
+            'userid' => $this->user->id,
+            'glossaryid' => $glossary->id,
         ];
         $DB->insert_record('local_deepler_user_glossary', $userglossary);
 
@@ -301,12 +251,12 @@ final class langhelper_test extends advanced_testcase {
 
         // Insert glossary with token ID.
         $glossary = (object) [
-                'glossaryid' => 'glo456',
-                'name' => 'Public Glossary',
-                'sourcelang' => 'EN',
-                'targetlang' => 'FR',
-                'entrycount' => 5,
-                'tokenid' => 999, // Simulate token-bound glossary.
+            'glossaryid' => 'glo456',
+            'name' => 'Public Glossary',
+            'sourcelang' => 'EN',
+            'targetlang' => 'FR',
+            'entrycount' => 5,
+            'tokenid' => 999, // Simulate token-bound glossary.
         ];
         $DB->insert_record('local_deepler_glossaries', $glossary);
 
@@ -354,4 +304,52 @@ final class langhelper_test extends advanced_testcase {
         $this->assertEquals('Synced Glossary', $result[0]->name);
     }
 
+    /**
+     * Set up.
+     *
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->resetAfterTest();
+
+        $this->user = new stdClass();
+        $this->user->id = 1;
+        $this->user->username = 'testuser';
+        $this->user->email = 'testuser@example.com';
+        $this->user->department = 'testdepartment';
+
+        $this->mocktranslator = $this->createMock(DeepLClient::class);
+
+        $mockusage = $this->createMock(Usage::class);
+        $mockusage->method('anyLimitReached')->willReturn(false);
+
+        $this->mocktranslator->method('getUsage')->willReturn($mockusage);
+        $this->mocktranslator->method('getSourceLanguages')->willReturn([
+            (object) ['code' => 'EN', 'name' => 'English'],
+            (object) ['code' => 'FR', 'name' => 'French'],
+        ]);
+        $this->mocktranslator->method('getTargetLanguages')->willReturn([
+            (object) ['code' => 'DE', 'name' => 'German'],
+            (object) ['code' => 'ES', 'name' => 'Spanish'],
+        ]);
+
+        $this->langhelper = new lang_helper(
+            $this->mocktranslator,
+            'mockapikey',
+            ['en' => 'English', 'fr' => 'French', 'de' => 'German', 'es' => 'Spanish'],
+            'en',
+            'de'
+        );
+    }
+
+    /** @var lang_helper */
+    private $langhelper;
+    /** @var stdClass */
+    private $user;
+    /** @var \PHPUnit\Framework\MockObject\MockObject|DeepLClient */
+    private $mocktranslator;
 }

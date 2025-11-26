@@ -26,7 +26,6 @@ use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 use question_definition;
 
-
 /**
  * Base class for question types.
  *
@@ -34,7 +33,7 @@ use question_definition;
  * @copyright  2025  <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class qbase implements translatable_interface, editable_interface, iconic_interface {
+abstract class qbase implements editable_interface, iconic_interface, translatable_interface {
     /**
      * @var \database_manager
      */
@@ -45,14 +44,14 @@ abstract class qbase implements translatable_interface, editable_interface, icon
     protected question_definition $question;
     /** @var string */
     protected string $qidcolname;
+    /** @var int|mixed */
+    protected int $cmid;
     /** @var moodle_url */
     private moodle_url $link;
     /** @var moodle_url */
     private moodle_url $iconurl;
     /** @var string|lang_string */
     private string|lang_string $pluginname;
-    /** @var int|mixed */
-    protected int $cmid;
     /** @var array
      * protected static array $additionals;*/
 
@@ -68,45 +67,15 @@ abstract class qbase implements translatable_interface, editable_interface, icon
         $this->question = $params['question'];
         $this->cmid = $params['cmid'];
 
-        $this->link = new moodle_url('/question/bank/editquestion/question.php',
-                ['cmid' => $this->cmid, 'id' => $this->question->id]);
+        $this->link = new moodle_url(
+            '/question/bank/editquestion/question.php',
+            ['cmid' => $this->cmid, 'id' => $this->question->id]
+        );
         $this->dbmanager = $DB->get_manager(); // Get the database manager.
         $this->qtype = $this->question->qtype->plugin_name(); // Get the question type.
         $this->iconurl = $OUTPUT->image_url('icon', $this->qtype);
         $this->pluginname = $this->question->qtype->local_name();
         $this->qidcolname = $this->question->qtype->questionid_column_name();
-    }
-
-    /**
-     * Get the main fields.
-     *
-     * @return array
-     */
-    private function getmain(): array {
-        $columns = [
-                'name' => [],
-                'questiontext' => [],
-                'generalfeedback' => [],
-        ];
-        return field::getfieldsfromcolumns($this->question, 'question', $columns, $this->cmid);
-    }
-
-    /**
-     * Get the options fields.
-     *
-     * @return array
-     */
-    private function gethints(): array {
-        $fields = [];
-        if (count($this->question->hints)) {
-            foreach ($this->question->hints as $hint) {
-                $hintfield = field::getfieldsfromcolumns($hint, 'question_hints',
-                        ['hint' => []], $this->cmid);
-                $fields = array_merge($fields, $hintfield);
-            }
-
-        }
-        return $fields;
     }
 
     /**
@@ -118,6 +87,41 @@ abstract class qbase implements translatable_interface, editable_interface, icon
         $fields = $this->getmain();
         $fields = array_merge($fields, $this->gethints());
         return array_merge($fields, $this->getsubs());
+    }
+
+    /**
+     * Get the main fields.
+     *
+     * @return array
+     */
+    private function getmain(): array {
+        $columns = [
+            'name' => [],
+            'questiontext' => [],
+            'generalfeedback' => [],
+        ];
+        return field::getfieldsfromcolumns($this->question, 'question', $columns, $this->cmid);
+    }
+
+    /**
+     * Get the option fields.
+     *
+     * @return array
+     */
+    private function gethints(): array {
+        $fields = [];
+        if (count($this->question->hints)) {
+            foreach ($this->question->hints as $hint) {
+                $hintfield = field::getfieldsfromcolumns(
+                    $hint,
+                    'question_hints',
+                    ['hint' => []],
+                    $this->cmid
+                );
+                $fields = array_merge($fields, $hintfield);
+            }
+        }
+        return $fields;
     }
 
     /**
@@ -187,8 +191,9 @@ abstract class qbase implements translatable_interface, editable_interface, icon
                     $content = $row->{$col} ?? '';
                     $editable = true;
                     if (isset($clauses)) {
-                        if (isset($clauses['exclude']) &&
-                                ($clauses['exclude'] === $content || '' === trim($content))) {
+                        if (
+                            isset($clauses['exclude']) && ($clauses['exclude'] === $content || '' === trim($content))
+                        ) {
                             continue;
                         }
                         if (isset($clauses['editable']) && $clauses['editable']) {
@@ -198,13 +203,13 @@ abstract class qbase implements translatable_interface, editable_interface, icon
                     $format = $row->{"{$col}format"} ?? 0;
                     if (trim($content) !== '') {
                         $qtypefields[] = new field(
-                                $row->id,
-                                $content,
-                                $format,
-                                $col,
-                                $modnamesub,
-                                $this->cmid,
-                                $editable
+                            $row->id,
+                            $content,
+                            $format,
+                            $col,
+                            $modnamesub,
+                            $this->cmid,
+                            $editable
                         );
                     }
                 }

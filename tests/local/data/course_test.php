@@ -28,17 +28,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class course_test extends advanced_testcase {
-
-    /**
-     * @var \stdClass
-     */
-    protected $course;
-
-    /**
-     * @var \local_deepler\local\data\course
-     */
-    protected $coursewrapper;
-
     /**
      * Setup function for the tests.
      *
@@ -48,13 +37,18 @@ final class course_test extends advanced_testcase {
         parent::setUp();
         $this->resetAfterTest();
         $this->course = $this->getDataGenerator()->create_course();
-        $this->getDataGenerator()->create_course_section(['course' => $this->course, 'section' => 1],
-                ['_name' => 'Test Section']);
-        $this->getDataGenerator()->create_module('quiz',
-                ['course' => $this->course->id,
-                        'name' => 'Test Quiz',
-                        'description' => 'Test intro',
-                ]);
+        $this->getDataGenerator()->create_course_section(
+            ['course' => $this->course, 'section' => 1],
+            ['_name' => 'Test Section']
+        );
+        $this->getDataGenerator()->create_module(
+            'quiz',
+            [
+                'course' => $this->course->id,
+                'name' => 'Test Quiz',
+                'description' => 'Test intro',
+            ]
+        );
         $this->coursewrapper = new course($this->course);
     }
 
@@ -67,6 +61,7 @@ final class course_test extends advanced_testcase {
     public function test_constructor(): void {
         $this->assertInstanceOf(course::class, $this->coursewrapper);
     }
+
     /**
      * Test the constructor and basic getters.
      *
@@ -97,7 +92,7 @@ final class course_test extends advanced_testcase {
         $this->resetAfterTest(true);
 
         $course = $this->getDataGenerator()->create_course(['fullname' => 'Test Course', 'shortname' => 'TC',
-                'summary' => 'Test summary']);
+            'summary' => 'Test summary']);
         $courseobj = new course($course);
 
         $fields = $courseobj->getfields();
@@ -184,4 +179,12 @@ final class course_test extends advanced_testcase {
         $expectedlink = new moodle_url($CFG->wwwroot . "/course/edit.php", ['id' => $this->course->id]);
         $this->assertEquals($expectedlink->out(), $this->coursewrapper->getlink());
     }
+    /**
+     * @var \stdClass
+     */
+    protected $course;
+    /**
+     * @var \local_deepler\local\data\course
+     */
+    protected $coursewrapper;
 }

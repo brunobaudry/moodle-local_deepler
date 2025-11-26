@@ -16,9 +16,6 @@
 
 namespace local_deepler\output;
 
-use renderable;
-use renderer_base;
-use templatable;
 use core_filters\text_filter;
 use Exception;
 use filter_multilang2\text_filter as Multilang2TextFilter;
@@ -26,7 +23,9 @@ use local_deepler\local\data\field;
 use local_deepler\local\data\module;
 use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
-use local_deepler\local\services\utils;
+use renderable;
+use renderer_base;
+use templatable;
 
 /**
  * Section data for translate page.
@@ -36,9 +35,6 @@ use local_deepler\local\services\utils;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class section_data extends translate_data implements renderable, templatable {
-    /** @var section */
-    private section $section;
-
     /**
      * Construct.
      *
@@ -47,10 +43,12 @@ class section_data extends translate_data implements renderable, templatable {
      * @param Multilang2TextFilter|text_filter $mlangfilter
      * @param string $editor
      */
-    public function __construct(section $section,
-            lang_helper $languagepack,
-            Multilang2TextFilter|text_filter $mlangfilter,
-            string $editor) {
+    public function __construct(
+        section $section,
+        lang_helper $languagepack,
+        Multilang2TextFilter|text_filter $mlangfilter,
+        string $editor
+    ) {
         parent::__construct($languagepack, $mlangfilter, $editor);
         $this->section = $section;
     }
@@ -83,8 +81,9 @@ class section_data extends translate_data implements renderable, templatable {
         /** @var module $m */
         foreach ($this->section->get_modules() as $m) {
             try {
-                $modulesrendered .= $renderer->makemodule(new module_data($m, $this->languagepack, $this->mlangfilter,
-                        $this->editor));
+                $modulesrendered .= $renderer->makemodule(
+                    new module_data($m, $this->languagepack, $this->mlangfilter, $this->editor)
+                );
             } catch (Exception $e) {
                 continue;
             }
@@ -94,16 +93,18 @@ class section_data extends translate_data implements renderable, templatable {
         $title = $this->mlangfilter->filter($this->section->getsectionname());
 
         return [
-                'hasicon' => false,
-                'hasheader' => true,
-                'level' => '3',
-                'id' => 'local_deepler__section' . $sectionid,
-                'sectionid' => $sectionid,
-                'activitydesc' => $title,
-                'link' => $this->section->getlink(),
-                'visibilityclass' => 'local_deepler' . ($this->section->isvisible() ? 'visible' : 'invisible'),
-                'fields' => $fieldsrendered,
-                'modules' => $modulesrendered,
+            'hasicon' => false,
+            'hasheader' => true,
+            'level' => '3',
+            'id' => 'local_deepler__section' . $sectionid,
+            'sectionid' => $sectionid,
+            'activitydesc' => $title,
+            'link' => $this->section->getlink(),
+            'visibilityclass' => 'local_deepler' . ($this->section->isvisible() ? 'visible' : 'invisible'),
+            'fields' => $fieldsrendered,
+            'modules' => $modulesrendered,
         ];
     }
+    /** @var section */
+    private section $section;
 }

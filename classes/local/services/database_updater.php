@@ -56,7 +56,6 @@ class database_updater {
                 $response['error'] = $e->getMessage();
             }
         }
-
     }
 
     /**

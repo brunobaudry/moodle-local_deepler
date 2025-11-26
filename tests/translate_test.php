@@ -39,7 +39,6 @@ use local_deepler\local\data\field;
  *
  */
 final class translate_test extends advanced_testcase {
-
     /**
      * Testing that all settings are loaded
      *

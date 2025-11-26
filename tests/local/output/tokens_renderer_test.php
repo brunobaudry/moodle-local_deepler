@@ -18,8 +18,6 @@ namespace local_deepler;
 
 use advanced_testcase;
 use context_system;
-use core_filters\text_filter;
-use local_deepler\output\tokens_renderer;
 
 /**
  * User tokens_renderer test case.

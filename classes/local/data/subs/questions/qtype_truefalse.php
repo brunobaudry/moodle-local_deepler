@@ -38,22 +38,22 @@ class qtype_truefalse extends qbase {
         $fields = [];
         if (!empty($this->question->truefeedback)) {
             $fields[] = new field(
-                    $this->question->trueanswerid,
-                    $this->question->truefeedback,
-                    $this->question->truefeedbackformat,
-                    'feedback',
-                    'question_answers',
-                    $this->cmid
+                $this->question->trueanswerid,
+                $this->question->truefeedback,
+                $this->question->truefeedbackformat,
+                'feedback',
+                'question_answers',
+                $this->cmid
             );
         }
         if (!empty($this->question->falsefeedback)) {
             $fields[] = new field(
-                    $this->question->falseanswerid,
-                    $this->question->falsefeedback,
-                    $this->question->falsefeedbackformat,
-                    'feedback',
-                    'question_answers',
-                    $this->cmid
+                $this->question->falseanswerid,
+                $this->question->falsefeedback,
+                $this->question->falsefeedbackformat,
+                'feedback',
+                'question_answers',
+                $this->cmid
             );
         }
         return $fields;

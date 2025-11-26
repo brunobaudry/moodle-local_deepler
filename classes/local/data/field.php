@@ -29,7 +29,6 @@ use Symfony\Component\Yaml\Yaml;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class field {
-
     /** @var array */
     private static array $fieldlengths = [];
 
@@ -93,13 +92,13 @@ class field {
      * @throws \dml_exception
      */
     public function __construct(
-            int $id,
-            string $text,
-            int $format,
-            string $field,
-            string $table,
-            int $cmid = 0,
-            bool $editable = true,
+        int $id,
+        string $text,
+        int $format,
+        string $field,
+        string $table,
+        int $cmid = 0,
+        bool $editable = true,
     ) {
         if (empty(self::$additionals)) {
             $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
@@ -148,7 +147,6 @@ class field {
         return $this->id;
     }
 
-
     /**
      * Getter for cmid.
      *
@@ -175,6 +173,7 @@ class field {
     public function get_table(): string {
         return $this->table;
     }
+
     /**
      * Getter for status.
      *
@@ -258,8 +257,6 @@ class field {
         return str_contains($this->text, '{mlang other}') && str_contains($this->text, "{mlang $lang");
     }
 
-
-
     /**
      * Building the text attributes.
      *
@@ -301,10 +298,10 @@ class field {
             $filtered = [];
             foreach ($columns as $name => $field) {
                 if (
-                        (($field->meta_type === "C" && $field->max_length > self::$mintxtfieldsize) ||
-                                $field->meta_type === "X") &&
-                        !in_array('*_' . $field->name, ['*_displayoptions', '*_stamp']) &&
-                        !in_array($tablename . '_' . $field->name, self::getcolstoskip())
+                    (($field->meta_type === "C" && $field->max_length > self::$mintxtfieldsize) ||
+                        $field->meta_type === "X") &&
+                    !in_array('*_' . $field->name, ['*_displayoptions', '*_stamp']) &&
+                    !in_array($tablename . '_' . $field->name, self::getcolstoskip())
                 ) {
                     $filtered[] = $field->name;
                     self::$fieldlengths[$tablename][$field->name] = $field->max_length ?? null;
@@ -342,13 +339,13 @@ class field {
             }
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
                 $fieldobject = new field(
-                        $info->id,
-                        $info->{$collumn},
-                        $info->{$fieldtextformat} ?? 0,
-                        $collumn,
-                        $table,
-                        $cmid,
-                        $editable
+                    $info->id,
+                    $info->{$collumn},
+                    $info->{$fieldtextformat} ?? 0,
+                    $collumn,
+                    $table,
+                    $cmid,
+                    $editable
                 );
 
                 $fieldobject->maxlength = self::$fieldlengths[$table][$collumn] ?? null;
@@ -410,14 +407,14 @@ class field {
      */
     private static function getcolstoskip(): array {
         $modcolstoskip =
-                ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
-                        'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles',
-                        'studentquiz_reportingemail',
-                        'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
-                        'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
-                        'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
-                        'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata', 'filetypelist',
-                ];
+            ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
+                'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles',
+                'studentquiz_reportingemail',
+                'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
+                'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
+                'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
+                'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata', 'filetypelist',
+            ];
         return array_merge(self::$usercolstoskip, $modcolstoskip);
     }
 
@@ -435,10 +432,10 @@ class field {
             throw new coding_exception('Invalid key format');
         }
         return [
-                'table' => $matches[1],
-                'id' => $matches[2],
-                'field' => $matches[3],
-                'cmid' => $matches[4],
+            'table' => $matches[1],
+            'id' => $matches[2],
+            'field' => $matches[3],
+            'cmid' => $matches[4],
         ];
     }
 }

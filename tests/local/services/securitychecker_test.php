@@ -28,7 +28,6 @@ use local_deepler\external\base_external;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class securitychecker_test extends base_external {
-
     /**
      * Test perform_security_checks method.
      *

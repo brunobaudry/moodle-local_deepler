@@ -49,12 +49,24 @@ class forum extends subbase {
             foreach ($posts as $post) {
                 // Do something with $post.
                 if ($post->subject) {
-                    $fields[] = new field($post->id,
-                            $post->subject, 0, 'subject', $table, $this->cm->id);
+                    $fields[] = new field(
+                        $post->id,
+                        $post->subject,
+                        0,
+                        'subject',
+                        $table,
+                        $this->cm->id
+                    );
                 }
                 if ($post->message) {
-                    $fields[] = new field($post->id,
-                            $post->message, 1, 'message', $table, $this->cm->id);
+                    $fields[] = new field(
+                        $post->id,
+                        $post->message,
+                        1,
+                        'message',
+                        $table,
+                        $this->cm->id
+                    );
                 }
             }
         }

@@ -17,7 +17,6 @@
 namespace local_deepler\local\data\subs;
 
 use local_deepler\local\data\field;
-use local_deepler\local\data\subs\subbase;
 
 /**
  * Sub for Lesson activities.
@@ -43,23 +42,47 @@ class lesson extends subbase {
 
         foreach ($pages as $page) {
             if ($page->title) {
-                $fields[] = new field($page->id,
-                        $page->title, 0, 'title', $table, $this->cm->id);
+                $fields[] = new field(
+                    $page->id,
+                    $page->title,
+                    0,
+                    'title',
+                    $table,
+                    $this->cm->id
+                );
             }
             if ($page->contents) {
-                $fields[] = new field($page->id,
-                        $page->contents, 0, 'contents', $table, $this->cm->id);
+                $fields[] = new field(
+                    $page->id,
+                    $page->contents,
+                    0,
+                    'contents',
+                    $table,
+                    $this->cm->id
+                );
             }
             if ($page->qtype != 0) {
                 $answers = $DB->get_records($tablequestion, ['pageid' => $page->id]);
                 foreach ($answers as $answer) {
                     if ($answer->answer) {
-                        $fields[] = new field($answer->id,
-                                $answer->answer, 0, 'answer', $tablequestion, $this->cm->id);
+                        $fields[] = new field(
+                            $answer->id,
+                            $answer->answer,
+                            0,
+                            'answer',
+                            $tablequestion,
+                            $this->cm->id
+                        );
                     }
                     if ($answer->response) {
-                        $fields[] = new field($answer->id,
-                                $answer->response, 0, 'response', $tablequestion, $this->cm->id);
+                        $fields[] = new field(
+                            $answer->id,
+                            $answer->response,
+                            0,
+                            'response',
+                            $tablequestion,
+                            $this->cm->id
+                        );
                     }
                 }
             }

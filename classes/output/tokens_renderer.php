@@ -17,7 +17,6 @@
 namespace local_deepler\output;
 
 use core\context;
-use html_writer;
 use local_deepler\local\services\utils;
 use moodle_url;
 use plugin_renderer_base;
@@ -30,7 +29,6 @@ use plugin_renderer_base;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tokens_renderer extends plugin_renderer_base {
-
     /**
      * Renders the token manager UI: table of attribute-token mappings and add form.
      *
@@ -54,9 +52,9 @@ class tokens_renderer extends plugin_renderer_base {
         // User fields.
         $userfields = utils::all_user_fields($context);
         $mappeduserfields = array_map(
-                fn($key, $value) => ['key' => $key, 'value' => $value],
-                array_keys($userfields),
-                $userfields
+            fn($key, $value) => ['key' => $key, 'value' => $value],
+            array_keys($userfields),
+            $userfields
         );
 
         // Records from DB.
@@ -65,41 +63,41 @@ class tokens_renderer extends plugin_renderer_base {
 
         foreach ($records as $record) {
             $deleteurl = new moodle_url('/local/deepler/tokenmanager.php', [
-                    'section' => 'local_deepler',
-                    'deletetoken' => $record->id,
-                    'sesskey' => sesskey(),
+                'section' => 'local_deepler',
+                'deletetoken' => $record->id,
+                'sesskey' => sesskey(),
             ]);
 
             $data['records'][] = [
-                    'id' => $record->id,
-                    'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
-                    'valuefilter' => s($record->valuefilter),
-                    'token' => s($record->token),
-                    'action' => utils::local_deepler_get_action_icon($deleteurl, 't/delete', get_string('delete')),
+                'id' => $record->id,
+                'attribute' => $userfields[$record->attribute] ?? s($record->attribute),
+                'valuefilter' => s($record->valuefilter),
+                'token' => s($record->token),
+                'action' => utils::local_deepler_get_action_icon($deleteurl, 't/delete', get_string('delete')),
             ];
         }
 
         // Strings and form data.
         $data += [
-                'apikeyisset' => get_config('local_deepler', 'apikey'),
-                'description' => get_string('tokenadminpagedescription', 'local_deepler'),
-                'mappingsheading' => get_string('tokentokenmanager_mappings', 'local_deepler'),
-                'addnewheading' => get_string('tokentokenmanager_addnew', 'local_deepler'),
-                'attribute' => get_string('tokenattribute', 'local_deepler'),
-                'valuefilter' => get_string('tokenvaluefilter', 'local_deepler'),
-                'token' => get_string('tokentoken', 'local_deepler'),
-                'actions' => get_string('tokenactions', 'local_deepler'),
-                'formaction' => (new moodle_url('/local/deepler/tokenmanager.php'))->out(),
-                'sesskey' => sesskey(),
-                'userattributeselect' => $mappeduserfields,
-                'valuefilterplaceholder' => get_string('tokenfiltervalue', 'local_deepler'),
-                'tokenplaceholder' => get_string('tokentoken', 'local_deepler'),
-                'addbutton' => get_string('tokenadd', 'local_deepler'),
-                'settingsurl' => (new moodle_url('/admin/settings.php', ['section' => 'local_deepler']))->out(),
-                'backtosettings' => get_string('tokengobacktosettings', 'local_deepler'),
-                'glossariesurl' => (new moodle_url('/local/deepler/glossarymanageradmin.php', ['section' => 'local_deepler']))
-                        ->out(),
-                'glossarymanagetitle' => get_string('glossary:manage:title', 'local_deepler'),
+            'apikeyisset' => get_config('local_deepler', 'apikey'),
+            'description' => get_string('tokenadminpagedescription', 'local_deepler'),
+            'mappingsheading' => get_string('tokentokenmanager_mappings', 'local_deepler'),
+            'addnewheading' => get_string('tokentokenmanager_addnew', 'local_deepler'),
+            'attribute' => get_string('tokenattribute', 'local_deepler'),
+            'valuefilter' => get_string('tokenvaluefilter', 'local_deepler'),
+            'token' => get_string('tokentoken', 'local_deepler'),
+            'actions' => get_string('tokenactions', 'local_deepler'),
+            'formaction' => (new moodle_url('/local/deepler/tokenmanager.php'))->out(),
+            'sesskey' => sesskey(),
+            'userattributeselect' => $mappeduserfields,
+            'valuefilterplaceholder' => get_string('tokenfiltervalue', 'local_deepler'),
+            'tokenplaceholder' => get_string('tokentoken', 'local_deepler'),
+            'addbutton' => get_string('tokenadd', 'local_deepler'),
+            'settingsurl' => (new moodle_url('/admin/settings.php', ['section' => 'local_deepler']))->out(),
+            'backtosettings' => get_string('tokengobacktosettings', 'local_deepler'),
+            'glossariesurl' => (new moodle_url('/local/deepler/glossarymanageradmin.php', ['section' => 'local_deepler']))
+                ->out(),
+            'glossarymanagetitle' => get_string('glossary:manage:title', 'local_deepler'),
         ];
 
         $this->page->requires->js_call_amd('local_deepler/formvalidation', 'init');

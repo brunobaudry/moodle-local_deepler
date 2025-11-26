@@ -46,12 +46,12 @@ class qtype_match extends qbase {
                     foreach ($subtablefileds as $field) {
                         if ($subrecord->{$field} !== null && trim($subrecord->{$field}) !== '') {
                             $fields[] = new field(
-                                    $subrecord->id,
-                                    $subrecord->{$field},
-                                    isset($subrecord->{$field . 'format'}) ?? 0,
-                                    $field,
-                                    $substablename,
-                                    $this->cmid
+                                $subrecord->id,
+                                $subrecord->{$field},
+                                isset($subrecord->{$field . 'format'}) ?? 0,
+                                $field,
+                                $substablename,
+                                $this->cmid
                             );
                         }
                     }

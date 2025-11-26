@@ -18,7 +18,6 @@ namespace local_deepler\local\data\subs;
 
 use context_module;
 use local_deepler\local\data\field;
-use local_deepler\local\data\subs\subbase;
 
 /**
  * Sub for Feedbacks activities.
@@ -44,21 +43,22 @@ class feedback extends subbase {
         $entries = $DB->get_records($table, ['feedback' => $this->cm->instance]);
         foreach ($entries as $entry) {
             $fields[] = new field(
-                    $entry->id,
-                    $entry->name,
-                    0,
-                    'name',
-                    $table,
-                    $this->cm->id
+                $entry->id,
+                $entry->name,
+                0,
+                'name',
+                $table,
+                $this->cm->id
             );
             if ($entry->definition) {
                 $fields[] = new field(
-                        $entry->id,
-                        $entry->label,
-                        1,
-                        'label',
-                        $table,
-                        $this->cm->id);
+                    $entry->id,
+                    $entry->label,
+                    1,
+                    'label',
+                    $table,
+                    $this->cm->id
+                );
             }
         }
         return $fields;

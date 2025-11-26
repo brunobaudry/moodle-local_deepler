@@ -39,12 +39,12 @@ class qtype_calculated extends qbase {
         foreach ($this->question->answers as $answer) {
             if (!empty($answer->feedback)) {
                 $fields[] = new field(
-                        $answer->id,
-                        $answer->feedback,
-                        $answer->feedbackformat,
-                        'feedback',
-                        'question_answers',
-                        $this->cmid
+                    $answer->id,
+                    $answer->feedback,
+                    $answer->feedbackformat,
+                    'feedback',
+                    'question_answers',
+                    $this->cmid
                 );
             }
         }

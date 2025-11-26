@@ -34,6 +34,148 @@ use local_deepler\local\services\lang_helper;
  */
 final class updatetranslation_test extends base_external {
     /**
+     * Data provider for testPrepareText.
+     *
+     * @return array
+     */
+    public static function dataprovider(): array {
+        return [
+            'Rephrasing with multilang' => [
+                'data' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => 'new_text',
+                    'sourcetext' => 'source_text',
+                ],
+                'fieldtext' => '{mlang other}source_text{mlang}',
+                'expected' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => '{mlang other}new_text{mlang}',
+                ],
+            ],
+            'Rephrasing with multilang but source not other' => [
+                'data' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => 'new_text',
+                    'sourcetext' => 'source_text',
+                ],
+                'fieldtext' => '{mlang en}source_text{mlang}',
+                'expected' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => '{mlang en}new_text{mlang}',
+                ],
+            ],
+            'Rephrasing with multilang but source differes from main' => [
+                'data' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'fr',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'fr',
+                    'text' => 'nouveau_text',
+                    'sourcetext' => 'source_text_fr',
+                ],
+                'fieldtext' => '{mlang fr}source_text_fr{mlang}',
+                'expected' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => '{mlang fr}nouveau_text{mlang}',
+                ],
+            ],
+            'Rephrasing without multilang' => [
+                'data' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => 'new_text',
+                    'sourcetext' => 'source_text',
+                ],
+                'fieldtext' => 'source_text',
+                'expected' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'en',
+                    'text' => 'new_text',
+                ],
+            ],
+            'Translation with multilang' => [
+                'data' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'de',
+                    'text' => 'Hallo welt',
+                    'sourcetext' => 'Hello world',
+                ],
+                'fieldtext' => '{mlang en}Hello world{mlang}',
+                'expected' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'de',
+                    'text' => '{mlang en}Hello world{mlang}{mlang de}Hallo welt{mlang}',
+                ],
+            ],
+            'Translation without multilang' => [
+                'data' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => 'en',
+                    'mainsourcecode' => 'fr',
+                    'targetcode' => 'de',
+                    'text' => 'Hallo welt',
+                    'sourcetext' => 'Hello world',
+                ],
+                'fieldtext' => 'Hello world',
+                'expected' => [
+                    'table' => 'course',
+                    'field' => 'summary',
+                    'id' => 1,
+                    'sourcecode' => 'en',
+                    'mainsourcecode' => 'en',
+                    'targetcode' => 'de',
+                    'text' => '{mlang other}Hello world{mlang}{mlang de}Hallo welt{mlang}',
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Tests execute parameters.
      *
      * @covers \local_deepler\external\update_translation::execute_parameters
@@ -61,7 +203,6 @@ final class updatetranslation_test extends base_external {
         $this->assertInstanceOf(external_multiple_structure::class, $returns);
     }
 
-
     /**
      * Tests update_translation success.
      *
@@ -76,28 +217,28 @@ final class updatetranslation_test extends base_external {
             return;
         }
         $this->resetAfterTest();
-        list($course, $user) = $this->create_test_course_and_user();
+        [$course, $user] = $this->create_test_course_and_user();
         $courseoldname = $course->fullname;
         $this->grant_capability($user, $course);
         $cid = $course->id;
         $deeplerrecord = (object) [
-                't_id' => $cid,
-                't_lang' => 'en',
-                't_table' => 'course',
-                't_field' => 'fullname',
-                's_lastmodified' => time(),
-                't_lastmodified' => time() - 3600, // 1 hour ago.
+            't_id' => $cid,
+            't_lang' => 'en',
+            't_table' => 'course',
+            't_field' => 'fullname',
+            's_lastmodified' => time(),
+            't_lastmodified' => time() - 3600, // 1 hour ago.
         ];
         $deeplerid = $DB->insert_record('local_deepler', $deeplerrecord);
 
         $data = [[
-                'tid' => $deeplerid,
-                'text' => $courseoldname . " transalted",
-                'keyid' => "course[$cid][fullname][0]",
-                'sourcecode' => 'en',
-                'sourcetext' => $courseoldname,
-                'targetcode' => 'de',
-                'mainsourcecode' => 'other',
+            'tid' => $deeplerid,
+            'text' => $courseoldname . " transalted",
+            'keyid' => "course[$cid][fullname][0]",
+            'sourcecode' => 'en',
+            'sourcetext' => $courseoldname,
+            'targetcode' => 'de',
+            'mainsourcecode' => 'other',
 
         ]];
 
@@ -140,147 +281,4 @@ final class updatetranslation_test extends base_external {
         update_translation::preparetext($data, $fieldtext);
         $this->assertEquals($expected['text'], $data['text']);
     }
-
-    /**
-     * Data provider for testPrepareText.
-     *
-     * @return array
-     */
-    public static function dataprovider(): array {
-        return [
-                'Rephrasing with multilang' => [
-                        'data' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => 'new_text',
-                                'sourcetext' => 'source_text',
-                        ],
-                        'fieldtext' => '{mlang other}source_text{mlang}',
-                        'expected' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => '{mlang other}new_text{mlang}',
-                        ],
-                ],
-                'Rephrasing with multilang but source not other' => [
-                        'data' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => 'new_text',
-                                'sourcetext' => 'source_text',
-                        ],
-                        'fieldtext' => '{mlang en}source_text{mlang}',
-                        'expected' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => '{mlang en}new_text{mlang}',
-                        ],
-                ],
-                'Rephrasing with multilang but source differes from main' => [
-                        'data' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'fr',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'fr',
-                                'text' => 'nouveau_text',
-                                'sourcetext' => 'source_text_fr',
-                        ],
-                        'fieldtext' => '{mlang fr}source_text_fr{mlang}',
-                        'expected' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => '{mlang fr}nouveau_text{mlang}',
-                        ],
-                ],
-                'Rephrasing without multilang' => [
-                        'data' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => 'new_text',
-                                'sourcetext' => 'source_text',
-                        ],
-                        'fieldtext' => 'source_text',
-                        'expected' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => lang_helper::REPHRASESYMBOL . 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'en',
-                                'text' => 'new_text',
-                        ],
-                ],
-                'Translation with multilang' => [
-                        'data' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'de',
-                                'text' => 'Hallo welt',
-                                'sourcetext' => 'Hello world',
-                        ],
-                        'fieldtext' => '{mlang en}Hello world{mlang}',
-                        'expected' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'de',
-                                'text' => '{mlang en}Hello world{mlang}{mlang de}Hallo welt{mlang}',
-                        ],
-                ],
-                'Translation without multilang' => [
-                        'data' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => 'en',
-                                'mainsourcecode' => 'fr',
-                                'targetcode' => 'de',
-                                'text' => 'Hallo welt',
-                                'sourcetext' => 'Hello world',
-                        ],
-                        'fieldtext' => 'Hello world',
-                        'expected' => [
-                                'table' => 'course',
-                                'field' => 'summary',
-                                'id' => 1,
-                                'sourcecode' => 'en',
-                                'mainsourcecode' => 'en',
-                                'targetcode' => 'de',
-                                'text' => '{mlang other}Hello world{mlang}{mlang de}Hallo welt{mlang}',
-                        ],
-                ],
-        ];
-    }
-
 }

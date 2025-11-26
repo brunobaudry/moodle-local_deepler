@@ -52,22 +52,26 @@ class update_translation extends external_api {
      * @return external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters([
+        return new external_function_parameters(
+            [
                 'data' => new external_multiple_structure(
-                        new external_single_structure([
-                                'tid' => new external_value(PARAM_INT, 'The id of the in the deepler table to trsck'),
-                                'text' => new external_value(PARAM_RAW, 'The new text content translated or updated'),
-                                'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
-                                'mainsourcecode' => new external_value(PARAM_ALPHANUMEXT, 'The main source code'),
-                                'sourcecode' => new external_value(PARAM_RAW, 'The source code of the translation'),
-                                'targetcode' => new external_value(PARAM_RAW, 'The targe code to save to'),
-                                'sourcetext' => new external_value(PARAM_RAW, 'The sourcetext to save if needed'),
-                        ])
+                    new external_single_structure(
+                        [
+                            'tid' => new external_value(PARAM_INT, 'The id of the in the deepler table to trsck'),
+                            'text' => new external_value(PARAM_RAW, 'The new text content translated or updated'),
+                            'keyid' => new external_value(PARAM_RAW, 'The field ui identifier'),
+                            'mainsourcecode' => new external_value(PARAM_ALPHANUMEXT, 'The main source code'),
+                            'sourcecode' => new external_value(PARAM_RAW, 'The source code of the translation'),
+                            'targetcode' => new external_value(PARAM_RAW, 'The targe code to save to'),
+                            'sourcetext' => new external_value(PARAM_RAW, 'The sourcetext to save if needed'),
+                        ]
+                    )
                 ),
                 'userid' => new external_value(PARAM_ALPHANUM, 'the user id'),
                 'courseid' => new external_value(PARAM_ALPHANUM, 'the course id'),
                 'action' => new external_value(PARAM_ALPHANUM, 'type of action to perform'),
-        ]);
+            ]
+        );
     }
 
     /**
@@ -84,8 +88,10 @@ class update_translation extends external_api {
         self::$action = $action;
         $responses = [];
         try {
-            $params = self::validate_parameters(self::execute_parameters(),
-                    ['data' => $data, 'userid' => $userid, 'courseid' => $courseid, 'action' => $action]);
+            $params = self::validate_parameters(
+                self::execute_parameters(),
+                ['data' => $data, 'userid' => $userid, 'courseid' => $courseid, 'action' => $action]
+            );
             $transaction = $DB->start_delegated_transaction();
             purge_all_caches();
             foreach ($params['data'] as $d) {
@@ -197,12 +203,14 @@ class update_translation extends external_api {
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
-                new external_single_structure([
-                        't_lastmodified' => new external_value(PARAM_INT, 'Timestamp the field was modified'),
-                        'text' => new external_value(PARAM_RAW, 'The updated text content'),
-                        'error' => new external_value(PARAM_RAW, 'An error message if any'),
-                        'keyid' => new external_value(PARAM_RAW, 'the key id of the field updated table-id-field'),
-                ])
+            new external_single_structure(
+                [
+                    't_lastmodified' => new external_value(PARAM_INT, 'Timestamp the field was modified'),
+                    'text' => new external_value(PARAM_RAW, 'The updated text content'),
+                    'error' => new external_value(PARAM_RAW, 'An error message if any'),
+                    'keyid' => new external_value(PARAM_RAW, 'the key id of the field updated table-id-field'),
+                ]
+            )
         );
     }
 

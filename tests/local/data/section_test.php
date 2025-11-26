@@ -30,15 +30,6 @@ use course_modinfo;
  */
 final class section_test extends advanced_testcase {
     /**
-     * @var course_modinfo|null
-     */
-    protected ?course_modinfo $course;
-    /** @var array|\section_info[] */
-    protected array $sectioninfos;
-    /** @var \core_courseformat\base */
-    protected base $courseformat;
-
-    /**
      * Setup function for the tests.
      *
      * @return void
@@ -48,8 +39,10 @@ final class section_test extends advanced_testcase {
         parent::setUp();
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
-        $this->getDataGenerator()->create_course_section(['course' => $course, 'section' => 1],
-                        ['_name' => 'Test Section']);
+        $this->getDataGenerator()->create_course_section(
+            ['course' => $course, 'section' => 1],
+            ['_name' => 'Test Section']
+        );
         $this->course = get_fast_modinfo($course);
         $this->sectioninfos = $this->course->get_section_info_all();
         $this->courseformat = $this->createMock(base::class);
@@ -164,4 +157,12 @@ final class section_test extends advanced_testcase {
         $this->assertEquals($sectionid, $section->getid());
         $this->assertEquals($sectionid1, $section1->getid());
     }
+    /**
+     * @var course_modinfo|null
+     */
+    protected ?course_modinfo $course;
+    /** @var array|\section_info[] */
+    protected array $sectioninfos;
+    /** @var \core_courseformat\base */
+    protected base $courseformat;
 }

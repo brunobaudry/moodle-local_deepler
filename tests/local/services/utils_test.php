@@ -89,8 +89,8 @@ final class utils_test extends advanced_testcase {
     public function test_standard_user_fields_contains_expected_keys(): void {
         $fields = utils::standard_user_fields();
         $expectedkeys =
-                ['username', 'email', 'firstname', 'lastname', 'city', 'country', 'institution', 'department', 'phone1', 'phone2',
-                        'address', 'idnumber'];
+            ['username', 'email', 'firstname', 'lastname', 'city', 'country', 'institution', 'department', 'phone1', 'phone2',
+                'address', 'idnumber'];
         foreach ($expectedkeys as $key) {
             $this->assertArrayHasKey($key, $fields);
         }
@@ -127,9 +127,9 @@ final class utils_test extends advanced_testcase {
 
         // Insert a mock custom profile field.
         $fielddata = (object) [
-                'shortname' => 'customfield1',
-                'name' => 'Custom Field One',
-                'datatype' => 'text',
+            'shortname' => 'customfield1',
+            'name' => 'Custom Field One',
+            'datatype' => 'text',
         ];
         $fielddata->id = $DB->insert_record('user_info_field', $fielddata);
 
@@ -144,5 +144,4 @@ final class utils_test extends advanced_testcase {
         $this->assertArrayHasKey('profile_field_customfield1', $fields);
         $this->assertEquals('Custom Field One', $fields['profile_field_customfield1']);
     }
-
 }

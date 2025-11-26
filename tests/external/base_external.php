@@ -25,12 +25,12 @@
 namespace local_deepler\external;
 
 use advanced_testcase;
+use context_course;
 
 /**
  * Base test case for local_deepler external functions.
  */
 abstract class base_external extends advanced_testcase {
-
     /**
      * Set up.
      *
@@ -63,7 +63,7 @@ abstract class base_external extends advanced_testcase {
      * @return void
      */
     protected function grant_capability($user, $course) {
-        $context = \context_course::instance($course->id);
+        $context = context_course::instance($course->id);
         $roleid = $this->getDataGenerator()->create_role();
         assign_capability('local/deepler:edittranslations', CAP_ALLOW, $roleid, $context);
         role_assign($roleid, $user->id, $context);

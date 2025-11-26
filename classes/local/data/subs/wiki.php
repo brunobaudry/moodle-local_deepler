@@ -29,7 +29,6 @@ use local_deepler\local\data\field;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class wiki extends subbase {
-
     /**
      * Get fields.
      *
@@ -41,15 +40,28 @@ class wiki extends subbase {
         $wikis = wiki_get_subwikis($this->record->id);
         foreach (array_keys($wikis) as $wid) {
             $pages = wiki_get_page_list($wid);
-            $pagesorphaned = array_map(function($op) {
+            $pagesorphaned = array_map(function ($op) {
                 return $op->id;
             }, wiki_get_orphaned_pages($wid));
             foreach ($pages as $p) {
                 if (!in_array($p->id, $pagesorphaned)) {
-                    $fields[] = new field($p->id,
-                            $p->title, 0, 'chapter', 'wiki_pages', $this->cm->id, false);
-                    $fields[] = new field($p->id,
-                            $p->cachedcontent, 1, 'cachedcontent', 'wiki_pages', $this->cm->id);
+                    $fields[] = new field(
+                        $p->id,
+                        $p->title,
+                        0,
+                        'chapter',
+                        'wiki_pages',
+                        $this->cm->id,
+                        false
+                    );
+                    $fields[] = new field(
+                        $p->id,
+                        $p->cachedcontent,
+                        1,
+                        'cachedcontent',
+                        'wiki_pages',
+                        $this->cm->id
+                    );
                 }
             }
         }

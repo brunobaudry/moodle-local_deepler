@@ -35,27 +35,6 @@ use Behat\Gherkin\Node\PyStringNode;
  */
 class behat_local_deepler_apitester implements Context {
     /**
-     * Api pro endpoint.
-     *
-     * @var string
-     */
-    static protected string $deeplpro = 'https://api.deepl.com/v2/translate';
-    /**
-     *  Api free endpoint.
-     *
-     * @var string
-     */
-    static protected string $deeplfree = 'https://api-free.deepl.com/v2/translate';
-    /** @var array */
-    private array $headers = [];
-    /**
-     * @var string
-     */
-    private string $response;
-    /** @var string */
-    private string $statuscode;
-
-    /**
      * feature_context constructor.
      * Loads environment variables.
      */
@@ -88,7 +67,6 @@ class behat_local_deepler_apitester implements Context {
         }
         $value = "DeepL-Auth-Key $value";
         $this->headers[$header] = $value;
-
     }
 
     /**
@@ -118,11 +96,11 @@ class behat_local_deepler_apitester implements Context {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array_map(
-                function($key, $value) {
-                    return "$key: $value";
-                },
-                array_keys($this->headers),
-                $this->headers
+            function ($key, $value) {
+                return "$key: $value";
+            },
+            array_keys($this->headers),
+            $this->headers
         ));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
@@ -162,4 +140,24 @@ class behat_local_deepler_apitester implements Context {
             throw new Exception("Response does not contain expected text: $text");
         }
     }
+    /**
+     * Api pro endpoint.
+     *
+     * @var string
+     */
+    protected static string $deeplpro = 'https://api.deepl.com/v2/translate';
+    /**
+     *  Api free endpoint.
+     *
+     * @var string
+     */
+    protected static string $deeplfree = 'https://api-free.deepl.com/v2/translate';
+    /** @var array */
+    private array $headers = [];
+    /**
+     * @var string
+     */
+    private string $response;
+    /** @var string */
+    private string $statuscode;
 }

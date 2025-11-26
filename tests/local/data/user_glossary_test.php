@@ -37,13 +37,9 @@ final class user_glossary_test extends advanced_testcase {
      */
     public function test_create_and_get_user_glossary(): void {
         $user = $this->getDataGenerator()->create_user();
-        $glo = new glossary('11111111-2222-3333-4444-555555555555',
-                'test', 'en', 'fr', 10);
+        $glo = new glossary('11111111-2222-3333-4444-555555555555', 'test', 'en', 'fr', 10);
         $glodbid = glossary::create($glo);
-        $data = new user_glossary($user->id,
-                $glodbid,
-                1
-        );
+        $data = new user_glossary($user->id, $glodbid, 1);
 
         $usergloid = user_glossary::create($data);
         $record = user_glossary::getbyid($usergloid);
@@ -62,10 +58,7 @@ final class user_glossary_test extends advanced_testcase {
      */
     public function test_update_user_glossary(): void {
         $user = $this->getDataGenerator()->create_user();
-        $data = new user_glossary($user->id,
-                2,
-                1
-        );
+        $data = new user_glossary($user->id, 2, 1);
 
         $id = user_glossary::create($data);
         $record = user_glossary::getbyid($id);
@@ -86,10 +79,7 @@ final class user_glossary_test extends advanced_testcase {
      */
     public function test_delete_user_glossary(): void {
         $user = $this->getDataGenerator()->create_user();
-        $data = new user_glossary($user->id,
-                3,
-                0
-        );
+        $data = new user_glossary($user->id, 3, 0);
 
         $id = user_glossary::create($data);
         user_glossary::delete($id);

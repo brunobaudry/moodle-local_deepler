@@ -44,12 +44,12 @@ class qtype_ddimageortext extends qbase {
                 continue;
             }
             $fields[] = new field(
-                    $answer->id,
-                    $answer->label,
-                    0,
-                    'label',
-                    $modname,
-                    $this->cmid
+                $answer->id,
+                $answer->label,
+                0,
+                'label',
+                $modname,
+                $this->cmid
             );
         }
         return $fields;

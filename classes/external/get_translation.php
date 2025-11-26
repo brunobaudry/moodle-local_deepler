@@ -82,8 +82,8 @@ class get_translation extends external_api {
             $chunks = self::chunk_payload($translationsgroup, $staticparts);
             foreach ($chunks as $chunk) {
                 $translatedtexts = array_merge(
-                        $translatedtexts,
-                        self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)
+                    $translatedtexts,
+                    self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)
                 );
             }
         }
@@ -101,10 +101,16 @@ class get_translation extends external_api {
      * @param string $glossaryid The glossary ID.
      * @return array Translated results or error.
      */
-    private static function process_chunk(DeepLClient $translator, array $chunk, string $sourcelang,
-            string $targetlang, array $options, string $glossaryid): array {
+    private static function process_chunk(
+        DeepLClient $translator,
+        array $chunk,
+        string $sourcelang,
+        string $targetlang,
+        array $options,
+        string $glossaryid
+    ): array {
 
-        $texts = array_map(function($t) {
+        $texts = array_map(function ($t) {
             return $t['text'];
         }, $chunk);
 
@@ -122,7 +128,6 @@ class get_translation extends external_api {
             }
 
             return $translated;
-
         } catch (DeepLException $e) {
             return [
                     [
@@ -152,35 +157,51 @@ class get_translation extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
                 'translations' => new external_multiple_structure(
-                        new external_single_structure(
-                                [
-                                        'text' => new external_value(PARAM_RAW, 'text to be translated'),
-                                        'source_lang' => new external_value(PARAM_ALPHA, 'source language'),
-                                        'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
-                                ])),
-                'options' => new external_single_structure(
+                    new external_single_structure(
                         [
-                                'target_lang' => new external_value(PARAM_RAW, 'target language'),
-                                'context' => new external_value(PARAM_RAW, 'context of the text'),
-                                'tag_handling' => new external_value(PARAM_ALPHA, 'html or xml'),
-                                'split_sentences' => new external_value(PARAM_ALPHANUMEXT, '0,1 or nonewlines'),
-                                'preserve_formatting' => new external_value(PARAM_BOOL, 'preserve formatting ?'),
-                                'formality' => new external_value(PARAM_ALPHAEXT,
-                                        'default, less, prefer_more, prefer_less or more'),
-                                'outline_detection' => new external_value(PARAM_BOOL, 'The automatic detection of the XML'),
-                                'non_splitting_tags' => new external_value(PARAM_RAW,
-                                        'Comma-separated list of XML tags which never split sentences'),
-                                'splitting_tags' => new external_value(PARAM_RAW,
-                                        'Comma-separated list of XML tags which always cause splits.'),
-                                'ignore_tags' => new external_value(PARAM_RAW,
-                                        'Comma-separated list of XML tags that indicate text not to be translated.'),
-                                'glossary_id' => new external_value(PARAM_ALPHANUMEXT,
-                                        'Specify the glossary to use for the translation.'),
-                                'model_type' => new external_value(PARAM_ALPHANUMEXT,
-                                        'Specifies which DeepL model should be used for translation.'),
-                                'show_billed_characters' => new external_value(PARAM_BOOL,
-                                        'Specifies whether the number of billed characters should be included in the response.'),
+                            'text' => new external_value(PARAM_RAW, 'text to be translated'),
+                            'source_lang' => new external_value(PARAM_ALPHA, 'source language'),
+                            'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
                         ]
+                    )
+                ),
+                'options' => new external_single_structure(
+                    [
+                        'target_lang' => new external_value(PARAM_RAW, 'target language'),
+                        'context' => new external_value(PARAM_RAW, 'context of the text'),
+                        'tag_handling' => new external_value(PARAM_ALPHA, 'html or xml'),
+                        'split_sentences' => new external_value(PARAM_ALPHANUMEXT, '0,1 or nonewlines'),
+                        'preserve_formatting' => new external_value(PARAM_BOOL, 'preserve formatting ?'),
+                        'formality' => new external_value(
+                            PARAM_ALPHAEXT,
+                            'default, less, prefer_more, prefer_less or more'
+                        ),
+                        'outline_detection' => new external_value(PARAM_BOOL, 'The automatic detection of the XML'),
+                        'non_splitting_tags' => new external_value(
+                            PARAM_RAW,
+                            'Comma-separated list of XML tags which never split sentences'
+                        ),
+                        'splitting_tags' => new external_value(
+                            PARAM_RAW,
+                            'Comma-separated list of XML tags which always cause splits.'
+                        ),
+                        'ignore_tags' => new external_value(
+                            PARAM_RAW,
+                            'Comma-separated list of XML tags that indicate text not to be translated.'
+                        ),
+                        'glossary_id' => new external_value(
+                            PARAM_ALPHANUMEXT,
+                            'Specify the glossary to use for the translation.'
+                        ),
+                        'model_type' => new external_value(
+                            PARAM_ALPHANUMEXT,
+                            'Specifies which DeepL model should be used for translation.'
+                        ),
+                        'show_billed_characters' => new external_value(
+                            PARAM_BOOL,
+                            'Specifies whether the number of billed characters should be included in the response.'
+                        ),
+                    ]
                 ),
                 'version' => new external_value(PARAM_RAW, 'the plugin version id'),
         ]);
@@ -193,15 +214,14 @@ class get_translation extends external_api {
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
-                new external_single_structure(
-                        [
-                                'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
-                                'translated_text' => new external_value(PARAM_RAW, 'translated text'),
-                                'glossary_id' => new external_value(PARAM_RAW, 'glossary id used'),
-                                'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
-                        ]
-                )
+            new external_single_structure(
+                [
+                    'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
+                    'translated_text' => new external_value(PARAM_RAW, 'translated text'),
+                    'glossary_id' => new external_value(PARAM_RAW, 'glossary id used'),
+                    'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
+                ]
+            )
         );
     }
-
 }

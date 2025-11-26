@@ -102,9 +102,10 @@ module.exports = function(grunt) {
             }
 
         });
-
         grunt.registerTask('default', ['clean', 'copy', 'uglify', 'eslint']);
         grunt.registerTask('dev', ['clean', 'copy', 'uglify', 'eslint', "sass:dev"]);
         // grunt.registerTask('dev', ['shell:behat','clean', 'copy', 'uglify', 'eslint', "sass:dev"]);
         grunt.registerTask('prod', ['clean', 'copy', 'uglify', 'eslint', "sass:prod"]);
+        grunt.registerTask('amd', ['clean', 'copy', 'uglify', 'eslint', "sass:prod"]);
+        grunt.registerTask('stylelint', ["sass:prod"]);
 };

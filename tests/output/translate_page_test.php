@@ -39,8 +39,6 @@ require_once($CFG->dirroot . '/filter/multilang2/filter.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class translate_page_test extends advanced_testcase {
-
-
     /**
      * Test the constructor of translate_page.
      *

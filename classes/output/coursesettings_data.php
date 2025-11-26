@@ -16,15 +16,15 @@
 
 namespace local_deepler\output;
 
-use renderable;
-use renderer_base;
-use templatable;
 use core_filters\text_filter;
 use Exception;
 use filter_multilang2\text_filter as Multilang2TextFilter;
 use local_deepler\local\data\field;
 use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\utils;
+use renderable;
+use renderer_base;
+use templatable;
 
 /**
  * Course settings block data for translate page.
@@ -34,14 +34,6 @@ use local_deepler\local\services\utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class coursesettings_data extends translate_data implements renderable, templatable {
-    /** @var string */
-    private string $title;
-    /** @var string */
-    private string $link;
-
-    /** @var field[] */
-    private array $fields;
-
     /**
      * Construct.
      *
@@ -53,12 +45,13 @@ class coursesettings_data extends translate_data implements renderable, templata
      * @param string $editor
      */
     public function __construct(
-            string $title,
-            string $link,
-            array $fields,
-            lang_helper $languagepack,
-            Multilang2TextFilter|text_filter $mlangfilter,
-            string $editor) {
+        string $title,
+        string $link,
+        array $fields,
+        lang_helper $languagepack,
+        Multilang2TextFilter|text_filter $mlangfilter,
+        string $editor
+    ) {
         parent::__construct($languagepack, $mlangfilter, $editor);
         $this->title = $title;
         $this->link = $link;
@@ -87,14 +80,20 @@ class coursesettings_data extends translate_data implements renderable, templata
         }
 
         return [
-                'hasheader' => true,
-                'hasicon' => false,
-                'level' => '3',
-                'activitydesc' => $this->title,
+            'hasheader' => true,
+            'hasicon' => false,
+            'level' => '3',
+            'activitydesc' => $this->title,
             'link' => $this->link,
             'id' => utils::makehtmlid($this->title),
-                'index' => '0',
+            'index' => '0',
             'fields' => $fieldsrendered,
         ];
     }
+    /** @var string */
+    private string $title;
+    /** @var string */
+    private string $link;
+    /** @var field[] */
+    private array $fields;
 }

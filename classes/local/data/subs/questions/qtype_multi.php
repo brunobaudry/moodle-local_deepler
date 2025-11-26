@@ -26,7 +26,6 @@ use local_deepler\local\data\field;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_multi extends qbase {
-
     /**
      * Get the fields to be translated.
      *
@@ -38,21 +37,21 @@ class qtype_multi extends qbase {
         $fields = [];
         foreach ($this->question->answers as $answer) {
             $fields[] = new field(
-                    $answer->id,
-                    $answer->answer,
-                    $answer->answerformat,
-                    'answer',
-                    'question_answers',
-                    $this->cmid
+                $answer->id,
+                $answer->answer,
+                $answer->answerformat,
+                'answer',
+                'question_answers',
+                $this->cmid
             );
             if (!empty($answer->feedback)) {
                 $fields[] = new field(
-                        $answer->id,
-                        $answer->feedback,
-                        $answer->feedbackformat,
-                        'feedback',
-                        'question_answers',
-                        $this->cmid
+                    $answer->id,
+                    $answer->feedback,
+                    $answer->feedbackformat,
+                    'feedback',
+                    'question_answers',
+                    $this->cmid
                 );
             }
         }

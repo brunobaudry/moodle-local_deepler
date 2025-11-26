@@ -24,6 +24,7 @@ use local_deepler\local\data\section;
 use local_deepler\local\services\lang_helper;
 use moodleform;
 use MoodleQuickForm;
+
 if (class_exists('\\core_filters\\text_filter')) {
     class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
 } else {
@@ -44,22 +45,14 @@ require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_ctedito
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class translateform extends moodleform {
-
     /**
      * Available langs.
      *
      * @var lang_helper
      */
     protected lang_helper $langpack;
-
     /** @var string */
     protected string $editor;
-    /**
-     * Define Moodle Form.
-     *
-     * @return void
-     * @throws \coding_exception
-     */
     /**
      * @var string[]
      */
@@ -72,7 +65,6 @@ class translateform extends moodleform {
      * @var text_filter|Multilang2TextFilter
      */
     protected text_filter|Multilang2TextFilter $mlangfilter;
-
     /**
      * Main data definition function.
      *
@@ -90,22 +82,25 @@ class translateform extends moodleform {
         field::$targetlangdeepl = $this->langpack->targetlang;
         // Start moodle form.
         $this->_form->disable_form_change_checker();
-        MoodleQuickForm::registerElementType('cteditor', "$CFG->libdir/form/editor.php",
-                '\local_deepler\editor\MoodleQuickForm_cteditor');
+        MoodleQuickForm::registerElementType(
+            'cteditor',
+            "$CFG->libdir/form/editor.php",
+            '\local_deepler\editor\MoodleQuickForm_cteditor'
+        );
         // Open Form local_deepler__form.
         $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
         // Create course settings section only if no section is selected.
         if ($this->coursedata->get_loadedsection() < 0) {
             $this->makecoursesetting(
-                    get_string('settings'),
-                    $this->coursedata->getlink(),
-                    $this->coursedata->getfields());
+                get_string('settings'),
+                $this->coursedata->getlink(),
+                $this->coursedata->getfields()
+            );
         }
         // Create sections.
         $this->makesections($this->coursedata->getsections());
         // Close form.
         $this->_form->addElement('html', '</div>');
-
     }
 
     /**
@@ -122,6 +117,12 @@ class translateform extends moodleform {
         $data = new coursesettings_data($title, $link, $settingfields, $this->langpack, $this->mlangfilter, $this->editor);
         $this->_form->addElement('html', $renderer->makecoursesetting($data));
     }
+    /**
+     * Define Moodle Form.
+     *
+     * @return void
+     * @throws \coding_exception
+     */
 
     /**
      * Create sections.
@@ -146,9 +147,12 @@ class translateform extends moodleform {
     protected function makesection(section $section): void {
         if (!$section->is_empty()) {
             global $PAGE;
-            $sectiondata = new section_data($section, $this->langpack,
-                    $this->mlangfilter,
-                    $this->editor);
+            $sectiondata = new section_data(
+                $section,
+                $this->langpack,
+                $this->mlangfilter,
+                $this->editor
+            );
             $renderer = $PAGE->get_renderer('local_deepler', 'translate');
             $this->_form->addElement('html', $renderer->makesection($sectiondata));
         }

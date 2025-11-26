@@ -52,10 +52,6 @@ class lang_helper {
      */
     public string $currentlang;
     /**
-     * @var string The source language for deepl.
-     */
-    private string $deeplsourcelang;
-    /**
      * The target language.
      *
      * @var string
@@ -65,6 +61,16 @@ class lang_helper {
      * @var array|mixed Moodle instance's installed languages.
      */
     public mixed $moodlelangs;
+    /**
+     * Deepl usage bound to the api key.
+     *
+     * @var Usage
+     */
+    protected Usage $usage;
+    /**
+     * @var string The source language for deepl.
+     */
+    private string $deeplsourcelang;
     /**
      * @var string
      */
@@ -87,12 +93,6 @@ class lang_helper {
      * @var Language[]
      */
     private array $deepltargets;
-    /**
-     * Deepl usage bound to the api key.
-     *
-     * @var Usage
-     */
-    protected Usage $usage;
     /**
      * Type of DeepL subscrription.
      *
@@ -124,11 +124,11 @@ class lang_helper {
      * @throws \dml_exception
      */
     public function __construct(
-            ?DeepLClient $translator = null,
-            ?string $apikey = null,
-            ?array $moodlelangs = null,
-            ?string $currentlang = null,
-            ?string $targetlang = null
+        ?DeepLClient $translator = null,
+        ?string $apikey = null,
+        ?array $moodlelangs = null,
+        ?string $currentlang = null,
+        ?string $targetlang = null
     ) {
         $this->deeplsources = [];
         $this->deepltargets = [];
@@ -160,7 +160,6 @@ class lang_helper {
             $key = get_config('local_deepler', 'apikey');
         }
         return $key;
-
     }
 
     /**
@@ -210,39 +209,6 @@ class lang_helper {
     }
 
     /**
-     * Initialise the Deepl object.
-     * Return a Boolean of the cnx status.
-     *
-     * @param string $version
-     * @return bool
-     * @throws \DeepL\DeepLException
-     */
-    private function inittranslator(string $version): bool {
-        if (!isset($this->translator)) {
-            try {
-                $this->translator = new DeepLClient($this->apikey, [
-                        'send_platform_info' => true,
-                        'app_info' => new AppInfo('Moodle-Deepler', $version),
-                ]);
-            } catch (AuthorizationException $e) {
-                return false;
-            }
-        }
-        return true;
-    }
-    /**
-     * Set the source language.
-     *
-     * @return void
-     * @throws \DeepL\DeepLException
-     */
-    private function setcurrentlanguage(): void {
-        // Moodle format is not the common culture format.
-        // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
-        $this->deeplsourcelang = LanguageCode::removeRegionalVariant(str_replace('_', '-', $this->currentlang));
-    }
-
-    /**
      * Finds the first available token for a user by looping through all tokens
      * and matching both standard and custom profile fields.
      *
@@ -273,10 +239,10 @@ class lang_helper {
                 if (property_exists($user, $attr)) {
                     $uservalue = (string) $user->$attr;
                     if (
-                            ($pattern === $uservalue) ||
-                            (strpos($pattern, '%') !== false) ||
-                            (strpos($pattern, '*') !== false) ||
-                            (strpos($pattern, '_') !== false)
+                        ($pattern === $uservalue) ||
+                        (strpos($pattern, '%') !== false) ||
+                        (strpos($pattern, '*') !== false) ||
+                        (strpos($pattern, '_') !== false)
                     ) {
                         if (utils::wildcard_match($pattern, $uservalue)) {
                             $foundtoken = $token;
@@ -287,16 +253,16 @@ class lang_helper {
                 } else if (array_key_exists($attr, $customfields) && !empty($user->id)) {
                     // If not, and it's a custom profile field, fetch from DB.
                     $profiledata = $DB->get_record('user_info_data', [
-                            'userid' => $user->id,
-                            'fieldid' => $customfields[$attr]->id,
+                        'userid' => $user->id,
+                        'fieldid' => $customfields[$attr]->id,
                     ]);
                     if ($profiledata) {
                         $uservalue = (string) $profiledata->data;
                         if (
-                                ($pattern === $uservalue) ||
-                                (strpos($pattern, '%') !== false) ||
-                                (strpos($pattern, '*') !== false) ||
-                                (strpos($pattern, '_') !== false)
+                            ($pattern === $uservalue) ||
+                            (strpos($pattern, '%') !== false) ||
+                            (strpos($pattern, '*') !== false) ||
+                            (strpos($pattern, '_') !== false)
                         ) {
                             if (utils::wildcard_match($pattern, $uservalue)) {
                                 $foundtoken = $token;
@@ -312,22 +278,55 @@ class lang_helper {
     }
 
     /**
-     * Find the Deepl langs that are supported by this moodle instance.
+     * Initialise the Deepl object.
+     * Return a Boolean of the cnx status.
      *
-     * @param array $deepls
-     * @return array
+     * @param string $version
+     * @return bool
+     * @throws \DeepL\DeepLException
      */
-    private function finddeeplsformoodle(array $deepls): array {
-        return array_filter($deepls, function($item) {
-            foreach (array_keys($this->moodlelangs) as $moodlecode) {
-                $moodle = strtolower(str_replace('_', '-', $moodlecode));
-                $deepl = strtolower($item->code);
-                if (stripos($deepl, $moodle) !== false) {
-                    return true;
-                }
+    private function inittranslator(string $version): bool {
+        if (!isset($this->translator)) {
+            try {
+                $this->translator = new DeepLClient($this->apikey, [
+                    'send_platform_info' => true,
+                    'app_info' => new AppInfo('Moodle-Deepler', $version),
+                ]);
+            } catch (AuthorizationException $e) {
+                return false;
             }
-            return false;
-        });
+        }
+        return true;
+    }
+
+    /**
+     * Getter for Usage.
+     *
+     * @return \Deepl\Usage
+     */
+    public function getusage(): Usage {
+        return $this->usage;
+    }
+
+    /**
+     * Getter for source langs.
+     *
+     * @return array|\DeepL\Language[]
+     */
+    public function getsourcelanguages(): array {
+        return $this->deeplsources;
+    }
+
+    /**
+     * Set the source language.
+     *
+     * @return void
+     * @throws \DeepL\DeepLException
+     */
+    private function setcurrentlanguage(): void {
+        // Moodle format is not the common culture format.
+        // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
+        $this->deeplsourcelang = LanguageCode::removeRegionalVariant(str_replace('_', '-', $this->currentlang));
     }
 
     /**
@@ -378,6 +377,15 @@ class lang_helper {
     }
 
     /**
+     * Checks if source language is supported.
+     *
+     * @return bool
+     */
+    public function iscurrentsupported(): bool {
+        return $this->islangsupported($this->deeplsourcelang);
+    }
+
+    /**
      * Checks if a given lang is supported by Deepl
      *
      * @param string $lang
@@ -397,15 +405,6 @@ class lang_helper {
     }
 
     /**
-     * Checks if source language is supported.
-     *
-     * @return bool
-     */
-    public function iscurrentsupported(): bool {
-        return $this->islangsupported($this->deeplsourcelang);
-    }
-
-    /**
      * If key empty string.
      *
      * @return bool
@@ -415,25 +414,38 @@ class lang_helper {
     }
 
     /**
-     * Check if source is same as target. Might call the rephrase instead.
-     *
-     * @param string $source
-     * @param string $target
-     * @return bool
-     */
-    public function isrephrase(string $source = '', string $target = ''): bool {
-        $s = $source === '' ? $this->deeplsourcelang : $source;
-        $t = $target === '' ? $this->targetlang : $target;
-        return str_contains($t, $s);
-    }
-
-    /**
      * Getter for deeplsourcelang.
      *
      * @return string
      */
     public function get_deeplsourcelang(): string {
         return $this->deeplsourcelang;
+    }
+
+    /**
+     * Prepare source options.
+     *
+     * @return array
+     */
+    public function preparesourcesoptionlangs(): array {
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
+    }
+
+    /**
+     * Creates props for html selects.
+     *
+     * @param array $filtereddeepls
+     * @param bool $issource
+     * @param bool $verbose
+     * @return array
+     */
+    private function prepareoptionlangs(array $filtereddeepls, bool $issource = true, bool $verbose = true): array {
+        $tab = [];
+        // Get the list of deepl langs that are supported by this moodle instance.
+        foreach ($filtereddeepls as $l) {
+            $tab[] = $this->getoption($issource, $l, $verbose);
+        }
+        return $tab;
     }
 
     /**
@@ -463,62 +475,44 @@ class lang_helper {
             $code = self::REPHRASESYMBOL . $code;
         }
         return [
-                'code' => $code,
-                'lang' => $text,
-                'verbose' => $l->name,
-                'selected' => $selected,
-                'disabled' => $disable,
+            'code' => $code,
+            'lang' => $text,
+            'verbose' => $l->name,
+            'selected' => $selected,
+            'disabled' => $disable,
         ];
     }
 
     /**
-     * Create HTML props for select.
+     * Check if source is same as target. Might call the rephrase instead.
      *
-     * @param array $tab
-     * @return string
-     * TODO MDL-0000 allow regional languages setup (expl EN-GB)
+     * @param string $source
+     * @param string $target
+     * @return bool
      */
-    private function preparehtmlotions(array $tab): string {
-        $list = '';
-        foreach ($tab as $item) {
-            $list .= '<option value="' . $item['code'] . '"';
-            if ($item['selected']) {
-                $list .= ' selected ';
-            }
-            if ($item['disabled']) {
-                $list .= ' disabled ';
-            }
-            $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
-        }
-        return $list;
-    }
-
-
-
-    /**
-     * Creates props for html selects.
-     *
-     * @param array $filtereddeepls
-     * @param bool $issource
-     * @param bool $verbose
-     * @return array
-     */
-    private function prepareoptionlangs(array $filtereddeepls, bool $issource = true, bool $verbose = true): array {
-        $tab = [];
-        // Get the list of deepl langs that are supported by this moodle instance.
-        foreach ($filtereddeepls as $l) {
-            $tab[] = $this->getoption($issource, $l, $verbose);
-        }
-        return $tab;
+    public function isrephrase(string $source = '', string $target = ''): bool {
+        $s = $source === '' ? $this->deeplsourcelang : $source;
+        $t = $target === '' ? $this->targetlang : $target;
+        return str_contains($t, $s);
     }
 
     /**
-     * Prepare source options.
+     * Find the Deepl langs that are supported by this moodle instance.
      *
+     * @param array $deepls
      * @return array
      */
-    public function preparesourcesoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
+    private function finddeeplsformoodle(array $deepls): array {
+        return array_filter($deepls, function ($item) {
+            foreach (array_keys($this->moodlelangs) as $moodlecode) {
+                $moodle = strtolower(str_replace('_', '-', $moodlecode));
+                $deepl = strtolower($item->code);
+                if (stripos($deepl, $moodle) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     /**
@@ -536,6 +530,15 @@ class lang_helper {
      * @return bool
      */
     public function get_canimprove(): bool {
+        return $this->canimprove;
+    }
+
+    /**
+     * Getter for ability  to use the improve API.
+     *
+     * @return bool
+     */
+    public function getcanimprove(): bool {
         return $this->canimprove;
     }
 
@@ -594,30 +597,12 @@ class lang_helper {
     }
 
     /**
-     * Getter for source langs.
-     *
-     * @return array|\DeepL\Language[]
-     */
-    public function getsourcelanguages(): array {
-        return $this->deeplsources;
-    }
-
-    /**
      * Getter for target langs.
      *
      * @return array|\DeepL\Language[]
      */
     public function gettargelanguages(): array {
         return $this->deepltargets;
-    }
-
-    /**
-     * Getter for Usage.
-     *
-     * @return \Deepl\Usage
-     */
-    public function getusage(): Usage {
-        return $this->usage;
     }
 
     /**
@@ -641,25 +626,6 @@ class lang_helper {
     }
 
     /**
-     * Getter for ability  to use the improve API.
-     *
-     * @return bool
-     */
-    public function getcanimprove(): bool {
-        return $this->canimprove;
-    }
-
-    /**
-     * Fetches all glossaries.
-     *
-     * @return array
-     * @throws \DeepL\DeepLException
-     */
-    private function getalldeeplglossaries(): array {
-        return $this->translator->listGlossaries();
-    }
-
-    /**
      * Adds a DeepL glossary if not yet stored in DB.
      *
      * @param array $deeplglossaries
@@ -671,11 +637,11 @@ class lang_helper {
         foreach ($deeplglossaries as $deeplglossary) {
             if (!glossary::exists($deeplglossary->glossaryId)) {
                 glossary::create(new glossary(
-                        $deeplglossary->glossaryId,
-                        $deeplglossary->name,
-                        $deeplglossary->sourceLang,
-                        $deeplglossary->targetLang,
-                        $deeplglossary->entryCount
+                    $deeplglossary->glossaryId,
+                    $deeplglossary->name,
+                    $deeplglossary->sourceLang,
+                    $deeplglossary->targetLang,
+                    $deeplglossary->entryCount
                 ));
             }
         }
@@ -724,6 +690,57 @@ class lang_helper {
     }
 
     /**
+     * Get All from DeepL add missing, remove deleted return all.
+     *
+     *
+     * @return glossary[]
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function syncdeeplglossaries(): array {
+        $deeplglossaries = $this->getalldeeplglossaries();
+        // Array of db IDs and DeepL's Glossary IDs.
+        $glossariesallids = glossary::getall_ids();
+        // Flatten Glossary IDs in DB.
+        $pluginsgloids = array_map(fn($o) => $o->glossaryid, $glossariesallids);
+        // Add those added from DeepL UI if missing.
+        foreach ($deeplglossaries as $deeplglossary) {
+            if (!in_array($deeplglossary->glossaryId, $pluginsgloids)) {
+                glossary::create(new glossary(
+                    $deeplglossary->glossaryId,
+                    $deeplglossary->name,
+                    $deeplglossary->sourceLang,
+                    $deeplglossary->targetLang,
+                    $deeplglossary->entryCount
+                ));
+            }
+        }
+        // Flatten DeepL's glo IDs.
+        $deeplsids = array_map(fn ($o) => $o->glossaryId, $deeplglossaries);
+        // Delete those deleted from DeepL's UI.
+        $pluginidsotindeepl = array_filter($glossariesallids, function ($obj) use ($deeplsids) {
+            if (!in_array($obj->glossaryid, $deeplsids)) {
+                return $obj->id;
+            }
+        });
+        $idstodelete = array_map(fn($o) => $o->id, $pluginidsotindeepl);
+        foreach ($idstodelete as $deleteme) {
+            $this->deleteglossary($deleteme, true);
+        }
+        return glossary::getall('', '');
+    }
+
+    /**
+     * Fetches all glossaries.
+     *
+     * @return array
+     * @throws \DeepL\DeepLException
+     */
+    private function getalldeeplglossaries(): array {
+        return $this->translator->listGlossaries();
+    }
+
+    /**
      * Delete user's glossary.
      *
      * @param int $glossarydbid
@@ -748,52 +765,33 @@ class lang_helper {
     }
 
     /**
-     * Get All from DeepL add missing, remove deleted return all.
-     *
-     *
-     * @return glossary[]
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
-     */
-    public function syncdeeplglossaries(): array {
-        $deeplglossaries = $this->getalldeeplglossaries();
-        // Array of db IDs and DeepL's Glossary IDs.
-        $glossariesallids = glossary::getall_ids();
-        // Flatten Glossary IDs in DB.
-        $pluginsgloids = array_map(fn($o) => $o->glossaryid, $glossariesallids);
-        // Add those added from DeepL UI if missing.
-        foreach ($deeplglossaries as $deeplglossary) {
-            if (!in_array($deeplglossary->glossaryId, $pluginsgloids)) {
-                glossary::create(new glossary(
-                        $deeplglossary->glossaryId,
-                        $deeplglossary->name,
-                        $deeplglossary->sourceLang,
-                        $deeplglossary->targetLang,
-                        $deeplglossary->entryCount
-                ));
-            }
-        }
-        // Flatten DeepL's glo IDs.
-        $deeplsids = array_map(fn($o) => $o->glossaryId, $deeplglossaries);
-        // Delete those deleted from DeepL's UI.
-        $pluginidsotindeepl = array_filter($glossariesallids, function($obj) use ($deeplsids) {
-            if (!in_array($obj->glossaryid, $deeplsids)) {
-                return $obj->id;
-            }
-        });
-        $idstodelete = array_map(fn($o) => $o->id, $pluginidsotindeepl);
-        foreach ($idstodelete as $deleteme) {
-            $this->deleteglossary($deleteme, true);
-        }
-        return glossary::getall('', '');
-    }
-
-    /**
      * Getter for the current token id.
      *
      * @return int
      */
     public function getdbtokenid(): int {
         return $this->dbtokenid;
+    }
+
+    /**
+     * Create HTML props for select.
+     *
+     * @param array $tab
+     * @return string
+     * TODO MDL-0000 allow regional languages setup (expl EN-GB)
+     */
+    private function preparehtmlotions(array $tab): string {
+        $list = '';
+        foreach ($tab as $item) {
+            $list .= '<option value="' . $item['code'] . '"';
+            if ($item['selected']) {
+                $list .= ' selected ';
+            }
+            if ($item['disabled']) {
+                $list .= ' disabled ';
+            }
+            $list .= ' data-initial-value="' . $item['code'] . '">' . $item['lang'] . '</option>';
+        }
+        return $list;
     }
 }

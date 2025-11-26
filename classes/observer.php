@@ -24,6 +24,10 @@
  */
 
 namespace local_deepler;
+use core\event\course_module_updated;
+use core\event\course_section_updated;
+use core\event\course_updated;
+
 /**
  * Course Translator Observers.
  *
@@ -32,14 +36,13 @@ namespace local_deepler;
  * @package    local_deepler
  */
 class observer {
-
     /**
      * Observer for course_updated event.
      *
      * @param \core\event\course_updated $event
      * @return void
      */
-    public static function course_updated(\core\event\course_updated $event) {
+    public static function course_updated(course_updated $event) {
         global $DB;
 
         // Get params.
@@ -51,17 +54,17 @@ class observer {
 
         // Get matching records.
         $records = $DB->get_recordset(
-                'local_deepler',
-                ['t_id' => $objectid, 't_table' => $objecttable],
-                '',
-                'id'
+            'local_deepler',
+            ['t_id' => $objectid, 't_table' => $objecttable],
+            '',
+            'id'
         );
 
         // Update s_lastmodified (source) time.
         foreach ($records as $record) {
             $DB->update_record(
-                    'local_deepler',
-                    ['id' => $record->id, 's_lastmodified' => $timemodified]
+                'local_deepler',
+                ['id' => $record->id, 's_lastmodified' => $timemodified]
             );
         }
         $records->close();
@@ -73,7 +76,7 @@ class observer {
      * @param \core\event\course_section_updated $event
      * @return void
      */
-    public static function course_section_updated(\core\event\course_section_updated $event) {
+    public static function course_section_updated(course_section_updated $event) {
         global $DB;
 
         // Get params.
@@ -85,17 +88,17 @@ class observer {
 
         // Get matching records.
         $records = $DB->get_recordset(
-                'local_deepler',
-                ['t_id' => $objectid, 't_table' => $objecttable],
-                '',
-                'id'
+            'local_deepler',
+            ['t_id' => $objectid, 't_table' => $objecttable],
+            '',
+            'id'
         );
 
         // Update s_lastmodified time.
         foreach ($records as $record) {
             $DB->update_record(
-                    'local_deepler',
-                    ['id' => $record->id, 's_lastmodified' => $timemodified]
+                'local_deepler',
+                ['id' => $record->id, 's_lastmodified' => $timemodified]
             );
         }
         $records->close();
@@ -107,7 +110,7 @@ class observer {
      * @param \core\event\course_module_updated $event
      * @return void
      */
-    public static function course_module_updated(\core\event\course_module_updated $event) {
+    public static function course_module_updated(course_module_updated $event) {
         global $DB;
 
         // Get params.
@@ -119,20 +122,19 @@ class observer {
 
         // Get matching records.
         $records = $DB->get_recordset(
-                'local_deepler',
-                ['t_id' => $objectid, 't_table' => $objecttable],
-                '',
-                '*'
+            'local_deepler',
+            ['t_id' => $objectid, 't_table' => $objecttable],
+            '',
+            '*'
         );
 
         // Update s_lastmodified time.
         foreach ($records as $record) {
             $DB->update_record(
-                    'local_deepler',
-                    ['id' => $record->id, 's_lastmodified' => $timemodified]
+                'local_deepler',
+                ['id' => $record->id, 's_lastmodified' => $timemodified]
             );
         }
         $records->close();
     }
-
 }

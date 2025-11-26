@@ -38,19 +38,14 @@ use DeepL\GlossaryInfo;
 class glossary {
     /** @var string Database table name */
     const TABLE = 'local_deepler_glossaries';
-
     /** @var int|null Primary key (optional for new records) */
     public ?int $id = null;
-
     /** @var string DeepL glossary ID */
     public string $glossaryid;
-
     /** @var string Glossary name */
     public string $name;
-
     /** @var string sourcelang language code (e.g., 'en') */
     public string $sourcelang;
-
     /** @var string Target language code (e.g., 'de') */
     public string $targetlang;
     /** @var int|null shared status (0=private,1=pool,2=public) */
@@ -79,16 +74,16 @@ class glossary {
      * @param int|null $id
      */
     public function __construct(
-            string $glossaryid,
-            string $name,
-            string $sourcelang,
-            string $target,
-            int $entrycount,
-            ?int $tokenid = 0,
-            ?int $shared = 0,
-            ?int $timecreated = null,
-            ?int $lastused = 0,
-            ?int $id = null
+        string $glossaryid,
+        string $name,
+        string $sourcelang,
+        string $target,
+        int $entrycount,
+        ?int $tokenid = 0,
+        ?int $shared = 0,
+        ?int $timecreated = null,
+        ?int $lastused = 0,
+        ?int $id = null
     ) {
         $this->glossaryid = $glossaryid;
         $this->name = $name;
@@ -120,15 +115,15 @@ class glossary {
      */
     public function toobject(): stdClass {
         $obj = (object) [
-                'glossaryid' => $this->glossaryid,
-                'name' => $this->name,
-                'sourcelang' => $this->sourcelang,
-                'targetlang' => $this->targetlang,
-                'entrycount' => $this->entrycount,
-                'timecreated' => $this->timecreated,
-                'lastused,' => $this->lastused,
-                'shared' => $this->shared,
-                'tokenid' => $this->tokenid,
+            'glossaryid' => $this->glossaryid,
+            'name' => $this->name,
+            'sourcelang' => $this->sourcelang,
+            'targetlang' => $this->targetlang,
+            'entrycount' => $this->entrycount,
+            'timecreated' => $this->timecreated,
+            'lastused,' => $this->lastused,
+            'shared' => $this->shared,
+            'tokenid' => $this->tokenid,
         ];
         if ($this->id !== null) {
             $obj->id = $this->id;
@@ -147,16 +142,16 @@ class glossary {
         global $DB;
         $record = $DB->get_record(self::TABLE, ['id' => $id], '*', MUST_EXIST);
         return new self(
-                $record->glossaryid,
-                $record->name,
-                $record->sourcelang,
-                $record->targetlang,
-                $record->entrycount,
-                $record->tokenid,
-                $record->shared,
-                $record->timecreated,
-                $record->lastused,
-                $record->id
+            $record->glossaryid,
+            $record->name,
+            $record->sourcelang,
+            $record->targetlang,
+            $record->entrycount,
+            $record->tokenid,
+            $record->shared,
+            $record->timecreated,
+            $record->lastused,
+            $record->id
         );
     }
 
@@ -171,26 +166,27 @@ class glossary {
     public static function getpublicexcepttokenid(int $tokenid): array {
         global $DB;
         $glossaries = [];
-        list($notinsql, $params) = $DB->get_in_or_equal($tokenid, SQL_PARAMS_NAMED, 'tokenid', false);
+        [$notinsql, $params] = $DB->get_in_or_equal($tokenid, SQL_PARAMS_NAMED, 'tokenid', false);
         $select = "shared = :shared AND tokenid $notinsql";
         $params['shared'] = 2;
         $records = $DB->get_records_select(self::TABLE, $select, $params);
         foreach ($records as $record) {
             $glossaries[] = new self(
-                    $record->glossaryid,
-                    $record->name,
-                    $record->sourcelang,
-                    $record->targetlang,
-                    $record->entrycount,
-                    $record->tokenid,
-                    $record->shared,
-                    $record->timecreated,
-                    $record->lastused,
-                    $record->id
+                $record->glossaryid,
+                $record->name,
+                $record->sourcelang,
+                $record->targetlang,
+                $record->entrycount,
+                $record->tokenid,
+                $record->shared,
+                $record->timecreated,
+                $record->lastused,
+                $record->id
             );
         }
         return $glossaries;
     }
+
     /**
      * Retrieves a glossary record by ID and returns a glossary object.
      *
@@ -202,16 +198,16 @@ class glossary {
         global $DB;
         $record = $DB->get_record(self::TABLE, ['glossaryid' => $glossaryid], '*', MUST_EXIST);
         return new self(
-                $record->glossaryid,
-                $record->name,
-                $record->sourcelang,
-                $record->targetlang,
-                $record->entrycount,
-                $record->tokenid,
-                $record->shared,
-                $record->timecreated,
-                $record->lastused,
-                $record->id
+            $record->glossaryid,
+            $record->name,
+            $record->sourcelang,
+            $record->targetlang,
+            $record->entrycount,
+            $record->tokenid,
+            $record->shared,
+            $record->timecreated,
+            $record->lastused,
+            $record->id
         );
     }
 
@@ -229,20 +225,22 @@ class glossary {
         if ($records) {
             foreach ($records as $record) {
                 $glossaries[] = new self(
-                        $record->glossaryid,
-                        $record->name,
-                        $record->sourcelang,
-                        $record->targetlang,
-                        $record->entrycount,
-                        $record->tokenid,
-                        $record->shared,
-                        $record->timecreated,
-                        $record->lastused,
-                        $record->id);
+                    $record->glossaryid,
+                    $record->name,
+                    $record->sourcelang,
+                    $record->targetlang,
+                    $record->entrycount,
+                    $record->tokenid,
+                    $record->shared,
+                    $record->timecreated,
+                    $record->lastused,
+                    $record->id
+                );
             }
         }
         return $glossaries;
     }
+
     /**
      * Retrieves all glossary records as glossary objects.
      *
@@ -264,16 +262,16 @@ class glossary {
                 continue;
             }
             $glossaries[] = new self(
-                    $record->glossaryid,
-                    $record->name,
-                    $record->sourcelang,
-                    $record->targetlang,
-                    $record->entrycount,
-                    $record->tokenid,
-                    $record->shared,
-                    $record->timecreated,
-                    $record->lastused,
-                    $record->id
+                $record->glossaryid,
+                $record->name,
+                $record->sourcelang,
+                $record->targetlang,
+                $record->entrycount,
+                $record->tokenid,
+                $record->shared,
+                $record->timecreated,
+                $record->lastused,
+                $record->id
             );
         }
 
@@ -327,7 +325,5 @@ class glossary {
     public static function exists(string $deeplid): bool {
         global $DB;
         return $DB->record_exists(self::TABLE, ['glossaryid' => $deeplid]);
-
     }
-
 }

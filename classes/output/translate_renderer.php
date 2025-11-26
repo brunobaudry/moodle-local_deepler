@@ -17,7 +17,7 @@
 namespace local_deepler\output;
 
 use renderer_base;
-use filter_multilang2\text_filter as Multilang2TextFilter;
+
 /**
  * Sub renderer for translate page stuff.
  *

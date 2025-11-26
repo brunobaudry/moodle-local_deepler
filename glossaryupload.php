@@ -68,7 +68,6 @@ if ($uploadinglossary) {
             $message = $ext;
             // Handle return early as appropriate!
         } else {
-
             try {
                 // Parse file name conventions.
                 $filenameext = explode('.', $filename);
@@ -111,36 +110,34 @@ if ($uploadinglossary) {
                             $status = 'fileempty';
                         } else {
                             $glossaryinfo = $langhelper->gettranslator()->createGlossaryFromCsv(
-                                    $glossaryname,
-                                    $source,
-                                    $target,
-                                    $csvcontent
+                                $glossaryname,
+                                $source,
+                                $target,
+                                $csvcontent
                             );
                             $gid = glossary::create(new glossary(
-                                    $glossaryinfo->glossaryId,
-                                    $glossaryinfo->name,
-                                    $glossaryinfo->sourceLang,
-                                    $glossaryinfo->targetLang,
-                                    $glossaryinfo->entryCount,
-                                    $langhelper->getdbtokenid()
+                                $glossaryinfo->glossaryId,
+                                $glossaryinfo->name,
+                                $glossaryinfo->sourceLang,
+                                $glossaryinfo->targetLang,
+                                $glossaryinfo->entryCount,
+                                $langhelper->getdbtokenid()
                             ));
 
                             if ($gid) {
                                 user_glossary::create(new user_glossary(
-                                        $USER->id,
-                                        $gid
+                                    $USER->id,
+                                    $gid
                                 ));
                                 $status = 'success';
                             } else {
                                 $status = 'failed';
                             }
-
                         }
                     }
                 } else {
                     $status = 'langpair:notresolved';
                 }
-
             } catch (DeepLException $e) {
                 $status = 'deeplissue';
                 $message = $e->getMessage();
@@ -152,10 +149,9 @@ if ($uploadinglossary) {
                 $message = $e->getMessage();
             }
         }
-
     }
     unset($uploadinglossary);
 }
 // Redirect.
 redirect(new moodle_url('/local/deepler/glossarymanager' . $redirect . '.php?uploadstatus=' . $status . '&message=' .
-        urlencode($message)));
+    urlencode($message)));

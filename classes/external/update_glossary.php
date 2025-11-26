@@ -69,7 +69,6 @@ class update_glossary extends external_api {
                                 'message' => 'Could not update glossary last used',
                         ];
                     }
-
                 } else {
                     $results[] = [
                             'glossaryid' => $id,
@@ -78,14 +77,16 @@ class update_glossary extends external_api {
                     ];
                 }
             }
-
             $transaction->allow_commit();
-
         } catch (Exception $e) {
             // Transaction will auto-rollback here.
             throw new moodle_exception(
-                    'transactionfailed',
-                    'local_deepler', '', null, $e->getMessage());
+                'transactionfailed',
+                'local_deepler',
+                '',
+                null,
+                $e->getMessage()
+            );
         }
         return $results;
     }
@@ -96,10 +97,14 @@ class update_glossary extends external_api {
      * @return \core_external\external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters(['glossaryids' => new external_multiple_structure(
-                        new external_value(PARAM_TEXT, 'Glossary ID'),
-                        'Array of glossary IDs'
-        )]);
+        return new external_function_parameters(
+            [
+                'glossaryids' => new external_multiple_structure(
+                    new external_value(PARAM_TEXT, 'Glossary ID'),
+                    'Array of glossary IDs'
+                ),
+            ]
+        );
     }
 
     /**
@@ -109,11 +114,13 @@ class update_glossary extends external_api {
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
-                new external_single_structure([
-                        'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
-                        'status' => new external_value(PARAM_TEXT, 'Result status: success or error'),
-                        'message' => new external_value(PARAM_TEXT, 'Detailed message'),
-                ])
+            new external_single_structure(
+                [
+                    'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
+                    'status' => new external_value(PARAM_TEXT, 'Result status: success or error'),
+                    'message' => new external_value(PARAM_TEXT, 'Detailed message'),
+                ]
+            )
         );
     }
 }

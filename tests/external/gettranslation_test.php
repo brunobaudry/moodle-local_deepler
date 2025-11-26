@@ -50,6 +50,7 @@ final class gettranslation_test extends base_external {
         $this->assertInstanceOf(external_function_parameters::class, $params);
         $this->assertInstanceOf(external_function_parameters::class, $paramsreph);
     }
+
     /**
      * Test execute_returns method.
      *
@@ -132,55 +133,13 @@ final class gettranslation_test extends base_external {
         }
         // Call the static chunk_payload directly.
         $result = self::callprotectedstaticmethod(
-                get_translation::class,
-                'chunk_payload',
-                [$items, $staticparts]
+            get_translation::class,
+            'chunk_payload',
+            [$items, $staticparts]
         );
         // Expect 2 chunks: first includes 3 items, second has 1 item.
         $this->assertCount(2, $result);
         $this->assertCount(2, $result[1]);
-    }
-
-    /**
-     * Loads empty item.
-     *
-     * @covers \local_deepler\external\get_translation::chunk_payload
-     * @covers \local_deepler\external\get_rephrase::chunk_payload
-     * @return void
-     */
-    public function test_chunkpayloadhandlesemptyitems(): void {
-        $staticparts = ['foo' => 'bar'];
-        $items = [];
-        // Call the static chunk_payload directly.
-        $result = self::callprotectedstaticmethod(
-                get_translation::class,
-                'chunk_payload',
-                [$items, $staticparts]
-        );
-        $this->assertCount(0, $result);
-    }
-
-    /**
-     * Respects max bytes for large payload.
-     *
-     * @covers \local_deepler\external\get_translation::chunk_payload
-     * @covers \local_deepler\external\get_rephrase::chunk_payload
-     * @return void
-     */
-    public function test_chunkpayloadrespectsmaxbytesforlargepayloads(): void {
-        $staticparts = ['meta' => 'info'];
-        $items = [
-                ['text' => str_repeat('x', 100000)],
-                ['text' => 'y'],
-        ];
-        // The first 'text' exceeds $maxbytes, should yield separate chunk per item.
-        $result = self::callprotectedstaticmethod(
-                get_translation::class,
-                'chunk_payload',
-                [$items, $staticparts]
-        );
-        $this->assertCount(2, $result);
-        $this->assertCount(1, $result[1]);
     }
 
     /**
@@ -198,5 +157,47 @@ final class gettranslation_test extends base_external {
         $method->setAccessible(true);
         // For static methods, pass null as the object.
         return $method->invokeArgs(null, $args);
+    }
+
+    /**
+     * Loads empty item.
+     *
+     * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
+     * @return void
+     */
+    public function test_chunkpayloadhandlesemptyitems(): void {
+        $staticparts = ['foo' => 'bar'];
+        $items = [];
+        // Call the static chunk_payload directly.
+        $result = self::callprotectedstaticmethod(
+            get_translation::class,
+            'chunk_payload',
+            [$items, $staticparts]
+        );
+        $this->assertCount(0, $result);
+    }
+
+    /**
+     * Respects max bytes for large payload.
+     *
+     * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
+     * @return void
+     */
+    public function test_chunkpayloadrespectsmaxbytesforlargepayloads(): void {
+        $staticparts = ['meta' => 'info'];
+        $items = [
+            ['text' => str_repeat('x', 100000)],
+            ['text' => 'y'],
+        ];
+        // The first 'text' exceeds $maxbytes, should yield separate chunk per item.
+        $result = self::callprotectedstaticmethod(
+            get_translation::class,
+            'chunk_payload',
+            [$items, $staticparts]
+        );
+        $this->assertCount(2, $result);
+        $this->assertCount(1, $result[1]);
     }
 }

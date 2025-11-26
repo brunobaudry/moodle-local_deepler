@@ -48,7 +48,6 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      */
     private base $format;
 
-
     /** @var section[] of sections titles (and id / order) for display */
     private array $sections;
     /**
@@ -56,12 +55,10 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      */
     private array $sectioninfoall;
 
-
     /** @var int */
     private int $loadedsectionid;
     /** @var int */
     private int $loadedsectionnum;
-
 
     /**
      * Getter for the session info.
@@ -80,6 +77,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     public function get_format(): base {
         return $this->format;
     }
+
     /**
      * Getter for the session rank.
      *
@@ -115,7 +113,6 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         } catch (moodle_exception $ex) {
             debugging($ex);
         }
-
     }
 
     /**
@@ -170,14 +167,14 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         $this->sectioninfoall = $this->course->get_section_info_all();
         /** @var section_info $sectioninfo */
         foreach ($this->sectioninfoall as $sectioninfo) {
-            // If selected section is -1 then load all, if -99 none else load single.
+            // If a selected section is -1 then load all, if -99 none else load single.
             if ($this->loadedsectionid !== -1 && $sectioninfo->id != $this->loadedsectionid) {
                 continue;
             }
             $this->sections[$sectioninfo->sectionnum ?? $sectioninfo->id] =
-                    new section($sectioninfo, $this->format, $loadeddmodule);
+                new section($sectioninfo, $this->format, $loadeddmodule);
             if ($this->loadedsectionid >= 0) {
-                $this->loadedsectionnum = $sectioninfo->sectionnum??$sectioninfo->id;
+                $this->loadedsectionnum = $sectioninfo->sectionnum ?? $sectioninfo->id;
             }
         }
     }

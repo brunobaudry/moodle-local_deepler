@@ -32,7 +32,6 @@ require_once($CFG->dirroot . '/mod/book/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class book_test extends advanced_testcase {
-
     /**
      * Test the constructor and getfields method.
      *
@@ -46,9 +45,11 @@ final class book_test extends advanced_testcase {
         $book = $this->getDataGenerator()->create_module('book', ['course' => $course->id]);
         $bookgenerator = $this->getDataGenerator()->get_plugin_generator('mod_book');
         $bookgenerator->create_chapter(
-                ['bookid' => $book->id, 'content' => 'Content 1', 'title' => 'Chapter 1']);
+            ['bookid' => $book->id, 'content' => 'Content 1', 'title' => 'Chapter 1']
+        );
         $bookgenerator->create_chapter(
-                ['bookid' => $book->id, 'content' => 'Content 2', 'title' => 'Chapter 2']);
+            ['bookid' => $book->id, 'content' => 'Content 2', 'title' => 'Chapter 2']
+        );
         $courseinfo = get_fast_modinfo($course);
         // Create an instance of the book class.
         $bookinstance = new book($courseinfo->get_cm($book->cmid));

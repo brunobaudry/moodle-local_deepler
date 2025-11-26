@@ -28,6 +28,7 @@ use DeepL\DeepLException;
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
+
 /**
  * External service to call DeepL's text improvement API.
  *
@@ -74,9 +75,7 @@ class get_rephrase extends external_api {
             $style = $rephraseoptions[0] === 'writing_style' ? $rephraseoptions[1] : null;
         }
 
-        $validatedparams = $improver->buildRephraseBodyParams(
-                $params['options']['target_lang'], $style, $tone
-        );
+        $validatedparams = $improver->buildRephraseBodyParams($params['options']['target_lang'], $style, $tone);
         // Get the target.
         $targetlang = $validatedparams['target_lang'];
         // Remove target from arrray to pass just the options.
@@ -90,7 +89,7 @@ class get_rephrase extends external_api {
 
         foreach ($chunks as $chunk) {
             // Extract the texts for each chunk.
-            $texts = array_map(function($t) {
+            $texts = array_map(function ($t) {
                 return $t['text'];
             }, $chunk);
 
@@ -128,17 +127,22 @@ class get_rephrase extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
                 'rephrasings' => new external_multiple_structure(
-                        new external_single_structure(
-                                [
-                                        'text' => new external_value(PARAM_RAW, 'text to be translated'),
-                                        'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
-                                ])),
-                'options' => new external_single_structure(
+                    new external_single_structure(
                         [
-                                'target_lang' => new external_value(PARAM_RAW, 'target language'),
-                                'toneorstyle' => new external_value(PARAM_RAW, 'Tone or writing style of your improvements',
-                                        VALUE_OPTIONAL),
+                                'text' => new external_value(PARAM_RAW, 'text to be translated'),
+                                'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
                         ]
+                    )
+                ),
+                'options' => new external_single_structure(
+                    [
+                        'target_lang' => new external_value(PARAM_RAW, 'target language'),
+                        'toneorstyle' => new external_value(
+                            PARAM_RAW,
+                            'Tone or writing style of your improvements',
+                            VALUE_OPTIONAL
+                        ),
+                    ]
                 ),
                 'version' => new external_value(PARAM_RAW, 'the plugin version id'),
         ]);
@@ -151,16 +155,19 @@ class get_rephrase extends external_api {
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
-                new external_single_structure(
-                        [
-                                'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
-                                'text' => new external_value(PARAM_RAW, 'Improved text.'),
-                                'target_language' => new external_value(PARAM_RAW, 'The target language specified by the user.'),
-                                'detected_source_language' => new external_value(PARAM_RAW,
-                                        'The detected source language of the text provided in the request.', VALUE_OPTIONAL),
-                                'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
-                        ]
-                )
+            new external_single_structure(
+                [
+                    'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
+                    'text' => new external_value(PARAM_RAW, 'Improved text.'),
+                    'target_language' => new external_value(PARAM_RAW, 'The target language specified by the user.'),
+                    'detected_source_language' => new external_value(
+                        PARAM_RAW,
+                        'The detected source language of the text provided in the request.',
+                        VALUE_OPTIONAL
+                    ),
+                    'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
+                ]
+            )
         );
     }
 }

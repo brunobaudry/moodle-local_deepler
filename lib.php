@@ -77,12 +77,14 @@ function local_deepler_extend_navigation_user_settings($navigation, $user, $user
     }
     if (has_capability('local/deepler:edittranslations', $usercontext)) {
         $url = new moodle_url('/local/deepler/glossarymanageruser.php');
-        $node = navigation_node::create(get_string('glossary:manage:title', 'local_deepler'), $url,
-                navigation_node::TYPE_SETTING);
+        $node = navigation_node::create(
+            get_string('glossary:manage:title', 'local_deepler'),
+            $url,
+            navigation_node::TYPE_SETTING
+        );
         $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
         $usernode->add_node($node);
     }
-
     return $prefs;
 }
 
@@ -99,9 +101,15 @@ function local_deepler_extend_navigation_user_settings($navigation, $user, $user
  * @return bool
  * @throws \coding_exception
  */
-function local_deepler_pluginfile(object $course, object $cm, \core\context $context, object $filearea, array $args,
-        bool $forcedownload, array $options): bool {
-
+function local_deepler_pluginfile(
+    object $course,
+    object $cm,
+    \core\context $context,
+    object $filearea,
+    array $args,
+    bool $forcedownload,
+    array $options
+): bool {
     debugging($cm);
     // Context validation.
     if ($context->contextlevel != CONTEXT_BLOCK && $context->contextlevel != CONTEXT_SYSTEM) {

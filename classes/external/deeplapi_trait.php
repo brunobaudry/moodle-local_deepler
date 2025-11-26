@@ -85,7 +85,7 @@ trait deeplapi_trait {
         $chunk = [];
         $maxbytes = 100000;
         $bufferbytes = 1024 * 16;
-        $basepayload = implode('', array_map(function($part) {
+        $basepayload = implode('', array_map(function ($part) {
             return json_encode($part);
         }, $staticparts));
 
@@ -111,5 +111,4 @@ trait deeplapi_trait {
 
         return $chunks;
     }
-
 }

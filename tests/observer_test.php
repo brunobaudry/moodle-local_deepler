@@ -90,11 +90,12 @@ final class observer_test extends advanced_testcase {
         $record->s_lastmodified = time() - 3600; // 1 hour ago.
         $recordid = $DB->insert_record('local_deepler', $record);
 
-        $event = course_section_updated::create([
-                        'objectid' => $section->id,
-                        'context' => \context_course::instance($course->id),
-                        'other' => ['sectionnum' => $section->sectionnum ?? 1],
-                ]
+        $event = course_section_updated::create(
+            [
+                'objectid' => $section->id,
+                'context' => \context_course::instance($course->id),
+                'other' => ['sectionnum' => $section->sectionnum ?? 1],
+            ]
         );
         observer::course_section_updated($event);
 

@@ -23,7 +23,7 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/book/locallib.php');
 
 /**
- * Subclass of book as it has chapters (subs).
+ * Subclass of Book as it has chapters (subs).
  *
  * @package    local_deepler
  * @copyright  2025  <bruno.baudry@bfh.ch>
@@ -40,10 +40,22 @@ class book extends subbase {
         $table = 'book_chapters';
         $chapters = book_preload_chapters($this->record);
         foreach ($chapters as $c) {
-            $fields[] = new field($c->id,
-                    $c->title, 0, 'title', $table, $this->cm->id);
-            $fields[] = new field($c->id,
-                    $c->content, 1, 'content', $table, $this->cm->id);
+            $fields[] = new field(
+                $c->id,
+                $c->title,
+                0,
+                'title',
+                $table,
+                $this->cm->id
+            );
+            $fields[] = new field(
+                $c->id,
+                $c->content,
+                1,
+                'content',
+                $table,
+                $this->cm->id
+            );
         }
         return $fields;
     }

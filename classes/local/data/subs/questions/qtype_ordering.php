@@ -26,7 +26,6 @@ use local_deepler\local\data\field;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_ordering extends qbase {
-
     /**
      * Get the fields to be translated.
      *
@@ -39,12 +38,12 @@ class qtype_ordering extends qbase {
         $fields = [];
         foreach ($this->question->answers as $answer) {
             $fields[] = new field(
-                    $answer->id,
-                    $answer->answer,
-                    $answer->answerformat,
-                    'answer',
-                    'question_answers',
-                    $this->cmid
+                $answer->id,
+                $answer->answer,
+                $answer->answerformat,
+                'answer',
+                'question_answers',
+                $this->cmid
             );
         }
         return $fields;

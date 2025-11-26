@@ -17,7 +17,6 @@
 namespace local_deepler\local\services;
 
 use advanced_testcase;
-use local_deepler\local\services\spreadsheetglossaryparser;
 use PhpOffice\PhpSpreadsheet\Settings;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -32,8 +31,34 @@ use ZipArchive;
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 final class spreadsheetglossaryparser_test extends advanced_testcase {
-    /** @var mixed */
-    private $originalzipclass = null;
+    /**
+     * Creates a fake spreadsheet, save and test parsing.
+     *
+     * @covers \local_deepler\local\services\spreadsheetglossaryparser
+     * @return void
+     */
+    public function test_convert_xlsx_to_csv(): void {
+        $this->resetAfterTest(true);
+        // Build an XLSX in temp.
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'source');
+        $sheet->setCellValue('B1', 'target');
+        $sheet->setCellValue('A2', 'Hello');
+        $sheet->setCellValue('B2', 'Bonjour');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'glx');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tmp);
+
+        $parser = new spreadsheetglossaryparser();
+        $csv = $parser->parse_to_csv($tmp, 'xlsx');
+
+        $this->assertNotEmpty($csv);
+        $this->assertStringContainsString("Hello,Bonjour", $csv);
+
+        @unlink($tmp);
+    }
 
     /**
      * This method is called before each test.
@@ -68,34 +93,6 @@ final class spreadsheetglossaryparser_test extends advanced_testcase {
         }
         parent::tearDown();
     }
-
-    /**
-     * Creates a fake spreadsheet, save and test parsing.
-     *
-     * @covers \local_deepler\local\services\spreadsheetglossaryparser
-     * @return void
-     */
-    public function test_convert_xlsx_to_csv(): void {
-        $this->resetAfterTest(true);
-        // Build an XLSX in temp.
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'source');
-        $sheet->setCellValue('B1', 'target');
-        $sheet->setCellValue('A2', 'Hello');
-        $sheet->setCellValue('B2', 'Bonjour');
-
-        $tmp = tempnam(sys_get_temp_dir(), 'glx');
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tmp);
-
-        $parser = new spreadsheetglossaryparser();
-        $csv = $parser->parse_to_csv($tmp, 'xlsx');
-
-        $this->assertNotEmpty($csv);
-        $this->assertStringContainsString("Hello,Bonjour", $csv);
-
-        @unlink($tmp);
-    }
-
+    /** @var mixed */
+    private $originalzipclass = null;
 }

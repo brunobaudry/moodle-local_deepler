@@ -18,7 +18,6 @@ namespace local_deepler\external;
 
 use core_external\external_api;
 use core_external\external_function_parameters;
-
 use core_external\external_single_structure;
 use core_external\external_value;
 use DeepL\DeepLClient;
@@ -78,7 +77,6 @@ class get_glossary_entries extends external_api {
                     'message' => $exception->getMessage(),
             ];
         }
-
     }
 
     /**

@@ -16,16 +16,15 @@
 
 namespace local_deepler\output;
 
-use Exception;
-use renderable;
-use renderer_base;
-use templatable;
 use core_filters\text_filter;
+use Exception;
 use local_deepler\local\data\field;
 use local_deepler\local\data\module;
 use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\utils;
-use local_deepler\output\translate_data;
+use renderable;
+use renderer_base;
+use templatable;
 
 /**
  * Module data.
@@ -34,12 +33,7 @@ use local_deepler\output\translate_data;
  * @copyright 2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class module_data extends translate_data implements templatable, renderable {
-    /**
-     * @var \local_deepler\local\data\module
-     */
-    private module $module;
-
+class module_data extends translate_data implements renderable, templatable {
     /**
      * Construct.
      *
@@ -48,9 +42,12 @@ class module_data extends translate_data implements templatable, renderable {
      * @param \local_deepler\output\Multilang2TextFilter|\core_filters\text_filter $mlangfilter
      * @param string $editor
      */
-    public function __construct(module $module, lang_helper $languagepack,
-            Multilang2TextFilter|text_filter $mlangfilter,
-            string $editor) {
+    public function __construct(
+        module $module,
+        lang_helper $languagepack,
+        Multilang2TextFilter|text_filter $mlangfilter,
+        string $editor
+    ) {
         parent::__construct($languagepack, $mlangfilter, $editor);
         $this->module = $module;
     }
@@ -90,17 +87,21 @@ class module_data extends translate_data implements templatable, renderable {
             }
         }
         return [
-                'hasicon' => true,
-                'level' => '4',
-                'childs' => $childsrendered,
-                'fields' => $fieldsrendered,
-                'activitydesc' => $activitydesc,
-                'link' => $this->module->getlink(),
-                'id' => Utils::makehtmlid($activitydesc),
-                'itempurpose' => $this->module->getpurpose(),
-                'icon' => $this->module->geticon(),
-                'pluginname' => $this->module->getpluginname(),
-                'visibilityclass' => 'local_deepler' . ($this->module->isvisible() ? 'visible' : 'invisible'),
+            'hasicon' => true,
+            'level' => '4',
+            'childs' => $childsrendered,
+            'fields' => $fieldsrendered,
+            'activitydesc' => $activitydesc,
+            'link' => $this->module->getlink(),
+            'id' => Utils::makehtmlid($activitydesc),
+            'itempurpose' => $this->module->getpurpose(),
+            'icon' => $this->module->geticon(),
+            'pluginname' => $this->module->getpluginname(),
+            'visibilityclass' => 'local_deepler' . ($this->module->isvisible() ? 'visible' : 'invisible'),
         ];
     }
+    /**
+     * @var \local_deepler\local\data\module
+     */
+    private module $module;
 }

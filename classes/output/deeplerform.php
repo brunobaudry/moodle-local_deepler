@@ -17,15 +17,8 @@
 namespace local_deepler\output;
 
 use core_filters\text_filter;
-use Exception;
 use filter_multilang2\text_filter as Multilang2TextFilter;
-use local_deepler\local\data\field;
-use local_deepler\local\data\interfaces\iconic_interface;
-use local_deepler\local\data\interfaces\visibility_interface;
-use local_deepler\local\data\interfaces\translatable_interface;
-use local_deepler\local\data\module;
 use local_deepler\local\data\section;
-use local_deepler\local\services\utils;
 use moodleform;
 
 /**
@@ -36,20 +29,6 @@ use moodleform;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class deeplerform extends moodleform {
-    /**
-     * @var string[]
-     */
-    protected array $langcodes;
-    /**
-     * @var course
-     */
-    protected mixed $coursedata;
-    /**
-     * @var text_filter|Multilang2TextFilter
-     */
-    protected text_filter|Multilang2TextFilter $mlangfilter;
-
-
     /**
      * Main data definition function.
      *
@@ -78,7 +57,6 @@ abstract class deeplerform extends moodleform {
         $this->_form->addElement('html', $renderer->makecoursesetting($data));
     }
 
-
     /**
      * Create sections.
      *
@@ -102,11 +80,26 @@ abstract class deeplerform extends moodleform {
     protected function makesection(section $section): void {
         if (!$section->is_empty()) {
             global $PAGE;
-            $sectiondata = new section_data($section, $this->langpack,
-                    $this->mlangfilter,
-                    $this->editor);
+            $sectiondata = new section_data(
+                $section,
+                $this->langpack,
+                $this->mlangfilter,
+                $this->editor
+            );
             $renderer = $PAGE->get_renderer('local_deepler', 'translate');
             $this->_form->addElement('html', $renderer->makesection($sectiondata));
         }
     }
+    /**
+     * @var string[]
+     */
+    protected array $langcodes;
+    /**
+     * @var course
+     */
+    protected mixed $coursedata;
+    /**
+     * @var text_filter|Multilang2TextFilter
+     */
+    protected text_filter|Multilang2TextFilter $mlangfilter;
 }

@@ -37,12 +37,12 @@ final class glossary_test extends advanced_testcase {
      */
     public function test_create_and_get_glossary(): void {
         $data = new glossary(
-                'abc123',
-                'Test Glossary',
-                'en',
-                'de',
-                3,
-                time()
+            'abc123',
+            'Test Glossary',
+            'en',
+            'de',
+            3,
+            time()
         );
 
         $id = glossary::create($data);
@@ -61,12 +61,12 @@ final class glossary_test extends advanced_testcase {
      */
     public function test_update_glossary(): void {
         $data = new glossary(
-                'abc124',
-                'Test Glossary 2',
-                'en',
-                'de',
-                3,
-                time()
+            'abc124',
+            'Test Glossary 2',
+            'en',
+            'de',
+            3,
+            time()
         );
 
         $id = glossary::create($data);
@@ -88,12 +88,12 @@ final class glossary_test extends advanced_testcase {
      */
     public function test_delete_glossary(): void {
         $data = new glossary(
-                'abc12356',
-                'Test Glossary 3',
-                'it',
-                'fr',
-                3,
-                time()
+            'abc12356',
+            'Test Glossary 3',
+            'it',
+            'fr',
+            3,
+            time()
         );
 
         $id = glossary::create($data);

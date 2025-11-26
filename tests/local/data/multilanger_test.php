@@ -17,8 +17,6 @@
 namespace local_deepler\local\data;
 
 use advanced_testcase;
-use coding_exception;
-use lang_string;
 
 /**
  * Tests for multilanger class
@@ -29,7 +27,6 @@ use lang_string;
  * @covers     \local_deepler\local\data\multilanger
  */
 final class multilanger_test extends advanced_testcase {
-
     /**
      * Test field string resolution for course table.
      *
@@ -48,7 +45,7 @@ final class multilanger_test extends advanced_testcase {
      * @return field
      */
     private function create_mock_field(string $table, string $fieldname): field {
-        return new class(0, '', 0, $fieldname, $table, 0) extends field {
+        return new class (0, '', 0, $fieldname, $table, 0) extends field {
             // No constructor needed - uses parent constructor directly.
         };
     }

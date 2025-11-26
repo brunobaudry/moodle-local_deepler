@@ -17,8 +17,8 @@
 namespace local_deepler\output;
 
 use core_filters\text_filter;
-use local_deepler\local\services\lang_helper;
 use filter_multilang2\text_filter as Multilang2TextFilter;
+use local_deepler\local\services\lang_helper;
 
 /**
  * Base class for translate page renderables
@@ -29,26 +29,17 @@ use filter_multilang2\text_filter as Multilang2TextFilter;
  */
 abstract class translate_data {
     /**
-     * @var \local_deepler\local\services\lang_helper
-     */
-    protected lang_helper $languagepack;
-    /**
-     * @var text_filter|Multilang2TextFilter
-     */
-    protected text_filter|Multilang2TextFilter $mlangfilter;
-    /** @var string */
-    protected string $editor;
-
-    /**
      * Constructor.
      *
      * @param \local_deepler\local\services\lang_helper $languagepack
      * @param text_filter|Multilang2TextFilter $mlangfilter
      * @param string $editor
      */
-    public function __construct(lang_helper $languagepack,
-            text_filter|Multilang2TextFilter $mlangfilter,
-            string $editor) {
+    public function __construct(
+        lang_helper $languagepack,
+        text_filter|Multilang2TextFilter $mlangfilter,
+        string $editor
+    ) {
         $this->languagepack = $languagepack;
         $this->mlangfilter = $mlangfilter;
         $this->editor = $editor;
@@ -69,4 +60,14 @@ abstract class translate_data {
         }
         return $pluginname;
     }
+    /**
+     * @var \local_deepler\local\services\lang_helper
+     */
+    protected lang_helper $languagepack;
+    /**
+     * @var text_filter|Multilang2TextFilter
+     */
+    protected text_filter|Multilang2TextFilter $mlangfilter;
+    /** @var string */
+    protected string $editor;
 }

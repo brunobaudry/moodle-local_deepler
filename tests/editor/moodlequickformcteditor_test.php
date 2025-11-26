@@ -27,12 +27,13 @@
 namespace local_deepler\editor;
 
 use advanced_testcase;
+use ReflectionClass;
+use stdClass;
 
 /**
  * Unit tests for MoodleQuickForm_cteditor class.
  */
 final class moodlequickformcteditor_test extends advanced_testcase {
-
     /**
      * Test the constructor of MoodleQuickForm_cteditor.
      *
@@ -46,7 +47,7 @@ final class moodlequickformcteditor_test extends advanced_testcase {
         $elementname = 'testelement';
         $elementlabel = 'Test Element';
         $attributes = [];
-        $editorsoptions = new \stdClass();
+        $editorsoptions = new stdClass();
 
         $editor = new MoodleQuickForm_cteditor($elementname, $elementlabel, $attributes, $editorsoptions);
         $this->assertTrue($editor->getSubdirs() == false);
@@ -54,7 +55,7 @@ final class moodlequickformcteditor_test extends advanced_testcase {
         $this->assertEquals(0, $editor->getMaxfiles());
         $editor->setValue(['text' => 'hello']);
         $this->assertEquals('hello', $editor->get_text());
-        $reflection = new \ReflectionClass($editor);
+        $reflection = new ReflectionClass($editor);
         $optionsproperty = $reflection->getProperty('_options');
         $optionsproperty->setAccessible(true);
         $options = $optionsproperty->getValue($editor);
@@ -81,7 +82,7 @@ final class moodlequickformcteditor_test extends advanced_testcase {
      */
     public function test_customattributes(): void {
         $customattributes = ['rows' => 10, 'cols' => 50];
-        $editor = new \local_deepler\editor\MoodleQuickForm_cteditor('test_editor', 'Test Editor', $customattributes);
+        $editor = new MoodleQuickForm_cteditor('test_editor', 'Test Editor', $customattributes);
         $this->assertEquals(10, $editor->getAttributes()['rows']);
         $this->assertEquals(50, $editor->getAttributes()['cols']);
     }
