@@ -27,8 +27,6 @@ use local_deepler\local\services\lang_helper;
 use ReflectionClass;
 use renderer_base;
 
-// Include the filter_multilang2 class manually.
-require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 /**
  * Unit tests for the translate_page class.
@@ -46,7 +44,6 @@ final class translate_page_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor(): void {
-
         $this->resetAfterTest();
         filter_set_global_state('multilang2', TEXTFILTER_ON);
         if (!class_exists('\core_filters\text_filter')) {
