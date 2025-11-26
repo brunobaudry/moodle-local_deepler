@@ -1,6 +1,9 @@
 {
   "name": "moodle-local_deepler",
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "grunt": "^1.6.1",
     "grunt-contrib-clean": "^2.0.1",
     "grunt-contrib-sass": "^2.0.0",
