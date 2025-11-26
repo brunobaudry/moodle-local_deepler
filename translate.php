@@ -75,11 +75,20 @@ $output = $PAGE->get_renderer('local_deepler');
 // Output header.
 echo $output->header();
 // Course name heading.
-try {
-    $mlangfilter = new filter_multilang2\text_filter($context, []);
-} catch (Exception $e) {
-    $mlangfilter = new filter_multilang2($context, []);
+
+// Normalize the filter class for all Moodle versions.
+if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
+    if (class_exists('\\core_filters\\text_filter')) {
+        class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+    } else if (class_exists('\\moodle_text_filter')) {
+        class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+    } else {
+        class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+    }
 }
+
+// Now instantiate using the alias.
+$mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);
 
 echo $output->heading($mlangfilter->filter($course->fullname));
 $version = $plugin->release;

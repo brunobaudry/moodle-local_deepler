@@ -26,11 +26,6 @@ use renderer_base;
 use stdClass;
 use templatable;
 
-if (class_exists('\\core_filters\\text_filter')) {
-    class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-} else {
-    class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-}
 
 /**
  * Translate Page Output.

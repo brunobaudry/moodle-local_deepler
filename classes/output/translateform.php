@@ -25,11 +25,6 @@ use local_deepler\local\services\lang_helper;
 use moodleform;
 use MoodleQuickForm;
 
-if (class_exists('\\core_filters\\text_filter')) {
-    class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-} else {
-    class_alias('\\moodle_text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-}
 
 // Load the files we're going to need.
 require_once("$CFG->libdir/form/editor.php");
