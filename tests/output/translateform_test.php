@@ -55,7 +55,16 @@ final class translateform_test extends advanced_testcase {
      */
     public function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest();
+        global $CFG;
+        require_once($CFG->dirroot . '/filter/multilang2/filter.php'); // Ensure filter_multilang2 is loaded.
+
+        if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
+            if (class_exists('\\core_filters\\text_filter')) {
+                class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+            } else if (class_exists('\\filter_multilang2')) {
+                class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+            }
+        }
         $this->user = $this->getDataGenerator()->create_user([
                 'username' => 'testuser',
                 'email' => 'testuser@example.com',

@@ -39,6 +39,8 @@ use local_deepler\output\nodeepl_page;
 use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 global $PAGE;
 global $DB;
@@ -82,7 +84,7 @@ echo $output->header();
 if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
     if (class_exists('\\core_filters\\text_filter')) {
         class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-    } elseif (class_exists('\\filter_multilang2')) {
+    } else if (class_exists('\\filter_multilang2')) {
         class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
     }
 }

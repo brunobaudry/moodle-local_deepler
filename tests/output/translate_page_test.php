@@ -15,8 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\output;
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
 
 use advanced_testcase;
 use core_filters\text_filter;
@@ -73,13 +71,7 @@ final class translate_page_test extends advanced_testcase {
     public function test_export_for_template(): void {
         $this->resetAfterTest();
         filter_set_global_state('multilang2', TEXTFILTER_ON);
-        if (!class_exists('\core_filters\text_filter')) {
-            // Create an alias for pre-4.5 versions.
-            class_alias(filter_multilang2::class, text_filter::class);
-            $mlangfilter = $this->createMock(filter_multilang2::class);
-        } else {
-            $mlangfilter = $this->createMock(text_filter::class);
-        }
+        $mlangfilter = $this->createMock(\local_deepler\output\Multilang2TextFilter::class);
         $coursedata = $this->createMock(course::class);
         $languagepack = $this->createMock(lang_helper::class);
         $sectionclass = $this->createMock(section::class);
@@ -167,5 +159,25 @@ final class translate_page_test extends advanced_testcase {
         global $CFG;
         $defaulteditor = strstr($CFG->texteditors, ',', true);
         return get_user_preferences()['htmleditor'] ?? $defaulteditor;
+    }
+
+    /**
+     * Setup.
+     *
+     * @return void
+     */
+    protected function setUp(): void {
+        parent::setUp();
+
+        global $CFG;
+        require_once($CFG->dirroot . '/filter/multilang2/filter.php'); // Ensure filter_multilang2 is loaded.
+
+        if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
+            if (class_exists('\\core_filters\\text_filter')) {
+                class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+            } else if (class_exists('\\filter_multilang2')) {
+                class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+            }
+        }
     }
 }
