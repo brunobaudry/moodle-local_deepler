@@ -1,7 +1,15 @@
 #!/bin/bash
 
-# Define the initialization script
-init_behat="php ../../admin/tool/behat/cli/init.php"
+# Detect BEHAT binary
+if [[ -f "../../vendor/bin/behat" ]]; then
+    behat_bin="../../vendor/bin/behat"
+    moodle_root="../../"
+else
+    behat_bin="../../../vendor/bin/behat"
+    moodle_root="../../../"
+fi
+
+init_behat="${moodle_root}admin/tool/behat/cli/init.php"
 
 # Function to display help
 show_help() {
@@ -42,11 +50,12 @@ for arg in "$@"; do
     esac
 done
 
+
 # Define the Behat command
 if [ -z "$tag" ]; then
-  behat_cmd="../../vendor/bin/behat --config ../../../behat_moodle/behatrun/behat/behat.yml -vvv --tags=@local_deepler"
+  behat_cmd="$behat_bin --config $moodle_root../behat_moodle/behatrun/behat/behat.yml -vvv --tags=@local_deepler"
 else
-  behat_cmd="../../vendor/bin/behat --config ../../../behat_moodle/behatrun/behat/behat.yml -vvv --tags=$tag"
+  behat_cmd="$behat_bin --config $moodle_root../behat_moodle/behatrun/behat/behat.yml -vvv --tags=$tag"
 fi
 
 # Run the Behat command and capture the output

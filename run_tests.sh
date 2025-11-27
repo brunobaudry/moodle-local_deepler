@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Help message
@@ -24,52 +23,61 @@ for arg in "$@"; do
     exit 0
   fi
 done
-
 # Initialize variables
 test_filter=""
-show_deprecations="0"
+show_deprecations=""
 
 # Parse arguments
 for arg in "$@"; do
   if [[ "$arg" == "--deprecations" ]]; then
-    show_deprecations="1"
+    show_deprecations="--display-deprecations"
   else
     test_filter="$arg"
   fi
 done
 
-# Check if PHPUnit exists
-if [[ ! -f "../../vendor/bin/phpunit" ]]; then
-  echo "Error: PHPUnit not found at ../../vendor/bin/phpunit"
-  exit 1
+
+
+# Define the PHPUnit command
+
+# Detect PHPUnit binary
+if [[ -f "../../vendor/bin/phpunit" ]]; then
+    phpunit_bin="../../vendor/bin/phpunit"
+else
+    phpunit_bin="../../../vendor/bin/phpunit"
 fi
 
 # Define the PHPUnit command
-phpunit_cmd="../../vendor/bin/phpunit --colors --testsuite local_deepler_testsuite"
+phpunit_cmd="$phpunit_bin --colors --testsuite local_deepler_testsuite $show_deprecations"
 
 # Add filter if provided
-if [[ -n "$test_filter" ]]; then
+if [ -n "$test_filter" ]; then
   phpunit_cmd="$phpunit_cmd --filter $test_filter"
 fi
 
-# Set PHP options based on deprecation flag
-if [[ "$show_deprecations" == "1" ]]; then
-  php_options="-d error_reporting=E_ALL"
+# Define the initialization script
+
+# Detect Moodle version and set paths
+if [[ -f "../../admin/tool/phpunit/cli/init.php" ]]; then
+    # Pre-5.1 structure
+    init_phpunit="php ../../admin/tool/phpunit/cli/init.php"
 else
-  php_options="-d error_reporting=E_ALL\&~E_DEPRECATED"
+    # Moodle 5.1+ structure
+    init_phpunit="php ../../../admin/tool/phpunit/cli/init.php"
 fi
 
-# Define the initialization script
-init_phpunit="php ../../admin/tool/phpunit/cli/init.php"
 
-# Run PHPUnit and capture output
-output=$(php $php_options $phpunit_cmd 2>&1)
+# Run the PHPUnit command and capture the output
+output=$($phpunit_cmd 2>&1)
 
-# Check if PHPUnit environment needs initialization
+# Check if the output contains the specific message
 if [[ $output == *"Moodle PHPUnit environment was initialised for different version"* || $output == *"Moodle PHPUnit environment is not initialised, please use:"* ]]; then
-    echo "Initializing Moodle PHPUnit environment..."
-    php $init_phpunit
-    php $php_options $phpunit_cmd
+    # Run the initialization script
+    $init_phpunit
+
+    # Run the PHPUnit command again
+    $phpunit_cmd
 else
-  echo "$output"
+    # Print the original output
+    echo "$output"
 fi
