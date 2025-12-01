@@ -39,7 +39,6 @@ use local_deepler\output\nodeepl_page;
 use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
-defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 global $PAGE;

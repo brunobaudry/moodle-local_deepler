@@ -21,6 +21,7 @@
  *
  * @package    local_deepler
  * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
+ * @copyright 2025 bruno baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/Events_API
  */
@@ -29,16 +30,40 @@ defined('MOODLE_INTERNAL') || die();
 
 // Event observer for local_deepler.
 $observers = [
-        [
-                'eventname' => '\core\event\course_updated',
-                'callback' => '\local_deepler\observer::course_updated',
-        ],
-        [
-                'eventname' => '\core\event\course_section_updated',
-                'callback' => '\local_deepler\observer::course_section_updated',
-        ],
-        [
-                'eventname' => '\core\event\course_module_updated',
-                'callback' => '\local_deepler\observer::course_module_updated',
-        ],
+    [
+        'eventname' => '\core\event\course_updated',
+        'callback' => '\local_deepler\observer::course_updated',
+    ],
+    [
+        'eventname' => '\core\event\course_section_updated',
+        'callback' => '\local_deepler\observer::course_section_updated',
+    ],
+    [
+        'eventname' => '\core\event\course_module_updated',
+        'callback' => '\local_deepler\observer::course_module_updated',
+    ],
+    [
+        'eventname' => '\mod_forum\event\discussion_updated',
+        'callback' => '\local_deepler\observer::subitems_update',
+    ],
+    [
+        'eventname' => '\mod_forum\event\post_updated',
+        'callback' => '\local_deepler\observer::subitems_update',
+    ],
+    [
+        'eventname' => '\mod_wiki\event\page_updated',
+        'callback' => '\local_deepler\observer::subitems_update',
+    ],
+    [
+        'eventname' => '\mod_lesson\event\page_updated',
+        'callback' => '\local_deepler\observer::subitems_update',
+    ],
+    [
+        'eventname' => '\mod_book\event\chapter_updated',
+        'callback' => '\local_deepler\observer::subitems_update',
+    ],
+    [
+        'eventname' => '\mod_book\event\chapter_updated',
+        'callback' => '\local_deepler\observer::subitems_update',
+    ],
 ];
