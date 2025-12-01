@@ -40,13 +40,16 @@ use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
 
+
+require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/version.php');
+
+
 global $CFG;
 global $PAGE;
 global $DB;
 global $USER;
 
-require_once(__DIR__ . '/../../config.php');
-require_once(__DIR__ . '/version.php');
 require_once($CFG->dirroot . '/filter/multilang2/filter.php'); // Ensure filter_multilang2 is available.
 
 // Needed vars for processing.
