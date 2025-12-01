@@ -54,9 +54,11 @@ $secondary: $gray-400 !default;
 #page-local-deepler-translate {
 
   .editing .activity-item {
-    cursor: pointer !important;
+    cursor: default !important;
   }
-
+  .editing .activity-item:hover {
+    cursor: default !important;
+  }
     #local_deepler-translate-header {
         z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
     }
