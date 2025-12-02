@@ -320,6 +320,24 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         saveAllModal = await Modal.create(messageObject);
         await saveAllModal.show();
     };
+
+    /**
+     * TinyMCE initialize.
+     *
+     * @param {Event} e
+     * @param {Object} options
+     * @return {Promise<void>}
+     */
+    const initTinyMCE = async(e, options) => {
+        try {
+            await TinyMCEinit.getTinyMCE(); // Ensure TinyMCE is initialized.
+            await TinyMCE.setupForTarget(e.target, options);
+            Log.info(`tiny loaded for ${e.target.id}`);
+        } catch (error) {
+            Log.error(error);
+        }
+    };
+
     const handleFocusEvent = (e)=>{
         if (e.target.closest(Selectors.editors.targetarea)) {
             if (getIconStatus(e.target.id.replace('tiny_', '')) === Selectors.statuses.tosave) {
@@ -335,21 +353,21 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                     removeorphaneddrafts: true,
                     plugins: []
                 };
-                // eslint-disable-next-line promise/catch-or-return
-                TinyMCEinit.getTinyMCE().then(
-                    // eslint-disable-next-line promise/always-return
-                    ()=>{
-                        // eslint-disable-next-line promise/no-nesting
-                        TinyMCE.setupForTarget(e.target, options)
-                            // eslint-disable-next-line promise/always-return
-                            .then(()=>{
-                                Log.info('tiny loaded for ' + e.target.id);
-                            })
-                            .catch((r)=>{
-                                Log.error(r);
-                            });
-                    }
-                );
+                initTinyMCE(e, options);
+                // // eslint-disable-next-line promise/catch-or-return
+                // TinyMCEinit.getTinyMCE().then(
+                //     // eslint-disable-next-line promise/always-return
+                //     ()=>{
+                //         TinyMCE.setupForTarget(e.target, options)
+                //             // eslint-disable-next-line promise/always-return
+                //             .then(()=>{
+                //                 Log.info('tiny loaded for ' + e.target.id);
+                //             })
+                //             .catch((r)=>{
+                //                 Log.error(r);
+                //             });
+                //     }
+                // );
             }
 
         }
