@@ -87,8 +87,21 @@ if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
     if (class_exists('\\filter_multilang2')) {
         class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
     } else if (class_exists('\\core_filters\\text_filter')) {
-        // Define a concrete subclass extending the abstract class.
+        /**
+         * Wrapper.
+         *
+         * @package local_deepler
+         * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
+         * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+         */
         class Multilang2TextFilter extends \core_filters\text_filter {
+            /**
+             * Main function.
+             *
+             * @param $text
+             * @param array $options
+             * @return mixed
+             */
             public function filter($text, array $options = []) {
                 // Implement minimal logic or leave empty if not needed.
                 return $text;
