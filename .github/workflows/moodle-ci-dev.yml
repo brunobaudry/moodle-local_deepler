@@ -21,6 +21,18 @@ jobs:
       matrix:
         include:
           - php: 8.4
+            moodle-branch: MOODLE_501_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.3
+            moodle-branch: MOODLE_501_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.2
+            moodle-branch: MOODLE_501_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.4
             moodle-branch: MOODLE_500_STABLE
             database: mariadb
             mariadb_version: 10.11
@@ -176,6 +188,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - php: 8.4
+            moodle-branch: MOODLE_501_STABLE
+            database: pgsql
+            postgres_version: 14
+          - php: 8.3
+            moodle-branch: MOODLE_501_STABLE
+            database: pgsql
+            postgres_version: 14
+          - php: 8.2
+            moodle-branch: MOODLE_501_STABLE
+            database: pgsql
+            postgres_version: 14
           - php: 8.4
             moodle-branch: MOODLE_500_STABLE
             database: pgsql
