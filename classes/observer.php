@@ -85,14 +85,15 @@ class observer {
     }
 
     /**
-     * Common Observer for subitems.
+     * Common Observer for subitems lil^ke forum posts, book chapters etc...
      *
-     * @param chapter_updated | wiki_page_updated | lesson_page_updated | post_updated | discussion_updated $event
+     * @param chapter_updated|wiki_page_updated|lesson_page_updated|post_updated|discussion_updated $event
      * @return void
+     * @throws \dml_exception
      */
     public static function subitems_update(
-        chapter_updated | wiki_page_updated | lesson_page_updated | post_updated | discussion_updated $event
-    ) {
+        chapter_updated|wiki_page_updated|lesson_page_updated|post_updated|discussion_updated $event
+    ): void {
         // Get params.
         $objectid = $event->objectid;
         $objecttable = $event->objecttable;
