@@ -82,12 +82,19 @@ echo $output->header();
 // Course name heading.
 
 
-// Normalize filter class.
+// Normalize filter class, workaround to match MDL version from 401 to 501.
 if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
-    if (class_exists('\\core_filters\\text_filter')) {
-        class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
-    } else if (class_exists('\\filter_multilang2')) {
+    if (class_exists('\\filter_multilang2')) {
         class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+    } else if (class_exists('\\core_filters\\text_filter')) {
+        // Define a concrete subclass extending the abstract class.
+        class Multilang2TextFilter extends \core_filters\text_filter {
+            public function filter($text, array $options = []) {
+                // Implement minimal logic or leave empty if not needed.
+                return $text;
+            }
+        }
+        class_alias('Multilang2TextFilter', 'local_deepler\\output\\Multilang2TextFilter');
     }
 }
 
