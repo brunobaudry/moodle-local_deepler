@@ -1,1 +1,180 @@
-﻿#page-local-deepler-translate .editing .activity-item{cursor:default !important}#page-local-deepler-translate .editing .activity-item:hover{cursor:default !important}#page-local-deepler-translate #local_deepler-translate-header{z-index:100 !important}#page-local-deepler-translate nav{z-index:1000 !important}#page-local-deepler-translate #local_deepler__settings{position:relative;top:-4px}#page-local-deepler-translate .caret-icons .fa-caret-down{display:none}#page-local-deepler-translate .caret-icons .fa-caret-right{display:inline}#page-local-deepler-translate a[aria-expanded=true] .fa-caret-down{display:inline}#page-local-deepler-translate a[aria-expanded=true] .fa-caret-right{display:none}#page-local-deepler-translate .local_deepler__source-text img,#page-local-deepler-translate .local_deepler__translation img{background-color:rgb(251.953125,238.34375,219.046875) !important;font-style:italic}#page-local-deepler-translate img::before{content:"pic:" !important}#page-local-deepler-translate .local_deepler__form{padding:0}#page-local-deepler-translate .local_deepler__form .d-none{display:none !important}#page-local-deepler-translate .local_deepler__form .local_deeplervisible>[data-action=local_deepler__hiddenfromstudents]{display:none}#page-local-deepler-translate .course_sections__name,#page-local-deepler-translate .course__fullname{margin-top:3rem}#page-local-deepler-translate .local_deepler__sectiondata{margin-top:1rem}#page-local-deepler-translate .local_deepler__activitysmalltitle{position:absolute}#page-local-deepler-translate .local_deepler__selectorbox{margin-top:0}#page-local-deepler-translate div[data-table^=question]{background-color:#fff !important}#page-local-deepler-translate div[id^="question["].local_deepler__activity>:first-child{color:#1d2125 !important;background-color:#fff !important;margin-bottom:1rem}#page-local-deepler-translate .local_deepler__level0{padding-left:15px}#page-local-deepler-translate .local_deepler__level1{padding-left:30px}#page-local-deepler-translate .local_deepler__level2{padding-left:45px}#page-local-deepler-translate .local_deepler__level3{padding-left:60px}#page-local-deepler-translate .local_deepler__activitydesc,#page-local-deepler-translate .local_deepler__activityfield{color:#6a737b;position:relative}#page-local-deepler-translate .local_deepler__activitydesc{top:-16px}#page-local-deepler-translate .local_deepler__activityfield{display:inline-block}#page-local-deepler-translate .local_deepler__source-text iframe{max-width:100%}#page-local-deepler-translate .local_deepler__translation iframe{max-width:100%}#page-local-deepler-translate .local_deepler__translation [data-action="local_deepler/editor"],#page-local-deepler-translate .local_deepler__translation [data-fieldtype=editor]{width:100%}#page-local-deepler-translate .local_deepler__translation textarea[data-action="local_deepler/editor"]{width:100%;min-height:300px}#page-local-deepler-translate .local_deepler__translation .form-group.row{margin-left:0;margin-right:0}#page-local-deepler-translate .local_deepler__translation .col-form-label{display:none !important}#page-local-deepler-translate .local_deepler__error{border:2px solid #ca3120;border-radius:6px}#page-local-deepler-translate .local_deepler__success{border:2px solid #357a32;border-radius:6px}#page-local-deepler-translate [data-status="local_deepler/success-message"]{background:#20c997;font-size:.6rem;text-transform:uppercase;padding:.25rem 1rem;margin-top:2rem;top:12px;bottom:9px;right:9px;border-radius:4px}#page-local-deepler-translate [data-status="local_deepler/wait"] i::before{content:"";color:#ced4da}#page-local-deepler-translate [data-status="local_deepler/totranslate"] i::before{content:"";color:#0f6cbf}#page-local-deepler-translate [data-status="local_deepler/tosave"] i::before{content:"";color:#0f6cbf}#page-local-deepler-translate [data-status="local_deepler/success"] i::before{content:"";color:#357a32}#page-local-deepler-translate [data-status="local_deepler/saved"] i::before{content:"";color:#357a32}#page-local-deepler-translate [data-status="local_deepler/failed"] i::before{content:"";color:#ca3120}#page-local-deepler-translate [data-status="local_deepler/error"] i::before{content:"";color:#ca3120}/*# sourceMappingURL=styles.css.map */
+/*
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*.local_deepler__translation img
+ * @module     local_deepler/deepler
+ * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+#page-local-deepler-translate .editing .activity-item {
+  cursor: default !important;
+}
+#page-local-deepler-translate .editing .activity-item:hover {
+  cursor: default !important;
+}
+#page-local-deepler-translate #local_deepler-translate-header {
+  z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate nav {
+  z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate #local_deepler__settings {
+  position: relative;
+  top: -4px;
+}
+#page-local-deepler-translate .caret-icons .fa-caret-down {
+  display: none;
+}
+#page-local-deepler-translate .caret-icons .fa-caret-right {
+  display: inline;
+}
+#page-local-deepler-translate a[aria-expanded=true] .fa-caret-down {
+  display: inline;
+}
+#page-local-deepler-translate a[aria-expanded=true] .fa-caret-right {
+  display: none;
+}
+#page-local-deepler-translate .local_deepler__source-text img,
+#page-local-deepler-translate .local_deepler__translation img {
+  background-color: rgb(251.953125, 238.34375, 219.046875) !important; /* stylelint-disable-line declaration-no-important */
+  font-style: italic;
+}
+#page-local-deepler-translate img::before {
+  content: "pic:" !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate .local_deepler__form {
+  padding: 0;
+}
+#page-local-deepler-translate .local_deepler__form .d-none {
+  display: none !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate .local_deepler__form .local_deeplervisible > [data-action=local_deepler__hiddenfromstudents] {
+  display: none;
+}
+#page-local-deepler-translate .course_sections__name,
+#page-local-deepler-translate .course__fullname {
+  margin-top: 3rem;
+}
+#page-local-deepler-translate .local_deepler__sectiondata {
+  margin-top: 1rem;
+}
+#page-local-deepler-translate .local_deepler__activitysmalltitle {
+  position: absolute;
+}
+#page-local-deepler-translate .local_deepler__selectorbox {
+  margin-top: 0;
+}
+#page-local-deepler-translate div[data-table^=question] {
+  background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate div[id^="question["].local_deepler__activity > :first-child {
+  color: #1d2125 !important; /* stylelint-disable-line declaration-no-important */
+  background-color: #fff !important; /* stylelint-disable-line declaration-no-important */
+  margin-bottom: 1rem;
+}
+#page-local-deepler-translate .local_deepler__level0 {
+  padding-left: 15px;
+}
+#page-local-deepler-translate .local_deepler__level1 {
+  padding-left: 30px;
+}
+#page-local-deepler-translate .local_deepler__level2 {
+  padding-left: 45px;
+}
+#page-local-deepler-translate .local_deepler__level3 {
+  padding-left: 60px;
+}
+#page-local-deepler-translate .local_deepler__activitydesc,
+#page-local-deepler-translate .local_deepler__activityfield {
+  color: #6a737b;
+  position: relative;
+}
+#page-local-deepler-translate .local_deepler__activitydesc {
+  top: -16px;
+}
+#page-local-deepler-translate .local_deepler__activityfield {
+  display: inline-block;
+}
+#page-local-deepler-translate .local_deepler__source-text iframe {
+  max-width: 100%; /* responsive iframes */
+}
+#page-local-deepler-translate .local_deepler__translation iframe {
+  max-width: 100%; /* responsive iframes */
+}
+#page-local-deepler-translate .local_deepler__translation [data-action="local_deepler/editor"],
+#page-local-deepler-translate .local_deepler__translation [data-fieldtype=editor] {
+  width: 100%; /* editor tweaks */
+}
+#page-local-deepler-translate .local_deepler__translation textarea[data-action="local_deepler/editor"] {
+  width: 100%; /* editor tweaks */
+  min-height: 300px;
+}
+#page-local-deepler-translate .local_deepler__translation .form-group.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+#page-local-deepler-translate .local_deepler__translation .col-form-label {
+  display: none !important; /* stylelint-disable-line declaration-no-important */
+}
+#page-local-deepler-translate .local_deepler__error {
+  border: 2px solid #ca3120; /* ui notices */
+  border-radius: 6px;
+}
+#page-local-deepler-translate .local_deepler__success {
+  border: 2px solid #357a32;
+  border-radius: 6px;
+}
+#page-local-deepler-translate [data-status="local_deepler/success-message"] {
+  background: #20c997;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  padding: 0.25rem 1rem;
+  margin-top: 2rem;
+  top: 12px;
+  bottom: 9px;
+  right: 9px;
+  border-radius: 4px;
+}
+#page-local-deepler-translate [data-status="local_deepler/wait"] i::before {
+  content: "\f141"; /*3 dots ellipse*/
+  color: #ced4da;
+}
+#page-local-deepler-translate [data-status="local_deepler/totranslate"] i::before {
+  content: "\f251"; /* Sand icon*/
+  color: #0f6cbf;
+}
+#page-local-deepler-translate [data-status="local_deepler/tosave"] i::before {
+  content: "\f0c7"; /*floppy (save) icon*/
+  color: #0f6cbf;
+}
+#page-local-deepler-translate [data-status="local_deepler/success"] i::before {
+  content: "\f00c"; /*check  icon*/
+  color: #357a32;
+}
+#page-local-deepler-translate [data-status="local_deepler/saved"] i::before {
+  content: "\f1c0"; /*database  icon*/
+  color: #357a32;
+}
+#page-local-deepler-translate [data-status="local_deepler/failed"] i::before {
+  content: "\f071"; /*exclamation triangle icon*/
+  color: #ca3120;
+}
+#page-local-deepler-translate [data-status="local_deepler/error"] i::before {
+  content: "\f1e2"; /*bomb icon*/
+  color: #ca3120;
+}
+
+/*# sourceMappingURL=styles.css.map */
