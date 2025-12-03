@@ -30,7 +30,7 @@ define([], () => {
 
     /**
      * Function to replace expressions with tokens.
-     * @param {String} text
+     * @param {Sng} text
      * @param {Object} escapePatterns
      * @returns {Object} {{expressions: *[], tokenizedText}}
      */
