@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.8.5]
 ### Fixed
 - Normalizing classes for text filters
-- Sonar cloud complains with vendors
+- Sonar cloud complains with vendors and duplicated compiled AMD
 - Grunt and github actions for 5.1
 
 ## [1.9.8.1]
