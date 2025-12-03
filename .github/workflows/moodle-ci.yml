@@ -164,15 +164,15 @@ jobs:
           - php: 8.4
             moodle-branch: MOODLE_501_STABLE
             database: pgsql
-            postgres_version: 14
+            postgres_version: 15
           - php: 8.3
             moodle-branch: MOODLE_501_STABLE
             database: pgsql
-            postgres_version: 14
+            postgres_version: 15
           - php: 8.2
             moodle-branch: MOODLE_501_STABLE
             database: pgsql
-            postgres_version: 14
+            postgres_version: 15
           - php: 8.4
             moodle-branch: MOODLE_500_STABLE
             database: pgsql
