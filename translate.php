@@ -98,11 +98,11 @@ if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
             /**
              * Main function.
              *
-             * @param $text
-             * @param array $options
-             * @return mixed
+             * @param string $text some HTML content to process.
+             * @param array $options options passed to the filters
+             * @return string the HTML content after the filtering has been applied.
              */
-            public function filter($text, array $options = []) {
+            public function filter( $text, array $options = []) {
                 // Implement minimal logic or leave empty if not needed.
                 return $text;
             }
