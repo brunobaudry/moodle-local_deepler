@@ -28,7 +28,7 @@
  */
 
 // Get libs.
-use core\plugin_manager;
+use core_filters\text_filter;
 use DeepL\AuthorizationException;
 use DeepL\DeepLException;
 use local_deepler\local\data\course;
@@ -39,11 +39,8 @@ use local_deepler\output\nodeepl_page;
 use local_deepler\output\sourcenotsupported_page;
 use local_deepler\output\translate_page;
 
-
-
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/version.php');
-
 
 global $CFG;
 global $PAGE;
@@ -81,7 +78,6 @@ $output = $PAGE->get_renderer('local_deepler');
 echo $output->header();
 // Course name heading.
 
-
 // Normalize filter class, workaround to match MDL version from 401 to 501.
 if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
     if (class_exists('\\filter_multilang2')) {
@@ -94,7 +90,7 @@ if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
          * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
          * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
          */
-        class Multilang2TextFilter extends \core_filters\text_filter {
+        class Multilang2TextFilter extends text_filter {
             /**
              * Main function.
              *
@@ -102,18 +98,18 @@ if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
              * @param array $options options passed to the filters
              * @return string the HTML content after the filtering has been applied.
              */
-            public function filter( $text, array $options = []) {
+            public function filter($text, array $options = []) {
                 // Implement minimal logic or leave empty if not needed.
                 return $text;
             }
         }
+
         class_alias('Multilang2TextFilter', 'local_deepler\\output\\Multilang2TextFilter');
     }
 }
 
 // Instantiate the normalized class.
 $mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);
-
 
 echo $output->heading($mlangfilter->filter($course->fullname));
 $version = $plugin->release;
