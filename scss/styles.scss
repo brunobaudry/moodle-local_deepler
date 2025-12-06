@@ -53,12 +53,12 @@ $secondary: $gray-400 !default;
 
 #page-local-deepler-translate {
 
-  .editing .activity-item {
-    cursor: default !important;
-  }
-  .editing .activity-item:hover {
-    cursor: default !important;
-  }
+    .editing .activity-item {
+        cursor: default !important; /* stylelint-disable-line declaration-no-important */
+    }
+    .editing .activity-item:hover {
+        cursor: default !important; /* stylelint-disable-line declaration-no-important */
+    }
     #local_deepler-translate-header {
         z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
     }
@@ -83,8 +83,6 @@ $secondary: $gray-400 !default;
         display: none;
     }
 
-
-
     .local_deepler__source-text img,
     .local_deepler__translation img {
         background-color: color.adjust($orange, $lightness: 30%) !important; /* stylelint-disable-line declaration-no-important */
@@ -98,7 +96,7 @@ $secondary: $gray-400 !default;
     .local_deepler__form {
         padding: 0;
         .d-none {
-            display:none !important; /* stylelint-disable-line declaration-no-important */
+            display: none !important; /* stylelint-disable-line declaration-no-important */
         }
         .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
             display: none;
@@ -210,37 +208,37 @@ $secondary: $gray-400 !default;
     }
 
     [data-status="local_deepler/wait"] i::before {
-        content: '\f141'; /*3 dots ellipse*/
+        content: '\f141'; /* 3 dots ellipse */
         color: $gray-400;
     }
 
     [data-status="local_deepler/totranslate"] i::before {
-        content: '\f251'; /* Sand icon*/
+        content: '\f251'; /* Send icon */
         color: $blue;
     }
 
     [data-status="local_deepler/tosave"] i::before {
-        content: '\f0c7'; /*floppy (save) icon*/
+        content: '\f0c7'; /* floppy (save) icon */
         color: $blue;
     }
 
     [data-status="local_deepler/success"] i::before {
-        content: '\f00c'; /*check  icon*/
+        content: '\f00c'; /* check icon */
         color: $green;
     }
 
     [data-status="local_deepler/saved"] i::before {
-        content: '\f1c0'; /*database  icon*/
+        content: '\f1c0'; /* database icon */
         color: $green;
     }
 
     [data-status="local_deepler/failed"] i::before {
-        content: '\f071'; /*exclamation triangle icon*/
+        content: '\f071'; /* exclamation triangle icon */
         color: $red;
     }
 
     [data-status="local_deepler/error"] i::before {
-        content: '\f1e2'; /*bomb icon*/
+        content: '\f1e2'; /* bomb icon */
         color: $red;
     }
 }

@@ -24,8 +24,10 @@
 "use strict";
 // eslint-disable-next-line no-undef
 module.exports = function(grunt) {
+    /* eslint-disable capitalized-comments */
     // require("grunt-load-gruntfile")(grunt);
     // grunt.loadGruntfile("../../../Gruntfile.js");
+    /* eslint-enable capitalized-comments */
         grunt.loadNpmTasks('grunt-contrib-clean');
         grunt.loadNpmTasks('grunt-contrib-copy');
         grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -90,13 +92,13 @@ module.exports = function(grunt) {
                         "styles.css": "scss/styles.scss"
                     }
                 },
-                prod:{
+                prod: {
                     options: {
                         // Saas output style.
                         style: "compressed"
                         // Specifies directories to scan for @import directives when parsing.
                         // The default value is the directory of the source, which is probably what you want.
-                        //loadPath: ["myOtherImports/"]
+                        // loadPath: ["myOtherImports/"]
                     },
                     files: {
                         "styles.css": "scss/styles.scss"
@@ -107,6 +109,7 @@ module.exports = function(grunt) {
         });
         grunt.registerTask('default', ['clean', 'copy', 'uglify', 'eslint']);
         grunt.registerTask('dev', ['clean', 'copy', 'uglify', 'eslint', "sass:dev"]);
+        /* eslint-disable-next-line capitalized-comments */
         // grunt.registerTask('dev', ['shell:behat','clean', 'copy', 'uglify', 'eslint', "sass:dev"]);
         grunt.registerTask('prod', ['clean', 'copy', 'uglify', 'eslint', "sass:prod"]);
         grunt.registerTask('amd', ['clean', 'copy', 'uglify', 'eslint', "sass:prod"]);
