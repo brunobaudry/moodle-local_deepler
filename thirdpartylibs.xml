@@ -39,4 +39,52 @@
         <version>^7.0</version>
         <license>MIT</license>
     </library>
+    <library>
+        <location>classes/vendor/doctrine</location>
+        <name>Doctrine Deprecations, Doctrine Instantiator</name>
+        <version>2.0.0</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/ezyang</location>
+        <name>HTML Purifier</name>
+        <version>4.18.0</version>
+        <license>GNU Lesser General Public License v2.1</license>
+    </library>
+    <library>
+        <location>classes/vendor/markbaker</location>
+        <name>PHPMatrix, PHPComplex</name>
+        <version>3.0.1</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/phpdocumentor</location>
+        <name>phpDocumentor</name>
+        <version>2.2.0</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/phpoffice</location>
+        <name>PhpSpreadsheet</name>
+        <version>5.3.0</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/phpstan</location>
+        <name>PHPDoc Parser for PHPStan</name>
+        <version>2.3.0</version>
+        <license>MIT</license>
+    </library>
+    <library>
+        <location>classes/vendor/sebastian</location>
+        <name>sebastian/exporter and others</name>
+        <version>7.0.2</version>
+        <license>BSD 3-Clause "New" or "Revised" License</license>
+    </library>
+    <library>
+        <location>classes/vendor/webmozart</location>
+        <name>Webmozart Assert</name>
+        <version>1.12.1</version>
+        <license>MIT</license>
+    </library>
 </libraries>
