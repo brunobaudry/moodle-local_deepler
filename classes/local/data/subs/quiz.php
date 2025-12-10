@@ -18,8 +18,6 @@ namespace local_deepler\local\data\subs;
 
 defined('MOODLE_INTERNAL') || die();
 
-
-
 use cm_info;
 use local_deepler\local\data\field;
 use mod_quiz\quiz_settings;
@@ -35,13 +33,6 @@ use question_bank;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quiz {
-    /** @var array */
-    private array $questions;
-    /**
-     * @var \cm_info
-     */
-    private cm_info $quiz;
-
     /**
      * Constructor.
      *
@@ -61,15 +52,9 @@ class quiz {
                 $this->questions[] = question_bank::load_question($slot->questionid, false);
             }
         }
-
-        if( $hasrandom ) {
-            // Remove duplicates (often in a quiz whith random questions).
-            $this->questions = array_map(
-                'unserialize',
-                array_unique(
-                    array_map(
-                        'serialize',
-                        $this->questions)));
+        // Remove duplicates (often in a quiz whith random questions).
+        if ($hasrandom) {
+            $this->questions = array_map('unserialize', array_unique( array_map('serialize', $this->questions)));
         }
     }
 
@@ -135,13 +120,13 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
 
         if (!empty($filter->filter->category)) {
             // New question bank filter format.
-            $categoryid = (int)($filter->filter->category->values[0] ?? 0);
-            $includesubs = (bool)($filter->filter->category->filteroptions->includesubcategories ?? false);
+            $categoryid = (int) ($filter->filter->category->values[0] ?? 0);
+            $includesubs = (bool) ($filter->filter->category->filteroptions->includesubcategories ?? false);
         } else if (isset($filter->cat)) {
             // Legacy format used by older Moodle versions.
-            $categories = array_map('intval', explode(',', (string)$filter->cat));
+            $categories = array_map('intval', explode(',', (string) $filter->cat));
             $categoryid = $categories[0] ?? 0;
-            $includesubs = (bool)($filter->includesubcategories ?? false);
+            $includesubs = (bool) ($filter->includesubcategories ?? false);
         }
 
         if (empty($categoryid)) {
@@ -154,18 +139,18 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         $rawtags = $filter->filter->qtagids->values ?? ($filter->tags ?? []);
         if (!empty($rawtags) && is_array($rawtags)) {
             foreach ($rawtags as $t) {
-                if (is_int($t) || ctype_digit((string)$t)) {
-                    $tagids[] = (int)$t;
+                if (is_int($t) || ctype_digit((string) $t)) {
+                    $tagids[] = (int) $t;
                 } else if (is_object($t) && isset($t->id)) {
-                    $tagids[] = (int)$t->id;
+                    $tagids[] = (int) $t->id;
                 } else if (is_object($t) && isset($t->name)) {
                     // Best-effort resolve by name.
                     if ($tagid = $DB->get_field('tag', 'id', ['name' => $t->name])) {
-                        $tagids[] = (int)$tagid;
+                        $tagids[] = (int) $tagid;
                     }
                 } else if (is_string($t) && $t !== '') {
                     if ($tagid = $DB->get_field('tag', 'id', ['name' => $t])) {
-                        $tagids[] = (int)$tagid;
+                        $tagids[] = (int) $tagid;
                     }
                 }
             }
@@ -182,13 +167,13 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
 
         // If tags are specified, filter the ids so that each question has ANY of the requested tags (OR semantics).
         if (!empty($tagids)) {
-            list($idsql, $idparams) = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
-            list($tagsql, $tagparams) = $DB->get_in_or_equal($tagids, SQL_PARAMS_NAMED, 'ti');
+            [$idsql, $idparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
+            [$tagsql, $tagparams] = $DB->get_in_or_equal($tagids, SQL_PARAMS_NAMED, 'ti');
 
             $params = $idparams + $tagparams + [
-                'questionitemtype' => 'question',
-                'questioncomponent' => 'core_question',
-            ];
+                    'questionitemtype' => 'question',
+                    'questioncomponent' => 'core_question',
+                ];
 
             $sql = "SELECT DISTINCT ti.itemid
                       FROM {tag_instance} ti
@@ -228,4 +213,10 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         }
         return $childs;
     }
+    /** @var array */
+    private array $questions;
+    /**
+     * @var \cm_info
+     */
+    private cm_info $quiz;
 }
