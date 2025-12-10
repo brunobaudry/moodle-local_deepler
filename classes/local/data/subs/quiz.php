@@ -16,10 +16,15 @@
 
 namespace local_deepler\local\data\subs;
 
+defined('MOODLE_INTERNAL') || die();
+
+
+
 use cm_info;
 use local_deepler\local\data\field;
 use mod_quiz\quiz_settings;
 use mod_quiz\structure;
+use qtype_random;
 use question_bank;
 
 /**
@@ -51,7 +56,7 @@ class quiz {
             if ($slot->qtype === 'random') {
                 $this->fetchrandomquestions($slot->id);
             } else {
-                $this->questions[] = question_bank::load_question($slot->questionid);
+                $this->questions[] = question_bank::load_question($slot->questionid, false);
             }
         }
     }
@@ -97,8 +102,12 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      * @return void
      * @throws \dml_exception
      */
-    /*public function fetchrandomquestions(int $slotid): void {
+    public function fetchrandomquestions(int $slotid): void {
         global $DB;
+        global $CFG;
+        require_once($CFG->dirroot . '/question/type/random/questiontype.php');
+        $qtyperandomquestions= new qtype_random();
+
         // Retrieve category and filter parameters.
         $reference = $DB->get_record('question_set_references', [
             'component' => 'mod_quiz',
@@ -132,19 +141,20 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         ];
 
         // Get all short-answer questions in target category.
-        $finder = question_bank::get_finder();
+/*        $finder = question_bank::get_finder();
         $questions = $finder->get_questions_from_categories(
             $result['questioncategoryid'],
             $result['includesubcategories'],
             $result['tags']
-        );
-
+        );*/
+        $questions = $qtyperandomquestions->get_available_questions_from_category($result['questioncategoryid'],
+            $result['includesubcategories']);
         // Load full question objects.
         foreach ($questions as $question) {
             $this->questions[] = question_bank::load_question($question);
         }
-    }*/
-    public function fetchrandomquestions(int $slotid): void {
+    }
+/*    public function fetchrandomquestions(int $slotid): void {
         global $DB;
 
         // 1. Load the random question reference.
@@ -201,7 +211,7 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         foreach ($questionids as $qid) {
             $this->questions[] = question_bank::load_question($qid);
         }
-    }
+    }*/
 
 
 
@@ -222,4 +232,6 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         }
         return $childs;
     }
+
+    private \qtype_random $qtyperandomquestions;
 }
