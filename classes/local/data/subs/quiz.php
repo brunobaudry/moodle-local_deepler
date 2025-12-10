@@ -97,7 +97,7 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      * @return void
      * @throws \dml_exception
      */
-    public function fetchrandomquestions(int $slotid): void {
+    /*public function fetchrandomquestions(int $slotid): void {
         global $DB;
         // Retrieve category and filter parameters.
         $reference = $DB->get_record('question_set_references', [
@@ -143,7 +143,67 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         foreach ($questions as $question) {
             $this->questions[] = question_bank::load_question($question);
         }
+    }*/
+    public function fetchrandomquestions(int $slotid): void {
+        global $DB;
+
+        // 1. Load the random question reference.
+        $reference = $DB->get_record('question_set_references', [
+            'component'    => 'mod_quiz',
+            'questionarea' => 'slot',
+            'itemid'       => $slotid,
+        ], '*', MUST_EXIST);
+
+        $filter = json_decode($reference->filtercondition);
+
+        // 2. Determine primary category and includesubcategories.
+        $primarycatid = null;
+        $includesubs  = false;
+
+        if (isset($filter->filter->category)) {
+            $primarycatid = (int)$filter->filter->category->values[0];
+            $includesubs  = !empty($filter->filter->category->filteroptions->includesubcategories);
+        } else if (isset($filter->cat)) {
+            $categories   = array_map('intval', explode(',', $filter->cat));
+            $primarycatid = $categories[0];
+            $includesubs  = !empty($filter->includesubcategories);
+        }
+
+        // 3. Build the *full* list of category IDs if subcategories should be included.
+        $categoryids = [$primarycatid];
+
+        if ($includesubs) {
+            $children = $DB->get_records('question_categories', ['parent' => $primarycatid], '', 'id');
+            foreach ($children as $child) {
+                $categoryids[] = (int)$child->id;
+                // Optional: recurse if you have deeper nesting.
+            }
+        }
+
+        // 4. Build extra SQL condition + params (for tags, status, etc.).
+        // For now, no extra conditions: pass empty string and empty params.
+        $extraconditions = '';
+        $extraparams     = [];
+
+        // Example: if you later want to filter by some custom field, do:
+        // $extraconditions = 'q.qtype = :qtype';
+        // $extraparams['qtype'] = 'shortanswer';
+
+        // 5. Call finder using the documented signature.
+        $finder    = question_bank::get_finder();
+        $questionids = $finder->get_questions_from_categories(
+            $categoryids,      // array or CSV list, not a boolean
+            $extraconditions,  // SQL string, e.g. 'q.qtype = :qtype'
+            $extraparams       // named params for the above
+        );
+
+        // 6. Load full questions.
+        foreach ($questionids as $qid) {
+            $this->questions[] = question_bank::load_question($qid);
+        }
     }
+
+
 
     /**
      * Get the child fields.
