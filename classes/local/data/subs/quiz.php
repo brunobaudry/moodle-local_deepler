@@ -52,12 +52,24 @@ class quiz {
         $this->quiz = $quiz;
         $slots = $this->getslots($quiz);
         $this->questions = [];
+        $hasrandom = false;
         foreach ($slots as $slot) {
             if ($slot->qtype === 'random') {
+                $hasrandom = true;
                 $this->fetchrandomquestions($slot->id);
             } else {
                 $this->questions[] = question_bank::load_question($slot->questionid, false);
             }
+        }
+
+        if( $hasrandom ) {
+            // Remove duplicates (often in a quiz whith random questions).
+            $this->questions = array_map(
+                'unserialize',
+                array_unique(
+                    array_map(
+                        'serialize',
+                        $this->questions)));
         }
     }
 
