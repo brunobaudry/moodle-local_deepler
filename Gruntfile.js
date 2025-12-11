@@ -3,8 +3,14 @@
 module.exports = function (grunt) {
 
     // We need to include the core Moodle grunt file too, otherwise we can't run tasks like "amd".
-    require("grunt-load-gruntfile")(grunt);
-    grunt.loadGruntfile("../../../Gruntfile.js");
+    const path = require("path");
+    const fs = require("fs");
+    const moodleGruntfile = path.resolve(__dirname, "../../../Gruntfile.js");
+
+    if (fs.existsSync(moodleGruntfile)) {
+        require("grunt-load-gruntfile")(grunt);
+        grunt.loadGruntfile(moodleGruntfile);
+    }
 
     // Load all grunt tasks.
     grunt.loadNpmTasks("grunt-contrib-sass");
