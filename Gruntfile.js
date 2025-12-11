@@ -39,6 +39,20 @@ module.exports = function(grunt) {
             }
         }
     });
+
+    // Register empty tasks for moodle-plugin-ci compatibility
+    grunt.registerTask("amd", "AMD task not needed for this plugin", function() {
+        grunt.log.ok("No AMD modules to process.");
+    });
+
+    grunt.registerTask("stylelint", "Stylelint task not needed for this plugin", function() {
+        grunt.log.ok("No custom styles to lint.");
+    });
+
+    grunt.registerTask("ignorefiles", "Ignore files task not needed for this plugin", function() {
+        grunt.log.ok("No ignore files to check.");
+    });
+
     // The default task (running "grunt" in the console).
     grunt.registerTask("default", ["sass:development"]);
     // Development task (running "grunt dev" in console).
