@@ -52,9 +52,6 @@ $danger: $red !default;
 $secondary: $gray-400 !default;
 
 #page-local-deepler-translate {
-
-  --bs-primary-rgb: 15, 108, 191;
-  --bs-secondary-rgb: 206, 212, 218;
   /* Fallback for Bootstrap 4: approximate BS5's subtle background */
   .local_deepler-bg-secondary-subtle {
     /* Use BS5 RGB if available; otherwise fall back to static RGB for .text-secondary/.bg-secondary */
