@@ -54,7 +54,7 @@ class quiz {
         }
         // Remove duplicates (often in a quiz whith random questions).
         if ($hasrandom) {
-            $this->questions = array_map('unserialize', array_unique( array_map('serialize', $this->questions)));
+            $this->questions = array_map('unserialize', array_unique(array_map('serialize', $this->questions)));
         }
     }
 
