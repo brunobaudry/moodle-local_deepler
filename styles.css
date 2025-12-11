@@ -49,7 +49,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }
 #page-local-deepler-translate .local_deepler__source-text img,
 #page-local-deepler-translate .local_deepler__translation img {
-  background-color: #fceedb !important; /* stylelint-disable-line declaration-no-important */
+  background-color: rgb(251.953125, 238.34375, 219.046875) !important; /* stylelint-disable-line declaration-no-important */
   font-style: italic;
 }
 #page-local-deepler-translate img::before {
