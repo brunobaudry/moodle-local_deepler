@@ -16,7 +16,7 @@
 /**
  *  description here.
  *
- * @module     'local_deepler'; // Full name of the plugin (used for diagnostics)./glossary
+ * @module     local_deepler/deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

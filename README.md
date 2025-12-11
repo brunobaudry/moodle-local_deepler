@@ -122,7 +122,6 @@ Translation workflow being the following:
     + [Pull requests](#pull-requests)
   * [PHPUNIT and BEHAT](#phpunit-and-behat)
     + [Github Moodle CI Actions](#github-moodle-ci-actions)
-- [Fork](#fork)
 
 <!-- tocstop -->
 
@@ -799,12 +798,3 @@ rename .env-dist to .env and set there your own api key
 If you intend to test in your forked repo this code with Moodle CI.
 Ensure you also add a **Repository secret** with the **DEEPL_API_TOKEN** (as with the .env)
 (Repo > Settings > Security > Secrets and variable > Actions > New repository secret)
-
-## Fork
-
-Originally a fork of Jamfire's https://github.com/jamfire/moodle-local_coursetranslator, this plugin had lots of refactoring and UI changes.
-Should you prefer a fully automated Deepl translation. Checkout Jamfire's replacement plugin :
-
-https://github.com/jamfire/moodle-filter_autotranslate
-It is text filter, most probably the best way for fast auto-translation (populating the result without intervention), we found useful to improve this one adding the necessary 
-"revision" step as Machine translation will never be 100% accurate specially in the context of knowledge transmission where accuracy is mandatory.

@@ -1,4 +1,4 @@
-define(['core/log'], (Log)=> {
+define(['core/log', 'editor_tiny/editor'], (Log, tinymce)=> {
     /**
      * Find tinyMCEs
      *
