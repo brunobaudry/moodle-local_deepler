@@ -1,16 +1,10 @@
+/* jshint strict:false */
 "use strict";
-
-module.exports = function (grunt) {
-
-    // We need to include the core Moodle grunt file too, otherwise we can't run tasks like "amd".
-    const path = require("path");
-    const fs = require("fs");
-    const moodleGruntfile = path.resolve(__dirname, "../../../Gruntfile.js");
-
-    if (fs.existsSync(moodleGruntfile)) {
-        require("grunt-load-gruntfile")(grunt);
-        grunt.loadGruntfile(moodleGruntfile);
-    }
+/* globals module: false */
+// eslint-disable-next-line no-redeclare
+/* global module */
+/* eslint no-undef: "error"*/
+module.exports = function(grunt) {
 
     // Load all grunt tasks.
     grunt.loadNpmTasks("grunt-contrib-sass");
@@ -34,7 +28,7 @@ module.exports = function (grunt) {
                     "styles.css": "scss/styles.scss"
                 }
             },
-            prod:{
+            prod: {
                 options: {
                     // Saas output style.
                     style: "compressed",
@@ -45,10 +39,10 @@ module.exports = function (grunt) {
             }
         }
     });
-    // The default task (running "grunt" in console).
+    // The default task (running "grunt" in the console).
     grunt.registerTask("default", ["sass:development"]);
     // Development task (running "grunt dev" in console).
     grunt.registerTask("dev", ["sass:development"]);
-    // The production task (running "grunt prod" in console).
+    // The production task (running "grunt prod" in the console).
     grunt.registerTask("prod", ["sass:prod"]);
 };
