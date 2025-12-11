@@ -24,15 +24,15 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }
 #page-local-deepler-translate .local_deepler-bg-secondary-subtle {
   /* Use BS5 RGB if available; otherwise fall back to static RGB for .text-secondary/.bg-secondary */
-  background-color: rgba(var(--bs-primary-rgb, 206, 212, 218), 0.12) !important;
+  background-color: rgba(var(--bs-primary-rgb, 206, 212, 218), 0.12) !important; /* stylelint-disable-line declaration-no-important */
   /* Optional: mild border for contrast similar to BS5 subtle tone */
-  border: 1px solid rgba(var(--bs-primary-rgb, 206, 212, 218), 0.2);
+  border: 1px solid rgba(var(--bs-primary-rgb, 206, 212, 218), 0.19);
 }
 #page-local-deepler-translate .local_deepler-bg-primary-subtle {
   /* Use BS5 RGB if available; otherwise fall back to static RGB for .text-secondary/.bg-secondary */
-  background-color: rgba(var(--bs-secondary-rgb, 15, 108, 191), 0.12) !important;
+  background-color: rgba(var(--bs-secondary-rgb, 15, 108, 191), 0.12) !important; /* stylelint-disable-line declaration-no-important */
   /* Optional: mild border for contrast similar to BS5 subtle tone */
-  border: 1px solid rgba(var(--bs-secondary-rgb, 15, 108, 191), 0.2);
+  border: 1px solid rgba(var(--bs-secondary-rgb, 15, 108, 191), 0.19);
 }
 #page-local-deepler-translate .editing .activity-item {
   cursor: default !important; /* stylelint-disable-line declaration-no-important */
