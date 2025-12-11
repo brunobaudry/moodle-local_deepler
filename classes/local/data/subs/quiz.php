@@ -16,8 +16,6 @@
 
 namespace local_deepler\local\data\subs;
 
-defined('MOODLE_INTERNAL') || die();
-
 use cm_info;
 use local_deepler\local\data\field;
 use mod_quiz\quiz_settings;
