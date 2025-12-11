@@ -3,7 +3,7 @@
         'name' => 'bruno.baudry/deepler',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '2a5392e4457a0fc10490faac3bf7fd5a07931087',
+        'reference' => '5aaa08fff58edce4282413d4973e96f007c3be7c',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'bruno.baudry/deepler' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '2a5392e4457a0fc10490faac3bf7fd5a07931087',
+            'reference' => '5aaa08fff58edce4282413d4973e96f007c3be7c',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../../',
             'aliases' => array(),
