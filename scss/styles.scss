@@ -54,19 +54,13 @@ $secondary: $gray-400 !default;
 #page-local-deepler-translate {
 
   .local_deepler-bg-secondary-subtle {
-    /* Fallback for Bootstrap 4: approximate BS5's subtle background */
-    /* Use BS5 RGB if available; otherwise fall back to static RGB for .text-secondary/.bg-secondary */
-    background-color: rgba(var(--bs-primary-rgb, 206, 212, 218), .12) !important;/* stylelint-disable-line declaration-no-important */
-    /* Optional: mild border for contrast similar to BS5 subtle tone */
-    border: 1px solid rgba(var(--bs-primary-rgb, 206, 212, 218), .19);
+    background-color: rgba($primary, .12) !important;/* stylelint-disable-line declaration-no-important */
+    border: 1px solid rgba($primary, .19);
   }
 
   .local_deepler-bg-primary-subtle {
-    /* Fallback for Bootstrap 4: approximate BS5's subtle background */
-    /* Use BS5 RGB if available; otherwise fall back to static RGB for .text-secondary/.bg-secondary */
-    background-color: rgba(var(--bs-secondary-rgb, 15, 108, 191), .12) !important;/* stylelint-disable-line declaration-no-important */
-    /* Optional: mild border for contrast similar to BS5 subtle tone */
-    border: 1px solid rgba(var(--bs-secondary-rgb, 15, 108, 191), .19);
+    background-color: rgba($secondary, .12) !important;/* stylelint-disable-line declaration-no-important */
+    border: 1px solid rgba($secondary, .19);
   }
 
   .editing .activity-item {
