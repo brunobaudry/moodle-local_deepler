@@ -36,6 +36,6 @@ npx grunt amd --files="public/local/deepler/amd/src/*.js,public/local/deepler/am
 npx update-browserslist-db@latest --yes
 # Optional CSS task
 # npx grunt css --files="public/local/deepler/scss/*" --force
-q
+
 # Return to previous directory
 cd
