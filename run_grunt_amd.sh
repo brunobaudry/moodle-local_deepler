@@ -2,6 +2,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+npx update-browserslist-db@latest --yes
 # Go to project root
 cd ../../../
 
@@ -32,9 +33,9 @@ npm -v
 
 # Run grunt task
 npx grunt amd --files="public/local/deepler/amd/src/*.js,public/local/deepler/amd/src/local/*.js" --force
-
+npx update-browserslist-db@latest --yes
 # Optional CSS task
 # npx grunt css --files="public/local/deepler/scss/*" --force
-
+q
 # Return to previous directory
 cd
