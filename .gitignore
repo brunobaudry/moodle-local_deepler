@@ -7,6 +7,8 @@ node_modules
 .idea/*
 .env
 indentor.py
+.grunt
+.Gruntfiler.js
 *.csv
 language_expansion_ratio_matrix_iso.csv
 language_expansion_ratio_matrix_iso_updated.csv
