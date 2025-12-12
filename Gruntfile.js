@@ -40,9 +40,9 @@ module.exports = function(grunt) {
         }
     });
 
-    // Stub tasks for CI - AMD modules should be pre-built
-    grunt.registerTask("amd", function() { grunt.log.ok("AMD check passed."); });
-    grunt.registerTask("stylelint", function() { grunt.log.ok("Stylelint check passed."); });
+    // Note: Do not override Moodle's standard grunt tasks (e.g., "amd", "stylelint").
+    // Moodle Plugin CI provides these tasks. Overriding them here would prevent
+    // the CI from generating AMD build files and cause failures.
 
     // The default task (running "grunt" in the console).
     grunt.registerTask("default", ["sass:development"]);
