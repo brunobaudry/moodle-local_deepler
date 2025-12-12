@@ -30,7 +30,7 @@ fi
 # Optional: print versions for debugging
 node -v
 npm -v
-
+npm install
 # Run grunt task
 npx grunt amd --files="public/local/deepler/amd/src/*.js,public/local/deepler/amd/src/local/*.js" --force
 npx update-browserslist-db@latest --yes
