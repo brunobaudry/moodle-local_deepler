@@ -81,6 +81,14 @@ if ($hassiteconfig) {
         true
     ));
 
+    // Allow beta languages.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_deepler/allowbeta',
+        get_string('allowbeta', 'local_deepler'),
+        get_string('allowbeta_desc', 'local_deepler'),
+        false
+    ));
+
     // Minimum scanned field size.
     $settings->add(new admin_setting_configtext(
         'local_deepler/scannedfieldsize',
@@ -135,6 +143,7 @@ if ($hassiteconfig) {
                 ['target' => '_self']
             )
         ));
+
     }
     // Add the settings page to the admin menu.
     $ADMIN->add('localplugins', $settings);

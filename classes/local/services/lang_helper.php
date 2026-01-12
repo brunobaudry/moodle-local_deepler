@@ -18,7 +18,6 @@ namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 
 use context_user;
-use core\user;
 use DeepL\AppInfo;
 use DeepL\AuthorizationException;
 use DeepL\DeepLClient;
@@ -61,55 +60,6 @@ class lang_helper {
      * @var array|mixed Moodle instance's installed languages.
      */
     public mixed $moodlelangs;
-    /**
-     * Deepl usage bound to the api key.
-     *
-     * @var Usage
-     */
-    protected Usage $usage;
-    /**
-     * @var string The source language for deepl.
-     */
-    private string $deeplsourcelang;
-    /**
-     * @var string
-     */
-    private string $apikey;
-    /** @var int the db id for the API key matching the user */
-    private int $dbtokenid;
-    /**
-     * @var DeepLClient
-     */
-    private mixed $translator;
-    /**
-     * Languages available as source in Deepl's API.
-     *
-     * @var Language[]
-     */
-    private array $deeplsources;
-    /**
-     * Languages available as target in Deepl's API.
-     *
-     * @var Language[]
-     */
-    private array $deepltargets;
-    /**
-     * Type of DeepL subscrription.
-     *
-     * @var bool
-     */
-    private bool $keyisfree;
-
-    /**
-     * @var bool
-     */
-    private bool $canimprove;
-    /**
-     * @var array|string[]
-     */
-    private array $deeplrephraselangs;
-    /** @var \stdClass */
-    private stdClass $user;
 
     /**
      * Constructor.
@@ -125,15 +75,18 @@ class lang_helper {
      */
     public function __construct(
         ?DeepLClient $translator = null,
-        ?string $apikey = null,
-        ?array $moodlelangs = null,
-        ?string $currentlang = null,
-        ?string $targetlang = null
+        ?string      $apikey = null,
+        ?array       $moodlelangs = null,
+        ?string      $currentlang = null,
+        ?string      $targetlang = null
     ) {
         $this->deeplsources = [];
         $this->deepltargets = [];
         $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
         $this->canimprove = false;
+        $this->allowbeta = get_config('local_deepler', 'allowbeta') ?? false;
+        // Remove this when DeepL improves its API language list.
+        $this->setbetas();
         $this->currentlang = $currentlang ?? optional_param('lang', current_language(), PARAM_NOTAGS);
         $this->targetlang = $targetlang ?? optional_param('target_lang', '', PARAM_NOTAGS);
         if ($this->targetlang !== '') {
@@ -184,6 +137,10 @@ class lang_helper {
             $this->canimprove = !$this->keyisfree;
             $this->deeplsources = $this->translator->getSourceLanguages();
             $this->deepltargets = $this->translator->getTargetLanguages();
+            if($this->allowbeta){
+                $this->deeplsources = array_merge($this->deeplsources, $this->betalanguages);
+                $this->deepltargets = array_merge($this->deepltargets, $this->betalanguages);
+            }
             $this->setcurrentlanguage();
             return true;
         } catch (DeepLException $e) {
@@ -503,7 +460,7 @@ class lang_helper {
      * @return array
      */
     private function finddeeplsformoodle(array $deepls): array {
-        return array_filter($deepls, function ($item) {
+        return array_filter($deepls, function($item) {
             foreach (array_keys($this->moodlelangs) as $moodlecode) {
                 $moodle = strtolower(str_replace('_', '-', $moodlecode));
                 $deepl = strtolower($item->code);
@@ -716,9 +673,9 @@ class lang_helper {
             }
         }
         // Flatten DeepL's glo IDs.
-        $deeplsids = array_map(fn ($o) => $o->glossaryId, $deeplglossaries);
+        $deeplsids = array_map(fn($o) => $o->glossaryId, $deeplglossaries);
         // Delete those deleted from DeepL's UI.
-        $pluginidsotindeepl = array_filter($glossariesallids, function ($obj) use ($deeplsids) {
+        $pluginidsotindeepl = array_filter($glossariesallids, function($obj) use ($deeplsids) {
             if (!in_array($obj->glossaryid, $deeplsids)) {
                 return $obj->id;
             }
@@ -774,6 +731,15 @@ class lang_helper {
     }
 
     /**
+     * Getter for allow beta.
+     *
+     * @return mixed
+     */
+    public function get_allowbeta(): mixed {
+        return $this->allowbeta;
+    }
+
+    /**
      * Create HTML props for select.
      *
      * @param array $tab
@@ -794,4 +760,153 @@ class lang_helper {
         }
         return $list;
     }
+
+    /**
+     * Remove this when DeepL improves its API language list.
+     *
+     * @return void
+     */
+    private function setbetas() {
+        $this->betalanguages = [
+            new Language('Acehnese', 'ACE',null),
+            new Language('Afrikaans', 'AF',null),
+            new Language('Aragonese', 'AN',null),
+            new Language('Assamese', 'AS',null),
+            new Language('Aymara', 'AY',null),
+            new Language('Azerbaijani', 'AZ',null),
+            new Language('Bashkir', 'BA',null),
+            new Language('Belarusian', 'BE',null),
+            new Language('Bhojpuri', 'BHO',null),
+            new Language('Bengali', 'BN',null),
+            new Language('Breton', 'BR',null),
+            new Language('Bosnian', 'BS',null),
+            new Language('Catalan', 'CA',null),
+            new Language('Cebuano', 'CEB',null),
+            new Language('Kurdish (Sorani)', 'CKB',null),
+            new Language('Welsh', 'CY',null),
+            new Language('Esperanto', 'EO',null),
+            new Language('Basque', 'EU',null),
+            new Language('Persian', 'FA',null),
+            new Language('Irish', 'GA',null),
+            new Language('Galician', 'GL',null),
+            new Language('Guarani', 'GN',null),
+            new Language('Konkani', 'GOM',null),
+            new Language('Gujarati', 'GU',null),
+            new Language('Hausa', 'HA',null),
+            new Language('Hindi', 'HI',null),
+            new Language('Croatian', 'HR',null),
+            new Language('Haitian Creole', 'HT',null),
+            new Language('Armenian', 'HY',null),
+            new Language('Igbo', 'IG',null),
+            new Language('Icelandic', 'IS',null),
+            new Language('Javanese', 'JV',null),
+            new Language('Georgian', 'KA',null),
+            new Language('Kazakh', 'KK',null),
+            new Language('Kurdish (Kurmanji)', 'KMR',null),
+            new Language('Kyrgyz', 'KY',null),
+            new Language('Latin', 'LA',null),
+            new Language('Luxembourgish', 'LB',null),
+            new Language('Lombard', 'LMO',null),
+            new Language('Lingala', 'LN',null),
+            new Language('Maithili', 'MAI',null),
+            new Language('Malagasy', 'MG',null),
+            new Language('Maori', 'MI',null),
+            new Language('Macedonian', 'MK',null),
+            new Language('Malayalam', 'ML',null),
+            new Language('Mongolian', 'MN',null),
+            new Language('Marathi', 'MR',null),
+            new Language('Malay', 'MS',null),
+            new Language('Maltese', 'MT',null),
+            new Language('Burmese', 'MY',null),
+            new Language('Nepali', 'NE',null),
+            new Language('Occitan', 'OC',null),
+            new Language('Oromo', 'OM',null),
+            new Language('Punjabi', 'PA',null),
+            new Language('Pangasinan', 'PAG',null),
+            new Language('Kapampangan', 'PAM',null),
+            new Language('Dari', 'PRS',null),
+            new Language('Pashto', 'PS',null),
+            new Language('Quechua', 'QU',null),
+            new Language('Sanskrit', 'SA',null),
+            new Language('Sicilian', 'SCN',null),
+            new Language('Albanian', 'SQ',null),
+            new Language('Serbian', 'SR',null),
+            new Language('Sesotho', 'ST',null),
+            new Language('Sundanese', 'SU',null),
+            new Language('Swahili', 'SW',null),
+            new Language('Tamil', 'TA',null),
+            new Language('Telugu', 'TE',null),
+            new Language('Tajik', 'TG',null),
+            new Language('Turkmen', 'TK',null),
+            new Language('Tagalog', 'TL',null),
+            new Language('Tswana', 'TN',null),
+            new Language('Tsonga', 'TS',null),
+            new Language('Tatar', 'TT',null),
+            new Language('Urdu', 'UR',null),
+            new Language('Uzbek', 'UZ',null),
+            new Language('Wolof', 'WO',null),
+            new Language('Xhosa', 'XH',null),
+            new Language('Yiddish', 'YI',null),
+            new Language('Cantonese', 'YUE',null),
+            new Language('Zulu', 'ZU',null),
+        ];
+    }
+    /**
+     * Remove this when DeepL improves its API language list.
+     * @var array|string[] hardcoded list of beta languages for sources.
+     */
+    private array $betalanguages = [];
+    /**
+     * @var false|mixed|object|string|stdClass
+     */
+    private mixed $allowbeta;
+    /**
+     * Deepl usage bound to the api key.
+     *
+     * @var Usage
+     */
+    protected Usage $usage;
+    /**
+     * @var string The source language for deepl.
+     */
+    private string $deeplsourcelang;
+    /**
+     * @var string
+     */
+    private string $apikey;
+    /** @var int the db id for the API key matching the user */
+    private int $dbtokenid;
+    /**
+     * @var DeepLClient
+     */
+    private mixed $translator;
+    /**
+     * Languages available as source in Deepl's API.
+     *
+     * @var Language[]
+     */
+    private array $deeplsources;
+    /**
+     * Languages available as target in Deepl's API.
+     *
+     * @var Language[]
+     */
+    private array $deepltargets;
+    /**
+     * Type of DeepL subscrription.
+     *
+     * @var bool
+     */
+    private bool $keyisfree;
+    /**
+     * @var bool
+     */
+    private bool $canimprove;
+    /**
+     * @var array|string[]
+     */
+    private array $deeplrephraselangs;
+    /** @var \stdClass */
+    private stdClass $user;
+
 }

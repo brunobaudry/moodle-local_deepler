@@ -17,7 +17,7 @@ class Translator
     /**
      * Library version.
      */
-    public const VERSION = '1.12.0';
+    public const VERSION = '1.16.0';
 
     /**
      * Implements all HTTP requests and retries.
@@ -270,6 +270,11 @@ class Translator
             $targetLang,
             $options[TranslateDocumentOptions::FORMALITY] ?? null,
             $options[TranslateDocumentOptions::GLOSSARY] ?? null
+        );
+
+        $this->applyExtraBodyParameters(
+            $params,
+            $options[TranslateDocumentOptions::EXTRA_BODY_PARAMETERS] ?? null
         );
 
         $response = $this->client->sendRequestWithBackoff(
@@ -666,6 +671,9 @@ class Translator
         if (isset($options[TranslateTextOptions::TAG_HANDLING])) {
             $params[TranslateTextOptions::TAG_HANDLING] = $options[TranslateTextOptions::TAG_HANDLING];
         }
+        if (isset($options[TranslateTextOptions::TAG_HANDLING_VERSION])) {
+            $params[TranslateTextOptions::TAG_HANDLING_VERSION] = $options[TranslateTextOptions::TAG_HANDLING_VERSION];
+        }
         if (isset($options[TranslateTextOptions::OUTLINE_DETECTION])) {
             $params[TranslateTextOptions::OUTLINE_DETECTION] =
                 $this->toBoolString($options[TranslateTextOptions::OUTLINE_DETECTION]);
@@ -687,6 +695,36 @@ class Translator
         if (isset($options[TranslateTextOptions::IGNORE_TAGS])) {
             $params[TranslateTextOptions::IGNORE_TAGS] =
                 $this->joinTagList($options[TranslateTextOptions::IGNORE_TAGS]);
+        }
+        if (isset($options[TranslateTextOptions::STYLE_ID])) {
+            $styleRule = $options[TranslateTextOptions::STYLE_ID];
+            if (is_string($styleRule)) {
+                $params['style_id'] = $styleRule;
+            } elseif ($styleRule instanceof StyleRuleInfo) {
+                $params['style_id'] = $styleRule->styleId;
+            } else {
+                throw new DeepLException('style_id must be a string or StyleRuleInfo object');
+            }
+        }
+        if (isset($options[TranslateTextOptions::CUSTOM_INSTRUCTIONS])) {
+            $params[TranslateTextOptions::CUSTOM_INSTRUCTIONS] = $options[TranslateTextOptions::CUSTOM_INSTRUCTIONS];
+        }
+        $this->applyExtraBodyParameters(
+            $params,
+            $options[TranslateTextOptions::EXTRA_BODY_PARAMETERS] ?? null
+        );
+    }
+
+    /**
+     * Adds extra body parameters to the params array. Extra parameters can override existing keys.
+     * Values are converted to strings.
+     */
+    private function applyExtraBodyParameters(array &$params, ?array $extraParams): void
+    {
+        if ($extraParams !== null) {
+            foreach ($extraParams as $key => $value) {
+                $params[$key] = (string)$value;
+            }
         }
     }
 
