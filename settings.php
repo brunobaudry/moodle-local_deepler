@@ -143,7 +143,6 @@ if ($hassiteconfig) {
                 ['target' => '_self']
             )
         ));
-
     }
     // Add the settings page to the admin menu.
     $ADMIN->add('localplugins', $settings);

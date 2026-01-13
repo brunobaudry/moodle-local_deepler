@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['allowbeta'] = 'Allow beta languages.';
 $string['allowbeta_desc'] = 'Tick this if you want to use what DeepL calls beta languages.
- Those languages are not listed by DeepL API as "supported languages". This could lead to error using the API as it will skip 
+ Those languages are not listed by DeepL API as "supported languages". This could lead to error using the API as it will skip
  support validation.';
 $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
