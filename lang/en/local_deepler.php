@@ -26,9 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['allowbeta'] = 'Allow beta languages.';
-$string['allowbeta_desc'] = 'Tick this if you want to use what DeepL calls beta languages.
- Those languages are not listed by DeepL API as "supported languages". This could lead to error using the API as it will skip
- support validation.';
+$string['allowbeta_desc'] = 'Tick this if you want to use what DeepL used to call "beta languages" 
+(marked with a star in their [supported languages](https://developers.deepl.com/docs/getting-started/supported-languages) page). 
+Those languages are not listed as available languages by 
+[DeepL API](https://developers.deepl.com/api-reference/languages/retrieve-supported-languages).';
 $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
         'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.';

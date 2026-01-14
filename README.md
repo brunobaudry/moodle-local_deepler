@@ -175,6 +175,13 @@ Unchecking it here if your organisation rarely uses LaTeX formulas in the course
 
 Do not send &lt;pre&gt;...&lt;/pre&gt; to translation by default.
 
+##### Allow bet languages
+
+Workaround to Allow "beta languages". DeepL API https://developers.deepl.com/api-reference/languages/retrieve-supported-languages does not (yet) return the full language
+list that it supports https://developers.deepl.com/docs/getting-started/supported-languages ... Those missing languages are now added hardcoded in the plugin.
+
+![](pix/advanced_settings_betalangs.png)
+
 ##### Minimum textfield size
 
 Small text field are often limited in the database. The text content grows quite fast (plus the mlang tags) at each translation steps.
@@ -517,6 +524,7 @@ Language that are not supported by ©DeepL are checked at each session so if you
 Also if you have a Free account, you cannot select a same source and target languages.
 
 ![](pix/target_lang.png)
+
 
 ### Header
 

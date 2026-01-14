@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.8.7]
+### Added
+- Workaround to Allow "beta languages". DeepL API https://developers.deepl.com/api-reference/languages/retrieve-supported-languages does not (yet) return the full language
+  list that it supports https://developers.deepl.com/docs/getting-started/supported-languages ... Those missing languages are now added hardcoded in the plugin.
+
 ## [1.9.8.6]
 ### Fixed
 - Random question scan. throwing SQL error when allow subcategories. Now also considering the filters and removing duplicates when multiple random pointing to the same pool.
