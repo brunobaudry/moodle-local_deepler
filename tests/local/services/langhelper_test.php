@@ -185,13 +185,13 @@ final class langhelper_test extends advanced_testcase {
             'valuefilter' => 'customvalue',
         ];
         $token->id = $DB->insert_record('local_deepler_tokens', $token);
-
+        $tokens = $DB->get_records('local_deepler_tokens', null, 'id ASC');
         // Inject user and run method.
         $this->langhelper->initdeepl($user, 'v1.0');
         $reflection = new ReflectionClass($this->langhelper);
         $method = $reflection->getMethod('find_first_matching_token');
         $method->setAccessible(true);
-        $result = $method->invoke($this->langhelper, $user);
+        $result = $method->invoke($this->langhelper, $user, $tokens);
 
         $this->assertNotFalse($result);
         $this->assertEquals($token->id, $result->id);
