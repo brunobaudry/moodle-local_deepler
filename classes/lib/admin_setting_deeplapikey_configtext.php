@@ -21,7 +21,7 @@ use lang_string;
 use local_deepler\local\services\utils;
 
 /**
- * Wrapper calss to add UUID key validation.
+ * Wrapper class to add UUID key validation.
  *
  * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -43,10 +43,7 @@ class admin_setting_deeplapikey_configtext extends admin_setting_configtext {
             return true;
         }
 
-        $allowfallbackkey = get_config('local_deepler', 'allowfallbackkey');
-        if (empty($data) && $allowfallbackkey) {
-            return get_string('missingmainapikey', 'local_deepler');
-        } else if (!preg_match(utils::DEEPL_API_REGEX, $data) || trim($data) === '') {
+        if (!empty(trim($data) && !preg_match(utils::DEEPL_API_REGEX, $data))) {
             return get_string('tokenerror_invaliduuid', 'local_deepler');
         }
         return true;

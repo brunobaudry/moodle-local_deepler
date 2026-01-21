@@ -32,7 +32,8 @@ Those languages are not listed as available languages by
 [DeepL API](https://developers.deepl.com/api-reference/languages/retrieve-supported-languages).';
 $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
-        'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.';
+        'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.
+        This has no effect if the API key isn\'t set or no are additional tokens are mapped to users\' attributes.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.

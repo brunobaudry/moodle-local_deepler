@@ -54,7 +54,7 @@ if ($hassiteconfig) {
         'local_deepler/allowfallbackkey',
         get_string('allowfallbackkey', 'local_deepler'),
         get_string('allowfallbackkey_desc', 'local_deepler'),
-        true
+        false
     ));
 
     // Hide iframes setting.
@@ -123,27 +123,31 @@ if ($hassiteconfig) {
         get_string('pluginversion', 'local_deepler'),
         $plugin->release ?? 'version'
     ));
-    if (get_config('local_deepler', 'apikey')) {
-        // Token manager.
-        $settings->add(new admin_setting_description(
-            'local_deepler/tokenmanagerlink',
-            get_string('tokenmanager', 'local_deepler'),
-            html_writer::link(
-                new moodle_url('/local/deepler/tokenmanager.php'),
-                get_string('tokengototokenmanager', 'local_deepler'),
-                ['target' => '_self']
-            )
-        ));
-        $settings->add(new admin_setting_description(
-            'local_deepler/glossaryadminlink',
+    $apikeyisset = get_config('local_deepler', 'apikey');
+    $linkatr = $apikeyisset ? ['target' => '_self'] : [
+        'target' => '_self',
+        'class' => 'btn-link disabled',
+        'title' => get_string('missingmainapikey', 'local_deepler'),
+    ];
+    // Token manager.
+    $settings->add(new admin_setting_description(
+        'local_deepler/tokenmanagerlink',
+        get_string('tokenmanager', 'local_deepler'),
+        html_writer::link(
+            $apikeyisset ? new moodle_url('/local/deepler/tokenmanager.php') : "#",
+            get_string('tokengototokenmanager', 'local_deepler'),
+            $linkatr
+        )
+    ));
+    $settings->add(new admin_setting_description(
+        'local_deepler/glossaryadminlink',
+        get_string('glossary:manage:title', 'local_deepler'),
+        html_writer::link(
+            $apikeyisset ? new moodle_url('/local/deepler/glossarymanageradmin.php') : "#",
             get_string('glossary:manage:title', 'local_deepler'),
-            html_writer::link(
-                new moodle_url('/local/deepler/glossarymanageradmin.php'),
-                get_string('glossary:manage:title', 'local_deepler'),
-                ['target' => '_self']
-            )
-        ));
-    }
+            $linkatr
+        )
+    ));
     // Add the settings page to the admin menu.
     $ADMIN->add('localplugins', $settings);
 }

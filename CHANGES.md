@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.8.8]
+### Fixed
+- Fixing error when installing Moodle's via cli with the plugin.
+
 ## [1.9.8.7]
 ### Added
 - Workaround to Allow "beta languages". DeepL API https://developers.deepl.com/api-reference/languages/retrieve-supported-languages does not (yet) return the full language

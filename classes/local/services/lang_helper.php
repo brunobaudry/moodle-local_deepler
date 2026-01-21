@@ -244,14 +244,22 @@ class lang_helper {
      * If empty, it will try to get it from the .env useful for tests runs.
      *
      * @return void
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
     private function setdeeplapi(): void {
-        $tokenrecord = $this->find_first_matching_token($this->user);
+        global $DB;
+        $tokens = $DB->get_records('local_deepler_tokens', null, 'id ASC');
+
+        if (empty($tokens)) {
+            // If no token mapping then allow nothing to do, we use the main key.
+            return;
+        }
+        $tokenrecord = $this->find_first_matching_token($this->user, $tokens);
         if ($tokenrecord) {
             $this->apikey = $tokenrecord->token;
             $this->dbtokenid = $tokenrecord->id;
         } else if (!get_config('local_deepler', 'allowfallbackkey')) {
+            // If no fallback key is allowed, then we can't use the api as no token mapping found.
             $this->apikey = '';
         }
     }
@@ -261,10 +269,11 @@ class lang_helper {
      * and matching both standard and custom profile fields.
      *
      * @param \core_user|stdClass $user The Moodle user object.
+     * @param array $tokens Array of token records to search through.
      * @return stdClass|false The first matching token record, or false if none found.
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
-    private function find_first_matching_token($user) {
+    private function find_first_matching_token(\core_user|stdClass $user, array $tokens): false|stdClass {
         global $DB;
         $foundtoken = false;
         $alluserfields = array_keys(utils::all_user_fields(context_user::instance($this->user->id, MUST_EXIST)));
@@ -274,8 +283,6 @@ class lang_helper {
         foreach ($DB->get_records('user_info_field') as $field) {
             $customfields['profile_field_' . $field->shortname] = $field;
         }
-
-        $tokens = $DB->get_records('local_deepler_tokens', null, 'id ASC');
 
         foreach ($tokens as $token) {
             $attr = $token->attribute;
