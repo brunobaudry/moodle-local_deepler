@@ -29,6 +29,103 @@ use Symfony\Component\Yaml\Yaml;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class field {
+    public static function getadditionals(cm_info $cm): array {
+        global $DB;
+        $fields = [];
+        $tables = self::$additionals['mod_' . $cm->modname] ?? [];
+        if (empty($tables)) {
+            return $fields;
+        }
+        foreach ($tables as $tablename => $tabledef) {
+            if (!isset($tabledef['id'])) {
+                continue; // No FK reference — skip.
+            }
+            $configfields = $tabledef['fields'] ?? [];
+            // Auto-discover: no configured fields → use all DB text columns.
+            if (empty($configfields)) {
+                if (!$DB->get_manager()->table_exists($tablename)) {
+                    continue;
+                }
+                $rows = $DB->get_records($tablename, [$tabledef['id'] => $cm->instance]);
+                $textcols = self::filterdbtextfields($tablename);
+                foreach ($rows as $record) {
+                    foreach ($textcols as $col) {
+                        if (trim($record->{$col}) === '') {
+                            continue;
+                        }
+                        $fields[] = new self(
+                            $record->id,
+                            $record->{$col},
+                            $record->{$col . 'format'} ?? 0,
+                            $col,
+                            $tablename,
+                            $cm->id,
+                            true
+                        );
+                    }
+                }
+                continue;
+            }
+            // Configured fields path — delegate to shared method.
+            $fields = array_merge(
+                $fields,
+                self::buildfieldsfromtableconfig([$tablename => $tabledef], $cm->instance, $cm->id)
+            );
+        }
+        return $fields;
+    }
+
+    /**
+     * Build field objects from a YAML table config section.
+     *
+     * Shared logic used by both getadditionals() and qbase::getadditionalsubs().
+     *
+     * @param array  $tableconfigs    e.g. ['qtype_essay_options' => ['id' => 'questionid', 'fields' => [...]]]
+     * @param int    $fkvalue         Value to match the FK column (question id or module instance id)
+     * @param int    $cmid            Course-module id for the field constructor
+     * @param string $defaultfkcolumn FK column name when 'id' key is absent in config
+     * @return array
+     */
+    public static function buildfieldsfromtableconfig(
+        array $tableconfigs,
+        int $fkvalue,
+        int $cmid,
+        string $defaultfkcolumn = 'questionid'
+    ): array {
+        global $DB;
+        $fields = [];
+        foreach ($tableconfigs as $tablename => $tabledef) {
+            $fkcol        = $tabledef['id'] ?? $defaultfkcolumn;
+            $configfields = $tabledef['fields'] ?? [];
+            if (empty($configfields)) {
+                continue;
+            }
+            if (!$DB->get_manager()->table_exists($tablename)) {
+                continue;
+            }
+            $selectcols = implode(', ', array_merge(['id'], array_keys($configfields)));
+            $rows = $DB->get_records($tablename, [$fkcol => $fkvalue], '', $selectcols);
+            foreach ($rows as $row) {
+                foreach ($configfields as $col => $clauses) {
+                    $content = $row->{$col} ?? '';
+                    if (trim($content) === '') {
+                        continue;
+                    }
+                    // Unified exclude: string → value match; true/boolean → always skip.
+                    if (isset($clauses['exclude'])) {
+                        if ($clauses['exclude'] === true || $clauses['exclude'] === $content) {
+                            continue;
+                        }
+                    }
+                    $editable = $clauses['editable'] ?? true;
+                    $format   = $row->{"{$col}format"} ?? 0;
+                    $fields[] = new self($row->id, $content, $format, $col, $tablename, $cmid, $editable);
+                }
+            }
+        }
+        return $fields;
+    }
+
     /** @var array */
     private static array $fieldlengths = [];
 
@@ -368,12 +465,14 @@ class field {
         $mod = $cminfo->modname;
         // Get all the fields as CMINFO does not carry them all.
         $filters = [];
-        if (isset(self::$additionals['mod_' . $mod][$mod]['fields'])) {
-            $filters = self::$additionals['mod_' . $mod][$mod]['fields'];
+        $addfields = self::$additionals['mod_' . $mod][$mod]['fields'];
+        if (!empty($addfields)) {
+            $filters = $addfields;
         }
         $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);
         $infocols = self::filterdbtextfields($cminfo->modname);
         $filteredfileds = [];
+        $keys = array_keys($filters);
         foreach ($infocols as $infocol) {
             if (isset($filters[$infocol])) {
                 $filteredfileds[$infocol] = $filters[$infocol];

@@ -61,7 +61,7 @@ qtype_ddwtos:
     id: question
     fields:
       answer:
-#      feedback:
+      feedback:
   question_ddwtos:
     fields:
       correctfeedback:
@@ -200,3 +200,10 @@ mod_url:
       intro:
       externalurl:
         editable: false
+mod_quiz:
+  quiz_feedback_notexisting:
+    id: quizid
+    fields:
+#      feedbacktext:
+#        exclude: true
+#        editable: false

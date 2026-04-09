@@ -17,7 +17,6 @@
 namespace local_deepler\local\data\subs\questions;
 
 use database_manager;
-use Exception;
 use lang_string;
 use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\editable_interface;
@@ -167,70 +166,12 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
      * @throws \dml_exception
      */
     protected function getadditionalsubs(): array {
-        global $DB;
-        $qtypefields = [];
-        $yamldef = [];
-        try {
-            $yamldef = field::$additionals[$this->qtype];
-            if ($yamldef === null) {
-                return $qtypefields;
-            }
-        } catch (Exception $e) {
-            return $qtypefields;
+        $yamldef = field::$additionals[$this->qtype] ?? null;
+        if (empty($yamldef)) {
+            return [];
         }
-        foreach ($yamldef as $modnamesub => $colnames) {
-            $id = $colnames['id'] ?? 'questionid'; // Normal plugin behaviour.
-            $yamlfields = $colnames['fields'] ?? [];
-            if (empty($yamlfields)) {
-                continue;
-            }
-            $fields = implode(', ', array_merge(['id'], array_keys($yamlfields)));
-            $rows = $DB->get_records("$modnamesub", [$id => $this->question->id], '', $fields);
-            foreach ($rows as $row) {
-                foreach ($yamlfields as $col => $clauses) {
-                    $content = $row->{$col} ?? '';
-                    $editable = true;
-                    if (isset($clauses)) {
-                        if (
-                            isset($clauses['exclude']) && ($clauses['exclude'] === $content || '' === trim($content))
-                        ) {
-                            continue;
-                        }
-                        if (isset($clauses['editable']) && $clauses['editable']) {
-                            $editable = $clauses['editable'];
-                        }
-                    }
-                    $format = $row->{"{$col}format"} ?? 0;
-                    if (trim($content) !== '') {
-                        $qtypefields[] = new field(
-                            $row->id,
-                            $content,
-                            $format,
-                            $col,
-                            $modnamesub,
-                            $this->cmid,
-                            $editable
-                        );
-                    }
-                }
-            }
-        }
-        return $qtypefields;
+        return field::buildfieldsfromtableconfig($yamldef, $this->question->id, $this->cmid);
     }
 
-    /**
-     * Preparewhereclause
-     *
-     * @param array $fields
-     * @return array
-     */
-    private function preparewhereclause(array $fields): array {
-        $where = [];
-        foreach ($fields as $field => $clauses) {
-            if ($clauses['where']) {
-                $where[$field] = $clauses['where'];
-            }
-        }
-        return $where;
-    }
+
 }

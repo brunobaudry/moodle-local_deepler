@@ -161,7 +161,11 @@ class module implements editable_interface, iconic_interface, translatable_inter
      * @return array
      */
     public function getfields(): array {
-        return $this->getmainfields();
+        //return $this->getmainfields();
+        $frominfo = field::getfieldsfrominfo($this->cm);
+        $additionals = field::getadditionals($this->cm);
+        return array_merge($frominfo, $additionals);
+        //return field::getfieldsfrominfo($this->cm);
     }
 
     /**
@@ -170,7 +174,9 @@ class module implements editable_interface, iconic_interface, translatable_inter
      * @return array
      */
     public function getmainfields(): array {
-        return field::getfieldsfrominfo($this->cm);
+        $frominfo = field::getfieldsfrominfo($this->cm);
+        $additionals = field::getadditionals($this->cm);
+        return array($additionals, $frominfo);
     }
 
     /**
