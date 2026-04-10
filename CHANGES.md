@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9.2]
+### Fixed
+- issue#113
+### Added
+- Config based engine to parse additional custom activities and questions fields not in core.
+
 ## [1.9.8.8]
 ### Fixed
 - Fixing error when installing Moodle's via cli with the plugin.
