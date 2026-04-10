@@ -22,7 +22,6 @@ use local_deepler\local\services\utils;
 use moodle_exception;
 use moodle_url;
 use stdClass;
-use Symfony\Component\Yaml\Yaml;
 
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../vendor/autoload.php');
@@ -99,10 +98,18 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
     public function __construct(stdClass $course, int $lodadedsection = -99, int $loadeddmodule = -99) {
         global $CFG;
         $this->loadedsectionnum = $this->loadedsectionid = $lodadedsection;
-        // Load yaml config of known field definitions.
+        // Load json config of known field definitions.
         if (empty(field::$additionals)) {
-            $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
-            field::$additionals = Yaml::parseFile($configfile);
+            $jsonconfig = get_config('local_deepler', 'additionalconf');
+            if ($jsonconfig !== false && $jsonconfig !== '') {
+                field::$additionals = json_decode($jsonconfig, true);
+            } else {
+                // Fallback: config not yet seeded (e.g. CLI/test context before install runs).
+                field::$additionals = json_decode(
+                    file_get_contents(utils::get_plugin_root() . '/additional_conf.json'),
+                    true
+                );
+            }
         }
         $this->sections = [];
         $this->course = get_fast_modinfo($course);

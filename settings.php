@@ -24,6 +24,7 @@
  */
 
 use local_deepler\lib\admin_setting_deeplapikey_configtext;
+use local_deepler\lib\admin_setting_deepler_configjson;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -116,6 +117,17 @@ if ($hassiteconfig) {
         703,
         PARAM_INT,
         4
+    ));
+
+    // Additional field configuration (JSON).
+    $settings->add(new admin_setting_deepler_configjson(
+        'local_deepler/additionalconf',
+        get_string('additionalconf', 'local_deepler'),
+        get_string('additionalconf_desc', 'local_deepler'),
+        '',
+        PARAM_RAW,
+        '80',
+        '30'
     ));
 
     $settings->add(new admin_setting_description(

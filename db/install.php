@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Local Course Translator.
+ * Post-install hook for local_deepler.
+ *
+ * Seeds the additionalconf setting from the bundled JSON file so that the
+ * value is stored in config_plugins on fresh installs, making it immediately
+ * editable through the admin UI.
  *
  * @package    local_deepler
- * @copyright  2022 Kaleb Heitzman <kaleb@jamfire.io>
- * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
+ * @copyright  2026 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @see        https://docs.moodle.org/dev/version.php
  */
 
-defined('MOODLE_INTERNAL') || die();
-if (!isset($plugin)) {
-    $plugin = new stdClass();
+/**
+ * Post-install hook.
+ *
+ * @return void
+ */
+function xmldb_local_deepler_install(): void {
+    $jsonfile = __DIR__ . '/../additional_conf.json';
+    if (file_exists($jsonfile)) {
+        set_config('additionalconf', file_get_contents($jsonfile), 'local_deepler');
+    }
 }
-$plugin->component = 'local_deepler'; // Full name of the plugin (used for diagnostics).
-$plugin->settings = true;
-$plugin->version = 2026041002; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires = 2023042400; // Requires Moodle 4.2.2.
-$plugin->supported = [402, 501]; // Supported Moodle Versions.
-$plugin->maturity = MATURITY_BETA; // Maturity level.
-$plugin->release = 'v1.9.9.1'; // Semantic Versioning for CHANGES.md.
-// Dependencies.
-$plugin->dependencies = ['filter_multilang2' => 2020101300];

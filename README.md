@@ -43,6 +43,11 @@ Translation workflow being the following:
       - [Default value Escape PRE (in the courses translation page "Advanced Settings")](#default-value-escape-pre-in-the-courses-translation-page-advanced-settings)
       - [Minimum textfield size](#minimum-textfield-size)
       - [Max length of breadcrumb's sub](#max-length-of-breadcrumbs-sub)
+    + [Additional field configuration (JSON)](#additional-field-configuration-json)
+      - [Purpose](#purpose)
+      - [JSON schema reference](#json-schema-reference)
+      - [Field-level properties](#field-level-properties)
+      - [Validation and warnings](#validation-and-warnings)
     + [Additional admin pages for Token management and Glossaries.](#additional-admin-pages-for-token-management-and-glossaries)
   * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
 - [Glossaries' management (NEW since v1.9)](#glossaries-management-new-since-v19)
@@ -196,7 +201,125 @@ Set to zero if you'd prefer no limiting.
 
 ![](pix/admin.png)
 
-#### Additional admin pages for Token management and Glossaries. 
+#### Additional field configuration (JSON)
+
+##### Purpose
+
+Out of the box, DeepLer auto-discovers the text fields of every standard Moodle activity and question type.
+However, **custom plugins, third-party question types, or activities with unusual DB structures** may have additional text fields that the auto-discovery mechanism cannot find, or fields that should be shown as read-only, or fields whose values should never be translated at all.
+
+The **Additional field configuration** admin setting lets a Moodle administrator describe those extra fields **without touching the server filesystem**.
+Navigate to **Site Administration → Plugins → Local plugins → DeepL Translator** and scroll to the *Additional field configuration (JSON)* textarea.
+
+Changes take effect for **all users** immediately after saving. Leave the textarea empty to fall back to the bundled `additional_conf.json` defaults.
+
+---
+
+##### JSON schema reference
+
+The configuration is a flat JSON object. Each top-level key is a **plugin component name** (e.g. `mod_url`, `qtype_essay`, `mod_customactivity`). Its value is an object whose keys are **database table names** (without the `mdl_` prefix) and whose values are **table definitions**.
+
+```json
+{
+  "<plugin_component>": {
+    "<table_name>": {
+      "id":     "<fk_column>",
+      "fields": {
+        "<field_name>": null,
+        "<field_name>": { "editable": false },
+        "<field_name>": { "exclude": "<value_to_skip>" }
+      }
+    }
+  }
+}
+```
+
+| Key | Required | Default | Description |
+|-----|----------|---------|-------------|
+| `id` | No | `id` | Name of the foreign-key column that links rows in this table back to the activity/question instance. Use `"questionid"` for question sub-tables, or a custom column name for non-standard plugins. |
+| `fields` | No | _(auto-discover)_ | Object of field names to expose. Omitting `fields` (or supplying an empty object `{}`) means the plugin will auto-discover all text columns in the table. |
+
+**Minimal example — expose two fields of a custom URL-based activity:**
+
+```json
+{
+  "mod_myactivity": {
+    "myactivity": {
+      "fields": {
+        "name":  null,
+        "intro": null
+      }
+    }
+  }
+}
+```
+
+**Multi-table example — question type with a separate answers table and a non-standard FK:**
+
+```json
+{
+  "qtype_myquestion": {
+    "qtype_myquestion_options": {
+      "id": "questionid",
+      "fields": {
+        "correctfeedback":   null,
+        "incorrectfeedback": null
+      }
+    },
+    "qtype_myquestion_answers": {
+      "id": "questionid",
+      "fields": {
+        "answertext": null,
+        "feedback":   null
+      }
+    }
+  }
+}
+```
+
+---
+
+##### Field-level properties
+
+Each entry inside `fields` is either `null` (plain field, fully translatable) or an object with one or both of the following optional properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `editable` | `false` | Display the field content in the translation UI but **prevent editing or translating it**. Useful for read-only reference fields (e.g. an external URL that must not be machine-translated). |
+| `exclude` | string or `true` | Skip rows where this field matches the given value. Use `"*"` to always skip the field regardless of its content (equivalent to `true`). Use a specific string to skip only rows whose content equals that string exactly. |
+
+**Examples:**
+
+```json
+"fields": {
+  "externalurl": { "editable": false },
+  "answer":      { "exclude": "*" },
+  "feedback":    null
+}
+```
+
+- `externalurl` will be shown in the translation table but cannot be translated.
+- `answer` rows are never shown (all values are excluded).
+- `feedback` is shown and fully translatable.
+
+---
+
+##### Validation and warnings
+
+When an admin saves the configuration, the plugin performs a **two-pass validation**:
+
+1. **JSON syntax** — uses PHP's native `json_decode`. Any syntax error (missing comma, unquoted key, trailing comma, etc.) blocks saving and displays the exact parse-error message.
+
+2. **Structural and database schema check** — the decoded object is validated against the expected shape and cross-checked live against the Moodle database:
+   - **Plugin not installed**: a yellow warning is shown (the entry is still saved — it becomes active once the plugin is installed).
+   - **Table not found in DB**: a yellow warning is shown (useful during development or when a plugin update renames tables).
+   - **Unknown table-level keys** (anything other than `id` and `fields`): yellow warning.
+   - **Unknown field attributes** (anything other than `editable` and `exclude`): yellow warning.
+   - **Field not found in DB table**: yellow warning (the field is still saved and will be silently skipped at runtime).
+
+Errors (wrong JSON types for `fields`, `id`, or the root object) **block saving** and must be fixed before the configuration is accepted. Warnings are informational only and do not prevent saving.
+
+#### Additional admin pages for Token management and Glossaries.
 
 ### Token manager (mapping user to DeepL's API keys)
 

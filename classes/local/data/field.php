@@ -19,7 +19,6 @@ namespace local_deepler\local\data;
 use cm_info;
 use coding_exception;
 use local_deepler\local\services\utils;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class filed
@@ -29,6 +28,14 @@ use Symfony\Component\Yaml\Yaml;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class field {
+    /**
+     *
+     *
+     * @param \cm_info $cm
+     * @return array
+     * @throws \ddl_exception
+     * @throws \dml_exception
+     */
     public static function getadditionals(cm_info $cm): array {
         global $DB;
         $fields = [];
@@ -37,16 +44,15 @@ class field {
             return $fields;
         }
         foreach ($tables as $tablename => $tabledef) {
-            if (!isset($tabledef['id'])) {
-                continue; // No FK reference — skip.
-            }
+            $tabledefid = $tabledef['id'] ?? 'id';
+
             $configfields = $tabledef['fields'] ?? [];
             // Auto-discover: no configured fields → use all DB text columns.
             if (empty($configfields)) {
                 if (!$DB->get_manager()->table_exists($tablename)) {
                     continue;
                 }
-                $rows = $DB->get_records($tablename, [$tabledef['id'] => $cm->instance]);
+                $rows = $DB->get_records($tablename, [$tabledefid => $cm->instance]);
                 $textcols = self::filterdbtextfields($tablename);
                 foreach ($rows as $record) {
                     foreach ($textcols as $col) {
@@ -69,7 +75,7 @@ class field {
             // Configured fields path — delegate to shared method.
             $fields = array_merge(
                 $fields,
-                self::buildfieldsfromtableconfig([$tablename => $tabledef], $cm->instance, $cm->id)
+                self::buildfieldsfromtableconfig([$tablename => $tabledef], $cm->instance, $cm->id, $tabledefid)
             );
         }
         return $fields;
@@ -151,7 +157,7 @@ class field {
      */
     public static array $filteredtablefields = [];
     /**
-     * @var mixed yaml additional db field config.
+     * @var mixed json additional db field config.
      */
     public static mixed $additionals;
     /** @var string */
@@ -198,8 +204,16 @@ class field {
         bool $editable = true,
     ) {
         if (empty(self::$additionals)) {
-            $configfile = utils::get_plugin_root() . '/additional_conf.yaml';
-            self::$additionals = Yaml::parseFile($configfile);
+            $jsonconfig = get_config('local_deepler', 'additionalconf');
+            if ($jsonconfig !== false && $jsonconfig !== '') {
+                self::$additionals = json_decode($jsonconfig, true);
+            } else {
+                // Fallback: config not yet seeded (e.g. CLI/test context before install runs).
+                self::$additionals = json_decode(
+                    file_get_contents(utils::get_plugin_root() . '/additional_conf.json'),
+                    true
+                );
+            }
         }
         $this->id = $id;
         $this->editable = $editable;

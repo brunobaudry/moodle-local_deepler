@@ -172,6 +172,4 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
         }
         return field::buildfieldsfromtableconfig($yamldef, $this->question->id, $this->cmid);
     }
-
-
 }

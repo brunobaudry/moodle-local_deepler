@@ -86,6 +86,7 @@ final class settings_test extends \advanced_testcase {
             'scannedfieldsize',
                 'breadcrumblength',
                 'cookieduration',
+                'additionalconf',
         ];
         $settingdeepler = get_config('local_deepler');
         $this->assertIsObject($settingdeepler);

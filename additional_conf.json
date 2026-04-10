@@ -1,0 +1,308 @@
+{
+  "qtype_calculated": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "question_calculated_options": {
+      "id": "question",
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_calculatedmulti": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "question_calculated_options": {
+      "id": "question",
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_calculatedsimple": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "question_calculated_options": {
+      "id": "question",
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_ddimageortext": {
+    "qtype_ddimageortext": {
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    },
+    "qtype_ddimageortext_drags": {
+      "fields": {
+        "label": null
+      }
+    }
+  },
+  "qtype_ddmarker": {
+    "qtype_ddmarker": {
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    },
+    "qtype_ddmarker_drags": {
+      "fields": {
+        "label": null
+      }
+    },
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    }
+  },
+  "qtype_ddwtos": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "question_ddwtos": {
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_essay": {
+    "qtype_essay_options": {
+      "fields": {
+        "graderinfo": null,
+        "responsetemplate": null
+      }
+    }
+  },
+  "qtype_formulas": {
+    "qtype_formulas_answers": {
+      "fields": {
+        "answer": null,
+        "partcorrectfb": null,
+        "partincorrectfb": null,
+        "partpartiallycorrectfb": null,
+        "subqtext": null
+      }
+    },
+    "qtype_formulas_options": {
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_fileresponse": {
+    "qtype_fileresponse_options": {
+      "fields": {
+        "graderinfo": null
+      }
+    }
+  },
+  "qtype_gapselect": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "question_gapselect": {
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_kprime": {
+    "qtype_kprime_columns": {
+      "fields": {
+        "responsetext": null
+      }
+    },
+    "qtype_kprime_rows": {
+      "fields": {
+        "optionfeedback": null,
+        "optiontext": null
+      }
+    }
+  },
+  "qtype_match": {
+    "qtype_match_options": {
+      "id": "questionid",
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    },
+    "qtype_match_subquestions": {
+      "fields": {
+        "answertext": null,
+        "questiontext": null
+      }
+    },
+    "question_calculated_options": {
+      "id": "question",
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null,
+        "partiallycorrectfeedback": null
+      }
+    }
+  },
+  "qtype_mtf": {
+    "qtype_mtf_columns": {
+      "fields": {
+        "responsetext": null
+      }
+    },
+    "qtype_mtf_rows": {
+      "fields": {
+        "optionfeedback": null,
+        "optiontext": null
+      }
+    }
+  },
+  "qtype_multichoice": {
+    "qtype_multichoice_options": {
+      "fields": {
+        "correctfeedback": null,
+        "partiallycorrectfeedback": null,
+        "incorrectfeedback": null
+      }
+    },
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    }
+  },
+  "qtype_multichoiceset": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "qtype_multichoiceset_options": {
+      "fields": {
+        "correctfeedback": null,
+        "incorrectfeedback": null
+      }
+    }
+  },
+  "qtype_numerical": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "feedback": null
+      }
+    }
+  },
+  "qtype_ordering": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    },
+    "qtype_ordering_options": {
+      "fields": {
+        "correctfeedback": null,
+        "partiallycorrectfeedback": null,
+        "incorrectfeedback": null
+      }
+    }
+  },
+  "qtype_pmatch": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": { "exclude": "*" },
+        "feedback": null
+      }
+    }
+  },
+  "qtype_randomsamatch": {
+    "qtype_randomsamatch_options": {
+      "fields": {
+        "correctfeedback": null,
+        "partiallycorrectfeedback": null,
+        "incorrectfeedback": null
+      }
+    }
+  },
+  "qtype_shortanswer": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "answer": null,
+        "feedback": null
+      }
+    }
+  },
+  "qtype_truefalse": {
+    "question_answers": {
+      "id": "question",
+      "fields": {
+        "feedback": null
+      }
+    }
+  },
+  "mod_url": {
+    "url": {
+      "fields": {
+        "name": null,
+        "intro": null,
+        "externalurl": { "editable": false }
+      }
+    }
+  },
+  "mod_quiz": {
+    "quiz_feedback": {
+      "id": "quizid",
+      "fields": {}
+    }
+  }
+}

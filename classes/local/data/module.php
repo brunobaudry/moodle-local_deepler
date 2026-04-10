@@ -32,22 +32,6 @@ use moodle_url;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class module implements editable_interface, iconic_interface, translatable_interface, visibility_interface {
-    /** @var \cm_info */
-    private cm_info $cm;
-
-    /** @var string */
-    private string $modname;
-    /** @var \moodle_url */
-    private moodle_url $link;
-    /** @var string|moodle_url */
-    private string|moodle_url $iconurl;
-    /** @var string|lang_string */
-    private string|lang_string $pluginname;
-    /** @var string */
-    private string $purpose;
-    /** @var array */
-    private array $childs;
-
     /**
      * Constructor
      *
@@ -158,25 +142,27 @@ class module implements editable_interface, iconic_interface, translatable_inter
     /**
      * Get the fields of the module.
      *
-     * @return array
-     */
-    public function getfields(): array {
-        //return $this->getmainfields();
-        $frominfo = field::getfieldsfrominfo($this->cm);
-        $additionals = field::getadditionals($this->cm);
-        return array_merge($frominfo, $additionals);
-        //return field::getfieldsfrominfo($this->cm);
-    }
-
-    /**
-     * Get the main translatable fields of the module.
+     * Additionals take precedence: if a YAML definition covers a field already
+     * auto-discovered by getfieldsfrominfo (same table + column), the additionals
+     * version is kept and the auto-discovered one is dropped.
      *
      * @return array
      */
-    public function getmainfields(): array {
+    public function getfields(): array {
         $frominfo = field::getfieldsfrominfo($this->cm);
         $additionals = field::getadditionals($this->cm);
-        return array($additionals, $frominfo);
+
+        // Index additionals by table.column so duplicates can be detected.
+        $overridden = [];
+        foreach ($additionals as $f) {
+            $overridden[$f->get_table() . '.' . $f->get_tablefield()] = true;
+        }
+
+        // Keep only frominfo fields that are not redefined in additionals.
+        $base = array_values(array_filter($frominfo, function ($f) use ($overridden) {
+            return !isset($overridden[$f->get_table() . '.' . $f->get_tablefield()]);
+        }));
+        return array_merge($base, $additionals);
     }
 
     /**
@@ -214,4 +200,18 @@ class module implements editable_interface, iconic_interface, translatable_inter
     public function getpluginname(): string {
         return $this->pluginname;
     }
+    /** @var \cm_info */
+    private cm_info $cm;
+    /** @var string */
+    private string $modname;
+    /** @var \moodle_url */
+    private moodle_url $link;
+    /** @var string|moodle_url */
+    private string|moodle_url $iconurl;
+    /** @var string|lang_string */
+    private string|lang_string $pluginname;
+    /** @var string */
+    private string $purpose;
+    /** @var array */
+    private array $childs;
 }

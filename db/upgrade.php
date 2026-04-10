@@ -30,9 +30,15 @@
  *
  * @param integer $oldversion
  * @return boolean
+ * @throws \ddl_change_structure_exception
  * @throws \ddl_exception
+ * @throws \ddl_table_missing_exception
+ * @throws \dml_exception
+ * @throws \downgrade_exception
+ * @throws \moodle_exception
+ * @throws \upgrade_exception
  */
-function xmldb_local_deepler_upgrade($oldversion) {
+function xmldb_local_deepler_upgrade($oldversion): bool {
     global $DB;
     $dbman = $DB->get_manager();
 
@@ -154,5 +160,60 @@ function xmldb_local_deepler_upgrade($oldversion) {
         // Upgrade savepoint.
         upgrade_plugin_savepoint(true, 2025080800, 'local', 'deepler');
     }
+
+    if ($oldversion < 2026041001) {
+        // Seed additionalconf from the bundled YAML file for existing deployments upgrading.
+        // Fresh installs use db/install.php instead. The check for false ensures we do not
+        // overwrite a value an admin has already saved via the UI.
+        if (get_config('local_deepler', 'additionalconf') === false) {
+            $yamlfile = __DIR__ . '/../additional_conf.yaml';
+            if (file_exists($yamlfile)) {
+                set_config('additionalconf', file_get_contents($yamlfile), 'local_deepler');
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026041001, 'local', 'deepler');
+    }
+
+    if ($oldversion < 2026041002) {
+        // Migrate additionalconf from YAML format (v2026041001) to JSON format.
+        // Three cases.
+        // A) No stored config at all → seed from new bundled JSON file.
+        // B) Stored config is YAML → parse and re-encode as JSON.
+        // C) Stored config is already valid JSON → leave untouched (idempotent).
+        $stored = get_config('local_deepler', 'additionalconf');
+
+        if ($stored === false || $stored === '') {
+            // Case a: no config — seed from bundled JSON.
+            $jsonfile = __DIR__ . '/../additional_conf.json';
+            if (file_exists($jsonfile)) {
+                set_config('additionalconf', file_get_contents($jsonfile), 'local_deepler');
+            }
+        } else {
+            // Detect whether the stored value is JSON or YAML by attempting JSON decode first.
+            $decoded = json_decode($stored, true);
+            if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+                // Case b: not valid JSON → assume it is YAML from previous version, convert it.
+                require_once(__DIR__ . '/../classes/vendor/autoload.php');
+                try {
+                    $parsed = \Symfony\Component\Yaml\Yaml::parse($stored);
+                    set_config(
+                        'additionalconf',
+                        json_encode($parsed, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                        'local_deepler'
+                    );
+                } catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
+                    // Stored YAML was broken — overwrite with fresh JSON default.
+                    $jsonfile = __DIR__ . '/../additional_conf.json';
+                    if (file_exists($jsonfile)) {
+                        set_config('additionalconf', file_get_contents($jsonfile), 'local_deepler');
+                    }
+                }
+            }
+            // Case c: already valid JSON — nothing to do.
+        }
+
+        upgrade_plugin_savepoint(true, 2026041002, 'local', 'deepler');
+    }
+
     return true;
 }

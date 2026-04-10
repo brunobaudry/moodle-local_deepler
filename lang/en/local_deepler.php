@@ -25,6 +25,21 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+$string['additionalconf'] = 'Additional field configuration (JSON)';
+$string['additionalconf_desc'] = 'Define extra database tables and fields available for translation, in JSON format.
+Changes take effect immediately for all users without server filesystem access.
+Leave empty to fall back to the bundled <code>additional_conf.json</code> file.';
+$string['additionalconf_err_plugnotfound'] = 'Plugin not found : "{$a}"';
+$string['additionalconf_err_tablenotfound'] = '{$a->plugin}:: Table not found : "{$a->name}"';
+$string['additionalconf_parseerror'] = 'Invalid JSON syntax line {$a->line} : {$a->message}';
+$string['additionalconf_schema_fields'] = 'Invalid structure: "fields" in table "{$a}" must be an object.';
+$string['additionalconf_schema_plugin'] = 'Invalid structure: "{$a}" must map to an object of table definitions.';
+$string['additionalconf_schema_root'] = 'Invalid structure: the top-level value must be a JSON object.';
+$string['additionalconf_schema_table'] = 'Invalid structure: table "{$a}" must be an object.';
+$string['additionalconf_warning'] = '<u>{$a} yielded some issues:</u>';
+$string['additionalconf_warning_unknown_field_table'] = '{$a->plugin}:: {$a->fields} do not exists in table definition <strong>{$a->name}</strong>';
+$string['additionalconf_warning_unknown_table_atributes'] = '{$a->plugin}:: There should only be <strong>{$a->fields}</strong> under the field definition <strong>{$a->name}</strong>, you gave : <em>{$a->unknown}</em>';
+$string['additionalconf_warning_unknown_table_keys'] = '{$a->plugin}:: There should only be <strong>{$a->fields}</strong> under the table definition <strong>{$a->name}</strong>, you gave : <em>{$a->unknown}</em>';
 $string['allowbeta'] = 'Allow beta languages.';
 $string['allowbeta_desc'] = 'Tick this if you want to use what DeepL used to call "beta languages"
 (marked with a star in their [supported languages](https://developers.deepl.com/docs/getting-started/supported-languages) page).
