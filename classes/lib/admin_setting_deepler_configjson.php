@@ -84,6 +84,22 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
                 return get_string('additionalconf_schema_plugin', 'local_deepler', $pluginkey);
             }
 
+            foreach ($tables as $tablename => $tabledef) {
+                if (!is_array($tabledef)) {
+                    return get_string('additionalconf_schema_table', 'local_deepler', $tablename);
+                }
+
+                if (isset($tabledef['id']) && !is_string($tabledef['id'])) {
+                    return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
+                }
+
+                if (isset($tabledef['fields'])) {
+                    if (!is_array($tabledef['fields'])) {
+                        return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
+                    }
+                }
+            }
+
             $pluginman = core_plugin_manager::instance();
             $info = $pluginman->get_plugin_info($pluginkey);
 
@@ -94,10 +110,6 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
             }
 
             foreach ($tables as $tablename => $tabledef) {
-                if (!is_array($tabledef)) {
-                    return get_string('additionalconf_schema_table', 'local_deepler', $tablename);
-                }
-
                 $table = new xmldb_table($tablename);
 
                 if (!$dbman->table_exists($table)) {
@@ -120,44 +132,37 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
                     ]);
                 }
 
-                if (isset($tabledef['id']) && !is_string($tabledef['id'])) {
-                    return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
-                }
                 if (isset($tabledef['fields'])) {
-                    if (!is_array($tabledef['fields'])) {
-                        return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
-                    } else {
-                        $fields = $tabledef['fields'];
-                        $unknownfileds = [];
-                        foreach ($fields as $fieldname => $fielddef) {
-                            $allowedattributes = ['exclude', 'editable'];
-                            if (!$dbman->field_exists($tablename, $fieldname)) {
-                                $unknownfileds[] = $fieldname;
-                            } else {
-                                if (is_array($fielddef)) {
-                                    $unknownattibutes = array_diff(array_keys($fielddef), $allowedattributes);
-                                    if (!empty($unknownattibutes)) {
-                                        $warnings[] = get_string(
-                                            'additionalconf_warning_unknown_table_atributes',
-                                            'local_deepler',
-                                            [
-                                                'name' => $tablename,
-                                                'plugin' => $pluginkey,
-                                                'fields' => implode(', ', $allowedattributes),
-                                                'unknown' => implode(', ', $unknownattibutes),
-                                            ]
-                                        );
-                                    }
+                    $fields = $tabledef['fields'];
+                    $unknownfileds = [];
+                    foreach ($fields as $fieldname => $fielddef) {
+                        $allowedattributes = ['exclude', 'editable'];
+                        if (!$dbman->field_exists($tablename, $fieldname)) {
+                            $unknownfileds[] = $fieldname;
+                        } else {
+                            if (is_array($fielddef)) {
+                                $unknownattibutes = array_diff(array_keys($fielddef), $allowedattributes);
+                                if (!empty($unknownattibutes)) {
+                                    $warnings[] = get_string(
+                                        'additionalconf_warning_unknown_table_atributes',
+                                        'local_deepler',
+                                        [
+                                            'name' => $tablename,
+                                            'plugin' => $pluginkey,
+                                            'fields' => implode(', ', $allowedattributes),
+                                            'unknown' => implode(', ', $unknownattibutes),
+                                        ]
+                                    );
                                 }
                             }
                         }
-                        if (!empty($unknownfileds)) {
-                            $warnings[] = get_string('additionalconf_warning_unknown_field_table', 'local_deepler', [
-                                'name' => $tablename,
-                                'plugin' => $pluginkey,
-                                'fields' => implode(', ', $unknownfileds),
-                            ]);
-                        }
+                    }
+                    if (!empty($unknownfileds)) {
+                        $warnings[] = get_string('additionalconf_warning_unknown_field_table', 'local_deepler', [
+                            'name' => $tablename,
+                            'plugin' => $pluginkey,
+                            'fields' => implode(', ', $unknownfileds),
+                        ]);
                     }
                 }
             }

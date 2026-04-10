@@ -79,7 +79,7 @@ final class admin_setting_deepler_configjson_test extends advanced_testcase {
      * @return void
      */
     public function test_validate_simple_valid_json(): void {
-        $json = json_encode(['key' => 'value', 'another_key' => 'another_value']);
+        $json = json_encode(['local_deepler' => []]);
         $this->assertTrue($this->setting->validate($json));
     }
 
