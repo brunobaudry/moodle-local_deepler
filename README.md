@@ -49,7 +49,7 @@ Translation workflow being the following:
       - [Field-level properties](#field-level-properties)
       - [Validation and warnings](#validation-and-warnings)
     + [Additional admin pages for Token management and Glossaries.](#additional-admin-pages-for-token-management-and-glossaries)
-  * [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
+- [Token manager (mapping user to DeepL's API keys)](#token-manager-mapping-user-to-deepls-api-keys)
 - [Glossaries' management (NEW since v1.9)](#glossaries-management-new-since-v19)
   * [Overview](#overview)
   * [File formats to upload.](#file-formats-to-upload)
@@ -161,40 +161,40 @@ you are using ©DeepL API Free or ©DeepL API Pro. Visit
 the [©DeepL API page](https://developers.deepl.com/docs/getting-started/readme) to
 signup for an api key that you can enter into local plugin settings.
 
-##### API Key for DeepL Translate - Allow Fallback key.
+#### API Key for DeepL Translate - Allow Fallback key.
 
 The main API key now can be used for all users if you do tick **Allow fallback key**
 
 If you untick *Allow fallback key* than a user must have an attribute mapped to a token in the **Token manager**
 
-##### Tell the browser not to render embed iframes by default.
+#### Tell the browser not to render embed iframes by default.
 Sometimes iframes can overlap the user interface toggle this to show/hide all iframes in the source text display.
 
-##### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
+#### Default value Escape LaTeX (in the courses translation page "Advanced Settings")
 
 Set to true will check "escape LaTeX formulas", in the course translation form. This will have the effect to enable by default the Non translation of LaTeX formulas in course (when
 set here to true).
 Unchecking it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve Deepler's performances,
 
-##### Default value Escape PRE (in the courses translation page "Advanced Settings")
+#### Default value Escape PRE (in the courses translation page "Advanced Settings")
 
 Do not send &lt;pre&gt;...&lt;/pre&gt; to translation by default.
 
-##### Allow bet languages
+#### Allow beta languages
 
 Workaround to Allow "beta languages". DeepL API https://developers.deepl.com/api-reference/languages/retrieve-supported-languages does not (yet) return the full language
 list that it supports https://developers.deepl.com/docs/getting-started/supported-languages ... Those missing languages are now added hardcoded in the plugin.
 
 ![](pix/advanced_settings_betalangs.png)
 
-##### Minimum textfield size
+#### Minimum textfield size
 
 Small text field are often limited in the database. The text content grows quite fast (plus the mlang tags) at each translation steps.
 After translation, if the text is too big, the DB will through an error.
 
 Size this here based on your main language properties and the number on languages your Moodle supports.
 
-##### Max length of breadcrumb's sub
+#### Max length of breadcrumb's sub
 
 The plugin adds a little breadcrumb when you scroll down the translation page. As some titles can be lengthy you can set a max length for each breadcrumb sub.
 Set to zero if you'd prefer no limiting.
@@ -321,9 +321,9 @@ When an admin saves the configuration, the plugin performs a **two-pass validati
 
 Errors (wrong JSON types for `fields`, `id`, or the root object) **block saving** and must be fixed before the configuration is accepted. Warnings are informational only and do not prevent saving.
 
-#### Additional admin pages for Token management and Glossaries.
-
-### Token manager (mapping user to DeepL's API keys)
+### Additional admin pages for Token management and Glossaries.
+    links see below
+## Token manager (mapping user to DeepL's API keys)
 
 DeepL API allows you to generate several API keys mainly for cost control and reporting.
 
