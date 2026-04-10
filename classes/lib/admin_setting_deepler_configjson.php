@@ -74,12 +74,16 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
      */
     private function validateschema(mixed $config): true|string {
         $warnings = [];
-        if (!is_array($config)) {
+        if (!is_array($config) || (count($config) > 0 && array_is_list($config))) {
             return get_string('additionalconf_schema_root', 'local_deepler');
         }
         global $DB;
         $dbman = $DB->get_manager();
         foreach ($config as $pluginkey => $tables) {
+            if (!is_array($tables)) {
+                return get_string('additionalconf_schema_plugin', 'local_deepler', $pluginkey);
+            }
+
             $pluginman = core_plugin_manager::instance();
             $info = $pluginman->get_plugin_info($pluginkey);
 
@@ -89,10 +93,11 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
                 continue;
             }
 
-            if (!is_array($tables)) {
-                return get_string('additionalconf_schema_plugin', 'local_deepler', $pluginkey);
-            }
             foreach ($tables as $tablename => $tabledef) {
+                if (!is_array($tabledef)) {
+                    return get_string('additionalconf_schema_table', 'local_deepler', $tablename);
+                }
+
                 $table = new xmldb_table($tablename);
 
                 if (!$dbman->table_exists($table)) {
@@ -101,10 +106,6 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
                         'plugin' => $pluginkey,
                     ]);
                     continue;
-                }
-
-                if (!is_array($tabledef)) {
-                    return get_string('additionalconf_schema_table', 'local_deepler', $tablename);
                 }
                 $allowedkeys = ['id', 'fields'];
 
