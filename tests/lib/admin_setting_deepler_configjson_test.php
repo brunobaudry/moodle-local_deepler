@@ -129,7 +129,10 @@ final class admin_setting_deepler_configjson_test extends advanced_testcase {
         $result = $this->setting->validate($brokenjson);
         $this->assertNotTrue($result);
         $this->assertIsString($result);
-        $this->assertStringContainsString(get_string('additionalconf_parseerror', 'local_deepler'), $result);
+        $this->assertMatchesRegularExpression(
+            '/Invalid JSON syntax line \d+ : .+/',
+            $result
+        );
     }
 
     /**

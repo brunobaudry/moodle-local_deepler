@@ -213,6 +213,8 @@ Navigate to **Site Administration → Plugins → Local plugins → DeepL Transl
 
 Changes take effect for **all users** immediately after saving. Leave the textarea empty to fall back to the bundled `additional_conf.json` defaults.
 
+** Note :** it will only work with activity or questions components indeed.
+
 ---
 
 ##### JSON schema reference

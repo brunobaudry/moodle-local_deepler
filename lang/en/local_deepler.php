@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['additionalconf'] = 'Additional field configuration (JSON)';
 $string['additionalconf_desc'] = 'Define extra database tables and fields available for translation, in JSON format.
 Changes take effect immediately for all users without server filesystem access.
-Leave empty to fall back to the bundled <code>additional_conf.json</code> file.';
+Leave empty to fall back to the bundled <code>additional_conf.json</code> file. See detailed documentation under <a href="https://github.com/brunobaudry/moodle-local_deepler/tree/dev?tab=readme-ov-file#additional-field-configuration-json">Additional field configuration (JSON)</a>';
 $string['additionalconf_err_plugnotfound'] = 'Plugin not found : "{$a}"';
 $string['additionalconf_err_tablenotfound'] = '{$a->plugin}:: Table not found : "{$a->name}"';
 $string['additionalconf_parseerror'] = 'Invalid JSON syntax line {$a->line} : {$a->message}';
