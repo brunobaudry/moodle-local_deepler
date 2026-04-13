@@ -1,15 +1,29 @@
 #!/bin/bash
 
-# Detect BEHAT binary
-if [[ -f "../../vendor/bin/behat" ]]; then
-    behat_bin="../../vendor/bin/behat"
-    moodle_root="../../"
+# Detect if running inside a container (ddev web container sets DDEV_SITENAME)
+if [[ -n "$DDEV_SITENAME" || -f "/.dockerenv" ]]; then
+    php_bin="php"
 else
-    behat_bin="../../../vendor/bin/behat"
-    moodle_root="../../../"
+    php_bin="ddev exec php"
 fi
 
-init_behat="${moodle_root}admin/tool/behat/cli/init.php"
+# Detect BEHAT binary and paths
+# moodle_root  = composer root (where vendor/ lives)
+# moodle_public = web root (where admin/ and lib/ live)
+if [[ -f "../../vendor/bin/behat" ]]; then
+    # Plugin is directly under moodle root (moodle_root/local/deepler)
+    behat_bin="../../vendor/bin/behat"
+    moodle_root="../../"
+    moodle_public="../../"
+else
+    # Plugin is under a public subdir (moodle_root/public/local/deepler)
+    behat_bin="../../../vendor/bin/behat"
+    moodle_root="../../../"
+    moodle_public="../../"
+fi
+
+behat_config="${moodle_root}../behat_moodle/behatrun/behat/behat.yml"
+init_behat="${moodle_public}admin/tool/behat/cli/init.php"
 
 # Function to display help
 show_help() {
@@ -50,27 +64,35 @@ for arg in "$@"; do
     esac
 done
 
-
 # Define the Behat command
 if [ -z "$tag" ]; then
-  behat_cmd="$behat_bin --config $moodle_root../behat_moodle/behatrun/behat/behat.yml -vvv --tags=@local_deepler"
+    behat_cmd="$behat_bin --config $behat_config -vvv --tags=@local_deepler"
 else
-  behat_cmd="$behat_bin --config $moodle_root../behat_moodle/behatrun/behat/behat.yml -vvv --tags=$tag"
+    behat_cmd="$behat_bin --config $behat_config -vvv --tags=$tag"
+fi
+
+echo "$behat_cmd"
+
+run_init() {
+    echo "Initializing Behat..."
+    $php_bin "$init_behat" || { echo "ERROR: Behat init failed (init.php not found or errored)"; exit 1; }
+}
+
+# Auto-init if config file is missing or --init was passed
+if $init_flag || [[ ! -f "$behat_config" ]]; then
+    run_init
+    output=$($behat_cmd 2>&1)
+    echo "$output"
+    exit 0
 fi
 
 # Run the Behat command and capture the output
 output=$($behat_cmd 2>&1)
-echo "$behat_cmd"
 
-# Check if the --init argument is passed or if the output contains "No scenarios"
-if $init_flag || [[ $output == *"No scenarios"* || $output == *"Your behat test site is outdated,"* ]]; then
-    # Run the initialization script
-    $init_behat
-
-    # Run the Behat command again
+# Re-init if Behat reports stale/missing state
+if [[ $output == *"No scenarios"* || $output == *"Your behat test site is outdated,"* || $output == *"does not exist"* ]]; then
+    run_init
     output=$($behat_cmd 2>&1)
-    echo "$output"
-else
-    # Print the original output
-    echo "$output"
 fi
+
+echo "$output"
