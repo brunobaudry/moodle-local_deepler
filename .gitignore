@@ -1,6 +1,6 @@
 # System Files
 .DS_Store
-
+.vscode/*
 # Libraries
 node_modules
 # ide

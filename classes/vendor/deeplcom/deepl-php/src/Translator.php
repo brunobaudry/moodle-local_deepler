@@ -17,7 +17,7 @@ class Translator
     /**
      * Library version.
      */
-    public const VERSION = '1.16.0';
+    public const VERSION = '1.18.0';
 
     /**
      * Implements all HTTP requests and retries.
@@ -709,6 +709,26 @@ class Translator
         if (isset($options[TranslateTextOptions::CUSTOM_INSTRUCTIONS])) {
             $params[TranslateTextOptions::CUSTOM_INSTRUCTIONS] = $options[TranslateTextOptions::CUSTOM_INSTRUCTIONS];
         }
+        if (isset($options[TranslateTextOptions::TRANSLATION_MEMORY_ID])) {
+            $tm = $options[TranslateTextOptions::TRANSLATION_MEMORY_ID];
+            if (is_string($tm)) {
+                $params['translation_memory_id'] = $tm;
+            } elseif ($tm instanceof TranslationMemoryInfo) {
+                $params['translation_memory_id'] = $tm->translationMemoryId;
+            } else {
+                throw new DeepLException('translation_memory_id must be a string or TranslationMemoryInfo object');
+            }
+        }
+        if (isset($options[TranslateTextOptions::TRANSLATION_MEMORY_THRESHOLD])) {
+            if (!isset($options[TranslateTextOptions::TRANSLATION_MEMORY_ID])) {
+                throw new DeepLException('translation_memory_threshold requires translation_memory_id');
+            }
+            $threshold = $options[TranslateTextOptions::TRANSLATION_MEMORY_THRESHOLD];
+            if (!is_int($threshold) || $threshold < 0 || $threshold > 100) {
+                throw new DeepLException('translation_memory_threshold must be an integer between 0 and 100');
+            }
+            $params['translation_memory_threshold'] = strval($threshold);
+        }
         $this->applyExtraBodyParameters(
             $params,
             $options[TranslateTextOptions::EXTRA_BODY_PARAMETERS] ?? null
@@ -763,7 +783,7 @@ class Translator
                 if ($usingGlossary) {
                     throw new GlossaryNotFoundException("Glossary not found$message");
                 }
-                throw new NotFoundException("Not found, check server_url$message");
+                throw new NotFoundException("Not found$message");
             case 400:
                 throw new DeepLException("Bad request$message");
             case 429:
