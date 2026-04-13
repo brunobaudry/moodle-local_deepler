@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Always run from the script's own directory so relative paths in phpunit.xml
+# and in this script resolve correctly regardless of where the caller's CWD is.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 # Help message
 show_help() {
   echo "Usage: $0 [TEST_FILTER] [--deprecations]"
@@ -37,6 +42,17 @@ for arg in "$@"; do
 done
 
 
+
+# Verify we can find the Moodle root (lib/phpunit/bootstrap.php must exist
+# two levels up — i.e. the plugin lives under <moodle>/local/deepler).
+if [[ ! -f "../../lib/phpunit/bootstrap.php" ]]; then
+    echo "ERROR: Cannot find Moodle's lib/phpunit/bootstrap.php relative to this script."
+    echo "       Make sure you run this script from within the Moodle installation."
+    echo "       In a DDEV container the correct path is:"
+    echo "         /var/www/html/moodle/public/local/deepler/"
+    echo "       Invoke with: ddev exec --dir /var/www/html/moodle/public/local/deepler bash run_tests.sh"
+    exit 1
+fi
 
 # Define the PHPUnit command
 
