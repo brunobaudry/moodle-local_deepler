@@ -66,9 +66,9 @@ done
 
 # Define the Behat command
 if [ -z "$tag" ]; then
-    behat_cmd="$behat_bin --config $behat_config -vvv --tags=@local_deepler"
+    behat_cmd="$behat_bin --config $behat_config --profile chrome -vvv --tags=@local_deepler"
 else
-    behat_cmd="$behat_bin --config $behat_config -vvv --tags=$tag"
+    behat_cmd="$behat_bin --config $behat_config --profile chrome -vvv --tags=$tag"
 fi
 
 echo "$behat_cmd"
