@@ -464,3 +464,15 @@ $string['writingstyleacademic'] = 'Academic writing style';
 $string['writingstylebusiness'] = 'Business writing style';
 $string['writingstylecasual'] = 'Casual writing style';
 $string['writingstylesimple'] = 'Simple writing style';
+
+// Translation provider abstraction.
+$string['provider'] = 'Translation provider';
+$string['provider_desc'] = 'Select the translation service to use. Each provider may support different features (rephrase, glossaries, formality, etc.).';
+$string['provider_no_rephrase'] = 'The selected translation provider does not support the rephrase/improve feature. Switch to DeepL (paid account) to use this feature.';
+$string['provider_no_glossary'] = 'The selected translation provider does not support glossaries.';
+
+// LibreTranslate provider settings.
+$string['libretranslate_url'] = 'LibreTranslate base URL';
+$string['libretranslate_url_desc'] = 'Base URL of your LibreTranslate instance, e.g. https://libretranslate.com or your self-hosted instance. No trailing slash.';
+$string['libretranslate_apikey'] = 'LibreTranslate API key';
+$string['libretranslate_apikey_desc'] = 'API key for your LibreTranslate instance. Leave empty for public instances that do not require authentication.';

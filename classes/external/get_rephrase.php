@@ -21,16 +21,16 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
-use DeepL\AppInfo;
-use DeepL\DeepLClient;
-use DeepL\DeepLException;
+use Exception;
+use local_deepler\local\translation\interfaces\rephrase_capable_interface;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 
 /**
- * External service to call DeepL's text improvement API.
+ * External service to improve / rephrase text via the configured translation provider.
+ *
+ * Only providers that implement rephrase_capable_interface support this feature.
+ * If the active provider does not support rephrase, an error is returned.
  *
  * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -40,78 +40,90 @@ class get_rephrase extends external_api {
     use deeplapi_trait;
 
     /**
-     * External service to call DeepL's improve API.
+     * Executes text improvement requests.
      *
-     * @param array $rephrasings
-     * @param array $options
+     * @param array  $rephrasings
+     * @param array  $options
      * @param string $version
      * @return array
-     * @throws \DeepL\DeepLException
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      */
     public static function execute(array $rephrasings, array $options, string $version): array {
         $params = self::validate_parameters(self::execute_parameters(), [
-                'rephrasings' => $rephrasings,
-                'options' => $options,
-                'version' => $version,
+            'rephrasings' => $rephrasings,
+            'options'     => $options,
+            'version'     => $version,
         ]);
+
         try {
-            $improver = self::setdeeplapikey($params['version']);
-        } catch (DeepLException $exception) {
+            $provider = self::set_provider($params['version']);
+        } catch (Exception $exception) {
             return [[
-                    'error' => 'Exception ' . $exception->getMessage(),
-                    'key' => '',
-                    'text' => '',
-                    'target_language' => '',
-                    'detected_source_language' => '',
+                'error'                    => 'Exception ' . $exception->getMessage(),
+                'key'                      => '',
+                'text'                     => '',
+                'target_language'          => '',
+                'detected_source_language' => '',
             ]];
         }
-        // Have the params cleaned by Deepl lib.
+
+        if ($provider === null) {
+            return [[
+                'error'                    => 'Translation provider could not be initialised.',
+                'key'                      => '',
+                'text'                     => '',
+                'target_language'          => '',
+                'detected_source_language' => '',
+            ]];
+        }
+
+        if (!($provider instanceof rephrase_capable_interface)) {
+            return [[
+                'error'                    => get_string('provider_no_rephrase', 'local_deepler'),
+                'key'                      => '',
+                'text'                     => '',
+                'target_language'          => '',
+                'detected_source_language' => '',
+            ]];
+        }
+
+        // Parse tone / style from the combined "toneorstyle" parameter.
         $style = $tone = null;
         if ($params['options']['toneorstyle'] !== 'default') {
             $rephraseoptions = explode("\n", $params['options']['toneorstyle']);
-            $tone = $rephraseoptions[0] === 'tone' ? $rephraseoptions[1] : null;
+            $tone  = $rephraseoptions[0] === 'tone'          ? $rephraseoptions[1] : null;
             $style = $rephraseoptions[0] === 'writing_style' ? $rephraseoptions[1] : null;
         }
 
-        $validatedparams = $improver->buildRephraseBodyParams($params['options']['target_lang'], $style, $tone);
-        // Get the target.
-        $targetlang = $validatedparams['target_lang'];
-        // Remove target from arrray to pass just the options.
+        $validatedparams = $provider->build_rephrase_params($params['options']['target_lang'], $style, $tone);
+        $targetlang      = $validatedparams['target_lang'];
         unset($validatedparams['target_lang']);
 
-        $staticparts = [$validatedparams, $targetlang];
-        $chunks = self::chunk_payload($params['rephrasings'], $staticparts);
-        // Prepare the texts.
-        // Results.
+        $staticparts   = [$validatedparams, $targetlang];
+        $chunks        = self::chunk_payload($params['rephrasings'], $staticparts);
         $improvedtexts = [];
 
         foreach ($chunks as $chunk) {
-            // Extract the texts for each chunk.
-            $texts = array_map(function ($t) {
-                return $t['text'];
-            }, $chunk);
-
+            $texts = array_map(fn($t) => $t['text'], $chunk);
             try {
-                $results = $improver->rephraseText($texts, $targetlang, $validatedparams);
+                $results = $provider->rephrase($texts, $targetlang, $validatedparams);
                 foreach ($results as $index => $result) {
-                    $key = $chunk[$index]['key'];
                     $improvedtexts[] = [
-                            'error' => '',
-                            'key' => $key,
-                            'text' => $result->text,
-                            'target_language' => $result->targetLanguage,
-                            'detected_source_language' => $result->detectedSourceLanguage,
+                        'error'                    => '',
+                        'key'                      => $chunk[$index]['key'],
+                        'text'                     => $result->text,
+                        'target_language'          => $result->target_language,
+                        'detected_source_language' => $result->detected_source_language,
                     ];
                 }
-            } catch (DeepLException $e) {
+            } catch (Exception $e) {
                 return [[
-                        'error' => 'Exception ' . $e->getMessage(),
-                        'key' => '',
-                        'text' => '',
-                        'target_language' => '',
-                        'detected_source_language' => '',
+                    'error'                    => 'Exception ' . $e->getMessage(),
+                    'key'                      => '',
+                    'text'                     => '',
+                    'target_language'          => '',
+                    'detected_source_language' => '',
                 ]];
             }
         }
@@ -126,25 +138,21 @@ class get_rephrase extends external_api {
      */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-                'rephrasings' => new external_multiple_structure(
-                    new external_single_structure(
-                        [
-                                'text' => new external_value(PARAM_RAW, 'text to be translated'),
-                                'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
-                        ]
-                    )
+            'rephrasings' => new external_multiple_structure(
+                new external_single_structure([
+                    'text' => new external_value(PARAM_RAW, 'text to be translated'),
+                    'key'  => new external_value(PARAM_RAW, 'UI identifier for the text'),
+                ])
+            ),
+            'options' => new external_single_structure([
+                'target_lang'  => new external_value(PARAM_RAW, 'target language'),
+                'toneorstyle'  => new external_value(
+                    PARAM_RAW,
+                    'Tone or writing style of your improvements',
+                    VALUE_OPTIONAL
                 ),
-                'options' => new external_single_structure(
-                    [
-                        'target_lang' => new external_value(PARAM_RAW, 'target language'),
-                        'toneorstyle' => new external_value(
-                            PARAM_RAW,
-                            'Tone or writing style of your improvements',
-                            VALUE_OPTIONAL
-                        ),
-                    ]
-                ),
-                'version' => new external_value(PARAM_RAW, 'the plugin version id'),
+            ]),
+            'version' => new external_value(PARAM_RAW, 'the plugin version id'),
         ]);
     }
 
@@ -155,19 +163,17 @@ class get_rephrase extends external_api {
      */
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
-            new external_single_structure(
-                [
-                    'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
-                    'text' => new external_value(PARAM_RAW, 'Improved text.'),
-                    'target_language' => new external_value(PARAM_RAW, 'The target language specified by the user.'),
-                    'detected_source_language' => new external_value(
-                        PARAM_RAW,
-                        'The detected source language of the text provided in the request.',
-                        VALUE_OPTIONAL
-                    ),
-                    'error' => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
-                ]
-            )
+            new external_single_structure([
+                'key'                      => new external_value(PARAM_RAW, 'UI identifier for the text'),
+                'text'                     => new external_value(PARAM_RAW, 'Improved text.'),
+                'target_language'          => new external_value(PARAM_RAW, 'The target language specified by the user.'),
+                'detected_source_language' => new external_value(
+                    PARAM_RAW,
+                    'The detected source language of the text provided in the request.',
+                    VALUE_OPTIONAL
+                ),
+                'error'                    => new external_value(PARAM_RAW, 'error message', VALUE_OPTIONAL),
+            ])
         );
     }
 }

@@ -30,10 +30,11 @@ require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
 use advanced_testcase;
 use DeepL\AuthorizationException;
-use DeepL\DeepLClient;
 use DeepL\GlossaryInfo;
 use DeepL\TooManyRequestsException;
 use DeepL\Usage;
+use local_deepler\local\translation\providers\deepl_provider;
+use local_deepler\local\translation\translation_language;
 use ReflectionClass;
 use stdClass;
 
@@ -292,9 +293,19 @@ final class langhelper_test extends advanced_testcase {
         $deeplglossary->targetLang = 'ES';
         $deeplglossary->entryCount = 3;
 
-        // Inject mock translator.
-        $this->mocktranslator->method('listGlossaries')->willReturn([$deeplglossary]);
-        $this->langhelper = new lang_helper($this->mocktranslator, 'mockapikey', null, 'en', 'es');
+        // Build a fresh provider mock for this test with list_glossaries stubbed.
+        $syncprovider = $this->getMockBuilder(deepl_provider::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $syncprovider->method('is_api_key_set')->willReturn(true);
+        $syncprovider->method('get_source_languages')->willReturn([
+            new translation_language('EN', 'English'),
+        ]);
+        $syncprovider->method('get_target_languages')->willReturn([
+            new translation_language('ES', 'Spanish'),
+        ]);
+        $syncprovider->method('list_glossaries')->willReturn([$deeplglossary]);
+        $this->langhelper = new lang_helper($syncprovider, 'mockapikey', null, 'en', 'es');
         $this->langhelper->initdeepl($this->user, 'v1.0');
 
         $result = $this->langhelper->syncdeeplglossaries();
@@ -322,23 +333,27 @@ final class langhelper_test extends advanced_testcase {
         $this->user->email = 'testuser@example.com';
         $this->user->department = 'testdepartment';
 
-        $this->mocktranslator = $this->createMock(DeepLClient::class);
+        $this->mockprovider = $this->getMockBuilder(deepl_provider::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $mockusage = $this->createMock(Usage::class);
         $mockusage->method('anyLimitReached')->willReturn(false);
 
-        $this->mocktranslator->method('getUsage')->willReturn($mockusage);
-        $this->mocktranslator->method('getSourceLanguages')->willReturn([
-            (object) ['code' => 'EN', 'name' => 'English'],
-            (object) ['code' => 'FR', 'name' => 'French'],
+        $this->mockprovider->method('is_api_key_set')->willReturn(true);
+        $this->mockprovider->method('get_usage')->willReturn($mockusage);
+        $this->mockprovider->method('can_rephrase')->willReturn(false);
+        $this->mockprovider->method('get_source_languages')->willReturn([
+            new translation_language('EN', 'English'),
+            new translation_language('FR', 'French'),
         ]);
-        $this->mocktranslator->method('getTargetLanguages')->willReturn([
-            (object) ['code' => 'DE', 'name' => 'German'],
-            (object) ['code' => 'ES', 'name' => 'Spanish'],
+        $this->mockprovider->method('get_target_languages')->willReturn([
+            new translation_language('DE', 'German'),
+            new translation_language('ES', 'Spanish'),
         ]);
 
         $this->langhelper = new lang_helper(
-            $this->mocktranslator,
+            $this->mockprovider,
             'mockapikey',
             ['en' => 'English', 'fr' => 'French', 'de' => 'German', 'es' => 'Spanish'],
             'en',
@@ -350,6 +365,6 @@ final class langhelper_test extends advanced_testcase {
     private $langhelper;
     /** @var stdClass */
     private $user;
-    /** @var \PHPUnit\Framework\MockObject\MockObject|DeepLClient */
-    private $mocktranslator;
+    /** @var \PHPUnit\Framework\MockObject\MockObject|deepl_provider */
+    private $mockprovider;
 }

@@ -28,7 +28,6 @@ namespace local_deepler\local\data;
 
 use coding_exception;
 use stdClass;
-use DeepL\GlossaryInfo;
 
 /**
  * Class glossary
@@ -121,7 +120,7 @@ class glossary {
             'targetlang' => $this->targetlang,
             'entrycount' => $this->entrycount,
             'timecreated' => $this->timecreated,
-            'lastused,' => $this->lastused,
+            'lastused' => $this->lastused,
             'shared' => $this->shared,
             'tokenid' => $this->tokenid,
         ];

@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use DeepL\DeepLClient;
 use local_deepler\local\services\lang_helper;
 use local_deepler\local\data\glossary;
+use local_deepler\local\translation\providers\deepl_provider;
 
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/version.php');
@@ -49,7 +49,7 @@ echo $OUTPUT->header();
 // Load glossary manager.
 $apikey = get_config('local_deepler', 'apikey');
 if ($apikey) {
-    $langhelper = new lang_helper(new DeepLClient($apikey), $apikey);
+    $langhelper = new lang_helper(new deepl_provider($apikey, ['version' => $plugin->release]), $apikey);
     $langhelper->initdeepl($USER, $plugin->release);
     // Prepare content.
 

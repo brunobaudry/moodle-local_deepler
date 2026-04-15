@@ -20,15 +20,15 @@ use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
-use DeepL\DeepLClient;
-use DeepL\DeepLException;
+use Exception;
+use local_deepler\local\translation\interfaces\glossary_capable_interface;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 
 /**
- * Simple service to fetch glossary's entries.
+ * External service to fetch glossary entries from the configured translation provider.
+ *
+ * Only providers that implement glossary_capable_interface support this feature.
  *
  * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -38,7 +38,7 @@ class get_glossary_entries extends external_api {
     use deeplapi_trait;
 
     /**
-     * Execute.
+     * Fetches entries for a single glossary.
      *
      * @param string $glossaryid
      * @param string $version
@@ -47,34 +47,71 @@ class get_glossary_entries extends external_api {
      * @throws \invalid_parameter_exception
      */
     public static function execute(string $glossaryid, string $version): array {
-
         $params = self::validate_parameters(self::execute_parameters(), [
-                'glossaryid' => $glossaryid,
-                'version' => $version,
+            'glossaryid' => $glossaryid,
+            'version'    => $version,
         ]);
+
+        $glossaryid = $params['glossaryid'];
+        $sourcelang = 'source';
+        $targetlang = 'target';
+
         try {
-            $translator = self::setdeeplapikey($params['version']);
-            $glossaryid = $params['glossaryid'];
-            $glo = $translator->getGlossary($glossaryid);
+            $provider = self::set_provider($params['version']);
+        } catch (Exception $exception) {
+            return [
+                'glossaryid' => $glossaryid,
+                'entries'    => '',
+                'status'     => 'error',
+                'source'     => $sourcelang,
+                'target'     => $targetlang,
+                'message'    => $exception->getMessage(),
+            ];
+        }
+
+        if ($provider === null) {
+            return [
+                'glossaryid' => $glossaryid,
+                'entries'    => '',
+                'status'     => 'error',
+                'source'     => $sourcelang,
+                'target'     => $targetlang,
+                'message'    => 'Translation provider could not be initialised.',
+            ];
+        }
+
+        if (!($provider instanceof glossary_capable_interface)) {
+            return [
+                'glossaryid' => $glossaryid,
+                'entries'    => '',
+                'status'     => 'error',
+                'source'     => $sourcelang,
+                'target'     => $targetlang,
+                'message'    => get_string('provider_no_glossary', 'local_deepler'),
+            ];
+        }
+
+        try {
+            $glo        = $provider->get_glossary($glossaryid);
             $sourcelang = $glo->sourceLang;
             $targetlang = $glo->targetLang;
-            $ge = $translator->getGlossaryEntries($glossaryid);
+            $ge         = $provider->get_glossary_entries($glossaryid);
             return [
-                    'glossaryid' => $glossaryid,
-                    'entries' => json_encode($ge->getEntries(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                    'status' => 'success',
-                    'message' => 'Shared value updated',
-                    'source' => $sourcelang,
-                    'target' => $targetlang,
+                'glossaryid' => $glossaryid,
+                'entries'    => json_encode($ge->getEntries(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'status'     => 'success',
+                'message'    => 'Shared value updated',
+                'source'     => $sourcelang,
+                'target'     => $targetlang,
             ];
-        } catch (DeepLException $exception) {
+        } catch (Exception $exception) {
             return [
-                    'glossaryid' => $glossaryid,
-                    'entries' => '',
-                    'status' => 'error',
-                    'source' => $sourcelang ?? 'source',
-                    'target' => $targetlang ?? 'target',
-                    'message' => $exception->getMessage(),
+                'glossaryid' => $glossaryid,
+                'entries'    => '',
+                'status'     => 'error',
+                'source'     => $sourcelang,
+                'target'     => $targetlang,
+                'message'    => $exception->getMessage(),
             ];
         }
     }
@@ -86,8 +123,8 @@ class get_glossary_entries extends external_api {
      */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-                'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
-                'version' => new external_value(PARAM_TEXT, 'Plugin\'s release'),
+            'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
+            'version'    => new external_value(PARAM_TEXT, 'Plugin\'s release'),
         ]);
     }
 
@@ -98,12 +135,12 @@ class get_glossary_entries extends external_api {
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-                'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
-                'entries' => new external_value(PARAM_RAW, 'JSON-encoded array key entries'),
-                'status' => new external_value(PARAM_TEXT, 'Result status'),
-                'message' => new external_value(PARAM_TEXT, 'Detailed message'),
-                'source' => new external_value(PARAM_TEXT, 'source'),
-                'target' => new external_value(PARAM_TEXT, 'target'),
+            'glossaryid' => new external_value(PARAM_TEXT, 'Glossary ID'),
+            'entries'    => new external_value(PARAM_RAW, 'JSON-encoded array key entries'),
+            'status'     => new external_value(PARAM_TEXT, 'Result status'),
+            'message'    => new external_value(PARAM_TEXT, 'Detailed message'),
+            'source'     => new external_value(PARAM_TEXT, 'source'),
+            'target'     => new external_value(PARAM_TEXT, 'target'),
         ]);
     }
 }

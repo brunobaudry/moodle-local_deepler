@@ -18,22 +18,23 @@ namespace local_deepler\local\services;
 defined('MOODLE_INTERNAL') || die();
 
 use context_user;
-use DeepL\AppInfo;
-use DeepL\AuthorizationException;
-use DeepL\DeepLClient;
-use DeepL\DeepLException;
-use DeepL\Language;
-use DeepL\LanguageCode;
-use Deepl\Usage;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
+use local_deepler\local\translation\interfaces\glossary_capable_interface;
+use local_deepler\local\translation\interfaces\rephrase_capable_interface;
+use local_deepler\local\translation\interfaces\translation_provider_interface;
+use local_deepler\local\translation\interfaces\usage_capable_interface;
+use local_deepler\local\translation\translation_language;
+use local_deepler\local\translation\translation_provider_factory;
 use stdClass;
 
-require_once(__DIR__ . '/../../vendor/autoload.php');
-
 /**
- * Helper class to connect to Deepl's API, fetch the available langs etc.
- * as well as prepare the data for the html selects and AMD.
+ * Helper class that orchestrates provider initialisation, language selection,
+ * and UI data preparation (dropdowns, config objects, string packs).
+ *
+ * All direct DeepL SDK calls have been removed. Provider-specific logic lives
+ * in translation_provider_interface implementations under
+ * classes/local/translation/providers/.
  *
  * @package local_deepler
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
@@ -44,204 +45,169 @@ class lang_helper {
      * Constant to display the lang as rephrasing.
      */
     const REPHRASESYMBOL = "® ";
+
     /**
      * The current moodle language.
      *
      * @var string
      */
     public string $currentlang;
+
     /**
      * The target language.
      *
      * @var string
      */
     public string $targetlang;
+
     /**
      * @var array|mixed Moodle instance's installed languages.
      */
     public mixed $moodlelangs;
 
+    // -------------------------------------------------------------------------
+    // Private / protected state
+    // -------------------------------------------------------------------------
+
+    /** @var translation_provider_interface|null */
+    private ?translation_provider_interface $provider = null;
+
+    /** @var string Resolved API key (before provider is created). */
+    private string $apikey;
+
+    /** @var int DB row id of the matched token record (0 = global key). */
+    private int $dbtokenid;
+
+    /** @var translation_language[] Source languages returned by the provider. */
+    private array $deeplsources;
+
+    /** @var translation_language[] Target languages returned by the provider. */
+    private array $deepltargets;
+
+    /** @var string Normalised source language code derived from the Moodle current lang. */
+    private string $deeplsourcelang;
+
+    /** @var bool Whether the current provider/account supports rephrasing. */
+    private bool $canimprove;
+
+    /** @var stdClass */
+    private stdClass $user;
+
+    // -------------------------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------------------------
+
     /**
      * Constructor.
      *
-     * @param \DeepL\DeepLClient|null $translator
-     * @param string|null $apikey
-     * @param array|null $moodlelangs
-     * @param string|null $currentlang
-     * @param string|null $targetlang
-     * @throws \DeepL\DeepLException
+     * The optional $provider parameter is used in tests to inject a mock.
+     * In production code lang_helper is always constructed without arguments
+     * and the provider is created by initdeepl().
+     *
+     * @param translation_provider_interface|null $provider  Pre-built provider (tests only).
+     * @param string|null                         $apikey    Override API key.
+     * @param array|null                          $moodlelangs Override Moodle language list.
+     * @param string|null                         $currentlang Override current language.
+     * @param string|null                         $targetlang  Override target language.
      * @throws \coding_exception
      * @throws \dml_exception
      */
     public function __construct(
-        ?DeepLClient $translator = null,
+        ?translation_provider_interface $provider = null,
         ?string $apikey = null,
         ?array $moodlelangs = null,
         ?string $currentlang = null,
         ?string $targetlang = null
     ) {
-        $this->deeplsources = [];
-        $this->deepltargets = [];
-        $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
-        $this->canimprove = false;
-        $this->allowbeta = get_config('local_deepler', 'allowbeta') ?? false;
-        // Remove this when DeepL improves its API language list.
-        $this->setbetas();
-        $this->currentlang = $currentlang ?? optional_param('lang', current_language(), PARAM_NOTAGS);
-        $this->targetlang = $targetlang ?? optional_param('target_lang', '', PARAM_NOTAGS);
+        $this->deeplsources    = [];
+        $this->deepltargets    = [];
+        $this->canimprove      = false;
+        $this->provider        = $provider;
+        $this->currentlang     = $currentlang ?? optional_param('lang', current_language(), PARAM_NOTAGS);
+        $this->targetlang      = $targetlang ?? optional_param('target_lang', '', PARAM_NOTAGS);
         if ($this->targetlang !== '') {
-            $this->targetlang = LanguageCode::standardizeLanguageCode($this->targetlang);
+            $this->targetlang = $this->normalize_lang_code($this->targetlang);
         }
-        $this->moodlelangs = $moodlelangs ?? get_string_manager()->get_list_of_translations();
+        $this->moodlelangs  = $moodlelangs ?? get_string_manager()->get_list_of_translations();
         $this->deeplsourcelang = '';
-        $this->apikey = $apikey ?? $this->initapikey();
-        $this->dbtokenid = 0;
-        $this->translator = $translator;
+        $this->apikey       = $apikey ?? $this->initapikey();
+        $this->dbtokenid    = 0;
     }
 
-    /**
-     * Remove this when DeepL improves its API language list.
-     *
-     * @return void
-     */
-    private function setbetas() {
-        $this->betalanguages = [
-            new Language('Acehnese', 'ACE', null),
-            new Language('Afrikaans', 'AF', null),
-            new Language('Aragonese', 'AN', null),
-            new Language('Assamese', 'AS', null),
-            new Language('Aymara', 'AY', null),
-            new Language('Azerbaijani', 'AZ', null),
-            new Language('Bashkir', 'BA', null),
-            new Language('Belarusian', 'BE', null),
-            new Language('Bhojpuri', 'BHO', null),
-            new Language('Bengali', 'BN', null),
-            new Language('Breton', 'BR', null),
-            new Language('Bosnian', 'BS', null),
-            new Language('Catalan', 'CA', null),
-            new Language('Cebuano', 'CEB', null),
-            new Language('Kurdish (Sorani)', 'CKB', null),
-            new Language('Welsh', 'CY', null),
-            new Language('Esperanto', 'EO', null),
-            new Language('Basque', 'EU', null),
-            new Language('Persian', 'FA', null),
-            new Language('Irish', 'GA', null),
-            new Language('Galician', 'GL', null),
-            new Language('Guarani', 'GN', null),
-            new Language('Konkani', 'GOM', null),
-            new Language('Gujarati', 'GU', null),
-            new Language('Hausa', 'HA', null),
-            new Language('Hindi', 'HI', null),
-            new Language('Croatian', 'HR', null),
-            new Language('Haitian Creole', 'HT', null),
-            new Language('Armenian', 'HY', null),
-            new Language('Igbo', 'IG', null),
-            new Language('Icelandic', 'IS', null),
-            new Language('Javanese', 'JV', null),
-            new Language('Georgian', 'KA', null),
-            new Language('Kazakh', 'KK', null),
-            new Language('Kurdish (Kurmanji)', 'KMR', null),
-            new Language('Kyrgyz', 'KY', null),
-            new Language('Latin', 'LA', null),
-            new Language('Luxembourgish', 'LB', null),
-            new Language('Lombard', 'LMO', null),
-            new Language('Lingala', 'LN', null),
-            new Language('Maithili', 'MAI', null),
-            new Language('Malagasy', 'MG', null),
-            new Language('Maori', 'MI', null),
-            new Language('Macedonian', 'MK', null),
-            new Language('Malayalam', 'ML', null),
-            new Language('Mongolian', 'MN', null),
-            new Language('Marathi', 'MR', null),
-            new Language('Malay', 'MS', null),
-            new Language('Maltese', 'MT', null),
-            new Language('Burmese', 'MY', null),
-            new Language('Nepali', 'NE', null),
-            new Language('Occitan', 'OC', null),
-            new Language('Oromo', 'OM', null),
-            new Language('Punjabi', 'PA', null),
-            new Language('Pangasinan', 'PAG', null),
-            new Language('Kapampangan', 'PAM', null),
-            new Language('Dari', 'PRS', null),
-            new Language('Pashto', 'PS', null),
-            new Language('Quechua', 'QU', null),
-            new Language('Sanskrit', 'SA', null),
-            new Language('Sicilian', 'SCN', null),
-            new Language('Albanian', 'SQ', null),
-            new Language('Serbian', 'SR', null),
-            new Language('Sesotho', 'ST', null),
-            new Language('Sundanese', 'SU', null),
-            new Language('Swahili', 'SW', null),
-            new Language('Tamil', 'TA', null),
-            new Language('Telugu', 'TE', null),
-            new Language('Tajik', 'TG', null),
-            new Language('Turkmen', 'TK', null),
-            new Language('Tagalog', 'TL', null),
-            new Language('Tswana', 'TN', null),
-            new Language('Tsonga', 'TS', null),
-            new Language('Tatar', 'TT', null),
-            new Language('Urdu', 'UR', null),
-            new Language('Uzbek', 'UZ', null),
-            new Language('Wolof', 'WO', null),
-            new Language('Xhosa', 'XH', null),
-            new Language('Yiddish', 'YI', null),
-            new Language('Cantonese', 'YUE', null),
-            new Language('Zulu', 'ZU', null),
-        ];
-    }
+    // -------------------------------------------------------------------------
+    // Provider initialisation
+    // -------------------------------------------------------------------------
 
     /**
-     * Init global API key.
+     * Initialises the translation provider and fetches language lists / usage.
      *
-     * @return string
-     * @throws \dml_exception
-     */
-    private function initapikey(): string {
-        $key = '';
-        if (getenv('DEEPL_API_TOKEN')) {
-            $key = getenv('DEEPL_API_TOKEN');
-        } else if (get_config('local_deepler', 'apikey')) {
-            $key = get_config('local_deepler', 'apikey');
-        }
-        return $key;
-    }
-
-    /**
-     * Initialise the Deepl object.
+     * This is the main entry point called from translate.php and external API classes.
      *
-     * @param \stdClass $user
-     * @param string $version
-     * @return bool
-     * @throws \DeepL\DeepLException
+     * @param stdClass $user
+     * @param string   $version  Plugin version string (forwarded to provider for AppInfo).
+     * @return bool  True on success, false if provider could not be initialised.
      * @throws \dml_exception
      */
     public function initdeepl(stdClass $user, string $version): bool {
-        $this->user = $user;
-        if (!$this->translator) {
-            $this->setdeeplapi();
-            $this->inittranslator($version);
-        }
-
-        try {
-            $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
-            $this->usage = $this->translator->getUsage();
-            $this->canimprove = !$this->keyisfree;
-            $this->deeplsources = $this->translator->getSourceLanguages();
-            $this->deepltargets = $this->translator->getTargetLanguages();
-            if ($this->allowbeta) {
-                $this->deeplsources = array_merge($this->deeplsources, $this->betalanguages);
-                $this->deepltargets = array_merge($this->deepltargets, $this->betalanguages);
-            }
-            $this->setcurrentlanguage();
-            return true;
-        } catch (DeepLException $e) {
-            return false;
-        }
+        return $this->init_provider($user, $version);
     }
 
     /**
-     * Set the key string.
-     * If empty, it will try to get it from the .env useful for tests runs.
+     * Initialises the translation provider and fetches language lists / usage.
+     *
+     * @param stdClass $user
+     * @param string   $version
+     * @return bool
+     * @throws \dml_exception
+     */
+    public function init_provider(stdClass $user, string $version): bool {
+        $this->user = $user;
+
+        if ($this->provider === null) {
+            $this->resolve_api_key_for_user();
+            $providerid = translation_provider_factory::get_configured_provider_id();
+            $this->provider = translation_provider_factory::make($providerid, $this->apikey, $version);
+        }
+
+        if ($this->provider === null || !$this->provider->is_api_key_set()) {
+            return false;
+        }
+
+        $sources = $this->provider->get_source_languages();
+        $targets = $this->provider->get_target_languages();
+
+        if (empty($sources) && empty($targets)) {
+            return false;
+        }
+
+        $this->deeplsources = $sources;
+        $this->deepltargets = $targets;
+        $this->canimprove   = ($this->provider instanceof rephrase_capable_interface)
+            && $this->provider->can_rephrase();
+
+        $this->setcurrentlanguage();
+        return true;
+    }
+
+    /**
+     * Resolves the API key to use for the current user.
+     *
+     * For DeepL, checks the token-pool table to find a user-specific key.
+     * For other providers, the global config key is used.
+     *
+     * @return void
+     * @throws \dml_exception|\coding_exception
+     */
+    private function resolve_api_key_for_user(): void {
+        $providerid = translation_provider_factory::get_configured_provider_id();
+        if ($providerid !== 'deepl') {
+            return;
+        }
+        $this->setdeeplapi();
+    }
+
+    /**
+     * Resolves the DeepL API key from the token-pool table for the current user.
      *
      * @return void
      * @throws \dml_exception|\coding_exception
@@ -251,15 +217,13 @@ class lang_helper {
         $tokens = $DB->get_records('local_deepler_tokens', null, 'id ASC');
 
         if (empty($tokens)) {
-            // If no token mapping then allow nothing to do, we use the main key.
             return;
         }
         $tokenrecord = $this->find_first_matching_token($this->user, $tokens);
         if ($tokenrecord) {
-            $this->apikey = $tokenrecord->token;
+            $this->apikey    = $tokenrecord->token;
             $this->dbtokenid = $tokenrecord->id;
         } else if (!get_config('local_deepler', 'allowfallbackkey')) {
-            // If no fallback key is allowed, then we can't use the api as no token mapping found.
             $this->apikey = '';
         }
     }
@@ -268,29 +232,26 @@ class lang_helper {
      * Finds the first available token for a user by looping through all tokens
      * and matching both standard and custom profile fields.
      *
-     * @param \core_user|stdClass $user The Moodle user object.
-     * @param array $tokens Array of token records to search through.
+     * @param \core_user|stdClass $user    The Moodle user object.
+     * @param array               $tokens  Array of token records to search through.
      * @return stdClass|false The first matching token record, or false if none found.
      * @throws \dml_exception|\coding_exception
      */
     private function find_first_matching_token(\core_user|stdClass $user, array $tokens): false|stdClass {
         global $DB;
-        $foundtoken = false;
+        $foundtoken    = false;
         $alluserfields = array_keys(utils::all_user_fields(context_user::instance($this->user->id, MUST_EXIST)));
 
-        // Build a map of custom profile fields for DB fallback.
         $customfields = [];
         foreach ($DB->get_records('user_info_field') as $field) {
             $customfields['profile_field_' . $field->shortname] = $field;
         }
 
         foreach ($tokens as $token) {
-            $attr = $token->attribute;
+            $attr    = $token->attribute;
             $pattern = (string) $token->valuefilter;
 
-            // Check if the attribute is a user field.
             if (in_array($attr, $alluserfields)) {
-                // If the user object has the property, compare directly.
                 if (property_exists($user, $attr)) {
                     $uservalue = (string) $user->$attr;
                     if (
@@ -306,9 +267,8 @@ class lang_helper {
                         $foundtoken = $token;
                     }
                 } else if (array_key_exists($attr, $customfields) && !empty($user->id)) {
-                    // If not, and it's a custom profile field, fetch from DB.
                     $profiledata = $DB->get_record('user_info_data', [
-                        'userid' => $user->id,
+                        'userid'  => $user->id,
                         'fieldid' => $customfields[$attr]->id,
                     ]);
                     if ($profiledata) {
@@ -329,76 +289,85 @@ class lang_helper {
                 }
             }
         }
-        return $foundtoken; // No matching token found.
+        return $foundtoken;
     }
 
     /**
-     * Initialise the Deepl object.
-     * Return a Boolean of the cnx status.
+     * Derives the normalised DeepL-style source language code from the Moodle current lang.
      *
-     * @param string $version
-     * @return bool
-     * @throws \DeepL\DeepLException
-     */
-    private function inittranslator(string $version): bool {
-        if (!isset($this->translator)) {
-            try {
-                $this->translator = new DeepLClient($this->apikey, [
-                    'send_platform_info' => true,
-                    'app_info' => new AppInfo('Moodle-Deepler', $version),
-                ]);
-            } catch (AuthorizationException $e) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Getter for Usage.
-     *
-     * @return \Deepl\Usage
-     */
-    public function getusage(): Usage {
-        return $this->usage;
-    }
-
-    /**
-     * Getter for source langs.
-     *
-     * @return array|\DeepL\Language[]
-     */
-    public function getsourcelanguages(): array {
-        return $this->deeplsources;
-    }
-
-    /**
-     * Set the source language.
+     * Moodle stores lang as 'en', 'fr', 'de', 'pt_br' etc.
+     * We need 'EN', 'FR', 'DE', 'PT' (base code, uppercase).
      *
      * @return void
-     * @throws \DeepL\DeepLException
      */
     private function setcurrentlanguage(): void {
-        // Moodle format is not the common culture format.
-        // Deepl's sources are ISO 639-1 (Alpha 2) and uppercase.
-        $this->deeplsourcelang = LanguageCode::removeRegionalVariant(str_replace('_', '-', $this->currentlang));
+        $code = $this->normalize_lang_code($this->currentlang);
+        $this->deeplsourcelang = $this->remove_regional_variant($code);
     }
 
     /**
-     * Injects lang attributes to the config object.
+     * Normalizes a language code to uppercase with dashes.
      *
-     * @param \stdClass $config
-     * @return \stdClass
+     * @param string $code
+     * @return string
+     */
+    private function normalize_lang_code(string $code): string {
+        return strtoupper(str_replace('_', '-', trim($code)));
+    }
+
+    /**
+     * Strips the regional variant from a language code.
+     *
+     * @param string $code  e.g. 'EN-GB'
+     * @return string  e.g. 'EN'
+     */
+    private function remove_regional_variant(string $code): string {
+        return explode('-', $code, 2)[0];
+    }
+
+    // -------------------------------------------------------------------------
+    // Initialisation helpers (kept for backward compat, now trivial)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Reads the global API key from env / config.
+     *
+     * @return string
+     * @throws \dml_exception
+     */
+    private function initapikey(): string {
+        if (getenv('DEEPL_API_TOKEN')) {
+            return getenv('DEEPL_API_TOKEN');
+        }
+        return (string) (get_config('local_deepler', 'apikey') ?: '');
+    }
+
+    // -------------------------------------------------------------------------
+    // Config / UI preparation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Injects provider state into the config object for AMD JavaScript.
+     *
+     * @param stdClass $config
+     * @return stdClass
      */
     public function prepareconfig(stdClass &$config): stdClass {
-        $config->usage = $this->usage;
-        $config->limitReached = $config->usage->anyLimitReached();
-        $config->targetlang = $this->targetlang;
-        $config->currentlang = $this->currentlang;
+        if ($this->provider instanceof usage_capable_interface) {
+            $usage = $this->provider->get_usage();
+            $config->usage        = $usage;
+            $config->limitReached = $usage->anyLimitReached();
+            $config->isfree       = $this->provider->is_free_account();
+        } else {
+            $config->usage        = (object) ['character' => (object) ['count' => 0, 'limit' => 0]];
+            $config->limitReached = false;
+            $config->isfree       = false;
+        }
+        $config->targetlang      = $this->targetlang;
+        $config->currentlang     = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
-        $config->isfree = $this->keyisfree;
-        $config->rephrasesymbol = self::REPHRASESYMBOL;
-        $config->canimprove = $this->canimprove;
+        $config->rephrasesymbol  = self::REPHRASESYMBOL;
+        $config->canimprove      = $this->canimprove;
         return $config;
     }
 
@@ -409,30 +378,32 @@ class lang_helper {
      * @throws \coding_exception
      */
     public function preparestrings(): string {
-        // Status strings for UI icons.
         $config = new stdClass();
         $config->statusstrings = new stdClass();
-        $config->statusstrings->failed = get_string('statusfailed', 'local_deepler');
-        $config->statusstrings->success = get_string('statussuccess', 'local_deepler');
-        $config->statusstrings->tosave = get_string('statustosave', 'local_deepler');
+        $config->statusstrings->failed     = get_string('statusfailed', 'local_deepler');
+        $config->statusstrings->success    = get_string('statussuccess', 'local_deepler');
+        $config->statusstrings->tosave     = get_string('statustosave', 'local_deepler');
         $config->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
-        $config->statusstrings->wait = get_string('statuswait', 'local_deepler');
-        // General UI strings.
+        $config->statusstrings->wait       = get_string('statuswait', 'local_deepler');
         $config->uistrings = new stdClass();
-        $config->uistrings->deeplapiexception = get_string('deeplapiexception', 'local_deepler');
-        $config->uistrings->errordbpartial = get_string('errordbpartial', 'local_deepler');
-        $config->uistrings->errordbtitle = get_string('errordbtitle', 'local_deepler');
-        $config->uistrings->errortoolong = get_string('errortoolong', 'local_deepler');
-        $config->uistrings->saveallmodaltitle = get_string('saveallmodaltitle', 'local_deepler');
+        $config->uistrings->deeplapiexception  = get_string('deeplapiexception', 'local_deepler');
+        $config->uistrings->errordbpartial     = get_string('errordbpartial', 'local_deepler');
+        $config->uistrings->errordbtitle       = get_string('errordbtitle', 'local_deepler');
+        $config->uistrings->errortoolong       = get_string('errortoolong', 'local_deepler');
+        $config->uistrings->saveallmodaltitle  = get_string('saveallmodaltitle', 'local_deepler');
         $config->uistrings->translatemodaltitle = get_string('translate:modal:title', 'local_deepler');
-        $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
-        $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
-        $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
+        $config->uistrings->translatemodalbody  = get_string('translate:modal:body', 'local_deepler');
+        $config->uistrings->saveallmodalbody    = get_string('saveallmodalbody', 'local_deepler');
+        $config->uistrings->canttranslatesame   = get_string('canttranslatesame', 'local_deepler');
         return json_encode($config);
     }
 
+    // -------------------------------------------------------------------------
+    // Language helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * Checks if source language is supported.
+     * Checks if source language is supported by the active provider.
      *
      * @return bool
      */
@@ -441,35 +412,32 @@ class lang_helper {
     }
 
     /**
-     * Checks if a given lang is supported by Deepl
+     * Checks if a given language code is supported by the active provider.
      *
      * @param string $lang
      * @return bool
-     * @throws \DeepL\DeepLException
      */
     public function islangsupported(string $lang): bool {
-        $list = $this->deeplsources;
-        $len = count($list);
-        while ($len--) {
-            $code = LanguageCode::standardizeLanguageCode($list[$len]->code);
-            if ($code === $lang || $code === strtolower($lang)) {
-                return true;
-            }
+        if ($this->provider === null) {
+            return false;
         }
-        return false;
+        return $this->provider->is_language_supported($lang);
     }
 
     /**
-     * If key empty string.
+     * Returns whether the API key / base URL is configured.
      *
      * @return bool
      */
     public function isapikeynoset(): bool {
+        if ($this->provider !== null) {
+            return !$this->provider->is_api_key_set();
+        }
         return $this->apikey === '' || $this->apikey === null || $this->apikey === 'DEFAULT';
     }
 
     /**
-     * Getter for deeplsourcelang.
+     * Getter for the normalised source language code.
      *
      * @return string
      */
@@ -478,7 +446,7 @@ class lang_helper {
     }
 
     /**
-     * Prepare source options.
+     * Prepare source language dropdown options.
      *
      * @return array
      */
@@ -487,59 +455,66 @@ class lang_helper {
     }
 
     /**
-     * Creates props for html selects.
+     * Prepare target language dropdown options.
      *
-     * @param array $filtereddeepls
-     * @param bool $issource
-     * @param bool $verbose
      * @return array
      */
-    private function prepareoptionlangs(array $filtereddeepls, bool $issource = true, bool $verbose = true): array {
+    public function preparetargetsoptionlangs(): array {
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false);
+    }
+
+    /**
+     * Creates option array for HTML selects.
+     *
+     * @param translation_language[] $filteredlangs
+     * @param bool                   $issource
+     * @param bool                   $verbose
+     * @return array
+     */
+    private function prepareoptionlangs(array $filteredlangs, bool $issource = true, bool $verbose = true): array {
         $tab = [];
-        // Get the list of deepl langs that are supported by this moodle instance.
-        foreach ($filtereddeepls as $l) {
+        foreach ($filteredlangs as $l) {
             $tab[] = $this->getoption($issource, $l, $verbose);
         }
         return $tab;
     }
 
     /**
-     * Sub function to list the options.
+     * Builds the data array for a single language option element.
      *
-     * @param bool $issource
-     * @param mixed $l
-     * @param bool $isverbose
+     * @param bool               $issource
+     * @param translation_language $l
+     * @param bool               $isverbose
      * @return array
      */
-    private function getoption(bool $issource, mixed $l, bool $isverbose = true): array {
-        // If the key is free, we can't improve the source lang.
-        $code = LanguageCode::standardizeLanguageCode($l->code);
-        $same = $issource ? $this->isrephrase($code, '') : $this->isrephrase('', $code);
-        $text = $isverbose ? $l->name : $code;
-        $langisrephrasable = in_array($code, $this->deeplrephraselangs, true);
+    private function getoption(bool $issource, translation_language $l, bool $isverbose = true): array {
+        $code             = $l->code;
+        $same             = $issource ? $this->isrephrase($code, '') : $this->isrephrase('', $code);
+        $text             = $isverbose ? $l->name : $code;
+        $langisrephrasable = $l->supports_rephrase;
 
         if ($issource) {
             $selected = $this->isrephrase($code, $this->deeplsourcelang);
-            $disable = !$selected && ($same && !$this->canimprove || $same && !$langisrephrasable);
+            $disable  = !$selected && ($same && !$this->canimprove || $same && !$langisrephrasable);
         } else {
             $selected = $this->targetlang !== '' && $this->isrephrase($code, $this->targetlang);
-            $disable = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
+            $disable  = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
         }
         if ($same && $this->canimprove) {
             $text = self::REPHRASESYMBOL . $text;
             $code = self::REPHRASESYMBOL . $code;
         }
         return [
-            'code' => $code,
-            'lang' => $text,
-            'verbose' => $l->name,
+            'code'     => $code,
+            'lang'     => $text,
+            'verbose'  => $l->name,
             'selected' => $selected,
             'disabled' => $disable,
         ];
     }
 
     /**
-     * Check if source is same as target. Might call the rephrase instead.
+     * Check if source is same as target (rephrase / improve mode).
      *
      * @param string $source
      * @param string $target
@@ -552,31 +527,100 @@ class lang_helper {
     }
 
     /**
-     * Find the Deepl langs that are supported by this moodle instance.
+     * Filters a provider language list to only those installed in this Moodle instance.
      *
-     * @param array $deepls
-     * @return array
+     * @param translation_language[] $langs
+     * @return translation_language[]
      */
-    private function finddeeplsformoodle(array $deepls): array {
-        return array_filter($deepls, function ($item) {
+    private function finddeeplsformoodle(array $langs): array {
+        return array_values(array_filter($langs, function (translation_language $item): bool {
             foreach (array_keys($this->moodlelangs) as $moodlecode) {
-                $moodle = strtolower(str_replace('_', '-', $moodlecode));
-                $deepl = strtolower($item->code);
-                if (stripos($deepl, $moodle) !== false) {
+                $moodle   = strtolower(str_replace('_', '-', $moodlecode));
+                $provider = strtolower($item->code);
+                if (stripos($provider, $moodle) !== false) {
                     return true;
                 }
             }
             return false;
-        });
+        }));
     }
 
     /**
-     *  Prepare target options.
+     * Lists the compatible Moodle langs for the current target lang.
      *
      * @return array
      */
-    public function preparetargetsoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deepltargets), false);
+    public function findcompatiblelangs(): array {
+        if ($this->targetlang === '') {
+            return [];
+        }
+        $langroot    = $this->remove_regional_variant($this->targetlang);
+        $compatibles = [];
+        foreach (array_keys($this->moodlelangs) as $code) {
+            if (str_contains(strtoupper($code), $langroot)) {
+                $compatibles[] = $code;
+            }
+        }
+        asort($compatibles);
+        return array_values($compatibles);
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the active translation provider.
+     *
+     * @return translation_provider_interface|null
+     */
+    public function get_provider(): ?translation_provider_interface {
+        return $this->provider;
+    }
+
+    /**
+     * Returns the underlying DeepLClient for legacy code that still needs it.
+     *
+     * Returns null if the provider is not deepl_provider.
+     *
+     * @return \DeepL\DeepLClient|null
+     * @deprecated Use get_provider() instead.
+     */
+    public function gettranslator() {
+        if ($this->provider instanceof \local_deepler\local\translation\providers\deepl_provider) {
+            return $this->provider->get_client();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the API usage object.
+     *
+     * @return object|null  null if the provider does not support usage reporting.
+     */
+    public function getusage(): ?object {
+        if ($this->provider instanceof usage_capable_interface) {
+            return $this->provider->get_usage();
+        }
+        return null;
+    }
+
+    /**
+     * Getter for source languages.
+     *
+     * @return translation_language[]
+     */
+    public function getsourcelanguages(): array {
+        return $this->deeplsources;
+    }
+
+    /**
+     * Getter for target languages.
+     *
+     * @return translation_language[]
+     */
+    public function gettargelanguages(): array {
+        return $this->deepltargets;
     }
 
     /**
@@ -589,7 +633,7 @@ class lang_helper {
     }
 
     /**
-     * Getter for ability  to use the improve API.
+     * Getter for canimprove (legacy alias).
      *
      * @return bool
      */
@@ -598,66 +642,24 @@ class lang_helper {
     }
 
     /**
-     * Getter for deeplrephraselangs.
+     * Returns rephrase-supported language codes from the provider.
      *
-     * @return array
+     * @return string[]
      */
     public function get_deeplrephraselangs(): array {
-        return $this->deeplrephraselangs;
+        if ($this->provider instanceof rephrase_capable_interface) {
+            return $this->provider->get_rephrase_languages();
+        }
+        return [];
     }
 
     /**
-     * Lists the compatible moodle langs for the current target lang.
-     *
-     * @return array
-     * @throws \DeepL\DeepLException
-     */
-    public function findcompatiblelangs(): array {
-        if ($this->targetlang === '') {
-            return [];
-        }
-        $langroot = LanguageCode::removeRegionalVariant($this->targetlang);
-
-        $compatibles = [];
-        foreach (array_keys($this->moodlelangs) as $code) {
-            if (str_contains($code, $langroot)) {
-                $compatibles[] = $code;
-            }
-        }
-        // Sort the array by the lang code, starting with the simplest one obviously.
-        asort($compatibles);
-        $tab = [];
-        foreach ($compatibles as $item) {
-            $tab[] = $item;
-        }
-        return $tab;
-    }
-
-    /**
-     * Getter translator.
-     *
-     * @return \DeepL\DeepLClient|null
-     */
-    public function gettranslator(): ?DeepLClient {
-        return $this->translator;
-    }
-
-    /**
-     * Getter for main key.
+     * Getter for main API key.
      *
      * @return string
      */
     public function getapikey(): string {
         return $this->apikey;
-    }
-
-    /**
-     * Getter for target langs.
-     *
-     * @return array|\DeepL\Language[]
-     */
-    public function gettargelanguages(): array {
-        return $this->deepltargets;
     }
 
     /**
@@ -681,145 +683,6 @@ class lang_helper {
     }
 
     /**
-     * Adds a DeepL glossary if not yet stored in DB.
-     *
-     * @param array $deeplglossaries
-     * @return void
-     * @throws \dml_exception
-     */
-    public function adddeeplglossariesifunknown(array $deeplglossaries): void {
-        /** @var \DeepL\GlossaryInfo $deeplglossary */
-        foreach ($deeplglossaries as $deeplglossary) {
-            if (!glossary::exists($deeplglossary->glossaryId)) {
-                glossary::create(new glossary(
-                    $deeplglossary->glossaryId,
-                    $deeplglossary->name,
-                    $deeplglossary->sourceLang,
-                    $deeplglossary->targetLang,
-                    $deeplglossary->entryCount
-                ));
-            }
-        }
-    }
-
-    /**
-     * Return all glossaries for current user.
-     *
-     * @return array
-     * @throws \dml_exception
-     */
-    public function getusersglossaries(): array {
-        $glos = [];
-        $pivot = user_glossary::getallbyuser($this->user->id);
-
-        foreach ($pivot as $item) {
-            $glos[] = glossary::getbyid($item->glossaryid);
-        }
-        return $glos;
-    }
-
-    /**
-     * Get all glossaries uploaded by translators of the same pool (sharing the same api token).
-     *
-     * @param array|null $except
-     * @return array
-     * @throws \dml_exception
-     */
-    public function getpoolglossaries(?array $except = []): array {
-        // Build a set of IDs to avoid duplicates.
-        $ids = array_map(fn($o) => $o->glossaryid, $except);
-        $poolglossaries = glossary::getallbytokenid($this->dbtokenid);
-        // Filter glossaries not build by user.
-        return array_filter($poolglossaries, fn($glo) => !in_array($glo->glossaryid, $ids));
-    }
-
-    /**
-     * Get all dictionaries except those bound to an api token.
-     *
-     * @return array
-     * @throws \coding_exception
-     * @throws \dml_exception
-     */
-    public function getpublicglossaries() {
-        return glossary::getpublicexcepttokenid($this->dbtokenid);
-    }
-
-    /**
-     * Get All from DeepL add missing, remove deleted return all.
-     *
-     *
-     * @return glossary[]
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
-     */
-    public function syncdeeplglossaries(): array {
-        $deeplglossaries = $this->getalldeeplglossaries();
-        // Array of db IDs and DeepL's Glossary IDs.
-        $glossariesallids = glossary::getall_ids();
-        // Flatten Glossary IDs in DB.
-        $pluginsgloids = array_map(fn($o) => $o->glossaryid, $glossariesallids);
-        // Add those added from DeepL UI if missing.
-        foreach ($deeplglossaries as $deeplglossary) {
-            if (!in_array($deeplglossary->glossaryId, $pluginsgloids)) {
-                glossary::create(new glossary(
-                    $deeplglossary->glossaryId,
-                    $deeplglossary->name,
-                    $deeplglossary->sourceLang,
-                    $deeplglossary->targetLang,
-                    $deeplglossary->entryCount
-                ));
-            }
-        }
-        // Flatten DeepL's glo IDs.
-        $deeplsids = array_map(fn($o) => $o->glossaryId, $deeplglossaries);
-        // Delete those deleted from DeepL's UI.
-        $pluginidsotindeepl = array_filter($glossariesallids, function ($obj) use ($deeplsids) {
-            if (!in_array($obj->glossaryid, $deeplsids)) {
-                return $obj->id;
-            }
-        });
-        $idstodelete = array_map(fn($o) => $o->id, $pluginidsotindeepl);
-        foreach ($idstodelete as $deleteme) {
-            $this->deleteglossary($deleteme, true);
-        }
-        return glossary::getall('', '');
-    }
-
-    /**
-     * Fetches all glossaries.
-     *
-     * @return array
-     * @throws \DeepL\DeepLException
-     */
-    private function getalldeeplglossaries(): array {
-        return $this->translator->listGlossaries();
-    }
-
-    /**
-     * Delete user's glossary.
-     *
-     * @param int $glossarydbid
-     * @param bool $dbonly
-     * @return bool|null
-     * @throws \DeepL\DeepLException
-     * @throws \dml_exception
-     */
-    public function deleteglossary(int $glossarydbid, bool $dbonly = false): ?bool {
-        $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
-        $success = $dbonly;
-        if ($guid) {
-            // Public glossaries downloaded from DeepL do not have users.
-            $delete = user_glossary::delete($guid->id);
-        }
-        $glo = glossary::getbyid($glossarydbid);
-        if (!$dbonly) {
-            $success = $this->translator->deleteglossary($glo->glossaryid);
-        }
-        $deleted = glossary::delete($glossarydbid);
-        return $success && $deleted;
-    }
-
-    /**
      * Getter for the current token id.
      *
      * @return int
@@ -828,21 +691,148 @@ class lang_helper {
         return $this->dbtokenid;
     }
 
+    // -------------------------------------------------------------------------
+    // Glossary management (delegates to glossary_capable_interface)
+    // -------------------------------------------------------------------------
+
     /**
-     * Getter for allow beta.
+     * Adds provider glossaries that are not yet stored in DB.
      *
-     * @return mixed
+     * @param array $providerglossaries  Raw glossary objects from the provider.
+     * @return void
+     * @throws \dml_exception
      */
-    public function get_allowbeta(): mixed {
-        return $this->allowbeta;
+    public function adddeeplglossariesifunknown(array $providerglossaries): void {
+        foreach ($providerglossaries as $g) {
+            if (!glossary::exists($g->glossaryId)) {
+                glossary::create(new glossary(
+                    $g->glossaryId,
+                    $g->name,
+                    $g->sourceLang,
+                    $g->targetLang,
+                    $g->entryCount
+                ));
+            }
+        }
     }
+
+    /**
+     * Return all glossaries for the current user.
+     *
+     * @return array
+     * @throws \dml_exception
+     */
+    public function getusersglossaries(): array {
+        $glos  = [];
+        $pivot = user_glossary::getallbyuser($this->user->id);
+        foreach ($pivot as $item) {
+            $glos[] = glossary::getbyid($item->glossaryid);
+        }
+        return $glos;
+    }
+
+    /**
+     * Get all glossaries uploaded by translators sharing the same API token.
+     *
+     * @param array|null $except
+     * @return array
+     * @throws \dml_exception
+     */
+    public function getpoolglossaries(?array $except = []): array {
+        $ids          = array_map(fn($o) => $o->glossaryid, $except);
+        $poolglossaries = glossary::getallbytokenid($this->dbtokenid);
+        return array_filter($poolglossaries, fn($glo) => !in_array($glo->glossaryid, $ids));
+    }
+
+    /**
+     * Get all dictionaries except those bound to an API token.
+     *
+     * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function getpublicglossaries(): array {
+        return glossary::getpublicexcepttokenid($this->dbtokenid);
+    }
+
+    /**
+     * Syncs provider glossaries with local DB: adds missing, removes deleted.
+     *
+     * Only meaningful when the provider implements glossary_capable_interface.
+     *
+     * @return glossary[]
+     * @throws \dml_exception
+     */
+    public function syncdeeplglossaries(): array {
+        if (!($this->provider instanceof glossary_capable_interface)) {
+            return glossary::getall('', '');
+        }
+
+        $providerglossaries = $this->provider->list_glossaries();
+        $glossariesallids   = glossary::getall_ids();
+        $pluginsgloids      = array_map(fn($o) => $o->glossaryid, $glossariesallids);
+
+        foreach ($providerglossaries as $g) {
+            if (!in_array($g->glossaryId, $pluginsgloids)) {
+                glossary::create(new glossary(
+                    $g->glossaryId,
+                    $g->name,
+                    $g->sourceLang,
+                    $g->targetLang,
+                    $g->entryCount
+                ));
+            }
+        }
+
+        $providerids         = array_map(fn($o) => $o->glossaryId, $providerglossaries);
+        $pluginidsnotinprovider = array_filter(
+            $glossariesallids,
+            fn($obj) => !in_array($obj->glossaryid, $providerids)
+        );
+        foreach (array_map(fn($o) => $o->id, $pluginidsnotinprovider) as $deleteme) {
+            $this->deleteglossary($deleteme, true);
+        }
+
+        return glossary::getall('', '');
+    }
+
+    /**
+     * Delete a glossary from the provider and/or DB.
+     *
+     * @param int  $glossarydbid  Local DB row ID.
+     * @param bool $dbonly        If true, only removes from DB (not from provider).
+     * @return bool|null
+     * @throws \dml_exception
+     */
+    public function deleteglossary(int $glossarydbid, bool $dbonly = false): ?bool {
+        $guid    = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
+        $success = $dbonly;
+        if ($guid) {
+            user_glossary::delete($guid->id);
+        }
+        $glo = glossary::getbyid($glossarydbid);
+        if (!$dbonly && $this->provider instanceof glossary_capable_interface) {
+            try {
+                $this->provider->delete_glossary($glo->glossaryid);
+                $success = true;
+            } catch (\Throwable $e) {
+                $success = false;
+            }
+        }
+        $deleted = glossary::delete($glossarydbid);
+        return $success && $deleted;
+    }
+
+    // -------------------------------------------------------------------------
+    // Private HTML builder (kept for legacy renderers)
+    // -------------------------------------------------------------------------
 
     /**
      * Create HTML props for select.
      *
      * @param array $tab
      * @return string
-     * TODO MDL-0000 allow regional languages setup (expl EN-GB)
+     * TODO MDL-0000 allow regional languages setup (e.g. EN-GB)
      */
     private function preparehtmlotions(array $tab): string {
         $list = '';
@@ -858,62 +848,4 @@ class lang_helper {
         }
         return $list;
     }
-    /**
-     * Remove this when DeepL improves its API language list.
-     *
-     * @var array|string[] hardcoded list of beta languages for sources.
-     */
-    private array $betalanguages = [];
-    /**
-     * @var false|mixed|object|string|stdClass
-     */
-    private mixed $allowbeta;
-    /**
-     * Deepl usage bound to the api key.
-     *
-     * @var Usage
-     */
-    protected Usage $usage;
-    /**
-     * @var string The source language for deepl.
-     */
-    private string $deeplsourcelang;
-    /**
-     * @var string
-     */
-    private string $apikey;
-    /** @var int the db id for the API key matching the user */
-    private int $dbtokenid;
-    /**
-     * @var DeepLClient
-     */
-    private mixed $translator;
-    /**
-     * Languages available as source in Deepl's API.
-     *
-     * @var Language[]
-     */
-    private array $deeplsources;
-    /**
-     * Languages available as target in Deepl's API.
-     *
-     * @var Language[]
-     */
-    private array $deepltargets;
-    /**
-     * Type of DeepL subscrription.
-     *
-     * @var bool
-     */
-    private bool $keyisfree;
-    /**
-     * @var bool
-     */
-    private bool $canimprove;
-    /**
-     * @var array|string[]
-     */
-    private array $deeplrephraselangs;
-    /** @var \stdClass */
-    private stdClass $user;
 }

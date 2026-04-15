@@ -16,80 +16,113 @@
 
 namespace local_deepler\external;
 
-use DeepL\AppInfo;
-use DeepL\AuthorizationException;
-use DeepL\DeepLClient;
-use DeepL\DeepLException;
 use local_deepler\local\services\lang_helper;
+use local_deepler\local\translation\interfaces\translation_provider_interface;
 
 /**
- * Simple trait to reuse Deepl api key settings.
+ * Shared trait for external API classes that need a configured translation provider.
+ *
+ * Provides:
+ *   set_provider()     – creates and returns the configured translation provider.
+ *   setdeeplapikey()   – deprecated alias kept for backward compatibility.
+ *   chunk_payload()    – provider-agnostic payload chunker.
  *
  * @package local_deepler
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 trait deeplapi_trait {
+
     /**
-     * Set the key string.
-     * If empty, it will try to get it from the .env useful for tests runs.
+     * Creates and returns the configured translation provider for the current user.
+     *
+     * Initialises lang_helper (which resolves the API key via token-pool matching
+     * and instantiates the provider via translation_provider_factory) and returns
+     * the provider instance.
+     *
+     * @param string $version  Plugin version string forwarded to the provider.
+     * @return translation_provider_interface|null  null if initialisation failed.
+     * @throws \dml_exception
+     */
+    public static function set_provider(string $version): ?translation_provider_interface {
+        global $USER;
+        $languagepack = new lang_helper();
+        $initok = $languagepack->init_provider($USER, $version);
+        if ($initok) {
+            return $languagepack->get_provider();
+        }
+        return null;
+    }
+
+    /**
+     * Deprecated alias for set_provider().
+     *
+     * Returns the underlying DeepLClient for legacy callers that type-hint it.
+     * Returns null if the active provider is not DeepL.
      *
      * @param string $version
      * @return \DeepL\DeepLClient|null
-     * @throws \DeepL\DeepLException
      * @throws \dml_exception
+     * @deprecated Use set_provider() instead.
      */
-    public static function setdeeplapikey(string $version): DeepLClient|null {
+    public static function setdeeplapikey(string $version) {
         global $USER;
         $languagepack = new lang_helper();
-        $initok = $languagepack->initdeepl($USER, $version);
+        $initok = $languagepack->init_provider($USER, $version);
         if ($initok) {
             return $languagepack->gettranslator();
-        } else {
-            $configkey = get_config('local_deepler', 'apikey');
-            if ($configkey === '') {
-                $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
-            }
-            try {
-                return new DeepLClient($configkey, [
-                        'send_platform_info' => true,
-                        'app_info' => self::setdeeplappinfo($version),
-                ]);
-            } catch (DeepLException $e) {
-                return null;
-            }
         }
+        // Fallback: try to build a provider from global config for tests.
+        $configkey = get_config('local_deepler', 'apikey');
+        if (!$configkey) {
+            $configkey = getenv('DEEPL_APIKEY') ? getenv('DEEPL_APIKEY') : '';
+        }
+        if (empty($configkey)) {
+            return null;
+        }
+        try {
+            $provider = \local_deepler\local\translation\translation_provider_factory::make('deepl', $configkey, $version);
+            if ($provider instanceof \local_deepler\local\translation\providers\deepl_provider) {
+                return $provider->get_client();
+            }
+        } catch (\Throwable $e) {
+            return null;
+        }
+        return null;
     }
 
     /**
-     * Set the key string.
-     * If empty, it will try to get it from the .env useful for tests runs.
+     * Creates an AppInfo object for the DeepL SDK.
      *
-     * @param string $version
+     * @param string $version  Plugin version string.
      * @return \DeepL\AppInfo
+     * @deprecated Kept for backward compat with tests. Logic moved to deepl_provider constructor.
      */
-    public static function setdeeplappinfo(string $version): AppInfo {
-        return new AppInfo('Moodle-Deepler', $version);
+    public static function setdeeplappinfo(string $version): \DeepL\AppInfo {
+        return new \DeepL\AppInfo('Moodle-Deepler', $version);
     }
 
     /**
-     * Splits texts into chunks respecting DeepL's payload size limit.
+     * Splits texts into chunks respecting a maximum payload size limit.
      *
-     * @param array $items Array of items with 'text' and 'key'.
-     * @param array $staticparts Static parts of the payload (e.g. options, lang).
-     * @return array Array of chunks.
+     * Used by get_translation and get_rephrase to avoid hitting provider
+     * request-body size limits. The logic is provider-agnostic.
+     *
+     * @param array $items        Array of items with 'text' and 'key'.
+     * @param array $staticparts  Static parts of the payload (options, lang codes, …).
+     * @return array  Array of chunks, each chunk being an array of items.
      * @todo MDL-0000 Make maxbytes and buffer admin settings.
      */
     protected static function chunk_payload(array $items, array $staticparts): array {
-        $chunks = [];
-        $chunk = [];
-        $maxbytes = 100000;
+        $chunks      = [];
+        $chunk       = [];
+        $maxbytes    = 100000;
         $bufferbytes = 1024 * 16;
         $basepayload = implode('', array_map(function ($part) {
             return json_encode($part);
         }, $staticparts));
 
-        $basebytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes;
+        $basebytes  = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes;
         $chunkbytes = $basebytes;
 
         foreach ($items as $item) {
@@ -97,10 +130,10 @@ trait deeplapi_trait {
 
             if ($chunkbytes + $textbytes > $maxbytes && !empty($chunk)) {
                 $chunks[] = $chunk;
-                $chunk = [$item];
+                $chunk    = [$item];
                 $chunkbytes = $basebytes + $textbytes;
             } else {
-                $chunk[] = $item;
+                $chunk[]    = $item;
                 $chunkbytes += $textbytes;
             }
         }

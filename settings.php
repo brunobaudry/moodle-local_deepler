@@ -25,6 +25,7 @@
 
 use local_deepler\lib\admin_setting_deeplapikey_configtext;
 use local_deepler\lib\admin_setting_deepler_configjson;
+use local_deepler\local\translation\translation_provider_factory;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -40,11 +41,38 @@ if ($hassiteconfig) {
     // Main settings page.
     $settings = new admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
 
-    // Key setting.
+    // Provider selection.
+    $settings->add(new admin_setting_configselect(
+        'local_deepler/provider',
+        get_string('provider', 'local_deepler'),
+        get_string('provider_desc', 'local_deepler'),
+        'deepl',
+        translation_provider_factory::get_available_providers()
+    ));
+
+    // Key setting (DeepL).
     $settings->add(new admin_setting_deeplapikey_configtext(
         'local_deepler/apikey',
         get_string('apikeytitle', 'local_deepler'),
         get_string('apikeytitle_desc', 'local_deepler'),
+        '',
+        PARAM_RAW_TRIMMED,
+        40
+    ));
+
+    // LibreTranslate settings.
+    $settings->add(new admin_setting_configtext(
+        'local_deepler/libretranslate_url',
+        get_string('libretranslate_url', 'local_deepler'),
+        get_string('libretranslate_url_desc', 'local_deepler'),
+        'https://libretranslate.com',
+        PARAM_URL,
+        50
+    ));
+    $settings->add(new admin_setting_configtext(
+        'local_deepler/libretranslate_apikey',
+        get_string('libretranslate_apikey', 'local_deepler'),
+        get_string('libretranslate_apikey_desc', 'local_deepler'),
         '',
         PARAM_RAW_TRIMMED,
         40
