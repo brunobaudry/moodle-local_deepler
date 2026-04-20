@@ -537,7 +537,8 @@ class lang_helper {
             foreach (array_keys($this->moodlelangs) as $moodlecode) {
                 $moodle   = strtolower(str_replace('_', '-', $moodlecode));
                 $provider = strtolower($item->code);
-                if (stripos($provider, $moodle) !== false) {
+                // Exact match, or provider is less specific than the Moodle lang.
+                if ($provider === $moodle || str_starts_with($moodle, $provider . '-')) {
                     return true;
                 }
             }
