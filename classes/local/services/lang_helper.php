@@ -562,7 +562,7 @@ class lang_helper {
             foreach (array_keys($this->moodlelangs) as $moodlecode) {
                 $moodle = strtolower(str_replace('_', '-', $moodlecode));
                 $deepl = strtolower($item->code);
-                if (stripos($deepl, $moodle) !== false) {
+                if ($deepl === $moodle || str_starts_with($moodle, $deepl . '-')) {
                     return true;
                 }
             }
