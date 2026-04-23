@@ -28,6 +28,44 @@ for arg in "$@"; do
     exit 0
   fi
 done
+
+# ---------------------------------------------------------------------------
+# DDEV detection: if ddev is installed and the project is running, delegate
+# test execution to the web container.
+# ---------------------------------------------------------------------------
+DDEV_CONTAINER_SCRIPT_DIR="/var/www/html/moodle/public/local/deepler"
+
+# Walk up from SCRIPT_DIR to find the directory containing .ddev/
+find_ddev_root() {
+    local dir="$SCRIPT_DIR"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -d "$dir/.ddev" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    return 1
+}
+
+if command -v ddev &>/dev/null; then
+    DDEV_ROOT=$(find_ddev_root)
+#    echo $DDEV_ROOT
+    if [[ -n "$DDEV_ROOT" ]]; then
+        ddev_status=$(cd "$DDEV_ROOT" && ddev status 2>/dev/null)
+        echo "RUNNING IN DDEV $DDEV_ROOT $DDEV_CONTAINER_SCRIPT_DIR $ddev_status"
+        if echo "$ddev_status" | grep -qiE "running|[[:space:]]OK[[:space:]]|[[:space:]]OK$"; then
+            echo "DDEV is running — executing tests inside the web container..."
+            ddev exec --dir "$DDEV_CONTAINER_SCRIPT_DIR" bash run_tests.sh "$@"
+            exit $?
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Local execution (DDEV not running or not available)
+# ---------------------------------------------------------------------------
+
 # Initialize variables
 test_filter=""
 show_deprecations=""
@@ -41,8 +79,6 @@ for arg in "$@"; do
   fi
 done
 
-
-
 # Verify we can find the Moodle root (lib/phpunit/bootstrap.php must exist
 # two levels up — i.e. the plugin lives under <moodle>/local/deepler).
 if [[ ! -f "../../lib/phpunit/bootstrap.php" ]]; then
@@ -53,8 +89,6 @@ if [[ ! -f "../../lib/phpunit/bootstrap.php" ]]; then
     echo "       Invoke with: ddev exec --dir /var/www/html/moodle/public/local/deepler bash run_tests.sh"
     exit 1
 fi
-
-# Define the PHPUnit command
 
 # Detect PHPUnit binary
 if [[ -f "../../vendor/bin/phpunit" ]]; then
@@ -71,8 +105,6 @@ if [ -n "$test_filter" ]; then
   phpunit_cmd="$phpunit_cmd --filter $test_filter"
 fi
 
-# Define the initialization script
-
 # Detect Moodle version and set paths
 if [[ -f "../../admin/tool/phpunit/cli/init.php" ]]; then
     # Pre-5.1 structure
@@ -81,7 +113,6 @@ else
     # Moodle 5.1+ structure
     init_phpunit="php ../../../admin/tool/phpunit/cli/init.php"
 fi
-
 
 # Run the PHPUnit command and capture the output
 output=$($phpunit_cmd 2>&1)
