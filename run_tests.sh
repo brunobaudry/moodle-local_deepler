@@ -48,16 +48,23 @@ find_ddev_root() {
     return 1
 }
 
-if command -v ddev &>/dev/null; then
+if [[ -z "$IS_DDEV_PROJECT" ]] && command -v ddev &>/dev/null; then
     DDEV_ROOT=$(find_ddev_root)
 #    echo $DDEV_ROOT
     if [[ -n "$DDEV_ROOT" ]]; then
         ddev_status=$(cd "$DDEV_ROOT" && ddev status 2>/dev/null)
-        echo "RUNNING IN DDEV $DDEV_ROOT $DDEV_CONTAINER_SCRIPT_DIR $ddev_status"
-        if echo "$ddev_status" | grep -qiE "running|[[:space:]]OK[[:space:]]|[[:space:]]OK$"; then
-            echo "DDEV is running — executing tests inside the web container..."
-            ddev exec --dir "$DDEV_CONTAINER_SCRIPT_DIR" bash run_tests.sh "$@"
-            exit $?
+        echo "RUNNING IN DDEV $DDEV_ROOT $DDEV_CONTAINER_SCRIPT_DIR"
+        # echo "$ddev_status" | grep -qiE "running|[[:space:]]OK[[:space:]]|[[:space:]]OK$"
+        DDEV_DESCRIBE=$(ddev describe -j)
+        wwwroot=$(echo "$DDEV_DESCRIBE" | jq -r '.raw.primary_url')
+        echo $wwwroot
+        if [[ -n "$wwwroot" ]]; then
+          echo "DDEV is running — executing tests inside the web container..."
+                     ddev exec --dir "$DDEV_CONTAINER_SCRIPT_DIR" bash run_tests.sh "$@"
+                     exit $?
+        else
+          echo 'no go'
+          exit 1;
         fi
     fi
 fi
