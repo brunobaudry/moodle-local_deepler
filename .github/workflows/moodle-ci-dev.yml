@@ -103,7 +103,7 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin --branch master iarenaza/moodle-filter_multilang2
-          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1 --no-init
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
@@ -279,7 +279,7 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin --branch master iarenaza/moodle-filter_multilang2
-          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1 --no-init
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
