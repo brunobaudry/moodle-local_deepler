@@ -143,6 +143,9 @@ jobs:
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
+      - name: Initialize PHPUnit environment
+        if: ${{ always() }}
+        run: php moodle/admin/tool/phpunit/cli/init.php
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
@@ -290,7 +293,9 @@ jobs:
       - name: Mustache Lint
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
-
+      - name: Initialize PHPUnit environment
+        if: ${{ always() }}
+        run: php moodle/admin/tool/phpunit/cli/init.php
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
