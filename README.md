@@ -762,31 +762,34 @@ When not found it will highlight the alt text in yellow and italicised as seen a
        (Save all saves all selected translations by batch)
 4. Translation is saved in the database, with the {mlang} filter surrounding it. (DB icon)
 
-_Note* the following process when saving to the database _
+#### Note the following process when saving to the database
 
-The original content **has no MLANG tag** and the source lang is the main:
+##### The original content has NO MLANG tag ... 
+###### ... and the SOURCE lang is the main (Moodle's current language) :
 
-`{mlang other}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+    `{mlang other}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-The original content **has no MLANG tag** and the source lang is different from the main:
+###### ... and the SOURCE lang is a SECONDARY language (NOT Moodle's current language):
 
-`{mlang other}SOURCE_CONTENT{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+    `{mlang other}SOURCE_CONTENT{mlang} {mlang secondary_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-The original content **has already MLANG tag** and the source lang is the main:
+##### The original content HAS MLANG tag ...
+###### ...and the SOURCE lang is the main (Moodle's current language):
+    `{mlang other}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-`{mlang other}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+###### ... and the SOURCE lang is a SECONDARY language (NOT Moodle's current language) 
 
-The original content **has already MLANG tag** and the source lang is different from the main and there were **no {mlang other}**:
+1. ... and there was NO {mlang other} :
 
-`{mlang other}SOURCE_CONTENT{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+    `{mlang other}SOURCE_CONTENT{mlang} {mlang secondary_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
-The original content **has already MLANG tag** and the source lang is different from the main and there were **already a {mlang other**:
+2. ... and there already was a {mlang other} :
 
-`{mlang other}ANOTHER_SOURCE{mlang} {mlang special_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
+    `{mlang other}ANOTHER_SOURCE{mlang} {mlang secondary_source_lang}SOURCE_CONTENT{mlang} {mlang target_lang}TRANSLATED_CONTENT{mlang}`
 
 #### Field size warning (DB max char)
 Moodle has this script limitation of field sizes. (understandable for db optimization)
-When translating you can find yourself generating more characters than the Database can handle.
+When translating, you can find yourself generating more characters than the Database can handle.
 Then the Plugin would yield a "Database error".
 But this can be annoying if you already called the DeepL API as you would have consumed the translation.
 To warn you the plugin will display a message with the actual character count and the DB mas field size.
