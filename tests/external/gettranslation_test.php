@@ -202,15 +202,19 @@ final class gettranslation_test extends base_external {
     }
 
     /**
-     * Verifies that HTML-heavy content (< > chars) is measured URL-encoded,
-     * so a single item with ~34 000 raw '<'-chars (≈102 000 url-encoded bytes)
+     * Verifies that HTML-heavy content (< chars) is measured URL-encoded,
+     * so a single item with 34 000 raw '<'-chars (exactly 102 000 url-encoded bytes)
      * exceeds maxbytes and lands in its own chunk.
      *
      * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
      * @return void
      */
     public function test_chunkpayload_urlencode_expansion(): void {
-        // '<' url-encodes to '%3C' (3 bytes). 34 000 chars → 102 000 url-encoded bytes.
+        if ($this->is_below_four_one()) {
+            return;
+        }
+        // '<' url-encodes to '%3C' (3 bytes). 34 000 chars → exactly 102 000 url-encoded bytes.
         // Two such items: each must land in its own chunk (maxbytes default 100 000).
         $items = [
             ['text' => str_repeat('<', 34000), 'key' => 'a'],

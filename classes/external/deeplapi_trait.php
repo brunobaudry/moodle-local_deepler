@@ -82,8 +82,8 @@ trait deeplapi_trait {
     protected static function chunk_payload(array $items, array $staticparts): array {
         $chunks = [];
         $chunk = [];
-        $maxbytes = (int) (get_config('local_deepler', 'maxchunkbytes') ?: 100000);
-        $bufferbytes = (int) (get_config('local_deepler', 'maxchunkbuffer') ?: 16384);
+        $maxbytes = max(1000, (int) (get_config('local_deepler', 'maxchunkbytes') ?: 100000));
+        $bufferbytes = max(0, (int) (get_config('local_deepler', 'maxchunkbuffer') ?: 16384));
         $basepayload = implode('', array_map(function ($part) {
             return json_encode($part);
         }, $staticparts));

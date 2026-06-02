@@ -178,6 +178,7 @@ define([
          * @param {string} sourceTextEncoded
          * @param {string} multilangRawTextEncoded
          * @param {string} sourceLang
+         * @param {object} escapePatterns Which token types to activate: {PRETAG, LATEX, DATAURI}.
          */
         const initTempForKey = (key, editorSettings, sourceTextEncoded, multilangRawTextEncoded, sourceLang, escapePatterns = {}) => {
             const sourceText = Utils.fromBase64(sourceTextEncoded);
