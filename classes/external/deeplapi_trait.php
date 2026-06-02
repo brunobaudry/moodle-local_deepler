@@ -78,22 +78,21 @@ trait deeplapi_trait {
      * @param array $items Array of items with 'text' and 'key'.
      * @param array $staticparts Static parts of the payload (e.g. options, lang).
      * @return array Array of chunks.
-     * @todo MDL-0000 Make maxbytes and buffer admin settings.
      */
     protected static function chunk_payload(array $items, array $staticparts): array {
         $chunks = [];
         $chunk = [];
-        $maxbytes = 100000;
-        $bufferbytes = 1024 * 16;
+        $maxbytes = (int) (get_config('local_deepler', 'maxchunkbytes') ?: 100000);
+        $bufferbytes = (int) (get_config('local_deepler', 'maxchunkbuffer') ?: 16384);
         $basepayload = implode('', array_map(function ($part) {
             return json_encode($part);
         }, $staticparts));
 
-        $basebytes = strlen(mb_convert_encoding($basepayload, 'UTF-8')) + $bufferbytes;
+        $basebytes = strlen(urlencode($basepayload)) + $bufferbytes;
         $chunkbytes = $basebytes;
 
         foreach ($items as $item) {
-            $textbytes = strlen(mb_convert_encoding($item['text'], 'UTF-8'));
+            $textbytes = strlen(urlencode($item['text']));
 
             if ($chunkbytes + $textbytes > $maxbytes && !empty($chunk)) {
                 $chunks[] = $chunk;
