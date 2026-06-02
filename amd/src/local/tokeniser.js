@@ -24,7 +24,8 @@ define([], () => {
      */
     const patterns = [
         {regex: /<pre\b[^>]*>(.*?)<\/pre>/gs, type: 'PRETAG'}, // Pre HTML.
-        {regex: /\$\$.*?\$\$/g, type: 'LATEX'} // Display math.
+        {regex: /\$\$.*?\$\$/g, type: 'LATEX'}, // Display math.
+        {regex: /<img\b[^>]*?src=(?:"data:[^"]*"|'data:[^']*')[^>]*?>/gs, type: 'DATAURI'}, // Inline base64 images.
     ];
 
 
