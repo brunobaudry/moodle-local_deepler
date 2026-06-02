@@ -234,6 +234,19 @@ $string['pluginversion'] = 'Current version';
 $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
 $string['preescapeadmin_desc'] = 'If enabled, &lt;pre&gt;...&lt;/pre&gt; content will not be sent to translation';
+$string['stripimagesadmin'] = 'Strip inline images from DeepL payload (default for translation page)';
+$string['stripimagesadmin_desc'] = 'When enabled, &lt;img&gt; tags with embedded base64 data: URIs are
+replaced by tokens before sending content to DeepL and restored afterwards.
+This prevents HTTP 413 errors caused by large binary blobs inflating the payload.
+Disable only if you specifically need DeepL to see the surrounding image context.';
+$string['stripimages'] = 'Strip inline base64 images (avoids HTTP 413 on large images)';
+$string['maxchunkbytes'] = 'DeepL payload chunk limit (bytes)';
+$string['maxchunkbytes_desc'] = 'Maximum URL-encoded bytes per DeepL translate request.
+DeepL\'s hard limit is 131 072 bytes (128 KiB). The default 100 000 leaves margin for
+HTTP envelope overhead. Only raise this if DeepL rejects requests for being too small.';
+$string['maxchunkbuffer'] = 'DeepL payload buffer (bytes)';
+$string['maxchunkbuffer_desc'] = 'Reserved bytes per chunk for static parameters (target_lang, options, etc.).
+Default 16 384 is safe for all DeepL option combinations.';
 $string['preserveformatting'] = 'Preserve formatting';
 $string['privacy:metadata'] = 'The DeepLer plugin does not store any personal data.';
 $string['rephraseinfos'] =

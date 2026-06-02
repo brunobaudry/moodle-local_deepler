@@ -82,6 +82,34 @@ if ($hassiteconfig) {
         true
     ));
 
+    // Strip inline base64 images from DeepL payload.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_deepler/stripimagesadmin',
+        get_string('stripimagesadmin', 'local_deepler'),
+        get_string('stripimagesadmin_desc', 'local_deepler'),
+        true
+    ));
+
+    // DeepL chunk byte limit.
+    $settings->add(new admin_setting_configtext(
+        'local_deepler/maxchunkbytes',
+        get_string('maxchunkbytes', 'local_deepler'),
+        get_string('maxchunkbytes_desc', 'local_deepler'),
+        100000,
+        PARAM_INT,
+        7
+    ));
+
+    // DeepL chunk buffer.
+    $settings->add(new admin_setting_configtext(
+        'local_deepler/maxchunkbuffer',
+        get_string('maxchunkbuffer', 'local_deepler'),
+        get_string('maxchunkbuffer_desc', 'local_deepler'),
+        16384,
+        PARAM_INT,
+        7
+    ));
+
     // Allow beta languages.
     $settings->add(new admin_setting_configcheckbox(
         'local_deepler/allowbeta',
