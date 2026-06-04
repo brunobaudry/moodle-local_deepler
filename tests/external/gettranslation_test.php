@@ -200,4 +200,34 @@ final class gettranslation_test extends base_external {
         $this->assertCount(2, $result);
         $this->assertCount(1, $result[1]);
     }
+
+    /**
+     * Verifies that HTML-heavy content (< chars) is measured URL-encoded,
+     * so a single item with 34 000 raw '<'-chars (exactly 102 000 url-encoded bytes)
+     * exceeds maxbytes and lands in its own chunk.
+     *
+     * @covers \local_deepler\external\get_translation::chunk_payload
+     * @covers \local_deepler\external\get_rephrase::chunk_payload
+     * @return void
+     */
+    public function test_chunkpayload_urlencode_expansion(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
+        // '<' url-encodes to '%3C' (3 bytes). 34 000 chars → exactly 102 000 url-encoded bytes.
+        // Two such items: each must land in its own chunk (maxbytes default 100 000).
+        $items = [
+            ['text' => str_repeat('<', 34000), 'key' => 'a'],
+            ['text' => str_repeat('<', 34000), 'key' => 'b'],
+        ];
+        $staticparts = ['meta' => 'x'];
+        $result = self::callprotectedstaticmethod(
+            get_translation::class,
+            'chunk_payload',
+            [$items, $staticparts]
+        );
+        $this->assertCount(2, $result, 'Each HTML-heavy item must be its own chunk after url-encoding');
+        $this->assertCount(1, $result[0]);
+        $this->assertCount(1, $result[1]);
+    }
 }

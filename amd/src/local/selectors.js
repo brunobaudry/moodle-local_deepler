@@ -44,6 +44,7 @@ define([], ()=>{
             showHidden: '[data-action="local_deepler/show-hidden"]',
             escapeLatex: '[data-id="local_deepler/latexeascape"]',
             escapePre: '[data-id="local_deepler/preescape"]',
+            stripImages: '[data-id="local_deepler/stripimages"]',
             toggleMultilang: '#toggleMultilang',
             letsdobutton: '[data-action="local_mlangremover/letsdobutton"]', //
             removeRadios: '[name="local_mlangremover/removehow"]', //

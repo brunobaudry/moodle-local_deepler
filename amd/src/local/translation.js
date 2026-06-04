@@ -24,7 +24,6 @@ define([
     'core/log', './api', './utils', './selectors', './tokeniser', './customevents'],
     (Log, Api, Utils, Selectors, Tokeniser, Events) => {
         let tempTranslations = {};
-        let escapePatterns = {};
         let mainSourceLang = "";
         let deeplSourceLang = "";
         let targetLang = "";
@@ -179,8 +178,9 @@ define([
          * @param {string} sourceTextEncoded
          * @param {string} multilangRawTextEncoded
          * @param {string} sourceLang
+         * @param {object} escapePatterns Which token types to activate: {PRETAG, LATEX, DATAURI}.
          */
-        const initTempForKey = (key, editorSettings, sourceTextEncoded, multilangRawTextEncoded, sourceLang) => {
+        const initTempForKey = (key, editorSettings, sourceTextEncoded, multilangRawTextEncoded, sourceLang, escapePatterns = {}) => {
             const sourceText = Utils.fromBase64(sourceTextEncoded);
             const fieldText = Utils.fromBase64(multilangRawTextEncoded);
             const tokenised = Tokeniser.preprocess(sourceText, escapePatterns);
