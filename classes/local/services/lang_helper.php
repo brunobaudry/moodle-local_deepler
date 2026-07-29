@@ -516,13 +516,15 @@ class lang_helper {
         $code = LanguageCode::standardizeLanguageCode($l->code);
         $same = $issource ? $this->isrephrase($code, '') : $this->isrephrase('', $code);
         $text = $isverbose ? $l->name : $code;
-        $langisrephrasable = in_array($code, $this->deeplrephraselangs, true);
+        $langisrephrasable = $this->isrephrasable($code);
 
         if ($issource) {
-            $selected = $this->isrephrase($code, $this->deeplsourcelang);
+            // Sources are already stripped from their regional variant, hence a strict comparison.
+            $selected = $code === $this->deeplsourcelang;
             $disable = !$selected && ($same && !$this->canimprove || $same && !$langisrephrasable);
         } else {
-            $selected = $this->targetlang !== '' && $this->isrephrase($code, $this->targetlang);
+            // Targets do keep their regional variant, only the very one chosen must be flagged selected.
+            $selected = $this->targetlang !== '' && $code === $this->targetlang;
             $disable = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
         }
         if ($same && $this->canimprove) {
@@ -540,15 +542,42 @@ class lang_helper {
 
     /**
      * Check if source is same as target. Might call the rephrase instead.
+     * Regional variants of the same language are considered the same language,
+     * as DeepL only exposes EN-GB/EN-US (resp. PT-BR/PT-PT) as targets while sources are plain EN (resp. PT).
      *
      * @param string $source
      * @param string $target
      * @return bool
+     * @throws \DeepL\DeepLException
      */
     public function isrephrase(string $source = '', string $target = ''): bool {
         $s = $source === '' ? $this->deeplsourcelang : $source;
         $t = $target === '' ? $this->targetlang : $target;
-        return str_contains($t, $s);
+        if ($s === '' || $t === '') {
+            return false;
+        }
+        return LanguageCode::removeRegionalVariant($s) === LanguageCode::removeRegionalVariant($t);
+    }
+
+    /**
+     * Checks if DeepL can improve (rephrase) texts in the given language.
+     * Matching is done on the root language, so EN matches EN-GB and EN-US, PT matches PT-BR and PT-PT.
+     *
+     * @param string $lang
+     * @return bool
+     * @throws \DeepL\DeepLException
+     */
+    public function isrephrasable(string $lang): bool {
+        if ($lang === '') {
+            return false;
+        }
+        $root = LanguageCode::removeRegionalVariant($lang);
+        foreach ($this->deeplrephraselangs as $rephrasable) {
+            if (LanguageCode::removeRegionalVariant($rephrasable) === $root) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -558,16 +587,47 @@ class lang_helper {
      * @return array
      */
     private function finddeeplsformoodle(array $deepls): array {
-        return array_filter($deepls, function ($item) {
+        $deeplroots = $this->findrootlangs($deepls);
+        return array_filter($deepls, function ($item) use ($deeplroots) {
+            $deepl = strtolower($item->code);
+            $deeplisvariant = str_contains($deepl, '-');
             foreach (array_keys($this->moodlelangs) as $moodlecode) {
                 $moodle = strtolower(str_replace('_', '-', $moodlecode));
-                $deepl = strtolower($item->code);
-                if ($deepl === $moodle || str_starts_with($moodle, $deepl . '-')) {
+                // Same language: fr <> FR, pt_br <> PT-BR.
+                if ($deepl === $moodle) {
+                    return true;
+                }
+                // Moodle's regional variant of a DeepL language: pt_br <> PT, zh_cn <> ZH.
+                if (str_starts_with($moodle, $deepl . '-')) {
+                    return true;
+                }
+                // DeepL's regional variant of a Moodle language: en <> EN-GB and EN-US, pt <> PT-BR and PT-PT.
+                // Only when DeepL has no plain code for that language, as it has none as target for EN and PT.
+                // Otherwise FR would also bring FR-FR and FR-CA, DE would bring DE-DE and DE-CH etc.
+                if ($deeplisvariant && !isset($deeplroots[$moodle]) && str_starts_with($deepl, $moodle . '-')) {
                     return true;
                 }
             }
             return false;
         });
+    }
+
+    /**
+     * Lists the languages a DeepL list provides without any regional variant.
+     * DeepL has no plain EN nor PT as target, only EN-GB/EN-US and PT-BR/PT-PT.
+     *
+     * @param array $deepls
+     * @return array Codes as keys, lowercased.
+     */
+    private function findrootlangs(array $deepls): array {
+        $roots = [];
+        foreach ($deepls as $item) {
+            $code = strtolower($item->code);
+            if (!str_contains($code, '-')) {
+                $roots[$code] = true;
+            }
+        }
+        return $roots;
     }
 
     /**
