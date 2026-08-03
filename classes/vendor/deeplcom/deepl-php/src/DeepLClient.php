@@ -38,7 +38,7 @@ class DeepLClient extends Translator
         $response = $this->client->sendRequestWithBackoff(
             'POST',
             '/v2/write/rephrase',
-            [HttpClientWrapper::OPTION_PARAMS => $params]
+            [HttpClientWrapper::OPTION_JSON => json_encode($params)]
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
@@ -676,6 +676,51 @@ class DeepLClient extends Translator
             "/v3/style_rules/" . rawurlencode($styleId) . "/custom_instructions/" . rawurlencode($instructionId)
         );
         $this->checkStatusCode($response);
+    }
+
+    /**
+     * Queries languages supported by the DeepL API for the given resource. Returns each
+     * language with its per-feature support information.
+     * @param string $resource Resource to query support for, see the RESOURCE_* constants on
+     *  {@see LanguageResource}.
+     * @param string[]|null $include Optional list of include values, for example
+     *  {@see LanguageSupport::INCLUDE_BETA} or {@see LanguageSupport::INCLUDE_EXTERNAL}. By default only
+     *  stable languages and features are returned.
+     * @return LanguageSupport[] Array of LanguageSupport objects containing per-feature support information.
+     * @throws DeepLException
+     */
+    public function getLanguagesForResource(string $resource, ?array $include = null): array
+    {
+        if (strlen($resource) === 0) {
+            throw new DeepLException('resource must be a non-empty string');
+        }
+
+        $queryString = '?' . http_build_query(['resource' => $resource]);
+        if ($include !== null) {
+            // include is repeated as include=<value>; http_build_query would index it as include[0]=
+            foreach ($include as $value) {
+                $queryString .= '&include=' . urlencode($value);
+            }
+        }
+
+        $response = $this->client->sendRequestWithBackoff('GET', "/v3/languages$queryString");
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return LanguageSupport::parseList($content);
+    }
+
+    /**
+     * Queries the resources supported by the DeepL API, along with their features and
+     * whether each feature requires support from the source/target language.
+     * @return LanguageResource[] Array of LanguageResource objects, one per supported resource.
+     * @throws DeepLException
+     */
+    public function getLanguageResources(): array
+    {
+        $response = $this->client->sendRequestWithBackoff('GET', '/v3/languages/resources');
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return LanguageResource::parseList($content);
     }
 
     /**
