@@ -20,7 +20,7 @@
 
   <php>
     <!--<const name="PHPUNIT_LONGTEST" value="1"/> uncomment to execute also slow or otherwise expensive tests-->
-    <const name="PHPUNIT_SEQUENCE_START" value="133000"/>
+    <const name="PHPUNIT_SEQUENCE_START" value="103000"/>
 
     <!--Following constants instruct tests to fetch external test files from alternative location
         or skip tests if empty, clone https://github.com/moodlehq/moodle-exttests to local web server-->
@@ -1046,6 +1046,11 @@
       <directory suffix="_test.php">../public/grade/import/csv/tests</directory>
       <exclude>../public/grade/import/csv/tests/classes</exclude>
       <exclude>../public/grade/import/csv/tests/fixtures</exclude>
+    </testsuite>
+    <testsuite name="gradeimport_xml_testsuite">
+      <directory suffix="_test.php">../public/grade/import/xml/tests</directory>
+      <exclude>../public/grade/import/xml/tests/classes</exclude>
+      <exclude>../public/grade/import/xml/tests/fixtures</exclude>
     </testsuite>
     <testsuite name="gradepenalty_duedate_testsuite">
       <directory suffix="_test.php">../public/grade/penalty/duedate/tests</directory>
@@ -3630,6 +3635,13 @@
       <file>../public/grade/import/csv/locallib.php</file>
       <file>../public/grade/import/csv/renderer.php</file>
       <file>../public/grade/import/csv/rsslib.php</file>
+      <directory suffix=".php">../public/grade/import/xml/classes</directory>
+      <directory suffix=".php">../public/grade/import/xml/tests/generator</directory>
+      <file>../public/grade/import/xml/externallib.php</file>
+      <file>../public/grade/import/xml/lib.php</file>
+      <file>../public/grade/import/xml/locallib.php</file>
+      <file>../public/grade/import/xml/renderer.php</file>
+      <file>../public/grade/import/xml/rsslib.php</file>
       <directory suffix=".php">../public/grade/penalty/duedate/classes</directory>
       <directory suffix=".php">../public/grade/penalty/duedate/tests/generator</directory>
       <file>../public/grade/penalty/duedate/externallib.php</file>

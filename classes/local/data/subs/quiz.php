@@ -22,6 +22,7 @@ use mod_quiz\quiz_settings;
 use mod_quiz\structure;
 use qtype_random;
 use question_bank;
+use dml_missing_record_exception;
 
 /**
  * Subclass for quiz with sub questions.
@@ -38,16 +39,26 @@ class quiz {
      * @throws \dml_exception
      */
     public function __construct(cm_info $quiz) {
+        global $DB;
         $this->quiz = $quiz;
         $slots = $this->getslots($quiz);
         $this->questions = [];
         $hasrandom = false;
         foreach ($slots as $slot) {
-            if ($slot->qtype === 'random') {
+            $israndom = $DB->record_exists(
+            'question_set_references',
+                [
+                    'component' => 'mod_quiz',
+                    'questionarea' => 'slot',
+                    'itemid' => $slot->id,
+                ]
+            );
+            // Seems like there a new slot attribute to describe random questions.
+            if ($israndom) {
                 $hasrandom = true;
                 $this->fetchrandomquestions($slot->id);
             } else {
-                $this->questions[] = question_bank::load_question($slot->questionid, false);
+                    $this->questions[] = question_bank::load_question($slot->questionid, false);
             }
         }
         // Remove duplicates (often in a quiz whith random questions).
@@ -89,7 +100,64 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
             return $structure->get_slots();
         }
     }
+    private function get_available_questions_from_category(
+        int $categoryid,
+        bool $includesubs
+    ): array {
+        global $DB;
 
+        $categoryids = [$categoryid];
+
+        if ($includesubs) {
+            $category = $DB->get_record(
+                'question_categories',
+                ['id' => $categoryid],
+                'id,path',
+                MUST_EXIST
+            );
+
+            $subcategories = $DB->get_fieldset_select(
+                'question_categories',
+                'id',
+                $DB->sql_like('path', ':path'),
+                ['path' => $category->path . '/%']
+            );
+
+            $categoryids = array_merge($categoryids, $subcategories);
+        }
+
+        [$catsql, $params] = $DB->get_in_or_equal(
+            $categoryids,
+            SQL_PARAMS_NAMED,
+            'cat'
+        );
+
+        $params['status1'] = 'ready';
+        $params['status2'] = 'ready';
+
+        $sql = "
+    SELECT q.id
+      FROM {question} q
+      JOIN {question_versions} qv
+        ON qv.questionid = q.id
+      JOIN {question_bank_entries} qbe
+        ON qbe.id = qv.questionbankentryid
+     WHERE qbe.questioncategoryid {$catsql}
+       AND qv.status = :status1
+       AND qv.version = (
+            SELECT MAX(qv2.version)
+              FROM {question_versions} qv2
+             WHERE qv2.questionbankentryid = qv.questionbankentryid
+               AND qv2.status = :status2
+       )
+       AND q.qtype <> 'missingtype'
+";
+        //debugging($sql);
+        //debugging(print_r($params, true));
+        //var_dump($params);
+//die();
+        return $DB->get_fieldset_sql($sql, $params);
+    }
     /**
      * Special method to fetch random questions.
      *
@@ -99,9 +167,9 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      */
     public function fetchrandomquestions(int $slotid): void {
         global $DB, $CFG;
-        require_once($CFG->dirroot . '/question/type/random/questiontype.php');
+        //require_once($CFG->dirroot . '/question/type/random/questiontype.php');
 
-        $qtyperandom = new qtype_random();
+        //$qtyperandom = new qtype_random();
 
         // Read the reference for this slot and decode its filter.
         $reference = $DB->get_record('question_set_references', [
@@ -157,7 +225,11 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         }
 
         // Get available question ids using Moodle random qtype helper (handles excluded qtypes etc.).
-        $questionids = $qtyperandom->get_available_questions_from_category($categoryid, $includesubs);
+        //$questionids = $qtyperandom->get_available_questions_from_category($categoryid, $includesubs);
+        $questionids = $this->get_available_questions_from_category(
+            $categoryid,
+            $includesubs
+        );
 
         if (empty($questionids)) {
             return; // No candidates.

@@ -930,6 +930,13 @@ rename .env-dist to .env and set there your own api key
 **DEEPL_API_TOKEN=DEFAULT** **DEEPL_API_TOKEN=YOUR_OWN_DEEPL_API_KEY**
 (You can add both a pro or a free key, we recommend that you do the tests with a free one).
 
+- Composer: Use ```composer install --no-dev``` in this repo — a plain composer install re-breaks PHPUnit the same way. The dev packages (phpunit/, phpstan/, phpspec/, nikic/, 
+  …) are currently untracked build output in classes/vendor/.
+- sebastian/comparator|diff|exporter|recursion-context ^4.0 sit in require, not require-dev, and no plugin code references SebastianBergmann — they're PHPUnit 9 leftovers that a 
+prepended autoloader can still push in front of core's v6.
+- The plugin's committed phpunit.xml (334 KB, 428 core testsuites) looks accidental. The script now ignores it, but it's a landmine for anything invoking phpunit from that 
+directory.
+
 #### Github Moodle CI Actions 
 If you intend to test in your forked repo this code with Moodle CI.
 Ensure you also add a **Repository secret** with the **DEEPL_API_TOKEN** (as with the .env)

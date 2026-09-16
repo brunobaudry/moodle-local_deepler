@@ -24,6 +24,7 @@ use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use DeepL\Language;
 use DeepL\LanguageCode;
+use DeepL\LanguageResource;
 use Deepl\Usage;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
@@ -227,6 +228,9 @@ class lang_helper {
             $this->usage = $this->translator->getUsage();
             $this->canimprove = !$this->keyisfree;
             $this->deeplsources = $this->translator->getSourceLanguages();
+            $translatelanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_TRANSLATE_TEXT);
+            $tmxlanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_TRANSLATION_MEMORY);
+            $imporvelanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_WRITE);
             $this->deepltargets = $this->translator->getTargetLanguages();
             if ($this->allowbeta) {
                 $this->deeplsources = array_merge($this->deeplsources, $this->betalanguages);
