@@ -1,11 +1,34 @@
 
 #!/usr/bin/env bash
 set -euo pipefail
+FOUND_DIR=''
+find_parent_with_items() {
+    local dir="$PWD"
 
-npx update-browserslist-db@latest --yes
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/config.php" && -f "$dir/gruntfile.js" && -d "$dir/admin" ]]; then
+            FOUND_DIR="$dir"
+            return 0
+        fi
+
+        dir=$(dirname "$dir")
+    done
+
+    return 1
+}
+
+if find_parent_with_items; then
+    echo "Moodle parent found"
+    cd $FOUND_DIR
+else 
+  echo = "Moodle parent not found"
+  exit 1    
+fi
+
 # Go to project root
-cd ../../../
-
+#cd ../../
+pwd
+npx update-browserslist-db@latest --yes
 # Ensure NVM is available in non-interactive shells
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
