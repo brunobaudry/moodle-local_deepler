@@ -257,6 +257,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             }
             settingsUI[Selectors.actions.escapeLatex] = domQuery(Selectors.actions.escapeLatex);
             settingsUI[Selectors.actions.escapePre] = domQuery(Selectors.actions.escapePre);
+            settingsUI[Selectors.actions.stripImages] = domQuery(Selectors.actions.stripImages);
             fetchCookies();
             resizeEditors();
         } catch (e) {
@@ -731,6 +732,13 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         );
         const keys = [];
         const [cookie, settings] = prepareSettingsAndCookieValues();
+        // Build escapePatterns from current UI state before calling initTempForKey.
+        // Previously escapePatterns was a module-level {} in translation.js, never populated.
+        const escapePatterns = {
+            PRETAG: settingsUI[Selectors.actions.escapePre]?.checked ?? false,
+            LATEX: settingsUI[Selectors.actions.escapeLatex]?.checked ?? false,
+            DATAURI: settingsUI[Selectors.actions.stripImages]?.checked ?? false,
+        };
         saveAllBtn.disabled = false;
         domQueryAll(Selectors.statuses.checkedCheckBoxes)
             .forEach((ckBox) => {
@@ -741,7 +749,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                     key, editor,
                     sourceText.getAttribute("data-sourcetext-raw"),
                     sourceText.getAttribute("data-filedtext-raw"),
-                    domQuery(Selectors.sourcetexts.sourcelangdd, key).value
+                    domQuery(Selectors.sourcetexts.sourcelangdd, key).value,
+                    escapePatterns
                 );
                 keys.push(key);
             });

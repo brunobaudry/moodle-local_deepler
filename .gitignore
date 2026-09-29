@@ -12,3 +12,5 @@ Gruntfile.js
 *.csv
 language_expansion_ratio_matrix_iso.csv
 language_expansion_ratio_matrix_iso_updated.csv
+# Internal planning/superpowers docs
+docs/

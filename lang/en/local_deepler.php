@@ -212,6 +212,13 @@ $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
 $string['latexescapeadmin_desc'] = 'If enabled, the plugin will set "escape LaTeX formulas" to true in the course translation form (advanced settings).
 Disable it here if your organisation rarely uses LaTeX formulas in the courses to slightly improve DeepLer\'s performances.';
+$string['maxchunkbuffer'] = 'DeepL payload buffer (bytes)';
+$string['maxchunkbuffer_desc'] = 'Reserved bytes per chunk for static parameters (target_lang, options, etc.).
+Default 16 384 is safe for all DeepL option combinations.';
+$string['maxchunkbytes'] = 'DeepL payload chunk limit (bytes)';
+$string['maxchunkbytes_desc'] = 'Maximum URL-encoded bytes per DeepL translate request.
+DeepL\'s hard limit is 131 072 bytes (128 KiB). The default 100 000 leaves margin for
+HTTP envelope overhead. Only raise this if DeepL rejects requests for being too small.';
 $string['missingmainapikey'] = 'First add a default API key to use this feature';
 $string['modeltpreferqualityoptimized'] = 'prefer quality optimized';
 $string['modeltype'] = 'Model';
@@ -274,6 +281,12 @@ $string['statussuccess'] = 'Succeeded';
 $string['statustosave'] = 'Save this';
 $string['statustotranslate'] = 'Ready to translate';
 $string['statuswait'] = 'Not selected';
+$string['stripimages'] = 'Strip inline base64 images (avoids HTTP 413 on large images)';
+$string['stripimagesadmin'] = 'Strip inline images from DeepL payload (default for translation page)';
+$string['stripimagesadmin_desc'] = 'When enabled, &lt;img&gt; tags with embedded base64 data: URIs are
+replaced by tokens before sending content to DeepL and restored afterwards.
+This prevents HTTP 413 errors caused by large binary blobs inflating the payload.
+Disable only if you specifically need DeepL to see the surrounding image context.';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
 $string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
