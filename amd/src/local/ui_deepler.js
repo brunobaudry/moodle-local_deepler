@@ -894,6 +894,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {bool} shouldBeChecked
      */
     const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
+        window.console.warn(`ui/toggleChildCheckBoxSelection`, key, Selectors.editors.multiples.checkBoxesWithKey);
         const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
         single.checked = shouldBeChecked;
         toggleStatus(key, false);
