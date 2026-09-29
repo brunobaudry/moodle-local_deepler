@@ -22,7 +22,11 @@ require_once(__DIR__ . '/base_external.php');
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use DeepL\AppInfo;
+use DeepL\AuthorizationException;
 use DeepL\DeepLClient;
+use DeepL\DeepLException;
+use DeepL\QuotaExceededException;
+use DeepL\TextResult;
 use ReflectionClass;
 
 /**
@@ -199,5 +203,71 @@ final class gettranslation_test extends base_external {
         );
         $this->assertCount(2, $result);
         $this->assertCount(1, $result[1]);
+    }
+
+    /**
+     * Texts with several top-level nodes get a single root and lose it again after translation.
+     *
+     * @covers \local_deepler\external\get_translation::wrap_html
+     * @covers \local_deepler\external\get_translation::unwrap_html
+     * @return void
+     */
+    public function test_wrap_and_unwrap_html(): void {
+        $text = "<!-- A -->\r\n<div>Hallo</div>\r\n<!-- B -->\r\n<div>Welt</div>";
+        $wrapped = self::callprotectedstaticmethod(get_translation::class, 'wrap_html', [$text]);
+        $this->assertEquals('<div data-deepler-wrap="">' . $text . '</div>', $wrapped);
+        $this->assertEquals($text, self::callprotectedstaticmethod(get_translation::class, 'unwrap_html', [$wrapped]));
+        // DeepL may drop the empty attribute value or add surrounding whitespace.
+        $this->assertEquals('<p>x</p>', self::callprotectedstaticmethod(
+            get_translation::class, 'unwrap_html', ["\n<div data-deepler-wrap><p>x</p></div>\n"]
+        ));
+        // Unknown shapes are returned untouched.
+        $this->assertEquals('<p>x</p>', self::callprotectedstaticmethod(get_translation::class, 'unwrap_html', ['<p>x</p>']));
+    }
+
+    /**
+     * Only plain HTTP 400 errors trigger the one-by-one retry.
+     *
+     * @covers \local_deepler\external\get_translation::is_bad_request
+     * @return void
+     */
+    public function test_is_bad_request(): void {
+        $check = fn($e) => self::callprotectedstaticmethod(get_translation::class, 'is_bad_request', [$e]);
+        $this->assertTrue($check(new DeepLException("Bad request, message: Tag handling parsing failed")));
+        $this->assertFalse($check(new DeepLException('Service unavailable')));
+        $this->assertFalse($check(new QuotaExceededException('Bad request')));
+        $this->assertFalse($check(new AuthorizationException('Authorization failure')));
+    }
+
+    /**
+     * A failing chunk is retried text by text, so only the malformed text reports an error.
+     *
+     * @covers \local_deepler\external\get_translation::process_chunk
+     * @return void
+     */
+    public function test_process_chunk_isolates_bad_text(): void {
+        $translator = $this->createMock(DeepLClient::class);
+        $translator->method('translateText')->willReturnCallback(function ($texts) {
+            if (in_array('BAD', $texts)) {
+                throw new DeepLException("Bad request, message: Tag handling parsing failed, please check input.");
+            }
+            return array_map(fn($t) => new TextResult(str_replace(['>a<', '>c<'], ['>A<', '>C<'], $t), 'DE', strlen($t)), $texts);
+        });
+        $chunk = [
+            ['text' => '<div data-deepler-wrap="">a</div>', 'key' => 'k1'],
+            ['text' => 'BAD', 'key' => 'k2'],
+            ['text' => '<div data-deepler-wrap="">c</div>', 'key' => 'k3'],
+        ];
+        $result = self::callprotectedstaticmethod(
+            get_translation::class,
+            'process_chunk',
+            [$translator, $chunk, 'de', 'vi', ['tag_handling' => 'html'], '']
+        );
+        $this->assertCount(3, $result);
+        $this->assertEquals(['k1', 'k2', 'k3'], array_column($result, 'key'));
+        $this->assertEquals('A', $result[0]['translated_text']);
+        $this->assertEquals('', $result[0]['error']);
+        $this->assertStringContainsString('[k2]', $result[1]['error']);
+        $this->assertEquals('C', $result[2]['translated_text']);
     }
 }
