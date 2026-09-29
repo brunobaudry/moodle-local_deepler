@@ -218,9 +218,12 @@ final class gettranslation_test extends base_external {
         $this->assertEquals('<div data-deepler-wrap="">' . $text . '</div>', $wrapped);
         $this->assertEquals($text, self::callprotectedstaticmethod(get_translation::class, 'unwrap_html', [$wrapped]));
         // DeepL may drop the empty attribute value or add surrounding whitespace.
-        $this->assertEquals('<p>x</p>', self::callprotectedstaticmethod(
-            get_translation::class, 'unwrap_html', ["\n<div data-deepler-wrap><p>x</p></div>\n"]
-        ));
+        $unwrapped = self::callprotectedstaticmethod(
+            get_translation::class,
+            'unwrap_html',
+            ["\n<div data-deepler-wrap><p>x</p></div>\n"]
+        );
+        $this->assertEquals('<p>x</p>', $unwrapped);
         // Unknown shapes are returned untouched.
         $this->assertEquals('<p>x</p>', self::callprotectedstaticmethod(get_translation::class, 'unwrap_html', ['<p>x</p>']));
     }
