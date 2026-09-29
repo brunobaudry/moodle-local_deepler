@@ -214,7 +214,7 @@ final class gettranslation_test extends base_external {
         if ($this->is_below_four_one()) {
             return;
         }
-        // '<' url-encodes to '%3C' (3 bytes). 34 000 chars → exactly 102 000 url-encoded bytes.
+        // A '<' url-encodes to '%3C' (3 bytes). 34 000 chars → exactly 102 000 url-encoded bytes.
         // Two such items: each must land in its own chunk (maxbytes default 100 000).
         $items = [
             ['text' => str_repeat('<', 34000), 'key' => 'a'],
