@@ -39,11 +39,15 @@ class field {
     public static function getadditionals(cm_info $cm): array {
         global $DB;
         $fields = [];
-        $tables = self::$additionals['mod_' . $cm->modname] ?? [];
+        $tables = self::loadadditionals()['mod_' . $cm->modname] ?? [];
         if (empty($tables)) {
             return $fields;
         }
         foreach ($tables as $tablename => $tabledef) {
+            // The module's own table is handled by getfieldsfrominfo().
+            if ($tablename === $cm->modname) {
+                continue;
+            }
             $tabledefid = $tabledef['id'] ?? 'id';
 
             $configfields = $tabledef['fields'] ?? [];
@@ -109,7 +113,18 @@ class field {
             if (!$DB->get_manager()->table_exists($tablename)) {
                 continue;
             }
-            $selectcols = implode(', ', array_merge(['id'], array_keys($configfields)));
+            $dbcols = $DB->get_columns($tablename);
+            $cols = ['id'];
+            foreach (array_keys($configfields) as $col) {
+                if (!isset($dbcols[$col])) {
+                    continue;
+                }
+                $cols[] = $col;
+                if (isset($dbcols[$col . 'format'])) {
+                    $cols[] = $col . 'format';
+                }
+            }
+            $selectcols = implode(', ', array_unique($cols));
             $rows = $DB->get_records($tablename, [$fkcol => $fkvalue], '', $selectcols);
             foreach ($rows as $row) {
                 foreach ($configfields as $col => $clauses) {
@@ -157,9 +172,9 @@ class field {
      */
     public static array $filteredtablefields = [];
     /**
-     * @var mixed json additional db field config.
+     * @var array json additional db field config.
      */
-    public static mixed $additionals;
+    public static array $additionals = [];
     /** @var string */
     private string $text;
     /** @var string */
@@ -203,18 +218,7 @@ class field {
         int $cmid = 0,
         bool $editable = true,
     ) {
-        if (empty(self::$additionals)) {
-            $jsonconfig = get_config('local_deepler', 'additionalconf');
-            if ($jsonconfig !== false && $jsonconfig !== '') {
-                self::$additionals = json_decode($jsonconfig, true);
-            } else {
-                // Fallback: config not yet seeded (e.g. CLI/test context before install runs).
-                self::$additionals = json_decode(
-                    file_get_contents(utils::get_plugin_root() . '/additional_conf.json'),
-                    true
-                );
-            }
-        }
+        self::loadadditionals();
         $this->id = $id;
         $this->editable = $editable;
         $this->field = $field;
@@ -229,6 +233,31 @@ class field {
             self::$countsimplefields++;
         }
         $this->init_db();
+    }
+
+    /**
+     * Load (once) the additional db field config, from the admin setting or the bundled json fallback.
+     *
+     * @return array
+     * @throws \dml_exception
+     */
+    public static function loadadditionals(): array {
+        if (empty(self::$additionals)) {
+            $jsonconfig = get_config('local_deepler', 'additionalconf');
+            $decoded = null;
+            if ($jsonconfig !== false && $jsonconfig !== '') {
+                $decoded = json_decode($jsonconfig, true);
+            }
+            if (!is_array($decoded)) {
+                // Fallback: config not yet seeded (e.g. CLI/test context before install runs) or invalid json.
+                $decoded = json_decode(
+                    file_get_contents(utils::get_plugin_root() . '/additional_conf.json'),
+                    true
+                );
+            }
+            self::$additionals = is_array($decoded) ? $decoded : [];
+        }
+        return self::$additionals;
     }
 
     /**
@@ -440,12 +469,16 @@ class field {
             if (!isset($info->{$collumn})) {
                 continue;
             }
-            if ($clauses) {
-                if ($clauses['exclude'] && (trim($info->{$collumn}) === trim($clauses['exclude']))) {
-                    continue;
+            if (is_array($clauses) && !empty($clauses)) {
+                // Unified exclude: string → value match; true/boolean → always skip.
+                if (isset($clauses['exclude'])) {
+                    if ($clauses['exclude'] === true ||
+                        (is_string($clauses['exclude']) && trim($info->{$collumn}) === trim($clauses['exclude']))) {
+                        continue;
+                    }
                 }
                 if (isset($clauses['editable'])) {
-                    $editable = $clauses['editable'];
+                    $editable = (bool) $clauses['editable'];
                 }
             }
             if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
@@ -478,19 +511,22 @@ class field {
         global $DB;
         $mod = $cminfo->modname;
         // Get all the fields as CMINFO does not carry them all.
-        $filters = [];
-        $addfields = self::$additionals['mod_' . $mod][$mod]['fields'];
-        if (!empty($addfields)) {
-            $filters = $addfields;
+        $filters = self::loadadditionals()['mod_' . $mod][$mod]['fields'] ?? [];
+        if (!is_array($filters)) {
+            $filters = [];
         }
         $activitydbrecord = $DB->get_record($mod, ['id' => $cminfo->instance]);
         $infocols = self::filterdbtextfields($cminfo->modname);
         $filteredfileds = [];
-        $keys = array_keys($filters);
-        foreach ($infocols as $infocol) {
-            if (isset($filters[$infocol])) {
-                $filteredfileds[$infocol] = $filters[$infocol];
-            } else {
+        if (!empty($filters)) {
+            // A configured module table is restrictive: only the listed columns are used.
+            foreach ($filters as $col => $clauses) {
+                if (in_array($col, $infocols, true)) {
+                    $filteredfileds[$col] = $clauses ?? [];
+                }
+            }
+        } else {
+            foreach ($infocols as $infocol) {
                 $filteredfileds[$infocol] = [];
             }
         }
@@ -523,7 +559,8 @@ class field {
             ['url_parameters', 'hotpot_outputformat', 'hvp_authors', 'hvp_changes', 'lesson_conditions',
                 'scorm_reference', 'studentquiz_allowedqtypes', 'studentquiz_excluderoles',
                 'studentquiz_reportingemail',
-                'survey_questions', 'data_csstemplate', 'data_config', 'wiki_firstpagetitle',
+                'survey_questions', 'data_csstemplate', 'data_config', 'data_jstemplate', 'data_rsstemplate',
+                'data_rsstitletemplate', 'data_asearchtemplate', 'wiki_firstpagetitle',
                 'bigbluebuttonbn_moderatorpass', 'bigbluebuttonbn_participants', 'bigbluebuttonbn_guestpassword',
                 'rattingallocate_setting', 'rattingallocate_strategy', 'hvp_json_content', 'hvp_filtered', 'hvp_slug',
                 'wooclap_linkedwooclapeventslug', 'wooclap_wooclapeventid', 'kalvidres_metadata', 'filetypelist',

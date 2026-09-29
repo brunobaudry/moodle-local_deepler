@@ -67,6 +67,7 @@
     * tid
     * fieldformat
     * plaintextinput
+    * escapedisplay
     * istiny
     * nottiny
     * totalchar
@@ -105,6 +106,7 @@
   "tid": 678,
   "fieldformat": "html",
   "plaintextinput": false,
+  "escapedisplay": false,
   "istiny": true,
   "nottiny": false,
   "cteditor": "<textarea id='editor_summary'></textarea>",
@@ -137,6 +139,7 @@
 <!--    col2 -->
     <div class="col-5 px-0 pr-5 local_deepler__source-text"
          data-key="{{key}}">
+        {{#iseditable}}
         <span title="{{multilangtitlestring}}"
               id="toggleMultilang"
               aria-controls="{{keyid}}"
@@ -154,6 +157,8 @@
                 <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
             {{/sourceoptions}}
         </select>
+    {{/iseditable}}
+        {{^iseditable}}<em class="text-bg-secondary p-1"><small>{{#str}}fieldnottranslatable, local_deepler{{/str}}</small></em>{{/iseditable}}
         {{#warnmaxlength}}
             <span class="p-2 text-sm-right">
                 <i class="fa fa-warning text-{{warntextcolor}}" aria-hidden="true"></i>&nbsp;
@@ -163,13 +168,13 @@
         {{/warnmaxlength}}
 
         <div class="collapse show"
-             data-sourcetext-key="{{key}}" 
+             data-sourcetext-key="{{key}}"
              data-sourcetext-raw="{{rawsourcetext}}"
-             data-filedtext-raw="{{rawunfilterdtext}}">{{{mlangfiltered}}}
+             data-filedtext-raw="{{rawunfilterdtext}}">{{#escapedisplay}}<pre class="text-wrap text-break mb-0">{{{mlangfiltered}}}</pre>{{/escapedisplay}}{{^escapedisplay}}{{{mlangfiltered}}}{{/escapedisplay}}
         </div>
         <div class="collapse" id="{{keyid}}">
-            <div data-key="{{key}}" 
-                 data-action="local_deepler/textarea">{{{trimedtext}}}</div>
+            <div data-key="{{key}}"
+                 data-action="local_deepler/textarea">{{#escapedisplay}}{{trimedtext}}{{/escapedisplay}}{{^escapedisplay}}{{{trimedtext}}}{{/escapedisplay}}</div>
         </div>
     </div>
 <!--    col3 -->

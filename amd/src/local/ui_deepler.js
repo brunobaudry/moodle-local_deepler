@@ -799,7 +799,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {Boolean} checked
      */
     const toggleStatus = (key, checked) => {
-        const status = domQuery(Selectors.actions.validatorBtn, key).dataset.status;
+        Log.info(key);
+        const validatorbtn = domQuery(Selectors.actions.validatorBtn, key);
+        const status = validatorbtn.dataset.status;
         switch (status) {
             case Selectors.statuses.wait :
                 Translation.initTemp(key); // Reset the translation.
@@ -876,9 +878,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
                     const childId = child.getAttribute('data-row-id');
+                    Log.info("Whitin LooP", childId);
                     toggleChildCheckBoxSelection(childId, shouldCheck);
                 });
             } else {
+                Log.info("RowId not null");
                 toggleChildCheckBoxSelection(rowId, shouldCheck);
             }
         });
@@ -894,8 +898,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {bool} shouldBeChecked
      */
     const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
-        window.console.warn(`ui/toggleChildCheckBoxSelection`, key, Selectors.editors.multiples.checkBoxesWithKey);
+        Log.info(`ui/toggleChildCheckBoxSelection`, key, Selectors.editors.multiples.checkBoxesWithKey);
         const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+        Log.info(single);
         single.checked = shouldBeChecked;
         toggleStatus(key, false);
     };

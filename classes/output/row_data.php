@@ -118,6 +118,12 @@ class row_data extends translate_data implements renderable, templatable {
         $mlangfilteredtext = $this->mlangfilter->filter($this->field->get_displaytext());
         $fieldformat = $this->field->get_format();
         $trimedtext = trim($fieldtext);
+        // Non editable or plain text (format 0) fields may hold raw HTML fragments (e.g. mod_data templates):
+        // never inject them unescaped or they would break the page layout.
+        $escapedisplay = !$iseditable || $fieldformat === 0;
+        if ($escapedisplay) {
+            $mlangfilteredtext = s($mlangfilteredtext);
+        }
         $totalschar = strlen($trimedtext);
         $maxlength = $this->field->get_maxlength() ?? -1;
         $warnmaxlength = $maxlength > 0;
@@ -152,6 +158,7 @@ class row_data extends translate_data implements renderable, templatable {
             'multilangdisabled' => $multilangdisabled,
             'multilangtitlestring' => $multilangtitlestring,
             'plaintextinput' => $fieldformat === 0,
+            'escapedisplay' => $escapedisplay,
             // Do Ajax.
             'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
             // Do Ajax.

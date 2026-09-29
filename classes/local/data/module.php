@@ -142,9 +142,9 @@ class module implements editable_interface, iconic_interface, translatable_inter
     /**
      * Get the fields of the module.
      *
-     * Additionals take precedence: if a YAML definition covers a field already
-     * auto-discovered by getfieldsfrominfo (same table + column), the additionals
-     * version is kept and the auto-discovered one is dropped.
+     * The module's own table is always handled by getfieldsfrominfo (which honours the
+     * configured fields/clauses); getadditionals only covers the other configured tables.
+     * Should both still produce the same table + column, the additionals version is kept.
      *
      * @return array
      */

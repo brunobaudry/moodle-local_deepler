@@ -304,5 +304,18 @@
       "id": "quizid",
       "fields": {}
     }
+  },
+  "mod_data": {
+    "data": {
+      "fields": {
+        "name": null,
+        "intro": null,
+        "singletemplate": { "editable": false },
+        "listtemplate": { "editable": false },
+        "listtemplatefooter": { "editable": false },
+        "listtemplateheader": { "editable": false },
+        "addtemplate": { "editable": false }
+      }
+    }
   }
 }
