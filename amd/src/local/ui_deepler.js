@@ -1074,6 +1074,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {string} key Translation Key
      */
     const findEditor = (key) => {
+        Log.info('findEditor', key);
         let e = domQuery(Selectors.editors.types.basic, key);
         let et = 'basic';
         if (e === null) {
@@ -1171,7 +1172,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const domQuery = (selector, key = '', target = null) => {
         const el = target ?? document;
-        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        // Some selectors (e.g. editors.types.other) hold <KEY> more than once: replace all occurrences.
+        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
         return el.querySelector(q);
     };
 
@@ -1185,7 +1187,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const domQueryAll = (selector, key = '', target = null) => {
         const el = target ?? document;
-        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
         return el.querySelectorAll(q);
     };
     /**
