@@ -57,14 +57,33 @@ class quiz {
             if ($israndom) {
                 $hasrandom = true;
                 $this->fetchrandomquestions($slot->id);
-            } else {
-                    $this->questions[] = question_bank::load_question($slot->questionid, false);
+            } else if (is_numeric($slot->questionid)) {
+                // Non numeric ids (e.g. 's12') are placeholders for questions that have gone missing.
+                $this->addquestion((int) $slot->questionid);
             }
         }
         // Remove duplicates (often in a quiz whith random questions).
         if ($hasrandom) {
             $this->questions = array_map('unserialize', array_unique(array_map('serialize', $this->questions)));
         }
+    }
+
+    /**
+     * Load a question definition and add it to the list.
+     * Questions whose type is not installed on this site are skipped, as core cannot load their options
+     * (question_bank::load_question() would fail with "Attempt to assign property shuffleanswers on null").
+     *
+     * @param int $questionid
+     * @return void
+     */
+    private function addquestion(int $questionid): void {
+        $questiondata = question_bank::load_question_data($questionid);
+        if (!question_bank::is_qtype_installed($questiondata->qtype)) {
+            $message = "local_deepler: skipping question $questionid, question type '{$questiondata->qtype}' is not installed.";
+            debugging($message, DEBUG_DEVELOPER);
+            return;
+        }
+        $this->questions[] = question_bank::load_question($questionid, false);
     }
 
     /**
@@ -262,7 +281,7 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
 
         // Load and append the question objects.
         foreach ($questionids as $qid) {
-            $this->questions[] = question_bank::load_question($qid, false);
+            $this->addquestion((int) $qid);
         }
     }
 

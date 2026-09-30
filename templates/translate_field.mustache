@@ -119,7 +119,9 @@
 <div title="{{rowtitle}}"
      class="{{cssclass}} d-flex align-items-start py-2"
      data-row-id="{{flagandkey}}"
-     data-status="{{status}}">
+     data-status="{{status}}"
+    {{^iseditable}}title="{{#str}}fieldnottranslatable, local_deepler{{/str}}"{{/iseditable}}
+>
 <!--    col1 -->
     <div class="col-1 px-0 local_deepler__selectorbox">
         <small class="local_deepler__activityfield lh-sm">{{fieldtranslation}}</small><br>
@@ -158,7 +160,7 @@
             {{/sourceoptions}}
         </select>
     {{/iseditable}}
-        {{^iseditable}}<em class="text-bg-secondary p-1"><small>{{#str}}fieldnottranslatable, local_deepler{{/str}}</small></em>{{/iseditable}}
+
         {{#warnmaxlength}}
             <span class="p-2 text-sm-right">
                 <i class="fa fa-warning text-{{warntextcolor}}" aria-hidden="true"></i>&nbsp;

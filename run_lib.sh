@@ -8,8 +8,9 @@
 #
 # Supported Moodle layouts (the plugin always sits at <dirroot>/local/deepler):
 #   classic  (<= 5.0): <root>/{config.php,vendor,Gruntfile.js,admin,lib,local/deepler}
-#   public   (>= 5.1): <root>/{config.php,vendor,Gruntfile.js}
+#   public   (>= 5.1): <root>/{config.php,composer.json,vendor,Gruntfile.js}
 #                      <root>/public/{admin,lib,local/deepler}
+#                      (<root>/public/config.php is a stub loading ../config.php)
 #
 # After `moodle_detect_layout` the following variables are set:
 #   DIRROOT       Moodle code root ($CFG->dirroot): where admin/ and lib/ live.
@@ -74,7 +75,11 @@ moodle_detect_layout() {
     done
     [[ -n "$DIRROOT" ]] || return 1
 
-    if [[ "$(basename "$DIRROOT")" == "public" && ! -f "$DIRROOT/config.php" && -f "$DIRROOT/../config.php" ]]; then
+    # Moodle 5.1+ keeps composer.json, vendor/ and the real config.php one
+    # level above public/. Do not rely on public/config.php being absent: since
+    # 5.1 Moodle ships a stub public/config.php that merely loads ../config.php.
+    if [[ "$(basename "$DIRROOT")" == "public" && ! -f "$DIRROOT/composer.json" \
+          && ( -f "$DIRROOT/../composer.json" || -f "$DIRROOT/../config.php" ) ]]; then
         MOODLE_ROOT="$(cd "$DIRROOT/.." && pwd)"
         MOODLE_LAYOUT="public"
     else
