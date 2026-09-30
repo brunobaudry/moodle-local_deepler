@@ -20,7 +20,7 @@
 
   <php>
     <!--<const name="PHPUNIT_LONGTEST" value="1"/> uncomment to execute also slow or otherwise expensive tests-->
-    <const name="PHPUNIT_SEQUENCE_START" value="103000"/>
+    <const name="PHPUNIT_SEQUENCE_START" value="154000"/>
 
     <!--Following constants instruct tests to fetch external test files from alternative location
         or skip tests if empty, clone https://github.com/moodlehq/moodle-exttests to local web server-->
@@ -1942,10 +1942,20 @@
       <exclude>../public/lib/editor/tiny/plugins/autosave/tests/classes</exclude>
       <exclude>../public/lib/editor/tiny/plugins/autosave/tests/fixtures</exclude>
     </testsuite>
+    <testsuite name="tiny_cloze_testsuite">
+      <directory suffix="_test.php">../public/lib/editor/tiny/plugins/cloze/tests</directory>
+      <exclude>../public/lib/editor/tiny/plugins/cloze/tests/classes</exclude>
+      <exclude>../public/lib/editor/tiny/plugins/cloze/tests/fixtures</exclude>
+    </testsuite>
     <testsuite name="tiny_equation_testsuite">
       <directory suffix="_test.php">../public/lib/editor/tiny/plugins/equation/tests</directory>
       <exclude>../public/lib/editor/tiny/plugins/equation/tests/classes</exclude>
       <exclude>../public/lib/editor/tiny/plugins/equation/tests/fixtures</exclude>
+    </testsuite>
+    <testsuite name="tiny_fontcolor_testsuite">
+      <directory suffix="_test.php">../public/lib/editor/tiny/plugins/fontcolor/tests</directory>
+      <exclude>../public/lib/editor/tiny/plugins/fontcolor/tests/classes</exclude>
+      <exclude>../public/lib/editor/tiny/plugins/fontcolor/tests/fixtures</exclude>
     </testsuite>
     <testsuite name="tiny_h5p_testsuite">
       <directory suffix="_test.php">../public/lib/editor/tiny/plugins/h5p/tests</directory>
@@ -1977,10 +1987,20 @@
       <exclude>../public/lib/editor/tiny/plugins/premium/tests/classes</exclude>
       <exclude>../public/lib/editor/tiny/plugins/premium/tests/fixtures</exclude>
     </testsuite>
+    <testsuite name="tiny_preview_testsuite">
+      <directory suffix="_test.php">../public/lib/editor/tiny/plugins/preview/tests</directory>
+      <exclude>../public/lib/editor/tiny/plugins/preview/tests/classes</exclude>
+      <exclude>../public/lib/editor/tiny/plugins/preview/tests/fixtures</exclude>
+    </testsuite>
     <testsuite name="tiny_recordrtc_testsuite">
       <directory suffix="_test.php">../public/lib/editor/tiny/plugins/recordrtc/tests</directory>
       <exclude>../public/lib/editor/tiny/plugins/recordrtc/tests/classes</exclude>
       <exclude>../public/lib/editor/tiny/plugins/recordrtc/tests/fixtures</exclude>
+    </testsuite>
+    <testsuite name="tiny_teamsmeeting_testsuite">
+      <directory suffix="_test.php">../public/lib/editor/tiny/plugins/teamsmeeting/tests</directory>
+      <exclude>../public/lib/editor/tiny/plugins/teamsmeeting/tests/classes</exclude>
+      <exclude>../public/lib/editor/tiny/plugins/teamsmeeting/tests/fixtures</exclude>
     </testsuite>
     <testsuite name="tool_admin_presets_testsuite">
       <directory suffix="_test.php">../public/admin/tool/admin_presets/tests</directory>
@@ -4895,6 +4915,13 @@
       <file>../public/lib/editor/tiny/plugins/autosave/locallib.php</file>
       <file>../public/lib/editor/tiny/plugins/autosave/renderer.php</file>
       <file>../public/lib/editor/tiny/plugins/autosave/rsslib.php</file>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/cloze/classes</directory>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/cloze/tests/generator</directory>
+      <file>../public/lib/editor/tiny/plugins/cloze/externallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/cloze/lib.php</file>
+      <file>../public/lib/editor/tiny/plugins/cloze/locallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/cloze/renderer.php</file>
+      <file>../public/lib/editor/tiny/plugins/cloze/rsslib.php</file>
       <directory suffix=".php">../public/lib/editor/tiny/plugins/equation/classes</directory>
       <directory suffix=".php">../public/lib/editor/tiny/plugins/equation/tests/generator</directory>
       <file>../public/lib/editor/tiny/plugins/equation/externallib.php</file>
@@ -4902,6 +4929,13 @@
       <file>../public/lib/editor/tiny/plugins/equation/locallib.php</file>
       <file>../public/lib/editor/tiny/plugins/equation/renderer.php</file>
       <file>../public/lib/editor/tiny/plugins/equation/rsslib.php</file>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/fontcolor/classes</directory>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/fontcolor/tests/generator</directory>
+      <file>../public/lib/editor/tiny/plugins/fontcolor/externallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/fontcolor/lib.php</file>
+      <file>../public/lib/editor/tiny/plugins/fontcolor/locallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/fontcolor/renderer.php</file>
+      <file>../public/lib/editor/tiny/plugins/fontcolor/rsslib.php</file>
       <directory suffix=".php">../public/lib/editor/tiny/plugins/h5p/classes</directory>
       <directory suffix=".php">../public/lib/editor/tiny/plugins/h5p/tests/generator</directory>
       <file>../public/lib/editor/tiny/plugins/h5p/externallib.php</file>
@@ -4944,6 +4978,13 @@
       <file>../public/lib/editor/tiny/plugins/premium/locallib.php</file>
       <file>../public/lib/editor/tiny/plugins/premium/renderer.php</file>
       <file>../public/lib/editor/tiny/plugins/premium/rsslib.php</file>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/preview/classes</directory>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/preview/tests/generator</directory>
+      <file>../public/lib/editor/tiny/plugins/preview/externallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/preview/lib.php</file>
+      <file>../public/lib/editor/tiny/plugins/preview/locallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/preview/renderer.php</file>
+      <file>../public/lib/editor/tiny/plugins/preview/rsslib.php</file>
       <directory suffix=".php">../public/lib/editor/tiny/plugins/recordrtc/classes</directory>
       <directory suffix=".php">../public/lib/editor/tiny/plugins/recordrtc/tests/generator</directory>
       <file>../public/lib/editor/tiny/plugins/recordrtc/externallib.php</file>
@@ -4951,6 +4992,13 @@
       <file>../public/lib/editor/tiny/plugins/recordrtc/locallib.php</file>
       <file>../public/lib/editor/tiny/plugins/recordrtc/renderer.php</file>
       <file>../public/lib/editor/tiny/plugins/recordrtc/rsslib.php</file>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/teamsmeeting/classes</directory>
+      <directory suffix=".php">../public/lib/editor/tiny/plugins/teamsmeeting/tests/generator</directory>
+      <file>../public/lib/editor/tiny/plugins/teamsmeeting/externallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/teamsmeeting/lib.php</file>
+      <file>../public/lib/editor/tiny/plugins/teamsmeeting/locallib.php</file>
+      <file>../public/lib/editor/tiny/plugins/teamsmeeting/renderer.php</file>
+      <file>../public/lib/editor/tiny/plugins/teamsmeeting/rsslib.php</file>
       <directory suffix=".php">../public/admin/tool/admin_presets/classes</directory>
       <directory suffix=".php">../public/admin/tool/admin_presets/tests/generator</directory>
       <file>../public/admin/tool/admin_presets/externallib.php</file>

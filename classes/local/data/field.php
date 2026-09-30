@@ -472,8 +472,10 @@ class field {
             if (is_array($clauses) && !empty($clauses)) {
                 // Unified exclude: string → value match; true/boolean → always skip.
                 if (isset($clauses['exclude'])) {
-                    if ($clauses['exclude'] === true ||
-                        (is_string($clauses['exclude']) && trim($info->{$collumn}) === trim($clauses['exclude']))) {
+                    if (
+                        $clauses['exclude'] === true ||
+                        (is_string($clauses['exclude']) && trim($info->{$collumn}) === trim($clauses['exclude']))
+                    ) {
                         continue;
                     }
                 }

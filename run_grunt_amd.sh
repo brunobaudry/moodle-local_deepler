@@ -1,49 +1,54 @@
 #!/usr/bin/env bash
+# Compile the plugin's AMD modules with Moodle's Gruntfile. Runs on the host
+# (node via nvm) and works with the classic (<= 5.0) and the public/ (>= 5.1)
+# Moodle layouts: Gruntfile.js always lives in the project root (MOODLE_ROOT).
 set -euo pipefail
 
+# shellcheck source=run_lib.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/run_lib.sh"
+
+show_help() {
+    echo "Usage: $0"
+    echo "Compile amd/src/**/*.js of this plugin into amd/build/ using Moodle's grunt setup."
+    echo
+    echo "The Moodle tree is found two levels above this script (<dirroot>/local/deepler);"
+    echo "as a fallback the current working directory is walked up."
+}
+handle_help_flag show_help "$@"
+
 ORIG_DIR="$PWD"
-DEEPLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEEPLER_DIR="$SCRIPT_DIR"
 echo "DeepLer directory: $DEEPLER_DIR"
 
-FOUND_DIR=''
-find_parent_with_items() {
-    local dir="$DEEPLER_DIR"
-
-    while [[ "$dir" != "/" ]]; do
-        if [[ -f "$dir/config.php" && ( -f "$dir/Gruntfile.js" || -f "$dir/gruntfile.js" ) && -d "$dir/admin" ]]; then
-            FOUND_DIR="$dir"
-            return 0
-        fi
-
-        dir=$(dirname "$dir")
-    done
-
-    # If not found through symlink target hierarchy, check current working directory
-    dir="$ORIG_DIR"
-    while [[ "$dir" != "/" ]]; do
-        if [[ -f "$dir/config.php" && ( -f "$dir/Gruntfile.js" || -f "$dir/gruntfile.js" ) && -d "$dir/admin" ]]; then
-            FOUND_DIR="$dir"
-            return 0
-        fi
-
-        dir=$(dirname "$dir")
-    done
-
-    return 1
+# True when $1 is a Moodle project root holding a Gruntfile (classic or public layout).
+is_grunt_root() {
+    [[ -f "$1/config.php" && ( -f "$1/Gruntfile.js" || -f "$1/gruntfile.js" ) \
+       && ( -d "$1/admin" || -d "$1/public/admin" ) ]]
 }
 
-if find_parent_with_items; then
-    echo "Moodle parent found at: $FOUND_DIR"
-    cd "$FOUND_DIR"
+# Prefer the regular layout detection; when the script is invoked from a
+# checkout that is not inside a Moodle tree, walk up from the caller's CWD.
+if moodle_detect_layout && is_grunt_root "$MOODLE_ROOT"; then
+    moodle_print_layout
 else
-    echo "Error: Moodle parent directory not found."
-    exit 1
+    MOODLE_ROOT=""
+    dir="$ORIG_DIR"
+    while [[ "$dir" != "/" ]]; do
+        if is_grunt_root "$dir"; then
+            MOODLE_ROOT="$dir"
+            break
+        fi
+        dir=$(dirname "$dir")
+    done
+    if [[ -z "$MOODLE_ROOT" ]]; then
+        echo "Error: Moodle root (config.php + Gruntfile.js) not found above $DEEPLER_DIR or $ORIG_DIR."
+        exit 1
+    fi
+    echo "Moodle root   : $MOODLE_ROOT"
+    [[ -d "$MOODLE_ROOT/public" ]] && echo "Moodle layout : public (Moodle 5.1+ public/ directory)"
 fi
 
-if [[ -d "$PWD/public" ]]; then
-    echo "Moodle 5.1+ directory structure detected."
-fi
-
+cd "$MOODLE_ROOT"
 echo "Working directory: $PWD"
 
 # Ensure NVM is available in non-interactive shells

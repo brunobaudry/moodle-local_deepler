@@ -46,7 +46,7 @@ class quiz {
         $hasrandom = false;
         foreach ($slots as $slot) {
             $israndom = $DB->record_exists(
-            'question_set_references',
+                'question_set_references',
                 [
                     'component' => 'mod_quiz',
                     'questionarea' => 'slot',
@@ -100,6 +100,14 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
             return $structure->get_slots();
         }
     }
+
+    /**
+     * Returns all qvilable questions from categories.
+     *
+     * @param int $categoryid
+     * @param bool $includesubs
+     * @return array
+     */
     private function get_available_questions_from_category(
         int $categoryid,
         bool $includesubs
@@ -152,10 +160,6 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
        )
        AND q.qtype <> 'missingtype'
 ";
-        //debugging($sql);
-        //debugging(print_r($params, true));
-        //var_dump($params);
-//die();
         return $DB->get_fieldset_sql($sql, $params);
     }
     /**
@@ -167,9 +171,6 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      */
     public function fetchrandomquestions(int $slotid): void {
         global $DB, $CFG;
-        //require_once($CFG->dirroot . '/question/type/random/questiontype.php');
-
-        //$qtyperandom = new qtype_random();
 
         // Read the reference for this slot and decode its filter.
         $reference = $DB->get_record('question_set_references', [
@@ -225,7 +226,6 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         }
 
         // Get available question ids using Moodle random qtype helper (handles excluded qtypes etc.).
-        //$questionids = $qtyperandom->get_available_questions_from_category($categoryid, $includesubs);
         $questionids = $this->get_available_questions_from_category(
             $categoryid,
             $includesubs
