@@ -103,7 +103,7 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin --branch master iarenaza/moodle-filter_multilang2
-          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1 --no-init
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
@@ -143,18 +143,11 @@ jobs:
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
-      - name: Initialize PHPUnit environment
-        if: ${{ always() }}
-        run: php moodle/admin/tool/phpunit/cli/init.php
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
-
-      - name: Initialize Behat environment
-        if: ${{ always() }}
-        run: php moodle/admin/tool/behat/cli/init.php
 
       - name: Behat features
         if: ${{ always() }}
