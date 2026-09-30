@@ -1102,6 +1102,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {{editor: object, editorType: string}}
      */
     const findEditorByType = (key, editorType) => {
+        Log.info(key, editorType);
         let et = 'basic';
         let ed = null;
         switch (editorType) {
