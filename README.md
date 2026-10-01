@@ -1,8 +1,8 @@
 # Deepler, Multilang Machine Translator for Moodle
 
 [![Moodle Plugin CI](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
-[![Supported](https://img.shields.io/badge/Moodle-4.2--5.0-orange.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
-[![PHP Support](https://img.shields.io/badge/php-8.2_--_8.4-blue)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
+[![Supported](https://img.shields.io/badge/Moodle-4.5--5.2-orange.svg)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
+[![PHP Support](https://img.shields.io/badge/php-8.1_--_8.4-blue)](https://github.com/brunobaudry/moodle-local_deepler/actions/workflows/moodle-ci.yml)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler) 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 [![License GPL-3.0](https://img.shields.io/github/license/brunobaudry/moodle-local_deepler?color=lightgrey)](https://github.com/brunobaudry/moodle-local_deepler/blob/main/LICENSE)
@@ -847,16 +847,16 @@ _question's image are still not displayed we are getting there..._
 ## Compatibility
 
 ### Moodle's versions
-
-This plugin has been tested on Moodle 4.1+
-php >= 8.1
+UPDATED on version 1.9.9.5
+This plugins support current versions only
+[Though plugin has been tested on Moodle 4.1+](https://moodledev.io/general/releases)
+php 8.1->8.4
 
 ### Editors
 Should work with the following editors:
 
+- Tiny° (default)
 - Plaintext
-- Atto
-- Tiny°
 - Marklar
 
 °Tiny editor: When a user has TinyMCE as prefered editor (Default behaviour since 4.4+) and if your moodle instance added TinyMCE funky plugin, it makes tons of http call upon 
