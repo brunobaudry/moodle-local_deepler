@@ -91,7 +91,17 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin --branch master iarenaza/moodle-filter_multilang2
-          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+
+          if [ "${MOODLE_BRANCH}" = "MOODLE_502_STABLE" ]; then
+            moodle-plugin-ci install \
+              --plugin ./plugin \
+              --db-host=127.0.0.1 \
+              --no-init
+          else
+            moodle-plugin-ci install \
+              --plugin ./plugin \
+              --db-host=127.0.0.1
+          fi
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
@@ -330,13 +340,19 @@ jobs:
           else
             echo "Build directories could not be located for comparison."
           fi
+      - name: Initialize PHPUnit
+        run: |
+          php admin/tool/phpunit/cli/init.php
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
+      - name: Initialize Behat
+        run: |
+          php admin/tool/behat/cli/init.php
       - name: Behat features
-        if: false
+        if: ${{ always() }}
         continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
