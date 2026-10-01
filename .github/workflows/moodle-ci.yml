@@ -21,6 +21,18 @@ jobs:
       matrix:
         include:
           - php: 8.4
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.3
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.2
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.4
             moodle-branch: MOODLE_501_STABLE
             database: mariadb
             mariadb_version: 10.11
@@ -122,7 +134,9 @@ jobs:
         run: npm -v
       - name: Trace Grunt version
         run: npx grunt --version
-
+      - name: Show Grunt Diff
+        if: ${{ always() }}
+        run: git diff public/local/deepler/amd/build/ || git diff plugin/amd/build/
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
@@ -153,6 +167,18 @@ jobs:
       matrix:
         include:
           - php: 8.4
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
+            mariadb_version: 16
+          - php: 8.3
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
+            mariadb_version: 16
+          - php: 8.2
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
+            mariadb_version: 16
+          - php: 8.4
             moodle-branch: MOODLE_501_STABLE
             database: pgsql
             postgres_version: 15
@@ -258,6 +284,9 @@ jobs:
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
+      - name: Show Grunt Diff
+        if: ${{ always() }}
+        run: git diff public/local/deepler/amd/build/ || git diff plugin/amd/build/
       - name: PHPUnit tests
         if: ${{ always() }}
         env:

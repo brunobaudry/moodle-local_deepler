@@ -77,7 +77,7 @@ fi
 node -v
 npm -v
 npm install
-npx update-browserslist-db@latest --yes
+# npx update-browserslist-db@latest --yes
 
 # Ensure the symlink resolution patch is in place
 PATCH_FILE="$DEEPLER_DIR/.grunt_symlink_patch.js"
