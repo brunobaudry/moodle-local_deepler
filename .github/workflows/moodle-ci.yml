@@ -134,12 +134,24 @@ jobs:
         run: npm -v
       - name: Trace Grunt version
         run: npx grunt --version
-      - name: Show Grunt Diff
-        if: ${{ always() }}
-        run: git diff public/local/deepler/amd/build/ || git diff plugin/amd/build/
+
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
+
+      - name: Show Grunt Diff
+        if: ${{ always() }}
+        run: |
+          echo "=== Diff in ./plugin repo ==="
+          git -C plugin status --short
+          git -C plugin diff amd/build/ || true
+
+          if [ -d "moodle" ]; then
+            echo "=== Diff in moodle (public layout) ==="
+            git -C moodle diff public/local/deepler/amd/build/ || true
+            echo "=== Diff in moodle (classic layout) ==="
+            git -C moodle diff local/deepler/amd/build/ || true
+          fi
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
@@ -284,9 +296,20 @@ jobs:
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
+
       - name: Show Grunt Diff
         if: ${{ always() }}
-        run: git diff public/local/deepler/amd/build/ || git diff plugin/amd/build/
+        run: |
+          echo "=== Diff in ./plugin repo ==="
+          git -C plugin status --short
+          git -C plugin diff amd/build/ || true
+
+          if [ -d "moodle" ]; then
+            echo "=== Diff in moodle (public layout) ==="
+            git -C moodle diff public/local/deepler/amd/build/ || true
+            echo "=== Diff in moodle (classic layout) ==="
+            git -C moodle diff local/deepler/amd/build/ || true
+          fi
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
