@@ -156,45 +156,6 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
 
-      - name: Show Grunt Diff
-        if: ${{ always() }}
-        run: |
-          echo "=== Locating compiled build directory ==="
-          TARGET_BUILD=""
-          if [ -d "moodle/public/local/deepler/amd/build" ]; then
-            TARGET_BUILD="moodle/public/local/deepler/amd/build"
-          elif [ -d "moodle/local/deepler/amd/build" ]; then
-            TARGET_BUILD="moodle/local/deepler/amd/build"
-          elif [ -d "public/local/deepler/amd/build" ]; then
-            TARGET_BUILD="public/local/deepler/amd/build"
-          fi
-
-          if [ -n "$TARGET_BUILD" ] && [ -d "plugin/amd/build" ]; then
-            echo "Comparing committed plugin/amd/build against CI output in $TARGET_BUILD"
-            git diff --no-index --stat plugin/amd/build/ "$TARGET_BUILD/" || true
-            git diff --no-index plugin/amd/build/ "$TARGET_BUILD/" || true
-          else
-            echo "Build directories could not be located for comparison."
-          fi
-          - name: Direct Grunt Build & Diff Inspection
-            if: ${{ always() }}
-            run: |
-              echo "=== Running Grunt directly inside Moodle ==="
-              cd moodle
-
-              # Determine the component path in classic vs public layout
-              if [ -d "public/local/deepler" ]; then
-                PLUGIN_PATH="public/local/deepler"
-              else
-                PLUGIN_PATH="local/deepler"
-              fi
-
-              # Compile AMD files directly
-              npx grunt amd --files="$PLUGIN_PATH/amd/src/*.js,$PLUGIN_PATH/amd/src/**/*.js" --force || true
-
-              echo "=== Diff between committed plugin and CI compiled output ==="
-              git diff --no-index --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
-              git diff --no-index ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
       - name: Direct Grunt Build & Diff Inspection
         if: ${{ always() }}
         run: |
@@ -358,26 +319,6 @@ jobs:
       - name: Grunt
         if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
-      - name: Show Grunt Diff
-        if: ${{ always() }}
-        run: |
-          echo "=== Locating compiled build directory ==="
-          TARGET_BUILD=""
-          if [ -d "moodle/public/local/deepler/amd/build" ]; then
-            TARGET_BUILD="moodle/public/local/deepler/amd/build"
-          elif [ -d "moodle/local/deepler/amd/build" ]; then
-            TARGET_BUILD="moodle/local/deepler/amd/build"
-          elif [ -d "public/local/deepler/amd/build" ]; then
-            TARGET_BUILD="public/local/deepler/amd/build"
-          fi
-
-          if [ -n "$TARGET_BUILD" ] && [ -d "plugin/amd/build" ]; then
-            echo "Comparing committed plugin/amd/build against CI output in $TARGET_BUILD"
-            git diff --no-index --stat plugin/amd/build/ "$TARGET_BUILD/" || true
-            git diff --no-index plugin/amd/build/ "$TARGET_BUILD/" || true
-          else
-            echo "Build directories could not be located for comparison."
-          fi
       - name: Direct Grunt Build & Diff Inspection
         if: ${{ always() }}
         run: |
