@@ -176,6 +176,44 @@ jobs:
           else
             echo "Build directories could not be located for comparison."
           fi
+          - name: Direct Grunt Build & Diff Inspection
+            if: ${{ always() }}
+            run: |
+              echo "=== Running Grunt directly inside Moodle ==="
+              cd moodle
+
+              # Determine the component path in classic vs public layout
+              if [ -d "public/local/deepler" ]; then
+                PLUGIN_PATH="public/local/deepler"
+              else
+                PLUGIN_PATH="local/deepler"
+              fi
+
+              # Compile AMD files directly
+              npx grunt amd --files="$PLUGIN_PATH/amd/src/*.js,$PLUGIN_PATH/amd/src/**/*.js" --force || true
+
+              echo "=== Diff between committed plugin and CI compiled output ==="
+              git diff --no-index --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+              git diff --no-index ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+      - name: Direct Grunt Build & Diff Inspection
+        if: ${{ always() }}
+        run: |
+          echo "=== Running Grunt directly inside Moodle ==="
+          cd moodle
+
+          # Determine the component path in classic vs public layout
+          if [ -d "public/local/deepler" ]; then
+            PLUGIN_PATH="public/local/deepler"
+          else
+            PLUGIN_PATH="local/deepler"
+          fi
+
+          # Compile AMD files directly
+          npx grunt amd --files="$PLUGIN_PATH/amd/src/*.js,$PLUGIN_PATH/amd/src/**/*.js" --force || true
+
+          echo "=== Diff between committed plugin and CI compiled output ==="
+          git diff --no-index --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+          git diff --no-index ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
@@ -340,6 +378,25 @@ jobs:
           else
             echo "Build directories could not be located for comparison."
           fi
+      - name: Direct Grunt Build & Diff Inspection
+        if: ${{ always() }}
+        run: |
+          echo "=== Running Grunt directly inside Moodle ==="
+          cd moodle
+
+          # Determine the component path in classic vs public layout
+          if [ -d "public/local/deepler" ]; then
+            PLUGIN_PATH="public/local/deepler"
+          else
+            PLUGIN_PATH="local/deepler"
+          fi
+
+          # Compile AMD files directly
+          npx grunt amd --files="$PLUGIN_PATH/amd/src/*.js,$PLUGIN_PATH/amd/src/**/*.js" --force || true
+
+          echo "=== Diff between committed plugin and CI compiled output ==="
+          git diff --no-index --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+          git diff --no-index ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
       - name: Initialize PHPUnit
         run: |
           php admin/tool/phpunit/cli/init.php
