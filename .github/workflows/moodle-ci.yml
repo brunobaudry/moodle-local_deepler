@@ -166,7 +166,6 @@ jobs:
           else
             echo "Build directories could not be located for comparison."
           fi
-          fi
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
