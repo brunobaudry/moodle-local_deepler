@@ -52,22 +52,6 @@ jobs:
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
             mariadb_version: 10.11
-          - php: 8.3
-            moodle-branch: MOODLE_404_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_404_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_403_STABLE
-            database: mariadb
-            mariadb_version: 10.6
-          - php: 8.2
-            moodle-branch: MOODLE_402_STABLE
-            database: mariadb
-            mariadb_version: 10.6
     steps:
       - name: Check out repository code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -131,6 +115,13 @@ jobs:
       - name: Mustache Lint
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
+
+      - name: Trace Node version
+        run: node -v
+      - name: Trace npm version
+        run: npm -v
+      - name: Trace Grunt version
+        run: npx grunt --version
 
       - name: Grunt
         if: ${{ always() }}
@@ -193,22 +184,6 @@ jobs:
             moodle-branch: MOODLE_405_STABLE
             database: pgsql
             postgres_version: 14
-          - php: 8.3
-            moodle-branch: MOODLE_404_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_404_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_403_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_402_STABLE
-            database: pgsql
-            postgres_version: 13
     steps:
       - name: Check out repository code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -272,6 +247,13 @@ jobs:
       - name: Mustache Lint
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
+
+      - name: Trace Node version
+        run: node -v
+      - name: Trace npm version
+        run: npm -v
+      - name: Trace Grunt version
+        run: npx grunt --version
 
       - name: Grunt
         if: ${{ always() }}
