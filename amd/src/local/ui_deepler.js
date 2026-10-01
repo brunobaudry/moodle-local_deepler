@@ -1119,7 +1119,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 ed = domQuery(Selectors.editors.types.other, key);
                 break;
         }
-        Log.info('Editor container :');
+        Log.info('Editor container is :');
         Log.info(ed);
         return {editor: ed, editorType: et};
     };
