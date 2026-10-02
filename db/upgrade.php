@@ -216,12 +216,12 @@ function xmldb_local_deepler_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026041002, 'local', 'deepler');
     }
 
-    if ($oldversion < 202609290001) {
+    if ($oldversion < 2026100200) {
         // The bundled additional_conf.json gained the mod_data block (templates are displayed read only).
         // Smartly merge the bundled defaults into the admin's stored config: new components/tables/fields/
         // clauses are added, whatever the admin already defined is kept. See db/upgradelib.php.
         local_deepler_sync_additionalconf();
-        upgrade_plugin_savepoint(true, 202609290001, 'local', 'deepler');
+        upgrade_plugin_savepoint(true, 2026100200, 'local', 'deepler');
     }
 
     return true;
