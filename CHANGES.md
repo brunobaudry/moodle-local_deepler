@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9.5]
+### Added
+- inline image tokenisation (t-meyer PR)
+- better bash for dev runs
+### Fixed
+- Additional fields would break UI in some case like database activity.
+- Error in JS with "hidden from student" fields.
+- Random questions with new databank did not fetch
+- Non default (tiny editor regression from 1.7) (Plain text and Marklar should work again)
+- Regression from 1.9.9.3: DeepL languages exposing only regional variants as target (EN-GB, EN-US, PT-BR, PT-PT) were
+  filtered out when Moodle has the root language pack installed (en, pt). English speaking users could then neither
+  improve their English texts nor translate to English. Variants are now only added for the languages DeepL provides
+  no plain code for, so FR does not bring FR-FR and FR-CA along, nor DE its DE-DE and DE-CH.
+
 ## [1.9.9.3]
 ### Fixed
 - issue#117

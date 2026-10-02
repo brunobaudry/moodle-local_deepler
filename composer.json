@@ -3,7 +3,7 @@
   "description": "Moodle plugin to use Deepl autotranslation services",
   "type": "project",
   "require": {
-    "deeplcom/deepl-php": "^1.7",
+    "deeplcom/deepl-php": "^v1.19.0",
     "symfony/http-client": "^6.4.6",
     "symfony/yaml": "^6.0",
     "nyholm/psr7": "^1.8",

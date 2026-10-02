@@ -30,10 +30,10 @@ if (!isset($plugin)) {
 }
 $plugin->component = 'local_deepler'; // Full name of the plugin (used for diagnostics).
 $plugin->settings = true;
-$plugin->version = 2026042001; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires = 2023042400; // Requires Moodle 4.2.2.
-$plugin->supported = [402, 501]; // Supported Moodle Versions.
+$plugin->version = 2026100200; // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires = 2024100700; // Requires Moodle 4.2.2.
+$plugin->supported = [405, 502]; // Supported Moodle Versions.
 $plugin->maturity = MATURITY_BETA; // Maturity level.
-$plugin->release = 'v1.9.9.3'; // Semantic Versioning for CHANGES.md.
+$plugin->release = 'v1.9.9.5'; // Semantic Versioning for CHANGES.md.
 // Dependencies.
 $plugin->dependencies = ['filter_multilang2' => 2020101300];

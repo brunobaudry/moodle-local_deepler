@@ -799,7 +799,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {Boolean} checked
      */
     const toggleStatus = (key, checked) => {
-        const status = domQuery(Selectors.actions.validatorBtn, key).dataset.status;
+        Log.info(key);
+        const validatorbtn = domQuery(Selectors.actions.validatorBtn, key);
+        const status = validatorbtn.dataset.status;
         switch (status) {
             case Selectors.statuses.wait :
                 Translation.initTemp(key); // Reset the translation.
@@ -876,9 +878,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
                     const childId = child.getAttribute('data-row-id');
+                    Log.info("Whitin LooP", childId);
                     toggleChildCheckBoxSelection(childId, shouldCheck);
                 });
             } else {
+                Log.info("RowId not null");
                 toggleChildCheckBoxSelection(rowId, shouldCheck);
             }
         });
@@ -894,7 +898,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {bool} shouldBeChecked
      */
     const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
+        Log.info(`ui/toggleChildCheckBoxSelection`, key, Selectors.editors.multiples.checkBoxesWithKey);
         const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+        Log.info(single);
         single.checked = shouldBeChecked;
         toggleStatus(key, false);
     };
@@ -1068,6 +1074,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {string} key Translation Key
      */
     const findEditor = (key) => {
+        Log.info('findEditor', key);
         let e = domQuery(Selectors.editors.types.basic, key);
         let et = 'basic';
         if (e === null) {
@@ -1095,6 +1102,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {{editor: object, editorType: string}}
      */
     const findEditorByType = (key, editorType) => {
+        Log.info(key, editorType);
         let et = 'basic';
         let ed = null;
         switch (editorType) {
@@ -1111,6 +1119,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 ed = domQuery(Selectors.editors.types.other, key);
                 break;
         }
+        Log.info('Editor container :');
+        Log.info(ed);
         return {editor: ed, editorType: et};
     };
     /**
@@ -1165,7 +1175,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const domQuery = (selector, key = '', target = null) => {
         const el = target ?? document;
-        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        // Some selectors (e.g. editors.types.other) hold <KEY> more than once: replace all occurrences.
+        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
         return el.querySelector(q);
     };
 
@@ -1179,7 +1190,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const domQueryAll = (selector, key = '', target = null) => {
         const el = target ?? document;
-        const q = key === '' ? selector : selector.replace("<KEY>", key);
+        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
         return el.querySelectorAll(q);
     };
     /**

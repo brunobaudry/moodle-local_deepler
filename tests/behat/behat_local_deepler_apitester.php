@@ -117,14 +117,15 @@ class behat_local_deepler_apitester implements Context {
      * @throws \Exception If the status code does not match.
      */
     public function the_response_status_code_should_be(int $statuscode): void {
-        if ($this->statuscode != $statuscode) {
-            $message = "Expected status code 200, ";
-            if ($statuscode == 403) {
-                $message .= "got 403, most probably bad api token";
-            } else {
-                $message .= "got $statuscode.";
+        $actual = (int) ($this->statuscode ?? 0);
+        if ($actual !== $statuscode) {
+            $message = "Expected status code $statuscode, got $actual";
+            if ($actual === 403) {
+                $message .= ", most probably a bad or missing api token (DEEPL_API_TOKEN in local/deepler/.env)";
+            } else if ($actual === 0) {
+                $message .= ", the request did not reach the API (network/DNS issue?)";
             }
-            throw new Exception($message);
+            throw new Exception($message . '.');
         }
     }
 

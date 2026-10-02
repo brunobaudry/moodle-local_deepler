@@ -22,6 +22,7 @@ use mod_quiz\quiz_settings;
 use mod_quiz\structure;
 use qtype_random;
 use question_bank;
+use dml_missing_record_exception;
 
 /**
  * Subclass for quiz with sub questions.
@@ -38,22 +39,51 @@ class quiz {
      * @throws \dml_exception
      */
     public function __construct(cm_info $quiz) {
+        global $DB;
         $this->quiz = $quiz;
         $slots = $this->getslots($quiz);
         $this->questions = [];
         $hasrandom = false;
         foreach ($slots as $slot) {
-            if ($slot->qtype === 'random') {
+            $israndom = $DB->record_exists(
+                'question_set_references',
+                [
+                    'component' => 'mod_quiz',
+                    'questionarea' => 'slot',
+                    'itemid' => $slot->id,
+                ]
+            );
+            // Seems like there a new slot attribute to describe random questions.
+            if ($israndom) {
                 $hasrandom = true;
                 $this->fetchrandomquestions($slot->id);
-            } else {
-                $this->questions[] = question_bank::load_question($slot->questionid, false);
+            } else if (is_numeric($slot->questionid)) {
+                // Non numeric ids (e.g. 's12') are placeholders for questions that have gone missing.
+                $this->addquestion((int) $slot->questionid);
             }
         }
         // Remove duplicates (often in a quiz whith random questions).
         if ($hasrandom) {
             $this->questions = array_map('unserialize', array_unique(array_map('serialize', $this->questions)));
         }
+    }
+
+    /**
+     * Load a question definition and add it to the list.
+     * Questions whose type is not installed on this site are skipped, as core cannot load their options
+     * (question_bank::load_question() would fail with "Attempt to assign property shuffleanswers on null").
+     *
+     * @param int $questionid
+     * @return void
+     */
+    private function addquestion(int $questionid): void {
+        $questiondata = question_bank::load_question_data($questionid);
+        if (!question_bank::is_qtype_installed($questiondata->qtype)) {
+            $message = "local_deepler: skipping question $questionid, question type '{$questiondata->qtype}' is not installed.";
+            debugging($message, DEBUG_DEVELOPER);
+            return;
+        }
+        $this->questions[] = question_bank::load_question($questionid, false);
     }
 
     /**
@@ -91,6 +121,67 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
     }
 
     /**
+     * Returns all qvilable questions from categories.
+     *
+     * @param int $categoryid
+     * @param bool $includesubs
+     * @return array
+     */
+    private function get_available_questions_from_category(
+        int $categoryid,
+        bool $includesubs
+    ): array {
+        global $DB;
+
+        $categoryids = [$categoryid];
+
+        if ($includesubs) {
+            $category = $DB->get_record(
+                'question_categories',
+                ['id' => $categoryid],
+                'id,path',
+                MUST_EXIST
+            );
+
+            $subcategories = $DB->get_fieldset_select(
+                'question_categories',
+                'id',
+                $DB->sql_like('path', ':path'),
+                ['path' => $category->path . '/%']
+            );
+
+            $categoryids = array_merge($categoryids, $subcategories);
+        }
+
+        [$catsql, $params] = $DB->get_in_or_equal(
+            $categoryids,
+            SQL_PARAMS_NAMED,
+            'cat'
+        );
+
+        $params['status1'] = 'ready';
+        $params['status2'] = 'ready';
+
+        $sql = "
+    SELECT q.id
+      FROM {question} q
+      JOIN {question_versions} qv
+        ON qv.questionid = q.id
+      JOIN {question_bank_entries} qbe
+        ON qbe.id = qv.questionbankentryid
+     WHERE qbe.questioncategoryid {$catsql}
+       AND qv.status = :status1
+       AND qv.version = (
+            SELECT MAX(qv2.version)
+              FROM {question_versions} qv2
+             WHERE qv2.questionbankentryid = qv.questionbankentryid
+               AND qv2.status = :status2
+       )
+       AND q.qtype <> 'missingtype'
+";
+        return $DB->get_fieldset_sql($sql, $params);
+    }
+    /**
      * Special method to fetch random questions.
      *
      * @param int $slotid
@@ -99,9 +190,6 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      */
     public function fetchrandomquestions(int $slotid): void {
         global $DB, $CFG;
-        require_once($CFG->dirroot . '/question/type/random/questiontype.php');
-
-        $qtyperandom = new qtype_random();
 
         // Read the reference for this slot and decode its filter.
         $reference = $DB->get_record('question_set_references', [
@@ -157,7 +245,10 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         }
 
         // Get available question ids using Moodle random qtype helper (handles excluded qtypes etc.).
-        $questionids = $qtyperandom->get_available_questions_from_category($categoryid, $includesubs);
+        $questionids = $this->get_available_questions_from_category(
+            $categoryid,
+            $includesubs
+        );
 
         if (empty($questionids)) {
             return; // No candidates.
@@ -190,7 +281,7 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
 
         // Load and append the question objects.
         foreach ($questionids as $qid) {
-            $this->questions[] = question_bank::load_question($qid, false);
+            $this->addquestion((int) $qid);
         }
     }
 

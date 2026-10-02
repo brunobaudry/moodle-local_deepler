@@ -115,6 +115,44 @@ final class translateform_test extends advanced_testcase {
     }
 
     /**
+     * Non Tiny users must get the cteditor element rendered (textarea named "<key>[text]").
+     *
+     * @covers \local_deepler\output\row_data::export_for_template
+     * @return void
+     */
+    public function test_render_with_non_tiny_editor(): void {
+        $this->resetAfterTest(true);
+        $this->setUser($this->user);
+        global $PAGE;
+        $PAGE->set_context(\context_course::instance($this->course->id));
+        // Make sure at least one field is a rich text (HTML) one.
+        $this->course->summary = '<p>Some course summary long enough to be scanned and translated.</p>';
+        $this->course->summaryformat = FORMAT_HTML;
+        $coursedata = new course($this->course);
+        multilanger::$translatedfields = ["course#fullname" => ''];
+
+        $tinyform = new translateform(null, [
+                'coursedata' => $coursedata,
+                'langpack' => $this->langhelper,
+                'mlangfilter' => $this->mlangfilter,
+                'editor' => 'tiny',
+        ]);
+        $tinyhtml = $tinyform->render();
+        $this->assertStringContainsString('id="tiny_', $tinyhtml);
+        $this->assertStringNotContainsString('[text]"', $tinyhtml);
+
+        $textareaform = new translateform(null, [
+                'coursedata' => $coursedata,
+                'langpack' => $this->langhelper,
+                'mlangfilter' => $this->mlangfilter,
+                'editor' => 'textarea',
+        ]);
+        $textareahtml = $textareaform->render();
+        $this->assertStringNotContainsString('id="tiny_', $textareahtml);
+        $this->assertMatchesRegularExpression('/<textarea[^>]*name="[^"]+\[text\]"/', $textareahtml);
+    }
+
+    /**
      * Get the site editor. Either the default or users.
      *
      * @return string

@@ -77,11 +77,7 @@ class translateform extends moodleform {
         field::$targetlangdeepl = $this->langpack->targetlang;
         // Start moodle form.
         $this->_form->disable_form_change_checker();
-        MoodleQuickForm::registerElementType(
-            'cteditor',
-            "$CFG->libdir/form/editor.php",
-            '\local_deepler\editor\MoodleQuickForm_cteditor'
-        );
+
         // Open Form local_deepler__form.
         $this->_form->addElement('html', '<div class="container-fluid local_deepler__form">');
         // Create course settings section only if no section is selected.

@@ -41,6 +41,7 @@
 function xmldb_local_deepler_upgrade($oldversion): bool {
     global $DB;
     $dbman = $DB->get_manager();
+    require_once(__DIR__ . '/upgradelib.php');
 
     if ($oldversion < 2022050100) {
         // Define table local_deepler to be created.
@@ -163,7 +164,7 @@ function xmldb_local_deepler_upgrade($oldversion): bool {
 
     if ($oldversion < 2026041001) {
         // Seed additionalconf from the bundled YAML file for existing deployments upgrading.
-        // Fresh installs use db/install.php instead. The check for false ensures we do not
+        // Fresh instalations use db/install.php instead. The check for false ensures we do not
         // overwrite a value an admin has already saved via the UI.
         if (get_config('local_deepler', 'additionalconf') === false) {
             $yamlfile = __DIR__ . '/../additional_conf.yaml';
@@ -213,6 +214,14 @@ function xmldb_local_deepler_upgrade($oldversion): bool {
         }
 
         upgrade_plugin_savepoint(true, 2026041002, 'local', 'deepler');
+    }
+
+    if ($oldversion < 202609290001) {
+        // The bundled additional_conf.json gained the mod_data block (templates are displayed read only).
+        // Smartly merge the bundled defaults into the admin's stored config: new components/tables/fields/
+        // clauses are added, whatever the admin already defined is kept. See db/upgradelib.php.
+        local_deepler_sync_additionalconf();
+        upgrade_plugin_savepoint(true, 202609290001, 'local', 'deepler');
     }
 
     return true;

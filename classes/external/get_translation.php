@@ -39,6 +39,11 @@ require_once($CFG->dirroot . '/local/deepler/classes/vendor/autoload.php');
 class get_translation extends external_api {
     use deeplapi_trait;
 
+    /** @var string Opening tag of the single root element sent to DeepL. */
+    private const WRAP_OPEN = '<div data-deepler-wrap="">';
+    /** @var string Closing tag of the single root element sent to DeepL. */
+    private const WRAP_CLOSE = '</div>';
+
     /**
      * Executes translation requests to DeepL, chunking them to respect payload limits.
      *
@@ -72,8 +77,12 @@ class get_translation extends external_api {
         $glossaryid = $params['options']['glossary_id'];
         unset($params['options']['glossary_id']);
         $params['options']['glossary'] = $glossaryid;
+        $ishtml = ($params['options']['tag_handling'] ?? '') === 'html';
         $groupedtranslations = [];
         foreach ($params['translations'] as $translation) {
+            if ($ishtml) {
+                $translation['text'] = self::wrap_html($translation['text']);
+            }
             $groupedtranslations[$translation['source_lang']][] = $translation;
         }
         $translatedtexts = [];
@@ -94,7 +103,7 @@ class get_translation extends external_api {
      * Processes a chunk of translations and returns translated results.
      *
      * @param DeepLClient $translator The DeepL client instance.
-     * @param array $chunk The chunk of translations.
+     * @param array $chunk The chunk of translations, HTML texts already wrapped by wrap_html().
      * @param string $sourcelang The source language.
      * @param string $targetlang The target language.
      * @param array $options Translation options.
@@ -110,6 +119,7 @@ class get_translation extends external_api {
         string $glossaryid
     ): array {
 
+        $ishtml = ($options['tag_handling'] ?? '') === 'html';
         $texts = array_map(function ($t) {
             return $t['text'];
         }, $chunk);
@@ -121,7 +131,7 @@ class get_translation extends external_api {
             foreach ($results as $index => $result) {
                 $translated[] = [
                         'key' => $chunk[$index]['key'],
-                        'translated_text' => $result->text,
+                        'translated_text' => $ishtml ? self::unwrap_html($result->text) : $result->text,
                         'glossary_id' => $glossaryid,
                         'error' => '',
                 ];
@@ -129,11 +139,23 @@ class get_translation extends external_api {
 
             return $translated;
         } catch (DeepLException $e) {
+            // One malformed text fails the whole request, so retry one by one to isolate it.
+            if (count($chunk) > 1 && self::is_bad_request($e)) {
+                $translated = [];
+                foreach ($chunk as $item) {
+                    $translated = array_merge(
+                        $translated,
+                        self::process_chunk($translator, [$item], $sourcelang, $targetlang, $options, $glossaryid)
+                    );
+                }
+                return $translated;
+            }
+            $single = count($chunk) === 1;
             return [
                     [
                             'glossary_id' => $glossaryid,
-                            'error' => 'Deepl exception ' . $e->getMessage(),
-                            'key' => '',
+                            'error' => 'Deepl exception ' . $e->getMessage() . ($single ? ' [' . $chunk[0]['key'] . ']' : ''),
+                            'key' => $single ? $chunk[0]['key'] : '',
                             'translated_text' => '',
                     ],
             ];
@@ -147,6 +169,42 @@ class get_translation extends external_api {
                     ],
             ];
         }
+    }
+
+    /**
+     * Wraps a text in a single root element.
+     *
+     * DeepL's HTML tag handling v2 rejects texts with several top-level nodes
+     * ("text without parent", "multiple roots").
+     *
+     * @param string $text
+     * @return string
+     */
+    protected static function wrap_html(string $text): string {
+        return self::WRAP_OPEN . $text . self::WRAP_CLOSE;
+    }
+
+    /**
+     * Removes the root element added by wrap_html().
+     *
+     * @param string $text
+     * @return string
+     */
+    protected static function unwrap_html(string $text): string {
+        if (preg_match('#^\s*<div data-deepler-wrap(?:="")?>(.*)</div>\s*$#s', $text, $matches)) {
+            return $matches[1];
+        }
+        return $text;
+    }
+
+    /**
+     * Whether DeepL rejected the request content (HTTP 400), as opposed to auth, quota or network errors.
+     *
+     * @param DeepLException $e
+     * @return bool
+     */
+    protected static function is_bad_request(DeepLException $e): bool {
+        return get_class($e) === DeepLException::class && str_starts_with($e->getMessage(), 'Bad request');
     }
 
     /**
