@@ -87,17 +87,7 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin --branch master iarenaza/moodle-filter_multilang2
-
-          if [ "${MOODLE_BRANCH}" = "MOODLE_502_STABLE" ]; then
-            moodle-plugin-ci install \
-              --plugin ./plugin \
-              --db-host=127.0.0.1 \
-              --no-init
-          else
-            moodle-plugin-ci install \
-              --plugin ./plugin \
-              --db-host=127.0.0.1
-          fi
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
@@ -246,17 +236,7 @@ jobs:
       - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin --branch master iarenaza/moodle-filter_multilang2
-
-          if [ "${MOODLE_BRANCH}" = "MOODLE_502_STABLE" ]; then
-            moodle-plugin-ci install \
-              --plugin ./plugin \
-              --db-host=127.0.0.1 \
-              --no-init
-          else
-            moodle-plugin-ci install \
-              --plugin ./plugin \
-              --db-host=127.0.0.1
-          fi
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
