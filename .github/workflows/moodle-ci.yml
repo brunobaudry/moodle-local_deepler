@@ -1,7 +1,7 @@
 name: Moodle Plugin CI
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 jobs:
   testMaria:
     runs-on: ubuntu-latest
@@ -15,12 +15,20 @@ jobs:
           MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+        options: --health-cmd="mariadb-admin ping" --health-interval 10s --health-timeout 5s --health-retries 3
     strategy:
       fail-fast: false
       matrix:
         include:
           - php: 8.4
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.3
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+            mariadb_version: 10.11
+          - php: 8.4
             moodle-branch: MOODLE_501_STABLE
             database: mariadb
             mariadb_version: 10.11
@@ -52,22 +60,6 @@ jobs:
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
             mariadb_version: 10.11
-          - php: 8.3
-            moodle-branch: MOODLE_404_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_404_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_403_STABLE
-            database: mariadb
-            mariadb_version: 10.6
-          - php: 8.2
-            moodle-branch: MOODLE_402_STABLE
-            database: mariadb
-            mariadb_version: 10.6
     steps:
       - name: Check out repository code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -102,7 +94,6 @@ jobs:
           IGNORE_PATHS: moodle/tests/fixtures,moodle/Sniffs,classes/vendor
           CODECHECKER_IGNORE_PATHS: classes/vendor
           PHPDOCCHECKER_IGNORE_PATHS: classes/vendor
-
       - name: PHP Lint
         if: ${{ always() }}
         run: moodle-plugin-ci phplint
@@ -132,20 +123,37 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
 
+      - name: Trace Node version
+        run: node -v
+      - name: Trace npm version
+        run: npm -v
+      - name: Trace Grunt version
+        run: npx grunt --version
+
       - name: Grunt
-        if: ${{ always() }}
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_502_STABLE' && matrix.php == '8.4' }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
+
+      - name: Initialize PHPUnit
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_502_STABLE' }}
+        run: php moodle/public/admin/tool/phpunit/cli/init.php
+
       - name: PHPUnit tests
-        if: ${{ always() }}
-        env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
-      - name: Behat features
-        if: false
-        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
+          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
+
+      - name: Initialize Behat
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_502_STABLE' }}
+        run: php moodle/public/admin/tool/behat/cli/init.php
+
+      - name: Behat features
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
+        run: moodle-plugin-ci behat --start-servers --profile chrome --tags='@local_deepler&&~@envtest'
   testPG:
     runs-on: ubuntu-latest
     services:
@@ -162,6 +170,14 @@ jobs:
       matrix:
         include:
           - php: 8.4
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
+            postgres_version: 16
+          - php: 8.3
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
+            postgres_version: 16
+          - php: 8.4
             moodle-branch: MOODLE_501_STABLE
             database: pgsql
             postgres_version: 15
@@ -193,22 +209,6 @@ jobs:
             moodle-branch: MOODLE_405_STABLE
             database: pgsql
             postgres_version: 14
-          - php: 8.3
-            moodle-branch: MOODLE_404_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_404_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_403_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_402_STABLE
-            database: pgsql
-            postgres_version: 13
     steps:
       - name: Check out repository code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -273,17 +273,34 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
 
+      - name: Trace Node version
+        run: node -v
+      - name: Trace npm version
+        run: npm -v
+      - name: Trace Grunt version
+        run: npx grunt --version
+
       - name: Grunt
-        if: ${{ always() }}
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_502_STABLE' && matrix.php == '8.4' }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
+
+      - name: Initialize PHPUnit
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_502_STABLE' }}
+        run: php moodle/public/admin/tool/phpunit/cli/init.php
+
       - name: PHPUnit tests
-        if: ${{ always() }}
-        env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
-      - name: Behat features
-        if: false
-        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
         env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
+          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
+
+      - name: Initialize Behat
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_502_STABLE' }}
+        run: php moodle/public/admin/tool/behat/cli/init.php
+
+      - name: Behat features
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN }}
+        run: moodle-plugin-ci behat --start-servers --profile chrome --tags='@local_deepler&&~@envtest'

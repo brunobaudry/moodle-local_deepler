@@ -57,7 +57,6 @@ final class observer_test extends advanced_testcase {
      */
     public function test_course_updated(): void {
         global $DB;
-
         $course = $this->getDataGenerator()->create_course();
         $record = new \stdClass();
         $record->t_id = $course->id;

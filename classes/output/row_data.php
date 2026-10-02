@@ -15,14 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\output;
-
+defined('MOODLE_INTERNAL') || die();
 use core_filters\text_filter;
+use local_deepler\editor\MoodleQuickForm_cteditor;
 use local_deepler\local\data\field;
 use local_deepler\local\data\multilanger;
 use local_deepler\local\services\lang_helper;
 use renderable;
 use renderer_base;
 use templatable;
+
+global $CFG;
+require_once("$CFG->libdir/form/editor.php");
+require_once("$CFG->dirroot/local/deepler/classes/editor/MoodleQuickForm_cteditor.php");
 
 /**
  * Row page renderables
@@ -118,6 +123,19 @@ class row_data extends translate_data implements renderable, templatable {
         $mlangfilteredtext = $this->mlangfilter->filter($this->field->get_displaytext());
         $fieldformat = $this->field->get_format();
         $trimedtext = trim($fieldtext);
+        // Non editable or plain text (format 0) fields may hold raw HTML fragments (e.g. mod_data templates):
+        // never inject them unescaped or they would break the page layout.
+        $escapedisplay = !$iseditable || $fieldformat === 0;
+        if ($escapedisplay) {
+            $mlangfilteredtext = s($mlangfilteredtext);
+        }
+        $istiny = $this->editor === 'tiny';
+        $plaintextinput = $fieldformat === 0;
+        // Non Tiny users (atto, textarea, marklar...) need the editor form element rendered server side.
+        $cteditor = '';
+        if ($iseditable && !$istiny && !$plaintextinput) {
+            $cteditor = $this->rendercteditor($key, $fieldformat);
+        }
         $totalschar = strlen($trimedtext);
         $maxlength = $this->field->get_maxlength() ?? -1;
         $warnmaxlength = $maxlength > 0;
@@ -144,17 +162,16 @@ class row_data extends translate_data implements renderable, templatable {
             'flagandkey' => "$isdbkey$key",
             'id' => $this->field->get_id(),
             'iseditable' => $iseditable,
-            'istiny' => $this->editor === 'tiny',
+            'istiny' => $istiny,
+            'cteditor' => $cteditor,
             'key' => $key,
             'keyid' => $keyid,
-            // Do Ajax.
             'mlangfiltered' => $mlangfilteredtext,
             'multilangdisabled' => $multilangdisabled,
             'multilangtitlestring' => $multilangtitlestring,
-            'plaintextinput' => $fieldformat === 0,
-            // Do Ajax.
+            'plaintextinput' => $plaintextinput,
+            'escapedisplay' => $escapedisplay,
             'rawsourcetext' => base64_encode($this->mlangfilter->filter($fieldtext) ?? ''),
-            // Do Ajax.
             'rawunfilterdtext' => base64_encode($trimedtext),
             'rowtitle' => $isdbkey ? get_string('translationdisabled', 'local_deepler') : '',
             'selecttitle' => get_string('specialsourcetext', 'local_deepler', strtoupper($currentlang)),
@@ -164,12 +181,27 @@ class row_data extends translate_data implements renderable, templatable {
             'tablefield' => $this->field->get_tablefield(),
             'tid' => $this->field->get_tid(),
             'titlestring' => htmlentities($titlestring, ENT_HTML5),
-            // Do Ajax.
             'trimedtext' => $trimedtext,
             'warnmaxlength' => $warnmaxlength,
             'warntextcolor' => $warntextcolor,
             'maxlength' => $maxlength > 0 ? $maxlength : null,
             'totalchar' => strlen($trimedtext),
         ];
+    }
+
+    /**
+     * Render the translation editor element for users not using TinyMCE.
+     *
+     * The element is rendered standalone (outside of the QuickForm stack) so it can be injected in the mustache template.
+     * Its name is the field key so that the JS can find it back (textarea[name="<KEY>[text]"] or its contenteditable).
+     *
+     * @param string $key Field key used as element name.
+     * @param int $fieldformat Field text format.
+     * @return string
+     */
+    protected function rendercteditor(string $key, int $fieldformat): string {
+        $editor = new MoodleQuickForm_cteditor($key, '', ['id' => 'id_' . $key, 'rows' => 5]);
+        $editor->setValue(['text' => '', 'format' => $fieldformat, 'itemid' => 0]);
+        return $editor->toHtml();
     }
 }

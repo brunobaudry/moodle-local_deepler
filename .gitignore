@@ -1,6 +1,6 @@
 # System Files
 .DS_Store
-
+.vscode/*
 # Libraries
 node_modules
 # ide
@@ -12,3 +12,4 @@ Gruntfile.js
 *.csv
 language_expansion_ratio_matrix_iso.csv
 language_expansion_ratio_matrix_iso_updated.csv
+phpunit.xml

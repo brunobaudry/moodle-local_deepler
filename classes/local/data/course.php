@@ -18,7 +18,6 @@ namespace local_deepler\local\data;
 
 use core_courseformat\base;
 use course_modinfo;
-use local_deepler\local\services\utils;
 use moodle_exception;
 use moodle_url;
 use stdClass;
@@ -99,18 +98,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         global $CFG;
         $this->loadedsectionnum = $this->loadedsectionid = $lodadedsection;
         // Load json config of known field definitions.
-        if (empty(field::$additionals)) {
-            $jsonconfig = get_config('local_deepler', 'additionalconf');
-            if ($jsonconfig !== false && $jsonconfig !== '') {
-                field::$additionals = json_decode($jsonconfig, true);
-            } else {
-                // Fallback: config not yet seeded (e.g. CLI/test context before install runs).
-                field::$additionals = json_decode(
-                    file_get_contents(utils::get_plugin_root() . '/additional_conf.json'),
-                    true
-                );
-            }
-        }
+        field::loadadditionals();
         $this->sections = [];
         $this->course = get_fast_modinfo($course);
         $this->format = course_get_format($course);

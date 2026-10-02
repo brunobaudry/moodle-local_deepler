@@ -31,7 +31,7 @@ define([], () => {
      * @returns {*}
      */
     const replaceKey = (s, k) => {
-        return s.replace("<KEY>", k);
+        return s.replaceAll("<KEY>", k);
     };
     /**
      * Transforms a keyid to a key.

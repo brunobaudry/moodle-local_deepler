@@ -77,6 +77,7 @@ $string['errordbtitle'] = 'Database error';
 $string['errortoolong'] = '(could be that the text is too long for the field... Check manually in place)';
 $string['fieldmaxlengtha'] = '{$a} characters';
 $string['fieldmaxlengthb'] = '(max {$a})';
+$string['fieldnottranslatable'] = 'Not translatable (set in "Additional field configuration" in admin)';
 $string['filters'] = 'Filters';
 $string['formality'] = 'Formality';
 $string['formalitydefault'] = 'default';

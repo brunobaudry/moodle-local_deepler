@@ -86,6 +86,205 @@ final class langhelper_test extends advanced_testcase {
     }
 
     /**
+     * DeepL has no plain EN (nor PT) target, only regional variants.
+     * They must still be offered when Moodle has the plain language pack installed,
+     * otherwise an English speaking user can neither improve nor translate to English.
+     *
+     * @covers \local_deepler\local\services\lang_helper::finddeeplsformoodle
+     * @covers \local_deepler\local\services\lang_helper::preparetargetsoptionlangs
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \dml_exception
+     */
+    public function test_english_regional_targets_are_offered_for_rephrasing(): void {
+        // Moodle only has the plain English pack installed, DeepL's source lang is then EN.
+        $helper = $this->makedeeplvariantshelper(['en' => 'English', 'fr' => 'French'], 'en', 'en-GB');
+        $options = $this->indexbycode($helper->preparetargetsoptionlangs());
+        $symbol = lang_helper::REPHRASESYMBOL;
+
+        $this->assertArrayHasKey($symbol . 'en-GB', $options, 'EN-GB must be offered to improve English texts.');
+        $this->assertArrayHasKey($symbol . 'en-US', $options, 'EN-US must be offered to improve English texts.');
+        $this->assertArrayHasKey('fr', $options);
+        // Both English variants are rephrasable, hence selectable, only the chosen one is selected.
+        $this->assertFalse($options[$symbol . 'en-GB']['disabled']);
+        $this->assertTrue($options[$symbol . 'en-GB']['selected']);
+        $this->assertFalse($options[$symbol . 'en-US']['disabled']);
+        $this->assertFalse($options[$symbol . 'en-US']['selected']);
+    }
+
+    /**
+     * English variants must also be available as plain translation targets for another source language.
+     *
+     * @covers \local_deepler\local\services\lang_helper::finddeeplsformoodle
+     * @covers \local_deepler\local\services\lang_helper::preparetargetsoptionlangs
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \dml_exception
+     */
+    public function test_english_regional_targets_are_offered_for_translation(): void {
+        $helper = $this->makedeeplvariantshelper(['en' => 'English', 'fr' => 'French'], 'fr', 'en-US');
+        $options = $this->indexbycode($helper->preparetargetsoptionlangs());
+
+        // No rephrase symbol as the source is French, plain codes then.
+        $this->assertArrayHasKey('en-GB', $options);
+        $this->assertArrayHasKey('en-US', $options);
+        $this->assertFalse($options['en-US']['disabled']);
+        $this->assertTrue($options['en-US']['selected']);
+        // French is the source language, so it is the rephrasing option.
+        $this->assertArrayHasKey(lang_helper::REPHRASESYMBOL . 'fr', $options);
+    }
+
+    /**
+     * Regional variants of the same language are the same language.
+     *
+     * @covers \local_deepler\local\services\lang_helper::isrephrase
+     * @covers \local_deepler\local\services\lang_helper::isrephrasable
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \dml_exception
+     */
+    public function test_isrephrase_ignores_regional_variants(): void {
+        $helper = $this->makedeeplvariantshelper(['en' => 'English', 'fr' => 'French'], 'en', 'en-GB');
+
+        $this->assertTrue($helper->isrephrase());
+        $this->assertTrue($helper->isrephrase('en', 'en-US'));
+        $this->assertTrue($helper->isrephrase('pt', 'pt-BR'));
+        $this->assertFalse($helper->isrephrase('en', 'fr'));
+        // Empty arguments fall back to the current source and target languages.
+        $this->assertTrue($helper->isrephrase('en', ''));
+        $this->assertFalse($helper->isrephrase('fr', ''));
+        // No target chosen yet is not a rephrasing.
+        $notarget = $this->makedeeplvariantshelper(['en' => 'English', 'fr' => 'French'], 'en', '');
+        $this->assertFalse($notarget->isrephrase());
+        // DeepL only lists the variants, but the root language is improvable too.
+        $this->assertTrue($helper->isrephrasable('en'));
+        $this->assertTrue($helper->isrephrasable('en-GB'));
+        $this->assertTrue($helper->isrephrasable('pt'));
+        $this->assertFalse($helper->isrephrasable('nl'));
+        $this->assertFalse($helper->isrephrasable(''));
+    }
+
+    /**
+     * A DeepL language having both a plain code and regional variants must be listed once only.
+     * DeepL provides FR, FR-FR and FR-CA as targets, FR-FR being a plain duplicate of FR.
+     *
+     * @covers \local_deepler\local\services\lang_helper::finddeeplsformoodle
+     * @covers \local_deepler\local\services\lang_helper::findrootlangs
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \dml_exception
+     */
+    public function test_target_languages_are_not_duplicated_by_their_variants(): void {
+        $helper = $this->makedeeplvariantshelper(
+            ['en' => 'English', 'fr' => 'French', 'de' => 'German'],
+            'en',
+            'en-GB'
+        );
+        $targets = $helper->preparetargetsoptionlangs();
+        $symbol = lang_helper::REPHRASESYMBOL;
+
+        // Only the plain FR and DE, as DeepL provides them, plus both English variants, as it provides no plain EN.
+        $codes = array_column($targets, 'code');
+        $expected = ['de', 'fr', $symbol . 'en-GB', $symbol . 'en-US'];
+        sort($codes);
+        sort($expected);
+        $this->assertSame($expected, $codes);
+        // FR-FR and DE-DE would show as a second French and German entry, FR-CA and DE-CH are not installed.
+        $this->assertCount(1, array_filter($targets, fn($option) => $option['verbose'] === 'French'));
+        $this->assertCount(1, array_filter($targets, fn($option) => $option['verbose'] === 'German'));
+    }
+
+    /**
+     * Regional variants installed in Moodle are matched, as well as their root language.
+     *
+     * @covers \local_deepler\local\services\lang_helper::finddeeplsformoodle
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \dml_exception
+     */
+    public function test_moodle_regional_packs_match_deepl_variants(): void {
+        $helper = $this->makedeeplvariantshelper(
+            ['en' => 'English', 'de_ch' => 'German (Swiss)', 'pt' => 'Portuguese', 'zh_cn' => 'Chinese'],
+            'en',
+            ''
+        );
+        $codes = array_column($helper->preparetargetsoptionlangs(), 'code');
+        $symbol = lang_helper::REPHRASESYMBOL;
+
+        // DE-CH matches de_ch, DE is its root, EN and PT only have variants, ZH is the root of zh_cn.
+        $expected = ['de', 'de-CH', 'pt-BR', 'pt-PT', 'zh', $symbol . 'en-GB', $symbol . 'en-US'];
+        sort($codes);
+        sort($expected);
+        $this->assertSame($expected, $codes);
+    }
+
+    /**
+     * Helper building a lang_helper mocking DeepL's source and target lists, variants included.
+     *
+     * @param array $moodlelangs
+     * @param string $currentlang
+     * @param string $targetlang
+     * @return \local_deepler\local\services\lang_helper
+     * @throws \DeepL\DeepLException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \dml_exception
+     */
+    private function makedeeplvariantshelper(array $moodlelangs, string $currentlang, string $targetlang): lang_helper {
+        $translator = $this->createMock(DeepLClient::class);
+        $usage = $this->createMock(Usage::class);
+        $usage->method('anyLimitReached')->willReturn(false);
+        $translator->method('getUsage')->willReturn($usage);
+        // Sources have no regional variant at all.
+        $translator->method('getSourceLanguages')->willReturn([
+            (object) ['code' => 'DE', 'name' => 'German'],
+            (object) ['code' => 'EN', 'name' => 'English'],
+            (object) ['code' => 'FR', 'name' => 'French'],
+            (object) ['code' => 'NL', 'name' => 'Dutch'],
+            (object) ['code' => 'PT', 'name' => 'Portuguese'],
+            (object) ['code' => 'ZH', 'name' => 'Chinese'],
+        ]);
+        // Targets as DeepL returns them: no plain EN nor PT, but a redundant DE-DE and FR-FR.
+        $translator->method('getTargetLanguages')->willReturn([
+            (object) ['code' => 'DE', 'name' => 'German'],
+            (object) ['code' => 'DE-CH', 'name' => 'German (Swiss)'],
+            (object) ['code' => 'DE-DE', 'name' => 'German'],
+            (object) ['code' => 'EN-GB', 'name' => 'English (British)'],
+            (object) ['code' => 'EN-US', 'name' => 'English (American)'],
+            (object) ['code' => 'FR', 'name' => 'French'],
+            (object) ['code' => 'FR-CA', 'name' => 'French (Canadian)'],
+            (object) ['code' => 'FR-FR', 'name' => 'French'],
+            (object) ['code' => 'NL', 'name' => 'Dutch'],
+            (object) ['code' => 'PT-BR', 'name' => 'Portuguese (Brazilian)'],
+            (object) ['code' => 'PT-PT', 'name' => 'Portuguese (European)'],
+            (object) ['code' => 'ZH', 'name' => 'Chinese (simplified)'],
+            (object) ['code' => 'ZH-HANS', 'name' => 'Chinese (simplified)'],
+            (object) ['code' => 'ZH-HANT', 'name' => 'Chinese (traditional)'],
+        ]);
+        $helper = new lang_helper($translator, 'mockapikey', $moodlelangs, $currentlang, $targetlang);
+        $helper->initdeepl($this->user, 'v1.0');
+        return $helper;
+    }
+
+    /**
+     * Flattens the select options by their code.
+     *
+     * @param array $options
+     * @return array
+     */
+    private function indexbycode(array $options): array {
+        $indexed = [];
+        foreach ($options as $option) {
+            $indexed[$option['code']] = $option;
+        }
+        return $indexed;
+    }
+
+    /**
      * Basic setting tests.
      *
      * @covers \local_deepler\local\services\lang_helper::initdeepl
