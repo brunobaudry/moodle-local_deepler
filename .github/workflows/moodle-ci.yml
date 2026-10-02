@@ -28,10 +28,6 @@ jobs:
             moodle-branch: MOODLE_502_STABLE
             database: mariadb
             mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_502_STABLE
-            database: mariadb
-            mariadb_version: 10.11
           - php: 8.4
             moodle-branch: MOODLE_501_STABLE
             database: mariadb
@@ -188,10 +184,6 @@ jobs:
             database: pgsql
             postgres_version: 16
           - php: 8.3
-            moodle-branch: MOODLE_502_STABLE
-            database: pgsql
-            postgres_version: 16
-          - php: 8.2
             moodle-branch: MOODLE_502_STABLE
             database: pgsql
             postgres_version: 16
