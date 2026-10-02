@@ -1,17 +1,14 @@
 name: Moodle Plugin CI
 
-on: [pull_request]
-
-permissions:
-  contents: read
+on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: ${{ matrix.database == 'pgsql' && 'postgres:17' || '' }}
+        image: postgres:16
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -20,127 +17,94 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
 
       mariadb:
-        image: ${{ matrix.database == 'mariadb' && 'mariadb:11' || '' }}
+        image: mariadb:10.11
         env:
-          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+          MYSQL_USER: 'root'
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
           MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
           MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
         ports:
           - 3306:3306
-        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval 10s --health-timeout 5s --health-retries 3
+        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
 
     strategy:
       fail-fast: false
       matrix:
         include:
-# PG
-          - php: 8.4
-            moodle-branch: MOODLE_502_STABLE
-            database: pgsql
-            postgres_version: 16
-          - php: 8.3
-            moodle-branch: MOODLE_502_STABLE
-            database: pgsql
-            postgres_version: 16
-          - php: 8.4
-            moodle-branch: MOODLE_501_STABLE
-            database: pgsql
-            postgres_version: 15
-          - php: 8.3
-            moodle-branch: MOODLE_501_STABLE
-            database: pgsql
-            postgres_version: 15
-          - php: 8.2
-            moodle-branch: MOODLE_501_STABLE
-            database: pgsql
-            postgres_version: 15
-          - php: 8.4
-            moodle-branch: MOODLE_500_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.3
-            moodle-branch: MOODLE_500_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_500_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.3
-            moodle-branch: MOODLE_405_STABLE
-            database: pgsql
-            postgres_version: 14
-          - php: 8.2
-            moodle-branch: MOODLE_405_STABLE
-            database: pgsql
-            postgres_version: 14
-# Maria
-          - php: 8.4
-            moodle-branch: MOODLE_502_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.3
-            moodle-branch: MOODLE_502_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.4
-            moodle-branch: MOODLE_501_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.3
-            moodle-branch: MOODLE_501_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_501_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.4
-            moodle-branch: MOODLE_500_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.3
-            moodle-branch: MOODLE_500_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.2
-            moodle-branch: MOODLE_500_STABLE
-            database: mariadb
-            mariadb_version: 10.11
-          - php: 8.3
+          - php: 8.1
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
-            mariadb_version: 10.11
+          - php: 8.1
+            moodle-branch: MOODLE_405_STABLE
+            database: pgsql
           - php: 8.2
             moodle-branch: MOODLE_405_STABLE
             database: mariadb
-            mariadb_version: 10.11
-#        php: [ '8.2', '8.3']
-#        moodle-branch: ['MOODLE_405_STABLE','MOODLE_500_STABLE','MOODLE_501_STABLE', 'MOODLE_502_STABLE']
-#        database: [pgsql, mariadb]
+          - php: 8.2
+            moodle-branch: MOODLE_405_STABLE
+            database: pgsql
+          - php: 8.2
+            moodle-branch: MOODLE_500_STABLE
+            database: mariadb
+          - php: 8.2
+            moodle-branch: MOODLE_500_STABLE
+            database: pgsql
+          - php: 8.3
+            moodle-branch: MOODLE_405_STABLE
+            database: mariadb
+          - php: 8.3
+            moodle-branch: MOODLE_405_STABLE
+            database: pgsql
+          - php: 8.3
+            moodle-branch: MOODLE_500_STABLE
+            database: mariadb
+          - php: 8.3
+            moodle-branch: MOODLE_500_STABLE
+            database: pgsql
+          - php: 8.4
+            moodle-branch: MOODLE_500_STABLE
+            database: mariadb
+          - php: 8.4
+            moodle-branch: MOODLE_500_STABLE
+            database: pgsql
+          - php: 8.3
+            moodle-branch: MOODLE_501_STABLE
+            database: mariadb
+          - php: 8.3
+            moodle-branch: MOODLE_501_STABLE
+            database: pgsql
+          - php: 8.4
+            moodle-branch: MOODLE_501_STABLE
+            database: mariadb
+          - php: 8.4
+            moodle-branch: MOODLE_501_STABLE
+            database: pgsql
+          - php: 8.3
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+          - php: 8.3
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
+          - php: 8.4
+            moodle-branch: MOODLE_502_STABLE
+            database: mariadb
+          - php: 8.4
+            moodle-branch: MOODLE_502_STABLE
+            database: pgsql
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           path: plugin
-          persist-credentials: false
 
       - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: ${{ matrix.extensions }}
-          ini-values: max_input_vars=5000, opcache.enable_cli=1
-          # If you are not using code coverage, keep "none". Otherwise, use "pcov" (Moodle 3.10 and up) or "xdebug".
-          # If you try to use code coverage with "none", it will fallback to phpdbg (which has known problems).
+          ini-values: max_input_vars=5000
           coverage: none
-      - name: Trace Node version
-        run: node -v
-      - name: Trace npm version
-        run: npm -v
-      - name: Trace Grunt version
-        run: npx grunt --version
 
       - name: Initialise moodle-plugin-ci
         run: |
@@ -157,64 +121,49 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-          # Uncomment this to run Behat tests using the Moodle App.
-          # MOODLE_APP: 'true'
+          CODECHECKER_IGNORE_PATHS: 'classes/vendor,fonts'
+          IGNORE_PATHS: 'classes/vendor,fonts'
+          PHPCS_IGNORE_PATHS: '/^classes\/vendor/,/^fonts/'
+          PHPDOCCHECKER_IGNORE_PATHS: '/^classes\/vendor/,/^fonts/'
+          MUSTACHE_IGNORE_NAMES: 'report.mustache,questionnaire.mustache'
 
       - name: PHP Lint
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci phplint
 
       - name: PHP Mess Detector
         continue-on-error: true # This step will show errors but will not fail
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci phpmd
 
       - name: Moodle Code Checker
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci phpcs --max-warnings 0
 
       - name: Moodle PHPDoc Checker
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci phpdoc --max-warnings 0
+        if: ${{ always() }}
+        run: moodle-plugin-ci phpdoc
 
       - name: Validating
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci validate
 
       - name: Check upgrade savepoints
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci savepoints
 
       - name: Mustache Lint
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci mustache
 
       - name: Grunt
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 0
 
       - name: PHPUnit tests
-        if: ${{ !cancelled() }}
-        env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
+        if: ${{ always() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
 
       - name: Behat features
-        id: behat
-        if: ${{ !cancelled() }}
-        env:
-          DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
-        run: moodle-plugin-ci behat --profile chrome --scss-deprecations
-
-      - name: Upload Behat Faildump
-        if: ${{ failure() && steps.behat.outcome == 'failure' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: Behat Faildump (${{ join(matrix.*, ', ') }})
-          path: ${{ github.workspace }}/moodledata/behat_dump
-          retention-days: 7
-          if-no-files-found: ignore
-
-      - name: Mark cancelled jobs as failed.
-        if: ${{ cancelled() }}
-        run: exit 1
+        if: ${{ always() }}
+        run: moodle-plugin-ci behat --profile chrome
