@@ -173,8 +173,8 @@ jobs:
           npx grunt amd --files="$PLUGIN_PATH/amd/src/*.js,$PLUGIN_PATH/amd/src/**/*.js" --force || true
 
           echo "=== Diff between committed plugin and CI compiled output ==="
-          git diff --no-index --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
-          git diff --no-index ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+          git diff --no-index -a --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+          git diff --no-index -a ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
