@@ -1,7 +1,7 @@
 name: Moodle Plugin CI
 on:
   push:
-    branches: [ debug ]
+    branches: [ dev ]
 jobs:
   testMaria:
     runs-on: ubuntu-latest
@@ -108,14 +108,6 @@ jobs:
           IGNORE_PATHS: moodle/tests/fixtures,moodle/Sniffs,classes/vendor
           CODECHECKER_IGNORE_PATHS: classes/vendor
           PHPDOCCHECKER_IGNORE_PATHS: classes/vendor
-      # NEW: Explicitly initialize Behat so vendor/bin/behat exists
-      - name: Initialize Behat
-        run: |
-          php admin/tool/behat/cli/init.php
-        env:
-          DB: ${{ matrix.database }}
-          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-
       - name: PHP Lint
         if: ${{ always() }}
         run: moodle-plugin-ci phplint
@@ -175,14 +167,33 @@ jobs:
           echo "=== Diff between committed plugin and CI compiled output ==="
           git diff --no-index -a --stat ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
           git diff --no-index -a ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
+      - name: Initialize PHPUnit
+        run: |
+          if [ -f "moodle/public/admin/tool/phpunit/cli/init.php" ]; then
+            php moodle/public/admin/tool/phpunit/cli/init.php
+          else
+            php moodle/admin/tool/phpunit/cli/init.php
+          fi
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci phpunit --fail-on-warning
+      # NEW: Explicitly initialize Behat so vendor/bin/behat exists
+      - name: Initialize Behat
+        run: |
+          if [[ "${{ matrix.moodle-branch }}" == "MOODLE_502_STABLE" || "${{ matrix.moodle-branch }}" == "MOODLE_501_STABLE" ]]; then
+            php public/admin/tool/behat/cli/init.php
+          else
+            php admin/tool/behat/cli/init.php
+          fi
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
       - name: Behat features
-        if: false
-        continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
+        if: true
+        continue-on-error: true
         env:
           DEEPL_API_TOKEN: ${{ secrets.DEEPL_API_TOKEN}}
         run: moodle-plugin-ci behat --profile chrome --tags='@local_deepler&&~@envtest'
@@ -317,7 +328,7 @@ jobs:
         run: npx grunt --version
 
       - name: Grunt
-        if: ${{ always() }}
+        if: ${{ matrix.moodle-branch == 'MOODLE_502_STABLE' && matrix.php == '8.4' }}
         run: moodle-plugin-ci grunt --max-lint-warnings 10
       - name: Direct Grunt Build & Diff Inspection
         if: ${{ always() }}
@@ -340,7 +351,11 @@ jobs:
           git diff --no-index ../plugin/amd/build/ "$PLUGIN_PATH/amd/build/" || true
       - name: Initialize PHPUnit
         run: |
-          php admin/tool/phpunit/cli/init.php
+          if [ -f "moodle/public/admin/tool/phpunit/cli/init.php" ]; then
+            php moodle/public/admin/tool/phpunit/cli/init.php
+          else
+            php moodle/admin/tool/phpunit/cli/init.php
+          fi
       - name: PHPUnit tests
         if: ${{ always() }}
         env:
@@ -348,7 +363,14 @@ jobs:
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Initialize Behat
         run: |
-          php admin/tool/behat/cli/init.php
+          if [[ "${{ matrix.moodle-branch }}" == "MOODLE_502_STABLE" || "${{ matrix.moodle-branch }}" == "MOODLE_501_STABLE" ]]; then
+            php public/admin/tool/behat/cli/init.php
+          else
+            php admin/tool/behat/cli/init.php
+          fi
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
       - name: Behat features
         if: ${{ always() }}
         continue-on-error: true  # Optional: you can also keep this if you want to make it clear it's temporarily disabled
