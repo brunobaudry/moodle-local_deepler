@@ -34,6 +34,11 @@ use local_deepler\local\services\lang_helper;
  */
 final class updatetranslation_test extends base_external {
     /**
+     * Factored test string.
+     */
+    const string HELLO_WORLD = 'Hello world';
+
+    /**
      * Data provider for testPrepareText.
      *
      * @return array
@@ -137,7 +142,7 @@ final class updatetranslation_test extends base_external {
                     'mainsourcecode' => 'en',
                     'targetcode' => 'de',
                     'text' => 'Hallo welt',
-                    'sourcetext' => 'Hello world',
+                    'sourcetext' => self::HELLO_WORLD,
                 ],
                 'fieldtext' => '{mlang en}Hello world{mlang}',
                 'expected' => [
@@ -159,9 +164,9 @@ final class updatetranslation_test extends base_external {
                     'mainsourcecode' => 'fr',
                     'targetcode' => 'de',
                     'text' => 'Hallo welt',
-                    'sourcetext' => 'Hello world',
+                    'sourcetext' => self::HELLO_WORLD,
                 ],
-                'fieldtext' => 'Hello world',
+                'fieldtext' => self::HELLO_WORLD,
                 'expected' => [
                     'table' => 'course',
                     'field' => 'summary',

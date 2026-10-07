@@ -49,6 +49,11 @@ global $USER;
 
 require_once($CFG->dirroot . '/filter/multilang2/filter.php'); // Ensure filter_multilang2 is available.
 
+/**
+ * Factored test string.
+ */
+const LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER = 'local_deepler\\output\\Multilang2TextFilter';
+
 // Needed vars for processing.
 try {
     $courseid = required_param('courseid', PARAM_INT);
@@ -79,9 +84,9 @@ echo $output->header();
 // Course name heading.
 
 // Normalize filter class, workaround to match MDL version from 401 to 501.
-if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
+if (!class_exists(LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {
     if (class_exists('\\filter_multilang2')) {
-        class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+        class_alias('\\filter_multilang2', LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER);
     } else if (class_exists('\\core_filters\\text_filter')) {
         /**
          * Wrapper.

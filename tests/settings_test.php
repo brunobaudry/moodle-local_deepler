@@ -31,6 +31,11 @@ namespace local_deepler;
  */
 final class settings_test extends \advanced_testcase {
     /**
+     * Factored test string.
+     */
+    const string MOODLE_SITE_CONFIG = 'moodle/site:config';
+
+    /**
      * Set it up
      *
      * @return void
@@ -69,13 +74,13 @@ final class settings_test extends \advanced_testcase {
         set_config('apikey', 'testvalue', 'local_deepler');
         $this->assertEquals($settings1->name, 'local_deepler');
         $this->assertEquals($settings1->visiblename, get_string('pluginname', 'local_deepler'));
-        $this->assertEquals($settings1->req_capability[0], 'moodle/site:config');
+        $this->assertEquals($settings1->req_capability[0], self::MOODLE_SITE_CONFIG);
         $this->assertIsArray($settings1->req_capability);
         $this->assertFileExists($CFG->dirroot . '/lib/adminlib.php');
         $this->assertFileExists(__DIR__ . '/../settings.php');
-        $this->assertFalse(has_capability('moodle/site:config', \context_system::instance()));
+        $this->assertFalse(has_capability(self::MOODLE_SITE_CONFIG, \context_system::instance()));
         $this->setAdminUser();
-        $this->assertTrue(has_capability('moodle/site:config', \context_system::instance()));
+        $this->assertTrue(has_capability(self::MOODLE_SITE_CONFIG, \context_system::instance()));
         // Testing single settings.
         $expectedsettings = [
                 'apikey',

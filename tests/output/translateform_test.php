@@ -37,6 +37,10 @@ use ReflectionClass;
  * Test case for translateform class.
  */
 final class translateform_test extends advanced_testcase {
+    /**
+     * Factored test string.
+     */
+    const string LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER = 'local_deepler\\output\\Multilang2TextFilter';
     /** @var mixed */
     protected mixed $course;
     /** @var lang_helper */
@@ -58,11 +62,11 @@ final class translateform_test extends advanced_testcase {
         global $CFG;
         require_once($CFG->dirroot . '/filter/multilang2/filter.php'); // Ensure filter_multilang2 is loaded.
 
-        if (!class_exists('local_deepler\\output\\Multilang2TextFilter')) {
+        if (!class_exists(self::LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {
             if (class_exists('\\core_filters\\text_filter')) {
-                class_alias('\\core_filters\\text_filter', 'local_deepler\\output\\Multilang2TextFilter');
+                class_alias('\\core_filters\\text_filter', self::LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER);
             } else if (class_exists('\\filter_multilang2')) {
-                class_alias('\\filter_multilang2', 'local_deepler\\output\\Multilang2TextFilter');
+                class_alias('\\filter_multilang2', self::LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER);
             }
         }
         $this->user = $this->getDataGenerator()->create_user([

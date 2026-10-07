@@ -22,8 +22,11 @@
  * @copyright    2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Factored test string.
+ */
+const LOCAL_DEEPLER_EDITTRANSLATIONS = 'local/deepler:edittranslations';
 require_once(__DIR__ . '/classes/vendor/autoload.php');
 
 /**
@@ -37,7 +40,7 @@ require_once(__DIR__ . '/classes/vendor/autoload.php');
  */
 function local_deepler_extend_navigation_course(mixed $navigation, mixed $course): void {
     // Do not show in menu if no capability.
-    if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
+    if (!has_capability(LOCAL_DEEPLER_EDITTRANSLATIONS, context_course::instance($course->id))) {
         return;
     }
     // Get current language.
@@ -75,7 +78,7 @@ function local_deepler_extend_navigation_user_settings($navigation, $user, $user
     if (!$onpreferencepage) {
         return null;
     }
-    if (has_capability('local/deepler:edittranslations', $usercontext)) {
+    if (has_capability(LOCAL_DEEPLER_EDITTRANSLATIONS, $usercontext)) {
         $url = new moodle_url('/local/deepler/glossarymanageruser.php');
         $node = navigation_node::create(
             get_string('glossary:manage:title', 'local_deepler'),
@@ -121,7 +124,7 @@ function local_deepler_pluginfile(
         return false;
     }
     // Security checks.
-    if (!has_capability('local/deepler:edittranslations', context_course::instance($course->id))) {
+    if (!has_capability(LOCAL_DEEPLER_EDITTRANSLATIONS, context_course::instance($course->id))) {
         return false;
     }
     $itemid = array_shift($args);

@@ -930,7 +930,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         let parent = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         let alertChild = domQuery('.alert-danger', '', parent);
         if (alertChild) {
-            parent.removeChild(alertChild);
+            alertChild.remove();
         }
     };
     /**

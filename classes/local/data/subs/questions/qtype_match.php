@@ -27,6 +27,33 @@ use local_deepler\local\data\field;
  */
 class qtype_match extends qbase {
     /**
+     * Find the matches
+     *
+     * @param $DB
+     * @param string $substablename
+     * @param mixed $submatch
+     * @param array $fields
+     * @return array
+     */
+    private function getmatches($DB, string $substablename, mixed $submatch, array $fields): array {
+        $subrecord = $DB->get_record($substablename, ['id' => $submatch->id]);
+        $subtablefileds = field::filterdbtextfields($substablename);
+        foreach ($subtablefileds as $field) {
+            if ($subrecord->{$field} !== null && trim($subrecord->{$field}) !== '') {
+                $fields[] = new field(
+                    $subrecord->id,
+                    $subrecord->{$field},
+                    isset($subrecord->{$field . 'format'}) ?? 0,
+                    $field,
+                    $substablename,
+                    $this->cmid
+                );
+            }
+        }
+        return $fields;
+    }
+
+    /**
      * Get the fields to be translated.
      *
      * @return array
@@ -41,20 +68,7 @@ class qtype_match extends qbase {
             if ($DB->record_exists($substablename, [$this->qidcolname => $this->question->id])) {
                 $submatches = $DB->get_records($substablename, [$this->qidcolname => $this->question->id]);
                 foreach ($submatches as $submatch) {
-                    $subrecord = $DB->get_record($substablename, ['id' => $submatch->id]);
-                    $subtablefileds = field::filterdbtextfields($substablename);
-                    foreach ($subtablefileds as $field) {
-                        if ($subrecord->{$field} !== null && trim($subrecord->{$field}) !== '') {
-                            $fields[] = new field(
-                                $subrecord->id,
-                                $subrecord->{$field},
-                                isset($subrecord->{$field . 'format'}) ?? 0,
-                                $field,
-                                $substablename,
-                                $this->cmid
-                            );
-                        }
-                    }
+                    $fields = $this->getmatches($DB, $substablename, $submatch, $fields);
                 }
             }
         }

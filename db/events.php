@@ -27,6 +27,10 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Factored test string.
+ */
 const LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE = '\local_deepler\observer::subitems_update';
 
 // Event observer for local_deepler.

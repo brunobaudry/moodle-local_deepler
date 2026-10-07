@@ -73,107 +73,221 @@ class admin_setting_deepler_configjson extends admin_setting_configtextarea {
      * @return true|string true on success, localised error string on failure
      */
     private function validateschema(mixed $config): true|string {
+        $error = $this->validate_config_structure($config);
+        if ($error !== null) {
+            return $error;
+        }
+
         $warnings = [];
+        foreach ($config as $pluginkey => $tables) {
+            $warnings = array_merge($warnings, $this->validate_plugin_tables($pluginkey, $tables));
+        }
+
+        $this->notify_warnings($warnings);
+        return true;
+    }
+
+    /**
+     * Validate the structural hierarchy of decoded config data.
+     *
+     * @param mixed $config
+     * @return ?string Localised error message or null if valid.
+     */
+    private function validate_config_structure(mixed $config): ?string {
         if (!is_array($config) || (count($config) > 0 && array_is_list($config))) {
             return get_string('additionalconf_schema_root', 'local_deepler');
         }
-        global $DB;
-        $dbman = $DB->get_manager();
+
         foreach ($config as $pluginkey => $tables) {
             if (!is_array($tables)) {
                 return get_string('additionalconf_schema_plugin', 'local_deepler', $pluginkey);
             }
 
             foreach ($tables as $tablename => $tabledef) {
-                if (!is_array($tabledef)) {
-                    return get_string('additionalconf_schema_table', 'local_deepler', $tablename);
-                }
-
-                if (isset($tabledef['id']) && !is_string($tabledef['id'])) {
-                    return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
-                }
-
-                if (isset($tabledef['fields'])) {
-                    if (!is_array($tabledef['fields'])) {
-                        return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
-                    }
+                $error = $this->validate_table_structure($tablename, $tabledef);
+                if ($error !== null) {
+                    return $error;
                 }
             }
+        }
 
-            $pluginman = core_plugin_manager::instance();
-            $info = $pluginman->get_plugin_info($pluginkey);
+        return null;
+    }
 
-            if ($info === null || !$info->is_installed_and_upgraded()) {
-                // Plugin is not installed.
-                $warnings[] = get_string('additionalconf_err_plugnotfound', 'local_deepler', $pluginkey);
+    /**
+     * Validate an individual table definition structure.
+     *
+     * @param string $tablename
+     * @param mixed $tabledef
+     * @return ?string Localised error message or null if valid.
+     */
+    private function validate_table_structure(string $tablename, mixed $tabledef): ?string {
+        if (!is_array($tabledef)) {
+            return get_string('additionalconf_schema_table', 'local_deepler', $tablename);
+        }
+
+        if (isset($tabledef['id']) && !is_string($tabledef['id'])) {
+            return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
+        }
+
+        if (isset($tabledef['fields']) && !is_array($tabledef['fields'])) {
+            return get_string('additionalconf_schema_fields', 'local_deepler', $tablename);
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate database existence and field configuration for a plugin's tables.
+     *
+     * @param string $pluginkey
+     * @param array $tables
+     * @return array List of warning strings.
+     */
+    private function validate_plugin_tables(string $pluginkey, array $tables): array {
+        $pluginman = core_plugin_manager::instance();
+        $info = $pluginman->get_plugin_info($pluginkey);
+
+        if ($info === null || !$info->is_installed_and_upgraded()) {
+            return [get_string('additionalconf_err_plugnotfound', 'local_deepler', $pluginkey)];
+        }
+
+        $warnings = [];
+        foreach ($tables as $tablename => $tabledef) {
+            $warnings = array_merge(
+                $warnings,
+                $this->validate_table_definition($pluginkey, $tablename, $tabledef)
+            );
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Validate table and fields existence in database, returning any warnings.
+     *
+     * @param string $pluginkey
+     * @param string $tablename
+     * @param array $tabledef
+     * @return array List of warning strings.
+     */
+    private function validate_table_definition(string $pluginkey, string $tablename, array $tabledef): array {
+        global $DB;
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table($tablename);
+
+        if (!$dbman->table_exists($table)) {
+            return [get_string('additionalconf_err_tablenotfound', 'local_deepler', [
+                'name' => $tablename,
+                'plugin' => $pluginkey,
+            ])];
+        }
+
+        $warnings = [];
+        $allowedkeys = ['id', 'fields'];
+        $unknownkeys = array_diff(array_keys($tabledef), $allowedkeys);
+
+        if (!empty($unknownkeys)) {
+            $warnings[] = get_string('additionalconf_warning_unknown_table_keys', 'local_deepler', [
+                'name' => $tablename,
+                'plugin' => $pluginkey,
+                'fields' => implode(', ', $allowedkeys),
+                'unknown' => implode(', ', $unknownkeys),
+            ]);
+        }
+
+        if (isset($tabledef['fields']) && is_array($tabledef['fields'])) {
+            $warnings = array_merge(
+                $warnings,
+                $this->validate_fields_definition($pluginkey, $tablename, $tabledef['fields'])
+            );
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Validate fields against the database schema and check attributes.
+     *
+     * @param string $pluginkey
+     * @param string $tablename
+     * @param array $fields
+     * @return array List of warning strings.
+     */
+    private function validate_fields_definition(string $pluginkey, string $tablename, array $fields): array {
+        global $DB;
+        $dbman = $DB->get_manager();
+        $warnings = [];
+        $unknownfields = [];
+
+        foreach ($fields as $fieldname => $fielddef) {
+            if (!$dbman->field_exists($tablename, $fieldname)) {
+                $unknownfields[] = $fieldname;
                 continue;
             }
 
-            foreach ($tables as $tablename => $tabledef) {
-                $table = new xmldb_table($tablename);
-
-                if (!$dbman->table_exists($table)) {
-                    $warnings[] = get_string('additionalconf_err_tablenotfound', 'local_deepler', [
-                        'name' => $tablename,
-                        'plugin' => $pluginkey,
-                    ]);
-                    continue;
-                }
-                $allowedkeys = ['id', 'fields'];
-
-                $unknownkeys = array_diff(array_keys($tabledef), $allowedkeys);
-
-                if (!empty($unknownkeys)) {
-                    $warnings[] = get_string('additionalconf_warning_unknown_table_keys', 'local_deepler', [
-                        'name' => $tablename,
-                        'plugin' => $pluginkey,
-                        'fields' => implode(', ', $allowedkeys),
-                        'unknown' => implode(', ', $unknownkeys),
-                    ]);
-                }
-
-                if (isset($tabledef['fields'])) {
-                    $fields = $tabledef['fields'];
-                    $unknownfileds = [];
-                    foreach ($fields as $fieldname => $fielddef) {
-                        $allowedattributes = ['exclude', 'editable'];
-                        if (!$dbman->field_exists($tablename, $fieldname)) {
-                            $unknownfileds[] = $fieldname;
-                        } else {
-                            if (is_array($fielddef)) {
-                                $unknownattibutes = array_diff(array_keys($fielddef), $allowedattributes);
-                                if (!empty($unknownattibutes)) {
-                                    $warnings[] = get_string(
-                                        'additionalconf_warning_unknown_table_atributes',
-                                        'local_deepler',
-                                        [
-                                            'name' => $tablename,
-                                            'plugin' => $pluginkey,
-                                            'fields' => implode(', ', $allowedattributes),
-                                            'unknown' => implode(', ', $unknownattibutes),
-                                        ]
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    if (!empty($unknownfileds)) {
-                        $warnings[] = get_string('additionalconf_warning_unknown_field_table', 'local_deepler', [
-                            'name' => $tablename,
-                            'plugin' => $pluginkey,
-                            'fields' => implode(', ', $unknownfileds),
-                        ]);
-                    }
+            if (is_array($fielddef)) {
+                $attributewarning = $this->check_field_attributes($pluginkey, $tablename, $fielddef);
+                if ($attributewarning !== null) {
+                    $warnings[] = $attributewarning;
                 }
             }
         }
-        if (!empty($warnings)) {
-            array_unshift(
-                $warnings,
-                get_string('additionalconf_warning', 'local_deepler', get_string('additionalconf', 'local_deepler'))
-            );
-            notification::warning(implode('<br />', $warnings));
+
+        if (!empty($unknownfields)) {
+            $warnings[] = get_string('additionalconf_warning_unknown_field_table', 'local_deepler', [
+                'name' => $tablename,
+                'plugin' => $pluginkey,
+                'fields' => implode(', ', $unknownfields),
+            ]);
         }
-        return true;
+
+        return $warnings;
+    }
+
+    /**
+     * Check field attributes for any unknown keys.
+     *
+     * @param string $pluginkey
+     * @param string $tablename
+     * @param array $fielddef
+     * @return ?string Warning string or null if all attributes are valid.
+     */
+    private function check_field_attributes(string $pluginkey, string $tablename, array $fielddef): ?string {
+        $allowedattributes = ['exclude', 'editable'];
+        $unknownattributes = array_diff(array_keys($fielddef), $allowedattributes);
+
+        if (empty($unknownattributes)) {
+            return null;
+        }
+
+        return get_string(
+            'additionalconf_warning_unknown_table_atributes',
+            'local_deepler',
+            [
+                'name' => $tablename,
+                'plugin' => $pluginkey,
+                'fields' => implode(', ', $allowedattributes),
+                'unknown' => implode(', ', $unknownattributes),
+            ]
+        );
+    }
+
+    /**
+     * Render warnings as a notification if any exist.
+     *
+     * @param array $warnings
+     * @return void
+     */
+    private function notify_warnings(array $warnings): void {
+        if (empty($warnings)) {
+            return;
+        }
+
+        array_unshift(
+            $warnings,
+            get_string('additionalconf_warning', 'local_deepler', get_string('additionalconf', 'local_deepler'))
+        );
+        notification::warning(implode('<br />', $warnings));
     }
 }

@@ -69,88 +69,36 @@ class row_data extends translate_data implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $key = $this->field->getkey();
         $keyid = $this->field->getkeyid();
-        $cssclass = '';
+        $iseditable = $this->field->iseditable();
+        $cssclass = $iseditable ? '' : 'bg-light border-bottom border-secondary rounded-bottom mt-2';
+
         $tneeded = $this->field->get_status()->istranslationneeded();
         $status = $tneeded ? 'needsupdate' : 'updated';
-        $iseditable = $this->field->iseditable();
-        if (!$iseditable) {
-            $cssclass = $cssclass . 'bg-light border-bottom border-secondary rounded-bottom mt-2';
-        }
+
         // Hacky Special cases where the content is a db key (should never be translated).
         $isdbkey = str_contains($this->field->get_table(), 'wiki_pages') && $this->field->get_tablefield() === 'title';
-        $canrephrase = $this->languagepack->get_canimprove();
-        $sametargetassource = $this->languagepack->isrephrase();
-        $targetlang = $this->languagepack->targetlang;
         $currentlang = $this->languagepack->currentlang;
         $fieldtext = $this->field->get_text();
-        if ((!$canrephrase && $sametargetassource) || $targetlang === '') {
-            $buttonclass = 'badge-dark';
-            $titlestring =
-                get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler', $targetlang);
-        } else if ($tneeded) {
-            if (str_contains($fieldtext, "{mlang " . $targetlang)) {
-                $buttonclass = 'badge-warning';
-                $titlestring = get_string('needsupdate', 'local_deepler');
-            } else {
-                $buttonclass = $canrephrase && $sametargetassource ? 'badge-primary' : 'badge-danger';
-                $titlestring = get_string(
-                    $canrephrase && $sametargetassource ? 'neverrephrased' : 'nevertranslated',
-                    'local_deepler',
-                    $targetlang
-                );
-            }
-        } else {
-            $buttonclass = 'badge-success';
-            $titlestring = get_string('uptodate', 'local_deepler');
-        }
-        $multilanger = new multilanger($fieldtext);
-        $alreadyhasmultilang = $multilanger->has_multilangs();
-        $multilangdisabled = 'disabled';
-        if ($alreadyhasmultilang) {
-            $multilangdisabled = '';
-            if ($multilanger->has_multilandcode_and_others($currentlang)) {
-                $badgeclass = 'danger';
-                $multilangtitlestring = get_string('warningsource', 'local_deepler', strtoupper($currentlang));
-            } else {
-                $multilangtitlestring = get_string('viewsource', 'local_deepler');
-                $badgeclass = 'info';
-            }
-            $multilangtitlestring .= ' (' . implode(', ', $multilanger->findmlangcodes()) . ')';
-        } else {
-            $multilangtitlestring = get_string('viewsourcedisabled', 'local_deepler');
-            $badgeclass = 'secondary';
-        }
-        $mlangfilteredtext = $this->mlangfilter->filter($this->field->get_displaytext());
-        $fieldformat = $this->field->get_format();
         $trimedtext = trim($fieldtext);
+
+        [$buttonclass, $titlestring] = $this->get_translation_button_info($tneeded, $fieldtext);
+        [$multilangdisabled, $badgeclass, $multilangtitlestring] = $this->get_multilang_info($fieldtext, $currentlang);
+
+        $fieldformat = $this->field->get_format();
         // Non editable or plain text (format 0) fields may hold raw HTML fragments (e.g. mod_data templates):
         // never inject them unescaped or they would break the page layout.
         $escapedisplay = !$iseditable || $fieldformat === 0;
+        $mlangfilteredtext = $this->mlangfilter->filter($this->field->get_displaytext());
         if ($escapedisplay) {
             $mlangfilteredtext = s($mlangfilteredtext);
         }
+
         $istiny = $this->editor === 'tiny';
         $plaintextinput = $fieldformat === 0;
         // Non Tiny users (atto, textarea, marklar...) need the editor form element rendered server side.
-        $cteditor = '';
-        if ($iseditable && !$istiny && !$plaintextinput) {
-            $cteditor = $this->rendercteditor($key, $fieldformat);
-        }
-        $totalschar = strlen($trimedtext);
-        $maxlength = $this->field->get_maxlength() ?? -1;
-        $warnmaxlength = $maxlength > 0;
-        $warntextcolor = 'warning';
-        if ($warnmaxlength) {
-            $charratio = $totalschar / $maxlength;
-            if (($charratio > 2 / 3)) {
-                $warnmaxlength = true;
-                $warntextcolor = 'danger';
-            } else if (($charratio > 3 / 5)) {
-                $warnmaxlength = true;
-            } else {
-                $warnmaxlength = false;
-            }
-        }
+        $cteditor = ($iseditable && !$istiny && !$plaintextinput) ? $this->rendercteditor($key, $fieldformat) : '';
+
+        [$warnmaxlength, $warntextcolor, $maxlength] = $this->get_maxlength_warning_info(strlen($trimedtext));
 
         return [
             'badgeclass' => $badgeclass,
@@ -184,9 +132,103 @@ class row_data extends translate_data implements renderable, templatable {
             'trimedtext' => $trimedtext,
             'warnmaxlength' => $warnmaxlength,
             'warntextcolor' => $warntextcolor,
-            'maxlength' => $maxlength > 0 ? $maxlength : null,
+            'maxlength' => $maxlength,
             'totalchar' => strlen($trimedtext),
         ];
+    }
+
+    /**
+     * Determine translation button class and tooltip title string.
+     *
+     * @param bool $tneeded
+     * @param string $fieldtext
+     * @return array{0: string, 1: string} [buttonclass, titlestring]
+     * @throws \coding_exception
+     */
+    private function get_translation_button_info(bool $tneeded, string $fieldtext): array {
+        $canrephrase = $this->languagepack->get_canimprove();
+        $sametargetassource = $this->languagepack->isrephrase();
+        $targetlang = $this->languagepack->targetlang;
+
+        if ((!$canrephrase && $sametargetassource) || $targetlang === '') {
+            $titlestring = get_string($canrephrase ? 'doselecttarget' : 'canttranslate', 'local_deepler', $targetlang);
+            return ['badge-dark', $titlestring];
+        }
+
+        if ($tneeded) {
+            return $this->get_needed_translation_button_info($fieldtext, $targetlang, $canrephrase && $sametargetassource);
+        }
+
+        return ['badge-success', get_string('uptodate', 'local_deepler')];
+    }
+
+    /**
+     * Get button styling for fields that need translation updates.
+     *
+     * @param string $fieldtext
+     * @param string $targetlang
+     * @param bool $isrephrase
+     * @return array{0: string, 1: string}
+     * @throws \coding_exception
+     */
+    private function get_needed_translation_button_info(string $fieldtext, string $targetlang, bool $isrephrase): array {
+        if (str_contains($fieldtext, "{mlang " . $targetlang)) {
+            return ['badge-warning', get_string('needsupdate', 'local_deepler')];
+        }
+
+        $buttonclass = $isrephrase ? 'badge-primary' : 'badge-danger';
+        $titlestring = get_string($isrephrase ? 'neverrephrased' : 'nevertranslated', 'local_deepler', $targetlang);
+        return [$buttonclass, $titlestring];
+    }
+
+    /**
+     * Compute multilang source inspection button attributes.
+     *
+     * @param string $fieldtext
+     * @param string $currentlang
+     * @return array{0: string, 1: string, 2: string} [multilangdisabled, badgeclass, multilangtitlestring]
+     * @throws \coding_exception
+     */
+    private function get_multilang_info(string $fieldtext, string $currentlang): array {
+        $multilanger = new multilanger($fieldtext);
+        if (!$multilanger->has_multilangs()) {
+            return ['disabled', 'secondary', get_string('viewsourcedisabled', 'local_deepler')];
+        }
+
+        if ($multilanger->has_multilandcode_and_others($currentlang)) {
+            $badgeclass = 'danger';
+            $titlestring = get_string('warningsource', 'local_deepler', strtoupper($currentlang));
+        } else {
+            $badgeclass = 'info';
+            $titlestring = get_string('viewsource', 'local_deepler');
+        }
+
+        $titlestring .= ' (' . implode(', ', $multilanger->findmlangcodes()) . ')';
+        return ['', $badgeclass, $titlestring];
+    }
+
+    /**
+     * Determine maxlength warning status and styling.
+     *
+     * @param int $totalschar
+     * @return array{0: bool, 1: string, 2: int|null} [warnmaxlength, warntextcolor, maxlength]
+     */
+    private function get_maxlength_warning_info(int $totalschar): array {
+        $maxlength = $this->field->get_maxlength() ?? -1;
+        if ($maxlength <= 0) {
+            return [false, 'warning', null];
+        }
+
+        $charratio = $totalschar / $maxlength;
+        if ($charratio > 2 / 3) {
+            return [true, 'danger', $maxlength];
+        }
+
+        if ($charratio > 3 / 5) {
+            return [true, 'warning', $maxlength];
+        }
+
+        return [false, 'warning', $maxlength];
     }
 
     /**

@@ -27,6 +27,11 @@ use advanced_testcase;
  */
 final class databaseupdater_test extends advanced_testcase {
     /**
+     * Factored test string.
+     */
+    const string UPDATED_NAME = 'Updated Name';
+
+    /**
      * Test update_records method.
      *
      * @covers \local_deepler\local\services\database_updater::update_records
@@ -40,7 +45,7 @@ final class databaseupdater_test extends advanced_testcase {
         $data = [
             'id' => 1,
             'field' => 'fullname',
-            'text' => 'Updated Name',
+            'text' => self::UPDATED_NAME,
             'table' => 'course',
             'tid' => 1,
         ];
@@ -55,11 +60,11 @@ final class databaseupdater_test extends advanced_testcase {
 
         // Verify the record was updated.
         $updatedrecord = $DB->get_record('course', ['id' => 1]);
-        $this->assertEquals('Updated Name', $updatedrecord->fullname);
+        $this->assertEquals(self::UPDATED_NAME, $updatedrecord->fullname);
 
         // Verify the response.
         $this->assertArrayHasKey('t_lastmodified', $response);
         $this->assertArrayHasKey('text', $response);
-        $this->assertEquals('Updated Name', $response['text']);
+        $this->assertEquals(self::UPDATED_NAME, $response['text']);
     }
 }

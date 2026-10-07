@@ -30,6 +30,11 @@ use stdClass;
  */
 final class field_test extends advanced_testcase {
     /**
+     * Factored test string.
+     */
+    const string SAMPLE_TEXT = 'Sample text';
+
+    /**
      * Test the constructor and basic getters.
      *
      * @covers \local_deepler\local\data\field::__construct
@@ -42,13 +47,13 @@ final class field_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor_and_getters(): void {
-        $field = new field(1, 'Sample text', 1, 'shortname', 'course', 2);
+        $field = new field(1, self::SAMPLE_TEXT, 1, 'shortname', 'course', 2);
 
         $this->assertEquals(1, $field->get_id());
         $this->assertEquals(2, $field->get_cmid());
         $this->assertEquals('shortname', $field->get_tablefield());
         $this->assertEquals('course', $field->get_table());
-        $this->assertEquals('Sample text', $field->get_text());
+        $this->assertEquals(self::SAMPLE_TEXT, $field->get_text());
         $this->assertEquals(1, $field->get_format());
     }
 
@@ -60,7 +65,7 @@ final class field_test extends advanced_testcase {
      * @return void
      */
     public function test_key_generation(): void {
-        $field = new field(1, 'Sample text', 1, 'shortname', 'course', 2);
+        $field = new field(1, self::SAMPLE_TEXT, 1, 'shortname', 'course', 2);
 
         $this->assertEquals('course[1][shortname][2]', $field->getkey());
         $this->assertEquals('course-1-shortname-2', $field->getkeyid());
