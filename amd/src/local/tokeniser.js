@@ -73,7 +73,7 @@ define([], () => {
      * @returns {String}
      */
     const escapeReplacementString = (str) => {
-        return str.replace(/\$/g, '$$$$');
+        return str.replaceAll(/\$/g, '$$$$');
     };
     return {
         postprocess: postprocess,
