@@ -26,10 +26,7 @@ use advanced_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class databaseupdater_test extends advanced_testcase {
-    /**
-     * Factored test string.
-     */
-    const string UPDATED_NAME = 'Updated Name';
+
 
     /**
      * Test update_records method.
@@ -39,13 +36,16 @@ final class databaseupdater_test extends advanced_testcase {
      */
     public function test_update_records(): void {
         global $DB;
-
+        /**
+         * Factored test string.
+         */
+        $updatedname = 'Updated Name';
         // Set up test data.
         $this->resetAfterTest(true);
         $data = [
             'id' => 1,
             'field' => 'fullname',
-            'text' => self::UPDATED_NAME,
+            'text' => $updatedname,
             'table' => 'course',
             'tid' => 1,
         ];
@@ -60,11 +60,11 @@ final class databaseupdater_test extends advanced_testcase {
 
         // Verify the record was updated.
         $updatedrecord = $DB->get_record('course', ['id' => 1]);
-        $this->assertEquals(self::UPDATED_NAME, $updatedrecord->fullname);
+        $this->assertEquals($updatedname, $updatedrecord->fullname);
 
         // Verify the response.
         $this->assertArrayHasKey('t_lastmodified', $response);
         $this->assertArrayHasKey('text', $response);
-        $this->assertEquals(self::UPDATED_NAME, $response['text']);
+        $this->assertEquals($updatedname, $response['text']);
     }
 }

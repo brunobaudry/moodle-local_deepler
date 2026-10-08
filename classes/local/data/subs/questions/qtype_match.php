@@ -27,15 +27,16 @@ use local_deepler\local\data\field;
  */
 class qtype_match extends qbase {
     /**
-     * Find the matches
+     * Get all the matches.
      *
-     * @param $DB
      * @param string $substablename
      * @param mixed $submatch
      * @param array $fields
      * @return array
+     * @throws \dml_exception
      */
-    private function getmatches($DB, string $substablename, mixed $submatch, array $fields): array {
+    private function getmatches(string $substablename, mixed $submatch, array $fields): array {
+        global $DB;
         $subrecord = $DB->get_record($substablename, ['id' => $submatch->id]);
         $subtablefileds = field::filterdbtextfields($substablename);
         foreach ($subtablefileds as $field) {
@@ -68,7 +69,7 @@ class qtype_match extends qbase {
             if ($DB->record_exists($substablename, [$this->qidcolname => $this->question->id])) {
                 $submatches = $DB->get_records($substablename, [$this->qidcolname => $this->question->id]);
                 foreach ($submatches as $submatch) {
-                    $fields = $this->getmatches($DB, $substablename, $submatch, $fields);
+                    $fields = $this->getmatches($substablename, $submatch, $fields);
                 }
             }
         }

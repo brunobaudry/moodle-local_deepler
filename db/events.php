@@ -28,11 +28,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Factored test string.
- */
-const LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE = '\local_deepler\observer::subitems_update';
-
 // Event observer for local_deepler.
 $observers = [
     [
@@ -49,22 +44,22 @@ $observers = [
     ],
     [
         'eventname' => '\mod_forum\event\discussion_updated',
-        'callback' => LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE,
+        'callback' => '\local_deepler\observer::subitems_update',
     ],
     [
         'eventname' => '\mod_forum\event\post_updated',
-        'callback' => LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE,
+        'callback' => '\local_deepler\observer::subitems_update',
     ],
     [
         'eventname' => '\mod_wiki\event\page_updated',
-        'callback' => LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE,
+        'callback' => '\local_deepler\observer::subitems_update',
     ],
     [
         'eventname' => '\mod_lesson\event\page_updated',
-        'callback' => LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE,
+        'callback' => '\local_deepler\observer::subitems_update',
     ],
     [
         'eventname' => '\mod_book\event\chapter_updated',
-        'callback' => LOCAL_DEEPLER_OBSERVER_SUBITEMS_UPDATE,
+        'callback' => '\local_deepler\observer::subitems_update',
     ],
 ];
