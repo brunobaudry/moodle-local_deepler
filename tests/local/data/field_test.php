@@ -42,10 +42,9 @@ final class field_test extends advanced_testcase {
      * @return void
      */
     public function test_constructor_and_getters(): void {
-        /**
-         * Factored test string.
-         */
+        // Factored test string.
         $sampltext = 'Sample text';
+
         $field = new field(1, $sampltext, 1, 'shortname', 'course', 2);
 
         $this->assertEquals(1, $field->get_id());

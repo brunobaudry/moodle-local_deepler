@@ -867,13 +867,13 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             item.classList.toggle("d-none", !shouldShow);
 
             // Handle checkbox selection for this item or its children.
-            let rowId = item.getAttribute('data-row-id');;
+            let rowId = item.getAttribute('data-row-id');
 
             if (rowId === null) {
                 // For items without row-id, toggle checkboxes of their child rows.
                 const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
-                    const childId = child.getAttribute('data-row-id');;
+                    const childId = child.getAttribute('data-row-id');
                     Log.info("Whitin LooP");
                     Log.debug(childId);
                     toggleChildCheckBoxSelection(childId, shouldCheck);
