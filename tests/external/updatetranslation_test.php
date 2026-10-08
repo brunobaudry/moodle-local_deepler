@@ -33,12 +33,18 @@ use local_deepler\local\services\lang_helper;
  * @see        https://docs.moodle.org/dev/PHPUnit
  */
 final class updatetranslation_test extends base_external {
+
+
     /**
      * Data provider for testPrepareText.
      *
      * @return array
      */
     public static function dataprovider(): array {
+        /**
+         * Factored test string.
+         */
+        $hello_world = 'Hello world';
         return [
             'Rephrasing with multilang' => [
                 'data' => [
@@ -137,7 +143,7 @@ final class updatetranslation_test extends base_external {
                     'mainsourcecode' => 'en',
                     'targetcode' => 'de',
                     'text' => 'Hallo welt',
-                    'sourcetext' => 'Hello world',
+                    'sourcetext' => $hello_world,
                 ],
                 'fieldtext' => '{mlang en}Hello world{mlang}',
                 'expected' => [
@@ -159,9 +165,9 @@ final class updatetranslation_test extends base_external {
                     'mainsourcecode' => 'fr',
                     'targetcode' => 'de',
                     'text' => 'Hallo welt',
-                    'sourcetext' => 'Hello world',
+                    'sourcetext' => $hello_world,
                 ],
-                'fieldtext' => 'Hello world',
+                'fieldtext' => $hello_world,
                 'expected' => [
                     'table' => 'course',
                     'field' => 'summary',

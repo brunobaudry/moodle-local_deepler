@@ -20,6 +20,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Csv as CsvReader;
 use PhpOffice\PhpSpreadsheet\Reader\IReader;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use RuntimeException;
 
 /**
@@ -66,73 +67,130 @@ final class spreadsheetglossaryparser {
         $sheet = $spreadsheet->getSheet(0);
 
         $languages = null;
+        $rows = $this->read_sheet_rows($sheet);
+        $startindex = $this->detect_header($rows, $useheaderlang, $languages);
+
+        return $this->rows_to_csv($rows, $startindex);
+    }
+
+    /**
+     * Read and collect non-empty rows from the worksheet.
+     *
+     * @param Worksheet $sheet
+     * @return array
+     */
+    private function read_sheet_rows(Worksheet $sheet): array {
         $rows = [];
         $maxrow = $sheet->getHighestDataRow();
         $maxcol = $sheet->getHighestDataColumn();
         $maxcolindex = Coordinate::columnIndexFromString($maxcol);
 
-        // Collect all rows first.
         for ($r = 1; $r <= $maxrow; $r++) {
-            $row = [];
-            for ($c = 1; $c <= $maxcolindex; $c++) {
-                $value = $sheet->getCellByColumnAndRow($c, $r)->getCalculatedValue();
-                $row[] = $this->normalize_cell($value);
-            }
-            // Keep rows that have at least one non-empty cell.
+            $row = $this->read_row_cells($sheet, $r, $maxcolindex);
             if ($this->row_has_data($row)) {
                 $rows[] = $row;
             }
         }
 
-        $startindex = 0;
+        return $rows;
+    }
 
-        // Optional header-language detection: first non-empty row must have two 2-letter codes in first two non-empty cells.
-        if ($useheaderlang && !empty($rows)) {
-            $firstrow = $rows[0];
-            [$cell1, $cell2] = $this->first_two_non_empty($firstrow);
+    /**
+     * Read and normalize cells for a single row index.
+     *
+     * @param Worksheet $sheet
+     * @param int $rowindex
+     * @param int $maxcolindex
+     * @return array
+     */
+    private function read_row_cells(Worksheet $sheet, int $rowindex, int $maxcolindex): array {
+        $row = [];
+        for ($c = 1; $c <= $maxcolindex; $c++) {
+            $value = $sheet->getCellByColumnAndRow($c, $rowindex)->getCalculatedValue();
+            $row[] = $this->normalize_cell($value);
+        }
+        return $row;
+    }
 
-            if (
-                $cell1 !== null && $cell2 !== null && $this->is_two_letter_code($cell1) && $this->is_two_letter_code($cell2)
-            ) {
-                $languages = [
-                    'source' => strtolower($cell1),
-                    'target' => strtolower($cell2),
-                ];
-                $startindex = 1; // Skip header languages row.
-            }
+    /**
+     * Detect header information (language header or legacy source/target header) and determine starting row index.
+     *
+     * @param array $rows
+     * @param bool $useheaderlang
+     * @param array|null $languages
+     * @return int
+     */
+    private function detect_header(array $rows, bool $useheaderlang, ?array &$languages): int {
+        if (empty($rows)) {
+            return 0;
         }
 
-        // If no header language row, we still try the legacy header semantics ("source"/"target") and skip if present.
-        if ($startindex === 0 && !empty($rows)) {
-            $firstrow = $rows[0];
-            [$cell1, $cell2] = $this->first_two_non_empty($firstrow);
-            if ($cell1 !== null && $cell2 !== null) {
-                $l1 = strtolower($cell1);
-                $l2 = strtolower($cell2);
-                if ($l1 === 'source' && $l2 === 'target') {
-                    $startindex = 1; // Skip the header row with "source,target".
-                }
-            }
+        if ($useheaderlang && $this->detect_header_languages($rows[0], $languages)) {
+            return 1;
         }
 
-        // Build normalized CSV with two columns.
+        if ($this->is_legacy_source_target_header($rows[0])) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Detect two-letter language codes in the first row.
+     *
+     * @param array $firstrow
+     * @param array|null $languages
+     * @return bool
+     */
+    private function detect_header_languages(array $firstrow, ?array &$languages): bool {
+        [$cell1, $cell2] = $this->first_two_non_empty($firstrow);
+        if ($cell1 === null || $cell2 === null) {
+            return false;
+        }
+
+        if ($this->is_two_letter_code($cell1) && $this->is_two_letter_code($cell2)) {
+            $languages = [
+                'source' => strtolower($cell1),
+                'target' => strtolower($cell2),
+            ];
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the first row represents a legacy 'source'/'target' header.
+     *
+     * @param array $firstrow
+     * @return bool
+     */
+    private function is_legacy_source_target_header(array $firstrow): bool {
+        [$cell1, $cell2] = $this->first_two_non_empty($firstrow);
+        if ($cell1 === null || $cell2 === null) {
+            return false;
+        }
+
+        return strtolower($cell1) === 'source' && strtolower($cell2) === 'target';
+    }
+
+    /**
+     * Convert rows starting from the given index into a 2-column CSV string.
+     *
+     * @param array $rows
+     * @param int $startindex
+     * @return string
+     * @throws RuntimeException
+     */
+    private function rows_to_csv(array $rows, int $startindex): string {
         $fh = fopen('php://temp', 'w+');
         if ($fh === false) {
             throw new RuntimeException('unable to open temp stream');
         }
 
         for ($i = $startindex; $i < count($rows); $i++) {
-            $row = $rows[$i];
-            [$src, $tgt] = $this->first_two_non_empty($row);
-            // Skip rows lacking either value after trimming.
-            if ($this->is_empty($src) || $this->is_empty($tgt)) {
-                continue;
-            }
-            // Ensure utf-8 strings.
-            $src = $this->to_utf8($src);
-            $tgt = $this->to_utf8($tgt);
-
-            fputcsv($fh, [$src, $tgt]);
+            $this->write_row_to_csv($fh, $rows[$i]);
         }
 
         rewind($fh);
@@ -140,6 +198,25 @@ final class spreadsheetglossaryparser {
         fclose($fh);
 
         return $csv;
+    }
+
+    /**
+     * Write a single row's first two non-empty cells to the temp CSV stream.
+     *
+     * @param resource $fh
+     * @param array $row
+     * @return void
+     */
+    private function write_row_to_csv($fh, array $row): void {
+        [$src, $tgt] = $this->first_two_non_empty($row);
+        if ($this->is_empty($src) || $this->is_empty($tgt)) {
+            return;
+        }
+
+        $src = $this->to_utf8($src);
+        $tgt = $this->to_utf8($tgt);
+
+        fputcsv($fh, [$src, $tgt]);
     }
 
     /**

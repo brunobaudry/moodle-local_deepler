@@ -103,10 +103,8 @@ class utils {
                 );
             } else {
                 // Fallback to context-based rewrite.
-                switch ($filearea) {
-                    case 'intro':
-                        $contextinfo['itemid'] = null;
-                        break;
+                if ($filearea === 'intro') {
+                    $contextinfo['itemid'] = null;
                 }
                 return file_rewrite_pluginfile_urls(
                     $text,

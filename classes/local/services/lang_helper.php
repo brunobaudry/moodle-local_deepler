@@ -278,62 +278,124 @@ class lang_helper {
      * @throws \dml_exception|\coding_exception
      */
     private function find_first_matching_token(\core_user|stdClass $user, array $tokens): false|stdClass {
-        global $DB;
-        $foundtoken = false;
-        $alluserfields = array_keys(utils::all_user_fields(context_user::instance($this->user->id, MUST_EXIST)));
+        $userid = !empty($user->id) ? $user->id : ($this->user->id ?? 0);
+        $alluserfields = !empty($userid)
+            ? array_keys(utils::all_user_fields(context_user::instance($userid, MUST_EXIST)))
+            : [];
+        $customfields = $this->get_custom_profile_fields_map();
 
-        // Build a map of custom profile fields for DB fallback.
+        foreach ($tokens as $token) {
+            if ($this->is_token_matching_user($token, $user, $alluserfields, $customfields)) {
+                return $token;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if a token matches the specified user.
+     *
+     * @param \stdClass $token
+     * @param \core_user|\stdClass $user
+     * @param array $alluserfields
+     * @param array $customfields
+     * @return bool
+     * @throws \dml_exception
+     */
+    private function is_token_matching_user(
+        stdClass $token,
+        \core_user|stdClass $user,
+        array $alluserfields,
+        array $customfields
+    ): bool {
+        $uservalue = $this->get_user_attribute_value($user, $token->attribute, $alluserfields, $customfields);
+        if ($uservalue === null) {
+            return false;
+        }
+
+        return $this->matches_token_pattern((string) $token->valuefilter, $uservalue);
+    }
+
+    /**
+     * Resolve the value of a specific user attribute (standard property or custom profile field).
+     *
+     * @param \core_user|\stdClass $user
+     * @param string $attr
+     * @param array $alluserfields
+     * @param array $customfields
+     * @return string|null
+     * @throws \dml_exception
+     */
+    private function get_user_attribute_value(
+        \core_user|stdClass $user,
+        string $attr,
+        array $alluserfields,
+        array $customfields
+    ): ?string {
+        if (!in_array($attr, $alluserfields)) {
+            return null;
+        }
+
+        if (property_exists($user, $attr)) {
+            return (string) $user->$attr;
+        }
+
+        if (isset($customfields[$attr]) && !empty($user->id)) {
+            return $this->get_custom_profile_field_value((int) $user->id, (int) $customfields[$attr]->id);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieve custom profile field value from database.
+     *
+     * @param int $userid
+     * @param int $fieldid
+     * @return string|null
+     * @throws \dml_exception
+     */
+    private function get_custom_profile_field_value(int $userid, int $fieldid): ?string {
+        global $DB;
+        $profiledata = $DB->get_record('user_info_data', [
+            'userid' => $userid,
+            'fieldid' => $fieldid,
+        ]);
+        return $profiledata ? (string) $profiledata->data : null;
+    }
+
+    /**
+     * Check if a token pattern matches a given user attribute value.
+     *
+     * @param string $pattern
+     * @param string $uservalue
+     * @return bool
+     */
+    private function matches_token_pattern(string $pattern, string $uservalue): bool {
+        if ($pattern === $uservalue) {
+            return true;
+        }
+
+        if (str_contains($pattern, '%') || str_contains($pattern, '*') || str_contains($pattern, '_')) {
+            return utils::wildcard_match($pattern, $uservalue);
+        }
+
+        return false;
+    }
+
+    /**
+     * Build a map of custom profile fields indexed by 'profile_field_{shortname}'.
+     *
+     * @return array<string, \stdClass>
+     * @throws \dml_exception
+     */
+    private function get_custom_profile_fields_map(): array {
+        global $DB;
         $customfields = [];
         foreach ($DB->get_records('user_info_field') as $field) {
             $customfields['profile_field_' . $field->shortname] = $field;
         }
-
-        foreach ($tokens as $token) {
-            $attr = $token->attribute;
-            $pattern = (string) $token->valuefilter;
-
-            // Check if the attribute is a user field.
-            if (in_array($attr, $alluserfields)) {
-                // If the user object has the property, compare directly.
-                if (property_exists($user, $attr)) {
-                    $uservalue = (string) $user->$attr;
-                    if (
-                        ($pattern === $uservalue) ||
-                        (strpos($pattern, '%') !== false) ||
-                        (strpos($pattern, '*') !== false) ||
-                        (strpos($pattern, '_') !== false)
-                    ) {
-                        if (utils::wildcard_match($pattern, $uservalue)) {
-                            $foundtoken = $token;
-                        }
-                    } else if ($pattern === $uservalue) {
-                        $foundtoken = $token;
-                    }
-                } else if (array_key_exists($attr, $customfields) && !empty($user->id)) {
-                    // If not, and it's a custom profile field, fetch from DB.
-                    $profiledata = $DB->get_record('user_info_data', [
-                        'userid' => $user->id,
-                        'fieldid' => $customfields[$attr]->id,
-                    ]);
-                    if ($profiledata) {
-                        $uservalue = (string) $profiledata->data;
-                        if (
-                            ($pattern === $uservalue) ||
-                            (strpos($pattern, '%') !== false) ||
-                            (strpos($pattern, '*') !== false) ||
-                            (strpos($pattern, '_') !== false)
-                        ) {
-                            if (utils::wildcard_match($pattern, $uservalue)) {
-                                $foundtoken = $token;
-                            }
-                        } else if ($pattern === $uservalue) {
-                            $foundtoken = $token;
-                        }
-                    }
-                }
-            }
-        }
-        return $foundtoken; // No matching token found.
+        return $customfields;
     }
 
     /**

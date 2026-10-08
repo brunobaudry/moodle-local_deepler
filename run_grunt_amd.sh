@@ -53,7 +53,7 @@ echo "Working directory: $PWD"
 
 # Ensure NVM is available in non-interactive shells
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
     # Load nvm
     # shellcheck disable=SC1090
     . "$NVM_DIR/nvm.sh"
@@ -64,7 +64,7 @@ else
 fi
 
 # Use node version (from .nvmrc if present, otherwise pick one)
-if [ -f ".nvmrc" ]; then
+if [[ -f ".nvmrc" ]]; then
     echo "Using Node version from .nvmrc:"
     nvm use
 else
@@ -76,12 +76,12 @@ fi
 # Print versions for debugging
 node -v
 npm -v
-npm install
+npm install --ignore-scripts
 # npx update-browserslist-db@latest --yes
 
 # Ensure the symlink resolution patch is in place
 PATCH_FILE="$DEEPLER_DIR/.grunt_symlink_patch.js"
-if [ ! -f "$PATCH_FILE" ]; then
+if [[ ! -f "$PATCH_FILE" ]]; then
     cat << 'EOF' > "$PATCH_FILE"
 const fs = require('fs');
 const path = require('path');

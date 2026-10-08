@@ -132,11 +132,11 @@ define([], () => {
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
             let c = ca[i];
-            while (c.charAt(0) == ' ') {
+            while (c.startsWith(' ')) {
                 // Strips leading spaces.
                 c = c.substring(1, c.length);
             }
-            if (c.indexOf(nameEQ) == 0) {
+            if (c.startsWith(nameEQ)) {
                 return c.substring(nameEQ.length, c.length);
             }
         }

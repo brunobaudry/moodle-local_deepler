@@ -29,7 +29,7 @@ use local_deepler\local\services\utils;
  */
 class field {
     /**
-     *
+     * Get additional fields for a course module.
      *
      * @param \cm_info $cm
      * @return array
@@ -37,51 +37,84 @@ class field {
      * @throws \dml_exception
      */
     public static function getadditionals(cm_info $cm): array {
-        global $DB;
-        $fields = [];
         $tables = self::loadadditionals()['mod_' . $cm->modname] ?? [];
         if (empty($tables)) {
-            return $fields;
+            return [];
         }
+
+        $fields = [];
         foreach ($tables as $tablename => $tabledef) {
             // The module's own table is handled by getfieldsfrominfo().
             if ($tablename === $cm->modname) {
                 continue;
             }
-            $tabledefid = $tabledef['id'] ?? 'id';
 
-            $configfields = $tabledef['fields'] ?? [];
-            // Auto-discover: no configured fields → use all DB text columns.
-            if (empty($configfields)) {
-                if (!$DB->get_manager()->table_exists($tablename)) {
+            $fields = array_merge($fields, self::get_table_additionals($tablename, $tabledef, $cm));
+        }
+        return $fields;
+    }
+
+    /**
+     * Get additional fields for a specific table definition.
+     *
+     * @param string $tablename
+     * @param array $tabledef
+     * @param \cm_info $cm
+     * @return array
+     * @throws \ddl_exception
+     * @throws \dml_exception
+     */
+    private static function get_table_additionals(string $tablename, array $tabledef, cm_info $cm): array {
+        $tabledefid = $tabledef['id'] ?? 'id';
+        $configfields = $tabledef['fields'] ?? [];
+
+        // Auto-discover: no configured fields → use all DB text columns.
+        if (empty($configfields)) {
+            return self::get_autodiscovered_table_fields($tablename, $tabledefid, $cm);
+        }
+
+        // Configured fields path — delegate to shared method.
+        return self::buildfieldsfromtableconfig([$tablename => $tabledef], $cm->instance, $cm->id, $tabledefid);
+    }
+
+    /**
+     * Auto-discover and create field instances for all text columns of a table.
+     *
+     * @param string $tablename
+     * @param string $tabledefid
+     * @param \cm_info $cm
+     * @return array
+     * @throws \ddl_exception
+     * @throws \dml_exception
+     */
+    private static function get_autodiscovered_table_fields(string $tablename, string $tabledefid, cm_info $cm): array {
+        global $DB;
+
+        if (!$DB->get_manager()->table_exists($tablename)) {
+            return [];
+        }
+
+        $fields = [];
+        $rows = $DB->get_records($tablename, [$tabledefid => $cm->instance]);
+        $textcols = self::filterdbtextfields($tablename);
+
+        foreach ($rows as $record) {
+            foreach ($textcols as $col) {
+                if (trim($record->{$col}) === '') {
                     continue;
                 }
-                $rows = $DB->get_records($tablename, [$tabledefid => $cm->instance]);
-                $textcols = self::filterdbtextfields($tablename);
-                foreach ($rows as $record) {
-                    foreach ($textcols as $col) {
-                        if (trim($record->{$col}) === '') {
-                            continue;
-                        }
-                        $fields[] = new self(
-                            $record->id,
-                            $record->{$col},
-                            $record->{$col . 'format'} ?? 0,
-                            $col,
-                            $tablename,
-                            $cm->id,
-                            true
-                        );
-                    }
-                }
-                continue;
+                $fields[] = new self(
+                    $record->id,
+                    $record->{$col},
+                    $record->{$col . 'format'} ?? 0,
+                    $col,
+                    $tablename,
+                    $cm->id,
+                    true
+                );
             }
-            // Configured fields path — delegate to shared method.
-            $fields = array_merge(
-                $fields,
-                self::buildfieldsfromtableconfig([$tablename => $tabledef], $cm->instance, $cm->id, $tabledefid)
-            );
         }
+
         return $fields;
     }
 
@@ -102,49 +135,149 @@ class field {
         int $cmid,
         string $defaultfkcolumn = 'questionid'
     ): array {
-        global $DB;
         $fields = [];
         foreach ($tableconfigs as $tablename => $tabledef) {
-            $fkcol        = $tabledef['id'] ?? $defaultfkcolumn;
-            $configfields = $tabledef['fields'] ?? [];
-            if (empty($configfields)) {
+            $tablefields = self::build_single_table_config_fields(
+                $tablename,
+                $tabledef,
+                $fkvalue,
+                $cmid,
+                $defaultfkcolumn
+            );
+            $fields = array_merge($fields, $tablefields);
+        }
+        return $fields;
+    }
+
+    /**
+     * Build field objects for a single table config.
+     *
+     * @param string $tablename
+     * @param array $tabledef
+     * @param int $fkvalue
+     * @param int $cmid
+     * @param string $defaultfkcolumn
+     * @return array
+     */
+    private static function build_single_table_config_fields(
+        string $tablename,
+        array $tabledef,
+        int $fkvalue,
+        int $cmid,
+        string $defaultfkcolumn
+    ): array {
+        global $DB;
+
+        $configfields = $tabledef['fields'] ?? [];
+        if (empty($configfields) || !$DB->get_manager()->table_exists($tablename)) {
+            return [];
+        }
+
+        $fkcol = $tabledef['id'] ?? $defaultfkcolumn;
+        $selectcols = self::get_table_select_columns($tablename, $configfields);
+        $rows = $DB->get_records($tablename, [$fkcol => $fkvalue], '', $selectcols);
+
+        $fields = [];
+        foreach ($rows as $row) {
+            $fields = array_merge($fields, self::build_row_config_fields($row, $tablename, $configfields, $cmid));
+        }
+        return $fields;
+    }
+
+    /**
+     * Get SELECT columns list for a table based on its config fields.
+     *
+     * @param string $tablename
+     * @param array $configfields
+     * @return string
+     */
+    private static function get_table_select_columns(string $tablename, array $configfields): string {
+        global $DB;
+        $dbcols = $DB->get_columns($tablename);
+        $cols = ['id'];
+        foreach (array_keys($configfields) as $col) {
+            if (!isset($dbcols[$col])) {
                 continue;
             }
-            if (!$DB->get_manager()->table_exists($tablename)) {
-                continue;
+            $cols[] = $col;
+            if (isset($dbcols[$col . 'format'])) {
+                $cols[] = $col . 'format';
             }
-            $dbcols = $DB->get_columns($tablename);
-            $cols = ['id'];
-            foreach (array_keys($configfields) as $col) {
-                if (!isset($dbcols[$col])) {
-                    continue;
-                }
-                $cols[] = $col;
-                if (isset($dbcols[$col . 'format'])) {
-                    $cols[] = $col . 'format';
-                }
-            }
-            $selectcols = implode(', ', array_unique($cols));
-            $rows = $DB->get_records($tablename, [$fkcol => $fkvalue], '', $selectcols);
-            foreach ($rows as $row) {
-                foreach ($configfields as $col => $clauses) {
-                    $content = $row->{$col} ?? '';
-                    if (trim($content) === '') {
-                        continue;
-                    }
-                    // Unified exclude: string → value match; true/boolean → always skip.
-                    if (isset($clauses['exclude'])) {
-                        if ($clauses['exclude'] === true || $clauses['exclude'] === $content) {
-                            continue;
-                        }
-                    }
-                    $editable = $clauses['editable'] ?? true;
-                    $format   = $row->{"{$col}format"} ?? 0;
-                    $fields[] = new self($row->id, $content, $format, $col, $tablename, $cmid, $editable);
-                }
+        }
+        return implode(', ', array_unique($cols));
+    }
+
+    /**
+     * Build fields for a single record row.
+     *
+     * @param \stdClass $row
+     * @param string $tablename
+     * @param array $configfields
+     * @param int $cmid
+     * @return array
+     */
+    private static function build_row_config_fields(
+        \stdClass $row,
+        string $tablename,
+        array $configfields,
+        int $cmid
+    ): array {
+        $fields = [];
+        foreach ($configfields as $col => $clauses) {
+            $field = self::build_single_config_field($row, $tablename, $col, $clauses, $cmid);
+            if ($field !== null) {
+                $fields[] = $field;
             }
         }
         return $fields;
+    }
+
+    /**
+     * Build a single field object from row data if valid and not excluded.
+     *
+     * @param \stdClass $row
+     * @param string $tablename
+     * @param string $col
+     * @param mixed $clauses
+     * @param int $cmid
+     * @return self|null
+     */
+    private static function build_single_config_field(
+        \stdClass $row,
+        string $tablename,
+        string $col,
+        mixed $clauses,
+        int $cmid
+    ): ?self {
+        $content = $row->{$col} ?? '';
+        if (trim($content) === '' || self::is_field_excluded($clauses, $content)) {
+            return null;
+        }
+
+        $editable = $clauses['editable'] ?? true;
+        $format = $row->{"{$col}format"} ?? 0;
+        return new self($row->id, $content, $format, $col, $tablename, $cmid, $editable);
+    }
+
+    /**
+     * Check whether a field value matches an exclusion rule.
+     *
+     * @param mixed $clauses
+     * @param string $content
+     * @return bool
+     */
+    private static function is_field_excluded(mixed $clauses, string $content): bool {
+        if (!is_array($clauses) || !isset($clauses['exclude'])) {
+            return false;
+        }
+        $exclude = $clauses['exclude'];
+        if ($exclude === true) {
+            return true;
+        }
+        if (is_string($exclude) && trim($content) === trim($exclude)) {
+            return true;
+        }
+        return false;
     }
 
     /** @var array */
@@ -464,42 +597,59 @@ class field {
     public static function getfieldsfromcolumns(mixed $info, string $table, array $collumns, int $cmid = 0): array {
         $infos = [];
         foreach ($collumns as $collumn => $clauses) {
-            $fieldtextformat = "{$collumn}format";
-            $editable = true;
-            if (!isset($info->{$collumn})) {
-                continue;
-            }
-            if (is_array($clauses) && !empty($clauses)) {
-                // Unified exclude: string → value match; true/boolean → always skip.
-                if (isset($clauses['exclude'])) {
-                    if (
-                        $clauses['exclude'] === true ||
-                        (is_string($clauses['exclude']) && trim($info->{$collumn}) === trim($clauses['exclude']))
-                    ) {
-                        continue;
-                    }
-                }
-                if (isset($clauses['editable'])) {
-                    $editable = (bool) $clauses['editable'];
-                }
-            }
-            if ($info->{$collumn} !== '' && is_string($info->{$collumn})) {
-                $fieldobject = new field(
-                    $info->id,
-                    $info->{$collumn},
-                    $info->{$fieldtextformat} ?? 0,
-                    $collumn,
-                    $table,
-                    $cmid,
-                    $editable
-                );
-
-                $fieldobject->maxlength = self::$fieldlengths[$table][$collumn] ?? null;
-
+            $fieldobject = self::extract_column_field($info, $table, $collumn, $clauses, $cmid);
+            if ($fieldobject !== null) {
                 $infos[] = $fieldobject;
             }
         }
         return $infos;
+    }
+
+    /**
+     * Extract a single field instance from record columns.
+     *
+     * @param mixed $info
+     * @param string $table
+     * @param string $collumn
+     * @param mixed $clauses
+     * @param int $cmid
+     * @return self|null
+     */
+    private static function extract_column_field(
+        mixed $info,
+        string $table,
+        string $collumn,
+        mixed $clauses,
+        int $cmid
+    ): ?self {
+        if (!isset($info->{$collumn})) {
+            return null;
+        }
+
+        $content = $info->{$collumn};
+        if (!is_string($content) || $content === '' || self::is_field_excluded($clauses, $content)) {
+            return null;
+        }
+
+        $editable = true;
+        if (is_array($clauses) && isset($clauses['editable'])) {
+            $editable = (bool) $clauses['editable'];
+        }
+
+        $fieldtextformat = "{$collumn}format";
+        $fieldobject = new self(
+            $info->id,
+            $content,
+            $info->{$fieldtextformat} ?? 0,
+            $collumn,
+            $table,
+            $cmid,
+            $editable
+        );
+
+        $fieldobject->maxlength = self::$fieldlengths[$table][$collumn] ?? null;
+
+        return $fieldobject;
     }
 
     /**

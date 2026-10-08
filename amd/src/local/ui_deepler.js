@@ -30,7 +30,8 @@ define(['core/log',
     './utils',
     './customevents',
     './scrollspy',
-    './api'
+    './api',
+    'core/notification'
 ], (Log, TinyMCEinit, TinyMCE,
     Modal,
     Selectors,
@@ -38,7 +39,9 @@ define(['core/log',
     Utils,
     Events,
     ScrollSpy,
-    Api) => {
+    Api,
+    MoodleNotification
+    ) => {
 
     /**
      * Debounce for performance
@@ -230,7 +233,7 @@ const cachedSelectors = {
         try {
             allDataFormatOne = domQueryAll(Selectors.editors.targetarea);
             hideiframes = domQuery(Selectors.actions.hideiframes);
-            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).dataset.langstrings);
             errordbtitle = langstrings.uistrings.errordbtitle;
             saveAllBtn = domQuery(Selectors.actions.saveAll);
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
@@ -353,21 +356,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                     removeorphaneddrafts: true,
                     plugins: []
                 };
-                initTinyMCE(e, options);
-                // // eslint-disable-next-line promise/catch-or-return
-                // TinyMCEinit.getTinyMCE().then(
-                //     // eslint-disable-next-line promise/always-return
-                //     ()=>{
-                //         TinyMCE.setupForTarget(e.target, options)
-                //             // eslint-disable-next-line promise/always-return
-                //             .then(()=>{
-                //                 Log.info('tiny loaded for ' + e.target.id);
-                //             })
-                //             .catch((r)=>{
-                //                 Log.error(r);
-                //             });
-                //     }
-                // );
+                void initTinyMCE(e, options).catch(MoodleNotification.exception);
             }
 
         }
@@ -446,15 +435,6 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 debouncedShowRows();
             }
         }, 30);
-        /* If (e.target.closest(Selectors.actions.showUpdated)) {
-            showRows(Selectors.statuses.updated, e.target.checked);
-        }
-        if (e.target.closest(Selectors.actions.showNeedUpdate)) {
-            showRows(Selectors.statuses.needsupdate, e.target.checked);
-        }
-        if (e.target.closest(Selectors.actions.showHidden)) {
-            showRows(Selectors.statuses.hidden, e.target.checked);
-        }*/
         if (e.target.closest(Selectors.actions.checkBoxes)) {
             onItemChecked(e);
         }
@@ -510,7 +490,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {Event} e Event
      */
     const onToggleMultilang = (e) => {
-        let keyid = e.getAttribute('aria-controls');
+        let keyid = e.ariaControls;
         let key = Utils.keyidToKey(keyid);
         if (key === null) {
             Log.error(`KEY ${keyid} BAD FORMAT should be TABLE-ID-FIELD-CMID`);
@@ -572,11 +552,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         return {
             key: key,
             courseid: config.courseid,
-            id: parseInt(element.getAttribute("data-id")),
-            tid: element.getAttribute("data-tid"),
-            table: element.getAttribute("data-table"),
-            field: element.getAttribute("data-field"),
-            cmid: element.getAttribute("data-cmid"),
+            id: Number.parseInt(element.dataset.id),
+            tid: element.dataset.tid,
+            table: element.dataset.table,
+            field: element.dataset.field,
+            cmid: element.dataset.cmid,
         };
     };
     /**
@@ -588,7 +568,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     const onSourceChange = (e) => {
         // Do check source and target and propose rephrase if PRO.
         Log.info('source changed');
-        Log.info(e.target.getAttribute('data-key'));
+        Log.info(e.target.dataset.key);
     };
     /**
      * Event listener for selection checkboxes.
@@ -596,8 +576,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const onItemChecked = (e) => {
         // Check/uncheck checkboxes changes the charcount and icon status.
-        if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
-            toggleStatus(e.target.getAttribute('data-key'), e.target.checked);
+        if (e.target.dataset.action === "local_deepler/checkbox") {
+            toggleStatus(e.target.dataset.key, e.target.checked);
             countWordAndChar();
         }
     };
@@ -623,7 +603,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         requestAnimationFrame(() => {
             updates.forEach(({checkbox, shouldCheck}) => {
                 checkbox.checked = shouldCheck;
-                toggleStatus(checkbox.getAttribute('data-key'), shouldCheck);
+                toggleStatus(checkbox.dataset.key, shouldCheck);
             });
 
             toggleAutotranslateButton();
@@ -644,7 +624,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {*}
      */
     const getIconStatus = (key)=> {
-        return domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
+        return domQuery(Selectors.actions.validatorBtn, key).dataset.status;
     };
     /**
      * Change translation process status icon.
@@ -682,7 +662,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {*}
      */
     const getParentRow = (node) => {
-        return node.closest(Utils.replaceKey(Selectors.sourcetexts.parentrow, node.getAttribute('data-key')));
+        return node.closest(Utils.replaceKey(Selectors.sourcetexts.parentrow, node.dataset.key));
     };
     const showModal = (title, body, type = 'default') => {
         Modal.create({
@@ -734,13 +714,13 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         saveAllBtn.disabled = false;
         domQueryAll(Selectors.statuses.checkedCheckBoxes)
             .forEach((ckBox) => {
-                const key = ckBox.getAttribute("data-key");
+                const key = ckBox.dataset.key;
                 const sourceText = domQuery(Selectors.sourcetexts.keys, key);
                 const editor = findEditor(key);
                 Translation.initTempForKey(
                     key, editor,
-                    sourceText.getAttribute("data-sourcetext-raw"),
-                    sourceText.getAttribute("data-filedtext-raw"),
+                    sourceText.dataset.sourcetextRaw,
+                    sourceText.dataset.filedtextRaw,
                     domQuery(Selectors.sourcetexts.sourcelangdd, key).value
                 );
                 keys.push(key);
@@ -750,46 +730,61 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         Translation.callTranslations(keys, config, settings);
     };
     /**
+     * Helper function for prepareSettingsAndCookieValues.
+     *
+     * @param {string} selector
+     * @param {element} element
+     * @param {object} cookie
+     * @param {object} settings
+     */
+    const getSettingValue = (selector, element, cookie, settings) => {
+        switch (element.type) {
+            case 'select-one':
+                cookie[selector] = element.value;
+                settings[selector] = element.value;
+                break;
+
+            case 'textarea':
+                cookie[selector] = element.value;
+                settings[selector] = Utils.toJsonArray(element.value);
+                break;
+
+            case 'checkbox':
+                cookie[selector] = element.checked;
+                settings[selector] = selector === Selectors.deepl.tagHandling
+                    ? (element.checked ? 'html' : 'xml')
+                    : element.checked;
+                break;
+
+            case 'radio':
+                settings[selector] = cookie[selector] = queryRadioValue(selector);
+                break;
+
+            default:
+                settings[selector] = cookie[selector] = element.value;
+        }
+    };
+    /**
      * Parse the advanced settings UI and map the values for cookies and Deepl.
      *
      * @returns {[{},{}]}
      */
     const prepareSettingsAndCookieValues = () => {
-        let settings = {};
-        let cookie = {};
+        const settings = {};
+        const cookie = {};
+
         for (const selector in settingsUI) {
-            if (settingsUI[selector] === null) {
+            const element = settingsUI[selector];
+
+            if (!element) {
                 Log.warn(`prepareSettingsAndCookieValues. Could not find selector ${selector}`);
                 Log.warn(settingsUI);
-            } else {
-                switch (settingsUI[selector].type) {
-                    case 'select-one':
-                        cookie[selector] = settingsUI[selector].value;
-                        settings[selector] = settingsUI[selector].value;
-                        break;
-                    case 'textarea':
-                        cookie[selector] = settingsUI[selector].value;
-                        // Deepl needs an array.
-                        settings[selector] = Utils.toJsonArray(cookie[selector]);
-                        break;
-                    case 'checkbox':
-                        if (selector === Selectors.deepl.tagHandling) {
-                            cookie[selector] = settingsUI[selector].checked;
-                            // Exception for tag_handling that checkbox but not boolean value for Deepl.
-                            settings[selector] = settingsUI[selector].checked ? 'html' : 'xml';
-                        } else {
-                            settings[selector] = cookie[selector] = settingsUI[selector].checked;
-                        }
-                        break;
-                    case 'radio':
-                        settings[selector] = cookie[selector] = queryRadioValue(selector);
-                        break;
-                    default: // Text.
-                        settings[selector] = cookie[selector] = settingsUI[selector].value;
-                        break;
-                }
+                continue;
             }
+
+            getSettingValue(selector, element, cookie, settings);
         }
+
         return [cookie, settings];
     };
     /**
@@ -872,12 +867,12 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             item.classList.toggle("d-none", !shouldShow);
 
             // Handle checkbox selection for this item or its children.
-            let rowId = item.getAttribute('data-row-id');
+            let rowId = item.dataset.rowId;
             if (rowId === null) {
                 // For items without row-id, toggle checkboxes of their child rows.
                 const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
-                    const childId = child.getAttribute('data-row-id');
+                    const childId = child.dataset.rowId;
                     Log.info("Whitin LooP", childId);
                     toggleChildCheckBoxSelection(childId, shouldCheck);
                 });
@@ -935,7 +930,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         let parent = domQuery(Selectors.editors.multiples.editorsWithKey, key);
         let alertChild = domQuery('.alert-danger', '', parent);
         if (alertChild) {
-            parent.removeChild(alertChild);
+            alertChild.remove();
         }
     };
     /**
@@ -1039,7 +1034,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
 
         // Aggregate counts in one loop.
         checkedBoxes.forEach(ckBox => {
-            const key = ckBox.getAttribute("data-key");
+            const key = ckBox.dataset.key;
             const results = getCount(key);
             wrdsc += results.wordCount;
             cws += results.charNumWithSpace;
@@ -1147,7 +1142,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const getCount = (key) => {
         const item = domQuery(Selectors.sourcetexts.keys, key);
-        const raw = item.getAttribute("data-sourcetext-raw");
+        const raw = item.dataset.sourcetextRaw;
         // Cleaned sourceText.
         const trimmedVal = Utils.stripHTMLTags(Utils.fromBase64(raw)).trim();
         return {

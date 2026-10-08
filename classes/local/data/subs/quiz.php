@@ -189,7 +189,7 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      * @throws \dml_exception
      */
     public function fetchrandomquestions(int $slotid): void {
-        global $DB, $CFG;
+        global $DB;
 
         // Read the reference for this slot and decode its filter.
         $reference = $DB->get_record('question_set_references', [
@@ -200,49 +200,12 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
 
         $filter = json_decode($reference->filtercondition);
 
-        // Extract category and include-subcategories flags (support modern and legacy formats).
-        $categoryid = null;
-        $includesubs = false;
-
-        if (!empty($filter->filter->category)) {
-            // New question bank filter format.
-            $categoryid = (int) ($filter->filter->category->values[0] ?? 0);
-            $includesubs = (bool) ($filter->filter->category->filteroptions->includesubcategories ?? false);
-        } else if (isset($filter->cat)) {
-            // Legacy format used by older Moodle versions.
-            $categories = array_map('intval', explode(',', (string) $filter->cat));
-            $categoryid = $categories[0] ?? 0;
-            $includesubs = (bool) ($filter->includesubcategories ?? false);
-        }
-
+        [$categoryid, $includesubs] = $this->extract_category_filter($filter);
         if (empty($categoryid)) {
             return; // Nothing to do without a category.
         }
 
-        // Resolve tag ids from the filter, supporting several shapes.
-        $tagids = [];
-        // New filter format could be under $filter->filter->tags or $filter->tags.
-        $rawtags = $filter->filter->qtagids->values ?? ($filter->tags ?? []);
-        if (!empty($rawtags) && is_array($rawtags)) {
-            foreach ($rawtags as $t) {
-                if (is_int($t) || ctype_digit((string) $t)) {
-                    $tagids[] = (int) $t;
-                } else if (is_object($t) && isset($t->id)) {
-                    $tagids[] = (int) $t->id;
-                } else if (is_object($t) && isset($t->name)) {
-                    // Best-effort resolve by name.
-                    if ($tagid = $DB->get_field('tag', 'id', ['name' => $t->name])) {
-                        $tagids[] = (int) $tagid;
-                    }
-                } else if (is_string($t) && $t !== '') {
-                    if ($tagid = $DB->get_field('tag', 'id', ['name' => $t])) {
-                        $tagids[] = (int) $tagid;
-                    }
-                }
-            }
-            // Ensure uniqueness.
-            $tagids = array_values(array_unique(array_filter($tagids)));
-        }
+        $tagids = $this->extract_tag_ids($filter);
 
         // Get available question ids using Moodle random qtype helper (handles excluded qtypes etc.).
         $questionids = $this->get_available_questions_from_category(
@@ -250,39 +213,134 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
             $includesubs
         );
 
-        if (empty($questionids)) {
-            return; // No candidates.
-        }
-
-        // If tags are specified, filter the ids so that each question has ANY of the requested tags (OR semantics).
         if (!empty($tagids)) {
-            [$idsql, $idparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
-            [$tagsql, $tagparams] = $DB->get_in_or_equal($tagids, SQL_PARAMS_NAMED, 'ti');
-
-            $params = $idparams + $tagparams + [
-                    'questionitemtype' => 'question',
-                    'questioncomponent' => 'core_question',
-                ];
-
-            $sql = "SELECT DISTINCT ti.itemid
-                      FROM {tag_instance} ti
-                     WHERE ti.itemtype = :questionitemtype
-                       AND ti.component = :questioncomponent
-                       AND ti.tagid {$tagsql}
-                       AND ti.itemid {$idsql}";
-
-            $filtered = $DB->get_fieldset_sql($sql, $params);
-
-            if (empty($filtered)) {
-                return; // No question matches any of the tags.
-            }
-            $questionids = $filtered;
+            $questionids = $this->filter_questions_by_tags($questionids, $tagids);
         }
 
         // Load and append the question objects.
         foreach ($questionids as $qid) {
             $this->addquestion((int) $qid);
         }
+    }
+
+    /**
+     * Extract category id and subcategory inclusion flag from the filter condition.
+     *
+     * @param ?\stdClass $filter
+     * @return array Array with [?int $categoryid, bool $includesubs]
+     */
+    private function extract_category_filter(?\stdClass $filter): array {
+        if (!$filter) {
+            return [null, false];
+        }
+
+        if (!empty($filter->filter->category)) {
+            // New question bank filter format.
+            $categoryid = (int) ($filter->filter->category->values[0] ?? 0);
+            $includesubs = (bool) ($filter->filter->category->filteroptions->includesubcategories ?? false);
+            return [$categoryid, $includesubs];
+        }
+
+        if (isset($filter->cat)) {
+            // Legacy format used by older Moodle versions.
+            $categories = array_map('intval', explode(',', (string) $filter->cat));
+            $categoryid = $categories[0] ?? 0;
+            $includesubs = (bool) ($filter->includesubcategories ?? false);
+            return [$categoryid, $includesubs];
+        }
+
+        return [null, false];
+    }
+
+    /**
+     * Extract resolved unique tag IDs from the filter condition.
+     *
+     * @param ?\stdClass $filter
+     * @return int[]
+     */
+    private function extract_tag_ids(?\stdClass $filter): array {
+        if (!$filter) {
+            return [];
+        }
+
+        $rawtags = $filter->filter->qtagids->values ?? ($filter->tags ?? []);
+        if (empty($rawtags) || !is_array($rawtags)) {
+            return [];
+        }
+
+        $tagids = [];
+        foreach ($rawtags as $tag) {
+            $tagid = $this->resolve_tag_id($tag);
+            if ($tagid !== null) {
+                $tagids[] = $tagid;
+            }
+        }
+
+        return array_values(array_unique($tagids));
+    }
+
+    /**
+     * Resolve a single tag entry to a numeric tag ID.
+     *
+     * @param mixed $tag
+     * @return ?int
+     */
+    private function resolve_tag_id(mixed $tag): ?int {
+        global $DB;
+
+        if (is_int($tag) || ctype_digit((string) $tag)) {
+            return (int) $tag;
+        }
+
+        if (is_object($tag)) {
+            if (isset($tag->id)) {
+                return (int) $tag->id;
+            }
+            if (isset($tag->name)) {
+                $tagid = $DB->get_field('tag', 'id', ['name' => $tag->name]);
+                return $tagid ? (int) $tagid : null;
+            }
+        }
+
+        if (is_string($tag) && $tag !== '') {
+            $tagid = $DB->get_field('tag', 'id', ['name' => $tag]);
+            return $tagid ? (int) $tagid : null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Filter question IDs so that each question has at least one of the specified tags.
+     *
+     * @param int[] $questionids
+     * @param int[] $tagids
+     * @return int[]
+     * @throws \dml_exception
+     */
+    private function filter_questions_by_tags(array $questionids, array $tagids): array {
+        global $DB;
+
+        if (empty($tagids) || empty($questionids)) {
+            return $questionids;
+        }
+
+        [$idsql, $idparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
+        [$tagsql, $tagparams] = $DB->get_in_or_equal($tagids, SQL_PARAMS_NAMED, 'ti');
+
+        $params = $idparams + $tagparams + [
+            'questionitemtype' => 'question',
+            'questioncomponent' => 'core_question',
+        ];
+
+        $sql = "SELECT DISTINCT ti.itemid
+                  FROM {tag_instance} ti
+                 WHERE ti.itemtype = :questionitemtype
+                   AND ti.component = :questioncomponent
+                   AND ti.tagid {$tagsql}
+                   AND ti.itemid {$idsql}";
+
+        return $DB->get_fieldset_sql($sql, $params);
     }
 
     /**

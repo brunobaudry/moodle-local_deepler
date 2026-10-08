@@ -37,56 +37,88 @@ class lesson extends subbase {
         global $DB;
         $fields = [];
         $table = 'lesson_pages';
-        $tablequestion = 'lesson_answers';
         $pages = $DB->get_records($table, ['lessonid' => $this->cm->instance], 'id ASC');
 
         foreach ($pages as $page) {
-            if ($page->title) {
+            $fields = array_merge($fields, $this->get_page_fields($page));
+        }
+        return $fields;
+    }
+
+    /**
+     * Get fields for a lesson page.
+     *
+     * @param \stdClass $page
+     * @return array
+     * @throws \dml_exception
+     */
+    protected function get_page_fields(\stdClass $page): array {
+        $fields = [];
+        $table = 'lesson_pages';
+
+        if ($page->title) {
+            $fields[] = new field(
+                $page->id,
+                $page->title,
+                0,
+                'title',
+                $table,
+                $this->cm->id
+            );
+        }
+        if ($page->contents) {
+            $fields[] = new field(
+                $page->id,
+                $page->contents,
+                0,
+                'contents',
+                $table,
+                $this->cm->id
+            );
+        }
+        if ($page->qtype != 0) {
+            $fields = array_merge($fields, $this->get_answer_fields((int) $page->id));
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get fields for answers of a lesson page.
+     *
+     * @param int $pageid
+     * @return array
+     * @throws \dml_exception
+     */
+    protected function get_answer_fields(int $pageid): array {
+        global $DB;
+        $fields = [];
+        $tablequestion = 'lesson_answers';
+        $answers = $DB->get_records($tablequestion, ['pageid' => $pageid]);
+
+        foreach ($answers as $answer) {
+            if ($answer->answer) {
                 $fields[] = new field(
-                    $page->id,
-                    $page->title,
+                    $answer->id,
+                    $answer->answer,
                     0,
-                    'title',
-                    $table,
+                    'answer',
+                    $tablequestion,
                     $this->cm->id
                 );
             }
-            if ($page->contents) {
+            if ($answer->response) {
                 $fields[] = new field(
-                    $page->id,
-                    $page->contents,
+                    $answer->id,
+                    $answer->response,
                     0,
-                    'contents',
-                    $table,
+                    'response',
+                    $tablequestion,
                     $this->cm->id
                 );
-            }
-            if ($page->qtype != 0) {
-                $answers = $DB->get_records($tablequestion, ['pageid' => $page->id]);
-                foreach ($answers as $answer) {
-                    if ($answer->answer) {
-                        $fields[] = new field(
-                            $answer->id,
-                            $answer->answer,
-                            0,
-                            'answer',
-                            $tablequestion,
-                            $this->cm->id
-                        );
-                    }
-                    if ($answer->response) {
-                        $fields[] = new field(
-                            $answer->id,
-                            $answer->response,
-                            0,
-                            'response',
-                            $tablequestion,
-                            $this->cm->id
-                        );
-                    }
-                }
             }
         }
+
         return $fields;
     }
 }

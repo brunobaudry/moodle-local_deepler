@@ -148,11 +148,7 @@ define(['./utils'], (Utils) => {
                 endOfScope = currentHeadingOfHigherLevel.endOfScope;
             }
         } else {
-            if (nextHeadingOfSameLevel) {
-                endOfScope = nextHeadingOfSameLevel.offsetTop;
-            } else {
-                endOfScope = END_OF_ARTICLE;
-            }
+            endOfScope = nextHeadingOfSameLevel ? nextHeadingOfSameLevel.offsetTop : END_OF_ARTICLE;
         }
 
         return endOfScope;

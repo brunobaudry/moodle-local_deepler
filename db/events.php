@@ -62,8 +62,4 @@ $observers = [
         'eventname' => '\mod_book\event\chapter_updated',
         'callback' => '\local_deepler\observer::subitems_update',
     ],
-    [
-        'eventname' => '\mod_book\event\chapter_updated',
-        'callback' => '\local_deepler\observer::subitems_update',
-    ],
 ];

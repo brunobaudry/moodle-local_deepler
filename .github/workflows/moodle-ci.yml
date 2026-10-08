@@ -1,7 +1,5 @@
 name: Moodle Plugin CI
-on:
-  push:
-    branches: [ dev ]
+on: [push, pull_request]
 jobs:
   testMaria:
     runs-on: ubuntu-latest
