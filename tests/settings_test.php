@@ -30,8 +30,6 @@ namespace local_deepler;
  * Settings Test
  */
 final class settings_test extends \advanced_testcase {
-
-
     /**
      * Set it up
      *
@@ -67,9 +65,8 @@ final class settings_test extends \advanced_testcase {
         global $CFG;
         require_once($CFG->dirroot . '/lib/adminlib.php');
         require_once(__DIR__ . '/../settings.php');
-        /**
-         * Factored test string.
-         */
+
+        // Factored test string.
         $moodlesiteconfig = 'moodle/site:config';
         $settings1 = new \admin_settingpage('local_deepler', get_string('pluginname', 'local_deepler'));
         set_config('apikey', 'testvalue', 'local_deepler');

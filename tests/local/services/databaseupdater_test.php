@@ -26,8 +26,6 @@ use advanced_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class databaseupdater_test extends advanced_testcase {
-
-
     /**
      * Test update_records method.
      *
@@ -36,10 +34,10 @@ final class databaseupdater_test extends advanced_testcase {
      */
     public function test_update_records(): void {
         global $DB;
-        /**
-         * Factored test string.
-         */
+
+        // Factored test string.
         $updatedname = 'Updated Name';
+
         // Set up test data.
         $this->resetAfterTest(true);
         $data = [

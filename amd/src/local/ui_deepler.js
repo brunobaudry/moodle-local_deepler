@@ -233,7 +233,7 @@ const cachedSelectors = {
         try {
             allDataFormatOne = domQueryAll(Selectors.editors.targetarea);
             hideiframes = domQuery(Selectors.actions.hideiframes);
-            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).dataset.langstrings);
+            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
             errordbtitle = langstrings.uistrings.errordbtitle;
             saveAllBtn = domQuery(Selectors.actions.saveAll);
             selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
@@ -490,7 +490,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {Event} e Event
      */
     const onToggleMultilang = (e) => {
-        let keyid = e.ariaControls;
+        let keyid = e.getAttribute('aria-controls');
         let key = Utils.keyidToKey(keyid);
         if (key === null) {
             Log.error(`KEY ${keyid} BAD FORMAT should be TABLE-ID-FIELD-CMID`);
@@ -552,11 +552,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         return {
             key: key,
             courseid: config.courseid,
-            id: Number.parseInt(element.dataset.id),
-            tid: element.dataset.tid,
-            table: element.dataset.table,
-            field: element.dataset.field,
-            cmid: element.dataset.cmid,
+            id: parseInt(element.getAttribute("data-id")),
+            tid: element.getAttribute("data-tid"),
+            table: element.getAttribute("data-table"),
+            field: element.getAttribute("data-field"),
+            cmid: element.getAttribute("data-cmid"),
         };
     };
     /**
@@ -576,8 +576,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const onItemChecked = (e) => {
         // Check/uncheck checkboxes changes the charcount and icon status.
-        if (e.target.dataset.action === "local_deepler/checkbox") {
-            toggleStatus(e.target.dataset.key, e.target.checked);
+        if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
+            toggleStatus(e.target.getAttribute('data-key'), e.target.checked);
             countWordAndChar();
         }
     };
@@ -603,7 +603,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         requestAnimationFrame(() => {
             updates.forEach(({checkbox, shouldCheck}) => {
                 checkbox.checked = shouldCheck;
-                toggleStatus(checkbox.dataset.key, shouldCheck);
+                toggleStatus(checkbox.getAttribute('data-key'), shouldCheck);
             });
 
             toggleAutotranslateButton();
@@ -624,7 +624,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {*}
      */
     const getIconStatus = (key)=> {
-        return domQuery(Selectors.actions.validatorBtn, key).dataset.status;
+        return domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
     };
     /**
      * Change translation process status icon.
@@ -662,7 +662,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {*}
      */
     const getParentRow = (node) => {
-        return node.closest(Utils.replaceKey(Selectors.sourcetexts.parentrow, node.dataset.key));
+        return node.closest(Utils.replaceKey(Selectors.sourcetexts.parentrow, node.getAttribute('data-key')));
     };
     const showModal = (title, body, type = 'default') => {
         Modal.create({
@@ -714,13 +714,13 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         saveAllBtn.disabled = false;
         domQueryAll(Selectors.statuses.checkedCheckBoxes)
             .forEach((ckBox) => {
-                const key = ckBox.dataset.key;
+                const key = ckBox.getAttribute("data-key");
                 const sourceText = domQuery(Selectors.sourcetexts.keys, key);
                 const editor = findEditor(key);
                 Translation.initTempForKey(
                     key, editor,
-                    sourceText.dataset.sourcetextRaw,
-                    sourceText.dataset.filedtextRaw,
+                    sourceText.getAttribute("data-sourcetext-raw"),
+                    sourceText.getAttribute("data-filedtext-raw"),
                     domQuery(Selectors.sourcetexts.sourcelangdd, key).value
                 );
                 keys.push(key);
@@ -867,17 +867,20 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             item.classList.toggle("d-none", !shouldShow);
 
             // Handle checkbox selection for this item or its children.
-            let rowId = item.dataset.rowId;
+            let rowId = item.getAttribute('data-row-id');
+
             if (rowId === null) {
                 // For items without row-id, toggle checkboxes of their child rows.
                 const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
-                    const childId = child.dataset.rowId;
-                    Log.info("Whitin LooP", childId);
+                    const childId = child.getAttribute('data-row-id');
+                    Log.info("Whitin LooP");
+                    Log.debug(childId);
                     toggleChildCheckBoxSelection(childId, shouldCheck);
                 });
             } else {
                 Log.info("RowId not null");
+                Log.debug(rowId);
                 toggleChildCheckBoxSelection(rowId, shouldCheck);
             }
         });
@@ -893,7 +896,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {bool} shouldBeChecked
      */
     const toggleChildCheckBoxSelection = (key, shouldBeChecked)=>{
-        Log.info(`ui/toggleChildCheckBoxSelection`, key, Selectors.editors.multiples.checkBoxesWithKey);
+        Log.info(`ui/toggleChildCheckBoxSelection`);
+        Log.debug(key);
+        Log.debug(Selectors.editors.multiples.checkBoxesWithKey);
         const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
         Log.info(single);
         single.checked = shouldBeChecked;
@@ -1034,7 +1039,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
 
         // Aggregate counts in one loop.
         checkedBoxes.forEach(ckBox => {
-            const key = ckBox.dataset.key;
+            const key = ckBox.getAttribute('data-key');
             const results = getCount(key);
             wrdsc += results.wordCount;
             cws += results.charNumWithSpace;
@@ -1142,7 +1147,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const getCount = (key) => {
         const item = domQuery(Selectors.sourcetexts.keys, key);
-        const raw = item.dataset.sourcetextRaw;
+        const raw = item.getAttribute("data-sourcetext-raw");
         // Cleaned sourceText.
         const trimmedVal = Utils.stripHTMLTags(Utils.fromBase64(raw)).trim();
         return {
