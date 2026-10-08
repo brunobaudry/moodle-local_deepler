@@ -45,7 +45,7 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
         /**
          * Remove preloader.
          */
-        const onAjaxStop = ()=> {
+        const onAjaxStop = () => {
             // This runs only once when all AJAX requests are finished after a batch
             const preloader = document.getElementById('local_deepler_preloaderModal');
             if (preloader) {
@@ -54,6 +54,30 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
             }
             ajaxStopFired = true;
         };
+
+        /**
+         * Get fetch loaded and fire when done.
+         */
+        const useFetchTracking = () => {
+            if (typeof window.fetch !== 'function') {
+                return false;
+            }
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                activeRequests++;
+                ajaxStopFired = false;
+                return originalFetch.apply(this, args).finally(() => {
+                    activeRequests--;
+                    if (activeRequests === 0 && !ajaxStopFired) {
+                        ajaxStopFired = true;
+                        onAjaxStop();
+                    }
+                });
+            };
+            Log.log('Using fetch tracking.');
+            return true;
+        };
+
         /**
          * Get ajax laoded and fire when done, the native way.
          */
@@ -112,11 +136,12 @@ define(['./local/ui_deepler', 'core/log', 'jquery'], (UI, Log, $) => {
             Log.log('Using jQuery AJAX tracking.');
         };
 
+        useFetchTracking();
         // Try XMLHttpRequest tracking first.
         if (!useXMLHttpRequestTracking()) {
             useJQueryTracking();
         }
-        window.addEventListener('load', UI.init(cfg));
+        UI.init(cfg);
     };
     return {
         init: init

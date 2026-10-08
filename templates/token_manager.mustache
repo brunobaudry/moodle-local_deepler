@@ -97,17 +97,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <form method="post" action="{{formaction}}" class="mform pt-2">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
 
-    <div class="form-inline d-flex align-items-center">
-        <select class="form-select custom-select mr-2" id="deepler-attribute" name="attribute" data-initial-value="">
+    <div class="d-flex flex-wrap align-items-center gap-2 form-inline">
+        <select class="form-select custom-select me-2 mr-2 w-auto" id="deepler-attribute" name="attribute" data-initial-value="">
                 <option selected="selected" value="">Choose</option>
             {{#userattributeselect}}
                 <option value="{{key}}">{{value}}</option>
             {{/userattributeselect}}
         </select>
-        <input type="text" name="valuefilter" class="form-control mr-2" id="deepler-valuefilter"
+        <input type="text" name="valuefilter" class="form-control me-2 mr-2 w-auto" id="deepler-valuefilter"
                placeholder="{{valuefilterplaceholder}}">
 
-        <input type="text" name="token" class="form-control mr-2" id="deepler-token"
+        <input type="text" name="token" class="form-control me-2 mr-2 w-auto" id="deepler-token"
                placeholder="{{tokenplaceholder}}" size="40">
 
         <input type="submit" name="addtoken" value="{{addbutton}}" class="btn btn-primary">
