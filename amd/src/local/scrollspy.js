@@ -170,7 +170,25 @@ define(['./utils'], (Utils) => {
         const opacityBottom = diffBottom > FADING_DISTANCE ? 1 : bottomOnFade;
         return Math.min(opacityTop, opacityBottom);
     };
+    /**
+     * Prepare the breandcrumb stickyness
+     */
+    const prepareSticky=()=>{
+        const topWrapper = document.querySelector('#local_deepler_uiheader');
+        const stickyHeader = document.querySelector('#local_deepler-translate-header');
 
+        if (topWrapper && stickyHeader) {
+            const observer = new IntersectionObserver(([entry]) => {
+                // When #local_deepler_uiheader is scrolled out past the navbar, header is stuck
+                stickyHeader.classList.toggle('is-stuck', !entry.isIntersecting);
+            }, {
+                rootMargin: '-60px 0px 0px 0px', // Matches $navbar-height
+                threshold: 0
+            });
+
+            observer.observe(topWrapper);
+        }
+    };
 
     const init = (article, breadcrumbsContainer, options) =>{
         MAX_SUB_LENGTH = options.crumbsmaxlen || 30;
@@ -184,6 +202,7 @@ define(['./utils'], (Utils) => {
         OFFSET_TOP = options.offsetTop || 0;
         const headingsPerLevel = getHeadingsPerLevel();
         makeBreadcrumbs(headingsPerLevel);
+        prepareSticky();
         window.addEventListener('scroll', () =>{
             makeBreadcrumbs(headingsPerLevel);
         });

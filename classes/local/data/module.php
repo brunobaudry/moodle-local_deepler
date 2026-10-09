@@ -22,6 +22,7 @@ use local_deepler\local\data\interfaces\editable_interface;
 use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\interfaces\visibility_interface;
+use local_deepler\local\services\field_extractor;
 use moodle_url;
 use renderer_base;
 
@@ -37,9 +38,11 @@ class module implements editable_interface, iconic_interface, translatable_inter
      * Constructor
      *
      * @param \cm_info $cminfo
+     * @param \local_deepler\local\services\field_extractor|null $fieldextractor
      * @throws \coding_exception|\dml_exception
      */
-    public function __construct(cm_info $cminfo) {
+    public function __construct(cm_info $cminfo, ?field_extractor $fieldextractor = null) {
+        $this->fieldextractor = $fieldextractor ?? new field_extractor();
         $this->childs = [];
         $this->cm = $cminfo;
         $this->modname = $this->cm->modname;
@@ -81,7 +84,7 @@ class module implements editable_interface, iconic_interface, translatable_inter
             $quiz = new $class($this->cm);
             $this->childs = $quiz->getchilds();
         } else {
-            $item = field::createclassfromstring($this->modname, $this->cm);
+            $item = $this->fieldextractor->create_class_from_string($this->modname, $this->cm);
             if ($item) {
                 $this->childs = [$item];
             }
@@ -127,15 +130,15 @@ class module implements editable_interface, iconic_interface, translatable_inter
     /**
      * Get the fields of the module.
      *
-     * The module's own table is always handled by getfieldsfrominfo (which honours the
-     * configured fields/clauses); getadditionals only covers the other configured tables.
+     * The module's own table is always handled by get_fields_from_info (which honours the
+     * configured fields/clauses); get_additionals only covers the other configured tables.
      * Should both still produce the same table + column, the additionals version is kept.
      *
      * @return array
      */
     public function getfields(): array {
-        $frominfo = field::getfieldsfrominfo($this->cm);
-        $additionals = field::getadditionals($this->cm);
+        $frominfo = $this->fieldextractor->get_fields_from_info($this->cm);
+        $additionals = $this->fieldextractor->get_additionals($this->cm);
 
         // Index additionals by table.column so duplicates can be detected.
         $overridden = [];
@@ -203,6 +206,8 @@ class module implements editable_interface, iconic_interface, translatable_inter
     public function getpluginname(): string {
         return $this->pluginname;
     }
+    /** @var \local_deepler\local\services\field_extractor */
+    private field_extractor $fieldextractor;
     /** @var \cm_info */
     private cm_info $cm;
     /** @var string */

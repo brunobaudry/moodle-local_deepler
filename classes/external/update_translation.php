@@ -26,9 +26,9 @@ use core_external\restricted_context_exception;
 use dml_transaction_exception;
 use Exception;
 use invalid_parameter_exception;
-use local_deepler\local\data\field;
 use local_deepler\local\data\multilanger;
 use local_deepler\local\services\database_updater;
+use local_deepler\local\services\field_extractor;
 use local_deepler\local\services\lang_helper;
 use local_deepler\local\services\security_checker;
 use Throwable;
@@ -160,7 +160,7 @@ class update_translation extends external_api {
      * @throws \coding_exception
      */
     public static function preparedata(array &$data): void {
-        $datafromkey = field::generatedatfromkey($data['keyid']);
+        $datafromkey = field_extractor::generate_data_from_key($data['keyid']);
         $data['table'] = $datafromkey['table'];
         $data['field'] = $datafromkey['field'];
         $data['id'] = $datafromkey['id'];

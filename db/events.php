@@ -28,15 +28,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Event string for subitems.
+$subitemscallback = '\local_deepler\observer::subitems_update';
+
 // Event observer for local_deepler.
 $observers = [
     [
         'eventname' => '\core\event\course_updated',
-        'callback' => '\local_deepler\observer::course_updated',
+        'callback' => $subitemscallback,
     ],
     [
         'eventname' => '\core\event\course_section_updated',
-        'callback' => '\local_deepler\observer::course_section_updated',
+        'callback' => $subitemscallback,
     ],
     [
         'eventname' => '\core\event\course_module_updated',
@@ -44,22 +47,22 @@ $observers = [
     ],
     [
         'eventname' => '\mod_forum\event\discussion_updated',
-        'callback' => '\local_deepler\observer::subitems_update',
+        'callback' => $subitemscallback,
     ],
     [
         'eventname' => '\mod_forum\event\post_updated',
-        'callback' => '\local_deepler\observer::subitems_update',
+        'callback' => $subitemscallback,
     ],
     [
         'eventname' => '\mod_wiki\event\page_updated',
-        'callback' => '\local_deepler\observer::subitems_update',
+        'callback' => $subitemscallback,
     ],
     [
         'eventname' => '\mod_lesson\event\page_updated',
-        'callback' => '\local_deepler\observer::subitems_update',
+        'callback' => $subitemscallback,
     ],
     [
         'eventname' => '\mod_book\event\chapter_updated',
-        'callback' => '\local_deepler\observer::subitems_update',
+        'callback' => $subitemscallback,
     ],
 ];

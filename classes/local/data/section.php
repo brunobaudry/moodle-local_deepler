@@ -21,6 +21,7 @@ use core_courseformat\base;
 use local_deepler\local\data\interfaces\editable_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\interfaces\visibility_interface;
+use local_deepler\local\services\field_extractor;
 use moodle_url;
 use section_info;
 
@@ -32,6 +33,8 @@ use section_info;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class section implements editable_interface, translatable_interface, visibility_interface {
+    /** @var \local_deepler\local\services\field_extractor */
+    private field_extractor $fieldextractor;
     /** @var \section_info */
     private section_info $si;
     /** @var \core_courseformat\base */
@@ -83,11 +86,18 @@ class section implements editable_interface, translatable_interface, visibility_
      * @param \section_info $sectioninfo
      * @param \core_courseformat\base $courseformat
      * @param int $loadeddmodule
+     * @param \local_deepler\local\services\field_extractor|null $fieldextractor
      * @throws \coding_exception
      * @throws \core\exception\moodle_exception
      */
-    public function __construct(section_info $sectioninfo, base $courseformat, int $loadeddmodule) {
+    public function __construct(
+        section_info $sectioninfo,
+        base $courseformat,
+        int $loadeddmodule,
+        ?field_extractor $fieldextractor = null
+    ) {
         global $CFG;
+        $this->fieldextractor = $fieldextractor ?? new field_extractor();
         $this->loadeddmoduleid = $loadeddmodule;
         $this->si = $sectioninfo;
         $this->link = new moodle_url($CFG->wwwroot . "/course/editsection.php", ['id' => $this->si->id]);
@@ -158,7 +168,7 @@ class section implements editable_interface, translatable_interface, visibility_
     public function getfields(): array {
         $table = 'course_sections';
         $collumns = ['name' => [], 'summary' => []];
-        return field::getfieldsfromcolumns($this->si, $table, $collumns);
+        return $this->fieldextractor->get_fields_from_columns($this->si, $table, $collumns);
     }
 
     /**

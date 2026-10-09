@@ -121,7 +121,6 @@ $version = $plugin->release;
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
-    field::$mintxtfieldsize = get_config('local_deepler', 'scannedfieldsize');
     $initok = $languagepack->initdeepl($USER, $version);
     if ($initok && $languagepack->iscurrentsupported()) {
         // Set js data.

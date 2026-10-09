@@ -65,7 +65,7 @@ final class observer_test extends advanced_testcase {
         $recordid = $DB->insert_record('local_deepler', $record);
 
         $event = course_updated::create(['objectid' => $course->id, 'context' => \context_course::instance($course->id)]);
-        observer::course_updated($event);
+        observer::subitems_update($event);
 
         $updatedrecord = $DB->get_record('local_deepler', ['id' => $recordid]);
         $this->assertGreaterThan($record->s_lastmodified, $updatedrecord->s_lastmodified);
@@ -96,7 +96,7 @@ final class observer_test extends advanced_testcase {
                 'other' => ['sectionnum' => $section->sectionnum ?? 1],
             ]
         );
-        observer::course_section_updated($event);
+        observer::subitems_update($event);
 
         $updatedrecord = $DB->get_record('local_deepler', ['id' => $recordid]);
         $this->assertGreaterThan($record->s_lastmodified, $updatedrecord->s_lastmodified);

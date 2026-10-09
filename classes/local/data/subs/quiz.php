@@ -17,12 +17,12 @@
 namespace local_deepler\local\data\subs;
 
 use cm_info;
-use local_deepler\local\data\field;
+use dml_missing_record_exception;
+use local_deepler\local\services\field_extractor;
 use mod_quiz\quiz_settings;
 use mod_quiz\structure;
 use qtype_random;
 use question_bank;
-use dml_missing_record_exception;
 
 /**
  * Subclass for quiz with sub questions.
@@ -350,13 +350,14 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
      */
     public function getchilds(): array {
         $childs = [];
+        $extractor = new field_extractor();
         /** @var \question_definition $question */
         foreach ($this->questions as $question) {
             $params = [
                 'question' => $question,
                 'cmid' => $this->quiz->id,
             ];
-            $childs[] = field::createclassfromstring('questions\qtype_basic', $params);
+            $childs[] = $extractor->create_class_from_string('questions\qtype_basic', $params);
         }
         return $childs;
     }

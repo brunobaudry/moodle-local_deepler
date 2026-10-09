@@ -1,0 +1,267 @@
+{{!
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}{{!
+  @template local_deepler/translate_page
+
+  Provides translation form header and controls
+  Classes required for JS:
+  * DeepL's
+  - context: '[data-id="local_deepler/context"]',
+  - nonSplittingTags: '[data-id="local_deepler/non_splitting_tags"]',
+  - splittingTags: '[data-id="local_deepler/splitting_tags"]',
+  - ignoreTags: '[data-id="local_deepler/ignore_tags"]',
+  - preserveFormatting: '[data-id="local_deepler/preserve_formatting"]',
+  - formality: '[name="local_deepler/formality"]',
+  - glossaryId: '[data-id="local_deepler/glossary_id"]',
+  - tagHandling: '[data-id="local_deepler/tag_handling"]',
+  - outlineDetection: '[data-id="local_deepler/outline_detection"]',
+  - splitSentences: '[name="local_deepler/split_sentences"]',
+  - modelType: '[name="local_deepler/model_type"]',
+  - toneorstyle: '[name="local_deepler/toneorstyle"]',
+  * UI
+  - #local_deepler__footer
+  - #local_deepler__settings
+  - sourceselect: '[data-action="local_deepler/sourceselect"]',
+  - selectAllCk: '[data-action="local_deepler/select-all"]',
+  - saveAll: '[data-action="local_deepler/saveall-btn"]',
+  - autoTranslateBtn: '[data-action="local_deepler/autotranslate-btn"]',
+  - targetSwitcher: '[data-action="local_deepler/target-switcher"]',
+  - targetCompatibleSwitcher: '[data-action="local_deepler/tartgetcompatible-switcher"]',
+  - showNeedUpdate: '[data-action="local_deepler/show-needsupdate"]',
+  - showUpdated: '[data-action="local_deepler/show-updated"]',
+  - showHidden: '[data-action="local_deepler/show-hidden"]',
+  - escapeLatex: '[data-id="local_deepler/latexeascape"]',
+  - escapePre: '[data-id="local_deepler/preescape"]',
+  - #local_deepler-translate-header-usage
+
+  Data attributes required for JS:
+  * none
+
+  Context variables required for this template:
+  * lang
+  * langs
+  * wordcount
+  * charcount
+  * charcountspaces
+  * langstrings
+  * glossayselector
+  * canimprove
+  * supportedlangs
+  * rephrasesymbol
+  * deeplsource
+  * target_lang
+  * notarget
+  * target_langs_htmloptions
+  * targetlangs
+  * showhiddenforstudents
+  * escapelatexbydefault
+  * escapeprebydefault
+  * hideiframesdefault
+  * hidecompatible
+  * compatiblelangs
+  * mform
+  * version
+  * sectionidnames
+  * modulesidnames
+
+  Example context (json):
+  {
+    "lang": "en",
+    "langs": [
+      {
+        "code": "other",
+        "lang": "Other (other)"
+      },
+      {
+        "code": "en",
+        "lang": "English (en)"
+      }
+    ],
+    "wordcount": 4,
+    "charcount": 20,
+    "charcountspaces": 25
+  }
+}}
+<div id="local_deepler_uiheader" class="mt-2">
+    <div class="container-fluid local_deepler-bg-primary-subtle">
+        <div class="row py-3 align-items-center" id="local_deepler__sourcetarget">
+            <div class="col-5 text-end text-right"><h6 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h6></div>
+            <div class="col-1 text-center"><i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+            </div>
+            <div class="col-3"><h6 id="local_deepler__targetlang" class="text-start text-left">{{#str}}selecttargetlanguage,local_deepler,
+                {{target_lang}}{{/str}}</h6></div>
+            <div class="col-3">
+                <select
+                        id="select-target-language"
+                        name="select-target-language"
+                        class="local_deepler__localeswitcher form-select form-control"
+                        data-action="local_deepler/target-switcher"
+                >
+                    {{#notarget}}
+                        <option value="" selected disabled>{{#str}}choose{{/str}}...</option>
+                    {{/notarget}}
+                    {{#targetlangs}}
+                        <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
+                    {{/targetlangs}}
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="container-fluid local_deepler-bg-secondary-subtle pb-1">
+        <div class="row">
+        <h5>{{#str}}filters,local_deepler{{/str}}:</h5>
+
+        </div>
+        <div class="row">
+            <div class="d-flex flex-wrap align-items-center col-2" id="local_deepler-translate-header-filter">
+                <div class="form-check form-switch custom-control custom-switch me-3 mr-3">
+                    <input id="show-updated" class="form-check-input custom-control-input local_deepler__show-updated" type="checkbox"
+                           data-action="local_deepler/show-updated">
+                    <label class="form-check-label custom-control-label" for="show-updated">{{#str}}uptodate,local_deepler{{/str}}</label>
+                </div>
+
+                <div class="form-check form-switch custom-control custom-switch me-3 mr-3">
+                    <input id="show-needsupdate" checked="checked" type="checkbox"
+                           class="form-check-input custom-control-input local_deepler__show-needsupdate"
+                           data-action="local_deepler/show-needsupdate">
+                    <label class="form-check-label custom-control-label" for="show-needsupdate">{{#str}}needsupdate,local_deepler{{/str}}</label>
+                </div>
+
+                <div class="form-check form-switch custom-control custom-switch me-3 mr-3">
+                    <input id="show-hidden" checked="checked" type="checkbox"
+                           class="form-check-input custom-control-input local_deepler__show-hidden"
+                           data-action="local_deepler/show-hidden">
+                    <label class="form-check-label custom-control-label" for="show-hidden">{{showhiddenforstudents}}</label>
+                </div>
+
+            </div>
+            <div class="form-check form-switch custom-control custom-switch col-5 pt-0">
+                <label for="select-section" class="form-label">{{#str}}section:select:label, local_deepler{{/str}}</label>
+                <select
+                        id="select-section"
+                        name="select-section"
+                        class="local_deepler__sectionswitcher form-select form-control"
+                        data-action="local_deepler/section-switcher"
+                >
+                    <option class="" value="-99" {{#nosectionsloaded}}selected{{/nosectionsloaded}}>* {{#str}}settings{{/str}}</option>
+                    <option class="" value="-1" {{#allselected}}selected{{/allselected}}>{{#str}}sectionall, local_deepler{{/str}}</option>
+                    {{#sectionidnames}}
+                        <option class="" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                    {{/sectionidnames}}
+                </select>
+
+            </div>
+            {{#hasmodulelist}}
+<!--                <div class="col-2 h3 text-center text-secondary align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>-->
+                <div class="form-check form-switch custom-control custom-switch col-5 pt-0">
+                    <label for="select-module" class="form-label">{{#str}}module:select:label, local_deepler{{/str}}</label>
+                    <select
+                            id="select-module"
+                            name="select-module"
+                            class="local_deepler__moduleswitcher form-select form-control"
+                            data-action="local_deepler/module-switcher"
+                    >
+                        <option class="" value="-1" {{^anymoduleselected}}selected{{/anymoduleselected}}>{{#str}}moduleall, local_deepler{{/str}}</option>
+                        {{#modulesidnames}}
+                            <option class="" value="{{ id }}" {{#selected}}selected{{/selected}}>{{ name }}</option>
+                        {{/modulesidnames}}
+                    </select>
+                </div>
+            {{/hasmodulelist}}
+        </div>
+    </div>
+</div>
+<div class="local_deepler-bg-primary-subtle container-fluid sticky-top sticky-offset" id="local_deepler-translate-header">
+
+    <div class="row pb-2 pt-2 align-items-center">
+
+        <div class="col-1 px-5">
+            <div class="form-check" id="local_deepler-translate-header-select-all">
+                <input
+                        class="form-check-input local_deepler__select-all"
+                        data-action="local_deepler/select-all"
+                        type="checkbox"
+                        aria-label="{{#str}}selectall,local_deepler{{/str}}"
+                        title="{{#str}}selectall,local_deepler{{/str}}"
+                        name="select-all"
+                        id="select-all"
+                        disabled>
+                <label class="form-check-label" for="select-all">
+                    {{#str}}selectall,local_deepler{{/str}}
+                </label>
+            </div>
+        </div>
+
+        <div class="col-7">
+            <div id="local_deepler-translate-header-usage" class="p-1 text-center fs-6">
+                {{#str}}wordcountsentence,local_deepler{{/str}}
+            </div>
+        </div>
+
+        <div class="col-3 px-0">
+            <div class="text-center">
+                <button
+                        id="local_deepler-translate-header-translatebutton"
+                        title="{{#str}}translateexplain,local_deepler{{/str}}"
+                        type="button"
+                        class="me-4 mr-4 btn btn-primary"
+                        data-action="local_deepler/autotranslate-btn"
+                        disabled>
+                    {{#str}}translatebutton,local_deepler,{{target_lang}} {{/str}}
+                </button>
+                <button
+                        id="local_deepler-translate-header-saveallbutton"
+                        title="{{#str}}saveallexplain,local_deepler{{/str}}"
+                        type="button"
+                        class="btn btn-success"
+                        data-action="local_deepler/saveall-btn"
+                        disabled>
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
+                </button>
+            </div>
+        </div>
+
+        <div class="col-1">
+            {{^hidecompatible}}
+                <select style='display:inherit' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
+                        class="local_deepler__tartgetcompatible form-select form-control"
+                        data-action="local_deepler/tartgetcompatible-switcher">
+                    {{#compatiblelangs}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/compatiblelangs}}
+                </select>
+            {{/hidecompatible}}
+
+            {{#hidecompatible}}
+                <select style='display:none' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
+                        class="local_deepler__tartgetcompatible form-select form-control"
+                        data-action="local_deepler/tartgetcompatible-switcher">
+                    {{#compatiblelangs}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/compatiblelangs}}
+                </select>
+            {{/hidecompatible}}
+        </div>
+    </div>
+
+    <div id='local_deepler-scrollspy' class="row p-1 ps-3 pl-3">
+        <span id="local_deepler__tothetop" class="col-1" role="button"><i class="fa fa-home" aria-hidden="true"></i></span>
+        <span id="local_deepler__breadcrumbs" class="col-11"></span>
+    </div>
+</div>

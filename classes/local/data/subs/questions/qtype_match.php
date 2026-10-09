@@ -38,7 +38,7 @@ class qtype_match extends qbase {
     private function getmatches(string $substablename, mixed $submatch, array $fields): array {
         global $DB;
         $subrecord = $DB->get_record($substablename, ['id' => $submatch->id]);
-        $subtablefileds = field::filterdbtextfields($substablename);
+        $subtablefileds = $this->fieldextractor->filter_db_text_fields($substablename);
         foreach ($subtablefileds as $field) {
             if ($subrecord->{$field} !== null && trim($subrecord->{$field}) !== '') {
                 $fields[] = new field(

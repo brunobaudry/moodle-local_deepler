@@ -86,7 +86,7 @@ class multilanger {
      * @return array
      */
     public function findmlangs(): array {
-        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}.*?{mlang\s*})/si";
+        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[a-z]{2})?)\s*}.*?{mlang\s*})/si";
         preg_match_all($pattern, $this->text, $matches);
 
         $result = [];
@@ -127,26 +127,23 @@ class multilanger {
         $f = $field->get_tablefield();
         $t = $field->get_table();
         // Try to find the activity names as well as the field translated in the current lang.
-        if ($t === 'course') {
-            return get_string($f);
-        } else if ($t === 'course_sections') {
+        if ($t === 'course_sections') {
             if ($f === 'name') {
-                return get_string('sectionname');
+                $f = 'sectionname';
             } else if ($f === 'summary') {
-                return get_string('description');
+                $f = 'description';
             } else {
                 return '';
             }
-        } else {
+        } else if ($t !== 'course') {
             if ($f === 'intro') {
-                return get_string('description');
-            } else if ($f === 'name') {
-                return get_string('name');
-            } else {
+                $f = 'description';
+            } else if ($f !== 'name') {
                 // One should be better than the other.
                 return self::findoutstanding($t, $f);
             }
         }
+        return get_string($f);
     }
 
     /**
@@ -263,7 +260,7 @@ class multilanger {
      * @return array
      */
     public function findmlangs_withouttags(): array {
-        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[A-Za-z]{2})?)\s*}(.*?){mlang\s*})/si";
+        $pattern = "/({\s*mlang\s+(([a-z]{2}|other)(_[a-z]{2})?)\s*}(.*?){mlang\s*})/si";
         preg_match_all($pattern, $this->text, $matches);
 
         $result = [];

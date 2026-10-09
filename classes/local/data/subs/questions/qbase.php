@@ -18,10 +18,10 @@ namespace local_deepler\local\data\subs\questions;
 
 use database_manager;
 use lang_string;
-use local_deepler\local\data\field;
 use local_deepler\local\data\interfaces\editable_interface;
 use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
+use local_deepler\local\services\field_extractor;
 use moodle_url;
 use question_definition;
 use renderer_base;
@@ -38,6 +38,10 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
      * @var \database_manager
      */
     protected database_manager $dbmanager;
+    /**
+     * @var \local_deepler\local\services\field_extractor
+     */
+    protected field_extractor $fieldextractor;
     /** @var string */
     protected string $qtype;
     /** @var \question_definition */
@@ -57,11 +61,13 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
      * Constructor.
      *
      * @param array $params
+     * @param \local_deepler\local\services\field_extractor|null $fieldextractor
      * @throws \core\exception\moodle_exception
      */
-    public function __construct(array $params) {
+    public function __construct(array $params, ?field_extractor $fieldextractor = null) {
         global $DB;
 
+        $this->fieldextractor = $fieldextractor ?? new field_extractor();
         $this->question = $params['question'];
         $this->cmid = $params['cmid'];
 
@@ -97,7 +103,7 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
             'questiontext' => [],
             'generalfeedback' => [],
         ];
-        return field::getfieldsfromcolumns($this->question, 'question', $columns, $this->cmid);
+        return $this->fieldextractor->get_fields_from_columns($this->question, 'question', $columns, $this->cmid);
     }
 
     /**
@@ -109,7 +115,7 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
         $fields = [];
         if (count($this->question->hints)) {
             foreach ($this->question->hints as $hint) {
-                $hintfield = field::getfieldsfromcolumns(
+                $hintfield = $this->fieldextractor->get_fields_from_columns(
                     $hint,
                     'question_hints',
                     ['hint' => []],
@@ -156,10 +162,10 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
      * @throws \dml_exception
      */
     protected function getadditionalsubs(): array {
-        $yamldef = field::$additionals[$this->qtype] ?? null;
+        $yamldef = $this->fieldextractor->load_additionals()[$this->qtype] ?? null;
         if (empty($yamldef)) {
             return [];
         }
-        return field::buildfieldsfromtableconfig($yamldef, $this->question->id, $this->cmid);
+        return $this->fieldextractor->build_fields_from_table_config($yamldef, $this->question->id, $this->cmid);
     }
 }

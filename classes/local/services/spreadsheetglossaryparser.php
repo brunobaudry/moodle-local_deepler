@@ -55,11 +55,12 @@ final class spreadsheetglossaryparser {
      * @param bool $useheaderlang whether to interpret the first row as language codes if possible
      * @param array|null $languages output param: ['source' => 'en', 'target' => 'fr'] if detected
      * @return string                      utf-8 csv with two columns: source,target
+     * @throws \file_exception
      */
     public function parse_to_csv(string $filepath, string $ext, bool $useheaderlang = true, ?array &$languages = null): string {
         $ext = strtolower(ltrim($ext, '.'));
         if (!self::is_supported($ext)) {
-            throw new RuntimeException('unsupported file type: ' . $ext);
+            throw new \file_exception('extensionproblem', 'unsupported file type: ' . $ext);
         }
 
         $reader = $this->create_reader($ext);

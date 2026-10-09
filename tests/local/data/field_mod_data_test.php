@@ -18,19 +18,23 @@ namespace local_deepler\local\data;
 
 use advanced_testcase;
 use cm_info;
+use local_deepler\local\services\field_extractor;
 
 /**
- * Unit tests for the field class with a mod_data instance and its additional config.
+ * Unit tests for field extraction with a mod_data instance and its additional config.
  *
  * @package    local_deepler
  * @category   test
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \local_deepler\local\data\field
+ * @coversDefaultClass \local_deepler\local\services\field_extractor
  */
 final class field_mod_data_test extends advanced_testcase {
     /** @var \cm_info */
     private cm_info $cm;
+
+    /** @var field_extractor */
+    private field_extractor $extractor;
 
     /**
      * Test setup: a database activity with populated templates and the mod_data additional config.
@@ -64,7 +68,7 @@ final class field_mod_data_test extends advanced_testcase {
         ]);
         $this->cm = get_fast_modinfo($course)->get_cm($data->cmid);
 
-        field::$additionals = [
+        $additionals = [
             'mod_data' => [
                 'data' => [
                     'fields' => [
@@ -79,17 +83,7 @@ final class field_mod_data_test extends advanced_testcase {
                 ],
             ],
         ];
-    }
-
-    /**
-     * Reset the static config.
-     *
-     * @return void
-     */
-    public function tearDown(): void {
-        field::$additionals = [];
-        field::$filteredtablefields = [];
-        parent::tearDown();
+        $this->extractor = new field_extractor(null, $additionals);
     }
 
     /**
@@ -109,12 +103,12 @@ final class field_mod_data_test extends advanced_testcase {
     /**
      * The configured module table is restrictive, keeps formats and editable clauses, without PHP warnings.
      *
-     * @covers ::getfieldsfrominfo
-     * @covers ::getfieldsfromcolumns
+     * @covers ::get_fields_from_info
+     * @covers ::get_fields_from_columns
      * @return void
      */
     public function test_getfieldsfrominfo_honours_mod_data_config(): void {
-        $fields = $this->bycolumn(field::getfieldsfrominfo($this->cm));
+        $fields = $this->bycolumn($this->extractor->get_fields_from_info($this->cm));
 
         $this->assertEqualsCanonicalizing(
             ['name', 'intro', 'singletemplate', 'listtemplate', 'listtemplatefooter', 'listtemplateheader', 'addtemplate'],
@@ -138,11 +132,11 @@ final class field_mod_data_test extends advanced_testcase {
     /**
      * The module's own table is not processed again by getadditionals.
      *
-     * @covers ::getadditionals
+     * @covers ::get_additionals
      * @return void
      */
     public function test_getadditionals_skips_module_own_table(): void {
-        $this->assertSame([], field::getadditionals($this->cm));
+        $this->assertSame([], $this->extractor->get_additionals($this->cm));
     }
 
     /**
@@ -152,7 +146,7 @@ final class field_mod_data_test extends advanced_testcase {
      * @return void
      */
     public function test_module_getfields(): void {
-        $module = new module($this->cm);
+        $module = new module($this->cm, $this->extractor);
         $fields = $module->getfields();
         $this->assertCount(7, $fields);
         $fields = $this->bycolumn($fields);
@@ -163,12 +157,12 @@ final class field_mod_data_test extends advanced_testcase {
     /**
      * When no fields are configured for the module table, all text columns are used except the skipped ones.
      *
-     * @covers ::getfieldsfrominfo
+     * @covers ::get_fields_from_info
      * @return void
      */
     public function test_getfieldsfrominfo_without_config(): void {
-        field::$additionals = ['mod_url' => []];
-        $fields = $this->bycolumn(field::getfieldsfrominfo($this->cm));
+        $extractor = new field_extractor(null, ['mod_url' => []]);
+        $fields = $this->bycolumn($extractor->get_fields_from_info($this->cm));
         $this->assertArrayHasKey('name', $fields);
         $this->assertArrayHasKey('intro', $fields);
         $this->assertArrayHasKey('singletemplate', $fields);
@@ -181,11 +175,11 @@ final class field_mod_data_test extends advanced_testcase {
     /**
      * buildfieldsfromtableconfig selects the *format column when it exists.
      *
-     * @covers ::buildfieldsfromtableconfig
+     * @covers ::build_fields_from_table_config
      * @return void
      */
     public function test_buildfieldsfromtableconfig_is_format_aware(): void {
-        $fields = $this->bycolumn(field::buildfieldsfromtableconfig(
+        $fields = $this->bycolumn($this->extractor->build_fields_from_table_config(
             ['data' => ['id' => 'id', 'fields' => ['intro' => null, 'jstemplate' => ['editable' => false]]]],
             $this->cm->instance,
             $this->cm->id
@@ -197,13 +191,13 @@ final class field_mod_data_test extends advanced_testcase {
     /**
      * Exclude clauses in getfieldsfromcolumns: boolean true always skips, string skips on match, missing key is fine.
      *
-     * @covers ::getfieldsfromcolumns
+     * @covers ::get_fields_from_columns
      * @return void
      */
     public function test_getfieldsfromcolumns_clauses(): void {
         $info = (object) ['id' => 1, 'a' => 'keep', 'b' => 'skip', 'c' => 'skipped', 'd' => 'x'];
         $columns = ['a' => ['editable' => false], 'b' => ['exclude' => 'skip'], 'c' => ['exclude' => true], 'd' => null];
-        $fields = $this->bycolumn(field::getfieldsfromcolumns($info, 'testtable', $columns));
+        $fields = $this->bycolumn($this->extractor->get_fields_from_columns($info, 'testtable', $columns));
         $this->assertEqualsCanonicalizing(['a', 'd'], array_keys($fields));
         $this->assertFalse($fields['a']->iseditable());
         $this->assertTrue($fields['d']->iseditable());

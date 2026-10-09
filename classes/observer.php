@@ -25,14 +25,8 @@
  */
 
 namespace local_deepler;
+use core\event\base;
 use core\event\course_module_updated;
-use core\event\course_section_updated;
-use core\event\course_updated;
-use mod_book\event\chapter_updated;
-use mod_forum\event\discussion_updated;
-use mod_forum\event\post_updated;
-use mod_wiki\event\page_updated as wiki_page_updated;
-use mod_lesson\event\page_updated as lesson_page_updated;
 
 /**
  * Course Translator Observers.
@@ -43,86 +37,49 @@ use mod_lesson\event\page_updated as lesson_page_updated;
  */
 class observer {
     /**
-     * Observer for course_updated event.
+     * Common Observer for subitems lil^ke forum posts, book chapters etc...
+     * See db/events.php to know which event triggers it.
      *
-     * @param \core\event\course_updated $event
+     * @param \core\event\base $event
      * @return void
+     * @throws \dml_exception
      */
-    public static function course_updated(course_updated $event) {
-        // Get params.
-        $objectid = $event->objectid;
-        $objecttable = $event->objecttable;
-
-        self::updatedb($objectid, $objecttable);
+    public static function subitems_update(base $event): void {
+        self::updatedb($event);
     }
 
     /**
-     * Observer for course_section_updated event.
-     *
-     * @param \core\event\course_section_updated $event
-     * @return void
-     */
-    public static function course_section_updated(course_section_updated $event) {
-        // Get params.
-        $objectid = $event->objectid;
-        $objecttable = $event->objecttable;
-
-        self::updatedb($objectid, $objecttable);
-    }
-
-    /**
-     * Observer for course_module_updated event.
+     * Event wrapper as module activity are in 'other'.
      *
      * @param \core\event\course_module_updated $event
      * @return void
-     */
-    public static function course_module_updated(course_module_updated $event) {
-        // Get params.
-        $objectid = $event->other['instanceid'];
-        $objecttable = $event->other['modulename'];
-
-        self::updatedb($objectid, $objecttable);
-    }
-
-    /**
-     * Common Observer for subitems lil^ke forum posts, book chapters etc...
-     *
-     * @param chapter_updated|wiki_page_updated|lesson_page_updated|post_updated|discussion_updated $event
-     * @return void
      * @throws \dml_exception
      */
-    public static function subitems_update(
-        chapter_updated|wiki_page_updated|lesson_page_updated|post_updated|discussion_updated $event
-    ): void {
-        // Get params.
-        $objectid = $event->objectid;
-        $objecttable = $event->objecttable;
-        self::updatedb($objectid, $objecttable);
-    }
-
-    /**
-     * DB wrapper.
-     *
-     * @param int $objectid
-     * @param string $objecttable
-     * @return void
-     * @throws \dml_exception
-     */
-    private static function updatedb(int $objectid, string $objecttable): void {
+    public static function course_module_updated(course_module_updated $event): void {
         global $DB;
-
-        // Set timemodified.
-        $timemodified = time();
-
-        // Get matching records.
+        // Get matching records for module which infos are in the other object.
         $records = $DB->get_recordset(
             'local_deepler',
-            ['t_id' => $objectid, 't_table' => $objecttable],
+            ['t_id' => $event->other['instanceid'], 't_table' => $event->other['modulename']],
             '',
             '*'
         );
 
         // Update s_lastmodified time.
+        self::update_lastmodifiedtime($records);
+    }
+    /**
+     *
+     *
+     * @param \moodle_recordset $records
+     * @return void
+     * @throws \dml_exception
+     */
+    private static function update_lastmodifiedtime(\moodle_recordset $records): void {
+        global $DB;
+        // Set timemodified.
+        $timemodified = time();
+
         foreach ($records as $record) {
             $DB->update_record(
                 'local_deepler',
@@ -130,5 +87,28 @@ class observer {
             );
         }
         $records->close();
+    }
+
+
+    /**
+     * DB wrapper, get the fields first.
+     *
+     * @param \core\event\base $event
+     * @return void
+     * @throws \dml_exception
+     */
+    private static function updatedb(base $event): void {
+        global $DB;
+
+        // Get matching records.
+        $records = $DB->get_recordset(
+            'local_deepler',
+            ['t_id' => $event->objectid, 't_table' => $event->objecttable],
+            '',
+            '*'
+        );
+
+        // Update s_lastmodified time.
+        self::update_lastmodifiedtime($records);
     }
 }

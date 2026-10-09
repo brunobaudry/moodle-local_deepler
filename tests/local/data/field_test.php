@@ -17,10 +17,10 @@
 namespace local_deepler\local\data;
 
 use advanced_testcase;
-use stdClass;
+use local_deepler\local\services\field_extractor;
 
 /**
- * Unit tests for the field class.
+ * Unit tests for the field entity class.
  *
  * @package    local_deepler
  * @category   test
@@ -39,20 +39,39 @@ final class field_test extends advanced_testcase {
      * @covers \local_deepler\local\data\field::get_table
      * @covers \local_deepler\local\data\field::get_text
      * @covers \local_deepler\local\data\field::get_format
+     * @covers \local_deepler\local\data\field::get_displaytext
+     * @covers \local_deepler\local\data\field::iseditable
+     * @covers \local_deepler\local\data\field::get_maxlength
      * @return void
      */
     public function test_constructor_and_getters(): void {
-        // Factored test string.
         $sampltext = 'Sample text';
 
-        $field = new field(1, $sampltext, 1, 'shortname', 'course', 2);
+        $field = new field(1, $sampltext, 1, 'shortname', 'course', 2, true, 255);
 
         $this->assertEquals(1, $field->get_id());
         $this->assertEquals(2, $field->get_cmid());
         $this->assertEquals('shortname', $field->get_tablefield());
         $this->assertEquals('course', $field->get_table());
         $this->assertEquals($sampltext, $field->get_text());
+        $this->assertEquals($sampltext, $field->get_displaytext());
         $this->assertEquals(1, $field->get_format());
+        $this->assertTrue($field->iseditable());
+        $this->assertEquals(255, $field->get_maxlength());
+    }
+
+    /**
+     * Test maxlength getter and setter.
+     *
+     * @covers \local_deepler\local\data\field::get_maxlength
+     * @covers \local_deepler\local\data\field::set_maxlength
+     * @return void
+     */
+    public function test_maxlength_mutation(): void {
+        $field = new field(1, 'Sample', 0, 'name', 'course');
+        $this->assertNull($field->get_maxlength());
+        $field->set_maxlength(100);
+        $this->assertEquals(100, $field->get_maxlength());
     }
 
     /**
@@ -67,7 +86,7 @@ final class field_test extends advanced_testcase {
 
         $this->assertEquals('course[1][shortname][2]', $field->getkey());
         $this->assertEquals('course-1-shortname-2', $field->getkeyid());
-        $datafromkey = field::generatedatfromkey($field->getkey());
+        $datafromkey = field_extractor::generate_data_from_key($field->getkey());
         $this->assertIsArray($datafromkey);
         $this->assertEquals('course', $datafromkey['table']);
         $this->assertEquals(1, $datafromkey['id']);
@@ -79,12 +98,16 @@ final class field_test extends advanced_testcase {
      * Test the check_field_has_other_and_sourcetag method.
      *
      * @covers \local_deepler\local\data\field::__construct
+     * @covers \local_deepler\local\data\field::check_field_has_other_and_sourcetag
      * @covers \local_deepler\local\data\multilanger::has_multilandcode_and_others
      * @return void
      */
     public function test_check_field_has_other_and_sourcetag(): void {
         $field1 = new field(1, '{mlang other}Other{mlang}{mlang en}English{mlang}', 1, 'shortname', 'course');
         $field2 = new field(2, 'Regular text', 1, 'name', 'course');
+        $this->assertTrue($field1->check_field_has_other_and_sourcetag('en'));
+        $this->assertFalse($field2->check_field_has_other_and_sourcetag('en'));
+
         $mlanger1 = new multilanger($field1->get_text());
         $mlanger2 = new multilanger($field2->get_text());
         $this->assertTrue($mlanger1->has_multilandcode_and_others('en'));
@@ -104,72 +127,5 @@ final class field_test extends advanced_testcase {
         $mlanger2 = new multilanger($field2->get_text());
         $this->assertTrue($mlanger1->has_multilangs());
         $this->assertFalse($mlanger2->has_multilangs());
-    }
-
-    /**
-     * Test the filterdbtextfields static method.
-     *
-     * @covers \local_deepler\local\data\field::filterdbtextfields
-     * @return void
-     */
-    public function test_filterdbtextfields(): void {
-        global $DB;
-
-        // Mock the $DB->get_columns() method.
-        $DB = $this->getMockBuilder(stdClass::class)->addMethods(['get_columns'])->getMock();
-
-        $mockcolumns = [
-            'id' => (object) [
-                'name' => 'id',
-                'meta_type' => 'R',
-                'max_length' => 10,
-            ],
-            'name' => (object) [
-                'name' => 'name',
-                'meta_type' => 'C',
-                'max_length' => 255,
-            ],
-            'description' => (object) [
-                'name' => 'description',
-                'meta_type' => 'X',
-                'max_length' => -1,
-            ],
-            'smalltext' => (object) [
-                'name' => 'smalltext',
-                'meta_type' => 'C',
-                'max_length' => 50,
-            ],
-        ];
-
-        $DB->expects($this->once())->method('get_columns')->with('testtable')->willReturn($mockcolumns);
-
-        $result = field::filterdbtextfields('testtable');
-
-        $this->assertEquals(['name', 'description'], $result);
-    }
-
-    /**
-     * Test the getfieldsfromcolumns static method.
-     *
-     * @covers \local_deepler\local\data\field::getfieldsfromcolumns
-     * @return void
-     */
-    public function test_getfieldsfromcolumns(): void {
-        $info = (object) [
-            'id' => 1,
-            'name' => 'Test Name',
-            'description' => 'Test Description',
-            'descriptionformat' => 1,
-            'empty' => '',
-        ];
-
-        $columns = ['name' => [], 'description' => [], 'empty' => []];
-        $result = field::getfieldsfromcolumns($info, 'testtable', $columns);
-
-        $this->assertCount(2, $result);
-        $this->assertInstanceOf(field::class, $result[0]);
-        $this->assertInstanceOf(field::class, $result[1]);
-        $this->assertEquals('name', $result[0]->get_tablefield());
-        $this->assertEquals('description', $result[1]->get_tablefield());
     }
 }

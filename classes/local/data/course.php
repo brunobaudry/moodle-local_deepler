@@ -18,6 +18,7 @@ namespace local_deepler\local\data;
 
 use core_courseformat\base;
 use course_modinfo;
+use local_deepler\local\services\field_extractor;
 use moodle_exception;
 use moodle_url;
 use stdClass;
@@ -33,6 +34,8 @@ require_once(__DIR__ . '/../../vendor/autoload.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course implements interfaces\editable_interface, interfaces\translatable_interface {
+    /** @var \local_deepler\local\services\field_extractor */
+    private field_extractor $fieldextractor;
     /**
      * @var \course_modinfo|null
      */
@@ -91,14 +94,19 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
      * @param \stdClass $course
      * @param int $lodadedsection
      * @param int $loadeddmodule
+     * @param \local_deepler\local\services\field_extractor|null $fieldextractor
      * @throws \core\exception\moodle_exception
      * @throws \moodle_exception
      */
-    public function __construct(stdClass $course, int $lodadedsection = -99, int $loadeddmodule = -99) {
+    public function __construct(
+        stdClass $course,
+        int $lodadedsection = -99,
+        int $loadeddmodule = -99,
+        ?field_extractor $fieldextractor = null
+    ) {
         global $CFG;
+        $this->fieldextractor = $fieldextractor ?? new field_extractor();
         $this->loadedsectionnum = $this->loadedsectionid = $lodadedsection;
-        // Load json config of known field definitions.
-        field::loadadditionals();
         $this->sections = [];
         $this->course = get_fast_modinfo($course);
         $this->format = course_get_format($course);
@@ -138,7 +146,7 @@ class course implements interfaces\editable_interface, interfaces\translatable_i
         $table = 'course';
         $collumns = ['fullname' => [], 'shortname' => [], 'summary' => []];
 
-        return field::getfieldsfromcolumns($info, $table, $collumns);
+        return $this->fieldextractor->get_fields_from_columns($info, $table, $collumns);
     }
 
     /**
