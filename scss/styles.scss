@@ -62,7 +62,7 @@ $secondary: $gray-400 !default;
     .local_deepler-bg-primary-subtle {
         background-color: var(--bs-primary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, 0.1)));
         border: 1px solid var(--bs-border-color, var(--mds-bg-feedback-info-default, rgba($info, 0.1)));
-      color: var(--bs-primary-text-emphasis, $info);
+        color: var(--bs-primary-text-emphasis, $info);
     }
 
     .bg-primary-light {

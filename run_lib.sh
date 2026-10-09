@@ -1,5 +1,5 @@
 #!/bin/bash
-# Shared helpers for run_tests.sh, run_behats.sh and run_grunt_amd.sh.
+# Shared helpers for run_tests.sh, run_behats.sh, run_grunt_amd.sh and run_scss.sh.
 #
 # Source it, do not execute it:
 #     source "$(dirname "${BASH_SOURCE[0]}")/run_lib.sh"
@@ -61,13 +61,15 @@ is_moodle_dirroot() {
 # Sets DIRROOT, MOODLE_ROOT and MOODLE_LAYOUT (see header). Returns 1 when the
 # plugin does not sit inside a Moodle tree.
 moodle_detect_layout() {
-    local candidate
+    local candidate cand_logical cand_real
     DIRROOT=""
     MOODLE_ROOT=""
     MOODLE_LAYOUT=""
     # The plugin is expected at <dirroot>/local/deepler: try the logical path
     # first (symlinked checkout inside a Moodle tree), then the physical one.
-    for candidate in "$SCRIPT_DIR/../.." "$SCRIPT_DIR_REAL/../.."; do
+    cand_logical="$(dirname "$(dirname "$SCRIPT_DIR")")"
+    cand_real="$(dirname "$(dirname "$SCRIPT_DIR_REAL")")"
+    for candidate in "$cand_logical" "$cand_real" "$SCRIPT_DIR/../.." "$SCRIPT_DIR_REAL/../.."; do
         if is_moodle_dirroot "$candidate"; then
             DIRROOT="$(cd "$candidate" && pwd)"
             break
