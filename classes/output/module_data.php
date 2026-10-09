@@ -93,9 +93,8 @@ class module_data extends translate_data implements renderable, templatable {
             'fields' => $fieldsrendered,
             'activitydesc' => $activitydesc,
             'link' => $this->module->getlink(),
-            'id' => Utils::makehtmlid($activitydesc),
-            'itempurpose' => $this->module->getpurpose(),
-            'icon' => $this->module->geticon(),
+            'id' => utils::makehtmlid($activitydesc),
+            'icon' => $this->module->geticon($output),
             'pluginname' => $this->module->getpluginname(),
             'visibilityclass' => 'local_deepler' . ($this->module->isvisible() ? 'visible' : 'invisible'),
         ];

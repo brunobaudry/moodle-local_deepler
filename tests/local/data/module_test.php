@@ -59,7 +59,7 @@ final class module_test extends advanced_testcase {
 
         $this->assertInstanceOf(module::class, $module);
         $this->assertEquals('Quiz', $module->getpluginname());
-        $this->assertEquals($this->cm->get_icon_url()->out(), $module->geticon());
+        $this->assertStringContainsString('activityiconcontainer', $module->geticon());
         $this->assertTrue($module->isvisible());
     }
 
@@ -136,20 +136,11 @@ final class module_test extends advanced_testcase {
         $this->resetAfterTest(true);
         $module = new module($this->cm);
 
-        $this->assertEquals($this->cm->get_icon_url()->out(), $module->geticon());
-    }
-
-    /**
-     * Test the getpurpose method.
-     *
-     * @covers \local_deepler\local\data\module::getpurpose
-     * @return void
-     */
-    public function test_getpurpose(): void {
-        $this->resetAfterTest(true);
-        $module = new module($this->cm);
-
-        $this->assertEquals(call_user_func('quiz_supports', FEATURE_MOD_PURPOSE), $module->getpurpose());
+        $iconhtml = $module->geticon();
+        $this->assertStringContainsString('activityiconcontainer', $iconhtml);
+        $this->assertStringContainsString('quiz', $iconhtml);
+        $this->assertStringContainsString('smaller', $iconhtml);
+        $this->assertStringContainsString('courseicon', $iconhtml);
     }
 
     /**

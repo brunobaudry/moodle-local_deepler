@@ -54,44 +54,40 @@ $secondary: $gray-400 !default;
 
 #page-local-deepler-translate {
     .local_deepler-bg-secondary-subtle {
-        background-color: rgba($info, 1) !important; /* stylelint-disable-line declaration-no-important */
-        border: 1px solid rgba($info, 1);
-        @supports (background-color: var(--mds-bg-feedback-info-default)) {
-            background-color: var(--mds-bg-feedback-info-default) !important; /* stylelint-disable-line declaration-no-important */
-            border: 1px solid var(--mds-bg-feedback-info-default);
-        }
+        background-color: var(--bs-secondary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, .2)));
+        border: 1px solid var(--bs-border-color, var(--mds-bg-feedback-info-default, rgba($info, 1)));
+        color: var(--bs-secondary-text-emphasis, $info);
     }
 
     .local_deepler-bg-primary-subtle {
-        background-color: rgba($info, .1) !important; /* stylelint-disable-line declaration-no-important */
-        border: 1px solid rgba($info, .1);
-        @supports (background-color: var(--mds-bg-feedback-info-default)) {
-            background-color: var(--mds-bg-feedback-info-default) !important; /* stylelint-disable-line declaration-no-important */
-            border: 1px solid var(--mds-bg-feedback-info-default);
-        }
+        background-color: var(--bs-primary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, 0.1)));
+        border: 1px solid var(--bs-border-color, var(--mds-bg-feedback-info-default, rgba($info, 0.1)));
+      color: var(--bs-primary-text-emphasis, $info);
     }
 
     .bg-primary-light {
-        background-color: rgba($info, 1);
-        @supports (background-color: var(--mds-bg-feedback-info-default)) {
-            background-color: var(--mds-bg-feedback-info-default);
-        }
+        background-color: var(--bs-primary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, 0.12)));
     }
 
-    .editing .activity-item {
-        cursor: default !important; /* stylelint-disable-line declaration-no-important */
-    }
-
+    .editing .activity-item,
     .editing .activity-item:hover {
-        cursor: default !important; /* stylelint-disable-line declaration-no-important */
+        cursor: default;
+    }
+
+    #collapseExample {
+        background-color: var(--bs-card-bg, var(--bs-tertiary-bg, #{$gray-100}));
+        border-color: var(--bs-border-color, #{$gray-300});
+        color: var(--bs-body-color, inherit);
     }
 
     #local_deepler-translate-header {
-        z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
+        z-index: 5;
+        background-color: var(--bs-tertiary-bg, var(--mds-bg-surface-default, #{$gray-100}));
+        border-color: var(--bs-border-color, #{$gray-300});
     }
 
-    nav {
-        z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
+    nav.fixed-top {
+        z-index: 1030;
     }
 
     #local_deepler__settings {
@@ -117,22 +113,17 @@ $secondary: $gray-400 !default;
 
     .local_deepler__source-text img,
     .local_deepler__translation img {
-        background-color: color.adjust($orange, $lightness: 30%) !important; /* stylelint-disable-line declaration-no-important */
-        @supports (background-color: var(--mds-activity-icon-communication-icon)) {
-            background-color: var(--mds-activity-icon-communication-icon);
-        }
+        background-color: var(--mds-activity-icon-communication-icon, color.adjust($orange, $lightness: 30%));
         font-style: italic;
     }
 
     img::before {
-        content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
+        content: 'pic:';
     }
 
     .local_deepler__form {
         padding: 0;
-        .d-none {
-            display: none !important; /* stylelint-disable-line declaration-no-important */
-        }
+
         .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
             display: none;
         }
@@ -156,46 +147,35 @@ $secondary: $gray-400 !default;
     }
 
     div[data-table^='question'] {
-        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
-        color: inherit;
-        @supports (background-color: var(--mds-bg-surface-default)) {
-            background-color: var(--mds-bg-surface-default) !important; /* stylelint-disable-line declaration-no-important */
-        }
-        @supports (color: var(--mds-text-default)) {
-            color: var(--mds-text-default);
-        }
+        background-color: var(--bs-body-bg, var(--mds-bg-surface-default, #{$white}));
+        color: var(--bs-body-color, var(--mds-text-default, inherit));
     }
 
     div[id^="question["].local_deepler__activity > :first-child {
-        color: $gray-900 !important; /* stylelint-disable-line declaration-no-important */
-        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
-        @supports (color: var(--mds-text-default)) {
-            color: var(--mds-text-default) !important; /* stylelint-disable-line declaration-no-important */
-        }
-        @supports (background-color: var(--mds-bg-surface-default)) {
-            background-color: var(--mds-bg-surface-default) !important; /* stylelint-disable-line declaration-no-important */
-        }
+        color: var(--bs-body-color, var(--mds-text-default, #{$gray-900}));
+        background-color: var(--bs-body-bg, var(--mds-bg-surface-default, #{$white}));
         margin-bottom: 1rem;
     }
 
     .local_deepler__level0 {
         padding-left: 15px;
     }
+
     .local_deepler__level1 {
         padding-left: 30px;
     }
+
     .local_deepler__level2 {
         padding-left: 45px;
     }
+
     .local_deepler__level3 {
         padding-left: 60px;
     }
+
     .local_deepler__activitydesc,
     .local_deepler__activityfield {
-        color: $gray-600;
-        @supports (color: var(--mds-text-muted)) {
-            color: var(--mds-text-muted);
-        }
+        color: var(--bs-secondary-color, var(--mds-text-muted, #{$gray-600}));
         position: relative;
     }
 
@@ -212,10 +192,10 @@ $secondary: $gray-400 !default;
     }
 
     .local_deepler__translation {
-
         iframe {
             max-width: 100%; /* responsive iframes */
         }
+
         [data-action="local_deepler/editor"],
         [data-fieldtype="editor"] {
             width: 100%; /* editor tweaks */
@@ -232,50 +212,29 @@ $secondary: $gray-400 !default;
         }
 
         .col-form-label {
-            display: none !important; /* stylelint-disable-line declaration-no-important */
+            display: none;
         }
 
         [contenteditable="true"] {
-            background-color: $white;
-            color: inherit;
-            border-color: $gray-300;
-            @supports (background-color: var(--mds-bg-surface-default)) {
-                background-color: var(--mds-bg-surface-default);
-            }
-            @supports (color: var(--mds-text-default)) {
-                color: var(--mds-text-default);
-            }
-            @supports (border-color: var(--mds-border-default)) {
-                border-color: var(--mds-border-default);
-            }
+            background-color: var(--bs-body-bg, var(--mds-bg-surface-default, #{$white}));
+            color: var(--bs-body-color, var(--mds-text-default, inherit));
+            border-color: var(--bs-border-color, var(--mds-border-default, #{$gray-300}));
         }
     }
 
     .local_deepler__error {
-        border: 2px solid $red; /* ui notices */
-        @supports (border-color: var(--mds-border-feedback-danger)) {
-            border-color: var(--mds-border-feedback-danger);
-        }
+        border: 2px solid var(--bs-danger, var(--mds-border-feedback-danger, #{$red})); /* ui notices */
         border-radius: 6px;
     }
 
     .local_deepler__success {
-        border: 2px solid $green;
-        @supports (border-color: var(--mds-border-feedback-success)) {
-            border-color: var(--mds-border-feedback-success);
-        }
+        border: 2px solid var(--bs-success, var(--mds-border-feedback-success, #{$green}));
         border-radius: 6px;
     }
 
     [data-status="local_deepler/success-message"] {
-        background: $teal;
-        color: $white;
-        @supports (background: var(--mds-bg-feedback-success-default)) {
-            background: var(--mds-bg-feedback-success-default);
-        }
-        @supports (color: var(--mds-text-feedback-success)) {
-            color: var(--mds-text-feedback-success);
-        }
+        background: var(--bs-teal, var(--mds-bg-feedback-success-default, #{$teal}));
+        color: var(--mds-text-feedback-success, #{$white});
         font-size: 0.6rem;
         text-transform: uppercase;
         padding: 0.25rem 1rem;
@@ -288,204 +247,36 @@ $secondary: $gray-400 !default;
 
     [data-status="local_deepler/wait"] i::before {
         content: '\f141'; /* 3 dots ellipse */
-        color: $gray-400;
-        @supports (color: var(--mds-text-feedback-secondary)) {
-            color: var(--mds-text-feedback-secondary);
-        }
+        color: var(--bs-secondary-color, var(--mds-text-feedback-secondary, #{$gray-400}));
     }
 
     [data-status="local_deepler/totranslate"] i::before {
         content: '\f251'; /* Send icon */
-        color: $blue;
-        @supports (color: var(--mds-text-feedback-info)) {
-            color: var(--mds-text-feedback-info);
-        }
+        color: var(--bs-primary, var(--mds-text-feedback-info, #{$blue}));
     }
 
     [data-status="local_deepler/tosave"] i::before {
         content: '\f0c7'; /* floppy (save) icon */
-        color: $blue;
-        @supports (color: var(--mds-text-feedback-info)) {
-            color: var(--mds-text-feedback-info);
-        }
+        color: var(--bs-primary, var(--mds-text-feedback-info, #{$blue}));
     }
 
     [data-status="local_deepler/success"] i::before {
         content: '\f00c'; /* check icon */
-        color: $green;
-        @supports (color: var(--mds-text-feedback-success)) {
-            color: var(--mds-text-feedback-success);
-        }
+        color: var(--bs-success, var(--mds-text-feedback-success, #{$green}));
     }
 
     [data-status="local_deepler/saved"] i::before {
         content: '\f1c0'; /* database icon */
-        color: $green;
-        @supports (color: var(--mds-text-feedback-success)) {
-            color: var(--mds-text-feedback-success);
-        }
+        color: var(--bs-success, var(--mds-text-feedback-success, #{$green}));
     }
 
     [data-status="local_deepler/failed"] i::before {
         content: '\f071'; /* exclamation triangle icon */
-        color: $red;
-        @supports (color: var(--mds-text-feedback-danger)) {
-            color: var(--mds-text-feedback-danger);
-        }
+        color: var(--bs-danger, var(--mds-text-feedback-danger, #{$red}));
     }
 
     [data-status="local_deepler/error"] i::before {
         content: '\f1e2'; /* bomb icon */
-        color: $red;
-        @supports (color: var(--mds-text-feedback-danger)) {
-            color: var(--mds-text-feedback-danger);
-        }
-    }
-}
-
-/* Boost Dark Mode compatibility */
-[data-bs-theme="dark"] {
-    #page-local-deepler-translate {
-        .local_deepler-bg-secondary-subtle {
-            background-color: rgba(110, 168, 254, 0.15) !important; /* stylelint-disable-line declaration-no-important */
-            border: 1px solid rgba(110, 168, 254, 0.3);
-            @supports (background-color: rgba(var(--bs-primary-rgb, 110, 168, 254), 0.15)) {
-                background-color: rgba(var(--bs-primary-rgb, 110, 168, 254), 0.15) !important; /* stylelint-disable-line declaration-no-important */
-                border: 1px solid rgba(var(--bs-primary-rgb, 110, 168, 254), 0.3);
-            }
-        }
-
-        .local_deepler-bg-primary-subtle {
-            background-color: rgba(108, 117, 125, 0.15) !important; /* stylelint-disable-line declaration-no-important */
-            border: 1px solid rgba(108, 117, 125, 0.3);
-            @supports (background-color: rgba(var(--bs-secondary-rgb, 108, 117, 125), 0.15)) {
-                background-color: rgba(var(--bs-secondary-rgb, 108, 117, 125), 0.15) !important; /* stylelint-disable-line declaration-no-important */
-                border: 1px solid rgba(var(--bs-secondary-rgb, 108, 117, 125), 0.3);
-            }
-        }
-
-        .bg-primary-light {
-            background-color: rgba(110, 168, 254, 0.12) !important; /* stylelint-disable-line declaration-no-important */
-            @supports (background-color: rgba(var(--bs-primary-rgb, 110, 168, 254), 0.12)) {
-                background-color: rgba(var(--bs-primary-rgb, 110, 168, 254), 0.12) !important; /* stylelint-disable-line declaration-no-important */
-            }
-        }
-
-        #collapseExample {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-            @supports (background-color: var(--bs-card-bg, #2b3035)) {
-                background-color: var(--bs-card-bg, #2b3035);
-                border-color: var(--bs-border-color, #495057);
-                color: var(--bs-body-color, #dee2e6);
-            }
-        }
-
-        #local_deepler-translate-header {
-            background-color: #212529 !important; /* stylelint-disable-line declaration-no-important */
-            border-color: #495057;
-            @supports (background-color: var(--bs-tertiary-bg, #212529)) {
-                background-color: var(--bs-tertiary-bg, #212529) !important; /* stylelint-disable-line declaration-no-important */
-                border-color: var(--bs-border-color, #495057);
-            }
-        }
-
-        .local_deepler__source-text img,
-        .local_deepler__translation img {
-            background-color: rgba($orange, 0.25) !important; /* stylelint-disable-line declaration-no-important */
-        }
-
-        div[data-table^='question'] {
-            background-color: #1d2125 !important; /* stylelint-disable-line declaration-no-important */
-            color: #dee2e6 !important; /* stylelint-disable-line declaration-no-important */
-            @supports (background-color: var(--bs-body-bg, #1d2125)) {
-                background-color: var(--bs-body-bg, #1d2125) !important; /* stylelint-disable-line declaration-no-important */
-                color: var(--bs-body-color, #dee2e6) !important; /* stylelint-disable-line declaration-no-important */
-            }
-        }
-
-        div[id^="question["].local_deepler__activity > :first-child {
-            color: #dee2e6 !important; /* stylelint-disable-line declaration-no-important */
-            background-color: #1d2125 !important; /* stylelint-disable-line declaration-no-important */
-            @supports (color: var(--bs-body-color, #dee2e6)) {
-                color: var(--bs-body-color, #dee2e6) !important; /* stylelint-disable-line declaration-no-important */
-                background-color: var(--bs-body-bg, #1d2125) !important; /* stylelint-disable-line declaration-no-important */
-            }
-        }
-
-        .local_deepler__activitydesc,
-        .local_deepler__activityfield {
-            color: #adb5bd;
-            @supports (color: var(--bs-secondary-color, #adb5bd)) {
-                color: var(--bs-secondary-color, #adb5bd);
-            }
-        }
-
-        .local_deepler__translation {
-            [contenteditable="true"] {
-                background-color: #1d2125;
-                color: #dee2e6;
-                border-color: #495057;
-                @supports (background-color: var(--bs-body-bg, #1d2125)) {
-                    background-color: var(--bs-body-bg, #1d2125);
-                    color: var(--bs-body-color, #dee2e6);
-                    border-color: var(--bs-border-color, #495057);
-                }
-            }
-        }
-
-        .local_deepler__error {
-            border-color: #ea868f;
-            @supports (border-color: var(--bs-danger, #ea868f)) {
-                border-color: var(--bs-danger, #ea868f);
-            }
-        }
-
-        .local_deepler__success {
-            border-color: #75b798;
-            @supports (border-color: var(--bs-success, #75b798)) {
-                border-color: var(--bs-success, #75b798);
-            }
-        }
-
-        [data-status="local_deepler/success-message"] {
-            background: #20c997;
-            color: #000;
-            @supports (background: var(--bs-teal, #20c997)) {
-                background: var(--bs-teal, #20c997);
-            }
-        }
-
-        [data-status="local_deepler/wait"] i::before {
-            color: #8f959e;
-            @supports (color: var(--bs-gray-500, #8f959e)) {
-                color: var(--bs-gray-500, #8f959e);
-            }
-        }
-
-        [data-status="local_deepler/totranslate"] i::before,
-        [data-status="local_deepler/tosave"] i::before {
-            color: #6ea8fe;
-            @supports (color: var(--bs-primary, #6ea8fe)) {
-                color: var(--bs-primary, #6ea8fe);
-            }
-        }
-
-        [data-status="local_deepler/success"] i::before,
-        [data-status="local_deepler/saved"] i::before {
-            color: #75b798;
-            @supports (color: var(--bs-success, #75b798)) {
-                color: var(--bs-success, #75b798);
-            }
-        }
-
-        [data-status="local_deepler/failed"] i::before,
-        [data-status="local_deepler/error"] i::before {
-            color: #ea868f;
-            @supports (color: var(--bs-danger, #ea868f)) {
-                color: var(--bs-danger, #ea868f);
-            }
-        }
+        color: var(--bs-danger, var(--mds-text-feedback-danger, #{$red}));
     }
 }

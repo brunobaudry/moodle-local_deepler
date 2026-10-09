@@ -23,28 +23,18 @@
  */
 
 namespace local_deepler\local\data\interfaces;
+
+use renderer_base;
+
 /**
  * Interface iconic_interface
  */
 interface iconic_interface {
     /**
-     * Get the icon to be displayed.
+     * Get the icon HTML to be displayed.
      *
+     * @param renderer_base|null $output
      * @return string
      */
-    public function geticon(): string;
-
-    /**
-     * Get the purpose of the object.
-     *
-     * @return string
-     */
-    public function getpurpose(): string;
-
-    /**
-     * Get the plugin name.
-     *
-     * @return string
-     */
-    public function getpluginname(): string;
+    public function geticon(?renderer_base $output = null): string;
 }

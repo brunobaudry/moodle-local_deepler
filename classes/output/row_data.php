@@ -70,7 +70,7 @@ class row_data extends translate_data implements renderable, templatable {
         $key = $this->field->getkey();
         $keyid = $this->field->getkeyid();
         $iseditable = $this->field->iseditable();
-        $cssclass = $iseditable ? '' : 'bg-light border-bottom border-secondary rounded-bottom mt-2';
+        $cssclass = $iseditable ? '' : 'alert alert-info text-muted';
 
         $tneeded = $this->field->get_status()->istranslationneeded();
         $status = $tneeded ? 'needsupdate' : 'updated';

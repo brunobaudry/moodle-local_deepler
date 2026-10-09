@@ -85,13 +85,12 @@ class child_data extends translate_data implements renderable, templatable {
             }
         }
         return [
-            'hasicon' => true,
+            'hasicon' => $isiconic,
             'level' => '5',
             'hasheader' => $isiconic && $iseditable,
-            'id' => Utils::makehtmlid($activitydesc),
+            'id' => utils::makehtmlid($activitydesc),
             'link' => $iseditable ? $this->child->getlink() : '',
-            'itempurpose' => $isiconic ? $this->child->getpurpose() : '',
-            'icon' => $isiconic ? $this->child->geticon() : '',
+            'icon' => $isiconic ? $this->child->geticon($output) : '',
             'pluginname' => $isiconic && $istranslatable ? $this->child->getpluginname() : '',
             'activitydesc' => $activitydesc,
             'childs' => $childs,
