@@ -21,6 +21,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
 @use "sass:color";
 $white: #fff !default;
 $gray-100: #f8f9fa !default;
@@ -52,62 +53,77 @@ $danger: $red !default;
 $secondary: $gray-400 !default;
 
 #page-local-deepler-translate {
-
-  .local_deepler-bg-secondary-subtle {
-    background-color: rgba($primary, .12) !important;/* stylelint-disable-line declaration-no-important */
-    border: 1px solid rgba($primary, .19);
-  }
-
-  .local_deepler-bg-primary-subtle {
-    background-color: rgba($secondary, .12) !important;/* stylelint-disable-line declaration-no-important */
-    border: 1px solid rgba($secondary, .19);
-  }
-
-  .editing .activity-item {
-        cursor: default !important; /* stylelint-disable-line declaration-no-important */
+    .local_deepler-bg-secondary-subtle {
+        background-color: var(--bs-secondary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, .2)));
+        border: 1px solid var(--bs-border-color, var(--mds-bg-feedback-info-default, rgba($info, 1)));
+        color: var(--bs-secondary-text-emphasis, $info);
     }
+
+    .local_deepler-bg-primary-subtle {
+        background-color: var(--bs-primary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, 0.1)));
+        border: 1px solid var(--bs-border-color, var(--mds-bg-feedback-info-default, rgba($info, 0.1)));
+        color: var(--bs-primary-text-emphasis, $info);
+    }
+
+    .bg-primary-light {
+        background-color: var(--bs-primary-bg-subtle, var(--mds-bg-feedback-info-default, rgba($info, 0.12)));
+    }
+
+    .editing .activity-item,
     .editing .activity-item:hover {
-        cursor: default !important; /* stylelint-disable-line declaration-no-important */
-    }
-    #local_deepler-translate-header {
-        z-index: 100 !important; /* stylelint-disable-line declaration-no-important */
+        cursor: default;
     }
 
-    nav {
-        z-index: 1000 !important; /* stylelint-disable-line declaration-no-important */
+    #collapseExample {
+        background-color: var(--bs-card-bg, var(--bs-tertiary-bg, #{$gray-100}));
+        border-color: var(--bs-border-color, #{$gray-300});
+        color: var(--bs-body-color, inherit);
     }
+
+    #local_deepler-translate-header {
+        z-index: 5;
+        background-color: var(--bs-tertiary-bg, var(--mds-bg-surface-default, #{$gray-100}));
+        border-color: var(--bs-border-color, #{$gray-300});
+    }
+
+    nav.fixed-top {
+        z-index: 1030;
+    }
+
     #local_deepler__settings {
         position: relative;
         top: -4px;
     }
+
     .caret-icons .fa-caret-down {
         display: none;
     }
+
     .caret-icons .fa-caret-right {
         display: inline;
     }
+
     a[aria-expanded="true"] .fa-caret-down {
         display: inline;
     }
+
     a[aria-expanded="true"] .fa-caret-right {
         display: none;
     }
 
     .local_deepler__source-text img,
     .local_deepler__translation img {
-        background-color: color.adjust($orange, $lightness: 30%) !important; /* stylelint-disable-line declaration-no-important */
+        background-color: var(--mds-activity-icon-communication-icon, color.adjust($orange, $lightness: 30%));
         font-style: italic;
     }
 
     img::before {
-        content: 'pic:' !important; /* stylelint-disable-line declaration-no-important */
+        content: 'pic:';
     }
 
     .local_deepler__form {
         padding: 0;
-        .d-none {
-            display: none !important; /* stylelint-disable-line declaration-no-important */
-        }
+
         .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
             display: none;
         }
@@ -131,30 +147,35 @@ $secondary: $gray-400 !default;
     }
 
     div[data-table^='question'] {
-        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
+        background-color: var(--bs-body-bg, var(--mds-bg-surface-default, #{$white}));
+        color: var(--bs-body-color, var(--mds-text-default, inherit));
     }
 
     div[id^="question["].local_deepler__activity > :first-child {
-        color: $gray-900 !important; /* stylelint-disable-line declaration-no-important */
-        background-color: $white !important; /* stylelint-disable-line declaration-no-important */
+        color: var(--bs-body-color, var(--mds-text-default, #{$gray-900}));
+        background-color: var(--bs-body-bg, var(--mds-bg-surface-default, #{$white}));
         margin-bottom: 1rem;
     }
 
     .local_deepler__level0 {
         padding-left: 15px;
     }
+
     .local_deepler__level1 {
         padding-left: 30px;
     }
+
     .local_deepler__level2 {
         padding-left: 45px;
     }
+
     .local_deepler__level3 {
         padding-left: 60px;
     }
+
     .local_deepler__activitydesc,
     .local_deepler__activityfield {
-        color: $gray-600;
+        color: var(--bs-secondary-color, var(--mds-text-muted, #{$gray-600}));
         position: relative;
     }
 
@@ -171,10 +192,10 @@ $secondary: $gray-400 !default;
     }
 
     .local_deepler__translation {
-
         iframe {
             max-width: 100%; /* responsive iframes */
         }
+
         [data-action="local_deepler/editor"],
         [data-fieldtype="editor"] {
             width: 100%; /* editor tweaks */
@@ -191,22 +212,29 @@ $secondary: $gray-400 !default;
         }
 
         .col-form-label {
-            display: none !important; /* stylelint-disable-line declaration-no-important */
+            display: none;
+        }
+
+        [contenteditable="true"] {
+            background-color: var(--bs-body-bg, var(--mds-bg-surface-default, #{$white}));
+            color: var(--bs-body-color, var(--mds-text-default, inherit));
+            border-color: var(--bs-border-color, var(--mds-border-default, #{$gray-300}));
         }
     }
 
     .local_deepler__error {
-        border: 2px solid $red; /* ui notices */
+        border: 2px solid var(--bs-danger, var(--mds-border-feedback-danger, #{$red})); /* ui notices */
         border-radius: 6px;
     }
 
     .local_deepler__success {
-        border: 2px solid $green;
+        border: 2px solid var(--bs-success, var(--mds-border-feedback-success, #{$green}));
         border-radius: 6px;
     }
 
     [data-status="local_deepler/success-message"] {
-        background: $teal;
+        background: var(--bs-teal, var(--mds-bg-feedback-success-default, #{$teal}));
+        color: var(--mds-text-feedback-success, #{$white});
         font-size: 0.6rem;
         text-transform: uppercase;
         padding: 0.25rem 1rem;
@@ -219,36 +247,36 @@ $secondary: $gray-400 !default;
 
     [data-status="local_deepler/wait"] i::before {
         content: '\f141'; /* 3 dots ellipse */
-        color: $gray-400;
+        color: var(--bs-secondary-color, var(--mds-text-feedback-secondary, #{$gray-400}));
     }
 
     [data-status="local_deepler/totranslate"] i::before {
         content: '\f251'; /* Send icon */
-        color: $blue;
+        color: var(--bs-primary, var(--mds-text-feedback-info, #{$blue}));
     }
 
     [data-status="local_deepler/tosave"] i::before {
         content: '\f0c7'; /* floppy (save) icon */
-        color: $blue;
+        color: var(--bs-primary, var(--mds-text-feedback-info, #{$blue}));
     }
 
     [data-status="local_deepler/success"] i::before {
         content: '\f00c'; /* check icon */
-        color: $green;
+        color: var(--bs-success, var(--mds-text-feedback-success, #{$green}));
     }
 
     [data-status="local_deepler/saved"] i::before {
         content: '\f1c0'; /* database icon */
-        color: $green;
+        color: var(--bs-success, var(--mds-text-feedback-success, #{$green}));
     }
 
     [data-status="local_deepler/failed"] i::before {
         content: '\f071'; /* exclamation triangle icon */
-        color: $red;
+        color: var(--bs-danger, var(--mds-text-feedback-danger, #{$red}));
     }
 
     [data-status="local_deepler/error"] i::before {
         content: '\f1e2'; /* bomb icon */
-        color: $red;
+        color: var(--bs-danger, var(--mds-text-feedback-danger, #{$red}));
     }
 }

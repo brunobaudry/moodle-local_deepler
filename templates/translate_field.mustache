@@ -123,12 +123,12 @@
     {{^iseditable}}title="{{#str}}fieldnottranslatable, local_deepler{{/str}}"{{/iseditable}}
 >
 <!--    col1 -->
-    <div class="col-1 px-0 local_deepler__selectorbox">
+    <div class="col-1 px-2 local_deepler__selectorbox">
         <small class="local_deepler__activityfield lh-sm">{{fieldtranslation}}</small><br>
         {{#iseditable}}
             <span id="previousTranslationStatus"
                   title="{{titlestring}}"
-                  class="badge badge-pill {{buttonclass}}">&nbsp;&nbsp;</span>
+                  class="badge badge-pill rounded-pill {{buttonclass}}">&nbsp;&nbsp;</span>
             <input title="{{titlestring}}"
                    type="checkbox"
                    data-key="{{key}}"
@@ -139,7 +139,7 @@
 
     </div>
 <!--    col2 -->
-    <div class="col-5 px-0 pr-5 local_deepler__source-text"
+    <div class="col-5 px-0 pe-5 pr-5 local_deepler__source-text"
          data-key="{{key}}">
         {{#iseditable}}
         <span title="{{multilangtitlestring}}"
@@ -147,11 +147,12 @@
               aria-controls="{{keyid}}"
               aria-pressed="false"
               data-toggle="button"
+              data-bs-toggle="button"
               role="button"
               class="mx-1 p-2 btn btn-sm btn-outline-{{badgeclass}} {{multilangdisabled}}">
                     <i class="fa fa-language" aria-hidden="true"></i>
         </span>
-        <select class="custom-select w-auto"
+        <select class="form-select custom-select w-auto d-inline-block"
                 title="{{selecttitle}}"
                 data-key="{{key}}"
                 data-action="local_deepler/sourceselect">
@@ -162,7 +163,7 @@
     {{/iseditable}}
 
         {{#warnmaxlength}}
-            <span class="p-2 text-sm-right">
+            <span class="p-2 text-sm-end text-sm-right">
                 <i class="fa fa-warning text-{{warntextcolor}}" aria-hidden="true"></i>&nbsp;
                 {{#str}}fieldmaxlengtha,local_deepler, {{totalchar}}{{/str}}&nbsp;
                 {{#str}}fieldmaxlengthb,local_deepler, {{maxlength}}{{/str}}

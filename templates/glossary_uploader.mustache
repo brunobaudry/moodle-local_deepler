@@ -64,7 +64,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <input type="hidden" name="uploadinglossary" value="true" class="form-control">
         <input type="hidden" name="sesskey" value="{{sesskey}}" class="form-control">
         <input type="hidden" name="redirect" value="{{redirect}}" class="form-control">
-        <div class="form-row">
+        <div class="row g-2 form-row">
             <div class="col">
                 <input type="file"
                        id="local_deepler/fileElem"
@@ -72,7 +72,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                        accept="{{fileaccept}}"
                        class="form-control"
                        required>
-                <small class="form-text text-muted">
+                <small class="form-text text-muted text-body-secondary">
                     {{#str}} glossary:upload:file:supported, local_deepler {{/str}}
                 </small>
 
@@ -81,7 +81,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 <span class="form-control-plaintext invisible" id="local_deepler/filename-display" ><i class="fas fa-check text-success"></i></span>
             </div>
         </div>
-        <div class="form-row p-2">
+        <div class="row g-2 form-row p-2">
             <button class="btn btn-primary invisible" id="local_deepler/createglossary">{{glossaryuploadbtn}}</button>
         </div>
     </form>
@@ -93,7 +93,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="helpModalLabel">{{glossaryhelpmodaltitle}}</h5>
-                <button type="button" class="btn btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">&times;</button>
+                <button type="button" class="btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">

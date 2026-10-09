@@ -102,4 +102,32 @@ final class quiz_test extends advanced_testcase {
         $childs = $quizinstance->getchilds();
         $this->assertCount(1, $childs);
     }
+
+    /**
+     * Test the geticon method on question childs.
+     *
+     * @return void
+     * @covers \local_deepler\local\data\subs\questions\qbase::geticon
+     */
+    public function test_question_child_geticon(): void {
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category();
+        $question = $questiongenerator->create_question('truefalse', null, ['category' => $cat->id]);
+        quiz_add_quiz_question($question->id, $quiz, 0);
+
+        $courseinfo = get_fast_modinfo($course);
+        $quizinstance = new quiz($courseinfo->get_cm($quiz->cmid));
+        $childs = $quizinstance->getchilds();
+        $this->assertNotEmpty($childs);
+        $qchild = $childs[0];
+        $iconhtml = $qchild->geticon();
+        $this->assertNotEmpty($iconhtml);
+        $this->assertStringContainsString('qtype_truefalse', $iconhtml);
+    }
 }

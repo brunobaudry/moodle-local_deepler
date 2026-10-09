@@ -1,10 +1,7 @@
 name: Moodle Plugin CI
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+    branches: [ dev ]
 jobs:
   testMaria:
     runs-on: ubuntu-latest
@@ -23,6 +20,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - php: 8.4
+            moodle-branch: MOODLE_503_STABLE
+            database: mariadb
+            mariadb_version: 	11.4
+          - php: 8.3
+            moodle-branch: MOODLE_503_STABLE
+            database: mariadb
+            mariadb_version: 	11.4
           - php: 8.4
             moodle-branch: MOODLE_502_STABLE
             database: mariadb
@@ -172,6 +177,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - php: 8.4
+            moodle-branch: MOODLE_503_STABLE
+            database: pgsql
+            postgres_version: 17
+          - php: 8.3
+            moodle-branch: MOODLE_503_STABLE
+            database: pgsql
+            postgres_version: 17
           - php: 8.4
             moodle-branch: MOODLE_502_STABLE
             database: pgsql

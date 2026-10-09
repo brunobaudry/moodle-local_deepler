@@ -24,6 +24,7 @@ use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use moodle_url;
 use question_definition;
+use renderer_base;
 
 /**
  * Base class for question types.
@@ -47,8 +48,6 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
     protected int $cmid;
     /** @var moodle_url */
     private moodle_url $link;
-    /** @var moodle_url */
-    private moodle_url $iconurl;
     /** @var string|lang_string */
     private string|lang_string $pluginname;
     /** @var array
@@ -61,7 +60,7 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
      * @throws \core\exception\moodle_exception
      */
     public function __construct(array $params) {
-        global $DB, $OUTPUT;
+        global $DB;
 
         $this->question = $params['question'];
         $this->cmid = $params['cmid'];
@@ -72,7 +71,6 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
         );
         $this->dbmanager = $DB->get_manager(); // Get the database manager.
         $this->qtype = $this->question->qtype->plugin_name(); // Get the question type.
-        $this->iconurl = $OUTPUT->image_url('icon', $this->qtype);
         $this->pluginname = $this->question->qtype->local_name();
         $this->qidcolname = $this->question->qtype->questionid_column_name();
     }
@@ -135,10 +133,11 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
     /**
      * Get the icon.
      *
+     * @param renderer_base|null $output
      * @return string
      */
-    public function geticon(): string {
-        return $this->iconurl;
+    public function geticon(?renderer_base $output = null): string {
+        return print_question_icon($this->question);
     }
 
     /**
@@ -148,15 +147,6 @@ abstract class qbase implements editable_interface, iconic_interface, translatab
      */
     public function getpluginname(): string {
         return $this->pluginname;
-    }
-
-    /**
-     * Get the purpose.
-     *
-     * @return string
-     */
-    public function getpurpose(): string {
-        return '';
     }
 
     /**

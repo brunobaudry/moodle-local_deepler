@@ -23,6 +23,7 @@ use local_deepler\local\data\interfaces\iconic_interface;
 use local_deepler\local\data\interfaces\translatable_interface;
 use local_deepler\local\data\interfaces\visibility_interface;
 use moodle_url;
+use renderer_base;
 
 /**
  * Class module wraps a cm_info object and provides a way to access its fields.
@@ -43,26 +44,10 @@ class module implements editable_interface, iconic_interface, translatable_inter
         $this->cm = $cminfo;
         $this->modname = $this->cm->modname;
 
-        $this->iconurl = $this->cm->get_icon_url();
         $this->pluginname = get_string('pluginname', $this->modname);
-        $this->purpose = '';
-
-        $this->makepurpose();
 
         $this->link = $this->buildlink();
         $this->fetchchilds();
-    }
-
-    /**
-     * Prepare the purpose of the module.
-     *
-     * @return void
-     */
-    private function makepurpose(): void {
-        $purpose = call_user_func($this->modname . '_supports', FEATURE_MOD_PURPOSE);
-        if ($purpose) {
-            $this->purpose = $purpose;
-        }
     }
 
     /**
@@ -177,19 +162,37 @@ class module implements editable_interface, iconic_interface, translatable_inter
     /**
      * Get the icon of the activity module.
      *
+     * @param renderer_base|null $output
      * @return string
      */
-    public function geticon(): string {
-        return $this->iconurl->out();
-    }
+    public function geticon(?renderer_base $output = null): string {
+        global $OUTPUT;
+        $output = $output ?? $OUTPUT;
 
-    /**
-     * Get the purpose of the module. Mainly used for CSS classes to color the icon.
-     *
-     * @return string
-     */
-    public function getpurpose(): string {
-        return $this->purpose;
+        // Moodle >= 5.0 provides core_course\output\activity_icon.
+        if (class_exists('\core_course\output\activity_icon')) {
+            $activityicon = \core_course\output\activity_icon::from_cm_info($this->cm)
+                ->set_extra_classes('smaller courseicon align-self-start me-2 mr-2');
+            return $output->render($activityicon);
+        }
+
+        // Fallback for Moodle 4.5.
+        $iconurl = $this->cm->get_icon_url();
+        $iconclass = 'activityicon icon' . ($iconurl->get_param('filtericon') ? '' : ' nofilter');
+        $isbranded = component_callback('mod_' . $this->modname, 'is_branded', [], false);
+        $purpose = plugin_supports('mod', $this->modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER);
+
+        $context = [
+            'icon' => $iconurl->out(false),
+            'iconclass' => $iconclass,
+            'purpose' => $purpose,
+            'branded' => $isbranded,
+            'pluginname' => (string) $this->pluginname,
+            'cmid' => $this->cm->id,
+            'showtooltip' => false,
+        ];
+
+        return $output->render_from_template('core_courseformat/local/content/cm/cmicon', $context);
     }
 
     /**
@@ -206,12 +209,8 @@ class module implements editable_interface, iconic_interface, translatable_inter
     private string $modname;
     /** @var \moodle_url */
     private moodle_url $link;
-    /** @var string|moodle_url */
-    private string|moodle_url $iconurl;
     /** @var string|lang_string */
     private string|lang_string $pluginname;
-    /** @var string */
-    private string $purpose;
     /** @var array */
     private array $childs;
 }

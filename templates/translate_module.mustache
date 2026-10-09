@@ -51,12 +51,14 @@
         "link": "https://test.org"
     }
 }}
-<div id='{{pluginname}}' class='activity-item local_deepler__activity py-2 {{visibilityclass}}'>
+<div id='{{pluginname}}' class='activity-item local_deepler__activity m-1 py-2 {{visibilityclass}}'>
     <small class="badge rounded-pill bg-secondary text-dark" data-action="local_deepler__hiddenfromstudents">
         <i class="fa fa-eye-slash" aria-hidden="true"></i>&nbsp;<small>{{#str}}hiddenfromstudents{{/str}}</small>
     </small>
     <span id='{{id}}' class='h{{level}} sectionname course-content-item d-flex align-self-stretch align-items-center mb-0 p-2'>
-        {{> local_deepler/activity_icon }}
+        {{#hasicon}}
+            {{{icon}}}
+        {{/hasicon}}
         {{activitydesc}}
         {{> local_deepler/translate_editbutton }}
     </span>
