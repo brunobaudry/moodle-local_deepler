@@ -449,8 +449,11 @@ $string['tour_advancedsettings23saveall'] =
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
+$string['translate:activity'] = 'Translate activity';
+$string['translate:course'] = 'Translate course';
 $string['translate:modal:body'] = 'It might take a little while, if you have a lot of content.';
 $string['translate:modal:title'] = 'Called DeepL';
+$string['translate:section'] = 'Translate section';
 $string['translatebutton'] = 'Translate &rarr; {$a}';
 $string['translateexplain'] = 'Translate all selected rows to {$a}';
 $string['translationdisabled'] = 'Translation is disabled because this is used as a link in database';

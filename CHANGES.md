@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.9.9]
 ### Added
 - Improved adherence to MDS 
+- Navigation deep links to translate specific course sections, activities, and resources
 
 ## [1.9.9.8]
 ### Added

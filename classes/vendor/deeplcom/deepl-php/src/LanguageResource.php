@@ -6,30 +6,28 @@
 
 namespace DeepL;
 
-use JsonException;
-
 /**
  * Information about a single DeepL resource and the features it supports, as
  * returned by {@see DeepLClient::getLanguageResources()}.
  */
 class LanguageResource
 {
-    /** Resource value: text translation. */
-    public const RESOURCE_TRANSLATE_TEXT = 'translate_text';
-    /** Resource value: document translation. */
-    public const RESOURCE_TRANSLATE_DOCUMENT = 'translate_document';
-    /** Resource value: glossary. */
-    public const RESOURCE_GLOSSARY = 'glossary';
-    /** Resource value: voice. */
-    public const RESOURCE_VOICE = 'voice';
-    /** Resource value: write (rephrase). */
-    public const RESOURCE_WRITE = 'write';
-    /** Resource value: style rules. */
-    public const RESOURCE_STYLE_RULES = 'style_rules';
-    /** Resource value: translation memory. */
-    public const RESOURCE_TRANSLATION_MEMORY = 'translation_memory';
+    /** @deprecated Use LanguageResourceName::TRANSLATE_TEXT instead. */
+    public const RESOURCE_TRANSLATE_TEXT = LanguageResourceName::TRANSLATE_TEXT;
+    /** @deprecated Use LanguageResourceName::TRANSLATE_DOCUMENT instead. */
+    public const RESOURCE_TRANSLATE_DOCUMENT = LanguageResourceName::TRANSLATE_DOCUMENT;
+    /** @deprecated Use LanguageResourceName::GLOSSARY instead. */
+    public const RESOURCE_GLOSSARY = LanguageResourceName::GLOSSARY;
+    /** @deprecated Use LanguageResourceName::VOICE instead. */
+    public const RESOURCE_VOICE = LanguageResourceName::VOICE;
+    /** @deprecated Use LanguageResourceName::WRITE instead. */
+    public const RESOURCE_WRITE = LanguageResourceName::WRITE;
+    /** @deprecated Use LanguageResourceName::STYLE_RULES instead. */
+    public const RESOURCE_STYLE_RULES = LanguageResourceName::STYLE_RULES;
+    /** @deprecated Use LanguageResourceName::TRANSLATION_MEMORY instead. */
+    public const RESOURCE_TRANSLATION_MEMORY = LanguageResourceName::TRANSLATION_MEMORY;
 
-    /** @var string Name of the resource, for example 'translate_text'. */
+    /** @var string Name of the resource, for example 'translate_text'; see {@see LanguageResourceName}. */
     public $resource;
 
     /** @var ResourceFeature[] Map of feature name to ResourceFeature describing each feature
@@ -52,32 +50,33 @@ class LanguageResource
         return isset($this->features[$feature]);
     }
 
+    /**
+     * @throws InvalidContentException If a required field is missing or has the wrong type.
+     */
     public static function fromJson(array $json): LanguageResource
     {
+        if (!is_string($json['name'] ?? null)) {
+            throw ParsingUtils::invalidContent('Expected a string name in each resource of the response');
+        }
         $features = [];
         if (isset($json['features']) && is_array($json['features'])) {
             foreach ($json['features'] as $value) {
-                $features[$value['name']] = ResourceFeature::fromJson($value);
+                if (!is_array($value)) {
+                    throw ParsingUtils::invalidContent("Expected objects in the features of resource {$json['name']}");
+                }
+                $feature = ResourceFeature::fromJson($value);
+                $features[$feature->name] = $feature;
             }
         }
         return new LanguageResource($json['name'], $features);
     }
 
     /**
-     * @throws InvalidContentException
+     * @return LanguageResource[]
+     * @throws InvalidContentException If the content is not a JSON list of valid resources.
      */
     public static function parseList(string $content): array
     {
-        try {
-            $decoded = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-
-        $result = [];
-        foreach ($decoded as $object) {
-            $result[] = self::fromJson($object);
-        }
-        return $result;
+        return array_map([self::class, 'fromJson'], ParsingUtils::decodeObjectList($content));
     }
 }

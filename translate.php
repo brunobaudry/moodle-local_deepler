@@ -81,7 +81,6 @@ $PAGE->set_course($course);
 $output = $PAGE->get_renderer('local_deepler');
 // Output header.
 echo $output->header();
-// Course name heading.
 
 // Normalize filter class, workaround to match MDL version from 401 to 501.
 if (!class_exists(LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {

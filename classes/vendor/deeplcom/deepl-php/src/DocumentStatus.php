@@ -6,19 +6,24 @@
 
 namespace DeepL;
 
-use JsonException;
-
 /**
  * Status of a document translation request.
  */
 class DocumentStatus
 {
     /**
-     * @var string The status code indicating the document translation status, one of:
+     * @var string|null ID of the document, or null if the response did not include it.
+     */
+    public $documentId;
+
+    /**
+     * @var string The status code indicating the document translation status, see DocumentStatusCode. One of:
      * * 'queued': Document translation has not yet started, but will begin soon.
      * * 'translating': Document translation is in progress.
      * * 'done': Document translation completed successfully, and the translated document may be downloaded.
      * * 'error': An error occurred during document translation.
+     * The API may add further values, so compare against the DocumentStatusCode constants instead of matching
+     * exhaustively.
      */
     public $status;
 
@@ -43,16 +48,18 @@ class DocumentStatus
      */
     public function __construct(string $content)
     {
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
+        $json = ParsingUtils::decodeJson($content);
 
-        $this->status = $json['status'];
-        $this->secondsRemaining = $json['seconds_remaining'] ?? null;
-        $this->billedCharacters = $json['billed_characters'] ?? null;
-        $this->errorMessage = $json['error_message'] ?? null;
+        ParsingUtils::guard(function () use ($json): void {
+            if (!is_string($json['status'])) {
+                throw ParsingUtils::invalidContent('Expected a status string in the response');
+            }
+            $this->status = $json['status'];
+            $this->documentId = is_string($json['document_id'] ?? null) ? $json['document_id'] : null;
+            $this->secondsRemaining = $json['seconds_remaining'] ?? null;
+            $this->billedCharacters = $json['billed_characters'] ?? null;
+            $this->errorMessage = $json['error_message'] ?? null;
+        });
     }
 
     /**
@@ -60,7 +67,7 @@ class DocumentStatus
      */
     public function done(): bool
     {
-        return $this->status === 'done';
+        return $this->status === DocumentStatusCode::DONE;
     }
 
     /**
@@ -69,6 +76,6 @@ class DocumentStatus
      */
     public function ok(): bool
     {
-        return $this->status !== 'error';
+        return $this->status !== DocumentStatusCode::ERROR;
     }
 }
