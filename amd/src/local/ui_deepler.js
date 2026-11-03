@@ -28,7 +28,6 @@ define(['core/log',
     './selectors',
     './translation',
     './utils',
-    './customevents',
     './scrollspy',
     './api',
     'core/notification',
@@ -40,7 +39,6 @@ define(['core/log',
     Selectors,
     Translation,
     Utils,
-    Events,
     ScrollSpy,
     Api,
     MoodleNotification,
@@ -137,21 +135,6 @@ const cachedSelectors = {
         document.addEventListener('change', handleChangeEvent);
         document.addEventListener('click', handleClickEvent);
         document.addEventListener('focusin', handleFocusEvent);
-
-        // Translation events.
-        Events.on(Translation.ON_ITEM_TRANSLATED, onItemTranslated);
-        Events.on(Translation.ON_TRANSLATION_FAILED, onTranslationFailed);
-        Events.on(Translation.ON_TRANSLATION_DONE, onTranslationDone);
-        Events.on(Translation.ON_REPHRASE_FAILED, onTranslationFailed);
-        Events.on(Translation.ON_DB_SAVE_SUCCESS, onDbSavedSuccess);
-        Events.on(Translation.ON_DB_FAILED, onDBFailed);
-        Events.on(Translation.ON_ITEM_SAVED, onSuccessMessageItem);
-        Events.on(Translation.ON_ITEM_NOT_SAVED, onErrorMessageItem);
-        Events.on(Api.GLOSSARY_DB_ALL_FAILED, onGlossaryDbAllfailed);
-        Events.on(Api.GLOSSARY_DB_FAILED, onGlossaryDbfailed);
-        Events.on(Api.GLOSSARY_DB_SUCCESS, onGlossaryDbSuccess);
-        Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);
-        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>Log.error(e));
     };
     const showEntriesModal = (ajaxResponse)=>{
         const glossaryid = ajaxResponse.glossaryid;
@@ -193,20 +176,6 @@ const cachedSelectors = {
                 removeOnClose: true,
             });
         }
-    };
-    const onGlossaryDbAllfailed = (obj)=> {
-        Log.info('onGlossaryDbAllfailed');
-        Log.error(obj);
-    };
-
-    const onGlossaryDbfailed = (obj)=> {
-        Log.info('onGlossaryDbfailed');
-        Log.error(obj);
-    };
-
-    const onGlossaryDbSuccess = (obj)=> {
-        Log.info('onGlossaryDbSuccess');
-        Log.info(obj);
     };
     const resizeEditors = ()=>{
 
@@ -403,9 +372,12 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             Log.info(settingsUI[Selectors.deepl.glossaryId].value);
             Api.getGlossariesEntries(
                 settingsUI[Selectors.deepl.glossaryId].value,
-                config.deeplsourcelang,
-                config.targetlang
-            );
+                config.version
+            ).then((response) => {
+                showEntriesModal(response);
+            }).catch((err) => {
+                Log.error('Error fetching glossary entries', err);
+            });
         }
     };
     /**
@@ -511,18 +483,16 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     /**
      * @returns void
      */
-    const saveTranslations = () => {
+    const saveTranslations = async() => {
         const selectedCheckboxes = domQueryAll(Selectors.statuses.checkedCheckBoxes);
         if (selectedCheckboxes.length === 0) {
             return;
         }
         // Prepare the UI for the save process.
         saveAllBtn.disabled = true;
-        launchModal({
+        await launchModal({
             title: langstrings.uistrings.saveallmodaltitle,
             body: langstrings.uistrings.saveallmodalbody,
-        }).then(r => Log.info('SaveAll Modal launched ' + r)).catch((reason)=>{
-            Log.error(reason);
         });
         // Prepare the data to be saved.
         const data = [];
@@ -535,17 +505,46 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 }
             }
         );
-        Translation.saveTranslations(data, config);
+        try {
+            const response = await Translation.saveTranslations(data, config);
+            if (saveAllModal !== null && saveAllModal.isVisible) {
+                saveAllModal.hide();
+            }
+            const errors = response.filter((item) => item.error !== '');
+            response.forEach((item) => {
+                if (item.error === '') {
+                    onSuccessMessageItem(item.keyid, item.text);
+                } else {
+                    onErrorMessageItem(item.keyid, item.error);
+                }
+            });
+            onDbSavedSuccess(errors);
+        } catch (error) {
+            if (saveAllModal !== null && saveAllModal.isVisible) {
+                saveAllModal.hide();
+            }
+            onDBFailed(error.message || error, '');
+        }
     };
     /**
      * Saving a single translation to DB.
      * @param {Event} e
      */
-    const saveSingleTranslation = (e)=> {
+    const saveSingleTranslation = async(e) => {
         const key = e.target.closest(Selectors.actions.validatorsBtns).dataset.keyValidator;
         if (getIconStatus(key) === Selectors.statuses.tosave) {
             hideErrorMessage(key);
-            Translation.saveTranslations([prepareDBitem(key)], config);
+            try {
+                const response = await Translation.saveTranslations([prepareDBitem(key)], config);
+                const item = response.find(r => r.keyid === key);
+                if (item && item.error !== '') {
+                    onErrorMessageItem(key, item.error);
+                } else if (item) {
+                    onSuccessMessageItem(key, item.text);
+                }
+            } catch (error) {
+                onErrorMessageItem(key, error.message || error);
+            }
         }
     };
     /**
@@ -652,24 +651,25 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
         let icon = domQuery(Selectors.actions.validatorBtn, key);
         if (!isBtn) {
-            if (!icon.classList.contains('disable')) {
-                icon.classList.add('disable');
+            if (!icon.classList.contains('disabled')) {
+                icon.classList.add('disabled');
             }
             if (icon.classList.contains('btn')) {
                 icon.classList.remove('btn');
-                icon.classList.remove('btn-outline-secondary');
+                icon.classList.remove('btn-success');
             }
         } else {
             if (!icon.classList.contains('btn')) {
                 icon.classList.add('btn');
-                icon.classList.add('btn-outline-secondary');
+                icon.classList.add('btn-success');
             }
-            if (icon.classList.contains('disable')) {
-                icon.classList.remove('disable');
+            if (icon.classList.contains('disabled')) {
+                icon.classList.remove('disabled');
             }
         }
         icon.setAttribute('role', isBtn ? 'button' : 'status');
         icon.setAttribute('data-status', status);
+
         icon.setAttribute('title', langstrings.statusstrings[status.replace('local_deepler/', '')]);
     };
     /**
@@ -718,11 +718,17 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     /**
      * Launch deepl services.
      */
-    const callDeeplServices = () => {
-        saveAllModal = launchModal(
+    const callDeeplServices = async() => {
+        const body = `
+        <div class="text-center p-3">
+            <span class="spinner-border" role="status" aria-hidden="true"></span>
+            <p class="mt-2">${langstrings.uistrings.translatemodalbody}...</p>
+        </div>
+    `;
+        await launchModal(
             {
                 title: langstrings.uistrings.translatemodaltitle,
-                body: langstrings.uistrings.translatemodalbody,
+                body: body,
             }
         );
         const keys = [];
@@ -743,7 +749,26 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             });
         const newCookiename = Utils.COOKIE_PREFIX_NEW + config.currentlang + config.targetlang + config.courseid;
         Utils.setEncodedCookie(newCookiename, JSON.stringify(cookie), config.cookieduration);
-        Translation.callTranslations(keys, config, settings);
+        try {
+            const results = await Translation.callTranslations(keys, config, settings);
+            if (results && results.length > 0) {
+                results.forEach((item) => {
+                    if (item.error === '') {
+                        onItemTranslated(item.key);
+                    } else {
+                        onErrorMessageItem(item.key, item.error);
+                    }
+                });
+            } else {
+                keys.forEach((key) => {
+                    onItemTranslated(key);
+                });
+            }
+        } catch (error) {
+            onTranslationFailed(error.message || error);
+        } finally {
+            onTranslationDone();
+        }
     };
     /**
      * Helper function for prepareSettingsAndCookieValues.

@@ -26,11 +26,68 @@
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
+require_once(__DIR__ . '/env_loader.php');
+
+use Behat\Behat\Tester\Exception\PendingException;
+use Behat\Gherkin\Node\PyStringNode;
+use Behat\Mink\Exception\ExpectationException;
 
 /**
  * Behat css finder helper code. Probably a duplicate but helped us understand extensions.
  */
 class behat_local_deepler extends behat_base {
+    /**
+     * Set DeepL API key in local_deepler configuration.
+     *
+     * @Given the DeepL API key is configured from environment
+     * @Given I set the DeepL api key from env
+     * @Given I set the DeepL api key to :value
+     * @param string $value
+     * @return void
+     */
+    public function i_set_the_deepl_api_key(string $value = '{{DEEPL_API_TOKEN}}'): void {
+        env_loader::load(__DIR__ . '/../../.env');
+        if (preg_match('/\{\{(\w+)\}\}/', $value, $matches)) {
+            $value = getenv($matches[1]) ?: '';
+        }
+        if (empty($value) && getenv('DEEPL_API_TOKEN')) {
+            $value = getenv('DEEPL_API_TOKEN');
+        }
+        if (!empty($value)) {
+            set_config('apikey', $value, 'local_deepler');
+        }
+    }
+
+    /**
+     * Checks that the specified checkbox is not checked.
+     *
+     * @Then the :checkbox checkbox should not be checked
+     * @Then the :checkbox checkbox is not checked
+     * @param string $checkbox The locator, label, id, or name of the checkbox
+     * @return void
+     */
+    public function the_checkbox_should_not_be_checked(string $checkbox): void {
+        $node = $this->find_field($checkbox);
+        if ($node->isChecked()) {
+            throw new ExpectationException("The '$checkbox' checkbox is checked", $this->getSession());
+        }
+    }
+
+    /**
+     * Checks that the specified checkbox is checked.
+     *
+     * @Then the :checkbox checkbox should be checked
+     * @Then the :checkbox checkbox is checked
+     * @param string $checkbox The locator, label, id, or name of the checkbox
+     * @return void
+     */
+    public function the_checkbox_should_be_checked(string $checkbox): void {
+        $node = $this->find_field($checkbox);
+        if (!$node->isChecked()) {
+            throw new ExpectationException("The '$checkbox' checkbox is not checked", $this->getSession());
+        }
+    }
+
     /**
      * Behat helper for css selector.
      *

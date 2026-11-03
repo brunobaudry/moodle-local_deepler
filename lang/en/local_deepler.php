@@ -68,8 +68,6 @@ $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['deeplapidoctitle'] = 'DeepL\'s API settings';
 $string['deeplapiexception'] = 'DeepL\'s API returned an error';
 $string['deepler:edittranslations'] = 'Edit course translations in DeepL Translator';
-$string['deeplprotitle'] = 'Use DeepL Pro?';
-$string['deeplprotitle_desc'] = 'If enabled use DeepL Pro else the free version of DeepL API.';
 $string['doselecttarget'] = 'Please select a target language.';
 $string['editbutton'] = 'Edit source in place';
 $string['errordbpartial'] = '{$a} of the fields NOT saved in the database. Check manually in place';
@@ -87,7 +85,6 @@ $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
 $string['glossary:actions'] = 'Actions';
 $string['glossary:deepl:link'] = 'DeepL API documentation';
-$string['glossary:deeplid'] = 'UUID';
 $string['glossary:delete:deeplissue:body'] = 'Could not delete the glossary: {$a}';
 $string['glossary:delete:deeplissue:title'] = 'DeepL issue';
 $string['glossary:delete:failed:body'] = 'Failed to delete the glossary: {$a}';
@@ -99,7 +96,6 @@ $string['glossary:delete:invalidsesskey:title'] = 'Invalid session key';
 $string['glossary:delete:success:body'] = '{$a} has been removed!';
 $string['glossary:delete:success:title'] = 'Deletion successful';
 $string['glossary:id'] = 'Glossary id';
-$string['glossary:id_placeholder'] = 'Glossary id should you have one...';
 $string['glossary:lastused'] = 'Last time it was used';
 $string['glossary:listempty'] =
         'There are no glossaries available with for language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
@@ -192,8 +188,6 @@ $string['glossary:upload:sourcenotsupported:body'] = '{$a} is not a supported so
 $string['glossary:upload:sourcenotsupported:title'] = 'DeepL: not supported source language';
 $string['glossary:upload:success:body'] = '{$a} has been uploaded!';
 $string['glossary:upload:success:title'] = 'Upload successful';
-$string['glossary:upload:suffixerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
-$string['glossary:upload:suffixerror:title'] = 'Incorrect suffix';
 $string['glossary:upload:targetnotsupported:body'] = '{$a} is not a supported target language';
 $string['glossary:upload:targetnotsupported:title'] = 'DeepL: not supported target language';
 $string['glossary:upload:unknownerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
@@ -207,7 +201,6 @@ $string['hideiframesadmin'] = 'Select this if you want rendering embed iframes b
 $string['hideiframesadmin_desc'] =
         'Sometimes iframes can overlap the user interface, or alter the browser\'s performances.';
 $string['ignoretags'] = 'Tags to ignore';
-$string['keepselected'] = 'Keep selected';
 $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
@@ -247,14 +240,13 @@ $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>
 <p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>
 <p>If you are impatient, and want to close this window,
-<br/>make sure all selected translation\'s statuses are <i class="fa fa-database" aria-hidden="true"></i></p>';
+<br/>make sure all selected translation\'s statuses are <i class="fa-solid fa-database" aria-hidden="true"></i></p>';
 $string['saveallmodaltitle'] = 'Saving translations to the database';
 $string['scannedfieldsize'] = 'Minimum textfield size';
 $string['scannedfieldsize_desc'] = 'Small text field are often limited in the database. The text content grows quite fast
  (plus the mlang tags) at each translation steps.
  After translation, if the text is too big, the DB will through an error. Size this here based on your main language properties and
  the number on languages your Moodle supports';
-$string['section:coursesettings'] = 'Course settings';
 $string['section:select:label'] = 'Select sections';
 $string['sectionall'] = 'ALL SECTIONS';
 $string['seesetting'] = 'Advanced settings';
@@ -280,13 +272,9 @@ $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quo
 $string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
 $string['tokenactions'] = 'Actions';
 $string['tokenadd'] = 'Add token map';
-$string['tokenaddtoken'] = 'Add Token';
 $string['tokenadminpagedescription'] =
         'Select a user attribute, give it a filter (you can use *,% or _ wildcards) and match that to a token.';
 $string['tokenattribute'] = 'User Attribute';
-$string['tokenchoose'] = 'Select an attribute';
-$string['tokendeletetoken'] = 'Delete Token';
-$string['tokenedittoken'] = 'Edit Token';
 $string['tokenerror_invaliduuid'] = 'Invalid token format';
 $string['tokenerror_noattribute'] = 'You must select an attribute to filter.';
 $string['tokenerror_nofilter'] = 'You must ad a value to filter.';
@@ -296,9 +284,7 @@ $string['tokengototokenmanager'] = 'Manage DeepL\'s tokens';
 $string['tokenmanager'] = 'DeepLer Token manager';
 $string['tokenmanager_desc'] =
         'Here you can map your DeepL api keys to user\'s attributes in order to create pools of translators. This can be useful should you need to measure and control consumption for each API key.';
-$string['tokennotokens'] = 'No tokens found.';
 $string['tokensettings'] = 'API Token Settings';
-$string['tokentabletitle'] = 'Token table';
 $string['tokentoken'] = 'Token';
 $string['tokentokenmanager_addnew'] = 'Add a new token filter';
 $string['tokentokenmanager_mappings'] = 'Token table';
@@ -416,14 +402,14 @@ $string['tour_advancedsettings18selection'] =
 $string['tour_advancedsettings18selectiontitle'] =
         'Selection checkbox';
 $string['tour_advancedsettings19editsource'] =
-        '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa fa-pencil"> </i>
+        '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa-solid fa-pencil"> </i>
 </span> Clicking on the pencil will jump to the editor in the Moodle course.</p>
 <p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.</p>';
 $string['tour_advancedsettings19editsourcetitle'] =
         'Edit source in place.';
 $string['tour_advancedsettings20togglemultilang'] =
         '<p>When translations {mlang} tags are present, this button appears.</p>
-<p><i class="fa fa-language"></i></p>
+<p><i class="fa-solid fa-language"></i></p>
 <p>Click on it to toggle the content and see what was already translated. If the current selected source language is found in the
 MLANG tags then this is displayed in red to alert you that the tag will be overriden.</p>';
 $string['tour_advancedsettings20togglemultilangtitle'] =
@@ -433,9 +419,9 @@ $string['tour_advancedsettings21secondsource'] =
 $string['tour_advancedsettings21secondsourcetitle'] =
         'Secondary source language.';
 $string['tour_advancedsettings22process'] =
-        '<p>When a text content is not selected and no translation was requested. <i class="fa fa-ellipsis-h"></i> is shown.</p>
-<p><i class="fa fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to DeepL.</p>
-<p><i class="fa fa-floppy-o"></i> will display after the text was fed back in the adjacent text editor.<br />
+        '<p>When a text content is not selected and no translation was requested. <i class="fa-solid fa-ellipsis-h"></i> is shown.</p>
+<p><i class="fa-solid fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to DeepL.</p>
+<p><i class="fa-solid fa-floppy-o"></i> will display after the text was fed back in the adjacent text editor.<br />
 You can review the translated content, make some changes then press the icon to actually save it in the database. <br /><br />
 <em>Note</em> that you can also save to the database in batch by clicking on the save all floating button below. <br />
 Should you want to save all tranlsated text but leave some to review later, you can uncheck it on the left so that it will be skiped when saving all.</p>
@@ -449,11 +435,8 @@ $string['tour_advancedsettings23saveall'] =
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
-$string['translate:activity'] = 'Translate activity';
-$string['translate:course'] = 'Translate course';
 $string['translate:modal:body'] = 'It might take a little while, if you have a lot of content.';
 $string['translate:modal:title'] = 'Called DeepL';
-$string['translate:section'] = 'Translate section';
 $string['translatebutton'] = 'Translate &rarr; {$a}';
 $string['translateexplain'] = 'Translate all selected rows to {$a}';
 $string['translationdisabled'] = 'Translation is disabled because this is used as a link in database';
