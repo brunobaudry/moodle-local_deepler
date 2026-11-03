@@ -6,10 +6,10 @@
 
 namespace DeepL;
 
-use JsonException;
-
 class DeepLClient extends Translator
 {
+    /** @var bool[] Deprecation messages already triggered in this process, by key. */
+    private static $multilingualDeprecationsTriggered = [];
 
     public function __construct(string $authKey, array $options = [])
     {
@@ -20,11 +20,12 @@ class DeepLClient extends Translator
      * Rephrases the given text using DeepL's API.
      * @param string|string[] $texts A single string or array of strings to rephrase
      * @param string|null $targetLang Optional target language code
-     * @param array $options Rephrase options to apply. See \DeepL\DeepLClientOptions.
+     * @param array $options Rephrase options to apply, see \DeepL\RephraseTextOptions: WRITING_STYLE, TONE
+     *  and EXTRA_BODY_PARAMETERS.
      * @return RephraseTextResult|RephraseTextResult[] A RephraseTextResult or array of
      * RephraseTextResult objects containing rephrased texts
      * @throws DeepLException
-     * @see \DeepL\DeepLClientOptions
+     * @see \DeepL\RephraseTextOptions
      */
     public function rephraseText($texts, ?string $targetLang = null, array $options = [])
     {
@@ -34,28 +35,80 @@ class DeepLClient extends Translator
             $options[RephraseTextOptions::TONE] ?? null
         );
         $this->validateAndAppendTexts($params, $texts);
+        return $this->sendWriteRequest(
+            '/v2/write/rephrase',
+            $params,
+            $texts,
+            $options[RephraseTextOptions::EXTRA_BODY_PARAMETERS] ?? null
+        );
+    }
 
+    /**
+     * Corrects spelling and grammar in the given text using DeepL's API.
+     * @param string|string[] $texts A single string or array of strings to correct
+     * @param string|null $targetLang Optional target language code
+     * @param array $options Correct options to apply, see \DeepL\CorrectTextOptions: only EXTRA_BODY_PARAMETERS.
+     * @return RephraseTextResult|RephraseTextResult[] A RephraseTextResult or array of
+     * RephraseTextResult objects containing corrected texts
+     * @throws DeepLException If a single text is empty or the request fails
+     */
+    public function correctText($texts, ?string $targetLang = null, array $options = [])
+    {
+        if ($texts === '') {
+            throw new DeepLException('text must not be empty');
+        }
+        $params = [];
+        if ($targetLang !== null) {
+            $params['target_lang'] = LanguageCode::standardizeLanguageCode($targetLang);
+        }
+        $this->validateAndAppendTexts($params, $texts);
+        return $this->sendWriteRequest(
+            '/v2/write/correct',
+            $params,
+            $texts,
+            $options[CorrectTextOptions::EXTRA_BODY_PARAMETERS] ?? null
+        );
+    }
+
+    /**
+     * Sends a rephrase or correct request, with the extra body parameters added last, and parses one
+     * RephraseTextResult per input text.
+     * @param string|string[] $texts
+     * @return RephraseTextResult|RephraseTextResult[]
+     * @throws DeepLException
+     */
+    private function sendWriteRequest(string $path, array $params, $texts, ?array $extraBodyParameters)
+    {
+        foreach ($extraBodyParameters ?? [] as $key => $value) {
+            $params[$key] = $value;
+        }
         $response = $this->client->sendRequestWithBackoff(
             'POST',
-            '/v2/write/rephrase',
+            $path,
             [HttpClientWrapper::OPTION_JSON => json_encode($params)]
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
 
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
+        $json = ParsingUtils::decodeJson($content);
+        $improvements = $json['improvements'] ?? null;
+        if (!is_array($improvements) || array_values($improvements) !== $improvements) {
+            throw ParsingUtils::invalidContent('Expected an improvements list in the response');
         }
-
-        $improvements = isset($json['improvements']) && is_array($json['improvements']) ? $json['improvements'] : [];
+        $expected = is_array($texts) ? count($texts) : 1;
+        if (count($improvements) !== $expected) {
+            throw ParsingUtils::invalidContent(
+                'Expected ' . $expected . ' improvements in the response, got ' . count($improvements)
+            );
+        }
         $output = [];
         foreach ($improvements as $improvement) {
-            $text = $improvement['text'] ?? '';
+            if (!is_array($improvement) || !is_string($improvement['text'] ?? null)) {
+                throw ParsingUtils::invalidContent('Expected a text in every improvement in the response');
+            }
             $detectedSourceLanguage = $improvement['detected_source_language'] ?? '';
             $targetLanguage = $improvement['target_language'] ?? '';
-            $output[] = new RephraseTextResult($text, $detectedSourceLanguage, $targetLanguage);
+            $output[] = new RephraseTextResult($improvement['text'], $detectedSourceLanguage, $targetLanguage);
         }
 
         return is_array($texts) ? $output : $output[0];
@@ -81,19 +134,9 @@ class DeepLClient extends Translator
 
         $params = [
             'name' => $name,
-            'dictionaries' => array_map(function (MultilingualGlossaryDictionaryEntries $entries) {
-                return $entries->toObject();
-            }, $dictionaries),
+            'dictionaries' => self::multilingualDictionariesToObjects($dictionaries),
         ];
-
-        $response = $this->client->sendRequestWithBackoff(
-            'POST',
-            '/v3/glossaries',
-            [HttpClientWrapper::OPTION_JSON => json_encode($params)]
-        );
-        $this->checkStatusCode($response, false, true);
-        list(, $content) = $response;
-        return MultilingualGlossaryInfo::parseJson($content);
+        return $this->createMultilingualGlossaryWithParams($params);
     }
 
     /**
@@ -118,16 +161,16 @@ class DeepLClient extends Translator
 
         $params = [
             'name' => $name,
-            'dictionaries' => [
-                [
-                    'source_lang' => $sourceLang,
-                    'target_lang' => $targetLang,
-                    'entries_format' => 'csv',
-                    'entries' => $csvContent,
-                ]
-            ]
+            'dictionaries' => [self::csvDictionaryObject($sourceLang, $targetLang, $csvContent)],
         ];
+        return $this->createMultilingualGlossaryWithParams($params);
+    }
 
+    /**
+     * @throws DeepLException
+     */
+    private function createMultilingualGlossaryWithParams(array $params): MultilingualGlossaryInfo
+    {
         $response = $this->client->sendRequestWithBackoff(
             'POST',
             '/v3/glossaries',
@@ -142,6 +185,7 @@ class DeepLClient extends Translator
      * Updates or creates a glossary dictionary with given entries for the
      * source and target languages. Either updates entries if they exist for
      * the given language pair, or adds new ones to the dictionary if not.
+     * Without a name and dictionaries, the body is {}.
      * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to update.
      * @param string|null $name Optional, new name for glossary.
      * @param array|null $dictionaries Optional, array of MultilingualGlossaryDictionaryEntries to update or add to
@@ -154,21 +198,86 @@ class DeepLClient extends Translator
         ?string $name,
         ?array $dictionaries
     ): MultilingualGlossaryInfo {
-        $glossaryId = MultilingualGlossaryInfo::getGlossaryId($glossary);
         $params = [];
         if (isset($name)) {
             $params['name'] = $name;
         }
         if (isset($dictionaries) and count($dictionaries) > 0) {
-            $params['dictionaries'] = array_map(function (MultilingualGlossaryDictionaryEntries $entries) {
-                return $entries->toObject();
-            }, $dictionaries);
+            $params['dictionaries'] = self::multilingualDictionariesToObjects($dictionaries);
         }
+        return $this->patchMultilingualGlossary($glossary, $params, []);
+    }
 
+    /**
+     * Renames a glossary.
+     * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to update.
+     * @param string $name New name for the glossary.
+     * @param array $options Request options, see \DeepL\MultilingualGlossaryOptions: only EXTRA_BODY_PARAMETERS.
+     * @return MultilingualGlossaryInfo Info about the updated glossary.
+     * @throws DeepLException
+     */
+    public function updateMultilingualGlossaryName(
+        $glossary,
+        string $name,
+        array $options = []
+    ): MultilingualGlossaryInfo {
+        self::checkMultilingualGlossaryOptions($options, []);
+        return $this->patchMultilingualGlossary($glossary, ['name' => $name], $options);
+    }
+
+    /**
+     * Merges entries into the glossary dictionary of their language pair: new source terms are added and
+     * the target term of an existing source term is replaced. The dictionary is added if the glossary has
+     * none for that language pair.
+     * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to update.
+     * @param MultilingualGlossaryDictionaryEntries $dictionaryEntries Language pair and entries to merge.
+     * @param array $options Request options, see \DeepL\MultilingualGlossaryOptions: only EXTRA_BODY_PARAMETERS.
+     * @return MultilingualGlossaryInfo Info about the updated glossary.
+     * @throws DeepLException
+     */
+    public function updateMultilingualGlossaryDictionary(
+        $glossary,
+        MultilingualGlossaryDictionaryEntries $dictionaryEntries,
+        array $options = []
+    ): MultilingualGlossaryInfo {
+        self::checkMultilingualGlossaryOptions($options, []);
+        $params = ['dictionaries' => [$dictionaryEntries->toObject()]];
+        return $this->patchMultilingualGlossary($glossary, $params, $options);
+    }
+
+    /**
+     * Merges CSV entries into the glossary dictionary of the given language pair, like
+     * updateMultilingualGlossaryDictionary().
+     * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to update.
+     * @param string $sourceLang Language code of the source terms.
+     * @param string $targetLang Language code of the target terms.
+     * @param string $csvContent String containing CSV content.
+     * @param array $options Request options, see \DeepL\MultilingualGlossaryOptions: only EXTRA_BODY_PARAMETERS.
+     * @return MultilingualGlossaryInfo Info about the updated glossary.
+     * @throws DeepLException
+     */
+    public function updateMultilingualGlossaryDictionaryFromCsv(
+        $glossary,
+        string $sourceLang,
+        string $targetLang,
+        string $csvContent,
+        array $options = []
+    ): MultilingualGlossaryInfo {
+        self::checkMultilingualGlossaryOptions($options, []);
+        $params = ['dictionaries' => [self::csvDictionaryObject($sourceLang, $targetLang, $csvContent)]];
+        return $this->patchMultilingualGlossary($glossary, $params, $options);
+    }
+
+    /**
+     * @param string|MultilingualGlossaryInfo $glossary
+     * @throws DeepLException
+     */
+    private function patchMultilingualGlossary($glossary, array $params, array $options): MultilingualGlossaryInfo
+    {
         $response = $this->client->sendRequestWithBackoff(
             'PATCH',
-            "/v3/glossaries/$glossaryId",
-            [HttpClientWrapper::OPTION_JSON => json_encode($params)]
+            self::multilingualGlossaryPath($glossary),
+            [HttpClientWrapper::OPTION_JSON => self::multilingualGlossaryJsonBody($params, $options)]
         );
         $this->checkStatusCode($response, false, true);
         list(, $content) = $response;
@@ -189,13 +298,46 @@ class DeepLClient extends Translator
         $glossary,
         MultilingualGlossaryDictionaryEntries $dictionaryEntries
     ): MultilingualGlossaryDictionaryInfo {
-        $glossaryId = MultilingualGlossaryInfo::getGlossaryId($glossary);
-        $params = $dictionaryEntries->toObject();
+        return $this->putMultilingualGlossaryDictionary($glossary, $dictionaryEntries->toObject(), []);
+    }
 
+    /**
+     * Replaces a glossary dictionary with the given CSV entries for the source and target languages, like
+     * replaceMultilingualGlossaryDictionary().
+     * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to
+     *  update.
+     * @param string $sourceLang Language code of the source terms.
+     * @param string $targetLang Language code of the target terms.
+     * @param string $csvContent String containing CSV content.
+     * @param array $options Request options, see \DeepL\MultilingualGlossaryOptions: only EXTRA_BODY_PARAMETERS.
+     * @return MultilingualGlossaryDictionaryInfo Info about the dictionary.
+     * @throws DeepLException
+     */
+    public function replaceMultilingualGlossaryDictionaryFromCsv(
+        $glossary,
+        string $sourceLang,
+        string $targetLang,
+        string $csvContent,
+        array $options = []
+    ): MultilingualGlossaryDictionaryInfo {
+        $params = self::csvDictionaryObject($sourceLang, $targetLang, $csvContent);
+        return $this->putMultilingualGlossaryDictionary($glossary, $params, $options);
+    }
+
+    /**
+     * @param string|MultilingualGlossaryInfo $glossary
+     * @throws DeepLException
+     */
+    private function putMultilingualGlossaryDictionary(
+        $glossary,
+        array $params,
+        array $options
+    ): MultilingualGlossaryDictionaryInfo {
+        self::checkMultilingualGlossaryOptions($options, []);
         $response = $this->client->sendRequestWithBackoff(
             'PUT',
-            "/v3/glossaries/$glossaryId/dictionaries",
-            [HttpClientWrapper::OPTION_JSON => json_encode($params)]
+            self::multilingualGlossaryPath($glossary) . '/dictionaries',
+            [HttpClientWrapper::OPTION_JSON => self::multilingualGlossaryJsonBody($params, $options)]
         );
         $this->checkStatusCode($response, false, true);
         list(, $content) = $response;
@@ -211,8 +353,7 @@ class DeepLClient extends Translator
      */
     public function getMultilingualGlossary($glossary): MultilingualGlossaryInfo
     {
-        $glossaryId = MultilingualGlossaryInfo::getGlossaryId($glossary);
-        $response = $this->client->sendRequestWithBackoff('GET', "/v3/glossaries/$glossaryId");
+        $response = $this->client->sendRequestWithBackoff('GET', self::multilingualGlossaryPath($glossary));
         $this->checkStatusCode($response, false, true);
         list(, $content) = $response;
         return MultilingualGlossaryInfo::parseJson($content);
@@ -233,6 +374,28 @@ class DeepLClient extends Translator
     }
 
     /**
+     * Retrieves the entries of the dictionary for the given source and target language in the given glossary.
+     * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to
+     *  retrieve entries of.
+     * @param string $sourceLang Language code of the glossary source terms.
+     * @param string $targetLang Language code of the glossary target terms.
+     * @return MultilingualGlossaryDictionaryEntries The language pair and entries of the dictionary.
+     * @throws GlossaryNotFoundException If the glossary or the dictionary does not exist.
+     * @throws DeepLException
+     */
+    public function getMultilingualGlossaryDictionaryEntries(
+        $glossary,
+        string $sourceLang,
+        string $targetLang
+    ): MultilingualGlossaryDictionaryEntries {
+        $dictionaries = $this->requestMultilingualGlossaryEntries($glossary, $sourceLang, $targetLang);
+        if (count($dictionaries) === 0) {
+            throw new GlossaryNotFoundException('Glossary dictionary not found');
+        }
+        return $dictionaries[0];
+    }
+
+    /**
      * Retrieves the dictionary entries for a given source and target language in the given glossary.
      * @param string|MultilingualGlossaryInfo $glossary Glossary ID or MultilingualGlossaryInfo of glossary to
      *  retrieve entries of.
@@ -240,11 +403,27 @@ class DeepLClient extends Translator
      * @param string $targetLang Language code of the glossary target terms.
      * @return MultilingualGlossaryDictionaryEntries[] The entries stored in the dictionary.
      * @throws DeepLException
+     * @deprecated Use getMultilingualGlossaryDictionaryEntries(), which returns the dictionary itself.
      */
     public function getMultilingualGlossaryEntries($glossary, string $sourceLang, string $targetLang): array
     {
-        $glossaryId = MultilingualGlossaryInfo::getGlossaryId($glossary);
-        $url = "/v3/glossaries/$glossaryId/entries?source_lang=$sourceLang&target_lang=$targetLang";
+        self::triggerMultilingualDeprecation(
+            'getMultilingualGlossaryEntries',
+            'DeepLClient::getMultilingualGlossaryEntries() is deprecated, use ' .
+            'DeepLClient::getMultilingualGlossaryDictionaryEntries() instead.'
+        );
+        return $this->requestMultilingualGlossaryEntries($glossary, $sourceLang, $targetLang);
+    }
+
+    /**
+     * @param string|MultilingualGlossaryInfo $glossary
+     * @return MultilingualGlossaryDictionaryEntries[]
+     * @throws DeepLException
+     */
+    private function requestMultilingualGlossaryEntries($glossary, string $sourceLang, string $targetLang): array
+    {
+        $query = ClientUtils::buildQuery(['source_lang' => $sourceLang, 'target_lang' => $targetLang]);
+        $url = self::multilingualGlossaryPath($glossary) . "/entries?$query";
         $response = $this->client->sendRequestWithBackoff('GET', $url);
         $this->checkStatusCode($response, false, true);
         list(, $content) = $response;
@@ -259,8 +438,7 @@ class DeepLClient extends Translator
      */
     public function deleteMultilingualGlossary($glossary): void
     {
-        $glossaryId = MultilingualGlossaryInfo::getGlossaryId($glossary);
-        $response = $this->client->sendRequestWithBackoff('DELETE', "/v3/glossaries/$glossaryId");
+        $response = $this->client->sendRequestWithBackoff('DELETE', self::multilingualGlossaryPath($glossary));
         $this->checkStatusCode($response, false, true);
     }
 
@@ -281,8 +459,6 @@ class DeepLClient extends Translator
         ?string $sourceLang = null,
         ?string $targetLang = null
     ): void {
-        $glossaryId = MultilingualGlossaryInfo::getGlossaryId($glossary);
-
         if (is_null($dictionary)) {
             if (is_null($sourceLang) or is_null($targetLang)) {
                 throw new DeepLException('must provide dictionary or both source_lang and target_lang');
@@ -292,32 +468,299 @@ class DeepLClient extends Translator
             $targetLang = $dictionary->targetLang;
         }
 
-        $url = "/v3/glossaries/$glossaryId/dictionaries?source_lang=$sourceLang&target_lang=$targetLang";
+        $query = ClientUtils::buildQuery(['source_lang' => $sourceLang, 'target_lang' => $targetLang]);
+        $url = self::multilingualGlossaryPath($glossary) . "/dictionaries?$query";
         $response = $this->client->sendRequestWithBackoff('DELETE', $url);
         $this->checkStatusCode($response, false, true);
     }
 
     /**
+     * @param string|MultilingualGlossaryInfo $glossary
+     */
+    private static function multilingualGlossaryPath($glossary): string
+    {
+        return '/v3/glossaries/' . rawurlencode(MultilingualGlossaryInfo::getGlossaryId($glossary));
+    }
+
+    /**
+     * @param MultilingualGlossaryDictionaryEntries[] $dictionaries
+     */
+    private static function multilingualDictionariesToObjects(array $dictionaries): array
+    {
+        return array_values(array_map(function (MultilingualGlossaryDictionaryEntries $entries) {
+            return $entries->toObject();
+        }, $dictionaries));
+    }
+
+    private static function csvDictionaryObject(string $sourceLang, string $targetLang, string $csvContent): array
+    {
+        return [
+            'source_lang' => $sourceLang,
+            'target_lang' => $targetLang,
+            'entries_format' => 'csv',
+            'entries' => $csvContent,
+        ];
+    }
+
+    /**
+     * @param string[] $allowed Option keys the method accepts besides EXTRA_BODY_PARAMETERS.
+     * @throws DeepLException If an option key is unknown to the method.
+     */
+    private static function checkMultilingualGlossaryOptions(array $options, array $allowed): void
+    {
+        $allowed[] = MultilingualGlossaryOptions::EXTRA_BODY_PARAMETERS;
+        foreach (array_keys($options) as $key) {
+            if (!in_array($key, $allowed, true)) {
+                throw new DeepLException("Unknown multilingual glossary option: $key");
+            }
+        }
+    }
+
+    /**
+     * Encodes the JSON body of a multilingual glossary request, with the extra body parameters added last.
+     * An empty body encodes as {}.
+     */
+    private static function multilingualGlossaryJsonBody(array $params, array $options): string
+    {
+        foreach ($options[MultilingualGlossaryOptions::EXTRA_BODY_PARAMETERS] ?? [] as $key => $value) {
+            $params[$key] = $value;
+        }
+        return json_encode((object)$params);
+    }
+
+    private static function triggerMultilingualDeprecation(string $key, string $message): void
+    {
+        if (!isset(self::$multilingualDeprecationsTriggered[$key])) {
+            self::$multilingualDeprecationsTriggered[$key] = true;
+            @trigger_error($message, E_USER_DEPRECATED);
+        }
+    }
+
+    /**
+     * Creates a spoken terms collection with the given name and term lists.
+     * @param string $name User-defined name to assign to the collection.
+     * @param SpokenTermsEntries[] $termLists Term lists to add, one per language.
+     * @param array $options Request options, see \DeepL\SpokenTermsOptions: only EXTRA_BODY_PARAMETERS.
+     * @return SpokenTerms Details about the created collection.
+     * @throws DeepLException
+     */
+    public function createSpokenTerms(string $name, array $termLists, array $options = []): SpokenTerms
+    {
+        self::checkSpokenTermsOptions($options, []);
+        $params = ['name' => $name, 'term_lists' => self::spokenTermsListsToObjects($termLists)];
+        $response = $this->client->sendRequestWithBackoff(
+            'POST',
+            '/v3/spoken-terms',
+            [HttpClientWrapper::OPTION_JSON => self::spokenTermsJsonBody($params, $options)]
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return SpokenTerms::parseJson($content);
+    }
+
+    /**
+     * Gets information about all spoken terms collections.
+     * @return SpokenTerms[] Details about all collections, without their entries.
+     * @throws DeepLException
+     */
+    public function listSpokenTerms(): array
+    {
+        $response = $this->client->sendRequestWithBackoff('GET', '/v3/spoken-terms');
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return SpokenTerms::parseListJson($content);
+    }
+
+    /**
+     * Gets information about a spoken terms collection.
+     * @param string|SpokenTerms $spokenTerms Spoken terms ID or SpokenTerms object.
+     * @return SpokenTerms Details about the collection, without its entries.
+     * @throws DeepLException
+     */
+    public function getSpokenTerms($spokenTerms): SpokenTerms
+    {
+        $response = $this->client->sendRequestWithBackoff('GET', self::spokenTermsPath($spokenTerms));
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return SpokenTerms::parseJson($content);
+    }
+
+    /**
+     * Renames a spoken terms collection and/or merges terms into its term lists. A term list for a
+     * language not yet in the collection is added. Options that are not set, or null, are not sent;
+     * without any, the body is {}.
+     * @param string|SpokenTerms $spokenTerms Spoken terms ID or SpokenTerms object.
+     * @param array $options Fields to change, see \DeepL\SpokenTermsOptions: NAME (new name), TERM_LISTS
+     *  (SpokenTermsEntries[] to merge) and EXTRA_BODY_PARAMETERS.
+     * @return SpokenTerms Details about the updated collection.
+     * @throws DeepLException
+     */
+    public function updateSpokenTerms($spokenTerms, array $options = []): SpokenTerms
+    {
+        self::checkSpokenTermsOptions($options, [SpokenTermsOptions::NAME, SpokenTermsOptions::TERM_LISTS]);
+        $params = [];
+        if (isset($options[SpokenTermsOptions::NAME])) {
+            $params['name'] = (string)$options[SpokenTermsOptions::NAME];
+        }
+        if (isset($options[SpokenTermsOptions::TERM_LISTS])) {
+            $params['term_lists'] = self::spokenTermsListsToObjects($options[SpokenTermsOptions::TERM_LISTS]);
+        }
+        $response = $this->client->sendRequestWithBackoff(
+            'PATCH',
+            self::spokenTermsPath($spokenTerms),
+            [HttpClientWrapper::OPTION_JSON => self::spokenTermsJsonBody($params, $options)]
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return SpokenTerms::parseJson($content);
+    }
+
+    /**
+     * Retrieves the terms of one language in a spoken terms collection.
+     * @param string|SpokenTerms $spokenTerms Spoken terms ID or SpokenTerms object.
+     * @param string $lang Language code of the term list, e.g. "en".
+     * @return SpokenTermsEntries The terms of the list.
+     * @throws DeepLException
+     */
+    public function getSpokenTermsEntries($spokenTerms, string $lang): SpokenTermsEntries
+    {
+        $query = ClientUtils::buildQuery(['lang' => $lang]);
+        $url = self::spokenTermsPath($spokenTerms) . "/entries?$query";
+        $response = $this->client->sendRequestWithBackoff('GET', $url);
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return SpokenTermsEntries::parseJson($content);
+    }
+
+    /**
+     * Replaces the term list of one language in a spoken terms collection, or adds it if the
+     * collection has no list for that language.
+     * @param string|SpokenTerms $spokenTerms Spoken terms ID or SpokenTerms object.
+     * @param SpokenTermsEntries $entries Language and terms of the replacement list.
+     * @param array $options Request options, see \DeepL\SpokenTermsOptions: only EXTRA_BODY_PARAMETERS.
+     * @return SpokenTermsList Details about the term list.
+     * @throws DeepLException
+     */
+    public function replaceSpokenTermsList(
+        $spokenTerms,
+        SpokenTermsEntries $entries,
+        array $options = []
+    ): SpokenTermsList {
+        self::checkSpokenTermsOptions($options, []);
+        $params = self::spokenTermsEntriesToObject($entries);
+        $response = $this->client->sendRequestWithBackoff(
+            'PUT',
+            self::spokenTermsPath($spokenTerms) . '/term-lists',
+            [HttpClientWrapper::OPTION_JSON => self::spokenTermsJsonBody($params, $options)]
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return SpokenTermsList::parseJson($content);
+    }
+
+    /**
+     * Deletes a spoken terms collection.
+     * @param string|SpokenTerms $spokenTerms Spoken terms ID or SpokenTerms object.
+     * @throws DeepLException
+     */
+    public function deleteSpokenTerms($spokenTerms): void
+    {
+        $response = $this->client->sendRequestWithBackoff('DELETE', self::spokenTermsPath($spokenTerms));
+        $this->checkStatusCode($response);
+    }
+
+    /**
+     * Deletes the term list of one language from a spoken terms collection.
+     * @param string|SpokenTerms $spokenTerms Spoken terms ID or SpokenTerms object.
+     * @param string $lang Language code of the term list to delete, e.g. "en".
+     * @throws DeepLException
+     */
+    public function deleteSpokenTermsList($spokenTerms, string $lang): void
+    {
+        $query = ClientUtils::buildQuery(['lang' => $lang]);
+        $url = self::spokenTermsPath($spokenTerms) . "/term-lists?$query";
+        $response = $this->client->sendRequestWithBackoff('DELETE', $url);
+        $this->checkStatusCode($response);
+    }
+
+    /**
+     * @param string|SpokenTerms $spokenTerms
+     */
+    private static function spokenTermsPath($spokenTerms): string
+    {
+        return '/v3/spoken-terms/' . rawurlencode(SpokenTerms::getSpokenTermsId($spokenTerms));
+    }
+
+    /**
+     * @param string[] $allowed Option keys the method accepts besides EXTRA_BODY_PARAMETERS.
+     * @throws DeepLException If an option key is unknown to the method.
+     */
+    private static function checkSpokenTermsOptions(array $options, array $allowed): void
+    {
+        $allowed[] = SpokenTermsOptions::EXTRA_BODY_PARAMETERS;
+        foreach (array_keys($options) as $key) {
+            if (!in_array($key, $allowed, true)) {
+                throw new DeepLException("Unknown spoken terms option: $key");
+            }
+        }
+    }
+
+    /**
+     * Encodes the JSON body of a spoken terms request, with the extra body parameters added last. An
+     * empty body encodes as {}.
+     */
+    private static function spokenTermsJsonBody(array $params, array $options): string
+    {
+        foreach ($options[SpokenTermsOptions::EXTRA_BODY_PARAMETERS] ?? [] as $key => $value) {
+            $params[$key] = $value;
+        }
+        return json_encode((object)$params);
+    }
+
+    /**
+     * @param SpokenTermsEntries[] $termLists
+     * @throws DeepLException
+     */
+    private static function spokenTermsListsToObjects(array $termLists): array
+    {
+        return array_values(array_map(function (SpokenTermsEntries $entries) {
+            return self::spokenTermsEntriesToObject($entries);
+        }, $termLists));
+    }
+
+    /**
+     * Trims every term and checks it like a glossary term before the terms are joined with newlines:
+     * a term containing a newline would otherwise be sent as several terms.
+     * @throws DeepLException
+     */
+    private static function spokenTermsEntriesToObject(SpokenTermsEntries $entries): array
+    {
+        $terms = [];
+        foreach ($entries->entries as $term) {
+            $trimmed = trim($term);
+            GlossaryUtils::validateGlossaryTerm($trimmed);
+            $terms[] = $trimmed;
+        }
+        return (new SpokenTermsEntries($entries->lang, $terms))->toObject();
+    }
+
+    /**
      * Validates and prepares HTTP parameters for rephrase requests.
-     * @param string|string[] $texts Text(s) to rephrase
      * @param string|null $targetLang Target language code, or null to use default
      * @param string|null $style Writing style option, or null if not specified
      * @param string|null $tone Tone option, or null if not specified
      * @return array Associative array of HTTP parameters
      * @throws DeepLException
+     * @deprecated Internal; will be made private in the next major version.
      */
     public function buildRephraseBodyParams(
         ?string $targetLang = null,
         ?string $style = null,
         ?string $tone = null
     ): array {
+        $params = [];
         if ($targetLang !== null) {
             $targetLang = LanguageCode::standardizeLanguageCode($targetLang);
-            if ($targetLang === 'en') {
-                throw new DeepLException('targetLang="en" is deprecated, please use "en-GB" or "en-US" instead.');
-            } elseif ($targetLang === 'pt') {
-                throw new DeepLException('targetLang="pt" is deprecated, please use "pt-PT" or "pt-BR" instead.');
-            }
             $params['target_lang'] = $targetLang;
         }
 
@@ -358,7 +801,7 @@ class DeepLClient extends Translator
 
         $queryString = '';
         if (!empty($params)) {
-            $queryString = '?' . http_build_query($params);
+            $queryString = '?' . ClientUtils::buildQuery($params);
         }
 
         $response = $this->client->sendRequestWithBackoff('GET', "/v3/style_rules$queryString");
@@ -408,12 +851,7 @@ class DeepLClient extends Translator
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return StyleRuleInfo::fromJson($json);
+        return StyleRuleInfo::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -432,12 +870,7 @@ class DeepLClient extends Translator
         $response = $this->client->sendRequestWithBackoff('GET', "/v3/style_rules/" . rawurlencode($styleId));
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return StyleRuleInfo::fromJson($json);
+        return StyleRuleInfo::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -466,12 +899,7 @@ class DeepLClient extends Translator
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return StyleRuleInfo::fromJson($json);
+        return StyleRuleInfo::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -513,12 +941,7 @@ class DeepLClient extends Translator
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return StyleRuleInfo::fromJson($json);
+        return StyleRuleInfo::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -562,12 +985,7 @@ class DeepLClient extends Translator
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return CustomInstruction::fromJson($json);
+        return CustomInstruction::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -593,12 +1011,7 @@ class DeepLClient extends Translator
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return CustomInstruction::fromJson($json);
+        return CustomInstruction::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -647,12 +1060,7 @@ class DeepLClient extends Translator
         );
         $this->checkStatusCode($response);
         list(, $content) = $response;
-        try {
-            $json = json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidContentException($exception);
-        }
-        return CustomInstruction::fromJson($json);
+        return CustomInstruction::fromJson(ParsingUtils::decodeJson($content));
     }
 
     /**
@@ -679,13 +1087,192 @@ class DeepLClient extends Translator
     }
 
     /**
+     * Retrieves one page of style profiles.
+     * @param int|null $page Page number for pagination, 0-indexed, or null for the API default (0).
+     * @param int|null $pageSize Number of items per page, or null for the API default (10). Values
+     *  above 100 are reduced to 100 by the API.
+     * @return StyleProfile[] The style profiles on the requested page.
+     * @throws DeepLException
+     */
+    public function listStyleProfiles(?int $page = null, ?int $pageSize = null): array
+    {
+        $params = [];
+        if ($page !== null) {
+            $params['page'] = (string)$page;
+        }
+        if ($pageSize !== null) {
+            $params['page_size'] = (string)$pageSize;
+        }
+        $queryString = empty($params) ? '' : '?' . ClientUtils::buildQuery($params);
+
+        $response = $this->client->sendRequestWithBackoff('GET', "/v3/style_profiles$queryString");
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return StyleProfile::parseList($content);
+    }
+
+    /**
+     * Creates a style profile.
+     * @param string $name Name of the style profile.
+     * @param array $options Optional fields, see \DeepL\CreateStyleProfileOptions. Options that are
+     *  null are not sent. If any of the linked component IDs cannot be used, no style profile is created.
+     * @return StyleProfile Details about the created style profile.
+     * @throws DeepLException
+     */
+    public function createStyleProfile(string $name, array $options = []): StyleProfile
+    {
+        $params = self::buildStyleProfileBody(['name' => $name], $options, [
+            CreateStyleProfileOptions::DESCRIPTION,
+            CreateStyleProfileOptions::INDUSTRY,
+        ]);
+        $response = $this->client->sendRequestWithBackoff(
+            'POST',
+            '/v3/style_profiles',
+            [HttpClientWrapper::OPTION_JSON => $params]
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return StyleProfile::parseJson($content);
+    }
+
+    /**
+     * Gets information about a style profile.
+     * @param string|StyleProfile $styleProfile Style profile ID or StyleProfile object.
+     * @return StyleProfile Details about the style profile.
+     * @throws DeepLException
+     * @throws NotFoundException If the style profile is not found.
+     */
+    public function getStyleProfile($styleProfile): StyleProfile
+    {
+        $styleProfileId = StyleProfile::getStyleProfileId($styleProfile);
+        $response = $this->client->sendRequestWithBackoff(
+            'GET',
+            '/v3/style_profiles/' . rawurlencode($styleProfileId)
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return StyleProfile::parseJson($content);
+    }
+
+    /**
+     * Updates a style profile. Options that are not set, or null, are not changed. An empty string
+     * clears the description or industry; an ID list replaces the linked list in full, and an empty
+     * array unlinks all components of that kind. Without options, an empty update ({}) is sent.
+     * @param string|StyleProfile $styleProfile Style profile ID or StyleProfile object.
+     * @param array $options Fields to change, see \DeepL\UpdateStyleProfileOptions.
+     * @return StyleProfile Details about the updated style profile.
+     * @throws DeepLException
+     * @throws NotFoundException If the style profile is not found.
+     */
+    public function updateStyleProfile($styleProfile, array $options = []): StyleProfile
+    {
+        $styleProfileId = StyleProfile::getStyleProfileId($styleProfile);
+        $params = self::buildStyleProfileBody([], $options, [
+            UpdateStyleProfileOptions::NAME,
+            UpdateStyleProfileOptions::DESCRIPTION,
+            UpdateStyleProfileOptions::INDUSTRY,
+        ]);
+        $response = $this->client->sendRequestWithBackoff(
+            'PATCH',
+            '/v3/style_profiles/' . rawurlencode($styleProfileId),
+            [HttpClientWrapper::OPTION_JSON => $params]
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return StyleProfile::parseJson($content);
+    }
+
+    /**
+     * Deletes a style profile.
+     * @param string|StyleProfile $styleProfile Style profile ID or StyleProfile object.
+     * @throws DeepLException
+     * @throws NotFoundException If the style profile is not found.
+     */
+    public function deleteStyleProfile($styleProfile): void
+    {
+        $styleProfileId = StyleProfile::getStyleProfileId($styleProfile);
+        $response = $this->client->sendRequestWithBackoff(
+            'DELETE',
+            '/v3/style_profiles/' . rawurlencode($styleProfileId)
+        );
+        $this->checkStatusCode($response);
+    }
+
+    /**
+     * Encodes the JSON body of a style profile request: $params, then the options that are set, then
+     * the extra body parameters. An empty body encodes as {}.
+     * @param string[] $stringKeys The string option keys the method accepts.
+     * @throws DeepLException If an option key is unknown to the method, or an ID list entry is neither
+     *  an ID nor an object of the expected resource class.
+     */
+    private static function buildStyleProfileBody(array $params, array $options, array $stringKeys): string
+    {
+        $idListClasses = [
+            CreateStyleProfileOptions::GLOSSARY_IDS => [GlossaryInfo::class, MultilingualGlossaryInfo::class],
+            CreateStyleProfileOptions::STYLE_RULE_IDS => [StyleRuleInfo::class],
+            CreateStyleProfileOptions::TRANSLATION_MEMORY_IDS => [TranslationMemoryInfo::class],
+        ];
+        $boolKey = CreateStyleProfileOptions::GLOSSARY_PRIORITY_ORDER_ENABLED;
+        $extraKey = CreateStyleProfileOptions::EXTRA_BODY_PARAMETERS;
+
+        foreach ($options as $key => $value) {
+            $isIdList = isset($idListClasses[$key]);
+            if (!$isIdList && !in_array($key, array_merge($stringKeys, [$boolKey, $extraKey]), true)) {
+                throw new DeepLException("Unknown style profile option: $key");
+            }
+            if (!isset($value) || $key === $extraKey) {
+                continue;
+            }
+            if ($isIdList) {
+                $params[$key] = array_values(array_map(function ($ref) use ($key, $idListClasses) {
+                    return self::styleProfileComponentId($ref, $key, $idListClasses[$key]);
+                }, (array)$value));
+            } elseif ($key === $boolKey) {
+                $params[$key] = (bool)$value;
+            } else {
+                $params[$key] = (string)$value;
+            }
+        }
+        foreach ($options[$extraKey] ?? [] as $key => $value) {
+            $params[$key] = $value;
+        }
+        return json_encode((object)$params);
+    }
+
+    /**
+     * @param mixed $ref An ID, or an object of one of $classes.
+     * @param string[] $classes Resource classes accepted for the option.
+     * @throws DeepLException If $ref is an object of another class.
+     */
+    private static function styleProfileComponentId($ref, string $option, array $classes): string
+    {
+        if (!is_object($ref)) {
+            return (string)$ref;
+        }
+        $idProperties = [
+            GlossaryInfo::class => 'glossaryId',
+            MultilingualGlossaryInfo::class => 'glossaryId',
+            StyleRuleInfo::class => 'styleId',
+            TranslationMemoryInfo::class => 'translationMemoryId',
+        ];
+        foreach ($classes as $class) {
+            if ($ref instanceof $class) {
+                return $ref->{$idProperties[$class]};
+            }
+        }
+        $names = array_map(function (string $class): string {
+            return substr($class, strlen(__NAMESPACE__) + 1);
+        }, $classes);
+        throw new DeepLException("$option entries must be IDs or " . implode(' or ', $names) . ' objects');
+    }
+
+    /**
      * Queries languages supported by the DeepL API for the given resource. Returns each
      * language with its per-feature support information.
-     * @param string $resource Resource to query support for, see the RESOURCE_* constants on
-     *  {@see LanguageResource}.
-     * @param string[]|null $include Optional list of include values, for example
-     *  {@see LanguageSupport::INCLUDE_BETA} or {@see LanguageSupport::INCLUDE_EXTERNAL}. By default only
-     *  stable languages and features are returned.
+     * @param string $resource Resource to query support for, see {@see LanguageResourceName}.
+     * @param array|null $include Options array, see {@see GetLanguagesForResourceOptions}, or a plain list of
+     *  include values, for example [{@see LanguageInclude::BETA}, {@see LanguageInclude::EXTERNAL}]. By default
+     *  only stable languages and features are returned.
      * @return LanguageSupport[] Array of LanguageSupport objects containing per-feature support information.
      * @throws DeepLException
      */
@@ -695,11 +1282,19 @@ class DeepLClient extends Translator
             throw new DeepLException('resource must be a non-empty string');
         }
 
-        $queryString = '?' . http_build_query(['resource' => $resource]);
+        // The parameter takes an options array or, as released first, the plain list of include values
+        if ($include !== null && $include !== array_values($include)) {
+            $include = $include[GetLanguagesForResourceOptions::INCLUDE] ?? null;
+            if ($include !== null && !is_array($include)) {
+                throw new DeepLException('include option must be an array of strings');
+            }
+        }
+
+        $queryString = '?' . ClientUtils::buildQuery(['resource' => $resource]);
         if ($include !== null) {
-            // include is repeated as include=<value>; http_build_query would index it as include[0]=
+            // include is repeated as include=<value>; buildQuery() would index it as include[0]=
             foreach ($include as $value) {
-                $queryString .= '&include=' . urlencode($value);
+                $queryString .= '&include=' . rawurlencode($value);
             }
         }
 
@@ -742,11 +1337,432 @@ class DeepLClient extends Translator
         if ($pageSize !== null) {
             $queryParams['page_size'] = $pageSize;
         }
-        $queryString = empty($queryParams) ? '' : '?' . http_build_query($queryParams);
+        $queryString = empty($queryParams) ? '' : '?' . ClientUtils::buildQuery($queryParams);
 
         $response = $this->client->sendRequestWithBackoff('GET', "/v3/translation_memories$queryString");
         $this->checkStatusCode($response);
         list(, $content) = $response;
         return TranslationMemoryInfo::parseList($content);
+    }
+
+    /**
+     * Retrieves a single translation memory by ID.
+     * @param string|TranslationMemoryInfo $translationMemory Translation memory ID or
+     *  TranslationMemoryInfo of the translation memory to retrieve.
+     * @return TranslationMemoryInfo TranslationMemoryInfo containing details about the translation memory.
+     * @throws DeepLException
+     * @throws NotFoundException If the translation memory is not found.
+     */
+    public function getTranslationMemory($translationMemory): TranslationMemoryInfo
+    {
+        $translationMemoryId = $this->getTranslationMemoryId($translationMemory);
+        $response = $this->client->sendRequestWithBackoff(
+            'GET',
+            "/v3/translation_memories/" . rawurlencode($translationMemoryId)
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return TranslationMemoryInfo::parse($content);
+    }
+
+    /**
+     * Retrieves one page of the segments of a translation memory.
+     *
+     * Pagination is cursor-based: omit the page cursor on the first call, then pass the previous
+     * response's nextPageCursor to fetch the next page. A null nextPageCursor means the last page
+     * has been returned. Note that segmentCount is the translation-memory total and is not reduced
+     * by the filter text.
+     * @param string|TranslationMemoryInfo $translationMemory Translation memory ID or
+     *  TranslationMemoryInfo of the translation memory to retrieve segments of.
+     * @param array $options Pagination and filtering options. See \DeepL\TranslationMemorySegmentsOptions.
+     * @return TranslationMemorySegments One page of segments.
+     * @throws DeepLException
+     * @throws NotFoundException If the translation memory is not found.
+     * @see \DeepL\TranslationMemorySegmentsOptions
+     */
+    public function listTranslationMemorySegments($translationMemory, array $options = []): TranslationMemorySegments
+    {
+        $translationMemoryId = $this->getTranslationMemoryId($translationMemory);
+
+        $queryParams = [];
+        if (isset($options[TranslationMemorySegmentsOptions::PAGE_SIZE])) {
+            $queryParams['page_size'] = $options[TranslationMemorySegmentsOptions::PAGE_SIZE];
+        }
+        if (isset($options[TranslationMemorySegmentsOptions::PAGE_CURSOR])) {
+            $queryParams['page_cursor'] = $options[TranslationMemorySegmentsOptions::PAGE_CURSOR];
+        }
+        if (isset($options[TranslationMemorySegmentsOptions::FILTER_TEXT])) {
+            $queryParams['filter_text'] = $options[TranslationMemorySegmentsOptions::FILTER_TEXT];
+        }
+        if (isset($options[TranslationMemorySegmentsOptions::FILTER_CASE_SENSITIVE])) {
+            $queryParams['filter_case_sensitive'] =
+                $options[TranslationMemorySegmentsOptions::FILTER_CASE_SENSITIVE] ? 'true' : 'false';
+        }
+        $queryString = empty($queryParams)
+            ? ''
+            : '?' . ClientUtils::buildQuery($queryParams);
+
+        $response = $this->client->sendRequestWithBackoff(
+            'GET',
+            "/v3/translation_memories/" . rawurlencode($translationMemoryId) . "/segments$queryString"
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return TranslationMemorySegments::parse($content);
+    }
+
+    /**
+     * Deletes the translation memory with the given ID or TranslationMemoryInfo.
+     * @param string|TranslationMemoryInfo $translationMemory Translation memory ID or
+     *  TranslationMemoryInfo of the translation memory to be deleted.
+     * @throws DeepLException
+     * @throws NotFoundException If the translation memory is not found.
+     */
+    public function deleteTranslationMemory($translationMemory): void
+    {
+        $translationMemoryId = $this->getTranslationMemoryId($translationMemory);
+        $response = $this->client->sendRequestWithBackoff(
+            'DELETE',
+            "/v3/translation_memories/" . rawurlencode($translationMemoryId)
+        );
+        $this->checkStatusCode($response);
+    }
+
+    /**
+     * Creates an import job for a new translation memory.
+     *
+     * The job only declares the file; upload the TMX file itself to the returned upload URL with
+     * uploadTranslationMemoryFile(), then poll getTranslationMemoryJob() for the outcome. Use
+     * importTranslationMemoryFromFilepath() to do all three steps at once.
+     * @param string $fileName Name of the TMX file to import, for example 'legal.tmx'.
+     * @param int $contentLength Size of the TMX file in bytes.
+     * @param string|null $contentType Optional MIME type of the file, defaults to 'application/xml'.
+     * @param string|null $displayName Optional name for the resulting translation memory, defaults
+     *  to the file name.
+     * @return TranslationMemoryImport The job ID and upload URL.
+     * @throws DeepLException
+     */
+    public function createTranslationMemoryImport(
+        string $fileName,
+        int $contentLength,
+        ?string $contentType = null,
+        ?string $displayName = null
+    ): TranslationMemoryImport {
+        if (strlen($fileName) === 0) {
+            throw new DeepLException('fileName must be a non-empty string');
+        }
+        if ($contentLength <= 0) {
+            throw new DeepLException('contentLength must be greater than 0');
+        }
+
+        $sourceFile = [
+            'file_name' => $fileName,
+            'content_length' => $contentLength,
+        ];
+        if ($contentType !== null) {
+            $sourceFile['content_type'] = $contentType;
+        }
+        $params = ['source_file' => $sourceFile];
+        if ($displayName !== null) {
+            $params['parameters'] = ['display_name' => $displayName];
+        }
+
+        $response = $this->client->sendRequestWithBackoff(
+            'POST',
+            '/v3/translation_memories/import',
+            [HttpClientWrapper::OPTION_JSON => json_encode($params)]
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return TranslationMemoryImport::parse($content);
+    }
+
+    /**
+     * Uploads a TMX file to the upload URL of an import job, which starts processing.
+     *
+     * Note that the upload URL is a pre-signed storage URL outside the DeepL API, so the
+     * authentication key is not sent with this request.
+     * @param string|TranslationMemoryImport $translationMemoryImport The import returned by
+     *  createTranslationMemoryImport(), or its upload URL.
+     * @param string $fileContent Content of the TMX file.
+     * @param string $contentType MIME type of the file, which must match the content type declared
+     *  when the import job was created. Defaults to 'application/xml'.
+     * @throws DeepLException
+     */
+    public function uploadTranslationMemoryFile(
+        $translationMemoryImport,
+        string $fileContent,
+        string $contentType = 'application/xml'
+    ): void {
+        $uploadUrl = is_string($translationMemoryImport)
+            ? $translationMemoryImport
+            : $translationMemoryImport->uploadUrl;
+        if (strlen($uploadUrl) === 0) {
+            throw new DeepLException('uploadUrl must be a non-empty string');
+        }
+
+        $response = $this->storageClient->sendRequestWithBackoff(
+            'PUT',
+            $uploadUrl,
+            [
+                HttpClientWrapper::OPTION_RAW_BODY => $fileContent,
+                HttpClientWrapper::OPTION_HEADERS => ['Content-Type' => $contentType],
+            ]
+        );
+        $this->checkAssetStatusCode($response, 'uploading translation memory file');
+    }
+
+    /**
+     * Creates an export job for a translation memory.
+     *
+     * Poll getTranslationMemoryJob() for the download URL of the exported TMX file. Use
+     * exportTranslationMemoryToFilepath() to do both steps and write the file at once.
+     * @param string|TranslationMemoryInfo $translationMemory Translation memory ID or
+     *  TranslationMemoryInfo of the translation memory to export.
+     * @return TranslationMemoryExport The job ID, and whether the API reused a previously completed
+     *  export.
+     * @throws DeepLException
+     * @throws NotFoundException If the translation memory is not found.
+     */
+    public function createTranslationMemoryExport($translationMemory): TranslationMemoryExport
+    {
+        $translationMemoryId = $this->getTranslationMemoryId($translationMemory);
+        $response = $this->client->sendRequestWithBackoff(
+            'POST',
+            "/v3/translation_memories/" . rawurlencode($translationMemoryId) . "/export"
+        );
+        $this->checkStatusCode($response);
+        list($statusCode, $content) = $response;
+        // 200 means the API reused a previously completed export, 202 that it started a new one.
+        return TranslationMemoryExport::parse($content, $statusCode === 200);
+    }
+
+    /**
+     * Retrieves the status of a translation memory import or export job.
+     * @param string|TranslationMemoryJob $job Job ID or TranslationMemoryJob of the job to query.
+     * @return TranslationMemoryJob The current status of the job.
+     * @throws DeepLException
+     * @throws NotFoundException If the job is not found.
+     */
+    public function getTranslationMemoryJob($job): TranslationMemoryJob
+    {
+        $jobId = TranslationMemoryJob::getJobId($job);
+        if (strlen($jobId) === 0) {
+            throw new DeepLException('jobId must be a non-empty string');
+        }
+        $response = $this->client->sendRequestWithBackoff(
+            'GET',
+            "/v3/translation_memories/jobs/" . rawurlencode($jobId)
+        );
+        $this->checkStatusCode($response);
+        list(, $content) = $response;
+        return TranslationMemoryJob::parse($content);
+    }
+
+    /**
+     * Returns when the given translation memory job completes, or throws an exception if there was
+     * an error communicating with the DeepL API, the job failed or expired, or the timeout expired.
+     *
+     * The job is polled every 5 seconds until its status is 'completed' or 'downloaded', which return
+     * the job, or 'failed' or 'expired', which throw a DeepLException with the API's error message.
+     * Any other status, including one this library does not know, keeps polling. Note that an
+     * import job keeps reporting 'awaiting_input' for a while after its file has been uploaded,
+     * because the API detects the upload asynchronously. A job whose file is never uploaded does
+     * not finish on its own, so pass $timeout when that is a possibility.
+     * @param string|TranslationMemoryJob $job Job ID or TranslationMemoryJob of the job to wait for.
+     * @param float|null $timeout Optional maximum time in seconds to wait before throwing an
+     *  exception. The last sleep between polls is shortened so the wait does not run past it.
+     * @return TranslationMemoryJob The completed or downloaded job.
+     * @throws DeepLException
+     */
+    public function waitUntilTranslationMemoryJobDone($job, ?float $timeout = null): TranslationMemoryJob
+    {
+        $jobId = TranslationMemoryJob::getJobId($job);
+        $deadline = $timeout === null ? null : microtime(true) + $timeout;
+        $status = $this->getTranslationMemoryJob($jobId);
+        while (!$status->done()) {
+            // The job duration is not reported by the API, so just poll equidistantly
+            $secs = 5.0;
+            if ($deadline !== null) {
+                $remaining = $deadline - microtime(true);
+                if ($remaining <= 0) {
+                    throw new DeepLException("Manual timeout of {$timeout}s exceeded for translation memory job");
+                }
+                $secs = min($secs, $remaining);
+            }
+            usleep((int)round($secs * 1000000));
+            $this->client->logInfo("Rechecking translation memory job status after sleeping for $secs seconds.");
+            $status = $this->getTranslationMemoryJob($jobId);
+        }
+        if (!$status->ok()) {
+            $result = $status->result();
+            throw new DeepLException(($result === null ? null : $result->errorMessage) ?? 'unknown error');
+        }
+        return $status;
+    }
+
+    /**
+     * Downloads the TMX file of a completed export job to the specified output file path.
+     *
+     * Note that the download URL is a pre-signed storage URL outside the DeepL API, so the
+     * authentication key is not sent with this request.
+     * @param TranslationMemoryJob $job Completed export job carrying the download URL.
+     * @param string $outputFile String containing file path to create the exported TMX file.
+     * @throws DeepLException
+     */
+    public function downloadTranslationMemoryExport(TranslationMemoryJob $job, string $outputFile): void
+    {
+        $result = $job->result();
+        $downloadUrl = $result === null ? null : $result->downloadUrl;
+        if ($downloadUrl === null || strlen($downloadUrl) === 0) {
+            throw new DeepLException(
+                'translation memory export job has no download URL; it may not have completed yet'
+            );
+        }
+        if (file_exists($outputFile)) {
+            throw new DeepLException("File already exists at output file path $outputFile");
+        }
+
+        try {
+            $response = $this->storageClient->sendRequestWithBackoff(
+                'GET',
+                $downloadUrl,
+                [
+                    HttpClientWrapper::OPTION_OUTFILE => $outputFile,
+                ]
+            );
+            // With OPTION_OUTFILE the cURL path streams the body straight to the file and
+            // returns true rather than the content, so on a non-2xx response the storage
+            // service's error detail is in the file. Read it back for the error message,
+            // otherwise the exception would just report "content: 1". Only on failure: the
+            // file holds the whole export on success, and reading it would defeat streaming
+            // it to disk in the first place.
+            list($statusCode) = $response;
+            $errorDetail = null;
+            if (($statusCode < 200 || $statusCode >= 300) && file_exists($outputFile)) {
+                $errorDetail = file_get_contents($outputFile) ?: null;
+            }
+            $this->checkAssetStatusCode($response, 'downloading translation memory export', $errorDetail);
+        } catch (DeepLException $error) {
+            if (file_exists($outputFile)) {
+                unlink($outputFile);
+            }
+            throw $error;
+        }
+    }
+
+    /**
+     * Imports a TMX file as a new translation memory: creates the import job, uploads the file, and
+     * waits for processing to finish.
+     * @param string $inputFile String containing file path of the TMX file to import.
+     * @param string|null $displayName Optional name for the resulting translation memory, defaults
+     *  to the file name.
+     * @param float|null $timeout Optional maximum time in seconds to wait for the import to finish.
+     * @return TranslationMemoryJob The completed import job; its result carries the ID of the new
+     *  translation memory.
+     * @throws DeepLException If no file exists at the input file path or it cannot be read, before any
+     *  request is sent; the read error, if any, is the previous exception.
+     */
+    public function importTranslationMemoryFromFilepath(
+        string $inputFile,
+        ?string $displayName = null,
+        ?float $timeout = null
+    ): TranslationMemoryJob {
+        if (!file_exists($inputFile)) {
+            throw new DeepLException("File does not exist at input file path $inputFile");
+        }
+        if (is_dir($inputFile) || !is_readable($inputFile)) {
+            throw new DeepLException("Failed reading input file $inputFile: the file is not readable");
+        }
+        error_clear_last();
+        // Suppressed so error handlers that turn warnings into exceptions see the DeepLException
+        $fileContent = @file_get_contents($inputFile);
+        if ($fileContent === false) {
+            $error = error_get_last();
+            $cause = $error === null
+                ? null
+                : new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
+            throw new DeepLException("Failed reading input file $inputFile", 0, $cause);
+        }
+
+        $created = $this->createTranslationMemoryImport(
+            basename($inputFile),
+            strlen($fileContent),
+            null,
+            $displayName
+        );
+        $this->uploadTranslationMemoryFile($created, $fileContent);
+        return $this->waitUntilTranslationMemoryJobDone($created->jobId, $timeout);
+    }
+
+    /**
+     * Exports a translation memory to a TMX file: creates the export job, waits for it to finish,
+     * and writes the result to the specified output file path.
+     * @param string|TranslationMemoryInfo $translationMemory Translation memory ID or
+     *  TranslationMemoryInfo of the translation memory to export.
+     * @param string $outputFile String containing file path to create the exported TMX file.
+     * @param float|null $timeout Optional maximum time in seconds to wait for the export to finish.
+     * @return TranslationMemoryJob The completed export job.
+     * @throws DeepLException Also if a file already exists at the output file path or its directory
+     *  does not exist or is not writable; this is checked before the export job is created.
+     */
+    public function exportTranslationMemoryToFilepath(
+        $translationMemory,
+        string $outputFile,
+        ?float $timeout = null
+    ): TranslationMemoryJob {
+        if (file_exists($outputFile)) {
+            throw new DeepLException("File already exists at output file path $outputFile");
+        }
+        $outputDir = dirname($outputFile);
+        if (!is_dir($outputDir) || !is_writable($outputDir)) {
+            throw new DeepLException(
+                "Failed to open output file $outputFile for writing: the directory does not exist or is not writable"
+            );
+        }
+        $created = $this->createTranslationMemoryExport($translationMemory);
+        $job = $this->waitUntilTranslationMemoryJobDone($created->jobId, $timeout);
+        $this->downloadTranslationMemoryExport($job, $outputFile);
+        return $job;
+    }
+
+    /**
+     * Extracts and validates the translation memory ID of the given argument.
+     * @param string|TranslationMemoryInfo $translationMemory Translation memory ID or
+     *  TranslationMemoryInfo.
+     * @throws DeepLException
+     */
+    private function getTranslationMemoryId($translationMemory): string
+    {
+        $translationMemoryId = TranslationMemoryInfo::getTranslationMemoryId($translationMemory);
+        if (strlen($translationMemoryId) === 0) {
+            throw new DeepLException('translationMemoryId must be a non-empty string');
+        }
+        return $translationMemoryId;
+    }
+
+    /**
+     * Checks the HTTP status code of a request to a pre-signed storage URL. These requests are not
+     * answered by the DeepL API, so the API error format does not apply.
+     * @param array $response Status code and content, as returned by the HTTP client.
+     * @param string $description Description of the attempted action, included in the message.
+     * @param string|null $detailOverride Error detail to report instead of the response content,
+     * used when the body was streamed to a file rather than returned.
+     * @throws DeepLException
+     */
+    private function checkAssetStatusCode(
+        array $response,
+        string $description,
+        ?string $detailOverride = null
+    ): void {
+        list($statusCode, $content) = $response;
+        if (200 <= $statusCode && $statusCode < 300) {
+            return;
+        }
+        $detail = $detailOverride ?? (is_string($content) ? $content : '');
+        throw ClientUtils::withStatus(
+            new DeepLException("Error $description, HTTP status: $statusCode, content: $detail"),
+            $statusCode
+        );
     }
 }

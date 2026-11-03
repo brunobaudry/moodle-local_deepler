@@ -76,9 +76,18 @@ To use DeepLer, your Moodle environment requires:
 ## Quick Start: Translating a Course
 
 ### 1. Open the Translator
+#### Whole course
 Navigate to the course you wish to translate, open the course **Actions menu** (gear icon or course navigation), and select **DeepL Translator**.
 
 ![](pix/launch.png)
+
+### Section
+When you are in edit mode
+
+![](pix/launch_section.png)
+
+#### Module
+![](pix/launch_section_module.png)
 
 ### 2. Choose Source and Target Languages
 - **Source Language:** Automatically reflects your current Moodle language. Set this to the language the course was originally written in.

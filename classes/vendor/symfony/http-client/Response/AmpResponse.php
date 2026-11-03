@@ -105,7 +105,8 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
             return new Coroutine(self::generateResponse($request, $multi, $id, $info, $headers, $canceller, $options, $onProgress, $handle, $logger, $pause));
         });
 
-        $info['pause_handler'] = static function (float $duration) use (&$throttleWatcher, &$pauseDeferred, &$pause) {
+        $pauseExpiry = &$this->pauseExpiry;
+        $info['pause_handler'] = static function (float $duration) use (&$throttleWatcher, &$pauseDeferred, &$pause, &$pauseExpiry) {
             if (null !== $throttleWatcher) {
                 Loop::cancel($throttleWatcher);
             }
@@ -113,10 +114,12 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
             $pause = $pauseDeferred->promise();
 
             if ($duration <= 0) {
+                $pauseExpiry = min($pauseExpiry, hrtime(true) / 1E9);
                 $deferred = $pauseDeferred;
                 $pauseDeferred = new Deferred();
                 $deferred->resolve();
             } else {
+                $pauseExpiry = hrtime(true) / 1E9 + $duration;
                 $throttleWatcher = Loop::delay(ceil(1000 * $duration), static function () use (&$pauseDeferred) {
                     $deferred = $pauseDeferred;
                     $pauseDeferred = new Deferred();
@@ -350,10 +353,9 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
                 $request->addHeader($name, $value);
             }
 
-            if ($request->getUri()->getAuthority() !== $originRequest->getUri()->getAuthority()) {
+            if ($request->getUri()->getScheme() !== $originRequest->getUri()->getScheme() || $request->getUri()->getAuthority() !== $originRequest->getUri()->getAuthority()) {
                 $request->removeHeader('authorization');
                 $request->removeHeader('cookie');
-                $request->removeHeader('proxy-authorization');
                 $request->removeHeader('host');
             }
 

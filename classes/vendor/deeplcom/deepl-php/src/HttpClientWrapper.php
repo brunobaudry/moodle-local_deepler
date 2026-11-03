@@ -42,11 +42,33 @@ class HttpClientWrapper
      */
     private $curlHandle;
 
+    /**
+     * @var bool True if the last cURL request failed before it was sent: a refused connection, a DNS
+     * failure, or a timeout before the connection was established.
+     */
+    private $lastCurlErrorUnsent = false;
+
+    /**
+     * @var bool True if the last cURL request failed because the response body was cut off mid-read.
+     */
+    private $lastCurlErrorBodyCutOff = false;
+
+    /** CURLE_HTTP2_STREAM, which PHP does not define: an HTTP/2 stream was reset, for example mid-body. */
+    private const CURLE_HTTP2_STREAM = 92;
+
     public const OPTION_FILE = 'file';
+    /** File name sent for the OPTION_FILE part; defaults to the base name of the file path. */
+    public const OPTION_FILENAME = 'filename';
     public const OPTION_HEADERS = 'headers';
     public const OPTION_PARAMS = 'params';
     public const OPTION_OUTFILE = 'outfile';
     public const OPTION_JSON = 'json';
+    public const OPTION_RAW_BODY = 'raw_body';
+    /**
+     * Retry only failures that show the request was not processed: HTTP 429, refused connections, DNS
+     * failures and timeouts before the connection was established. For requests that are unsafe to repeat.
+     */
+    public const OPTION_RETRY_ONLY_UNPROCESSED = 'retry_only_unprocessed';
 
     public function __construct(
         string           $serverUrl,
@@ -82,15 +104,18 @@ class HttpClientWrapper
     /**
      * Makes API request retrying if necessary, and returns (as Promise) response.
      * @param string $method HTTP method, for example 'GET'.
-     * @param string $url Path to endpoint, excluding base server URL.
+     * @param string $url Path to endpoint excluding base server URL, or an absolute URL of a
+     * service outside the DeepL API, for example a pre-signed storage URL.
      * @param array|null $options Array of options, possible arguments are given by OPTIONS_ constants.
      * @return array Status code and content.
      * @throws DeepLException
      */
     public function sendRequestWithBackoff(string $method, string $url, ?array $options = []): array
     {
-        $url = $this->serverUrl . $url;
-        $headers = array_replace(
+        if (!self::isAbsoluteUrl($url)) {
+            $url = $this->serverUrl . $url;
+        }
+        $headers = ClientUtils::mergeHeaders(
             $this->headers,
             $options[self::OPTION_HEADERS] ?? []
         );
@@ -101,23 +126,44 @@ class HttpClientWrapper
         $backoff = new BackoffTimer();
         $response = null;
         $exception = null;
+        $onlyUnprocessed = !empty($options[self::OPTION_RETRY_ONLY_UNPROCESSED]);
         while ($backoff->getNumRetries() <= $this->maxRetries) {
-            $outFile = isset($options[self::OPTION_OUTFILE]) ? fopen($options[self::OPTION_OUTFILE], 'w') : null;
+            $outFile = null;
+            if (isset($options[self::OPTION_OUTFILE])) {
+                $outFile = @fopen($options[self::OPTION_OUTFILE], 'w');
+                if ($outFile === false) {
+                    throw new DeepLException("Failed to open output file {$options[self::OPTION_OUTFILE]} for writing");
+                }
+            }
             $timeout = max($this->minTimeout, $backoff->getTimeUntilDeadline());
             $response = null;
             $exception = null;
             $json = isset($options[self::OPTION_JSON]) ? $options[self::OPTION_JSON] : null;
+            $rawBody = isset($options[self::OPTION_RAW_BODY]) ? $options[self::OPTION_RAW_BODY] : null;
             try {
-                $response = $this->sendRequest($method, $url, $timeout, $headers, $params, $file, $outFile, $json);
+                $response = $this->sendRequest(
+                    $method,
+                    $url,
+                    $timeout,
+                    $headers,
+                    $params,
+                    $file,
+                    $outFile,
+                    $json,
+                    $rawBody,
+                    $onlyUnprocessed,
+                    $options[self::OPTION_FILENAME] ?? null
+                );
             } catch (ConnectionException $e) {
                 $exception = $e;
+            } finally {
+                if ($outFile) {
+                    fclose($outFile);
+                }
             }
 
-            if ($outFile) {
-                fclose($outFile);
-            }
-
-            if (!$this->shouldRetry($response, $exception) || $backoff->getNumRetries() + 1 >= $this->maxRetries) {
+            $retry = $this->shouldRetry($response, $exception, $onlyUnprocessed);
+            if (!$retry || $backoff->getNumRetries() >= $this->maxRetries) {
                 break;
             }
 
@@ -152,6 +198,9 @@ class HttpClientWrapper
      * @param string|null $filePath If not null, path to file to upload with request.
      * @param resource|null $outFile If not null, file to write output to.
      * @param string|null $json If not null, JSON content to include in body.
+     * @param string|null $rawBody If not null, raw content to include in body, sent as-is.
+     * @param bool $freshConnection If true, cURL sends the request on a new connection.
+     * @param string|null $fileName File name sent for the uploaded file, or null for the path's base name.
      * @return array Array where the first element is the HTTP status code and the second element is the response body.
      * @throws ConnectionException
      */
@@ -163,12 +212,37 @@ class HttpClientWrapper
         array $params,
         ?string $filePath,
         $outFile,
-        ?string $json
+        ?string $json,
+        ?string $rawBody = null,
+        bool $freshConnection = false,
+        ?string $fileName = null
     ): array {
         if ($this->customHttpClient !== null) {
-            return $this->sendCustomHttpRequest($method, $url, $headers, $params, $filePath, $outFile, $json);
+            return $this->sendCustomHttpRequest(
+                $method,
+                $url,
+                $headers,
+                $params,
+                $filePath,
+                $outFile,
+                $json,
+                $rawBody,
+                $fileName
+            );
         } else {
-            return $this->sendCurlRequest($method, $url, $timeout, $headers, $params, $filePath, $outFile, $json);
+            return $this->sendCurlRequest(
+                $method,
+                $url,
+                $timeout,
+                $headers,
+                $params,
+                $filePath,
+                $outFile,
+                $json,
+                $rawBody,
+                $freshConnection,
+                $fileName
+            );
         }
     }
 
@@ -199,6 +273,8 @@ class HttpClientWrapper
      * @param string|null $filePath If not null, path to file to upload with request.
      * @param resource|null $outFile If not null, file to write output to.
      * @param string|null $json If not null, JSON content to include in body.
+     * @param string|null $rawBody If not null, raw content to include in body, sent as-is.
+     * @param string|null $fileName File name sent for the uploaded file, or null for the path's base name.
      * @return array Array where the first element is the HTTP status code and the second element is the response body.
      * @throws ConnectionException
      */
@@ -209,12 +285,18 @@ class HttpClientWrapper
         array $params,
         ?string $filePath,
         $outFile,
-        ?string $json
+        ?string $json,
+        ?string $rawBody = null,
+        ?string $fileName = null
     ): array {
         $body = null;
         if ($filePath !== null) {
             $builder = new MultipartStreamBuilder($this->streamClient);
-            $builder->addResource('file', fopen($filePath, 'r'));
+            $fileHandle = @fopen($filePath, 'r');
+            if ($fileHandle === false) {
+                throw new DeepLException("Failed to open input file $filePath for reading");
+            }
+            $builder->addResource('file', $fileHandle, ['filename' => $fileName ?? basename($filePath)]);
             foreach ($params as $param_name => $value) {
                 $builder->addResource($param_name, $value);
             }
@@ -229,6 +311,9 @@ class HttpClientWrapper
         } elseif (isset($json)) {
             $headers['Content-Type'] = 'application/json';
             $body = $this->streamFactory->createStream($json);
+        } elseif (isset($rawBody)) {
+            // The Content-Type of a raw body is specified by the caller
+            $body = $this->streamFactory->createStream($rawBody);
         } else {
             $body = $this->streamFactory->createStream('');
         }
@@ -237,7 +322,10 @@ class HttpClientWrapper
             $response = $this->customHttpClient->sendRequest($request);
             $response_data = (string) $response->getBody();
             if ($outFile) {
-                fwrite($outFile, $response_data);
+                $written = @fwrite($outFile, $response_data);
+                if ($written !== strlen($response_data)) {
+                    throw new DeepLException('Failed to write the response to the output file');
+                }
             }
             return [$response->getStatusCode(), $response_data];
         } catch (RequestExceptionInterface $e) {
@@ -257,6 +345,9 @@ class HttpClientWrapper
      * @param string|null $filePath If not null, path to file to upload with request.
      * @param resource|null $outFile If not null, file to write output to.
      * @param string|null $json If not null, JSON content to include in body.
+     * @param string|null $rawBody If not null, raw content to include in body, sent as-is.
+     * @param bool $freshConnection If true, the request is sent on a new connection.
+     * @param string|null $fileName File name sent for the uploaded file, or null for the path's base name.
      * @return array Array where the first element is the HTTP status code and the second element is the response body.
      * @throws ConnectionException
      */
@@ -268,7 +359,10 @@ class HttpClientWrapper
         array $params,
         ?string $filePath,
         $outFile,
-        ?string $json
+        ?string $json,
+        ?string $rawBody = null,
+        bool $freshConnection = false,
+        ?string $fileName = null
     ): array {
         $curlOptions = [];
         $curlOptions[\CURLOPT_HEADER] = false;
@@ -300,7 +394,7 @@ class HttpClientWrapper
 
         if ($filePath !== null) {
             // If a file is to be uploaded, add it to the list of body parameters
-            $params['file'] = \curl_file_create($filePath);
+            $params['file'] = \curl_file_create($filePath, null, $fileName ?? basename($filePath));
             $curlOptions[\CURLOPT_POSTFIELDS] = $params;
         } elseif (count($params) > 0) {
             // If there are repeated parameters, passing the parameters directly to cURL will index the repeated
@@ -310,6 +404,9 @@ class HttpClientWrapper
         } elseif (!is_null($json)) {
             $curlOptions[\CURLOPT_POSTFIELDS] = $json;
             $curlOptions[\CURLOPT_HTTPHEADER][] = 'Content-Type: application/json';
+        } elseif (!is_null($rawBody)) {
+            // The Content-Type of a raw body is specified by the caller
+            $curlOptions[\CURLOPT_POSTFIELDS] = $rawBody;
         }
 
         if ($outFile) {
@@ -320,19 +417,27 @@ class HttpClientWrapper
             $curlOptions[\CURLOPT_RETURNTRANSFER] = true;
         }
 
+        if ($freshConnection) {
+            // libcurl resends a request silently when a reused keep-alive connection was closed.
+            // A request that must not be sent twice therefore never reuses a connection.
+            $curlOptions[\CURLOPT_FRESH_CONNECT] = true;
+        }
+
         \curl_reset($this->curlHandle);
 
-        // The next 3 curl calls are unqualified so that we can mock them, see
+        // The next curl calls are unqualified so that we can mock them, see
         // https://github.com/php-mock/php-mock-phpunit#restrictions
         curl_setopt_array($this->curlHandle, $curlOptions);
 
+        $this->lastCurlErrorUnsent = false;
+        $this->lastCurlErrorBodyCutOff = false;
         $result = curl_exec($this->curlHandle);
         if ($result !== false) {
             $statusCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
             return [$statusCode, $result];
         } else {
-            $errorMessage = \curl_error($this->curlHandle);
-            $errorCode = \curl_errno($this->curlHandle);
+            $errorMessage = curl_error($this->curlHandle);
+            $errorCode = curl_errno($this->curlHandle);
             switch ($errorCode) {
                 case \CURLE_UNSUPPORTED_PROTOCOL:
                 case \CURLE_URL_MALFORMAT:
@@ -343,25 +448,63 @@ class HttpClientWrapper
                 case \CURLE_OPERATION_TIMEOUTED:
                 case \CURLE_COULDNT_CONNECT:
                 case \CURLE_GOT_NOTHING:
+                case \CURLE_SEND_ERROR: // includes broken pipes
+                case \CURLE_RECV_ERROR: // includes connection resets
+                case \CURLE_COULDNT_RESOLVE_HOST:
                     $shouldRetry = true;
+                    break;
+                case \CURLE_PARTIAL_FILE: // body shorter than Content-Length, or a chunked body ended early
+                case self::CURLE_HTTP2_STREAM: // HTTP/2 stream reset, for example mid-body
+                    // Not retried and reported with shouldRetry false until the next major: the request was
+                    // processed, and a streamed body may already be partly written to the output file.
+                    $shouldRetry = false;
+                    $this->lastCurlErrorBodyCutOff = true;
                     break;
                 default:
                     $shouldRetry = false;
                     break;
             }
+            $this->lastCurlErrorUnsent = in_array(
+                $errorCode,
+                [\CURLE_COULDNT_CONNECT, \CURLE_COULDNT_RESOLVE_HOST],
+                true
+            ) || ($errorCode === \CURLE_OPERATION_TIMEDOUT
+                && (float)curl_getinfo($this->curlHandle, CURLINFO_CONNECT_TIME) == 0.0);
             throw new ConnectionException($errorMessage, $errorCode, null, $shouldRetry);
         }
     }
 
-    private function shouldRetry(?array $response, ?ConnectionException $exception): bool
+    /**
+     * Returns true if the given URL is absolute, and therefore must not be appended to the
+     * configured server URL.
+     */
+    private static function isAbsoluteUrl(string $url): bool
+    {
+        return preg_match('/^https?:\/\//i', $url) === 1;
+    }
+
+    private function shouldRetry(?array $response, ?ConnectionException $exception, bool $onlyUnprocessed): bool
     {
         if ($exception !== null) {
-            return $exception->shouldRetry;
+            if ($this->customHttpClient === null && $this->lastCurlErrorBodyCutOff) {
+                return false;
+            }
+            return $exception->shouldRetry && (!$onlyUnprocessed || $this->isUnsentRequestError($exception));
         }
         list($statusCode, ) = $response;
 
         // Retry on Too-Many-Requests error and internal errors
-        return $statusCode === 429 || $statusCode >= 500;
+        return $statusCode === 429 || (!$onlyUnprocessed && $statusCode >= 500);
+    }
+
+    /**
+     * Returns true if the connection error happened before the request was sent: a refused connection,
+     * a DNS failure, or a timeout before the connection was established. Only cURL tells this; errors of
+     * a custom HTTP client are treated as possibly sent.
+     */
+    private function isUnsentRequestError(ConnectionException $exception): bool
+    {
+        return $this->customHttpClient === null && $this->lastCurlErrorUnsent;
     }
 
     public function logDebug(string $message): void

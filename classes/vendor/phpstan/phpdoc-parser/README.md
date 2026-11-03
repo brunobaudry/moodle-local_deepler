@@ -13,7 +13,7 @@ For the complete list of supported PHPDoc features check out PHPStan documentati
 
 * [PHPDoc Basics](https://phpstan.org/writing-php-code/phpdocs-basics) (list of PHPDoc tags)
 * [PHPDoc Types](https://phpstan.org/writing-php-code/phpdoc-types) (list of PHPDoc types)
-* [phpdoc-parser API Reference](https://phpstan.github.io/phpdoc-parser/2.3.x/namespace-PHPStan.PhpDocParser.html) with all the AST node types etc.
+* [phpdoc-parser API Reference](https://phpstan.github.io/phpdoc-parser/2.4.x/namespace-PHPStan.PhpDocParser.html) with all the AST node types etc.
 
 This parser also supports parsing [Doctrine Annotations](https://github.com/doctrine/annotations). The AST nodes live in the [PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine namespace](https://phpstan.github.io/phpdoc-parser/2.1.x/namespace-PHPStan.PhpDocParser.Ast.PhpDoc.Doctrine.html).
 
@@ -166,6 +166,22 @@ $newPhpDoc = $printer->printFormatPreserving($newPhpDocNode, $phpDocNode, $token
 echo $newPhpDoc; // '/** @param Ipsum $a */'
 ```
 
+## The grammars
+
+The language this library reads is written down as a grammar in
+[`doc/grammars`](doc/grammars), in the format the [phplrt](https://phplrt.org)
+compiler reads. A grammar says what a PHPDoc may be written as, so it can be
+walked the other way round and asked for PHPDocs instead of being asked about
+one: that is where `FuzzyTest` gets its corpus, and it covers a great deal more
+of the language than a hand-written one does. `GrammarSyncTest` walks them the
+other way, asking each grammar about the inputs of every other test in this
+project, so that what the grammars describe and what the parser reads cannot
+drift apart.
+
+Nothing in `src/` reads those files, and the library needs neither the toolchain
+writing the corpus nor the PHP 8.4 it asks for. See
+[`doc/grammars/README.md`](doc/grammars/README.md).
+
 ## Code of Conduct
 
 This project adheres to a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project and its community, you are expected to uphold this code.
@@ -181,3 +197,13 @@ Afterwards you can either run the whole build including linting and coding stand
 or run only tests using
 
     make tests
+
+The grammars have a toolchain of their own, because the compiler reading them
+asks for PHP 8.4. Without it the fuzzy tests skip themselves:
+
+    make grammars-install   # install it
+
+`FuzzyTest` then writes its own corpus out of `doc/grammars/*.pp3` every time it
+runs, and leaves it in `temp/fuzzy` to be looked at afterwards. `GrammarSyncTest`
+asks the same grammars about the inputs of every other test, so that a feature
+added to the parser is one they have to describe as well.
