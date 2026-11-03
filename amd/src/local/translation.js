@@ -21,8 +21,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([
-    'core/log', './api', './utils', './selectors', './tokeniser', './customevents'],
-    (Log, Api, Utils, Selectors, Tokeniser, Events) => {
+    'core/log', './api', './utils', './selectors', './tokeniser', './customevents', './reactive/statemanager'],
+    (Log, Api, Utils, Selectors, Tokeniser, Events, StateManager) => {
         let tempTranslations = {};
         let escapePatterns = {};
         let mainSourceLang = "";
@@ -72,11 +72,24 @@ define([
             }
         };
         /**
+         * Helper to get active reactive state manager.
+         *
+         * @returns {object|null}
+         */
+        const getReactive = () => {
+            return StateManager.getStateManager(courseid || 'main');
+        };
+
+        /**
          * When translation successfully stored in Moodle's DB.
          *
          * @param {object} data
          */
         const onTrDbSuccess = (data)=>{
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isSaving: false});
+            }
             if (data.length === 0) {
                 Events.emit(ON_DB_FAILED, 'no data returned', '');
             } else {
@@ -85,8 +98,14 @@ define([
                     if (item.error === '') {
                         // Refreshing the text in the temp obbject in case of new translation without page refresh.
                         tempTranslations[item.keyid].fieldText = item.text;
+                        if (reactive) {
+                            reactive.dispatch('setRowStatus', item.keyid, 'saved');
+                        }
                         Events.emit(ON_ITEM_SAVED, item.keyid, item.text);
                     } else {
+                        if (reactive) {
+                            reactive.dispatch('setRowStatus', item.keyid, 'error', item.error);
+                        }
                         Events.emit(ON_ITEM_NOT_SAVED, item.keyid, item.error);
                     }
                 });
@@ -99,6 +118,10 @@ define([
          * @param {string} error
          */
         const onTrDbFailed = (status, error) =>{
+                const reactive = getReactive();
+                if (reactive) {
+                    reactive.dispatch('updateBatchStatus', {isSaving: false});
+                }
                 Events.emit(ON_DB_FAILED, error, status);
                 Log.trace(status);
                 Log.trace(error);
@@ -109,6 +132,13 @@ define([
          * @param {object} config
          */
         const saveTranslations = (items, config) => {
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isSaving: true});
+                items.forEach((item) => {
+                    reactive.dispatch('setRowStatus', item.key, 'saving');
+                });
+            }
             const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
             Log.debug(`translation/x/saveTranslations::data`);
             Log.debug(data);
@@ -235,6 +265,13 @@ define([
          */
         const callTranslations = (keys, config, settings) => {
             rephrasesymbol = config.rephrasesymbol;
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isTranslating: true});
+                keys.forEach((key) => {
+                    reactive.dispatch('setRowStatus', key, 'translating');
+                });
+            }
             const translations = [];
             const rephrases = [];
             // We parse and check if it is a tranlsation or text improvment.
@@ -267,20 +304,30 @@ define([
          */
         const onTranslateSuccess = (response)=>{
             Log.info(response);
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isTranslating: false});
+            }
             const glossaries = [];
             response.forEach((tr) => {
+                let key = tr.key;
                 if (tr.error === '') {
                     // For now used glossary_id should, be the same for the batch,
                     // but it would make sense to use a single glossary for each text.
                     if (glossaries.indexOf(tr.glossary_id) === -1 && tr.glossary_id.trim() !== '') {
                         glossaries.push(tr.glossary_id);
                     }
-                    let key = tr.key;
                     let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
                     tempTranslations[key].editor.innerHTML = translation;
                     tempTranslations[key].translation = translation;
+                    if (reactive) {
+                        reactive.dispatch('updateRowTranslation', key, translation);
+                    }
                     Events.emit(ON_ITEM_TRANSLATED, key);
                 } else {
+                    if (reactive && key) {
+                        reactive.dispatch('setRowStatus', key, 'error', tr.error);
+                    }
                     Events.emit(ON_TRANSLATION_FAILED, tr.error);
                 }
             });
@@ -295,14 +342,24 @@ define([
          * @param {object} response
          */
         const onRephraseSuccess = (response)=>{
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isTranslating: false});
+            }
             response.forEach((tr) => {
+                let key = tr.key;
                 if (tr.error === '') {
-                    let key = tr.key;
                     let rephrase = Tokeniser.postprocess(tr.text, tempTranslations[key].tokens);
                     tempTranslations[key].editor.innerHTML = rephrase;
                     tempTranslations[key].translation = rephrase;
+                    if (reactive) {
+                        reactive.dispatch('updateRowTranslation', key, rephrase);
+                    }
                     Events.emit(ON_ITEM_TRANSLATED, key);
                 } else {
+                    if (reactive && key) {
+                        reactive.dispatch('setRowStatus', key, 'error', tr.error);
+                    }
                     Events.emit(ON_REPHRASE_FAILED, tr.error);
                 }
             });
@@ -315,6 +372,10 @@ define([
          * @param {string} error
          */
         const onTranslateFailed = (status, error)=>{
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isTranslating: false});
+            }
             Events.emit(ON_TRANSLATION_FAILED, status, error);
         };
         /**
@@ -324,6 +385,10 @@ define([
          * @param {string} error
          */
         const onRephaseFailed = (status, error)=>{
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isTranslating: false});
+            }
             Events.emit(ON_REPHRASE_FAILED, status, error);
         };
         /**

@@ -31,7 +31,10 @@ define(['core/log',
     './customevents',
     './scrollspy',
     './api',
-    'core/notification'
+    'core/notification',
+    './reactive/statemanager',
+    './reactive/components/page',
+    './reactive/components/row'
 ], (Log, TinyMCEinit, TinyMCE,
     Modal,
     Selectors,
@@ -40,7 +43,10 @@ define(['core/log',
     Events,
     ScrollSpy,
     Api,
-    MoodleNotification
+    MoodleNotification,
+    StateManager,
+    PageComponent,
+    RowComponent
     ) => {
 
     /**
@@ -577,7 +583,12 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     const onItemChecked = (e) => {
         // Check/uncheck checkboxes changes the charcount and icon status.
         if (e.target.getAttribute('data-action') === "local_deepler/checkbox") {
-            toggleStatus(e.target.getAttribute('data-key'), e.target.checked);
+            const key = e.target.getAttribute('data-key');
+            toggleStatus(key, e.target.checked);
+            const reactive = StateManager.getStateManager(config.courseid || 'main');
+            if (reactive) {
+                reactive.dispatch('setRowSelection', key, e.target.checked);
+            }
             countWordAndChar();
         }
     };
@@ -605,6 +616,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 checkbox.checked = shouldCheck;
                 toggleStatus(checkbox.getAttribute('data-key'), shouldCheck);
             });
+
+            const reactive = StateManager.getStateManager(config.courseid || 'main');
+            if (reactive) {
+                reactive.dispatch('selectAllRows', checked);
+            }
 
             toggleAutotranslateButton();
             countWordAndChar();
@@ -1194,6 +1210,77 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         return el.querySelectorAll(q);
     };
     /**
+     * Initializes the reactive state manager and registers page & row components.
+     *
+     * @param {object} cfg
+     */
+    const initReactiveState = (cfg) => {
+        try {
+            const rowElements = domQueryAll('[data-row-id]');
+            const rows = [];
+            rowElements.forEach((el) => {
+                const rowId = el.getAttribute('data-row-id');
+                const counts = getCount(rowId);
+                const sourceEl = domQuery(Selectors.sourcetexts.keys, rowId);
+                const raw = sourceEl ? sourceEl.getAttribute("data-sourcetext-raw") : "";
+                const originalText = raw ? Utils.stripHTMLTags(Utils.fromBase64(raw)).trim() : "";
+                const checkbox = domQuery(Selectors.actions.checkBoxes, rowId, el);
+                const isSelected = checkbox ? checkbox.checked : true;
+
+                rows.push({
+                    id: rowId,
+                    key: rowId,
+                    sourceLang: cfg.sourcelang || 'en',
+                    originalText: originalText,
+                    translatedText: '',
+                    customSettings: null,
+                    status: 'idle',
+                    errorMessage: null,
+                    selected: isSelected,
+                    isDirty: false,
+                    wordCount: counts.wordCount || 0,
+                    charCount: counts.charNumWithSpace || 0,
+                });
+            });
+
+            const reactive = StateManager.getStateManager(cfg.courseid || 'main', {
+                targetLang: cfg.targetlang || 'fr',
+                formality: 'default',
+                tagHandling: 'html',
+                splitSentences: '1',
+                preserveFormatting: false,
+                escapeLatex: true,
+                escapePre: true,
+                hideIframes: true,
+                glossaryId: '',
+                modelType: 'default',
+                toneorstyle: 'default',
+                rows: rows,
+            });
+
+            // Register Page Component on container
+            const pageContainer = document.querySelector('.local_deepler__form') || document.body;
+            new PageComponent({
+                element: pageContainer,
+                reactive: reactive,
+            });
+
+            // Register Row Components on each row element
+            rowElements.forEach((el) => {
+                new RowComponent({
+                    element: el,
+                    reactive: reactive,
+                });
+            });
+
+            // Initial stats recalculation
+            reactive.dispatch('recalculateStats');
+        } catch (err) {
+            Log.error('Error initializing reactive state: ' + err.message);
+        }
+    };
+
+    /**
      * Event listener to switch source lang.
      * @param {*} cfg
      */
@@ -1214,6 +1301,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             node.disabled = selectAllBtn.disabled;
         });
         debouncedShowRows();
+        initReactiveState(cfg);
     };
     /**
      * Api to be used by the other modules.
