@@ -94,7 +94,7 @@ export default class {
      */
     async selectAllRows(stateManager, isSelected) {
         stateManager.setReadOnly(false);
-        const rows = stateManager.get('rows');
+        const rows = stateManager.state.rows;
         if (rows) {
             rows.forEach((row) => {
                 row.selected = isSelected;
@@ -197,7 +197,7 @@ export default class {
      * @param {StateManager} stateManager The state manager.
      */
     _recalculateStatsInternal(stateManager) {
-        const rows = stateManager.get('rows');
+        const rows = stateManager.state.rows;
         const stats = stateManager.get('stats');
         const selection = stateManager.get('selection');
 

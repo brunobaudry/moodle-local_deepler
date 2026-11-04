@@ -36,7 +36,5 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5",
-    "phpspec/prophecy": "^1.19"
   }
 }

@@ -297,6 +297,11 @@ We welcome feedback, bug reports, and community contributions!
 - **Contribution Guidelines:** See [CONTRIBUTING.md](CONTRIBUTING.md) for pull request guidelines and coding standards.
 - **Automated Testing:** PHPUnit and Behat test suites are configured for continuous integration. For local testing with your API key, copy `.env-dist` to `.env` and configure `DEEPL_API_TOKEN`.
 
+### Composer
+After a lib update :
+```
+composer install --no-dev --optimize-autoloader
+```
 ---
 
 *DeepLer is an open-source Moodle plugin distributed under the GNU General Public License (GPL-3.0).*

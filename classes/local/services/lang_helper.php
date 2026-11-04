@@ -457,8 +457,12 @@ class lang_helper {
      * @return \stdClass
      */
     public function prepareconfig(stdClass &$config): stdClass {
-        $config->usage = $this->usage;
-        $config->limitReached = $config->usage->anyLimitReached();
+        $usage = new stdClass();
+        $usage->character = new stdClass();
+        $usage->character->count = $this->usage->character?->count ?? 0;
+        $usage->character->limit = $this->usage->character?->limit ?? null;
+        $config->usage = $usage;
+        $config->limitReached = $this->usage->anyLimitReached();
         $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
@@ -480,6 +484,7 @@ class lang_helper {
         $config->statusstrings = new stdClass();
         $config->statusstrings->failed = get_string('statusfailed', 'local_deepler');
         $config->statusstrings->success = get_string('statussuccess', 'local_deepler');
+        $config->statusstrings->saved = get_string('statussaved', 'local_deepler');
         $config->statusstrings->tosave = get_string('statustosave', 'local_deepler');
         $config->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
         $config->statusstrings->wait = get_string('statuswait', 'local_deepler');

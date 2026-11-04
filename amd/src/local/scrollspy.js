@@ -173,7 +173,7 @@ define(['./utils'], (Utils) => {
     /**
      * Prepare the breandcrumb stickyness
      */
-    const prepareSticky=()=>{
+    const prepareSticky = ()=>{
         const topWrapper = document.querySelector('#local_deepler_uiheader');
         const stickyHeader = document.querySelector('#local_deepler-translate-header');
 
