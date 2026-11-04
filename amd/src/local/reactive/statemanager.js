@@ -22,7 +22,7 @@
  */
 
 import Reactive from 'core/local/reactive/reactive';
-import DefaultMutations from './mutations';
+import DefaultMutations from 'local_deepler/local/reactive/mutations';
 
 // Map with all the state manager instances.
 const stateManagerMap = new Map();

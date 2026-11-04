@@ -22,8 +22,271 @@
  */
 
 import BaseComponent from 'core/local/reactive/basecomponent';
+import ModalSaveCancel from 'core/modal_save_cancel';
+import ModalEvents from 'core/modal_events';
+import Templates from 'core/templates';
+import {getString} from 'core/str';
+import Log from 'core/log';
 
-export default class extends BaseComponent {
+/**
+ * Get effective default settings from reactive state.
+ *
+ * @param {object} reactive The reactive instance.
+ * @returns {object} Default settings.
+ */
+const getEffectiveDefaults = (reactive) => {
+    const globalContainer = document.querySelector('#local_deepler__additionalsettings');
+    const domSettings = globalContainer ? gatherFormValues(globalContainer, '') : {};
+    const globalSettings = reactive?.state?.globalSettings || {};
+
+    return {
+        // eslint-disable-next-line camelcase
+        model_type: domSettings.model_type || globalSettings.modelType || 'prefer_quality_optimized',
+        formality: domSettings.formality || globalSettings.formality || 'default',
+        // eslint-disable-next-line camelcase
+        split_sentences: domSettings.split_sentences || globalSettings.splitSentences || '1',
+        // eslint-disable-next-line camelcase
+        preserve_formatting: domSettings.preserve_formatting !== undefined
+            ? domSettings.preserve_formatting
+            : Boolean(globalSettings.preserveFormatting),
+        context: domSettings.context !== undefined
+            ? domSettings.context
+            : (globalSettings.context || ''),
+        // eslint-disable-next-line camelcase
+        tag_handling: domSettings.tag_handling || globalSettings.tagHandling || 'html',
+        // eslint-disable-next-line camelcase
+        outline_detection: domSettings.outline_detection !== undefined
+            ? domSettings.outline_detection
+            : Boolean(globalSettings.outlineDetection),
+        // eslint-disable-next-line camelcase
+        ignore_tags: domSettings.ignore_tags !== undefined
+            ? domSettings.ignore_tags
+            : (globalSettings.ignoreTags || ''),
+        // eslint-disable-next-line camelcase
+        non_splitting_tags: domSettings.non_splitting_tags !== undefined
+            ? domSettings.non_splitting_tags
+            : (globalSettings.nonSplittingTags || ''),
+        // eslint-disable-next-line camelcase
+        splitting_tags: domSettings.splitting_tags !== undefined
+            ? domSettings.splitting_tags
+            : (globalSettings.splittingTags || ''),
+        toneorstyle: domSettings.toneorstyle || globalSettings.toneorstyle || 'default',
+        latexeascape: domSettings.latexeascape !== undefined
+            ? domSettings.latexeascape
+            : (globalSettings.escapeLatex !== undefined ? Boolean(globalSettings.escapeLatex) : true),
+        preescape: domSettings.preescape !== undefined
+            ? domSettings.preescape
+            : (globalSettings.escapePre !== undefined ? Boolean(globalSettings.escapePre) : true),
+        hideiframes: domSettings.hideiframes !== undefined
+            ? domSettings.hideiframes
+            : (globalSettings.hideIframes !== undefined ? Boolean(globalSettings.hideIframes) : true),
+    };
+};
+
+/**
+ * Populate form values in the modal.
+ *
+ * @param {Element} form The form container.
+ * @param {string} prefix The ID/name prefix.
+ * @param {object} settings The settings to populate.
+ */
+const populateForm = (form, prefix, settings) => {
+    if (!form || !settings) {
+        return;
+    }
+
+    const setRadio = (name, value) => {
+        if (value !== undefined && value !== null) {
+            const radio = form.querySelector(`input[type="radio"][name$="${name}"][value="${value}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+        }
+    };
+
+    const setCheckbox = (id, value) => {
+        if (value !== undefined && value !== null) {
+            const cb = form.querySelector(`#${prefix}${id}`);
+            if (cb) {
+                cb.checked = Boolean(value);
+            }
+        }
+    };
+
+    const setTextarea = (id, value) => {
+        if (value !== undefined && value !== null) {
+            const ta = form.querySelector(`#${prefix}${id}`);
+            if (ta) {
+                ta.value = value;
+            }
+        }
+    };
+
+    setRadio('model_type', settings.model_type || settings.modelType);
+    setRadio('formality', settings.formality);
+    setRadio('split_sentences', settings.split_sentences || settings.splitSentences);
+    setCheckbox('preserve_formatting', settings.preserve_formatting ?? settings.preserveFormatting);
+    setTextarea('local_deepler__context', settings.context);
+    const tagHandling = settings.tag_handling || settings.tagHandling;
+    setCheckbox('tag_handling', tagHandling ? tagHandling === 'html' : true);
+    setCheckbox('outline_detection', settings.outline_detection ?? settings.outlineDetection);
+    setTextarea('ignore_tags', settings.ignore_tags || settings.ignoreTags);
+    setTextarea('non_splitting_tags', settings.non_splitting_tags || settings.nonSplittingTags);
+    setTextarea('splitting_tags', settings.splitting_tags || settings.splittingTags);
+    setRadio('toneorstyle', settings.toneorstyle);
+    setCheckbox('latexeascape', settings.latexeascape ?? settings.escapeLatex);
+    setCheckbox('preescape', settings.preescape ?? settings.escapePre);
+    setCheckbox('hideiframes', settings.hideiframes ?? settings.hideIframes);
+};
+
+/**
+ * Gather form values from modal body.
+ *
+ * @param {Element} form The modal body element.
+ * @param {string} prefix The ID/name prefix.
+ * @returns {object} The collected custom settings.
+ */
+const gatherFormValues = (form, prefix = '') => {
+    const getRadio = (name) => {
+        const checked = form.querySelector(`input[type="radio"][name$="${name}"]:checked`);
+        return checked ? checked.value : null;
+    };
+    const getCheckbox = (id) => {
+        const cb = (prefix ? form.querySelector(`#${prefix}${id}`) : null) ||
+            form.querySelector(`#${id}`) ||
+            form.querySelector(`[data-id="local_deepler/${id}"]`);
+        return cb ? cb.checked : false;
+    };
+    const getTextarea = (id, dataId = null) => {
+        const targetDataId = dataId || id;
+        const ta = (prefix ? form.querySelector(`#${prefix}${id}`) : null) ||
+            form.querySelector(`#${id}`) ||
+            form.querySelector(`[data-id="local_deepler/${targetDataId}"]`);
+        return ta ? ta.value : '';
+    };
+
+    return {
+        // eslint-disable-next-line camelcase
+        model_type: getRadio('model_type') || 'prefer_quality_optimized',
+        formality: getRadio('formality') || 'default',
+        // eslint-disable-next-line camelcase
+        split_sentences: getRadio('split_sentences') || '1',
+        // eslint-disable-next-line camelcase
+        preserve_formatting: getCheckbox('preserve_formatting'),
+        context: getTextarea('local_deepler__context', 'context'),
+        // eslint-disable-next-line camelcase
+        tag_handling: getCheckbox('tag_handling') ? 'html' : 'xml',
+        // eslint-disable-next-line camelcase
+        outline_detection: getCheckbox('outline_detection'),
+        // eslint-disable-next-line camelcase
+        ignore_tags: getTextarea('ignore_tags'),
+        // eslint-disable-next-line camelcase
+        non_splitting_tags: getTextarea('non_splitting_tags'),
+        // eslint-disable-next-line camelcase
+        splitting_tags: getTextarea('splitting_tags'),
+        toneorstyle: getRadio('toneorstyle') || 'default',
+        latexeascape: getCheckbox('latexeascape'),
+        preescape: getCheckbox('preescape'),
+        hideiframes: getCheckbox('hideiframes'),
+    };
+};
+
+/**
+ * Open the settings modal for a specific row.
+ *
+ * @param {object} reactive The reactive instance.
+ * @param {string} rowId The row identifier.
+ * @returns {Promise<void>}
+ */
+export const openSettingsModal = async(reactive, rowId) => {
+    try {
+        const row = reactive.state.rows?.get(rowId) ||
+            Array.from(reactive.state.rows?.values() || []).find(r => r.key === rowId || r.id === rowId);
+
+        const defaults = getEffectiveDefaults(reactive);
+        const currentSettings = row?.customSettings ? Object.assign({}, defaults, row.customSettings) : defaults;
+
+        const title = await getString('rowsettingstitle', 'local_deepler', rowId);
+        const resetText = await getString('resettodefaults', 'local_deepler');
+        const prefix = 'modal_';
+
+        const formHtml = await Templates.render('local_deepler/settings_form', {
+            prefix: prefix,
+            canimprove: true,
+            rephrasesymbol: '',
+            supportedlangs: 'de, en-GB, en-US',
+            escapelatexbydefault: currentSettings.latexeascape ? 'checked' : '',
+            escapeprebydefault: currentSettings.preescape ? 'checked' : '',
+            hideiframesdefault: currentSettings.hideiframes ? 'checked' : '',
+        });
+
+        const modal = await ModalSaveCancel.create({
+            title: title,
+            body: formHtml,
+            large: true,
+        });
+
+        const footer = modal.getFooter();
+        if (footer && footer[0]) {
+            const resetBtn = document.createElement('button');
+            resetBtn.type = 'button';
+            resetBtn.className = 'btn btn-outline-danger me-auto';
+            resetBtn.setAttribute('data-action', 'reset');
+            resetBtn.textContent = resetText;
+            footer[0].prepend(resetBtn);
+        }
+
+        const bodyElement = modal.getBody()[0];
+        populateForm(bodyElement, prefix, currentSettings);
+
+        modal.getRoot().on(ModalEvents.save, (e) => {
+            e.preventDefault();
+            const customSettings = gatherFormValues(bodyElement, prefix);
+            reactive.dispatch('setRowCustomSettings', rowId, customSettings);
+            modal.hide();
+            modal.destroy();
+        });
+
+        modal.getRoot().on('click', '[data-action="reset"]', (e) => {
+            e.preventDefault();
+            reactive.dispatch('resetRowCustomSettings', rowId);
+            modal.hide();
+            modal.destroy();
+        });
+
+        modal.getRoot().on(ModalEvents.hidden, () => {
+            modal.destroy();
+        });
+
+        await modal.show();
+    } catch (err) {
+        Log.error('Error opening settings modal: ' + err.message);
+    }
+};
+
+export default class SettingsModal extends BaseComponent {
+    /**
+     * Open the settings modal for a specific row.
+     *
+     * @param {object} reactive The reactive instance.
+     * @param {string} rowId The row identifier.
+     * @returns {Promise<void>}
+     */
+    static async open(reactive, rowId) {
+        return openSettingsModal(reactive, rowId);
+    }
+
+    /**
+     * Open the settings modal for a specific row (alias).
+     *
+     * @param {object} reactive The reactive instance.
+     * @param {string} rowId The row identifier.
+     * @returns {Promise<void>}
+     */
+    static async openSettingsModal(reactive, rowId) {
+        return openSettingsModal(reactive, rowId);
+    }
+
     /**
      * Component create lifecycle method.
      *
@@ -32,11 +295,7 @@ export default class extends BaseComponent {
     create(descriptor) {
         this.name = 'local_deepler_settings_modal';
         this.rowId = descriptor.rowId || null;
-        this.selectors = {
-            form: 'form',
-            saveBtn: '[data-action="save"]',
-            resetBtn: '[data-action="reset"]',
-        };
+        this.prefix = descriptor.prefix || 'modal_';
     }
 
     /**
@@ -60,38 +319,11 @@ export default class extends BaseComponent {
      * @param {object} args.element The updated element.
      */
     _settingsUpdated({element}) {
-        this._updateFormValues(element.customSettings);
-    }
-
-    /**
-     * Update form fields with values.
-     *
-     * @param {object|null} customSettings Settings object or null if default.
-     */
-    _updateFormValues(customSettings) {
-        if (!customSettings) {
-            return;
+        if (this.element) {
+            populateForm(this.element, this.prefix, element.customSettings);
         }
-        // Iterate form elements and update matching fields.
-        const form = this.getElement(this.selectors.form) || this.element;
-        if (!form) {
-            return;
-        }
-
-        Object.entries(customSettings).forEach(([key, val]) => {
-            const input = form.querySelector(`[name="${key}"], [name="local_deepler/${key}"]`);
-            if (input) {
-                if (input.type === 'checkbox') {
-                    input.checked = Boolean(val);
-                } else if (input.type === 'radio') {
-                    const radio = form.querySelector(`[name="${input.name}"][value="${val}"]`);
-                    if (radio) {
-                        radio.checked = true;
-                    }
-                } else {
-                    input.value = val;
-                }
-            }
-        });
     }
 }
+
+SettingsModal.open = openSettingsModal;
+SettingsModal.openSettingsModal = openSettingsModal;

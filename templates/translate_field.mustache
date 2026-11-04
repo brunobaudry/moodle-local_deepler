@@ -160,6 +160,15 @@
                 <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
             {{/sourceoptions}}
         </select>
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary local_deepler__row-settings-btn ms-1"
+                data-action="row-settings"
+                data-row-id="{{flagandkey}}"
+                title="{{#str}}customsettings, local_deepler{{/str}}"
+                aria-label="{{#str}}customsettings, local_deepler{{/str}}">
+            <i class="fa fa-sliders" aria-hidden="true"></i>
+            <span class="badge badge-pill badge-primary bg-primary d-none local_deepler__custom-settings-indicator" data-indicator-key="{{flagandkey}}">•</span>
+        </button>
     {{/iseditable}}
 
         {{#warnmaxlength}}

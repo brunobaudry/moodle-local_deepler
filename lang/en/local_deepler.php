@@ -64,6 +64,8 @@ $string['contextdeepl_placeholder'] =
 $string['cookieduration'] = 'Advanced setting storage duration';
 $string['cookieduration_desc'] =
         'The advanced settings are saved (in a cookie) on a per course and language pair. Set duration value in days here.';
+$string['customsettings'] = 'Custom translation settings';
+$string['customsettingsactive'] = 'Custom settings active for this field';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['deeplapidoctitle'] = 'DeepL\'s API settings';
 $string['deeplapiexception'] = 'DeepL\'s API returned an error';
@@ -235,6 +237,8 @@ $string['rephraseinfos'] =
 $string['rephraseoptionsinfos'] =
         'The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>. Using "default" as value behaves the same as not sending a tone nor a writing style.';
 $string['rephrasetitle'] = '{$a}Rephrase settings';
+$string['resettodefaults'] = 'Reset to Global Defaults';
+$string['rowsettingstitle'] = 'Translation Settings for Field {$a}';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>

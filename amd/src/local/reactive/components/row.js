@@ -22,6 +22,7 @@
  */
 
 import BaseComponent from 'core/local/reactive/basecomponent';
+import SettingsModal from 'local_deepler/local/reactive/components/settings_modal';
 
 export default class extends BaseComponent {
     /**
@@ -36,9 +37,18 @@ export default class extends BaseComponent {
             checkbox: `input[type="checkbox"][data-key="${this.rowId}"]`,
             statusBadge: `[data-status-key="${this.rowId}"]`,
             customSettingsBadge: `[data-indicator-key="${this.rowId}"]`,
+            settingsBtn: `[data-action="row-settings"]`,
             resultContainer: `div[data-result-key="${this.rowId}"]`,
             wordCountBadge: `[data-wordcount-key="${this.rowId}"]`,
         };
+
+        const settingsBtn = this.element.querySelector(this.selectors.settingsBtn);
+        if (settingsBtn) {
+            this.addEventListener(settingsBtn, 'click', (e) => {
+                e.preventDefault();
+                SettingsModal.open(this.reactive, this.rowId);
+            });
+        }
     }
 
     /**

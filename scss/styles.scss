@@ -302,4 +302,20 @@ $secondary: $gray-400 !default;
     [data-key-validator] .btn {
         cursor: pointer;
     }
+
+    .local_deepler__row-settings-btn {
+        position: relative;
+
+        .local_deepler__custom-settings-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 0;
+            line-height: 0;
+        }
+    }
 }

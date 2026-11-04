@@ -273,4 +273,70 @@ final class gettranslation_test extends base_external {
         $this->assertStringContainsString('[k2]', $result[1]['error']);
         $this->assertEquals('C', $result[2]['translated_text']);
     }
+
+    /**
+     * Test execute_parameters validation with row options.
+     *
+     * @covers \local_deepler\external\get_translation::execute_parameters
+     * @return void
+     */
+    public function test_execute_parameters_with_row_options(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
+
+        $params = [
+            'translations' => [
+                [
+                    'text' => 'Hello',
+                    'source_lang' => 'en',
+                    'key' => 'row_1',
+                    'options' => [
+                        'formality' => 'more',
+                        'split_sentences' => 'nonewlines',
+                        'preserve_formatting' => true,
+                        'context' => 'Academic context',
+                        'tag_handling' => 'html',
+                        'outline_detection' => false,
+                        'non_splitting_tags' => 'span',
+                        'splitting_tags' => 'p',
+                        'ignore_tags' => 'code',
+                        'glossary_id' => 'glossary-123',
+                        'model_type' => 'prefer_quality_optimized',
+                    ],
+                ],
+                [
+                    'text' => 'World',
+                    'source_lang' => 'en',
+                    'key' => 'row_2',
+                ],
+            ],
+            'options' => [
+                'target_lang' => 'DE',
+                'context' => '',
+                'tag_handling' => 'html',
+                'split_sentences' => '1',
+                'preserve_formatting' => false,
+                'formality' => 'default',
+                'outline_detection' => false,
+                'non_splitting_tags' => '',
+                'splitting_tags' => '',
+                'ignore_tags' => '',
+                'glossary_id' => '',
+                'model_type' => 'default',
+                'show_billed_characters' => true,
+            ],
+            'version' => 'v1.0',
+        ];
+
+        $validated = \core_external\external_api::validate_parameters(
+            get_translation::execute_parameters(),
+            $params
+        );
+
+        $this->assertCount(2, $validated['translations']);
+        $this->assertEquals('more', $validated['translations'][0]['options']['formality']);
+        $this->assertEquals('glossary-123', $validated['translations'][0]['options']['glossary_id']);
+        $this->assertNull($validated['translations'][1]['options']['formality']);
+    }
 }
