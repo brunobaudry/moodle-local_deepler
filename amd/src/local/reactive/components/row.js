@@ -40,6 +40,7 @@ export default class extends BaseComponent {
             settingsBtn: `[data-action="row-settings"]`,
             resultContainer: `div[data-result-key="${this.rowId}"]`,
             wordCountBadge: `[data-wordcount-key="${this.rowId}"]`,
+            sourceSelect: `select[data-action="local_deepler/sourceselect"][data-key="${this.rowId}"]`,
         };
 
         const settingsBtn = this.element.querySelector(this.selectors.settingsBtn);
@@ -74,7 +75,76 @@ export default class extends BaseComponent {
             {watch: `rows[${this.rowId}].selected:updated`, handler: this._selectedUpdated},
             {watch: `rows[${this.rowId}].status:updated`, handler: this._statusUpdated},
             {watch: `rows[${this.rowId}].customSettings:updated`, handler: this._customSettingsUpdated},
+            {watch: `rows[${this.rowId}].sourceSelectDisabled:updated`, handler: this._sourceSelectDisabledUpdated},
+            {watch: `rows[${this.rowId}].detectedSourceLang:updated`, handler: this._detectedSourceLangUpdated},
+            {watch: `rows[${this.rowId}].sourceLang:updated`, handler: this._sourceLangUpdated},
         ];
+    }
+
+    /**
+     * Handler when sourceSelectDisabled changes.
+     *
+     * @param {object} args Watcher arguments.
+     * @param {object} args.element The updated row element.
+     */
+    _sourceSelectDisabledUpdated({element}) {
+        const select = this.getElement(this.selectors.sourceSelect);
+        if (select) {
+            select.disabled = Boolean(element.sourceSelectDisabled);
+        }
+    }
+
+    /**
+     * Handler when detectedSourceLang changes.
+     *
+     * @param {object} args Watcher arguments.
+     * @param {object} args.element The updated row element.
+     */
+    _detectedSourceLangUpdated({element}) {
+        this._updateSourceSelectUI(element);
+    }
+
+    /**
+     * Handler when sourceLang changes.
+     *
+     * @param {object} args Watcher arguments.
+     * @param {object} args.element The updated row element.
+     */
+    _sourceLangUpdated({element}) {
+        const select = this.getElement(this.selectors.sourceSelect);
+        if (select && element.sourceLang) {
+            select.value = element.sourceLang;
+        }
+        this._updateSourceSelectUI(element);
+    }
+
+    /**
+     * Helper to update source select dropdown styling and warnings.
+     *
+     * @param {object} row Row state object.
+     */
+    _updateSourceSelectUI(row) {
+        const select = this.getElement(this.selectors.sourceSelect);
+        if (!select) {
+            return;
+        }
+
+        if (row.sourceSelectDisabled !== undefined) {
+            select.disabled = Boolean(row.sourceSelectDisabled);
+        }
+
+        const globalSourceLang = this.reactive.state.globalSettings?.sourceLang || '';
+        const isDiff = Boolean(
+            row.detectedSourceLang &&
+            globalSourceLang &&
+            row.detectedSourceLang.toLowerCase() !== globalSourceLang.toLowerCase()
+        );
+
+        if (isDiff) {
+            select.classList.add('is-warning', 'border-warning');
+        } else {
+            select.classList.remove('is-warning', 'border-warning');
+        }
     }
 
     /**

@@ -111,6 +111,15 @@ final class langhelper_test extends advanced_testcase {
         $this->assertTrue($options[$symbol . 'en-GB']['selected']);
         $this->assertFalse($options[$symbol . 'en-US']['disabled']);
         $this->assertFalse($options[$symbol . 'en-US']['selected']);
+
+        // Main source language options (allowrephrase = false) must never have rephrase symbols.
+        $mainsources = $this->indexbycode($helper->preparesourcesoptionlangs(true, false));
+        $this->assertArrayHasKey('en', $mainsources);
+        $this->assertArrayNotHasKey($symbol . 'en', $mainsources);
+
+        // Row source language options (allowrephrase = true) must have rephrase symbol when matching target.
+        $rowsources = $this->indexbycode($helper->preparesourcesoptionlangs(false, true));
+        $this->assertArrayHasKey($symbol . 'en', $rowsources);
     }
 
     /**
@@ -501,6 +510,25 @@ final class langhelper_test extends advanced_testcase {
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
         $this->assertEquals('Synced Glossary', $result[0]->name);
+    }
+
+    /**
+     * Test cookie initialization for source and target languages.
+     *
+     * @covers \local_deepler\local\services\lang_helper::__construct
+     * @return void
+     */
+    public function test_languages_initialized_from_cookies(): void {
+        $_COOKIE['local_deepler_sourcelang'] = 'fr';
+        $_COOKIE['local_deepler_targetlang'] = 'de';
+
+        $helper = new lang_helper($this->mocktranslator, 'mockapikey');
+
+        $this->assertEquals('fr', $helper->currentlang);
+        $this->assertEquals('de', $helper->targetlang);
+
+        unset($_COOKIE['local_deepler_sourcelang']);
+        unset($_COOKIE['local_deepler_targetlang']);
     }
 
     /**

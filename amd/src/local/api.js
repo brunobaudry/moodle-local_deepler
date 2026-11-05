@@ -140,6 +140,25 @@ define(['core/log', 'core/ajax'], (Log, Ajax) => {
     };
 
     /**
+     * Calls Deepl's source language auto-detection.
+     *
+     * @param {string} text
+     * @param {string} rowId
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const detectSourceLanguage = (text, rowId, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_detect_source_language',
+            args: {
+                text: text,
+                row_id: rowId,
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
      * Api to be used by the other modules.
      */
     return {
@@ -154,6 +173,7 @@ define(['core/log', 'core/ajax'], (Log, Ajax) => {
         updateGlossariesVisibility: updateGlossariesVisibility,
         updateTranslationsInDb: updateTranslationsInDb,
         translate: translate,
-        rephrase: rephrase
+        rephrase: rephrase,
+        detectSourceLanguage: detectSourceLanguage
     };
 });

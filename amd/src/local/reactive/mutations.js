@@ -105,6 +105,42 @@ export default class {
     }
 
     /**
+     * Set source language for a specific row.
+     *
+     * @param {StateManager} stateManager The state manager.
+     * @param {string} rowId The row identifier.
+     * @param {string} sourceLang The source language code.
+     */
+    async setRowSourceLang(stateManager, rowId, sourceLang) {
+        stateManager.setReadOnly(false);
+        const row = stateManager.get('rows', rowId);
+        if (row) {
+            row.sourceLang = sourceLang;
+            row.isSourceLangOverridden = true;
+        }
+        stateManager.setReadOnly(true);
+    }
+
+    /**
+     * Set detected source language for a specific row.
+     *
+     * @param {StateManager} stateManager The state manager.
+     * @param {string} rowId The row identifier.
+     * @param {string} detectedLang The detected source language code.
+     */
+    async setDetectedSourceLang(stateManager, rowId, detectedLang) {
+        stateManager.setReadOnly(false);
+        const row = stateManager.get('rows', rowId);
+        if (row) {
+            row.detectedSourceLang = detectedLang;
+            if (detectedLang) {
+                row.sourceLang = detectedLang;
+            }
+        }
+        stateManager.setReadOnly(true);
+    }
+
+    /**
      * Update translated text of a row.
      *
      * @param {StateManager} stateManager The state manager.

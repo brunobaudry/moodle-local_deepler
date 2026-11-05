@@ -81,7 +81,7 @@ class translate_page implements renderable, templatable {
         // Data for the mustache template.
         $data->langstrings = $this->langpacks->preparestrings();
         $data->targetlangs = $this->langpacks->preparetargetsoptionlangs();
-        $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs();
+        $data->sourcelangs = $this->langpacks->preparesourcesoptionlangs(true, false);
 
         // Hacky fix but the only way to adjust html...
         // This could be overridden in css and I might look at that fix for the future.

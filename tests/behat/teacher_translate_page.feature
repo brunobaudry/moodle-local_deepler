@@ -64,3 +64,14 @@ Feature: Check initial state of the course translation page
     When I click on "Reset to Global Defaults" "button"
     Then "Translation Settings for Field" "dialogue" should not be visible
     And ".local_deepler__custom-settings-indicator" "css_element" should not be visible
+
+  Scenario: Dynamic refresh of previousTranslationStatus bullets when selecting target language
+    Given I am on the "C1" "course" page
+    When I navigate to "DeepL Translator" in current page administration
+    Then "#previousTranslationStatus.badge-dark" "css_element" should exist
+    When I select target language "English"
+    Then "#previousTranslationStatus.badge-dark" "css_element" should not exist
+    And "#previousTranslationStatus.badge-primary" "css_element" should exist
+    And the "select-all" "checkbox" should be enabled
+    When I click on "select-all" "checkbox"
+    Then the "local_deepler-translate-header-translatebutton" "button" should be enabled

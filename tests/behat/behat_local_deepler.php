@@ -89,6 +89,35 @@ class behat_local_deepler extends behat_base {
     }
 
     /**
+     * Selects a target language option in the DeepL translator target language dropdown.
+     * Matches by code, name, or partial text, handling optional rephrase (®) symbols.
+     *
+     * @When I select target language :lang
+     * @param string $lang
+     * @return void
+     */
+    public function i_select_target_language(string $lang): void {
+        $session = $this->getSession();
+        $select = $this->find_field('select-target-language');
+        $options = $select->findAll('css', 'option');
+        $langclean = strtolower(trim(str_replace(['®', '_'], ['', '-'], $lang)));
+
+        foreach ($options as $option) {
+            $val = strtolower(trim(str_replace(['®', '_'], ['', '-'], $option->getValue())));
+            $text = strtolower(trim(str_replace(['®', '_'], ['', '-'], $option->getText())));
+            if (empty($val)) {
+                continue;
+            }
+            if ($val === $langclean || $text === $langclean || str_contains($text, $langclean) || str_contains($val, $langclean)) {
+                $select->selectOption($option->getValue());
+                return;
+            }
+        }
+
+        throw new ExpectationException("Target language option matching '$lang' not found", $session);
+    }
+
+    /**
      * Behat helper for css selector.
      *
      * @When I scroll to the element with css selector :cssselector
