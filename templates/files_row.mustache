@@ -1,0 +1,71 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_deepler/files_row
+
+    Template for a single translatable file row.
+}}
+<tr class="file-row {{^supported}}table-secondary text-muted{{/supported}}" data-fileid="{{fileid}}" data-cmid="{{cmid}}" data-sourcelang="{{sourcelang}}">
+    <td class="text-center align-middle">
+        {{#supported}}
+            <input type="checkbox" class="file-select-checkbox" data-action="select-file" data-fileid="{{fileid}}" aria-label="{{filename}}">
+        {{/supported}}
+        {{^supported}}
+            <input type="checkbox" disabled aria-label="{{filename}}">
+        {{/supported}}
+    </td>
+    <td class="align-middle">
+        {{{activityicon}}}
+        <span>{{activityname}}</span>
+    </td>
+    <td class="align-middle">
+        {{{fileicon}}}
+        <a href="{{fileurl}}" target="_blank" class="{{^supported}}text-muted{{/supported}}">{{filename}}</a>
+    </td>
+    <td class="align-middle font-italic small">
+        {{filesize}}
+    </td>
+    <td class="align-middle">
+        <span class="badge badge-light border">{{sourcelang}}</span>
+    </td>
+    <td class="align-middle">
+        {{#supported}}
+            <select class="form-control form-control-sm target-lang-select" data-action="target-lang" data-fileid="{{fileid}}">
+                {{#targetlangs}}
+                    <option value="{{code}}">{{name}}</option>
+                {{/targetlangs}}
+            </select>
+        {{/supported}}
+        {{^supported}}
+            <span class="small text-danger">{{reason}}</span>
+        {{/supported}}
+    </td>
+    <td class="align-middle status-cell" data-fileid="{{fileid}}">
+        <span class="badge badge-secondary status-badge" data-status-for="{{fileid}}">
+            {{#str}} files:queued, local_deepler {{/str}}
+        </span>
+        <span class="status-detail small d-block text-muted mt-1" data-detail-for="{{fileid}}"></span>
+
+        {{#hascompletedduplicate}}
+            <div class="mt-1">
+                <a href="{{newcmurl}}" target="_blank" class="btn btn-xs btn-outline-success py-0 px-1 small">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> {{str_openactivity}}
+                </a>
+            </div>
+        {{/hascompletedduplicate}}
+    </td>
+</tr>

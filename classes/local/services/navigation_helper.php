@@ -269,21 +269,34 @@ class navigation_helper {
      */
     public static function extend_navigation_course(navigation_node $navigation, stdClass $course): void {
         $context = context_course::instance($course->id);
-        if (!self::can_translate_context($context)) {
-            return;
+        if (self::can_translate_context($context)) {
+            $sectionid = self::detect_current_section_id();
+            $url = self::get_translate_url((int)$course->id, $sectionid > 0 ? $sectionid : -99);
+            $title = get_string('pluginname', 'local_deepler');
+            $translatecontent = navigation_node::create(
+                $title,
+                $url,
+                navigation_node::TYPE_CUSTOM,
+                $title,
+                'translate'
+            );
+            $navigation->add_node($translatecontent);
+            $navigation->showinflatnavigation = true;
         }
 
-        $sectionid = self::detect_current_section_id();
-        $url = self::get_translate_url((int)$course->id, $sectionid > 0 ? $sectionid : -99);
-        $title = get_string('pluginname', 'local_deepler');
-        $translatecontent = navigation_node::create(
-            $title,
-            $url,
-            navigation_node::TYPE_CUSTOM,
-            $title,
-            'translate'
-        );
-        $navigation->add_node($translatecontent);
-        $navigation->showinflatnavigation = true;
+        // Add Deepler: Files link if enabled and user has capability.
+        if (get_config('local_deepler', 'filetranslation') && has_capability('local/deepler:translatefiles', $context)) {
+            $filesurl = new moodle_url('/local/deepler/files.php', ['courseid' => (int)$course->id]);
+            $filestitle = get_string('files:menu', 'local_deepler');
+            $filesnode = navigation_node::create(
+                $filestitle,
+                $filesurl,
+                navigation_node::TYPE_CUSTOM,
+                $filestitle,
+                'deepler_files'
+            );
+            $navigation->add_node($filesnode);
+            $navigation->showinflatnavigation = true;
+        }
     }
 }

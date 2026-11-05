@@ -20,6 +20,7 @@
 - [Course Translation Features](#course-translation-features)
   - [Interface & Content Filters](#interface--content-filters)
   - [Status Indicators](#status-indicators)
+  - [Document and File Translation](#document-and-file-translation)
   - [Rephrasing and Text Improvement](#rephrasing-and-text-improvement)
   - [Image and Media Previews](#image-and-media-previews)
   - [Formulas and Technical Formatting](#formulas-and-technical-formatting)
@@ -135,6 +136,13 @@ Every row displays a color-coded status dot so you can quickly monitor translati
 - 🔴 **Red (Not Translated):** The text has no translation in the selected target language.
 - 🟢 **Green (Up to Date):** The text has already been translated and the original source has not changed.
 - 🟠 **Orange (Needs Update):** The text was previously translated, but the original source content has since been edited in Moodle.
+
+### Document and File Translation
+
+In addition to text content, DeepLer provides a dedicated **Deepler: Files** page for translating binary and document files attached to course activities or course overview files:
+- **Supported formats:** `docx`, `pptx`, `xlsx`, `pdf`, `htm/html`, `txt`, `xlf/xliff`, `srt`.
+- **Activity duplication:** For activities like Resources or Folders, DeepLer duplicates the activity, inserts the translated file(s), translates the title/intro, and places the copy right after the source.
+- **Language restriction:** When the `availability_language` plugin is installed, DeepLer automatically pre-fills access restrictions so learners only see the activity corresponding to their selected language.
 
 ### Rephrasing and Text Improvement
 

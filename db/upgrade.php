@@ -85,6 +85,11 @@ function xmldb_local_deepler_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026100200, 'local', 'deepler');
     }
 
+    if ($oldversion < 2026110500) {
+        local_deepler_upgrade_2026110500($dbman);
+        upgrade_plugin_savepoint(true, 2026110500, 'local', 'deepler');
+    }
+
     return true;
 }
 
@@ -300,5 +305,44 @@ function local_deepler_convert_yaml_to_json(string $stored): void {
     } catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
         // Stored YAML was broken — overwrite with fresh JSON default.
         local_deepler_seed_json_config();
+    }
+}
+
+/**
+ * Upgrade step for version 2026110500: create local_deepler_files table.
+ *
+ * @param \database_manager $dbman
+ * @return void
+ * @throws \ddl_exception
+ */
+function local_deepler_upgrade_2026110500(\database_manager $dbman): void {
+    $table = new xmldb_table('local_deepler_files');
+
+    $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+    $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+    $table->add_field('fileid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('contenthash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('sourcelang', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('targetlang', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('status', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('documentid', XMLDB_TYPE_CHAR, '64', null, null, null, null);
+    $table->add_field('documentkey', XMLDB_TYPE_CHAR, '64', null, null, null, null);
+    $table->add_field('newcmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+    $table->add_field('newfileid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+    $table->add_field('billedcharacters', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+    $table->add_field('errormessage', XMLDB_TYPE_TEXT, null, null, null, null, null);
+    $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+    $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+    $table->add_index('courseid_idx', XMLDB_INDEX_NOTUNIQUE, ['courseid']);
+    $table->add_index('fileid_idx', XMLDB_INDEX_NOTUNIQUE, ['fileid']);
+    $table->add_index('fileid_targetlang_idx', XMLDB_INDEX_NOTUNIQUE, ['fileid', 'targetlang']);
+
+    if (!$dbman->table_exists($table)) {
+        $dbman->create_table($table);
     }
 }

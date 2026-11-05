@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_deepler/files_section
+
+    Template for a section block in Deepler files page.
+}}
+<div class="card mb-4 files-section-card" data-sectionid="{{sectionid}}">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">{{sectionname}}</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="thead-light">
+                    <tr>
+                        <th style="width: 40px;" class="text-center">#</th>
+                        <th>{{#str}} files:activityname, local_deepler {{/str}}</th>
+                        <th>{{#str}} files:filename, local_deepler {{/str}}</th>
+                        <th style="width: 90px;">{{#str}} files:filesize, local_deepler {{/str}}</th>
+                        <th style="width: 80px;">{{#str}} files:sourcelang, local_deepler {{/str}}</th>
+                        <th style="width: 220px;">{{#str}} files:selecttargets, local_deepler {{/str}}</th>
+                        <th style="width: 200px;">{{#str}} files:status, local_deepler {{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#rows}}
+                        {{> local_deepler/files_row }}
+                    {{/rows}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -140,6 +140,63 @@ define(['core/log', 'core/ajax'], (Log, Ajax) => {
     };
 
     /**
+     * Uploads a document file to DeepL for translation.
+     *
+     * @param {number} fileId
+     * @param {string} sourceLang
+     * @param {string} targetLang
+     * @param {object} options
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const uploadDocument = (fileId, sourceLang, targetLang, options, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_upload_document',
+            args: {
+                fileid: fileId,
+                sourcelang: sourceLang,
+                targetlang: targetLang,
+                options: options || {},
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
+     * Checks status of a document translation job.
+     *
+     * @param {number} jobId
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const getDocumentStatus = (jobId, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_get_document_status',
+            args: {
+                jobid: jobId,
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
+     * Finalizes document translation by creating duplicate activity / saving file.
+     *
+     * @param {number} jobId
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const finalizeDocument = (jobId, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_finalize_document',
+            args: {
+                jobid: jobId,
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
      * Api to be used by the other modules.
      */
     return {
@@ -154,6 +211,9 @@ define(['core/log', 'core/ajax'], (Log, Ajax) => {
         updateGlossariesVisibility: updateGlossariesVisibility,
         updateTranslationsInDb: updateTranslationsInDb,
         translate: translate,
-        rephrase: rephrase
+        rephrase: rephrase,
+        uploadDocument: uploadDocument,
+        getDocumentStatus: getDocumentStatus,
+        finalizeDocument: finalizeDocument
     };
 });

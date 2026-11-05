@@ -36,4 +36,13 @@ $capabilities = [
                 'contextlevel' => CONTEXT_USER,
                 'archetypes' => ['manager' => CAP_ALLOW],
         ],
+        'local/deepler:translatefiles' => [
+                'captype' => 'write',
+                'riskbitmask' => RISK_XSS,
+                'contextlevel' => CONTEXT_COURSE,
+                'archetypes' => [
+                        'manager' => CAP_ALLOW,
+                        'editingteacher' => CAP_ALLOW,
+                ],
+        ],
 ];

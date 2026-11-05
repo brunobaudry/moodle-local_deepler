@@ -1,0 +1,224 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace local_deepler\local\services;
+
+use context_course;
+use context_module;
+use get_fast_modinfo;
+use local_deepler\local\data\translatable_file;
+use stdClass;
+use stored_file;
+
+/**
+ * Service to discover and inspect translatable files in a Moodle course.
+ *
+ * @package    local_deepler
+ * @copyright  2026 Bruno Baudry
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class file_scanner {
+    /** @var array Supported file extensions by DeepL Document API. */
+    public const SUPPORTED_EXTENSIONS = [
+        'docx',
+        'pptx',
+        'xlsx',
+        'pdf',
+        'htm',
+        'html',
+        'txt',
+        'xlf',
+        'xliff',
+        'srt',
+    ];
+
+    /** @var stdClass Course object. */
+    protected stdClass $course;
+
+    /** @var int Max file size allowed in bytes. */
+    protected int $maxbytes;
+
+    /**
+     * Constructor.
+     *
+     * @param stdClass $course
+     * @param int $maxbytes Maximum bytes allowed (0 to use admin setting or default).
+     */
+    public function __construct(stdClass $course, int $maxbytes = 0) {
+        $this->course = $course;
+        if ($maxbytes <= 0) {
+            $configmax = get_config('local_deepler', 'filemaxbytes');
+            $this->maxbytes = $configmax ? (int)$configmax : 10485760; // 10 MB default.
+        } else {
+            $this->maxbytes = $maxbytes;
+        }
+    }
+
+    /**
+     * Check if a stored_file has a supported extension and fits size limits.
+     *
+     * @param stored_file $file
+     * @param int $maxbytes
+     * @return bool
+     */
+    public static function is_supported(stored_file $file, int $maxbytes = 10485760): bool {
+        if ($file->is_directory() || $file->get_filename() === '.') {
+            return false;
+        }
+        $ext = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
+        if (!in_array($ext, self::SUPPORTED_EXTENSIONS, true)) {
+            return false;
+        }
+        if ($maxbytes > 0 && $file->get_filesize() > $maxbytes) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get unsupported reason for a stored_file.
+     *
+     * @param stored_file $file
+     * @param int $maxbytes
+     * @return string Empty if supported, 'unsupported_extension', or 'file_too_big'.
+     */
+    public static function get_unsupported_reason(stored_file $file, int $maxbytes = 10485760): string {
+        if ($file->is_directory() || $file->get_filename() === '.') {
+            return 'directory';
+        }
+        $ext = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
+        if (!in_array($ext, self::SUPPORTED_EXTENSIONS, true)) {
+            return 'unsupported_extension';
+        }
+        if ($maxbytes > 0 && $file->get_filesize() > $maxbytes) {
+            return 'file_too_big';
+        }
+        return '';
+    }
+
+    /**
+     * Scan the course and return all translatable file DTOs grouped by section and module.
+     *
+     * @return translatable_file[]
+     */
+    public function get_course_files(): array {
+        global $DB;
+
+        // Fetch all existing translation jobs for this course.
+        $jobsrecords = $DB->get_records('local_deepler_files', ['courseid' => $this->course->id], 'id ASC');
+        $jobsbyfile = [];
+        foreach ($jobsrecords as $job) {
+            $jobsbyfile[$job->fileid][] = $job;
+        }
+
+        $fs = get_file_storage();
+        $results = [];
+
+        // 1. Scan Course-level files (summary, overviewfiles, legacy).
+        $coursecontext = context_course::instance($this->course->id);
+        $courseareas = ['summary', 'overviewfiles', 'legacy'];
+        foreach ($courseareas as $area) {
+            $files = $fs->get_area_files($coursecontext->id, 'course', $area, 0, 'filename', false);
+            foreach ($files as $file) {
+                if ($file->is_directory() || $file->get_filename() === '.') {
+                    continue;
+                }
+                $supported = self::is_supported($file, $this->maxbytes);
+                $reason = self::get_unsupported_reason($file, $this->maxbytes);
+                $filejobs = $jobsbyfile[$file->get_id()] ?? [];
+
+                $results[] = new translatable_file(
+                    $file,
+                    null,
+                    'course',
+                    $area,
+                    $supported,
+                    $reason,
+                    $filejobs,
+                    0,
+                    0,
+                    get_string('files:courselevel', 'local_deepler')
+                );
+            }
+        }
+
+        // 2. Scan activity modules per section.
+        $modinfo = get_fast_modinfo($this->course);
+        $sections = $modinfo->get_section_info_all();
+
+        foreach ($sections as $sectionnum => $sectioninfo) {
+            if (empty($modinfo->sections[$sectionnum])) {
+                continue;
+            }
+
+            $sectionname = get_section_name($this->course, $sectioninfo);
+            $sectionid = (int)$sectioninfo->id;
+
+            foreach ($modinfo->sections[$sectionnum] as $cmid) {
+                $cm = $modinfo->cms[$cmid] ?? null;
+                if (!$cm) {
+                    continue;
+                }
+
+                $context = context_module::instance($cm->id);
+                $modname = $cm->modname;
+
+                // Determine fileareas to inspect for this module.
+                $areas = [];
+                if ($modname === 'resource' || $modname === 'folder') {
+                    $areas[] = ['component' => 'mod_' . $modname, 'filearea' => 'content'];
+                }
+                $areas[] = ['component' => 'mod_' . $modname, 'filearea' => 'intro'];
+                if ($modname === 'assign') {
+                    $areas[] = ['component' => 'mod_assign', 'filearea' => 'introattachment'];
+                }
+
+                $seenfileids = [];
+                foreach ($areas as $area) {
+                    $files = $fs->get_area_files($context->id, $area['component'], $area['filearea'], false, 'filename', false);
+                    foreach ($files as $file) {
+                        if ($file->is_directory() || $file->get_filename() === '.') {
+                            continue;
+                        }
+                        if (isset($seenfileids[$file->get_id()])) {
+                            continue;
+                        }
+                        $seenfileids[$file->get_id()] = true;
+
+                        $supported = self::is_supported($file, $this->maxbytes);
+                        $reason = self::get_unsupported_reason($file, $this->maxbytes);
+                        $filejobs = $jobsbyfile[$file->get_id()] ?? [];
+
+                        $results[] = new translatable_file(
+                            $file,
+                            $cm,
+                            $area['component'],
+                            $area['filearea'],
+                            $supported,
+                            $reason,
+                            $filejobs,
+                            $sectionid,
+                            $sectionnum,
+                            $sectionname
+                        );
+                    }
+                }
+            }
+        }
+
+        return $results;
+    }
+}

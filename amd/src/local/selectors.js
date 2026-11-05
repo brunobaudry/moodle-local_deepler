@@ -131,6 +131,18 @@ define([], ()=>{
             visibilityDropdown: '[data-id="local_deepler/glossary_visibility"]',
             entriesviewer: '[data-id="local_deepler/glossary_entriesviewer"]',
             entriesviewerPage: '[data-id="local_deepler/glossary_entriesviewer_page"]',
+        },
+        files: {
+            container: '#local_deepler_files_container',
+            selectAllBtn: '[data-action="files-select-all"]',
+            translateSelectedBtn: '[data-action="files-translate-selected"]',
+            fileCheckbox: 'input[data-action="select-file"]',
+            fileCheckboxChecked: 'input[data-action="select-file"]:checked',
+            targetSelect: 'select[data-action="target-lang"]',
+            statusBadge: '[data-status-for="<FILEID>"]',
+            statusDetail: '[data-detail-for="<FILEID>"]',
+            fileRow: 'tr.file-row[data-fileid="<FILEID>"]',
+            statusCell: '.status-cell[data-fileid="<FILEID>"]',
         }
     };
 });

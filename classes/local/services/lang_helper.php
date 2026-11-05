@@ -792,6 +792,15 @@ class lang_helper {
     }
 
     /**
+     * Getter for target langs (alias with correct spelling).
+     *
+     * @return array|\DeepL\Language[]
+     */
+    public function gettargetlanguages(): array {
+        return $this->deepltargets;
+    }
+
+    /**
      * Getter for current lang.
      *
      * @param bool $mainlonly

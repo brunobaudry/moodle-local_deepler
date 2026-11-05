@@ -33,6 +33,9 @@ if (!defined('LOCAL_DEEPLER_CAP')) {
 if (!defined('LOCAL_DEEPLER_REMOVEMLANG_CAP')) {
     define('LOCAL_DEEPLER_REMOVEMLANG_CAP', 'local/deepler:deletetranslations');
 }
+if (!defined('LOCAL_DEEPLER_TRANSLATEFILES_CAP')) {
+    define('LOCAL_DEEPLER_TRANSLATEFILES_CAP', 'local/deepler:translatefiles');
+}
 // Add functions for webservices.
 $functions = [
         'local_deepler_get_glossary_entries' => [
@@ -84,5 +87,25 @@ $functions = [
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
-
+        'local_deepler_upload_document' => [
+                'classname' => 'local_deepler\external\upload_document',
+                'description' => 'Upload a document to DeepL for translation',
+                'type' => 'write',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_TRANSLATEFILES_CAP,
+        ],
+        'local_deepler_get_document_status' => [
+                'classname' => 'local_deepler\external\get_document_status',
+                'description' => 'Check status of a DeepL document translation job',
+                'type' => 'read',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_TRANSLATEFILES_CAP,
+        ],
+        'local_deepler_finalize_document' => [
+                'classname' => 'local_deepler\external\finalize_document',
+                'description' => 'Finalize a translated document and create duplicated activity',
+                'type' => 'write',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_TRANSLATEFILES_CAP,
+        ],
 ];
