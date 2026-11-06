@@ -19,20 +19,125 @@
 
     Template for Deepler file translation main page.
 }}
-<div class="local_deepler-files-container" id="local_deepler_files_container" data-courseid="{{courseid}}">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>{{coursename}}</h3>
+<div class="local_deepler-files-container" id="local_deepler_files_container" data-courseid="{{courseid}}" data-glossaries="{{glossariesjson}}">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h3 class="mb-0">{{coursename}}</h3>
+        </div>
+
         {{#hasfiles}}
-        <div class="d-flex align-items-center">
-            <button type="button" class="btn btn-outline-secondary mr-2" data-action="files-select-all">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Global Source Language -->
+            <div class="d-inline-flex align-items-center me-2">
+                <label for="local_deepler_global_sourcelang" class="me-1 mb-0 small text-muted font-weight-bold">
+                    {{#str}} files:globalsourcelang, local_deepler {{/str}}:
+                </label>
+                <select id="local_deepler_global_sourcelang" class="form-control form-control-sm custom-select custom-select-sm" data-action="global-sourcelang">
+                    {{#sourcelangs}}
+                        <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                    {{/sourcelangs}}
+                </select>
+            </div>
+
+            <!-- Global Target Language -->
+            <div class="d-inline-flex align-items-center me-2">
+                <label for="local_deepler_global_targetlang" class="me-1 mb-0 small text-muted font-weight-bold">
+                    {{#str}} files:globaltargetlang, local_deepler {{/str}}:
+                </label>
+                <select id="local_deepler_global_targetlang" class="form-control form-control-sm custom-select custom-select-sm" data-action="global-targetlang">
+                    {{#targetlangs}}
+                        <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                    {{/targetlangs}}
+                </select>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-outline-secondary me-2" data-action="files-select-all">
                 {{str_selectall}}
             </button>
-            <button type="button" class="btn btn-primary" data-action="files-translate-selected" disabled>
+            <button type="button" class="btn btn-sm btn-primary" data-action="files-translate-selected" disabled>
                 <i class="fa-solid fa-language mr-1"></i> {{str_translateselected}}
             </button>
         </div>
         {{/hasfiles}}
     </div>
+
+    {{#hasfiles}}
+    <!-- Global Additional Settings Toggle -->
+    <div class="text-end text-right mb-2">
+        <a id="local_deepler__settings"
+           class="link small text-decoration-none"
+           data-toggle="collapse" data-bs-toggle="collapse"
+           href="#local_deepler__additionalsettings"
+           role="button"
+           aria-expanded="false"
+           aria-controls="local_deepler__additionalsettings">
+            <i class="fa-solid fa-caret-right collapse show"></i>
+            <i class="fa-solid fa-caret-down collapse"></i>
+            {{str_seesettings}}
+        </a>
+    </div>
+
+    <!-- Global Additional Settings Panel -->
+    <div class="container-fluid collapse card p-3 mb-4 local_deepler-bg-secondary-subtle bg-light" id="local_deepler__additionalsettings">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h5 class="mb-0">{{#str}}deeplapidoctitle,local_deepler{{/str}}</h5>
+            <div>
+                <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
+                <a href="https://developers.deepl.com/api-reference/document/upload-and-translate-a-document" target="_blank" class="small">
+                    {{#str}}deeplapidoc,local_deepler{{/str}}
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Formality Option -->
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold d-block">{{#str}}formality,local_deepler{{/str}}</label>
+                <div class="btn-group btn-group-sm btn-group-toggle d-flex flex-wrap" data-toggle="buttons" id="local_deepler_global_formality_group">
+                    <label class="btn btn-outline-secondary active">
+                        <input type="radio" name="global_formality" id="formality_default" value="default" checked autocomplete="off">
+                        {{#str}}formalitydefault,local_deepler{{/str}}
+                    </label>
+                    <label class="btn btn-outline-secondary">
+                        <input type="radio" name="global_formality" id="formality_prefer_more" value="prefer_more" autocomplete="off">
+                        {{#str}}formalityprefermore,local_deepler{{/str}}
+                    </label>
+                    <label class="btn btn-outline-secondary">
+                        <input type="radio" name="global_formality" id="formality_prefer_less" value="prefer_less" autocomplete="off">
+                        {{#str}}formalitypreferless,local_deepler{{/str}}
+                    </label>
+                    <label class="btn btn-outline-secondary">
+                        <input type="radio" name="global_formality" id="formality_more" value="more" autocomplete="off">
+                        {{#str}}formalitymore,local_deepler{{/str}}
+                    </label>
+                    <label class="btn btn-outline-secondary">
+                        <input type="radio" name="global_formality" id="formality_less" value="less" autocomplete="off">
+                        {{#str}}formalityless,local_deepler{{/str}}
+                    </label>
+                </div>
+            </div>
+
+            <!-- Glossary Option -->
+            <div class="col-md-4 mb-3" id="local_deepler_global_glossary_container">
+                <label class="form-label font-weight-bold d-block">{{#str}}glossary:name,local_deepler{{/str}}</label>
+                <div id="local_deepler_global_glossary_selector_wrapper">
+                    {{{glossaryselector}}}
+                </div>
+            </div>
+
+            <!-- Document Minification Option -->
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold d-block">{{str_minification}}</label>
+                <div class="form-check form-switch custom-control custom-switch mt-1">
+                    <input type="checkbox" class="form-check-input custom-control-input" id="local_deepler_global_minification">
+                    <label class="form-check-label custom-control-label small text-muted" for="local_deepler_global_minification">
+                        {{str_minification_desc}}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/hasfiles}}
 
     {{^hasfiles}}
     <div class="alert alert-info" role="alert">

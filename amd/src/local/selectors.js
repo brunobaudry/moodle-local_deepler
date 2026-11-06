@@ -136,13 +136,23 @@ define([], ()=>{
             container: '#local_deepler_files_container',
             selectAllBtn: '[data-action="files-select-all"]',
             translateSelectedBtn: '[data-action="files-translate-selected"]',
+            globalSourceLang: '#local_deepler_global_sourcelang',
+            globalTargetLang: '#local_deepler_global_targetlang',
+            globalMinification: '#local_deepler_global_minification',
+            globalFormality: 'input[name="global_formality"]',
             fileCheckbox: 'input[data-action="select-file"]',
             fileCheckboxChecked: 'input[data-action="select-file"]:checked',
+            fileSourceSelect: 'select[data-action="file-source-lang"]',
             targetSelect: 'select[data-action="target-lang"]',
+            rowSettingsBtn: '[data-action="row-settings"]',
+            customSettingsIndicator: '[data-indicator-fileid="<FILEID>"]',
             statusBadge: '[data-status-for="<FILEID>"]',
             statusDetail: '[data-detail-for="<FILEID>"]',
             fileRow: 'tr.file-row[data-fileid="<FILEID>"]',
             statusCell: '.status-cell[data-fileid="<FILEID>"]',
+            toggleTranslationsBtn: '.toggle-translations-btn',
+            translationsRow: 'tr.file-translations-row[data-translations-for="<FILEID>"]',
+            translationsList: '.translations-list[data-list-for="<FILEID>"]',
         }
     };
 });

@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use local_deepler\local\data\multilanger;
 use local_deepler\local\services\file_scanner;
 use local_deepler\local\services\lang_helper;
 use moodle_url;
@@ -44,6 +45,9 @@ class files_page implements renderable, templatable {
     /** @var string Plugin release version. */
     protected string $version;
 
+    /** @var mixed Multilang filter. */
+    protected mixed $mlangfilter;
+
     /**
      * Constructor.
      *
@@ -51,12 +55,48 @@ class files_page implements renderable, templatable {
      * @param array $files
      * @param lang_helper $langpack
      * @param string $version
+     * @param mixed $mlangfilter
      */
-    public function __construct(stdClass $course, array $files, lang_helper $langpack, string $version) {
+    public function __construct(
+        stdClass $course,
+        array $files,
+        lang_helper $langpack,
+        string $version,
+        mixed $mlangfilter = null
+    ) {
         $this->course = $course;
         $this->files = $files;
         $this->langpack = $langpack;
         $this->version = $version;
+        $this->mlangfilter = $mlangfilter;
+    }
+
+    /**
+     * Filter text through multilang filter and strip raw {mlang} tags if any remain.
+     *
+     * @param string $text
+     * @return string
+     */
+    public function filter_multilang_text(string $text): string {
+        if ($this->mlangfilter && method_exists($this->mlangfilter, 'filter')) {
+            $text = $this->mlangfilter->filter($text);
+        }
+
+        // If {mlang} tags still present, parse with multilanger and extract matching or fallback string.
+        if (str_contains($text, '{mlang')) {
+            $ml = new multilanger($text);
+            $langs = $ml->findmlangs_withouttags();
+            $currlang = $this->langpack->getcurrentlang(true);
+            if (isset($langs[$currlang])) {
+                $text = $langs[$currlang];
+            } else if (isset($langs['other'])) {
+                $text = $langs['other'];
+            } else if (!empty($langs)) {
+                $text = reset($langs);
+            }
+        }
+
+        return $text;
     }
 
     /**
@@ -66,22 +106,46 @@ class files_page implements renderable, templatable {
      * @return stdClass
      */
     public function export_for_template(renderer_base $output): stdClass {
+        global $PAGE;
+
         $data = new stdClass();
         $data->courseid = (int)$this->course->id;
-        $data->coursename = format_string($this->course->fullname);
+        $data->coursename = $this->filter_multilang_text(format_string($this->course->fullname));
         $data->hasfiles = !empty($this->files);
+        $data->version = $this->version;
+
         $data->str_empty = get_string('files:empty', 'local_deepler');
         $data->str_selectall = get_string('files:selectall', 'local_deepler');
         $data->str_translateselected = get_string('files:translateselected', 'local_deepler');
         $data->str_title = get_string('files:title', 'local_deepler');
+        $data->str_seesettings = get_string('files:seesettings', 'local_deepler');
+        $data->str_customsettings = get_string('files:customsettings', 'local_deepler');
+        $data->str_minification = get_string('files:minification', 'local_deepler');
+        $data->str_minification_desc = get_string('files:minification_desc', 'local_deepler');
 
-        // Target languages options (limited to installed Moodle languages).
+        // 1. Source languages options.
+        $sourcelanguages = $this->langpack->preparesourcesoptionlangs();
+        $globalsource = $this->langpack->get_deeplsourcelang() ?: $this->langpack->getcurrentlang(true);
+        $sourcelangsformatted = [];
+        foreach ($sourcelanguages as $slang) {
+            $rawcode = $slang['code'];
+            $cleancode = str_replace(lang_helper::REPHRASESYMBOL, '', $rawcode);
+            $code = strtolower($cleancode);
+            $sourcelangsformatted[] = [
+                'code' => $code,
+                'name' => $slang['verbose'] . ' (' . strtoupper($cleancode) . ')',
+                'selected' => ($code === strtolower($globalsource)),
+            ];
+        }
+        $data->sourcelangs = $sourcelangsformatted;
+        $data->globalsource = strtolower($globalsource);
+
+        // 2. Target languages options (limited to installed Moodle languages).
         $targetlanguages = $this->langpack->preparetargetsoptionlangs();
         $targetlangsformatted = [];
         $defaulttarget = '';
         foreach ($targetlanguages as $idx => $tlang) {
             $rawcode = $tlang['code'];
-            // Clean rephrase symbol if present.
             $cleancode = str_replace(lang_helper::REPHRASESYMBOL, '', $rawcode);
             $code = strtolower($cleancode);
             if ($defaulttarget === '') {
@@ -96,15 +160,46 @@ class files_page implements renderable, templatable {
         $data->targetlangs = $targetlangsformatted;
         $data->defaulttarget = $defaulttarget;
 
-        // Group files by section.
+        // 3. Glossaries data & rendered selector.
+        $glorenderer = $PAGE->get_renderer('local_deepler', 'glossary');
+        $glossaries = $this->langpack->getusersglossaries() ?? [];
+        $poolglossaries = $this->langpack->getpoolglossaries($glossaries) ?? [];
+        $publicglossaries = $this->langpack->getpublicglossaries() ?? [];
+        $allglossaries = array_merge($glossaries, $publicglossaries, $poolglossaries);
+
+        $data->glossaryselector = $glorenderer->glossay_selector_deepl(
+            $allglossaries,
+            $this->langpack->getcurrentlang(true),
+            $defaulttarget
+        );
+
+        $glossarydata = [];
+        foreach ($allglossaries as $g) {
+            $nameadd = ' (' . get_string('glossary:visibility:private', 'local_deepler') . ')';
+            if ($g->shared === 1) {
+                $nameadd = ' (' . get_string('glossary:visibility:pool', 'local_deepler') . ')';
+            } else if ($g->shared === 2) {
+                $nameadd = ' (' . get_string('glossary:visibility:public', 'local_deepler') . ')';
+            }
+            $glossarydata[] = [
+                'id' => $g->glossaryid,
+                'name' => $g->name . $nameadd,
+                'sourcelang' => strtolower($g->sourcelang),
+                'targetlang' => strtolower($g->targetlang),
+            ];
+        }
+        $data->glossariesjson = json_encode($glossarydata);
+
+        // 4. Group files by section.
         $sections = [];
         foreach ($this->files as $tfile) {
             $secid = $tfile->sectionid;
             if (!isset($sections[$secid])) {
+                $secname = $tfile->sectionname ?: get_string('files:courselevel', 'local_deepler');
                 $sections[$secid] = [
                     'sectionid' => $secid,
                     'sectionnum' => $tfile->sectionnum,
-                    'sectionname' => $tfile->sectionname ?: get_string('files:courselevel', 'local_deepler'),
+                    'sectionname' => $this->filter_multilang_text(format_string($secname)),
                     'rows' => [],
                 ];
             }
@@ -123,8 +218,12 @@ class files_page implements renderable, templatable {
 
             $icon = $output->pix_icon(file_file_icon($file), $file->get_filename(), 'moodle', ['class' => 'icon']);
 
-            $activityname = $cm ? format_string($cm->name) : get_string('files:courselevel', 'local_deepler');
+            $rawactivityname = $cm ? $cm->name : get_string('files:courselevel', 'local_deepler');
+            $activityname = $this->filter_multilang_text(format_string($rawactivityname));
             $activityicon = $cm ? $output->pix_icon('monologo', $cm->modname, 'mod_' . $cm->modname, ['class' => 'icon mr-1']) : '';
+
+            $rawfilename = $file->get_filename();
+            $filename = $this->filter_multilang_text($rawfilename);
 
             // Format reason if unsupported.
             $reasondesc = '';
@@ -137,29 +236,68 @@ class files_page implements renderable, templatable {
                 }
             }
 
-            // Format existing jobs / translations.
-            $existingtranslations = [];
+            // Format existing jobs / translations for grouped display.
+            $translations = [];
             $hascompletedduplicate = false;
             $newcmurl = '';
             foreach ($tfile->jobs as $job) {
-                $existingtranslations[] = [
+                $jobcmurl = '';
+                if ($job->newcmid > 0) {
+                    $jobcmurl = (new moodle_url('/mod/' . ($cm ? $cm->modname : 'resource') . '/view.php', ['id' => $job->newcmid]))->out(false);
+                    $hascompletedduplicate = true;
+                    $newcmurl = $jobcmurl;
+                }
+
+                $statusbadge = 'badge-secondary';
+                $statusstr = get_string('files:' . $job->status, 'local_deepler');
+                if ($job->status === 'done') {
+                    $statusbadge = 'badge-success';
+                } else if ($job->status === 'translating') {
+                    $statusbadge = 'badge-warning';
+                } else if ($job->status === 'error') {
+                    $statusbadge = 'badge-danger';
+                }
+
+                $translations[] = [
+                    'jobid' => (int)$job->id,
                     'targetlang' => strtoupper($job->targetlang),
                     'status' => $job->status,
+                    'statusstr' => $statusstr,
+                    'statusbadge' => $statusbadge,
                     'newcmid' => (int)$job->newcmid,
-                    'newfileid' => (int)$job->newfileid,
+                    'newcmurl' => $jobcmurl,
+                    'billedchars' => (int)$job->billedcharacters,
+                    'str_billedchars' => get_string('files:billedchars', 'local_deepler', (int)$job->billedcharacters),
+                    'timecreated' => userdate($job->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
+                    'errormessage' => $job->errormessage ?: '',
                 ];
-                if ($job->status === 'done' && $job->newcmid > 0) {
-                    $hascompletedduplicate = true;
-                    $newcmurl = (new moodle_url('/mod/' . ($cm ? $cm->modname : 'resource') . '/view.php', ['id' => $job->newcmid]))->out(false);
-                }
             }
 
-            $sourcelang = $this->langpack->getcurrentlang(true);
+            // Per-row source language options (with selected state matching global default).
+            $rowsourcelangs = [];
+            foreach ($sourcelangsformatted as $sl) {
+                $rowsourcelangs[] = [
+                    'code' => $sl['code'],
+                    'name' => $sl['name'],
+                    'selected' => ($sl['code'] === strtolower($globalsource)),
+                ];
+            }
+
+            // Per-row target language options (with selected state matching default target).
+            $rowtargetlangs = [];
+            foreach ($targetlangsformatted as $tl) {
+                $rowtargetlangs[] = [
+                    'code' => $tl['code'],
+                    'name' => $tl['name'],
+                    'selected' => ($tl['code'] === $defaulttarget),
+                ];
+            }
 
             $sections[$secid]['rows'][] = [
                 'fileid' => (int)$file->get_id(),
                 'cmid' => $cm ? (int)$cm->id : 0,
-                'filename' => $file->get_filename(),
+                'filename' => $filename,
+                'rawfilename' => $rawfilename,
                 'filesize' => display_size($file->get_filesize()),
                 'fileurl' => $fileurl,
                 'fileicon' => $icon,
@@ -167,8 +305,12 @@ class files_page implements renderable, templatable {
                 'activityicon' => $activityicon,
                 'supported' => $tfile->supported,
                 'reason' => $reasondesc,
-                'sourcelang' => strtoupper($sourcelang),
-                'existingtranslations' => $existingtranslations,
+                'sourcelangs' => $rowsourcelangs,
+                'targetlangs' => $rowtargetlangs,
+                'hastranslations' => !empty($translations),
+                'translationscount' => count($translations),
+                'str_translations' => get_string('files:translations', 'local_deepler', count($translations)),
+                'translations' => $translations,
                 'hascompletedduplicate' => $hascompletedduplicate,
                 'newcmurl' => $newcmurl,
                 'str_openactivity' => get_string('files:openactivity', 'local_deepler'),

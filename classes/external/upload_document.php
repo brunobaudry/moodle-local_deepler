@@ -56,6 +56,7 @@ class upload_document extends external_api {
             'options' => new external_single_structure([
                 'formality' => new external_value(PARAM_RAW, 'Formality preference', VALUE_DEFAULT, ''),
                 'glossary_id' => new external_value(PARAM_RAW, 'Glossary ID', VALUE_DEFAULT, ''),
+                'enable_document_minification' => new external_value(PARAM_BOOL, 'Enable document minification', VALUE_DEFAULT, false),
             ], 'Translation options', VALUE_DEFAULT, []),
             'version' => new external_value(PARAM_TEXT, 'Plugin release version'),
         ]);
@@ -176,6 +177,9 @@ class upload_document extends external_api {
         }
         if (!empty($params['options']['glossary_id'])) {
             $deeploptions['glossary'] = $params['options']['glossary_id'];
+        }
+        if (!empty($params['options']['enable_document_minification'])) {
+            $deeploptions['enable_document_minification'] = true;
         }
 
         $effective_source = !empty($params['sourcelang']) ? $params['sourcelang'] : null;

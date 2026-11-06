@@ -19,21 +19,24 @@
 
     Template for a section block in Deepler files page.
 }}
-<div class="card mb-4 files-section-card" data-sectionid="{{sectionid}}">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">{{sectionname}}</h5>
+<div class="card mb-4 files-section-card shadow-sm" data-sectionid="{{sectionid}}">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+        <h5 class="mb-0 font-weight-bold">{{sectionname}}</h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0">
+            <table class="table table-hover mb-0">
                 <thead class="thead-light">
                     <tr>
-                        <th style="width: 40px;" class="text-center">#</th>
+                        <th style="width: 70px;" class="text-center">#</th>
                         <th>{{#str}} files:activityname, local_deepler {{/str}}</th>
                         <th>{{#str}} files:filename, local_deepler {{/str}}</th>
-                        <th style="width: 90px;">{{#str}} files:filesize, local_deepler {{/str}}</th>
-                        <th style="width: 80px;">{{#str}} files:sourcelang, local_deepler {{/str}}</th>
-                        <th style="width: 220px;">{{#str}} files:selecttargets, local_deepler {{/str}}</th>
+                        <th style="width: 80px;">{{#str}} files:filesize, local_deepler {{/str}}</th>
+                        <th style="width: 140px;">{{#str}} files:sourcelang, local_deepler {{/str}}</th>
+                        <th style="width: 170px;">{{#str}} files:selecttargets, local_deepler {{/str}}</th>
+                        <th style="width: 50px;" class="text-center" title="{{#str}} customsettings, local_deepler {{/str}}">
+                            <i class="fa fa-sliders text-muted" aria-hidden="true"></i>
+                        </th>
                         <th style="width: 200px;">{{#str}} files:status, local_deepler {{/str}}</th>
                     </tr>
                 </thead>

@@ -34,8 +34,33 @@ use local_deepler\output\sourcenotsupported_page;
 
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/version.php');
+require_once($CFG->dirroot . '/filter/multilang2/filter.php');
 
 global $CFG, $PAGE, $DB, $USER;
+
+const LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER = 'local_deepler\\output\\Multilang2TextFilter';
+if (!class_exists(LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {
+    if (class_exists('\\filter_multilang2')) {
+        class_alias('\\filter_multilang2', LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER);
+    } else if (class_exists('\\core_filters\\text_filter')) {
+        /**
+         * Multilang2 text filter wrapper.
+         */
+        class Multilang2TextFilter extends \core_filters\text_filter {
+            /**
+             * Filter text.
+             *
+             * @param string $text
+             * @param array $options
+             * @return string
+             */
+            public function filter($text, array $options = []) {
+                return $text;
+            }
+        }
+        class_alias('Multilang2TextFilter', LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER);
+    }
+}
 
 try {
     $courseid = required_param('courseid', PARAM_INT);
@@ -61,9 +86,11 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('incourse');
 $PAGE->set_course($course);
 
+$mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);
+
 $output = $PAGE->get_renderer('local_deepler');
 echo $output->header();
-echo $output->heading($title);
+echo $output->heading($mlangfilter->filter(format_string($course->fullname)));
 
 $version = $plugin->release;
 $languagepack = new lang_helper();
@@ -74,15 +101,37 @@ try {
         $scanner = new file_scanner($course);
         $files = $scanner->get_course_files();
 
+        $glossaries = $languagepack->getusersglossaries() ?? [];
+        $poolglossaries = $languagepack->getpoolglossaries($glossaries) ?? [];
+        $publicglossaries = $languagepack->getpublicglossaries() ?? [];
+        $allglossaries = array_merge($glossaries, $publicglossaries, $poolglossaries);
+
+        $glossarydata = [];
+        foreach ($allglossaries as $g) {
+            $nameadd = ' (' . get_string('glossary:visibility:private', 'local_deepler') . ')';
+            if ($g->shared === 1) {
+                $nameadd = ' (' . get_string('glossary:visibility:pool', 'local_deepler') . ')';
+            } else if ($g->shared === 2) {
+                $nameadd = ' (' . get_string('glossary:visibility:public', 'local_deepler') . ')';
+            }
+            $glossarydata[] = [
+                'id' => $g->glossaryid,
+                'name' => $g->name . $nameadd,
+                'sourcelang' => strtolower($g->sourcelang),
+                'targetlang' => strtolower($g->targetlang),
+            ];
+        }
+
         $jsconfig = new stdClass();
         $jsconfig->version = $version;
         $jsconfig->courseid = $courseid;
         $jsconfig->userid = $USER->id;
         $jsconfig->sourcelang = $languagepack->getcurrentlang(true);
+        $jsconfig->glossaries = $glossarydata;
 
         $PAGE->requires->js_call_amd('local_deepler/files', 'init', [$jsconfig]);
 
-        $renderable = new files_page($course, $files, $languagepack, $version);
+        $renderable = new files_page($course, $files, $languagepack, $version, $mlangfilter);
         $filesrenderer = new files_renderer($PAGE, null);
         echo $filesrenderer->render_files_page($renderable);
     } else if ($initok) {
