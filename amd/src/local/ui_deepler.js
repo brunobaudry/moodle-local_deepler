@@ -25,6 +25,9 @@ define(['core/log',
     'editor_tiny/loader',
     'editor_tiny/editor',
     'core/modal',
+    'core/modal_save_cancel',
+    'core/modal_events',
+    'core/str',
     './selectors',
     './translation',
     './utils',
@@ -36,6 +39,9 @@ define(['core/log',
     './reactive/components/row'
 ], (Log, TinyMCEinit, TinyMCE,
     Modal,
+    ModalSaveCancel,
+    ModalEvents,
+    Str,
     Selectors,
     Translation,
     Utils,
@@ -300,6 +306,61 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     };
 
     /**
+     * Opens the global DeepL settings modal.
+     *
+     * @returns {Promise<void>}
+     */
+    const openGlobalSettingsModal = async() => {
+        const settingsContainer = document.querySelector('#local_deepler__additionalsettings');
+        if (!settingsContainer) {
+            return;
+        }
+
+        const placeholder = document.createElement('div');
+        placeholder.id = 'local_deepler__additionalsettings_placeholder';
+        settingsContainer.parentNode.insertBefore(placeholder, settingsContainer);
+
+        const title = (langstrings && langstrings.uistrings && langstrings.uistrings.seesetting) ?
+            langstrings.uistrings.seesetting :
+            await Str.get_string('seesetting', 'local_deepler');
+
+        const modal = await ModalSaveCancel.create({
+            title: title,
+            body: '',
+            large: true,
+        });
+
+        const bodyElement = modal.getBody()[0];
+        settingsContainer.classList.remove('d-none');
+        bodyElement.appendChild(settingsContainer);
+
+        let saved = false;
+
+        modal.getRoot().on(ModalEvents.save, (e) => {
+            e.preventDefault();
+            saved = true;
+            const [cookie] = prepareSettingsAndCookieValues();
+            const newCookiename = Utils.COOKIE_PREFIX_NEW + config.currentlang + config.targetlang + config.courseid;
+            Utils.setEncodedCookie(newCookiename, JSON.stringify(cookie), config.cookieduration);
+            modal.hide();
+        });
+
+        modal.getRoot().on(ModalEvents.hidden, () => {
+            settingsContainer.classList.add('d-none');
+            if (placeholder.parentNode) {
+                placeholder.parentNode.insertBefore(settingsContainer, placeholder);
+                placeholder.remove();
+            }
+            if (!saved) {
+                fetchCookies();
+            }
+            modal.destroy();
+        });
+
+        await modal.show();
+    };
+
+    /**
      * TinyMCE initialize.
      *
      * @param {Event} e
@@ -342,6 +403,10 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {event} e
      */
     const handleClickEvent = (e) => {
+        if (e.target.closest('#local_deepler__settings') || e.target.closest('[data-action="global-settings"]')) {
+            e.preventDefault();
+            void openGlobalSettingsModal().catch(MoodleNotification.exception);
+        }
         if (e.target.closest(Selectors.actions.toggleMultilang)) {
             onToggleMultilang(e.target.closest(Selectors.actions.toggleMultilang));
         }
@@ -566,14 +631,57 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     };
     /**
      * Listener for individual source change.
-     * @todo MDL-000 implement in v1.4.0
      *
      * @param {event} e
      */
     const onSourceChange = (e) => {
-        // Do check source and target and propose rephrase if PRO.
-        Log.info('source changed');
-        Log.info(e.target.dataset.key);
+        const rowSelect = e.target.closest(Selectors.actions.sourceselect);
+        if (!rowSelect) {
+            return;
+        }
+        const key = rowSelect.getAttribute('data-key');
+        const selectedSourceLang = rowSelect.value;
+        const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+        if (!sourceContainer) {
+            return;
+        }
+
+        const rawUnfilteredBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
+        const rawUnfiltered = Utils.fromBase64(rawUnfilteredBase64);
+        const mlangResult = Utils.extractMultilangSource(rawUnfiltered, selectedSourceLang);
+
+        // Update data-sourcetext-raw with base64 encoded filtered text.
+        sourceContainer.setAttribute('data-sourcetext-raw', Utils.toBase64(mlangResult.filteredText));
+
+        // Update displayed text in DOM.
+        const preEl = sourceContainer.querySelector('pre');
+        if (preEl) {
+            preEl.textContent = mlangResult.filteredText;
+        } else {
+            sourceContainer.innerHTML = mlangResult.filteredText;
+        }
+
+        // Re-initialize Translation temp item with updated source text.
+        const editor = findEditor(key);
+        Translation.initTempForKey(
+            key,
+            editor,
+            Utils.toBase64(mlangResult.filteredText),
+            rawUnfilteredBase64,
+            selectedSourceLang
+        );
+
+        // Update reactive state for this row.
+        const counts = getCount(key);
+        const reactive = StateManager.getStateManager(config.courseid || 'main');
+        if (reactive) {
+            const strippedText = Utils.stripHTMLTags(mlangResult.filteredText).trim();
+            reactive.dispatch('updateRowOriginalText', key, strippedText, counts.wordCount || 0, counts.charNumWithSpace || 0);
+            reactive.dispatch('setRowSourceLang', key, selectedSourceLang);
+        }
+
+        updateAllRowsTranslationStatus();
+        countWordAndChar();
     };
     /**
      * Event listener for selection checkboxes.
@@ -1001,8 +1109,19 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         setTimeout(() => {
             let multilangPill = domQuery(Selectors.statuses.multilang, key);
             let prevTransStatus = domQuery(Selectors.statuses.prevTransStatus, key);
-            prevTransStatus.classList = "badge badge-pill badge-success";
-            if (multilangPill.classList.contains("disabled")) {
+            if (prevTransStatus) {
+                prevTransStatus.className = "badge badge-pill rounded-pill badge-success";
+                prevTransStatus.setAttribute('title', langstrings.uistrings.uptodate || "Up to date");
+            }
+            let sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            if (sourceContainer) {
+                sourceContainer.setAttribute('data-filedtext-raw', Utils.toBase64(savedText));
+            }
+            let rowEl = domQuery(`[data-row-id="${key}"]`);
+            if (rowEl) {
+                rowEl.setAttribute('data-status', 'updated');
+            }
+            if (multilangPill && multilangPill.classList.contains("disabled")) {
                 multilangPill.classList.remove('disabled');
             }
             setIconStatus(key, Selectors.statuses.saved);
@@ -1023,15 +1142,230 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         parent.appendChild(errorMsg);
     };
     /**
-     * Event listener to switch target lang.
+     * Update rephrase symbol on main source language dropdown options (strip all).
+     */
+    const updateMainSourceDropdownNoRephrase = () => {
+        const sourceSelect = domQuery(Selectors.actions.sourceSwitcher);
+        if (!sourceSelect) {
+            return;
+        }
+        Array.from(sourceSelect.options).forEach((option) => {
+            const rawCode = Utils.stripRephraseSymbol(option.value, config.rephrasesymbol);
+            const rawText = Utils.stripRephraseSymbol(option.textContent, config.rephrasesymbol);
+            option.value = rawCode;
+            option.textContent = rawText;
+        });
+    };
+
+    /**
+     * Update rephrase symbol on target language dropdown options.
+     *
+     * @param {string} sourceLang
+     */
+    const updateTargetLangDropdownRephrase = (sourceLang) => {
+        const targetSelect = domQuery(Selectors.actions.targetSwitcher);
+        if (!targetSelect) {
+            return;
+        }
+        const currentTargetVal = Utils.stripRephraseSymbol(targetSelect.value, config.rephrasesymbol);
+        Array.from(targetSelect.options).forEach((option) => {
+            if (!option.value) {
+                return;
+            }
+            const rawCode = Utils.stripRephraseSymbol(option.value, config.rephrasesymbol);
+            const rawText = Utils.stripRephraseSymbol(option.textContent, config.rephrasesymbol);
+            const same = Utils.isRephrase(sourceLang, rawCode);
+            const canRephrase = config.canimprove && Utils.isRephrasable(rawCode, config.supportedlangs);
+
+            if (same && canRephrase) {
+                option.value = config.rephrasesymbol + rawCode;
+                option.textContent = config.rephrasesymbol + rawText;
+            } else {
+                option.value = rawCode;
+                option.textContent = rawText;
+            }
+        });
+        const matchingOpt = Array.from(targetSelect.options).find(
+            (opt) => Utils.stripRephraseSymbol(opt.value, config.rephrasesymbol) === currentTargetVal
+        );
+        if (matchingOpt) {
+            targetSelect.value = matchingOpt.value;
+        }
+    };
+
+    /**
+     * Update rephrase symbol on individual row source dropdowns.
+     *
+     * @param {string} targetLang
+     */
+    const updateRowSourceDropdownsRephrase = (targetLang) => {
+        const rowSelects = domQueryAll(Selectors.actions.sourceselect);
+        rowSelects.forEach((rowSelect) => {
+            const currentRowVal = Utils.stripRephraseSymbol(rowSelect.value, config.rephrasesymbol);
+            Array.from(rowSelect.options).forEach((option) => {
+                if (!option.value) {
+                    return;
+                }
+                const rawCode = Utils.stripRephraseSymbol(option.value, config.rephrasesymbol);
+                const rawText = Utils.stripRephraseSymbol(option.textContent, config.rephrasesymbol);
+                const same = Utils.isRephrase(rawCode, targetLang);
+                const canRephrase = config.canimprove && Utils.isRephrasable(rawCode, config.supportedlangs);
+
+                if (same && canRephrase) {
+                    option.value = config.rephrasesymbol + rawCode;
+                    option.textContent = config.rephrasesymbol + rawText;
+                } else {
+                    option.value = rawCode;
+                    option.textContent = rawText;
+                }
+            });
+            const matchingOpt = Array.from(rowSelect.options).find(
+                (opt) => Utils.stripRephraseSymbol(opt.value, config.rephrasesymbol) === currentRowVal
+            );
+            if (matchingOpt) {
+                rowSelect.value = matchingOpt.value;
+            }
+        });
+    };
+
+    /**
+     * Updates the translation status bullet (#previousTranslationStatus) and checkbox tooltip for all rows.
+     */
+    const updateAllRowsTranslationStatus = () => {
+        const targetLang = Utils.stripRephraseSymbol(config.targetlang || '', config.rephrasesymbol);
+        const rowElements = domQueryAll('[data-row-id]');
+
+        rowElements.forEach((rowEl) => {
+            const statusAttr = rowEl.getAttribute('data-status');
+            if (statusAttr === 'local_deepler/disabled') {
+                return;
+            }
+
+            const key = rowEl.getAttribute('data-row-id');
+            const bullet = domQuery(Selectors.statuses.prevTransStatus, key);
+            const checkbox = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+            const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            if (!bullet || !sourceContainer) {
+                return;
+            }
+
+            const rawFieldBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
+            const rawFieldText = Utils.fromBase64(rawFieldBase64);
+
+            const rowSourceSelect = domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            const rowSourceLang = rowSourceSelect
+                ? Utils.stripRephraseSymbol(rowSourceSelect.value, config.rephrasesymbol)
+                : (config.deeplsourcelang || config.sourcelang || 'en');
+
+            const statusInfo = Utils.getTranslationStatusInfo(
+                rawFieldText,
+                rowSourceLang,
+                targetLang,
+                config,
+                langstrings.uistrings
+            );
+
+            bullet.className = 'badge badge-pill rounded-pill ' + statusInfo.buttonClass;
+            bullet.setAttribute('title', statusInfo.titleString);
+            if (checkbox) {
+                checkbox.setAttribute('title', statusInfo.titleString);
+            }
+            rowEl.setAttribute('data-status', statusInfo.status);
+        });
+    };
+
+    /**
+     * Event listener to switch target lang dynamically without page reloading.
      * @param {Event} e
      */
     const switchTarget = (e) => {
-        let url = new URL(window.location.href);
-        let searchParams = url.searchParams;
-        // Pass the target lang in the url and refresh, not forgetting to remove the rephrase prefix indicator.
-        searchParams.set("target_lang", e.target.value.replace(config.rephrasesymbol, '').trim());
-        window.location = url.toString();
+        const targetLang = Utils.stripRephraseSymbol(e.target.value, config.rephrasesymbol);
+        // Store in cookie for current session only (no expires attribute).
+        document.cookie = "local_deepler_targetlang=" + encodeURIComponent(targetLang) + "; path=/; SameSite=Lax";
+        config.targetlang = targetLang;
+
+        Translation.setMainLangs({
+            currentlang: config.currentlang,
+            deeplsourcelang: config.deeplsourcelang,
+            targetlang: targetLang,
+        });
+
+        const reactive = StateManager.getStateManager(config.courseid || 'main');
+        if (reactive) {
+            reactive.dispatch('setGlobalSetting', 'targetLang', targetLang);
+        }
+
+        // Update target language header label.
+        const targetHeader = domQuery('#local_deepler__targetlang');
+        if (targetHeader && langstrings.uistrings.selecttargetlanguage) {
+            targetHeader.innerHTML = langstrings.uistrings.selecttargetlanguage.replace('{$a}', targetLang);
+        }
+
+        // Update translate button text.
+        const translateBtn = domQuery(Selectors.actions.autoTranslateBtn);
+        if (translateBtn) {
+            if (langstrings.uistrings.translatebutton) {
+                translateBtn.innerHTML = langstrings.uistrings.translatebutton.replace('{$a}', targetLang);
+            }
+            if (langstrings.uistrings.translateexplain) {
+                translateBtn.setAttribute('title', langstrings.uistrings.translateexplain.replace('{$a}', targetLang));
+            }
+        }
+
+        // Update compatible languages switcher.
+        const langroot = Utils.removeRegionalVariant(targetLang);
+        const moodleLangs = config.moodlelangs || [];
+        const compatibles = moodleLangs.filter((code) => code.includes(langroot)).sort();
+        const compatSelect = domQuery(Selectors.actions.targetCompatibleSwitcher);
+        if (compatSelect) {
+            compatSelect.innerHTML = '';
+            compatibles.forEach((code) => {
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = code;
+                compatSelect.appendChild(opt);
+            });
+            if (compatibles.length > 0) {
+                compatSelect.value = compatibles[0];
+            }
+            compatSelect.style.display = compatibles.length >= 2 ? 'inherit' : 'none';
+        }
+
+        // Update ® symbols on target dropdown and row source dropdowns.
+        updateTargetLangDropdownRephrase(config.deeplsourcelang || config.sourcelang || 'en');
+        updateRowSourceDropdownsRephrase(targetLang);
+
+        // Re-initialize Translation temp items for all rows.
+        const rowElements = domQueryAll('[data-row-id]');
+        rowElements.forEach((rowEl) => {
+            const key = rowEl.getAttribute('data-row-id');
+            const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            if (!sourceContainer) {
+                return;
+            }
+            const rowSourceSelect = domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            const sourceRawBase64 = sourceContainer.getAttribute('data-sourcetext-raw') || '';
+            const fieldRawBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
+            const editor = findEditor(key);
+            Translation.initTempForKey(
+                key,
+                editor,
+                sourceRawBase64,
+                fieldRawBase64,
+                rowSourceSelect ? rowSourceSelect.value : (config.deeplsourcelang || config.sourcelang || 'en')
+            );
+        });
+
+        // Update translation status bullets and tooltips for all rows.
+        updateAllRowsTranslationStatus();
+
+        // Update buttons state based on new target lang.
+        selectAllBtn.disabled = !Translation.isTranslatable();
+        checkboxes.forEach((node) => {
+            node.disabled = selectAllBtn.disabled;
+        });
+        toggleAutotranslateButton();
+        debouncedShowRows();
     };
     /**
      * Event listener to filter sections.
@@ -1059,15 +1393,118 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         window.location = url.toString();
     };
     /**
-     * Event listener to switch source lang,
-     * Hence reload the page and change the site main lang.
+     * Event listener to switch source lang dynamically without page reloading.
+     * Sets the source lang in session cookie and re-filters all rows.
+     *
      * @param {Event} e
      */
-    const switchSource = (e) => {
-        let url = new URL(window.location.href);
-        let searchParams = url.searchParams;
-        searchParams.set("lang", e.target.value);
-        window.location = url.toString();
+    const switchSource = async(e) => {
+        const sourceLang = e.target.value.replace(config.rephrasesymbol, '').trim();
+        // Store in cookie for current session only (no expires attribute).
+        document.cookie = "local_deepler_sourcelang=" + encodeURIComponent(sourceLang) + "; path=/; SameSite=Lax";
+
+        config.sourcelang = sourceLang;
+        config.deeplsourcelang = sourceLang;
+        config.currentlang = sourceLang;
+
+        Translation.setMainLangs({
+            currentlang: sourceLang,
+            deeplsourcelang: sourceLang,
+            targetlang: config.targetlang,
+        });
+
+        const reactive = StateManager.getStateManager(config.courseid || 'main');
+        if (reactive) {
+            reactive.dispatch('setGlobalSetting', 'sourceLang', sourceLang);
+        }
+
+        // Ensure main source dropdown has NO ® symbols.
+        updateMainSourceDropdownNoRephrase();
+
+        // Update target dropdown ® symbols based on new source language.
+        updateTargetLangDropdownRephrase(sourceLang);
+
+        // Update row source dropdowns ® symbols based on target language.
+        updateRowSourceDropdownsRephrase(config.targetlang);
+
+        // Iterate through all translation rows and dynamically re-filter strings.
+        const rowElements = domQueryAll('[data-row-id]');
+        rowElements.forEach((rowEl) => {
+            const key = rowEl.getAttribute('data-row-id');
+            const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            if (!sourceContainer) {
+                return;
+            }
+
+            const rawUnfilteredBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
+            const rawUnfiltered = Utils.fromBase64(rawUnfilteredBase64);
+            const mlangResult = Utils.extractMultilangSource(rawUnfiltered, sourceLang);
+
+            // Update data-sourcetext-raw with base64 encoded filtered text.
+            sourceContainer.setAttribute('data-sourcetext-raw', Utils.toBase64(mlangResult.filteredText));
+
+            // Update visible DOM text.
+            const preEl = sourceContainer.querySelector('pre');
+            if (preEl) {
+                preEl.textContent = mlangResult.filteredText;
+            } else {
+                sourceContainer.innerHTML = mlangResult.filteredText;
+            }
+
+            // Update row source selection dropdown.
+            const rowSourceSelect = domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            if (rowSourceSelect) {
+                if (mlangResult.mlangTagMatched) {
+                    rowSourceSelect.disabled = true;
+                    if (mlangResult.matchedCode) {
+                        rowSourceSelect.value = mlangResult.matchedCode;
+                    }
+                    rowSourceSelect.classList.remove('is-warning', 'border-warning');
+                } else if (mlangResult.isFallbackOther) {
+                    rowSourceSelect.disabled = false;
+                    rowSourceSelect.value = sourceLang;
+                    // Trigger auto-detection if enabled.
+                    if (config.autodetect_sourcelang) {
+                        Api.detectSourceLanguage(mlangResult.filteredText, key)
+                            .then((res) => {
+                                if (res && res.detected_lang && reactive) {
+                                    reactive.dispatch('setDetectedSourceLang', key, res.detected_lang.toLowerCase());
+                                }
+                            })
+                            .catch((err) => {
+                                Log.debug('Auto-detection error: ' + err);
+                            });
+                    }
+                } else {
+                    rowSourceSelect.disabled = false;
+                    rowSourceSelect.value = sourceLang;
+                    rowSourceSelect.classList.remove('is-warning', 'border-warning');
+                }
+            }
+
+            // Re-initialize Translation temp item.
+            const editor = findEditor(key);
+            Translation.initTempForKey(
+                key,
+                editor,
+                Utils.toBase64(mlangResult.filteredText),
+                rawUnfilteredBase64,
+                rowSourceSelect ? rowSourceSelect.value : sourceLang
+            );
+
+            // Update reactive state for this row.
+            const counts = getCount(key);
+            if (reactive) {
+                const strippedText = Utils.stripHTMLTags(mlangResult.filteredText).trim();
+                reactive.dispatch('updateRowOriginalText', key, strippedText, counts.wordCount || 0, counts.charNumWithSpace || 0);
+                reactive.dispatch('setRowSourceLang', key, rowSourceSelect ? rowSourceSelect.value : sourceLang);
+            }
+        });
+
+        // Update translation status bullets and tooltips for all rows.
+        updateAllRowsTranslationStatus();
+
+        countWordAndChar();
     };
     /**
      * Launch, display count of Words And Chars.
@@ -1327,7 +1764,11 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         checkboxes.forEach((node) => {
             node.disabled = selectAllBtn.disabled;
         });
+        updateAllRowsTranslationStatus();
         debouncedShowRows();
+        updateMainSourceDropdownNoRephrase();
+        updateTargetLangDropdownRephrase(cfg.deeplsourcelang || cfg.sourcelang || 'en');
+        updateRowSourceDropdownsRephrase(cfg.targetlang || '');
         initReactiveState(cfg);
     };
     /**

@@ -262,6 +262,7 @@ define([
                     glossary_id: rowCustomSettings.glossary_id || null,
                     // eslint-disable-next-line camelcase
                     model_type: rowCustomSettings.model_type || null,
+                    toneorstyle: rowCustomSettings.toneorstyle || null,
                 };
             }
 
@@ -291,6 +292,11 @@ define([
                 const t = prepareTranslation(key);
                 if (config.canimprove && t.source_lang && t.source_lang.includes(rephrasesymbol)) {
                     delete t.source_lang;
+                    if (t.options) {
+                        t.options = {
+                            toneorstyle: t.options.toneorstyle || null,
+                        };
+                    }
                     Log.debug(`translation/x/callTranslations::t`);
                     Log.debug(t);
                     rephrases.push(t);

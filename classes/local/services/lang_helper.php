@@ -88,8 +88,11 @@ class lang_helper {
         $this->allowbeta = get_config('local_deepler', 'allowbeta') ?? false;
         // Remove this when DeepL improves its API language list.
         $this->setbetas();
-        $this->currentlang = $currentlang ?? optional_param('lang', current_language(), PARAM_NOTAGS);
-        $this->targetlang = $targetlang ?? optional_param('target_lang', '', PARAM_NOTAGS);
+        $defaultlang = current_language();
+        $cookielang = isset($_COOKIE['local_deepler_sourcelang']) ? clean_param($_COOKIE['local_deepler_sourcelang'], PARAM_NOTAGS) : null;
+        $this->currentlang = $currentlang ?? optional_param('sourcelang', optional_param('lang', $cookielang ?? $defaultlang, PARAM_NOTAGS), PARAM_NOTAGS);
+        $cookietargetlang = isset($_COOKIE['local_deepler_targetlang']) ? clean_param($_COOKIE['local_deepler_targetlang'], PARAM_NOTAGS) : null;
+        $this->targetlang = $targetlang ?? optional_param('target_lang', $cookietargetlang ?? '', PARAM_NOTAGS);
         if ($this->targetlang !== '') {
             $this->targetlang = LanguageCode::standardizeLanguageCode($this->targetlang);
         }
@@ -469,6 +472,8 @@ class lang_helper {
         $config->isfree = $this->keyisfree;
         $config->rephrasesymbol = self::REPHRASESYMBOL;
         $config->canimprove = $this->canimprove;
+        $config->supportedlangs = $this->deeplrephraselangs;
+        $config->moodlelangs = array_keys($this->moodlelangs);
         return $config;
     }
 
@@ -499,6 +504,15 @@ class lang_helper {
         $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
         $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
+        $config->uistrings->translatebutton = get_string('translatebutton', 'local_deepler', '{$a}');
+        $config->uistrings->selecttargetlanguage = get_string('selecttargetlanguage', 'local_deepler', '{$a}');
+        $config->uistrings->translateexplain = get_string('translateexplain', 'local_deepler', '{$a}');
+        $config->uistrings->doselecttarget = get_string('doselecttarget', 'local_deepler');
+        $config->uistrings->canttranslate = get_string('canttranslate', 'local_deepler', '{$a}');
+        $config->uistrings->needsupdate = get_string('needsupdate', 'local_deepler');
+        $config->uistrings->nevertranslated = get_string('nevertranslated', 'local_deepler', '{$a}');
+        $config->uistrings->neverrephrased = get_string('neverrephrased', 'local_deepler');
+        $config->uistrings->uptodate = get_string('uptodate', 'local_deepler');
         return json_encode($config);
     }
 
@@ -551,10 +565,11 @@ class lang_helper {
     /**
      * Prepare source options.
      *
+     * @param bool $verbose
      * @return array
      */
-    public function preparesourcesoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
+    public function preparesourcesoptionlangs(bool $verbose = false, bool $allowrephrase = true): array {
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, $verbose, $allowrephrase);
     }
 
     /**
@@ -563,13 +578,19 @@ class lang_helper {
      * @param array $filtereddeepls
      * @param bool $issource
      * @param bool $verbose
+     * @param bool $allowrephrase
      * @return array
      */
-    private function prepareoptionlangs(array $filtereddeepls, bool $issource = true, bool $verbose = true): array {
+    private function prepareoptionlangs(
+        array $filtereddeepls,
+        bool $issource = true,
+        bool $verbose = true,
+        bool $allowrephrase = true
+    ): array {
         $tab = [];
         // Get the list of deepl langs that are supported by this moodle instance.
         foreach ($filtereddeepls as $l) {
-            $tab[] = $this->getoption($issource, $l, $verbose);
+            $tab[] = $this->getoption($issource, $l, $verbose, $allowrephrase);
         }
         return $tab;
     }
@@ -580,9 +601,15 @@ class lang_helper {
      * @param bool $issource
      * @param mixed $l
      * @param bool $isverbose
+     * @param bool $allowrephrase
      * @return array
      */
-    private function getoption(bool $issource, mixed $l, bool $isverbose = true): array {
+    private function getoption(
+        bool $issource,
+        mixed $l,
+        bool $isverbose = true,
+        bool $allowrephrase = true
+    ): array {
         // If the key is free, we can't improve the source lang.
         $code = LanguageCode::standardizeLanguageCode($l->code);
         $same = $issource ? $this->isrephrase($code, '') : $this->isrephrase('', $code);
@@ -598,7 +625,7 @@ class lang_helper {
             $selected = $this->targetlang !== '' && $code === $this->targetlang;
             $disable = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
         }
-        if ($same && $this->canimprove) {
+        if ($allowrephrase && $same && $this->canimprove) {
             $text = self::REPHRASESYMBOL . $text;
             $code = self::REPHRASESYMBOL . $code;
         }

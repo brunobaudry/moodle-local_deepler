@@ -118,7 +118,6 @@ class files_page implements renderable, templatable {
         $data->str_selectall = get_string('files:selectall', 'local_deepler');
         $data->str_translateselected = get_string('files:translateselected', 'local_deepler');
         $data->str_title = get_string('files:title', 'local_deepler');
-        $data->str_seesettings = get_string('files:seesettings', 'local_deepler');
         $data->str_customsettings = get_string('files:customsettings', 'local_deepler');
         $data->str_minification = get_string('files:minification', 'local_deepler');
         $data->str_minification_desc = get_string('files:minification_desc', 'local_deepler');

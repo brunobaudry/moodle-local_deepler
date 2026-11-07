@@ -90,6 +90,14 @@ if ($hassiteconfig) {
         false
     ));
 
+    // Auto-detect source language setting.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_deepler/autodetect_sourcelang',
+        get_string('autodetect_sourcelang', 'local_deepler'),
+        get_string('autodetect_sourcelang_desc', 'local_deepler'),
+        false
+    ));
+
     // Minimum scanned field size.
     $settings->add(new admin_setting_configtext(
         'local_deepler/scannedfieldsize',

@@ -102,4 +102,62 @@ final class multilanger_test extends advanced_testcase {
         $this->assertFalse($mlanger2->has_multilandcode_and_others('en'));
         $this->assertFalse($mlanger3->has_multilandcode_and_others('en'));
     }
+
+    /**
+     * Test wrapping original text into other and target tag when no mlang tags exist.
+     *
+     * @covers \local_deepler\local\data\multilanger::prepare_multilang_save
+     */
+    public function test_wrap_text_without_mlang_tags(): void {
+        $source = "Welcome to our course";
+        $translated = "Bienvenue dans notre cours";
+
+        $result = multilanger::prepare_multilang_save($source, $translated, 'en', 'fr', false);
+        $expected = '{mlang other}Welcome to our course{mlang}{mlang fr}Bienvenue dans notre cours{mlang}';
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test saving translation adjacent to matching source mlang tag.
+     *
+     * @covers \local_deepler\local\data\multilanger::prepare_multilang_save
+     */
+    public function test_save_with_matching_source_mlang_tag(): void {
+        $originaldb = '{mlang en}Hello{mlang}{mlang de}Hallo{mlang}';
+        $translated = 'Bonjour';
+
+        // Translating from matching 'en' to 'fr'.
+        $result = multilanger::prepare_multilang_save($originaldb, $translated, 'en', 'fr', true);
+        $expected = '{mlang en}Hello{mlang}{mlang fr}Bonjour{mlang}{mlang de}Hallo{mlang}';
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test saving translation adjacent to fallback other tag when source tag doesn't match.
+     *
+     * @covers \local_deepler\local\data\multilanger::prepare_multilang_save
+     */
+    public function test_save_with_non_matching_source_and_fallback_other(): void {
+        $originaldb = '{mlang de}Hallo{mlang}{mlang other}Hello World{mlang}';
+        $translated = 'Hola Mundo';
+
+        // User selected 'en' (which hit fallback 'other'), translating to 'es'.
+        $result = multilanger::prepare_multilang_save($originaldb, $translated, 'en', 'es', false);
+        $expected = '{mlang de}Hallo{mlang}{mlang other}Hello World{mlang}{mlang es}Hola Mundo{mlang}';
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test updating an existing target mlang tag in-place.
+     *
+     * @covers \local_deepler\local\data\multilanger::prepare_multilang_save
+     */
+    public function test_update_existing_target_mlang_tag(): void {
+        $originaldb = '{mlang en}Hello{mlang}{mlang fr}Salut{mlang}{mlang de}Hallo{mlang}';
+        $translated = 'Bonjour';
+
+        $result = multilanger::prepare_multilang_save($originaldb, $translated, 'en', 'fr', true);
+        $expected = '{mlang en}Hello{mlang}{mlang fr}Bonjour{mlang}{mlang de}Hallo{mlang}';
+        $this->assertEquals($expected, $result);
+    }
 }

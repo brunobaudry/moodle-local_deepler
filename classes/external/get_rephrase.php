@@ -67,52 +67,71 @@ class get_rephrase extends external_api {
                     'detected_source_language' => '',
             ]];
         }
-        // Have the params cleaned by Deepl lib.
-        $style = $tone = null;
-        if ($params['options']['toneorstyle'] !== 'default') {
-            $rephraseoptions = explode("\n", $params['options']['toneorstyle']);
-            $tone = $rephraseoptions[0] === 'tone' ? $rephraseoptions[1] : null;
-            $style = $rephraseoptions[0] === 'writing_style' ? $rephraseoptions[1] : null;
+        $targetlang = $params['options']['target_lang'];
+        $globaltoneorstyle = $params['options']['toneorstyle'] ?? 'default';
+
+        $groupedrephrasings = [];
+        foreach ($params['rephrasings'] as $rephrasing) {
+            $rowoverrides = array_filter($rephrasing['options'] ?? [], static fn($v) => !is_null($v));
+            $effectivetoneorstyle = $rowoverrides['toneorstyle'] ?? $globaltoneorstyle;
+
+            $style = $tone = null;
+            if ($effectivetoneorstyle !== 'default' && !empty($effectivetoneorstyle)) {
+                $rephraseoptions = explode('|', $effectivetoneorstyle);
+                if (count($rephraseoptions) === 2) {
+                    $tone = $rephraseoptions[0] === 'tone' ? $rephraseoptions[1] : null;
+                    $style = $rephraseoptions[0] === 'writing_style' ? $rephraseoptions[1] : null;
+                }
+            }
+
+            $validatedparams = $improver->buildRephraseBodyParams($targetlang, $style, $tone);
+            $grouptargetlang = $validatedparams['target_lang'];
+            unset($validatedparams['target_lang']);
+
+            $groupkey = $grouptargetlang . '_' . md5((string)json_encode($validatedparams));
+            if (!isset($groupedrephrasings[$groupkey])) {
+                $groupedrephrasings[$groupkey] = [
+                    'targetlang' => $grouptargetlang,
+                    'options' => $validatedparams,
+                    'rephrasings' => [],
+                ];
+            }
+            $groupedrephrasings[$groupkey]['rephrasings'][] = $rephrasing;
         }
 
-        $validatedparams = $improver->buildRephraseBodyParams($params['options']['target_lang'], $style, $tone);
-        // Get the target.
-        $targetlang = $validatedparams['target_lang'];
-        // Remove target from arrray to pass just the options.
-        unset($validatedparams['target_lang']);
-
-        $staticparts = [$validatedparams, $targetlang];
-        $chunks = self::chunk_payload($params['rephrasings'], $staticparts);
-        // Prepare the texts.
-        // Results.
         $improvedtexts = [];
+        foreach ($groupedrephrasings as $group) {
+            $grouptargetlang = $group['targetlang'];
+            $groupoptions = $group['options'];
+            $staticparts = [$groupoptions, $grouptargetlang];
+            $chunks = self::chunk_payload($group['rephrasings'], $staticparts);
 
-        foreach ($chunks as $chunk) {
-            // Extract the texts for each chunk.
-            $texts = array_map(function ($t) {
-                return $t['text'];
-            }, $chunk);
+            foreach ($chunks as $chunk) {
+                $texts = array_map(function ($t) {
+                    return $t['text'];
+                }, $chunk);
 
-            try {
-                $results = $improver->rephraseText($texts, $targetlang, $validatedparams);
-                foreach ($results as $index => $result) {
-                    $key = $chunk[$index]['key'];
-                    $improvedtexts[] = [
+                try {
+                    $results = $improver->rephraseText($texts, $grouptargetlang, $groupoptions);
+                    foreach ($results as $index => $result) {
+                        $key = $chunk[$index]['key'];
+                        $improvedtexts[] = [
                             'error' => '',
                             'key' => $key,
                             'text' => $result->text,
                             'target_language' => $result->targetLanguage,
                             'detected_source_language' => $result->detectedSourceLanguage,
-                    ];
-                }
-            } catch (DeepLException $e) {
-                return [[
+                        ];
+                    }
+                } catch (DeepLException $e) {
+                    return [[
                         'error' => 'Exception ' . $e->getMessage(),
                         'key' => '',
                         'text' => '',
                         'target_language' => '',
                         'detected_source_language' => '',
-                ]];
+                    ]];
+                }
             }
         }
 
@@ -131,6 +150,19 @@ class get_rephrase extends external_api {
                         [
                                 'text' => new external_value(PARAM_RAW, 'text to be translated'),
                                 'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
+                                'options' => new external_single_structure(
+                                    [
+                                        'toneorstyle' => new external_value(
+                                            PARAM_RAW,
+                                            'Tone or writing style of your improvements',
+                                            VALUE_DEFAULT,
+                                            null
+                                        ),
+                                    ],
+                                    'Optional row-level option overrides',
+                                    VALUE_DEFAULT,
+                                    []
+                                ),
                         ]
                     )
                 ),
@@ -140,7 +172,8 @@ class get_rephrase extends external_api {
                         'toneorstyle' => new external_value(
                             PARAM_RAW,
                             'Tone or writing style of your improvements',
-                            VALUE_OPTIONAL
+                            VALUE_DEFAULT,
+                            'default'
                         ),
                     ]
                 ),

@@ -55,6 +55,7 @@ export class DeeplerReactive extends Reactive {
     init(initialData = {}) {
         const state = {
             globalSettings: {
+                sourceLang: initialData.sourceLang || '',
                 targetLang: initialData.targetLang || 'fr',
                 formality: initialData.formality || 'default',
                 tagHandling: initialData.tagHandling || 'html',

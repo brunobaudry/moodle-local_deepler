@@ -113,17 +113,13 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 </div>
 
 <div class="text-end text-right">
-    <a id="local_deepler__settings"
-       class="link"
-       data-toggle="collapse" data-bs-toggle="collapse"
-       href="#local_deepler__additionalsettings"
-       role="button"
-       aria-expanded="false"
-       aria-controls="local_deepler__additionalsettings">
-        <i class="fa-solid fa-caret-right collapse show"></i>
-        <i class="fa-solid fa-caret-down collapse"></i>
-        {{#str}}seesetting,local_deepler{{/str}}
-    </a>
+    <button type="button"
+            id="local_deepler__settings"
+            class="btn btn-sm btn-outline-secondary"
+            data-action="global-settings"
+            aria-controls="local_deepler__additionalsettings">
+        <i class="fa fa-sliders" aria-hidden="true"></i> {{#str}}seesetting,local_deepler{{/str}}
+    </button>
 </div>
 
 {{> local_deepler/translate_page_additionalsettings }}

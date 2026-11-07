@@ -64,21 +64,17 @@
     {{#hasfiles}}
     <!-- Global Additional Settings Toggle -->
     <div class="text-end text-right mb-2">
-        <a id="local_deepler__settings"
-           class="link small text-decoration-none"
-           data-toggle="collapse" data-bs-toggle="collapse"
-           href="#local_deepler__additionalsettings"
-           role="button"
-           aria-expanded="false"
-           aria-controls="local_deepler__additionalsettings">
-            <i class="fa-solid fa-caret-right collapse show"></i>
-            <i class="fa-solid fa-caret-down collapse"></i>
-            {{str_seesettings}}
-        </a>
+        <button type="button"
+                id="local_deepler__settings"
+                class="btn btn-sm btn-outline-secondary"
+                data-action="global-settings"
+                aria-controls="local_deepler__additionalsettings">
+            <i class="fa fa-sliders" aria-hidden="true"></i> {{#str}}seesetting,local_deepler{{/str}}
+        </button>
     </div>
 
     <!-- Global Additional Settings Panel -->
-    <div class="container-fluid collapse card p-3 mb-4 local_deepler-bg-secondary-subtle bg-light" id="local_deepler__additionalsettings">
+    <div class="container-fluid card p-3 mb-4 local_deepler-bg-secondary-subtle bg-light d-none" id="local_deepler__additionalsettings">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h5 class="mb-0">{{#str}}deeplapidoctitle,local_deepler{{/str}}</h5>
             <div>

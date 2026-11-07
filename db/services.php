@@ -87,6 +87,14 @@ $functions = [
                 'ajax' => true,
                 'capabilities' => LOCAL_DEEPLER_CAP,
         ],
+        'local_deepler_detect_source_language' => [
+                'classname' => 'local_deepler\external\detect_source_language',
+                'description' => 'Detect source language via DeepL',
+                'type' => 'read',
+                'ajax' => true,
+                'capabilities' => LOCAL_DEEPLER_CAP,
+        ],
+
         'local_deepler_upload_document' => [
                 'classname' => 'local_deepler\external\upload_document',
                 'description' => 'Upload a document to DeepL for translation',

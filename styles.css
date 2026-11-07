@@ -61,7 +61,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate #local_deepler__settings {
     position: relative;
     top: -4px;
-    color: var(--mds-text-link-primary-default);
 }
 #page-local-deepler-translate .caret-icons .fa-caret-down {
     display: none;

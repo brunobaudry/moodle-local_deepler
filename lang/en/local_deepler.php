@@ -49,6 +49,8 @@ $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
         'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.
         This has no effect if the API key isn\'t set or no are additional tokens are mapped to users\' attributes.';
+$string['autodetect_sourcelang'] = 'Auto-detect source language';
+$string['autodetect_sourcelang_desc'] = 'Automatically detect the source language of content falling back to {mlang other} by sending a short text excerpt to DeepL. Note: This consumes character quota.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
@@ -106,7 +108,6 @@ $string['files:queued'] = 'Queued';
 $string['files:reason_extension'] = 'Unsupported file format ({$a})';
 $string['files:reason_filesize'] = 'File exceeds maximum size limit ({$a})';
 $string['files:retry'] = 'Retry';
-$string['files:seesettings'] = 'See settings';
 $string['files:selectall'] = 'Select all';
 $string['files:selecttargets'] = 'Target language';
 $string['files:settingsmodal_title'] = 'File translation settings';
@@ -303,6 +304,9 @@ $string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
 $string['showhiddenforstudents'] = 'Show "{$a}"';
 $string['sourcelang'] =
         'Source lang <em>{mlang other} </em>';
+$string['sourceselect_detected_diff'] = 'Detected source language ({$a}) differs from selected default.';
+$string['sourceselect_disabled_hint'] = 'Source language matches existing multilang tag.';
+$string['sourceselect_label'] = 'Source language';
 $string['specialsourcetext'] = 'Use a different source than "{$a}"';
 $string['splitsentences'] = 'Split sentences?';
 $string['splitsentences0'] = 'no splitting at all';

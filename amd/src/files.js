@@ -58,7 +58,8 @@ define([
             {key: 'closebuttontitle', component: 'core'},
             {key: 'glossary:notselected', component: 'local_deepler'},
             {key: 'files:justnow', component: 'local_deepler'},
-            {key: 'files:billedchars', component: 'local_deepler'}
+            {key: 'files:billedchars', component: 'local_deepler'},
+            {key: 'seesetting', component: 'local_deepler'}
         ];
 
         return Str.get_strings(stringRequests).then((results) => {
@@ -79,6 +80,7 @@ define([
             strings.glossarynotselected = results[14];
             strings.justnow = results[15];
             strings.billedchars = results[16];
+            strings.seesetting = results[17];
             return strings;
         });
     };
@@ -419,9 +421,59 @@ define([
     };
 
     /**
+     * Open global settings modal.
+     */
+    const openGlobalSettingsModal = () => {
+        const settingsContainer = document.querySelector('#local_deepler__additionalsettings');
+        if (!settingsContainer) {
+            return;
+        }
+
+        const placeholder = document.createElement('div');
+        placeholder.id = 'local_deepler__files_additionalsettings_placeholder';
+        settingsContainer.parentNode.insertBefore(placeholder, settingsContainer);
+
+        ModalSaveCancel.create({
+            title: strings.seesetting || strings.settingsmodal_title || 'Advanced settings',
+            body: '',
+            large: true,
+        }).then((modal) => {
+            modal.show();
+
+            const bodyElement = modal.getBody()[0];
+            settingsContainer.classList.remove('d-none');
+            bodyElement.appendChild(settingsContainer);
+
+            modal.setSaveButtonText(strings.save);
+
+            const root = modal.getRoot();
+            root.on(ModalEvents.save, () => {
+                modal.hide();
+            });
+
+            root.on(ModalEvents.hidden, () => {
+                settingsContainer.classList.add('d-none');
+                if (placeholder.parentNode) {
+                    placeholder.parentNode.insertBefore(settingsContainer, placeholder);
+                    placeholder.remove();
+                }
+                modal.destroy();
+            });
+
+            return modal;
+        }).catch(Notification.exception);
+    };
+
+    /**
      * Register DOM event listeners.
      */
     const registerEventListeners = () => {
+        // 0. Global settings button
+        $(document).on('click', '#local_deepler__settings, [data-action="global-settings"]', function(e) {
+            e.preventDefault();
+            openGlobalSettingsModal();
+        });
+
         // 1. Global Source Language change
         $(document).on('change', Selectors.files.globalSourceLang, function() {
             const val = $(this).val();

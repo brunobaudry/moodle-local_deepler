@@ -339,4 +339,47 @@ final class gettranslation_test extends base_external {
         $this->assertEquals('glossary-123', $validated['translations'][0]['options']['glossary_id']);
         $this->assertNull($validated['translations'][1]['options']['formality']);
     }
+
+    /**
+     * Test get_rephrase execute_parameters validation with row options and global toneorstyle.
+     *
+     * @covers \local_deepler\external\get_rephrase::execute_parameters
+     * @return void
+     */
+    public function test_get_rephrase_execute_parameters_with_row_options(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
+
+        $params = [
+            'rephrasings' => [
+                [
+                    'text' => 'Hello there',
+                    'key' => 'row_1',
+                    'options' => [
+                        'toneorstyle' => 'tone|prefer_friendly',
+                    ],
+                ],
+                [
+                    'text' => 'General Kenobi',
+                    'key' => 'row_2',
+                ],
+            ],
+            'options' => [
+                'target_lang' => 'EN',
+                'toneorstyle' => 'tone|prefer_diplomatic',
+            ],
+            'version' => 'v1.0',
+        ];
+
+        $validated = \core_external\external_api::validate_parameters(
+            get_rephrase::execute_parameters(),
+            $params
+        );
+
+        $this->assertCount(2, $validated['rephrasings']);
+        $this->assertEquals('tone|prefer_friendly', $validated['rephrasings'][0]['options']['toneorstyle']);
+        $this->assertNull($validated['rephrasings'][1]['options']['toneorstyle']);
+        $this->assertEquals('tone|prefer_diplomatic', $validated['options']['toneorstyle']);
+    }
 }
