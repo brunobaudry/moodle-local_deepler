@@ -138,8 +138,12 @@ define([], ()=>{
             translateSelectedBtn: '[data-action="files-translate-selected"]',
             globalSourceLang: '#local_deepler_global_sourcelang',
             globalTargetLang: '#local_deepler_global_targetlang',
-            globalMinification: '#local_deepler_global_minification',
-            globalFormality: 'input[name="global_formality"]',
+            globalMinification: '#local_deepler__additionalsettings [data-id="local_deepler/minification"], ' +
+                '#local_deepler_global_minification',
+            globalFormality: '#local_deepler__additionalsettings [data-id="local_deepler/formality"], ' +
+                'input[name="global_formality"]',
+            globalGlossary: '#local_deepler__additionalsettings [data-id="local_deepler/glossary_id"], ' +
+                '[data-id="local_deepler/glossary_id"]',
             fileCheckbox: 'input[data-action="select-file"]',
             fileCheckboxChecked: 'input[data-action="select-file"]:checked',
             fileSourceSelect: 'select[data-action="file-source-lang"]',

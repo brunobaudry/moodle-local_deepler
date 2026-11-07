@@ -66,6 +66,7 @@ class finalize_document extends external_api {
             'newcmid' => new external_value(PARAM_INT, 'Created course module ID (0 for course files)', VALUE_DEFAULT, 0),
             'newcmurl' => new external_value(PARAM_TEXT, 'URL to the duplicated activity or file', VALUE_DEFAULT, ''),
             'newname' => new external_value(PARAM_TEXT, 'Translated name', VALUE_DEFAULT, ''),
+            'filename' => new external_value(PARAM_TEXT, 'Translated filename', VALUE_DEFAULT, ''),
             'restricted' => new external_value(PARAM_BOOL, 'Whether language restriction was applied', VALUE_DEFAULT, false),
             'warning' => new external_value(PARAM_TEXT, 'Warning message if applicable', VALUE_DEFAULT, ''),
             'error' => new external_value(PARAM_TEXT, 'Error message if failed', VALUE_DEFAULT, ''),
@@ -95,6 +96,7 @@ class finalize_document extends external_api {
                 'newcmid' => 0,
                 'newcmurl' => '',
                 'newname' => '',
+                'filename' => '',
                 'restricted' => false,
                 'warning' => '',
                 'error' => 'Job record not found.',
@@ -133,12 +135,22 @@ class finalize_document extends external_api {
                 }
             }
 
+            $returnedfilename = '';
+            if ($job->newfileid > 0) {
+                $fs = get_file_storage();
+                $newfile = $fs->get_file_by_id($job->newfileid);
+                if ($newfile) {
+                    $returnedfilename = $newfile->get_filename();
+                }
+            }
+
             return [
                 'jobid' => (int)$job->id,
                 'status' => 'done',
                 'newcmid' => (int)$job->newcmid,
                 'newcmurl' => $url,
                 'newname' => $name,
+                'filename' => $returnedfilename,
                 'restricted' => true,
                 'warning' => '',
                 'error' => '',
@@ -154,6 +166,7 @@ class finalize_document extends external_api {
                 'newcmid' => 0,
                 'newcmurl' => '',
                 'newname' => '',
+                'filename' => '',
                 'restricted' => false,
                 'warning' => '',
                 'error' => 'Could not initialize DeepL client.',
@@ -169,6 +182,7 @@ class finalize_document extends external_api {
                 'newcmid' => 0,
                 'newcmurl' => '',
                 'newname' => '',
+                'filename' => '',
                 'restricted' => false,
                 'warning' => '',
                 'error' => 'Original stored file not found in file storage.',
@@ -195,6 +209,7 @@ class finalize_document extends external_api {
                 'newcmid' => 0,
                 'newcmurl' => '',
                 'newname' => '',
+                'filename' => '',
                 'restricted' => false,
                 'warning' => '',
                 'error' => 'Failed to download translated document: ' . $e->getMessage(),
@@ -311,6 +326,7 @@ class finalize_document extends external_api {
                 'newcmid' => 0,
                 'newcmurl' => '',
                 'newname' => '',
+                'filename' => '',
                 'restricted' => false,
                 'warning' => '',
                 'error' => 'Duplication failed: ' . $e->getMessage(),
@@ -334,6 +350,7 @@ class finalize_document extends external_api {
             'newcmid' => $newcmid,
             'newcmurl' => $newcmurl,
             'newname' => $newname,
+            'filename' => $newstoredfile ? $newstoredfile->get_filename() : '',
             'restricted' => $restricted,
             'warning' => $warning,
             'error' => '',

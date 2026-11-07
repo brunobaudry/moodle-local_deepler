@@ -18,13 +18,42 @@
     @template local_deepler/files_translation_item
 
     Template for a single translation entry inside the file accordion list.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * targetlang
+    * filename
+    * timecreated
+    * newcmurl
+    * str_billedchars
+    * statusbadge
+    * statusstr
+
+    Example context (json):
+    {
+        "targetlang": "DE",
+        "filename": "document_de.pdf",
+        "timecreated": "10 Nov 2026, 14:30",
+        "newcmurl": "https://example.com/mod/resource/view.php?id=124",
+        "str_billedchars": "1,250 chars",
+        "statusbadge": "badge-success bg-success text-white",
+        "statusstr": "Completed"
+    }
 }}
 <div class="translation-item d-flex justify-content-between align-items-center border-bottom py-2">
-    <div class="d-flex align-items-center">
-        <span class="badge badge-primary bg-primary text-white me-2 px-2 py-1">{{targetlang}}</span>
-        <span class="small text-muted me-2">{{timecreated}}</span>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+        <span class="badge badge-primary bg-primary text-white px-2 py-1">{{targetlang}}</span>
+        {{#filename}}
+            <span class="font-weight-bold fw-bold">{{filename}}</span>
+        {{/filename}}
+        <span class="small text-muted">{{timecreated}}</span>
         {{#newcmurl}}
-            <a href="{{newcmurl}}" target="_blank" class="btn btn-xs btn-outline-success py-0 px-2 small ms-2">
+            <a href="{{newcmurl}}" target="_blank" class="btn btn-xs btn-outline-success py-0 px-2 small">
                 <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> {{#str}} files:openactivity, local_deepler {{/str}}
             </a>
         {{/newcmurl}}

@@ -18,6 +18,50 @@
     @template local_deepler/files_page
 
     Template for Deepler file translation main page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * courseid
+    * coursename
+    * hasfiles
+    * sourcelangs
+    * targetlangs
+    * str_selectall
+    * str_translateselected
+    * str_empty
+    * glossariesjson
+    * sections
+
+    Example context (json):
+    {
+        "courseid": 2,
+        "coursename": "Introduction to Physics",
+        "hasfiles": true,
+        "sourcelangs": [
+            {
+                "code": "EN",
+                "name": "English",
+                "selected": true
+            }
+        ],
+        "targetlangs": [
+            {
+                "code": "DE",
+                "name": "German",
+                "selected": true
+            }
+        ],
+        "str_selectall": "Select all",
+        "str_translateselected": "Translate selected",
+        "str_empty": "No translatable files found in this course.",
+        "glossariesjson": "[]",
+        "sections": []
+    }
 }}
 <div class="local_deepler-files-container" id="local_deepler_files_container" data-courseid="{{courseid}}" data-glossaries="{{glossariesjson}}">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
@@ -85,53 +129,7 @@
             </div>
         </div>
 
-        <div class="row">
-            <!-- Formality Option -->
-            <div class="col-md-4 mb-3">
-                <label class="form-label font-weight-bold d-block">{{#str}}formality,local_deepler{{/str}}</label>
-                <div class="btn-group btn-group-sm btn-group-toggle d-flex flex-wrap" data-toggle="buttons" id="local_deepler_global_formality_group">
-                    <label class="btn btn-outline-secondary active">
-                        <input type="radio" name="global_formality" id="formality_default" value="default" checked autocomplete="off">
-                        {{#str}}formalitydefault,local_deepler{{/str}}
-                    </label>
-                    <label class="btn btn-outline-secondary">
-                        <input type="radio" name="global_formality" id="formality_prefer_more" value="prefer_more" autocomplete="off">
-                        {{#str}}formalityprefermore,local_deepler{{/str}}
-                    </label>
-                    <label class="btn btn-outline-secondary">
-                        <input type="radio" name="global_formality" id="formality_prefer_less" value="prefer_less" autocomplete="off">
-                        {{#str}}formalitypreferless,local_deepler{{/str}}
-                    </label>
-                    <label class="btn btn-outline-secondary">
-                        <input type="radio" name="global_formality" id="formality_more" value="more" autocomplete="off">
-                        {{#str}}formalitymore,local_deepler{{/str}}
-                    </label>
-                    <label class="btn btn-outline-secondary">
-                        <input type="radio" name="global_formality" id="formality_less" value="less" autocomplete="off">
-                        {{#str}}formalityless,local_deepler{{/str}}
-                    </label>
-                </div>
-            </div>
-
-            <!-- Glossary Option -->
-            <div class="col-md-4 mb-3" id="local_deepler_global_glossary_container">
-                <label class="form-label font-weight-bold d-block">{{#str}}glossary:name,local_deepler{{/str}}</label>
-                <div id="local_deepler_global_glossary_selector_wrapper">
-                    {{{glossaryselector}}}
-                </div>
-            </div>
-
-            <!-- Document Minification Option -->
-            <div class="col-md-4 mb-3">
-                <label class="form-label font-weight-bold d-block">{{str_minification}}</label>
-                <div class="form-check form-switch custom-control custom-switch mt-1">
-                    <input type="checkbox" class="form-check-input custom-control-input" id="local_deepler_global_minification">
-                    <label class="form-check-label custom-control-label small text-muted" for="local_deepler_global_minification">
-                        {{str_minification_desc}}
-                    </label>
-                </div>
-            </div>
-        </div>
+        {{> local_deepler/files_settings_modal }}
     </div>
     {{/hasfiles}}
 

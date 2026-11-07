@@ -120,8 +120,16 @@ class file_scanner {
         // Fetch all existing translation jobs for this course.
         $jobsrecords = $DB->get_records('local_deepler_files', ['courseid' => $this->course->id], 'id ASC');
         $jobsbyfile = [];
+        $translatedfileids = [];
+        $translatedcmids = [];
         foreach ($jobsrecords as $job) {
             $jobsbyfile[$job->fileid][] = $job;
+            if ($job->newfileid > 0) {
+                $translatedfileids[$job->newfileid] = true;
+            }
+            if ($job->newcmid > 0) {
+                $translatedcmids[$job->newcmid] = true;
+            }
         }
 
         $fs = get_file_storage();
@@ -134,6 +142,10 @@ class file_scanner {
             $files = $fs->get_area_files($coursecontext->id, 'course', $area, 0, 'filename', false);
             foreach ($files as $file) {
                 if ($file->is_directory() || $file->get_filename() === '.') {
+                    continue;
+                }
+                // Skip files created as translated duplicates.
+                if (isset($translatedfileids[$file->get_id()])) {
                     continue;
                 }
                 $supported = self::is_supported($file, $this->maxbytes);
@@ -168,6 +180,10 @@ class file_scanner {
             $sectionid = (int)$sectioninfo->id;
 
             foreach ($modinfo->sections[$sectionnum] as $cmid) {
+                // Skip duplicated modules created by Deepler translation.
+                if (isset($translatedcmids[$cmid])) {
+                    continue;
+                }
                 $cm = $modinfo->cms[$cmid] ?? null;
                 if (!$cm) {
                     continue;
@@ -193,7 +209,7 @@ class file_scanner {
                         if ($file->is_directory() || $file->get_filename() === '.') {
                             continue;
                         }
-                        if (isset($seenfileids[$file->get_id()])) {
+                        if (isset($seenfileids[$file->get_id()]) || isset($translatedfileids[$file->get_id()])) {
                             continue;
                         }
                         $seenfileids[$file->get_id()] = true;

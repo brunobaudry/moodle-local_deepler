@@ -187,6 +187,7 @@ class files_page implements renderable, templatable {
                 'targetlang' => strtolower($g->targetlang),
             ];
         }
+        $data->glossaries = $glossarydata;
         $data->glossariesjson = json_encode($glossarydata);
 
         // 4. Group files by section.
@@ -239,12 +240,27 @@ class files_page implements renderable, templatable {
             $translations = [];
             $hascompletedduplicate = false;
             $newcmurl = '';
+            $fs = get_file_storage();
             foreach ($tfile->jobs as $job) {
                 $jobcmurl = '';
+                $jobfilename = '';
                 if ($job->newcmid > 0) {
                     $jobcmurl = (new moodle_url('/mod/' . ($cm ? $cm->modname : 'resource') . '/view.php', ['id' => $job->newcmid]))->out(false);
                     $hascompletedduplicate = true;
                     $newcmurl = $jobcmurl;
+                }
+                if ($job->newfileid > 0) {
+                    $newfile = $fs->get_file_by_id($job->newfileid);
+                    if ($newfile) {
+                        $jobfilename = $newfile->get_filename();
+                    }
+                }
+                if ($jobfilename === '') {
+                    // Fallback to deriving name from source file and target lang.
+                    $pathinfo = pathinfo($rawfilename);
+                    $basename = $pathinfo['filename'] ?? 'file';
+                    $ext = !empty($pathinfo['extension']) ? ('.' . $pathinfo['extension']) : '';
+                    $jobfilename = $basename . '_' . strtolower($job->targetlang) . $ext;
                 }
 
                 $statusbadge = 'badge-secondary';
@@ -260,6 +276,7 @@ class files_page implements renderable, templatable {
                 $translations[] = [
                     'jobid' => (int)$job->id,
                     'targetlang' => strtoupper($job->targetlang),
+                    'filename' => $this->filter_multilang_text($jobfilename),
                     'status' => $job->status,
                     'statusstr' => $statusstr,
                     'statusbadge' => $statusbadge,

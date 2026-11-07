@@ -18,6 +18,24 @@
     @template local_deepler/files_section
 
     Template for a section block in Deepler files page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * sectionid
+    * sectionname
+    * rows
+
+    Example context (json):
+    {
+        "sectionid": 1,
+        "sectionname": "General Topic",
+        "rows": []
+    }
 }}
 <div class="card mb-4 files-section-card shadow-sm" data-sectionid="{{sectionid}}">
     <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">

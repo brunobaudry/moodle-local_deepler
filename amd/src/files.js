@@ -59,7 +59,8 @@ define([
             {key: 'glossary:notselected', component: 'local_deepler'},
             {key: 'files:justnow', component: 'local_deepler'},
             {key: 'files:billedchars', component: 'local_deepler'},
-            {key: 'seesetting', component: 'local_deepler'}
+            {key: 'seesetting', component: 'local_deepler'},
+            {key: 'resettodefaults', component: 'local_deepler'}
         ];
 
         return Str.get_strings(stringRequests).then((results) => {
@@ -81,6 +82,7 @@ define([
             strings.justnow = results[15];
             strings.billedchars = results[16];
             strings.seesetting = results[17];
+            strings.resettodefaults = results[18];
             return strings;
         });
     };
@@ -110,13 +112,17 @@ define([
         const sourceLang = $(Selectors.files.globalSourceLang).val() || '';
         const targetLang = $(Selectors.files.globalTargetLang).val() || '';
         const matching = getFilteredGlossaries(sourceLang, targetLang);
-        const glossarySelect = $('[data-id="local_deepler/glossary_id"]');
+        const glossarySelect = $('#local_deepler__additionalsettings [data-id="local_deepler/glossary_id"]').length ?
+            $('#local_deepler__additionalsettings [data-id="local_deepler/glossary_id"]') :
+            $(Selectors.files.globalGlossary);
 
         if (glossarySelect.length > 0) {
+            const currentVal = glossarySelect.val();
             glossarySelect.empty();
             glossarySelect.append(`<option value="">${strings.glossarynotselected || 'No Glossary selected'}</option>`);
             matching.forEach((g) => {
-                glossarySelect.append(`<option value="${g.id}">${g.name}</option>`);
+                const selected = (g.id === currentVal) ? 'selected' : '';
+                glossarySelect.append(`<option value="${g.id}" ${selected}>${g.name}</option>`);
             });
         }
     };
@@ -216,6 +222,7 @@ define([
 
         const context = {
             targetlang: targetLang.toUpperCase(),
+            filename: finalRes.filename || '',
             timecreated: strings.justnow || 'Just now',
             newcmurl: finalRes.newcmurl || '',
             statusbadge: 'badge-success',
@@ -316,9 +323,15 @@ define([
             return;
         }
 
-        const globalFormality = $('input[name="global_formality"]:checked').val() || '';
-        const globalGlossary = $('[data-id="local_deepler/glossary_id"]').val() || '';
-        const globalMinification = $(Selectors.files.globalMinification).is(':checked');
+        const globalFormality = $('#local_deepler__additionalsettings [data-id="local_deepler/formality"]').val() ||
+            $(Selectors.files.globalFormality).val() ||
+            $('input[name="global_formality"]:checked').val() ||
+            '';
+        const globalGlossary = $('#local_deepler__additionalsettings [data-id="local_deepler/glossary_id"]').val() ||
+            $(Selectors.files.globalGlossary).val() ||
+            '';
+        const globalMinification = $('#local_deepler__additionalsettings [data-id="local_deepler/minification"]').is(':checked') ||
+            $(Selectors.files.globalMinification).is(':checked');
 
         const items = [];
         checkedBoxes.each((_, el) => {
@@ -365,17 +378,37 @@ define([
         const targetLang = row.find(Selectors.files.targetSelect).val() || '';
         const matchingGlossaries = getFilteredGlossaries(sourceLang, targetLang);
 
+        const globalFormality = $('#local_deepler__additionalsettings [data-id="local_deepler/formality"]').val() ||
+            $(Selectors.files.globalFormality).val() ||
+            'default';
+        const globalGlossary = $('#local_deepler__additionalsettings [data-id="local_deepler/glossary_id"]').val() ||
+            $(Selectors.files.globalGlossary).val() ||
+            '';
+        const globalMinification = $('#local_deepler__additionalsettings [data-id="local_deepler/minification"]').is(':checked') ||
+            $(Selectors.files.globalMinification).is(':checked');
+
         const currentCustom = customSettingsMap[fileId] || {};
+        const effectiveFormality = currentCustom.formality !== undefined && currentCustom.formality !== '' ?
+            currentCustom.formality : globalFormality;
+        const effectiveGlossary = currentCustom.glossary_id !== undefined && currentCustom.glossary_id !== '' ?
+            currentCustom.glossary_id : globalGlossary;
+        const effectiveMinification = currentCustom.enable_document_minification !== undefined ?
+            currentCustom.enable_document_minification : globalMinification;
 
         const context = {
             fileid: fileId,
             filename: fileName,
-            formality: currentCustom.formality || '',
-            minification: currentCustom.enable_document_minification || false,
+            prefix: 'modal_',
+            formality_default: effectiveFormality === 'default',
+            formality_prefer_more: effectiveFormality === 'prefer_more',
+            formality_prefer_less: effectiveFormality === 'prefer_less',
+            formality_more: effectiveFormality === 'more',
+            formality_less: effectiveFormality === 'less',
+            minification: effectiveMinification,
             glossaries: matchingGlossaries.map((g) => ({
                 id: g.id,
                 name: g.name,
-                selected: (currentCustom.glossary_id === g.id)
+                selected: (effectiveGlossary === g.id)
             }))
         };
 
@@ -383,39 +416,50 @@ define([
             title: `${strings.settingsmodal_title} - ${fileName}`,
             body: Templates.render('local_deepler/files_settings_modal', context),
         }).then((modal) => {
+            const footer = modal.getFooter();
+            if (footer && footer[0]) {
+                const resetBtn = document.createElement('button');
+                resetBtn.type = 'button';
+                resetBtn.className = 'btn btn-outline-danger me-auto';
+                resetBtn.setAttribute('data-action', 'reset');
+                resetBtn.textContent = strings.resettodefaults || 'Reset to defaults';
+                resetBtn.addEventListener('click', () => {
+                    delete customSettingsMap[fileId];
+                    $(`[data-indicator-fileid="${fileId}"]`).addClass('d-none');
+                    modal.destroy();
+                });
+                footer[0].prepend(resetBtn);
+            }
+
             modal.show();
 
-            // Set current formality select
             const root = modal.getRoot();
-            if (currentCustom.formality) {
-                root.find(`#modal_formality_${fileId}`).val(currentCustom.formality);
-            }
+            root.find(`[data-id="local_deepler/formality"], #modal_formality_${fileId}`).val(effectiveFormality);
+            root.find(`[data-id="local_deepler/glossary_id"], #modal_glossary_${fileId}`).val(effectiveGlossary);
+            root.find(`[data-id="local_deepler/minification"], #modal_minification_${fileId}`)
+                .prop('checked', effectiveMinification);
 
             modal.setSaveButtonText(strings.save);
 
             root.on(ModalEvents.save, () => {
-                const formalityVal = root.find(`#modal_formality_${fileId}`).val();
-                const glossaryVal = root.find(`#modal_glossary_${fileId}`).val();
-                const minificationVal = root.find(`#modal_minification_${fileId}`).is(':checked');
+                const formalityVal = root.find(`[data-id="local_deepler/formality"]`).val() ||
+                    root.find(`#modal_formality_${fileId}`).val() || 'default';
+                const glossaryVal = root.find(`[data-id="local_deepler/glossary_id"]`).val() ||
+                    root.find(`#modal_glossary_${fileId}`).val() || '';
+                const minificationVal = root.find(`[data-id="local_deepler/minification"]`).is(':checked') ||
+                    root.find(`#modal_minification_${fileId}`).is(':checked');
 
-                const hasCustom = (formalityVal !== '' || glossaryVal !== '' || minificationVal === true);
-                if (hasCustom) {
-                    customSettingsMap[fileId] = {
-                        formality: formalityVal,
-                        glossary_id: glossaryVal,
-                        enable_document_minification: minificationVal
-                    };
-                    $(`[data-indicator-fileid="${fileId}"]`).removeClass('d-none');
-                } else {
-                    delete customSettingsMap[fileId];
-                    $(`[data-indicator-fileid="${fileId}"]`).addClass('d-none');
-                }
+                customSettingsMap[fileId] = {
+                    formality: formalityVal,
+                    glossary_id: glossaryVal,
+                    enable_document_minification: minificationVal
+                };
+                $(`[data-indicator-fileid="${fileId}"]`).removeClass('d-none');
             });
 
             root.on(ModalEvents.hidden, () => {
                 modal.destroy();
             });
-
             return modal;
         }).catch(Notification.exception);
     };

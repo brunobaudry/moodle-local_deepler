@@ -192,5 +192,38 @@ final class file_scanner_test extends advanced_testcase {
         $this->assertNotNull($foundzip);
         $this->assertFalse($foundzip->supported);
         $this->assertEquals('unsupported_extension', $foundzip->reason);
+
+        // 5. Test that translated files / duplicated activities are excluded from scanner.
+        $dupresource = $generator->create_module('resource', ['course' => $course->id, 'name' => 'Handout Doc (FR)']);
+        $cmdupresource = get_coursemodule_from_instance('resource', $dupresource->id, $course->id);
+        $contextdupres = context_module::instance($cmdupresource->id);
+        $translatedfile = $fs->create_file_from_string([
+            'contextid' => $contextdupres->id,
+            'component' => 'mod_resource',
+            'filearea' => 'content',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'handout_fr.docx',
+        ], 'Translated Word handout content');
+
+        $DB->insert_record('local_deepler_files', [
+            'courseid' => $course->id,
+            'cmid' => $cmresource->id,
+            'fileid' => $files[1]->file->get_id(),
+            'contenthash' => $files[1]->file->get_contenthash(),
+            'sourcelang' => 'en',
+            'targetlang' => 'fr',
+            'status' => 'done',
+            'newcmid' => $cmdupresource->id,
+            'newfileid' => $translatedfile->get_id(),
+            'billedcharacters' => 50,
+            'userid' => 2,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        $filesafter = $scanner->get_course_files();
+        $filenamesafter = array_map(fn($f) => $f->file->get_filename(), $filesafter);
+        $this->assertNotContains('handout_fr.docx', $filenamesafter);
     }
 }

@@ -18,6 +18,62 @@
     @template local_deepler/files_row
 
     Template for a single translatable file row with expandable translations.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * fileid
+    * cmid
+    * supported
+    * hastranslations
+    * translationscount
+    * filename
+    * fileurl
+    * activityicon
+    * activityname
+    * fileicon
+    * filesize
+    * sourcelangs
+    * targetlangs
+    * reason
+    * hascompletedduplicate
+    * translations
+
+    Example context (json):
+    {
+        "fileid": 101,
+        "cmid": 42,
+        "supported": true,
+        "hastranslations": true,
+        "translationscount": 1,
+        "filename": "document.pdf",
+        "fileurl": "https://example.com/file.php/42/document.pdf",
+        "activityicon": "<i class=\"fa fa-file-pdf\"></i>",
+        "activityname": "Lecture Slides",
+        "fileicon": "<i class=\"fa fa-file-pdf\"></i>",
+        "filesize": "1.2 MB",
+        "sourcelangs": [
+            {
+                "code": "EN",
+                "name": "English",
+                "selected": true
+            }
+        ],
+        "targetlangs": [
+            {
+                "code": "DE",
+                "name": "German",
+                "selected": true
+            }
+        ],
+        "reason": "",
+        "hascompletedduplicate": false,
+        "translations": []
+    }
 }}
 <tr class="file-row {{^supported}}table-secondary text-muted{{/supported}}" data-fileid="{{fileid}}" data-cmid="{{cmid}}">
     <td class="text-center align-middle">
