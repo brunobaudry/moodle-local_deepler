@@ -139,7 +139,10 @@ class activity_duplicator {
 
         // 2. Duplicate activity using cmactions::duplicate or duplicate_module.
         $newcmid = 0;
-        if (class_exists('core_courseformat\\local\\cmactions')) {
+        if (
+            class_exists('core_courseformat\\local\\cmactions') &&
+            method_exists('core_courseformat\\local\\cmactions', 'duplicate')
+        ) {
             $actions = new cmactions($course);
             $duplicatedcm = $actions->duplicate((int)$cm->id, null, $newname);
             $newcmid = $duplicatedcm ? (int)$duplicatedcm->id : 0;
@@ -179,6 +182,12 @@ class activity_duplicator {
             }
         }
         $DB->update_record($modname, $instance);
+        rebuild_course_cache((int)$course->id, true);
+        $modinfo = get_fast_modinfo($course, true);
+        $newcminfo = $modinfo->cms[$newcmid] ?? null;
+        if (!$newcminfo) {
+            throw new \moodle_exception('Could not locate duplicated cm_info ' . $newcmid);
+        }
 
         // 4. Replace file in the duplicate module context.
         $newcontext = context_module::instance($newcminfo->id);

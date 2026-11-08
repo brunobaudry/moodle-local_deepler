@@ -24,7 +24,9 @@ use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use DeepL\Language;
 use DeepL\LanguageCode;
-use DeepL\LanguageResource;
+use DeepL\LanguageInclude;
+use DeepL\LanguageResourceName;
+use DeepL\LanguageSupport;
 use Deepl\Usage;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
@@ -83,11 +85,10 @@ class lang_helper {
     ) {
         $this->deeplsources = [];
         $this->deepltargets = [];
-        $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
+        $this->deeplrephraselangs = [];
+        $this->betalanguages = [];
         $this->canimprove = false;
         $this->allowbeta = get_config('local_deepler', 'allowbeta') ?? false;
-        // Remove this when DeepL improves its API language list.
-        $this->setbetas();
         $defaultlang = current_language();
         $cookielang = isset($_COOKIE['local_deepler_sourcelang']) ?
             clean_param($_COOKIE['local_deepler_sourcelang'], PARAM_NOTAGS) : null;
@@ -106,96 +107,6 @@ class lang_helper {
         $this->translator = $translator;
     }
 
-    /**
-     * Remove this when DeepL improves its API language list.
-     *
-     * @return void
-     */
-    private function setbetas() {
-        $this->betalanguages = [
-            new Language('Acehnese', 'ACE', null),
-            new Language('Afrikaans', 'AF', null),
-            new Language('Aragonese', 'AN', null),
-            new Language('Assamese', 'AS', null),
-            new Language('Aymara', 'AY', null),
-            new Language('Azerbaijani', 'AZ', null),
-            new Language('Bashkir', 'BA', null),
-            new Language('Belarusian', 'BE', null),
-            new Language('Bhojpuri', 'BHO', null),
-            new Language('Bengali', 'BN', null),
-            new Language('Breton', 'BR', null),
-            new Language('Bosnian', 'BS', null),
-            new Language('Catalan', 'CA', null),
-            new Language('Cebuano', 'CEB', null),
-            new Language('Kurdish (Sorani)', 'CKB', null),
-            new Language('Welsh', 'CY', null),
-            new Language('Esperanto', 'EO', null),
-            new Language('Basque', 'EU', null),
-            new Language('Persian', 'FA', null),
-            new Language('Irish', 'GA', null),
-            new Language('Galician', 'GL', null),
-            new Language('Guarani', 'GN', null),
-            new Language('Konkani', 'GOM', null),
-            new Language('Gujarati', 'GU', null),
-            new Language('Hausa', 'HA', null),
-            new Language('Hindi', 'HI', null),
-            new Language('Croatian', 'HR', null),
-            new Language('Haitian Creole', 'HT', null),
-            new Language('Armenian', 'HY', null),
-            new Language('Igbo', 'IG', null),
-            new Language('Icelandic', 'IS', null),
-            new Language('Javanese', 'JV', null),
-            new Language('Georgian', 'KA', null),
-            new Language('Kazakh', 'KK', null),
-            new Language('Kurdish (Kurmanji)', 'KMR', null),
-            new Language('Kyrgyz', 'KY', null),
-            new Language('Latin', 'LA', null),
-            new Language('Luxembourgish', 'LB', null),
-            new Language('Lombard', 'LMO', null),
-            new Language('Lingala', 'LN', null),
-            new Language('Maithili', 'MAI', null),
-            new Language('Malagasy', 'MG', null),
-            new Language('Maori', 'MI', null),
-            new Language('Macedonian', 'MK', null),
-            new Language('Malayalam', 'ML', null),
-            new Language('Mongolian', 'MN', null),
-            new Language('Marathi', 'MR', null),
-            new Language('Malay', 'MS', null),
-            new Language('Maltese', 'MT', null),
-            new Language('Burmese', 'MY', null),
-            new Language('Nepali', 'NE', null),
-            new Language('Occitan', 'OC', null),
-            new Language('Oromo', 'OM', null),
-            new Language('Punjabi', 'PA', null),
-            new Language('Pangasinan', 'PAG', null),
-            new Language('Kapampangan', 'PAM', null),
-            new Language('Dari', 'PRS', null),
-            new Language('Pashto', 'PS', null),
-            new Language('Quechua', 'QU', null),
-            new Language('Sanskrit', 'SA', null),
-            new Language('Sicilian', 'SCN', null),
-            new Language('Albanian', 'SQ', null),
-            new Language('Serbian', 'SR', null),
-            new Language('Sesotho', 'ST', null),
-            new Language('Sundanese', 'SU', null),
-            new Language('Swahili', 'SW', null),
-            new Language('Tamil', 'TA', null),
-            new Language('Telugu', 'TE', null),
-            new Language('Tajik', 'TG', null),
-            new Language('Turkmen', 'TK', null),
-            new Language('Tagalog', 'TL', null),
-            new Language('Tswana', 'TN', null),
-            new Language('Tsonga', 'TS', null),
-            new Language('Tatar', 'TT', null),
-            new Language('Urdu', 'UR', null),
-            new Language('Uzbek', 'UZ', null),
-            new Language('Wolof', 'WO', null),
-            new Language('Xhosa', 'XH', null),
-            new Language('Yiddish', 'YI', null),
-            new Language('Cantonese', 'YUE', null),
-            new Language('Zulu', 'ZU', null),
-        ];
-    }
 
     /**
      * Init global API key.
@@ -220,10 +131,11 @@ class lang_helper {
      * @param string $version
      * @return bool
      * @throws \DeepL\DeepLException
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
     public function initdeepl(stdClass $user, string $version): bool {
         $this->user = $user;
+        $gracelyfell = false;
         if (!$this->translator) {
             $this->setdeeplapi();
             $this->inittranslator($version);
@@ -233,14 +145,44 @@ class lang_helper {
             $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
             $this->usage = $this->translator->getUsage();
             $this->canimprove = !$this->keyisfree;
-            $this->deeplsources = $this->translator->getSourceLanguages();
-            $translatelanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_TRANSLATE_TEXT);
-            $tmxlanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_TRANSLATION_MEMORY);
-            $imporvelanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_WRITE);
-            $this->deepltargets = $this->translator->getTargetLanguages();
+            $this->deeplsources = $this->translator->getSourceLanguages() ?? [];
+            $this->deepltargets = $this->translator->getTargetLanguages() ?? [];
+
+            // Fetch rephrase / write languages dynamically.
+            try {
+                $writelanguages = $this->translator->getLanguagesForResource(LanguageResourceName::WRITE);
+                $this->deeplrephraselangs = array_map(function ($lang) {
+                    return $lang->code;
+                }, $writelanguages);
+            } catch (\Throwable $e) {
+                // Keep default empty or fallback if write languages retrieval fails.
+                $gracelyfell = true;
+            }
+
             if ($this->allowbeta) {
-                $this->deeplsources = array_merge($this->deeplsources, $this->betalanguages);
-                $this->deepltargets = array_merge($this->deepltargets, $this->betalanguages);
+                try {
+                    $alltextlanguages = $this->translator->getLanguagesForResource(
+                        LanguageResourceName::TRANSLATE_TEXT,
+                        [LanguageInclude::BETA]
+                    );
+                    $betas = array_filter($alltextlanguages, function ($lang) {
+                        return $lang->status === 'beta';
+                    });
+                    $this->betalanguages = [];
+                    foreach ($betas as $betalang) {
+                        $langobj = new Language($betalang->name, $betalang->code, null);
+                        $this->betalanguages[] = $langobj;
+                        if ($betalang->usableAsSource) {
+                            $this->deeplsources[] = $langobj;
+                        }
+                        if ($betalang->usableAsTarget) {
+                            $this->deepltargets[] = $langobj;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    // Fallback gracefully if beta languages retrieval fails.
+                    $gracelyfell = true;
+                }
             }
             $this->setcurrentlanguage();
             return true;
@@ -972,22 +914,27 @@ class lang_helper {
      * @param int $glossarydbid
      * @param bool $dbonly
      * @return bool|null
-     * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
     public function deleteglossary(int $glossarydbid, bool $dbonly = false): ?bool {
         $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
         $success = $dbonly;
+        $userdelete = true;
         if ($guid) {
             // Public glossaries downloaded from DeepL do not have users.
-            $delete = user_glossary::delete($guid->id);
+            $userdelete = user_glossary::delete($guid->id);
         }
         $glo = glossary::getbyid($glossarydbid);
         if (!$dbonly) {
-            $success = $this->translator->deleteglossary($glo->glossaryid);
+            try {
+                $this->translator->deleteglossary($glo->glossaryid);
+                $success = true;
+            } catch (DeepLException $e) {
+                return false;
+            }
         }
         $deleted = glossary::delete($glossarydbid);
-        return $success && $deleted;
+        return $success && $deleted && $userdelete;
     }
 
     /**

@@ -188,7 +188,7 @@ const cachedSelectors = {
         allDataFormatOne.forEach((editable)=>{
             const key = editable.id.replace('tiny_', '');
             const selector = `[data-sourcetext-key="${key}"]`;
-            let parent = domQuery(selector);
+            let parent = Utils.domQuery(selector);
             const grandparent = parent.parentElement;
 
             const updateEditableHeight = ()=> {
@@ -212,35 +212,35 @@ const cachedSelectors = {
     const registerUI = () => {
 
         try {
-            allDataFormatOne = domQueryAll(Selectors.editors.targetarea);
-            hideiframes = domQuery(Selectors.actions.hideiframes);
-            langstrings = JSON.parse(domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
+            allDataFormatOne = Utils.domQueryAll(Selectors.editors.targetarea);
+            hideiframes = Utils.domQuery(Selectors.actions.hideiframes);
+            langstrings = JSON.parse(Utils.domQuery(Selectors.config.langstrings).getAttribute('data-langstrings'));
             errordbtitle = langstrings.uistrings.errordbtitle;
-            saveAllBtn = domQuery(Selectors.actions.saveAll);
-            selectAllBtn = domQuery(Selectors.actions.selectAllBtn);
-            autotranslateButton = domQuery(Selectors.actions.autoTranslateBtn);
-            checkboxes = domQueryAll(Selectors.actions.checkBoxes);
+            saveAllBtn = Utils.domQuery(Selectors.actions.saveAll);
+            selectAllBtn = Utils.domQuery(Selectors.actions.selectAllBtn);
+            autotranslateButton = Utils.domQuery(Selectors.actions.autoTranslateBtn);
+            checkboxes = Utils.domQueryAll(Selectors.actions.checkBoxes);
 
 if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesviewerPage)) {
     glossaryDetailViewr = document.querySelector(Selectors.glossary.entriesviewerPage);
 }
 
-            settingsUI[Selectors.deepl.glossaryId] = domQuery(Selectors.deepl.glossaryId);
-            settingsUI[Selectors.deepl.context] = domQuery(Selectors.deepl.context);
-            settingsUI[Selectors.deepl.formality] = domQuery(Selectors.deepl.formality);
-            settingsUI[Selectors.deepl.modelType] = domQuery(Selectors.deepl.modelType);
-            settingsUI[Selectors.deepl.ignoreTags] = domQuery(Selectors.deepl.ignoreTags);
-            settingsUI[Selectors.deepl.nonSplittingTags] = domQuery(Selectors.deepl.nonSplittingTags);
-            settingsUI[Selectors.deepl.outlineDetection] = domQuery(Selectors.deepl.outlineDetection);
-            settingsUI[Selectors.deepl.preserveFormatting] = domQuery(Selectors.deepl.preserveFormatting);
-            settingsUI[Selectors.deepl.splitSentences] = domQuery(Selectors.deepl.splitSentences);
-            settingsUI[Selectors.deepl.splittingTags] = domQuery(Selectors.deepl.splittingTags);
-            settingsUI[Selectors.deepl.tagHandling] = domQuery(Selectors.deepl.tagHandling);
+            settingsUI[Selectors.deepl.glossaryId] = Utils.domQuery(Selectors.deepl.glossaryId);
+            settingsUI[Selectors.deepl.context] = Utils.domQuery(Selectors.deepl.context);
+            settingsUI[Selectors.deepl.formality] = Utils.domQuery(Selectors.deepl.formality);
+            settingsUI[Selectors.deepl.modelType] = Utils.domQuery(Selectors.deepl.modelType);
+            settingsUI[Selectors.deepl.ignoreTags] = Utils.domQuery(Selectors.deepl.ignoreTags);
+            settingsUI[Selectors.deepl.nonSplittingTags] = Utils.domQuery(Selectors.deepl.nonSplittingTags);
+            settingsUI[Selectors.deepl.outlineDetection] = Utils.domQuery(Selectors.deepl.outlineDetection);
+            settingsUI[Selectors.deepl.preserveFormatting] = Utils.domQuery(Selectors.deepl.preserveFormatting);
+            settingsUI[Selectors.deepl.splitSentences] = Utils.domQuery(Selectors.deepl.splitSentences);
+            settingsUI[Selectors.deepl.splittingTags] = Utils.domQuery(Selectors.deepl.splittingTags);
+            settingsUI[Selectors.deepl.tagHandling] = Utils.domQuery(Selectors.deepl.tagHandling);
             if (!config.isfree) {
-                settingsUI[Selectors.deepl.toneorstyle] = domQuery(Selectors.deepl.toneorstyle);
+                settingsUI[Selectors.deepl.toneorstyle] = Utils.domQuery(Selectors.deepl.toneorstyle);
             }
-            settingsUI[Selectors.actions.escapeLatex] = domQuery(Selectors.actions.escapeLatex);
-            settingsUI[Selectors.actions.escapePre] = domQuery(Selectors.actions.escapePre);
+            settingsUI[Selectors.actions.escapeLatex] = Utils.domQuery(Selectors.actions.escapeLatex);
+            settingsUI[Selectors.actions.escapePre] = Utils.domQuery(Selectors.actions.escapePre);
             fetchCookies();
             resizeEditors();
         } catch (e) {
@@ -270,7 +270,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                             settingsUI[selector].checked = settingsCookie[selector];
                             break;
                         case 'radio' :
-                            domQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
+                            Utils.domQuery(selector + `[value="${settingsCookie[selector]}"]`).checked = true;
                             break;
                         default:
                             settingsUI[selector].value = settingsCookie[selector];
@@ -290,7 +290,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {string} value
      */
     const setOptionFromCookie = (value)=>{
-        let optionToSelect = domQuery(`option[value="${value}"]`);
+        let optionToSelect = Utils.domQuery(`option[value="${value}"]`);
         if (optionToSelect) {
             optionToSelect.selected = true;
         }
@@ -497,7 +497,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {boolean} isChecked
      */
     function doHideiframes(isChecked) {
-        const allIframes = domQueryAll(Selectors.sourcetexts.iframes);
+        const allIframes = Utils.domQueryAll(Selectors.sourcetexts.iframes);
         if (!isChecked && allIframes.length > 0) {
             removedIframes = [];
             allIframes.forEach(iframe => {
@@ -538,8 +538,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         if (key === null) {
             Log.error(`KEY ${keyid} BAD FORMAT should be TABLE-ID-FIELD-CMID`);
         } else {
-            let source = domQuery(Selectors.sourcetexts.keys, key);
-            let multilang = domQuery(Selectors.sourcetexts.multilangs, keyid);
+            let source = Utils.domQuery(Selectors.sourcetexts.keys, key);
+            let multilang = Utils.domQuery(Selectors.sourcetexts.multilangs, keyid);
             source.classList.toggle("show");
             multilang.classList.toggle("show");
         }
@@ -549,7 +549,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns void
      */
     const saveTranslations = async() => {
-        const selectedCheckboxes = domQueryAll(Selectors.statuses.checkedCheckBoxes);
+        const selectedCheckboxes = Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes);
         if (selectedCheckboxes.length === 0) {
             return;
         }
@@ -618,7 +618,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {{key, courseid, id: number, tid: *, table: *, field: *}}
      */
     const prepareDBitem = (key) => {
-        const element = domQuery(Selectors.editors.multiples.editorsWithKey, key);
+        const element = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
         return {
             key: key,
             courseid: config.courseid,
@@ -641,7 +641,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         }
         const key = rowSelect.getAttribute('data-key');
         const selectedSourceLang = rowSelect.value;
-        const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+        const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
         if (!sourceContainer) {
             return;
         }
@@ -747,7 +747,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {*}
      */
     const getIconStatus = (key)=> {
-        return domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
+        return Utils.domQuery(Selectors.actions.validatorBtn, key).getAttribute('data-status');
     };
     /**
      * Change translation process status icon.
@@ -757,7 +757,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {boolean} isBtn
      */
     const setIconStatus = (key, status = Selectors.statuses.wait, isBtn = false) => {
-        let icon = domQuery(Selectors.actions.validatorBtn, key);
+        let icon = Utils.domQuery(Selectors.actions.validatorBtn, key);
         if (!isBtn) {
             if (!icon.classList.contains('disabled')) {
                 icon.classList.add('disabled');
@@ -842,16 +842,16 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         const keys = [];
         const [cookie, settings] = prepareSettingsAndCookieValues();
         saveAllBtn.disabled = false;
-        domQueryAll(Selectors.statuses.checkedCheckBoxes)
+        Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes)
             .forEach((ckBox) => {
                 const key = ckBox.getAttribute("data-key");
-                const sourceText = domQuery(Selectors.sourcetexts.keys, key);
+                const sourceText = Utils.domQuery(Selectors.sourcetexts.keys, key);
                 const editor = findEditor(key);
                 Translation.initTempForKey(
                     key, editor,
                     sourceText.getAttribute("data-sourcetext-raw"),
                     sourceText.getAttribute("data-filedtext-raw"),
-                    domQuery(Selectors.sourcetexts.sourcelangdd, key).value
+                    Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key).value
                 );
                 keys.push(key);
             });
@@ -946,7 +946,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const toggleStatus = (key, checked) => {
         Log.info(key);
-        const validatorbtn = domQuery(Selectors.actions.validatorBtn, key);
+        const validatorbtn = Utils.domQuery(Selectors.actions.validatorBtn, key);
         const status = validatorbtn.dataset.status;
         switch (status) {
             case Selectors.statuses.wait :
@@ -988,19 +988,19 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     const showRows = () => {
         // Map each selector to its corresponding checkbox checked state
         const selectorMap = {
-            [Selectors.statuses.updated]: domQuery(Selectors.actions.showUpdated).checked,
-            [Selectors.statuses.needsupdate]: domQuery(Selectors.actions.showNeedUpdate).checked,
-            [Selectors.statuses.hidden]: domQuery(Selectors.actions.showHidden).checked
+            [Selectors.statuses.updated]: Utils.domQuery(Selectors.actions.showUpdated).checked,
+            [Selectors.statuses.needsupdate]: Utils.domQuery(Selectors.actions.showNeedUpdate).checked,
+            [Selectors.statuses.hidden]: Utils.domQuery(Selectors.actions.showHidden).checked
         };
 
         // Combine all selectors into one comma-separated string for batch querying.
         const mergedSelector = Object.keys(selectorMap).join(",");
 
         // Query all items matching any of the selectors once.
-        const allItems = domQueryAll(mergedSelector);
+        const allItems = Utils.domQueryAll(mergedSelector);
 
         // Cache the global "select all" button checked state once.
-        const allSelected = domQuery(Selectors.actions.selectAllBtn).checked;
+        const allSelected = Utils.domQuery(Selectors.actions.selectAllBtn).checked;
 
         allItems.forEach(item => {
             // Determine which selector this item matches so we can apply the right checkbox state.
@@ -1022,7 +1022,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
 
             if (rowId === null) {
                 // For items without row-id, toggle checkboxes of their child rows.
-                const childs = domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
+                const childs = Utils.domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
                 childs.forEach(child => {
                     const childId = child.getAttribute('data-row-id');
                     Log.info("Whitin LooP");
@@ -1050,7 +1050,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         Log.info(`ui/toggleChildCheckBoxSelection`);
         Log.debug(key);
         Log.debug(Selectors.editors.multiples.checkBoxesWithKey);
-        const single = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+        const single = Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
         Log.info(single);
         single.checked = shouldBeChecked;
         toggleStatus(key, false);
@@ -1065,7 +1065,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         Log.warn(`ui/errorMessageItem`);
         Log.warn(key);
         Log.warn(error);
-        const editor = domQuery(Selectors.editors.multiples.editorsWithKey, key);
+        const editor = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
         editor.classList.add("local_deepler__error");
         setIconStatus(key, Selectors.statuses.failed);
         // Display granular error messages.
@@ -1083,8 +1083,8 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {String} key
      */
     const hideErrorMessage = (key) => {
-        let parent = domQuery(Selectors.editors.multiples.editorsWithKey, key);
-        let alertChild = domQuery('.alert-danger', '', parent);
+        let parent = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
+        let alertChild = Utils.domQuery('.alert-danger', '', parent);
         if (alertChild) {
             alertChild.remove();
         }
@@ -1096,28 +1096,28 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {string} savedText
      */
     const onSuccessMessageItem = (key, savedText) => {
-        domQuery(Selectors.editors.multiples.editorsWithKey, key)
+        Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key)
             .classList.add("local_deepler__success");
         // Add saved indicator.
         setIconStatus(key, Selectors.statuses.success);
         // Replace text in the multilang textarea.
-        const multilangTextarea = domQuery(Selectors.editors.multiples.textAreas, key);
+        const multilangTextarea = Utils.domQuery(Selectors.editors.multiples.textAreas, key);
         multilangTextarea.innerHTML = savedText;
         // Deselect the checkbox.
-        domQuery(Selectors.editors.multiples.checkBoxesWithKey, key).checked = false;
+        Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, key).checked = false;
         // Remove success message after a few seconds.
         setTimeout(() => {
-            let multilangPill = domQuery(Selectors.statuses.multilang, key);
-            let prevTransStatus = domQuery(Selectors.statuses.prevTransStatus, key);
+            let multilangPill = Utils.domQuery(Selectors.statuses.multilang, key);
+            let prevTransStatus = Utils.domQuery(Selectors.statuses.prevTransStatus, key);
             if (prevTransStatus) {
                 prevTransStatus.className = "badge badge-pill rounded-pill badge-success";
                 prevTransStatus.setAttribute('title', langstrings.uistrings.uptodate || "Up to date");
             }
-            let sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            let sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
             if (sourceContainer) {
                 sourceContainer.setAttribute('data-filedtext-raw', Utils.toBase64(savedText));
             }
-            let rowEl = domQuery(`[data-row-id="${key}"]`);
+            let rowEl = Utils.domQuery(`[data-row-id="${key}"]`);
             if (rowEl) {
                 rowEl.setAttribute('data-status', 'updated');
             }
@@ -1134,7 +1134,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {String} message
      */
     const showErrorMessageForEditor = (key, message) => {
-        let parent = domQuery(Selectors.editors.multiples.editorsWithKey, key);
+        let parent = Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key);
         const errorMsg = document.createElement('div');
         errorMsg.id = 'local_deepler__errormsg';
         errorMsg.classList = ['alert alert-danger'];
@@ -1145,7 +1145,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * Update rephrase symbol on main source language dropdown options (strip all).
      */
     const updateMainSourceDropdownNoRephrase = () => {
-        const sourceSelect = domQuery(Selectors.actions.sourceSwitcher);
+        const sourceSelect = Utils.domQuery(Selectors.actions.sourceSwitcher);
         if (!sourceSelect) {
             return;
         }
@@ -1163,7 +1163,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {string} sourceLang
      */
     const updateTargetLangDropdownRephrase = (sourceLang) => {
-        const targetSelect = domQuery(Selectors.actions.targetSwitcher);
+        const targetSelect = Utils.domQuery(Selectors.actions.targetSwitcher);
         if (!targetSelect) {
             return;
         }
@@ -1199,7 +1199,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {string} targetLang
      */
     const updateRowSourceDropdownsRephrase = (targetLang) => {
-        const rowSelects = domQueryAll(Selectors.actions.sourceselect);
+        const rowSelects = Utils.domQueryAll(Selectors.actions.sourceselect);
         rowSelects.forEach((rowSelect) => {
             const currentRowVal = Utils.stripRephraseSymbol(rowSelect.value, config.rephrasesymbol);
             Array.from(rowSelect.options).forEach((option) => {
@@ -1233,7 +1233,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const updateAllRowsTranslationStatus = () => {
         const targetLang = Utils.stripRephraseSymbol(config.targetlang || '', config.rephrasesymbol);
-        const rowElements = domQueryAll('[data-row-id]');
+        const rowElements = Utils.domQueryAll('[data-row-id]');
 
         rowElements.forEach((rowEl) => {
             const statusAttr = rowEl.getAttribute('data-status');
@@ -1242,9 +1242,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             }
 
             const key = rowEl.getAttribute('data-row-id');
-            const bullet = domQuery(Selectors.statuses.prevTransStatus, key);
-            const checkbox = domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
-            const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            const bullet = Utils.domQuery(Selectors.statuses.prevTransStatus, key);
+            const checkbox = Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
+            const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
             if (!bullet || !sourceContainer) {
                 return;
             }
@@ -1252,7 +1252,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             const rawFieldBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
             const rawFieldText = Utils.fromBase64(rawFieldBase64);
 
-            const rowSourceSelect = domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            const rowSourceSelect = Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key);
             const rowSourceLang = rowSourceSelect
                 ? Utils.stripRephraseSymbol(rowSourceSelect.value, config.rephrasesymbol)
                 : (config.deeplsourcelang || config.sourcelang || 'en');
@@ -1296,13 +1296,13 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         }
 
         // Update target language header label.
-        const targetHeader = domQuery('#local_deepler__targetlang');
+        const targetHeader = Utils.domQuery('#local_deepler__targetlang');
         if (targetHeader && langstrings.uistrings.selecttargetlanguage) {
             targetHeader.innerHTML = langstrings.uistrings.selecttargetlanguage.replace('{$a}', targetLang);
         }
 
         // Update translate button text.
-        const translateBtn = domQuery(Selectors.actions.autoTranslateBtn);
+        const translateBtn = Utils.domQuery(Selectors.actions.autoTranslateBtn);
         if (translateBtn) {
             if (langstrings.uistrings.translatebutton) {
                 translateBtn.innerHTML = langstrings.uistrings.translatebutton.replace('{$a}', targetLang);
@@ -1316,7 +1316,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         const langroot = Utils.removeRegionalVariant(targetLang);
         const moodleLangs = config.moodlelangs || [];
         const compatibles = moodleLangs.filter((code) => code.includes(langroot)).sort();
-        const compatSelect = domQuery(Selectors.actions.targetCompatibleSwitcher);
+        const compatSelect = Utils.domQuery(Selectors.actions.targetCompatibleSwitcher);
         if (compatSelect) {
             compatSelect.innerHTML = '';
             compatibles.forEach((code) => {
@@ -1336,14 +1336,14 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         updateRowSourceDropdownsRephrase(targetLang);
 
         // Re-initialize Translation temp items for all rows.
-        const rowElements = domQueryAll('[data-row-id]');
+        const rowElements = Utils.domQueryAll('[data-row-id]');
         rowElements.forEach((rowEl) => {
             const key = rowEl.getAttribute('data-row-id');
-            const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
             if (!sourceContainer) {
                 return;
             }
-            const rowSourceSelect = domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            const rowSourceSelect = Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key);
             const sourceRawBase64 = sourceContainer.getAttribute('data-sourcetext-raw') || '';
             const fieldRawBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
             const editor = findEditor(key);
@@ -1428,10 +1428,10 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         updateRowSourceDropdownsRephrase(config.targetlang);
 
         // Iterate through all translation rows and dynamically re-filter strings.
-        const rowElements = domQueryAll('[data-row-id]');
+        const rowElements = Utils.domQueryAll('[data-row-id]');
         rowElements.forEach((rowEl) => {
             const key = rowEl.getAttribute('data-row-id');
-            const sourceContainer = domQuery(Selectors.sourcetexts.keys, key);
+            const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
             if (!sourceContainer) {
                 return;
             }
@@ -1452,7 +1452,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             }
 
             // Update row source selection dropdown.
-            const rowSourceSelect = domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            const rowSourceSelect = Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key);
             if (rowSourceSelect) {
                 if (mlangResult.mlangTagMatched) {
                     rowSourceSelect.disabled = true;
@@ -1516,7 +1516,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         cwos = 0;
 
         // Cache checkboxes matching selector once, convert to array if needed.
-        const checkedBoxes = Array.from(domQueryAll(Selectors.statuses.checkedCheckBoxes));
+        const checkedBoxes = Array.from(Utils.domQueryAll(Selectors.statuses.checkedCheckBoxes));
 
         // Aggregate counts in one loop.
         checkedBoxes.forEach(ckBox => {
@@ -1556,7 +1556,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const findEditor = (key) => {
         Log.info('findEditor', key);
-        let e = domQuery(Selectors.editors.types.basic, key);
+        let e = Utils.domQuery(Selectors.editors.types.basic, key);
         let et = 'basic';
         if (e === null) {
             let r = null;
@@ -1589,7 +1589,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         switch (editorType) {
             case "atto" :
                 et = 'iframe';
-                ed = domQuery(Selectors.editors.types.atto, key);
+                ed = Utils.domQuery(Selectors.editors.types.atto, key);
                 break;
             case "tiny":
                 et = 'iframe';
@@ -1597,7 +1597,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 break;
             case 'marklar':
             case "textarea" :
-                ed = domQuery(Selectors.editors.types.other, key);
+                ed = Utils.domQuery(Selectors.editors.types.other, key);
                 break;
         }
         Log.info('Editor container :');
@@ -1627,7 +1627,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {{wordCount: *, charNumWithSpace: *, charNumWithOutSpace: *}}
      */
     const getCount = (key) => {
-        const item = domQuery(Selectors.sourcetexts.keys, key);
+        const item = Utils.domQuery(Selectors.sourcetexts.keys, key);
         const raw = item.getAttribute("data-sourcetext-raw");
         // Cleaned sourceText.
         const trimmedVal = Utils.stripHTMLTags(Utils.fromBase64(raw)).trim();
@@ -1644,35 +1644,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @returns {*}
      */
     const queryRadioValue = (selector) => {
-        return domQuery(Selectors.actions.radioValues.replace("<RADIO>", selector)).value;
-    };
-    /**
-     * Shortcut for dom querySelector.
-     *
-     * @param {string} selector
-     * @param {string} key
-     * @param {element} target
-     * @returns {element}
-     */
-    const domQuery = (selector, key = '', target = null) => {
-        const el = target ?? document;
-        // Some selectors (e.g. editors.types.other) hold <KEY> more than once: replace all occurrences.
-        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
-        return el.querySelector(q);
-    };
-
-    /**
-     * Shortcut for dom querySelector.
-     *
-     * @param {string} selector
-     * @param {string} key
-     * @param {element} target
-     * @returns {NodeList}
-     */
-    const domQueryAll = (selector, key = '', target = null) => {
-        const el = target ?? document;
-        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
-        return el.querySelectorAll(q);
+        return Utils.domQuery(Selectors.actions.radioValues.replace("<RADIO>", selector)).value;
     };
     /**
      * Initializes the reactive state manager and registers page & row components.
@@ -1681,15 +1653,15 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const initReactiveState = (cfg) => {
         try {
-            const rowElements = domQueryAll('[data-row-id]');
+            const rowElements = Utils.domQueryAll('[data-row-id]');
             const rows = [];
             rowElements.forEach((el) => {
                 const rowId = el.getAttribute('data-row-id');
                 const counts = getCount(rowId);
-                const sourceEl = domQuery(Selectors.sourcetexts.keys, rowId);
+                const sourceEl = Utils.domQuery(Selectors.sourcetexts.keys, rowId);
                 const raw = sourceEl ? sourceEl.getAttribute("data-sourcetext-raw") : "";
                 const originalText = raw ? Utils.stripHTMLTags(Utils.fromBase64(raw)).trim() : "";
-                const checkbox = domQuery(Selectors.actions.checkBoxes, rowId, el);
+                const checkbox = Utils.domQuery(Selectors.actions.checkBoxes, rowId, el);
                 const isSelected = checkbox ? checkbox.checked : true;
 
                 rows.push({
@@ -1750,7 +1722,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * @param {*} cfg
      */
     const init = (cfg) => {
-        offsetTop = domQuery(Selectors.config.langstrings).offsetTop;
+        offsetTop = Utils.domQuery(Selectors.config.langstrings).offsetTop;
         ScrollSpy.init('.local_deepler__form', '#local_deepler-scrollspy',
             {highestLevel: 3, fadingDistance: 60, offsetEndOfScope: 1, offsetTop: 100, crumbsmaxlen: cfg.crumbsmaxlen});
         Translation.init(cfg);

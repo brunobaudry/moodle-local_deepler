@@ -120,8 +120,7 @@ $version = $plugin->release;
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
-    $initok = $languagepack->initdeepl($USER, $version);
-    if ($initok && $languagepack->iscurrentsupported()) {
+    if ($languagepack->initdeepl($USER, $version)) {
         // Set js data.
         $jsconfig = new stdClass();
         // We get the version from the version dot php file.
@@ -148,7 +147,7 @@ try {
         // Build the page.
         $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
         echo $output->render($renderable);
-    } else if ($initok) {
+    } else if (empty($languagepack->preparesourcesoptionlangs())) {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
         echo $output->render($renderable);
     } else {

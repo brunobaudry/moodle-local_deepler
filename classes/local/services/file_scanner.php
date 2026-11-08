@@ -34,6 +34,7 @@ class file_scanner {
     /** @var array Supported file extensions by DeepL Document API. */
     public const SUPPORTED_EXTENSIONS = [
         'docx',
+        'doc',
         'pptx',
         'xlsx',
         'pdf',

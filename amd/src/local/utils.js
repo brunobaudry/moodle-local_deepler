@@ -175,8 +175,8 @@ define([], () => {
      */
     const smartTruncate = (str, maxLength) =>{
         if (str.length <= maxLength || maxLength == 0) {
- return str;
-}
+            return str;
+        }
 
         const ellipsis = '…';
         const trimmed = str.slice(0, maxLength - ellipsis.length);
@@ -403,7 +403,33 @@ define([], () => {
             status: 'needsupdate',
         };
     };
-
+    /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {element} target
+     * @returns {element}
+     */
+    const domQuery = (selector, key = '', target = null) => {
+        const el = target ?? document;
+        // Some selectors (e.g. editors.types.other) hold <KEY> more than once: replace all occurrences.
+        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
+        return el.querySelector(q);
+    };
+    /**
+     * Shortcut for dom querySelector.
+     *
+     * @param {string} selector
+     * @param {string} key
+     * @param {element} target
+     * @returns {NodeList}
+     */
+    const domQueryAll = (selector, key = '', target = null) => {
+        const el = target ?? document;
+        const q = key === '' ? selector : selector.replaceAll("<KEY>", key);
+        return el.querySelectorAll(q);
+    };
     /**
      * Api to be used by the other modules.
      */
@@ -425,6 +451,8 @@ define([], () => {
         isRephrasable: isRephrasable,
         stripRephraseSymbol: stripRephraseSymbol,
         getTranslationStatusInfo: getTranslationStatusInfo,
+        domQuery: domQuery,
+        domQueryAll: domQueryAll,
         toJsonArray: toJsonArray
     };
 });

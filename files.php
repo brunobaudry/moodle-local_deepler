@@ -84,8 +84,7 @@ $version = $plugin->release;
 $languagepack = new lang_helper();
 
 try {
-    $initok = $languagepack->initdeepl($USER, $version);
-    if ($initok && $languagepack->iscurrentsupported()) {
+    if ($languagepack->initdeepl($USER, $version)) {
         $scanner = new file_scanner($course);
         $files = $scanner->get_course_files();
 
@@ -122,7 +121,7 @@ try {
         $renderable = new files_page($course, $files, $languagepack, $version, $mlangfilter);
         $filesrenderer = new files_renderer($PAGE, null);
         echo $filesrenderer->render_files_page($renderable);
-    } else if ($initok) {
+    } else if (empty($languagepack->preparesourcesoptionlangs())) {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
         echo $output->render($renderable);
     } else {
