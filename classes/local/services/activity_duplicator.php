@@ -85,7 +85,7 @@ class activity_duplicator {
             if (!empty($results) && empty($results[0]['error']) && !empty($results[0]['translated_text'])) {
                 return $results[0]['translated_text'];
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $e) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             // Fallback handled by caller.
         }
 

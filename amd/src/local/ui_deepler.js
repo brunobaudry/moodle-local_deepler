@@ -1470,6 +1470,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                                 if (res && res.detected_lang && reactive) {
                                     reactive.dispatch('setDetectedSourceLang', key, res.detected_lang.toLowerCase());
                                 }
+                                return res;
                             })
                             .catch((err) => {
                                 Log.debug('Auto-detection error: ' + err);

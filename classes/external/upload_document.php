@@ -56,7 +56,12 @@ class upload_document extends external_api {
             'options' => new external_single_structure([
                 'formality' => new external_value(PARAM_RAW, 'Formality preference', VALUE_DEFAULT, ''),
                 'glossary_id' => new external_value(PARAM_RAW, 'Glossary ID', VALUE_DEFAULT, ''),
-                'enable_document_minification' => new external_value(PARAM_BOOL, 'Enable document minification', VALUE_DEFAULT, false),
+                'enable_document_minification' => new external_value(
+                    PARAM_BOOL,
+                    'Enable document minification',
+                    VALUE_DEFAULT,
+                    false
+                ),
             ], 'Translation options', VALUE_DEFAULT, []),
             'version' => new external_value(PARAM_TEXT, 'Plugin release version'),
         ]);
@@ -166,7 +171,7 @@ class upload_document extends external_api {
                     'error' => 'DeepL API usage limit reached for this month.',
                 ];
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $e) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             // Ignore usage check exceptions if quota check fails.
         }
 
@@ -182,10 +187,10 @@ class upload_document extends external_api {
             $deeploptions['enable_document_minification'] = true;
         }
 
-        $effective_source = !empty($params['sourcelang']) ? $params['sourcelang'] : null;
+        $effectivesource = !empty($params['sourcelang']) ? $params['sourcelang'] : null;
 
         try {
-            $handle = $translator->upload($file, $effective_source, $params['targetlang'], $deeploptions);
+            $handle = $translator->upload($file, $effectivesource, $params['targetlang'], $deeploptions);
         } catch (DeepLException $e) {
             return [
                 'jobid' => 0,

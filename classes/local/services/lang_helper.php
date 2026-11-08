@@ -89,9 +89,12 @@ class lang_helper {
         // Remove this when DeepL improves its API language list.
         $this->setbetas();
         $defaultlang = current_language();
-        $cookielang = isset($_COOKIE['local_deepler_sourcelang']) ? clean_param($_COOKIE['local_deepler_sourcelang'], PARAM_NOTAGS) : null;
-        $this->currentlang = $currentlang ?? optional_param('sourcelang', optional_param('lang', $cookielang ?? $defaultlang, PARAM_NOTAGS), PARAM_NOTAGS);
-        $cookietargetlang = isset($_COOKIE['local_deepler_targetlang']) ? clean_param($_COOKIE['local_deepler_targetlang'], PARAM_NOTAGS) : null;
+        $cookielang = isset($_COOKIE['local_deepler_sourcelang']) ?
+            clean_param($_COOKIE['local_deepler_sourcelang'], PARAM_NOTAGS) : null;
+        $fallbacklang = optional_param('lang', $cookielang ?? $defaultlang, PARAM_NOTAGS);
+        $this->currentlang = $currentlang ?? optional_param('sourcelang', $fallbacklang, PARAM_NOTAGS);
+        $cookietargetlang = isset($_COOKIE['local_deepler_targetlang']) ?
+            clean_param($_COOKIE['local_deepler_targetlang'], PARAM_NOTAGS) : null;
         $this->targetlang = $targetlang ?? optional_param('target_lang', $cookietargetlang ?? '', PARAM_NOTAGS);
         if ($this->targetlang !== '') {
             $this->targetlang = LanguageCode::standardizeLanguageCode($this->targetlang);
@@ -566,6 +569,7 @@ class lang_helper {
      * Prepare source options.
      *
      * @param bool $verbose
+     * @param bool $allowrephrase
      * @return array
      */
     public function preparesourcesoptionlangs(bool $verbose = false, bool $allowrephrase = true): array {

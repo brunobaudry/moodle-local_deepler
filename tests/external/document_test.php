@@ -35,6 +35,10 @@ use local_deepler\output\files_page;
  * @category   test
  * @copyright  2026 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \local_deepler\external\upload_document
+ * @covers     \local_deepler\external\get_document_status
+ * @covers     \local_deepler\external\finalize_document
+ * @covers     \local_deepler\output\files_page
  */
 final class document_test extends base_external {
     /**

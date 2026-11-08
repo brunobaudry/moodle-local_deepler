@@ -74,7 +74,7 @@ define([
             strings.openactivity = results[7];
             strings.translations = results[8];
             strings.notranslations = results[9];
-            strings.settingsmodal_title = results[10];
+            strings.settingsmodalTitle = results[10];
             strings.save = results[11];
             strings.reset = results[12];
             strings.close = results[13];
@@ -227,6 +227,7 @@ define([
             newcmurl: finalRes.newcmurl || '',
             statusbadge: 'badge-success',
             statusstr: strings.done,
+            // eslint-disable-next-line camelcase
             str_billedchars: billedStr
         };
 
@@ -343,7 +344,9 @@ define([
             const custom = customSettingsMap[fileId] || {};
             const options = {
                 formality: custom.formality !== undefined && custom.formality !== '' ? custom.formality : globalFormality,
+                // eslint-disable-next-line camelcase
                 glossary_id: custom.glossary_id !== undefined && custom.glossary_id !== '' ? custom.glossary_id : globalGlossary,
+                // eslint-disable-next-line camelcase
                 enable_document_minification: custom.enable_document_minification !== undefined ?
                     custom.enable_document_minification : globalMinification
             };
@@ -399,10 +402,15 @@ define([
             fileid: fileId,
             filename: fileName,
             prefix: 'modal_',
+            // eslint-disable-next-line camelcase
             formality_default: effectiveFormality === 'default',
+            // eslint-disable-next-line camelcase
             formality_prefer_more: effectiveFormality === 'prefer_more',
+            // eslint-disable-next-line camelcase
             formality_prefer_less: effectiveFormality === 'prefer_less',
+            // eslint-disable-next-line camelcase
             formality_more: effectiveFormality === 'more',
+            // eslint-disable-next-line camelcase
             formality_less: effectiveFormality === 'less',
             minification: effectiveMinification,
             glossaries: matchingGlossaries.map((g) => ({
@@ -413,7 +421,7 @@ define([
         };
 
         ModalSaveCancel.create({
-            title: `${strings.settingsmodal_title} - ${fileName}`,
+            title: `${strings.settingsmodalTitle} - ${fileName}`,
             body: Templates.render('local_deepler/files_settings_modal', context),
         }).then((modal) => {
             const footer = modal.getFooter();
@@ -451,7 +459,9 @@ define([
 
                 customSettingsMap[fileId] = {
                     formality: formalityVal,
+                    // eslint-disable-next-line camelcase
                     glossary_id: glossaryVal,
+                    // eslint-disable-next-line camelcase
                     enable_document_minification: minificationVal
                 };
                 $(`[data-indicator-fileid="${fileId}"]`).removeClass('d-none');
@@ -478,7 +488,7 @@ define([
         settingsContainer.parentNode.insertBefore(placeholder, settingsContainer);
 
         ModalSaveCancel.create({
-            title: strings.seesetting || strings.settingsmodal_title || 'Advanced settings',
+            title: strings.seesetting || strings.settingsmodalTitle || 'Advanced settings',
             body: '',
             large: true,
         }).then((modal) => {
@@ -583,6 +593,7 @@ define([
             registerEventListeners();
             updateGlobalGlossarySelector();
             updateButtonState();
+            return null;
         }).catch(Notification.exception);
     };
 

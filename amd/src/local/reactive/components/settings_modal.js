@@ -29,6 +29,42 @@ import {getString} from 'core/str';
 import Log from 'core/log';
 
 /**
+ * Helper to resolve boolean setting with fallback.
+ *
+ * @param {*} domValue Value from DOM.
+ * @param {*} stateValue Value from reactive state.
+ * @param {boolean} defaultValue Default boolean value.
+ * @returns {boolean}
+ */
+const resolveBoolean = (domValue, stateValue, defaultValue) => {
+    if (domValue !== undefined) {
+        return Boolean(domValue);
+    }
+    if (stateValue !== undefined) {
+        return Boolean(stateValue);
+    }
+    return defaultValue;
+};
+
+/**
+ * Helper to resolve string/value setting with fallback.
+ *
+ * @param {*} domValue Value from DOM.
+ * @param {*} stateValue Value from reactive state.
+ * @param {*} defaultValue Default value.
+ * @returns {*}
+ */
+const resolveValue = (domValue, stateValue, defaultValue = '') => {
+    if (domValue !== undefined && domValue !== null && domValue !== '') {
+        return domValue;
+    }
+    if (stateValue !== undefined && stateValue !== null && stateValue !== '') {
+        return stateValue;
+    }
+    return defaultValue;
+};
+
+/**
  * Get effective default settings from reactive state.
  *
  * @param {object} reactive The reactive instance.
@@ -41,45 +77,27 @@ const getEffectiveDefaults = (reactive) => {
 
     return {
         // eslint-disable-next-line camelcase
-        model_type: domSettings.model_type || globalSettings.modelType || 'prefer_quality_optimized',
-        formality: domSettings.formality || globalSettings.formality || 'default',
+        model_type: resolveValue(domSettings.model_type, globalSettings.modelType, 'prefer_quality_optimized'),
+        formality: resolveValue(domSettings.formality, globalSettings.formality, 'default'),
         // eslint-disable-next-line camelcase
-        split_sentences: domSettings.split_sentences || globalSettings.splitSentences || '1',
+        split_sentences: resolveValue(domSettings.split_sentences, globalSettings.splitSentences, '1'),
         // eslint-disable-next-line camelcase
-        preserve_formatting: domSettings.preserve_formatting !== undefined
-            ? domSettings.preserve_formatting
-            : Boolean(globalSettings.preserveFormatting),
-        context: domSettings.context !== undefined
-            ? domSettings.context
-            : (globalSettings.context || ''),
+        preserve_formatting: resolveBoolean(domSettings.preserve_formatting, globalSettings.preserveFormatting, false),
+        context: resolveValue(domSettings.context, globalSettings.context, ''),
         // eslint-disable-next-line camelcase
-        tag_handling: domSettings.tag_handling || globalSettings.tagHandling || 'html',
+        tag_handling: resolveValue(domSettings.tag_handling, globalSettings.tagHandling, 'html'),
         // eslint-disable-next-line camelcase
-        outline_detection: domSettings.outline_detection !== undefined
-            ? domSettings.outline_detection
-            : Boolean(globalSettings.outlineDetection),
+        outline_detection: resolveBoolean(domSettings.outline_detection, globalSettings.outlineDetection, false),
         // eslint-disable-next-line camelcase
-        ignore_tags: domSettings.ignore_tags !== undefined
-            ? domSettings.ignore_tags
-            : (globalSettings.ignoreTags || ''),
+        ignore_tags: resolveValue(domSettings.ignore_tags, globalSettings.ignoreTags, ''),
         // eslint-disable-next-line camelcase
-        non_splitting_tags: domSettings.non_splitting_tags !== undefined
-            ? domSettings.non_splitting_tags
-            : (globalSettings.nonSplittingTags || ''),
+        non_splitting_tags: resolveValue(domSettings.non_splitting_tags, globalSettings.nonSplittingTags, ''),
         // eslint-disable-next-line camelcase
-        splitting_tags: domSettings.splitting_tags !== undefined
-            ? domSettings.splitting_tags
-            : (globalSettings.splittingTags || ''),
-        toneorstyle: domSettings.toneorstyle || globalSettings.toneorstyle || 'default',
-        latexeascape: domSettings.latexeascape !== undefined
-            ? domSettings.latexeascape
-            : (globalSettings.escapeLatex !== undefined ? Boolean(globalSettings.escapeLatex) : true),
-        preescape: domSettings.preescape !== undefined
-            ? domSettings.preescape
-            : (globalSettings.escapePre !== undefined ? Boolean(globalSettings.escapePre) : true),
-        hideiframes: domSettings.hideiframes !== undefined
-            ? domSettings.hideiframes
-            : (globalSettings.hideIframes !== undefined ? Boolean(globalSettings.hideIframes) : true),
+        splitting_tags: resolveValue(domSettings.splitting_tags, globalSettings.splittingTags, ''),
+        toneorstyle: resolveValue(domSettings.toneorstyle, globalSettings.toneorstyle, 'default'),
+        latexeascape: resolveBoolean(domSettings.latexeascape, globalSettings.escapeLatex, true),
+        preescape: resolveBoolean(domSettings.preescape, globalSettings.escapePre, true),
+        hideiframes: resolveBoolean(domSettings.hideiframes, globalSettings.hideIframes, true),
     };
 };
 

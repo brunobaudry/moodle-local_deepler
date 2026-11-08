@@ -56,18 +56,18 @@ class detect_source_language extends external_api {
      * Executes the detection.
      *
      * @param string $text
-     * @param string $row_id
+     * @param string $rowid
      * @param string $version
      * @return array
      */
-    public static function execute(string $text, string $row_id = '', string $version = 'v1'): array {
+    public static function execute(string $text, string $rowid = '', string $version = 'v1'): array {
         global $USER;
 
         $params = self::validate_parameters(
             self::execute_parameters(),
             [
                 'text' => $text,
-                'row_id' => $row_id,
+                'row_id' => $rowid,
                 'version' => $version,
             ]
         );

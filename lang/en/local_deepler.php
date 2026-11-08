@@ -49,10 +49,10 @@ $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
         'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.
         This has no effect if the API key isn\'t set or no are additional tokens are mapped to users\' attributes.';
-$string['autodetect_sourcelang'] = 'Auto-detect source language';
-$string['autodetect_sourcelang_desc'] = 'Automatically detect the source language of content falling back to {mlang other} by sending a short text excerpt to DeepL. Note: This consumes character quota.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
+$string['autodetect_sourcelang'] = 'Auto-detect source language';
+$string['autodetect_sourcelang_desc'] = 'Automatically detect the source language of content falling back to {mlang other} by sending a short text excerpt to DeepL. Note: This consumes character quota.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
 Check with your Moodle admin.';
 $string['breadcrumblength'] = 'Max length of breadcrumb\'s sub';
@@ -115,8 +115,8 @@ $string['files:sourcelang'] = 'Source';
 $string['files:status'] = 'Status';
 $string['files:title'] = 'Deepler file translation';
 $string['files:translateselected'] = 'Translate selected';
-$string['files:translations'] = 'Translations ({$a})';
 $string['files:translating'] = 'Translating';
+$string['files:translations'] = 'Translations ({$a})';
 $string['files:unknown'] = 'Unknown';
 $string['files:unsupported'] = 'Unsupported';
 $string['files:uploading'] = 'Uploading';

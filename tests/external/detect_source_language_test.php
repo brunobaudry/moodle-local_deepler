@@ -27,7 +27,11 @@ use advanced_testcase;
  * @covers     \local_deepler\external\detect_source_language
  */
 final class detect_source_language_test extends advanced_testcase {
-
+    /**
+     * Test autodetect disabled.
+     *
+     * @covers \local_deepler\external\detect_source_language::execute
+     */
     public function test_autodetect_disabled_returns_empty(): void {
         $this->resetAfterTest();
         set_config('autodetect_sourcelang', 0, 'local_deepler');
@@ -38,6 +42,11 @@ final class detect_source_language_test extends advanced_testcase {
         $this->assertEquals('row_1', $result['row_id']);
     }
 
+    /**
+     * Test empty text detection.
+     *
+     * @covers \local_deepler\external\detect_source_language::execute
+     */
     public function test_empty_text_returns_empty(): void {
         $this->resetAfterTest();
         set_config('autodetect_sourcelang', 1, 'local_deepler');

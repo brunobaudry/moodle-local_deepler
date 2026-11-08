@@ -27,6 +27,7 @@ use context_module;
  * @category   test
  * @copyright  2026 Bruno Baudry
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \local_deepler\local\services\activity_duplicator
  */
 final class activity_duplicator_test extends advanced_testcase {
     /**

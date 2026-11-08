@@ -209,6 +209,7 @@ define(['core/log', 'core/ajax'], (Log, Ajax) => {
             methodname: 'local_deepler_detect_source_language',
             args: {
                 text: text,
+                // eslint-disable-next-line camelcase
                 row_id: rowId,
                 version: version
             }

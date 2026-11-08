@@ -217,7 +217,7 @@ final class spreadsheetglossaryparser {
         $src = $this->to_utf8($src);
         $tgt = $this->to_utf8($tgt);
 
-        fputcsv($fh, [$src, $tgt]);
+        fputcsv($fh, [$src, $tgt], ',', '"', "\\");
     }
 
     /**

@@ -245,7 +245,8 @@ class files_page implements renderable, templatable {
                 $jobcmurl = '';
                 $jobfilename = '';
                 if ($job->newcmid > 0) {
-                    $jobcmurl = (new moodle_url('/mod/' . ($cm ? $cm->modname : 'resource') . '/view.php', ['id' => $job->newcmid]))->out(false);
+                    $modtype = $cm ? $cm->modname : 'resource';
+                    $jobcmurl = (new moodle_url('/mod/' . $modtype . '/view.php', ['id' => $job->newcmid]))->out(false);
                     $hascompletedduplicate = true;
                     $newcmurl = $jobcmurl;
                 }

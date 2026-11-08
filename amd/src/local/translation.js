@@ -214,25 +214,66 @@ define([
             };
         };
         /**
+         * Format translation options from custom settings.
+         *
+         * @param {object|null} custom
+         * @returns {object|null}
+         */
+        const formatRowOptions = (custom) => {
+            if (!custom) {
+                return null;
+            }
+            return {
+                context: custom.context || null,
+                // eslint-disable-next-line camelcase
+                tag_handling: custom.tag_handling || null,
+                // eslint-disable-next-line camelcase
+                split_sentences: custom.split_sentences || null,
+                // eslint-disable-next-line camelcase
+                preserve_formatting: custom.preserve_formatting ?? null,
+                formality: custom.formality || null,
+                // eslint-disable-next-line camelcase
+                outline_detection: custom.outline_detection ?? null,
+                // eslint-disable-next-line camelcase
+                non_splitting_tags: custom.non_splitting_tags || null,
+                // eslint-disable-next-line camelcase
+                splitting_tags: custom.splitting_tags || null,
+                // eslint-disable-next-line camelcase
+                ignore_tags: custom.ignore_tags || null,
+                // eslint-disable-next-line camelcase
+                glossary_id: custom.glossary_id || null,
+                // eslint-disable-next-line camelcase
+                model_type: custom.model_type || null,
+                toneorstyle: custom.toneorstyle || null,
+            };
+        };
+
+        /**
+         * Retrieve custom settings for a given row key.
+         *
+         * @param {string} key
+         * @returns {object|null}
+         */
+        const getRowCustomSettings = (key) => {
+            const reactive = getReactive();
+            const rows = reactive?.state?.rows;
+            if (rows) {
+                const row = rows.get(key) || Array.from(rows.values()).find((r) => r.key === key || r.id === key);
+                if (row?.customSettings) {
+                    return row.customSettings;
+                }
+            }
+            return tempTranslations[key]?.customSettings || null;
+        };
+
+        /**
          * Prepare the texts for the external api calls.
          *
          * @param {string} key
          * @returns {{text, source_lang: (string|string|*), key}}
          */
         const prepareTranslation = (key) => {
-            const reactive = getReactive();
-            let rowCustomSettings = null;
-            if (reactive && reactive.state.rows) {
-                const row = reactive.state.rows.get(key) ||
-                    Array.from(reactive.state.rows.values()).find(r => r.key === key || r.id === key);
-                if (row && row.customSettings) {
-                    rowCustomSettings = row.customSettings;
-                }
-            }
-            if (!rowCustomSettings && tempTranslations[key]?.customSettings) {
-                rowCustomSettings = tempTranslations[key].customSettings;
-            }
-
+            const rowCustomSettings = getRowCustomSettings(key);
             const item = {
                 text: tempTranslations[key].source,
                 // eslint-disable-next-line camelcase
@@ -240,30 +281,9 @@ define([
                 key: key,
             };
 
-            if (rowCustomSettings) {
-                item.options = {
-                    context: rowCustomSettings.context || null,
-                    // eslint-disable-next-line camelcase
-                    tag_handling: rowCustomSettings.tag_handling || null,
-                    // eslint-disable-next-line camelcase
-                    split_sentences: rowCustomSettings.split_sentences || null,
-                    // eslint-disable-next-line camelcase
-                    preserve_formatting: rowCustomSettings.preserve_formatting ?? null,
-                    formality: rowCustomSettings.formality || null,
-                    // eslint-disable-next-line camelcase
-                    outline_detection: rowCustomSettings.outline_detection ?? null,
-                    // eslint-disable-next-line camelcase
-                    non_splitting_tags: rowCustomSettings.non_splitting_tags || null,
-                    // eslint-disable-next-line camelcase
-                    splitting_tags: rowCustomSettings.splitting_tags || null,
-                    // eslint-disable-next-line camelcase
-                    ignore_tags: rowCustomSettings.ignore_tags || null,
-                    // eslint-disable-next-line camelcase
-                    glossary_id: rowCustomSettings.glossary_id || null,
-                    // eslint-disable-next-line camelcase
-                    model_type: rowCustomSettings.model_type || null,
-                    toneorstyle: rowCustomSettings.toneorstyle || null,
-                };
+            const options = formatRowOptions(rowCustomSettings);
+            if (options) {
+                item.options = options;
             }
 
             return item;
