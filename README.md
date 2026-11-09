@@ -60,6 +60,8 @@ To use DeepLer, your Moodle environment requires:
 - A **DeepL API Account**:
   - **DeepL API Free** or **DeepL API Pro** for multi-language translations.
   - **DeepL API Pro** for text improvement and rephrasing in the same language.
+- Optional **[availability_language](https://marketplace.moodle.com/plugins/availability_language)** to automatically create language restricted file or folder resources when 
+  translating documents. *moodle version >5.2*
 
 ---
 
@@ -76,22 +78,16 @@ To use DeepLer, your Moodle environment requires:
 
 ## Quick Start: Translating a Course
 
-### 1. Open the Translator
-#### Whole course
-Navigate to the course you wish to translate, open the course **Actions menu** (gear icon or course navigation), and select **DeepL Translator**.
+### 1. Open the Translator from the setting
+#### From the course, a section or a module settings
 
-![](pix/launch.png)
-
-### Section
+Navigate to the course you wish to translate, open the course **Actions menu** (gear icon or course navigation), and select **DeepLer Translator** or **DeepLer Files**.
 When you are in edit mode
 
 ![](pix/launch_section.png)
 
-#### Module
-![](pix/launch_section_module.png)
-
 ### 2. Choose Source and Target Languages
-- **Source Language:** Automatically reflects your current Moodle language. Set this to the language the course was originally written in.
+- **Source Language:** Automatically reflects your current Moodle language. Set this to the language the course was originally written in. But you can change it.
 - **Target Language:** Select the language you want to translate your course into from the dropdown menu.
 
 ![](pix/source_lang.png)
@@ -138,11 +134,15 @@ Every row displays a color-coded status dot so you can quickly monitor translati
 - 🟠 **Orange (Needs Update):** The text was previously translated, but the original source content has since been edited in Moodle.
 
 ### Document and File Translation
-
-In addition to text content, DeepLer provides a dedicated **Deepler: Files** page for translating binary and document files attached to course activities or course overview files:
-- **Supported formats:** `docx`, `pptx`, `xlsx`, `pdf`, `htm/html`, `txt`, `xlf/xliff`, `srt`.
+![](pix/file_general.png)
+In addition to text content, DeepLer provides a dedicated **DeepL Files** page for translating binary and document files attached to course activities or course overview files:
+- **Supported formats:** `docx`, `pptx`, `xlsx`, `pdf`, `htm/html`, `txt`, `xlf/xliff`, `srt` but also images `jpeg` and `png`.
+  * DeepL bill's a default 50K characters for certain file types (https://developers.deepl.com/docs/best-practices/document-translations#billing-minimums) the interface will 
+    inform  the translator
+    ![](pix/file_detail.png)
 - **Activity duplication:** For activities like Resources or Folders, DeepLer duplicates the activity, inserts the translated file(s), translates the title/intro, and places the copy right after the source.
 - **Language restriction:** When the `availability_language` plugin is installed, DeepLer automatically pre-fills access restrictions so learners only see the activity corresponding to their selected language.
+  ![](pix/file_restriction.png)
 
 ### Rephrasing and Text Improvement
 
@@ -283,7 +283,8 @@ If your site uses **custom 3rd-party plugins or unique question types**, adminis
 
 - **Establish Source Language First:** Always write your original course materials in your primary language before starting the translation process.
 - **Review High-Stakes Assessments:** While DeepL provides high-accuracy translations, always have an educator review translated quiz questions and answer options for pedagogical nuances.
-- **Take Advantage of User Tours:** Administrators can enable Moodle User Tours (`tourguide/tour_export.json`) to provide new translators with an interactive, on-screen walkthrough.
+- **Take Advantage of User Tours:** Administrators can enable Moodle User Tours (`tourguide/activities_tour_export.json` and `tourguide/files_tour_export.json`) to provide new 
+  translators with an interactive, on-screen walkthrough.
 - **Monitor Character Limits:** When translating concise titles or short field labels, keep an eye on database length warnings to avoid text truncation.
 
 ---

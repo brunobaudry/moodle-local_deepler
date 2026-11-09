@@ -132,6 +132,13 @@
                                 <a href="{{fileurl}}" target="_blank" class="{{^supported}}text-muted{{/supported}} font-weight-bold" title="{{filename}}">
                                     {{filename}}
                                 </a>
+                                {{#hasbillingminimum}}
+                                    <span class="badge badge-warning bg-warning text-dark ms-1"
+                                          title="{{#str}} files:billingminimum, local_deepler {{/str}}"
+                                          data-toggle="tooltip" data-bs-toggle="tooltip">
+                                        <i class="fa fa-info-circle me-1" aria-hidden="true"></i>{{#str}} files:billingminimumbadge, local_deepler {{/str}}
+                                    </span>
+                                {{/hasbillingminimum}}
                                 {{#hastranslations}}
                                     <span class="badge badge-info bg-info text-white ms-1" style="cursor: pointer;"
                                           data-toggle="collapse" data-bs-toggle="collapse"

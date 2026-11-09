@@ -75,6 +75,28 @@ final class file_scanner_test extends advanced_testcase {
     }
 
     /**
+     * Test has_billing_minimum helper.
+     */
+    public function test_has_billing_minimum(): void {
+        $this->assertTrue(file_scanner::has_billing_minimum('document.docx'));
+        $this->assertTrue(file_scanner::has_billing_minimum('slides.pptx'));
+        $this->assertTrue(file_scanner::has_billing_minimum('data.xlsx'));
+        $this->assertTrue(file_scanner::has_billing_minimum('book.pdf'));
+        $this->assertTrue(file_scanner::has_billing_minimum('photo.jpg'));
+        $this->assertTrue(file_scanner::has_billing_minimum('graphic.png'));
+        $this->assertTrue(file_scanner::has_billing_minimum('text.odt'));
+        $this->assertTrue(file_scanner::has_billing_minimum('notes.rtf'));
+
+        // Text formats do not have 50k minimum.
+        $this->assertFalse(file_scanner::has_billing_minimum('readme.txt'));
+        $this->assertFalse(file_scanner::has_billing_minimum('page.html'));
+        $this->assertFalse(file_scanner::has_billing_minimum('page.htm'));
+        $this->assertFalse(file_scanner::has_billing_minimum('strings.xlf'));
+        $this->assertFalse(file_scanner::has_billing_minimum('strings.xliff'));
+        $this->assertFalse(file_scanner::has_billing_minimum('subtitles.srt'));
+    }
+
+    /**
      * Test scanning course files across activities and course level.
      */
     public function test_get_course_files(): void {
@@ -181,6 +203,18 @@ final class file_scanner_test extends advanced_testcase {
         $this->assertTrue($foundcoursefile->supported);
         $this->assertCount(1, $foundcoursefile->jobs);
         $this->assertEquals('fr', $foundcoursefile->jobs[0]->targetlang);
+        $this->assertTrue($foundcoursefile->hasbillingminimum); // PDF has billing minimum.
+
+        // Check text file does not have billing minimum.
+        $foundtxt = null;
+        foreach ($files as $f) {
+            if ($f->file->get_filename() === 'brief.txt') {
+                $foundtxt = $f;
+                break;
+            }
+        }
+        $this->assertNotNull($foundtxt);
+        $this->assertFalse($foundtxt->hasbillingminimum);
 
         // Check unsupported zip file.
         $foundzip = null;

@@ -1,5 +1,5 @@
 @local @local_deepler @deepler_menu
-Feature: Check course 'MORE' menu entry with DeepL Translator
+Feature: Check course 'MORE' menu entry with DeepLer Translator
   In order to access plugin functionality
   As a teacher
   I need to see the plugin entry in the course 'MORE' menu
@@ -24,13 +24,13 @@ Feature: Check course 'MORE' menu entry with DeepL Translator
   Scenario: Teacher can see the plugin entry in the course 'MORE' menu
     Given I am on the "C1" "course" page
     Then I should see "Course 1"
-    And I navigate to "DeepL Translator" in current page administration
-    Then I should see "DeepL Translator"
+    And I navigate to "DeepLer Translator" in current page administration
+    Then I should see "DeepLer Translator"
 
   Scenario: Teacher can see the plugin entry in the activity setting and section setting
     Given I am on the "Test assignment name" Activity page
     And I navigate to "Settings" in current page administration
-    Then I should see "DeepL Translator"
+    Then I should see "DeepLer Translator"
     And I am on "C1" course homepage with editing mode on
     When I edit the section "1"
-    Then I should see "DeepL Translator"
+    Then I should see "DeepLer Translator"

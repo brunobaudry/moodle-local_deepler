@@ -115,7 +115,7 @@ if (!class_exists(LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {
 // Instantiate the normalized class.
 $mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);
 
-echo $output->heading($mlangfilter->filter($course->fullname));
+echo $output->heading($mlangfilter->filter(format_string($course->fullname)));
 $version = $plugin->release;
 // Get Language helper.
 $languagepack = new lang_helper();

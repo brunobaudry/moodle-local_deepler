@@ -1,0 +1,123 @@
+{
+  "name": "Course files translator guide tour",
+  "description": "Tour to demo the files translation feature in the deepler plugin",
+  "pathmatch": "\/local\/deepler\/files.php%",
+  "enabled": "1",
+  "sortorder": "6",
+  "endtourlabel": "",
+  "configdata": "{\"showtourwhen\":1,\"placement\":\"bottom\",\"orphan\":\"0\",\"backdrop\":\"0\",\"reflex\":\"0\",\"filtervalues\":{\"accessdate\":{\"filter_accessdate\":\"tool_usertours_accountcreation\",\"filter_accessdate_range\":0,\"filter_accessdate_enabled\":\"0\"},\"category\":[],\"course\":[],\"courseformat\":[],\"role\":[],\"theme\":[],\"cssselector\":[]},\"majorupdatetime\":1732877869}",
+  "displaystepnumbers": true,
+  "version": "2024042200",
+  "steps": [
+    {
+      "title": "tour_files00title,local_deepler",
+      "content": "tour_files00,local_deepler",
+      "contentformat": "1",
+      "targettype": "2",
+      "targetvalue": "",
+      "sortorder": "0",
+      "configdata": "{\"orphan\":\"1\",\"backdrop\":\"1\",\"reflex\":\"0\",\"placement\":\"top\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files01billingtitle,local_deepler",
+      "content": "tour_files01billing,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": ".local_deepler-files-container .alert-info",
+      "sortorder": "1",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"bottom\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files02globalsettingstitle,local_deepler",
+      "content": "tour_files02globalsettings,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler__settings",
+      "sortorder": "2",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"bottom\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files03globalsourcetitle,local_deepler",
+      "content": "tour_files03globalsource,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler_global_sourcelang",
+      "sortorder": "3",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"bottom\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files04globaltargettitle,local_deepler",
+      "content": "tour_files04globaltarget,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#local_deepler_global_targetlang",
+      "sortorder": "4",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"bottom\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files05selectalltitle,local_deepler",
+      "content": "tour_files05selectall,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "#select-all",
+      "sortorder": "5",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"bottom\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files06translatestitle,local_deepler",
+      "content": "tour_files06translate,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": "[data-action=\"files-translate-selected\"]",
+      "sortorder": "6",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"bottom\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files07sectionstitle,local_deepler",
+      "content": "tour_files07sections,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": ".files-sections",
+      "sortorder": "7",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"top\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files08rowselecttitle,local_deepler",
+      "content": "tour_files08rowselect,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": ".file-row:first-child .file-select-checkbox",
+      "sortorder": "8",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"right\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files09rowsettingstitle,local_deepler",
+      "content": "tour_files09rowsettings,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": ".file-row:first-child [data-action=\"row-settings\"]",
+      "sortorder": "9",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"left\"}",
+      "files": []
+    },
+    {
+      "title": "tour_files10statustitle,local_deepler",
+      "content": "tour_files10status,local_deepler",
+      "contentformat": "1",
+      "targettype": "0",
+      "targetvalue": ".file-row:first-child .status-cell",
+      "sortorder": "10",
+      "configdata": "{\"orphan\":\"0\",\"backdrop\":\"0\",\"placement\":\"left\"}",
+      "files": []
+    }
+  ]
+}

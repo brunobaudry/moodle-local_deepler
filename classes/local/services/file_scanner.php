@@ -34,7 +34,6 @@ class file_scanner {
     /** @var array Supported file extensions by DeepL Document API. */
     public const SUPPORTED_EXTENSIONS = [
         'docx',
-        'doc',
         'pptx',
         'xlsx',
         'pdf',
@@ -44,6 +43,29 @@ class file_scanner {
         'xlf',
         'xliff',
         'srt',
+        'odt',
+        'rtf',
+        'jpeg',
+        'jpg',
+        'png',
+    ];
+
+    /** @var array File extensions subject to DeepL 50,000 characters billing minimum. */
+    public const MINIMUM_BILLING_EXTENSIONS = [
+        'docx',
+        'doc',
+        'pptx',
+        'xlsx',
+        'xlsm',
+        'pdf',
+        'odt',
+        'rtf',
+        'jpeg',
+        'jpg',
+        'png',
+        'idml',
+        'mif',
+        'zip',
     ];
 
     /** @var stdClass Course object. */
@@ -66,6 +88,18 @@ class file_scanner {
         } else {
             $this->maxbytes = $maxbytes;
         }
+    }
+
+    /**
+     * Check if a stored_file or filename is subject to DeepL 50k character billing minimum.
+     *
+     * @param stored_file|string $file Stored file object or filename.
+     * @return bool
+     */
+    public static function has_billing_minimum(stored_file|string $file): bool {
+        $filename = is_string($file) ? $file : $file->get_filename();
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return in_array($ext, self::MINIMUM_BILLING_EXTENSIONS, true);
     }
 
     /**
@@ -152,6 +186,7 @@ class file_scanner {
                 $supported = self::is_supported($file, $this->maxbytes);
                 $reason = self::get_unsupported_reason($file, $this->maxbytes);
                 $filejobs = $jobsbyfile[$file->get_id()] ?? [];
+                $hasbillingmin = self::has_billing_minimum($file);
 
                 $results[] = new translatable_file(
                     $file,
@@ -163,7 +198,8 @@ class file_scanner {
                     $filejobs,
                     0,
                     0,
-                    get_string('files:courselevel', 'local_deepler')
+                    get_string('files:courselevel', 'local_deepler'),
+                    $hasbillingmin
                 );
             }
         }
@@ -218,6 +254,7 @@ class file_scanner {
                         $supported = self::is_supported($file, $this->maxbytes);
                         $reason = self::get_unsupported_reason($file, $this->maxbytes);
                         $filejobs = $jobsbyfile[$file->get_id()] ?? [];
+                        $hasbillingmin = self::has_billing_minimum($file);
 
                         $results[] = new translatable_file(
                             $file,
@@ -229,7 +266,8 @@ class file_scanner {
                             $filejobs,
                             $sectionid,
                             $sectionnum,
-                            $sectionname
+                            $sectionname,
+                            $hasbillingmin
                         );
                     }
                 }

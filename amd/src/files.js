@@ -723,19 +723,6 @@ define([
                 return;
             }
 
-            // 3. Select all button
-            const selectAllBtn = e.target.closest(Selectors.files.selectAllBtn);
-            if (selectAllBtn) {
-                const checkboxes = Utils.domQueryAll(Selectors.files.fileCheckbox);
-                const checkedCheckboxes = Utils.domQueryAll(Selectors.files.fileCheckboxChecked);
-                const allChecked = checkboxes.length > 0 && checkboxes.length === checkedCheckboxes.length;
-                checkboxes.forEach((cb) => {
-                    cb.checked = !allChecked;
-                });
-                updateButtonState();
-                return;
-            }
-
             // 5. Translate selected button
             const translateBtn = e.target.closest(Selectors.files.translateSelectedBtn);
             if (translateBtn) {
@@ -819,6 +806,18 @@ define([
             // 4. File checkbox change
             if (e.target.matches(Selectors.files.fileCheckbox)) {
                 updateButtonState();
+            }
+            // 3. Select all button
+            const selectAllBtn = e.target.closest(Selectors.files.selectAllBtn);
+            if (selectAllBtn) {
+                const checkboxes = Utils.domQueryAll(Selectors.files.fileCheckbox);
+                const checkedCheckboxes = Utils.domQueryAll(Selectors.files.fileCheckboxChecked);
+                const allChecked = checkboxes.length > 0 && checkboxes.length === checkedCheckboxes.length;
+                checkboxes.forEach((cb) => {
+                    cb.checked = !allChecked;
+                });
+                updateButtonState();
+                return;
             }
         });
     };

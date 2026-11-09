@@ -24,6 +24,7 @@ use core_external\external_value;
 use DeepL\AppInfo;
 use DeepL\DeepLClient;
 use DeepL\DeepLException;
+use DeepL\RephraseTextOptions;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -75,8 +76,9 @@ class get_rephrase extends external_api {
             $rowoverrides = array_filter($rephrasing['options'] ?? [], static fn($v) => !is_null($v));
             $effectivetoneorstyle = $rowoverrides['toneorstyle'] ?? $globaltoneorstyle;
 
+            $iscorrect = ($effectivetoneorstyle === 'correct');
             $style = $tone = null;
-            if ($effectivetoneorstyle !== 'default' && !empty($effectivetoneorstyle)) {
+            if (!$iscorrect && $effectivetoneorstyle !== 'default' && !empty($effectivetoneorstyle)) {
                 $rephraseoptions = explode('|', $effectivetoneorstyle);
                 if (count($rephraseoptions) === 2) {
                     $tone = $rephraseoptions[0] === 'tone' ? $rephraseoptions[1] : null;
@@ -84,15 +86,22 @@ class get_rephrase extends external_api {
                 }
             }
 
-            $validatedparams = $improver->buildRephraseBodyParams($targetlang, $style, $tone);
-            $grouptargetlang = $validatedparams['target_lang'];
-            unset($validatedparams['target_lang']);
+            $rephraseoptions = [];
+            if ($style !== null) {
+                $rephraseoptions[RephraseTextOptions::WRITING_STYLE] = $style;
+            }
+            if ($tone !== null) {
+                $rephraseoptions[RephraseTextOptions::TONE] = $tone;
+            }
 
-            $groupkey = $grouptargetlang . '_' . md5((string)json_encode($validatedparams));
+            $grouptargetlang = $targetlang;
+            $md5 = md5((string)json_encode($rephraseoptions));
+            $groupkey = ($iscorrect ? 'correct_' : 'rephrase_') . $grouptargetlang . '_' . $md5;
             if (!isset($groupedrephrasings[$groupkey])) {
                 $groupedrephrasings[$groupkey] = [
                     'targetlang' => $grouptargetlang,
-                    'options' => $validatedparams,
+                    'options' => $rephraseoptions,
+                    'iscorrect' => $iscorrect,
                     'rephrasings' => [],
                 ];
             }
@@ -103,6 +112,7 @@ class get_rephrase extends external_api {
         foreach ($groupedrephrasings as $group) {
             $grouptargetlang = $group['targetlang'];
             $groupoptions = $group['options'];
+            $iscorrect = $group['iscorrect'];
             $staticparts = [$groupoptions, $grouptargetlang];
             $chunks = self::chunk_payload($group['rephrasings'], $staticparts);
 
@@ -112,7 +122,11 @@ class get_rephrase extends external_api {
                 }, $chunk);
 
                 try {
-                    $results = $improver->rephraseText($texts, $grouptargetlang, $groupoptions);
+                    if ($iscorrect) {
+                        $results = $improver->correctText($texts, $grouptargetlang);
+                    } else {
+                        $results = $improver->rephraseText($texts, $grouptargetlang, $groupoptions);
+                    }
                     foreach ($results as $index => $result) {
                         $key = $chunk[$index]['key'];
                         $improvedtexts[] = [

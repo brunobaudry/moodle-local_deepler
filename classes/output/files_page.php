@@ -322,6 +322,7 @@ class files_page implements renderable, templatable {
                 'activityicon' => $activityicon,
                 'supported' => $tfile->supported,
                 'reason' => $reasondesc,
+                'hasbillingminimum' => $tfile->hasbillingminimum,
                 'sourcelangs' => $rowsourcelangs,
                 'targetlangs' => $rowtargetlangs,
                 'hastranslations' => !empty($translations),

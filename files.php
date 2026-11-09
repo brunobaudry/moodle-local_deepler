@@ -70,8 +70,8 @@ if (!get_config('local_deepler', 'filetranslation')) {
 $title = get_string('files:title', 'local_deepler');
 $PAGE->set_url('/local/deepler/files.php', ['courseid' => $courseid]);
 $PAGE->set_title($title);
-$PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_pagelayout('incourse');
+$PAGE->set_heading($title);
+$PAGE->set_pagelayout('base');
 $PAGE->set_course($course);
 
 $mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);

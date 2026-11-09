@@ -1184,6 +1184,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 option.value = rawCode;
                 option.textContent = rawText;
             }
+            option.disabled = false;
         });
         const matchingOpt = Array.from(targetSelect.options).find(
             (opt) => Utils.stripRephraseSymbol(opt.value, config.rephrasesymbol) === currentTargetVal
@@ -1201,6 +1202,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     const updateRowSourceDropdownsRephrase = (targetLang) => {
         const rowSelects = Utils.domQueryAll(Selectors.actions.sourceselect);
         rowSelects.forEach((rowSelect) => {
+            rowSelect.disabled = false;
             const currentRowVal = Utils.stripRephraseSymbol(rowSelect.value, config.rephrasesymbol);
             Array.from(rowSelect.options).forEach((option) => {
                 if (!option.value) {
@@ -1218,6 +1220,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                     option.value = rawCode;
                     option.textContent = rawText;
                 }
+                option.disabled = false;
             });
             const matchingOpt = Array.from(rowSelect.options).find(
                 (opt) => Utils.stripRephraseSymbol(opt.value, config.rephrasesymbol) === currentRowVal
@@ -1295,12 +1298,6 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             reactive.dispatch('setGlobalSetting', 'targetLang', targetLang);
         }
 
-        // Update target language header label.
-        const targetHeader = Utils.domQuery('#local_deepler__targetlang');
-        if (targetHeader && langstrings.uistrings.selecttargetlanguage) {
-            targetHeader.innerHTML = langstrings.uistrings.selecttargetlanguage.replace('{$a}', targetLang);
-        }
-
         // Update translate button text.
         const translateBtn = Utils.domQuery(Selectors.actions.autoTranslateBtn);
         if (translateBtn) {
@@ -1354,6 +1351,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 fieldRawBase64,
                 rowSourceSelect ? rowSourceSelect.value : (config.deeplsourcelang || config.sourcelang || 'en')
             );
+            if (reactive && rowSourceSelect) {
+                reactive.dispatch('setRowSourceLang', key, rowSourceSelect.value);
+            }
         });
 
         // Update translation status bullets and tooltips for all rows.
@@ -1454,32 +1454,32 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             // Update row source selection dropdown.
             const rowSourceSelect = Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key);
             if (rowSourceSelect) {
-                if (mlangResult.mlangTagMatched) {
-                    rowSourceSelect.disabled = true;
-                    if (mlangResult.matchedCode) {
-                        rowSourceSelect.value = mlangResult.matchedCode;
-                    }
-                    rowSourceSelect.classList.remove('is-warning', 'border-warning');
-                } else if (mlangResult.isFallbackOther) {
-                    rowSourceSelect.disabled = false;
-                    rowSourceSelect.value = sourceLang;
-                    // Trigger auto-detection if enabled.
-                    if (config.autodetect_sourcelang) {
-                        Api.detectSourceLanguage(mlangResult.filteredText, key)
-                            .then((res) => {
-                                if (res && res.detected_lang && reactive) {
-                                    reactive.dispatch('setDetectedSourceLang', key, res.detected_lang.toLowerCase());
-                                }
-                                return res;
-                            })
-                            .catch((err) => {
-                                Log.debug('Auto-detection error: ' + err);
-                            });
-                    }
+                rowSourceSelect.disabled = false;
+                const matchedVal = mlangResult.mlangTagMatched && mlangResult.matchedCode
+                    ? mlangResult.matchedCode
+                    : sourceLang;
+                const matchingOpt = Array.from(rowSourceSelect.options).find(
+                    (opt) => Utils.stripRephraseSymbol(opt.value, config.rephrasesymbol) === matchedVal
+                );
+                if (matchingOpt) {
+                    rowSourceSelect.value = matchingOpt.value;
                 } else {
-                    rowSourceSelect.disabled = false;
-                    rowSourceSelect.value = sourceLang;
-                    rowSourceSelect.classList.remove('is-warning', 'border-warning');
+                    rowSourceSelect.value = matchedVal;
+                }
+                rowSourceSelect.classList.remove('is-warning', 'border-warning');
+
+                if (mlangResult.isFallbackOther && config.autodetect_sourcelang) {
+                    // Trigger auto-detection if enabled.
+                    Api.detectSourceLanguage(mlangResult.filteredText, key)
+                        .then((res) => {
+                            if (res && res.detected_lang && reactive) {
+                                reactive.dispatch('setDetectedSourceLang', key, res.detected_lang.toLowerCase());
+                            }
+                            return res;
+                        })
+                        .catch((err) => {
+                            Log.debug('Auto-detection error: ' + err);
+                        });
                 }
             }
 

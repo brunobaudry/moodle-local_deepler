@@ -66,6 +66,7 @@ $string['contextdeepl_placeholder'] =
 $string['cookieduration'] = 'Advanced setting storage duration';
 $string['cookieduration_desc'] =
         'The advanced settings are saved (in a cookie) on a per course and language pair. Set duration value in days here.';
+$string['correcttext'] = 'Correct grammar and spelling';
 $string['customsettings'] = 'Custom translation settings';
 $string['customsettingsactive'] = 'Custom settings active for this field';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
@@ -85,6 +86,9 @@ $string['filemaxbytes'] = 'Maximum file size for translation (bytes)';
 $string['filemaxbytes_desc'] = 'The maximum file size in bytes allowed to be sent to DeepL for document translation (default: 10485760 = 10 MB).';
 $string['files:activityname'] = 'Activity';
 $string['files:billedchars'] = 'Billed chars: {$a}';
+$string['files:billingminimum'] = 'DeepL applies a minimum billing of 50,000 characters for this file type.';
+$string['files:billingminimumbadge'] = '50k char min';
+$string['files:billingminimuminfo'] = 'Note: DeepL document translation applies a minimum billing threshold (50,000 characters) for certain file types (e.g. PDF, DOCX, PPTX, XLSX).';
 $string['files:courselevel'] = 'Course level files';
 $string['files:customsettings'] = 'Custom settings';
 $string['files:done'] = 'Done';
@@ -98,7 +102,7 @@ $string['files:filesize'] = 'Size';
 $string['files:globalsourcelang'] = 'Global source language';
 $string['files:globaltargetlang'] = 'Global target language';
 $string['files:justnow'] = 'Just now';
-$string['files:menu'] = 'Deepler: Files';
+$string['files:menu'] = 'DeepLer Files';
 $string['files:minification'] = 'Enable document minification';
 $string['files:minification_desc'] = 'Reduces document size if supported by DeepL';
 $string['files:missingavailabilitywarning'] = 'Language restriction plugin (availability_language) is not installed or enabled. The duplicate was created without language restriction.';
@@ -270,7 +274,7 @@ $string['notsupportedsource'] = 'The source language you are in is not supported
 $string['onomatopoeia'] = 'Ouch !!!';
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
-$string['pluginname'] = 'DeepL Translator';
+$string['pluginname'] = 'DeepLer Translator';
 $string['pluginversion'] = 'Current version';
 $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
@@ -300,10 +304,9 @@ $string['section:select:label'] = 'Select sections';
 $string['sectionall'] = 'ALL SECTIONS';
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
-$string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
+$string['selecttargetlanguage'] = 'Target';
 $string['showhiddenforstudents'] = 'Show "{$a}"';
-$string['sourcelang'] =
-        'Source lang <em>{mlang other} </em>';
+$string['sourcelang'] = 'Source';
 $string['sourceselect_detected_diff'] = 'Detected source language ({$a}) differs from selected default.';
 $string['sourceselect_disabled_hint'] = 'Source language matches existing multilang tag.';
 $string['sourceselect_label'] = 'Source language';
@@ -466,6 +469,10 @@ $string['tour_advancedsettings20togglemultilang'] =
 MLANG tags then this is displayed in red to alert you that the tag will be overriden.</p>';
 $string['tour_advancedsettings20togglemultilangtitle'] =
         'Toggle mutlilang content.';
+$string['tour_advancedsettings21rowsettings'] =
+    'You can set a distinct options for each field.';
+$string['tour_advancedsettings21rowsettingstitle'] =
+    'Field individual settings';
 $string['tour_advancedsettings21secondsource'] =
         'You can choose a secondary source for specific content. <br/>If there is yet no OTHER lang tag, it will save the source in its language plus OTHER.';
 $string['tour_advancedsettings21secondsourcetitle'] =
@@ -487,6 +494,28 @@ $string['tour_advancedsettings23saveall'] =
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
+$string['tour_files00'] = '<p>Welcome to the <strong>Course Files Translation</strong> tool.</p><p>This page allows you to translate files attached to course resources (such as Folder and Resource activities) directly with DeepL while preserving format and creating translated variants.</p>';
+$string['tour_files00title'] = 'Course Files Translation';
+$string['tour_files01billing'] = '<p>DeepL charges a <strong>minimum character count per document</strong> (e.g. 50,000 characters for API translation).</p><p>Keep this in mind when translating smaller documents to optimize your API usage and costs.</p>';
+$string['tour_files01billingtitle'] = 'Billing & minimum characters notice';
+$string['tour_files02globalsettings'] = '<p>Configure global translation settings and source/target languages for this page.</p><p>You can also access the glossary manager, formality settings, and advanced options.</p>';
+$string['tour_files02globalsettingstitle'] = 'Global settings & options';
+$string['tour_files03globalsource'] = '<p>Select the <strong>source language</strong> of the original documents.</p><p>You can choose automatic detection or specify the language manually.</p>';
+$string['tour_files03globalsourcetitle'] = 'Source language';
+$string['tour_files04globaltarget'] = '<p>Select the <strong>target language</strong> into which you want your files translated.</p>';
+$string['tour_files04globaltargettitle'] = 'Target language';
+$string['tour_files05selectall'] = '<p>Toggle this checkbox to select or deselect all translatable files across all sections.</p>';
+$string['tour_files05selectalltitle'] = 'Select all files';
+$string['tour_files06translate'] = '<p>Click here to start translating all selected files to the chosen target language.</p><p>Progress indicators will appear for each document being processed.</p>';
+$string['tour_files06translatestitle'] = 'Translate selected files';
+$string['tour_files07sections'] = '<p>Course content is grouped by course sections and activities. Expand or collapse sections to view attached files and their details.</p>';
+$string['tour_files07sectionstitle'] = 'Course sections & activities';
+$string['tour_files08rowselect'] = '<p>Use individual checkboxes to include or exclude specific files from batch translation.</p>';
+$string['tour_files08rowselecttitle'] = 'File selection';
+$string['tour_files09rowsettings'] = '<p>Click the gear icon to customize translation options (such as custom glossary, formality, or source language) specifically for this file.</p>';
+$string['tour_files09rowsettingstitle'] = 'File custom settings';
+$string['tour_files10status'] = '<p>Shows the current translation status for the selected target language: not translated, in progress, succeeded, or failed.</p>';
+$string['tour_files10statustitle'] = 'File translation status';
 $string['translate:activity'] = 'Translate activity';
 $string['translate:course'] = 'Translate course';
 $string['translate:modal:body'] = 'It might take a little while, if you have a lot of content.';

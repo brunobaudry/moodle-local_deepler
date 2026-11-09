@@ -57,6 +57,9 @@ class translatable_file {
     /** @var string Section name / title. */
     public string $sectionname;
 
+    /** @var bool Whether this file type is subject to DeepL 50,000 characters billing minimum. */
+    public bool $hasbillingminimum;
+
     /**
      * Constructor.
      *
@@ -70,6 +73,7 @@ class translatable_file {
      * @param int $sectionid
      * @param int $sectionnum
      * @param string $sectionname
+     * @param bool $hasbillingminimum
      */
     public function __construct(
         stored_file $file,
@@ -81,7 +85,8 @@ class translatable_file {
         array $jobs = [],
         int $sectionid = 0,
         int $sectionnum = 0,
-        string $sectionname = ''
+        string $sectionname = '',
+        bool $hasbillingminimum = false
     ) {
         $this->file = $file;
         $this->cm = $cm;
@@ -93,5 +98,6 @@ class translatable_file {
         $this->sectionid = $sectionid;
         $this->sectionnum = $sectionnum;
         $this->sectionname = $sectionname;
+        $this->hasbillingminimum = $hasbillingminimum;
     }
 }

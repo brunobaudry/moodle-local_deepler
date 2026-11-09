@@ -45,6 +45,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         "hideiframesdefault": "checked"
     }
 }}
+<!-- TRANSLATE -->
 <div class="row py-3">
     <div class="col-md-2" id="{{prefix}}local_deepler__modeltype">
         {{#str}}modeltype,local_deepler{{/str}}
@@ -159,7 +160,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                       placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
     </div>
 </div>
+<!-- END TRANSLATE -->
+<!-- REPHRASE -->
 {{#canimprove}}
+
     <div class="text-end text-right">
         <h5>{{#str}}rephrasetitle,local_deepler,{{rephrasesymbol}}{{/str}}</h5>
         <p>{{#str}}rephraseinfos,local_deepler, {{supportedlangs}}{{/str}}</p>
@@ -174,6 +178,11 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 <input type="radio" value="default" id="{{prefix}}toneorstyle0" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
                        data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
                 <label class="form-check-label custom-control-label" for="{{prefix}}toneorstyle0">{{#str}}formalitydefault  ,local_deepler{{/str}}</label>
+            </div>
+            <div class="form-check custom-control custom-radio">
+                <input type="radio" value="correct" id="{{prefix}}writingstylecorrect" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                       data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                <label class="form-check-label custom-control-label" for="{{prefix}}writingstylecorrect">{{#str}}correcttext,local_deepler{{/str}}</label>
             </div>
             <div class="form-check custom-control custom-radio">
                 <input type="radio" value="writing_style|prefer_simple" id="{{prefix}}writingstyle9" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
@@ -217,7 +226,10 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             </div>
         </div>
     </div>
-{{/canimprove}}<hr class="hr hr-blurry">
+{{/canimprove}}
+<!-- END REPHRASE -->
+<hr class="hr hr-blurry">
+<!-- OTHER -->
 <div class="text-end text-right">
     <h4>{{#str}}othersettingstitle,local_deepler{{/str}}</h4>
 </div>
@@ -243,3 +255,4 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         </div>
     </div>
 </div>
+<!-- END OTHER -->

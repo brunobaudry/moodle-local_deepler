@@ -54,6 +54,11 @@ $warning: $orange !default;
 $danger: $red !default;
 $secondary: $gray-400 !default;
 
+//Common to files translations.
+.local_deepler-bg-secondary-subtle {
+  background-color: var(--mds-bg-feedback-info-light, rgba($info, .2));
+  border: 1px solid var(--mds-border-feedback-info, rgba($info, 0.1));
+}
 #page-local-deepler-translate {
     .local_deepler__activity {
         background-color: var(--mds-bg-surface-subtle);
@@ -61,10 +66,6 @@ $secondary: $gray-400 !default;
         border-radius: var(--mds-border-radius-md, 0.5rem);
         padding: var(--mds-spacing-md, 1rem);
         color: var(--mds-text-default);
-    }
-    .local_deepler-bg-secondary-subtle {
-        background-color: var(--mds-bg-feedback-info-light, rgba($info, .2));
-        border: 1px solid var(--mds-border-feedback-info, rgba($info, 0.1));
     }
 
     .local_deepler-bg-primary-subtle {

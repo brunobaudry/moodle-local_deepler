@@ -22,9 +22,9 @@ Feature: Check initial state of the course translation page
 
   Scenario: Initial state of controls when launching DeepL Translator in a course
     Given I am on the "C1" "course" page
-    When I navigate to "DeepL Translator" in current page administration
-    Then I should see "Source lang {mlang other}"
-    And I should see "Target language {mlang ?}"
+    When I navigate to "DeepLer Translator" in current page administration
+    Then I should see "Source"
+    And I should see "Target"
     And the field "select-target-language" matches value ""
     And the "show-updated" checkbox should not be checked
     And the "show-needsupdate" checkbox should be checked
@@ -36,7 +36,7 @@ Feature: Check initial state of the course translation page
 
   Scenario: Open and customize row translation settings via modal
     Given I am on the "C1" "course" page
-    When I navigate to "DeepL Translator" in current page administration
+    When I navigate to "DeepLer Translator" in current page administration
     Then ".local_deepler__row-settings-btn" "css_element" should exist
     When I click on ".local_deepler__row-settings-btn" "css_element"
     Then I should see "Translation Settings for Field"
@@ -46,7 +46,7 @@ Feature: Check initial state of the course translation page
 
   Scenario: Row settings modal inherits active global settings and can reset to current global values
     Given I am on the "C1" "course" page
-    When I navigate to "DeepL Translator" in current page administration
+    When I navigate to "DeepLer Translator" in current page administration
     And I click on "#local_deepler__settings" "css_element"
     And I click on "#preserve_formatting" "css_element"
     And I set the field "local_deepler__context" to "Global translation context"
@@ -68,7 +68,7 @@ Feature: Check initial state of the course translation page
 
   Scenario: Dynamic refresh of previousTranslationStatus bullets when selecting target language
     Given I am on the "C1" "course" page
-    When I navigate to "DeepL Translator" in current page administration
+    When I navigate to "DeepLer Translator" in current page administration
     Then "#previousTranslationStatus.badge-dark" "css_element" should exist
     When I select target language "English"
     Then "#previousTranslationStatus.badge-dark" "css_element" should not exist

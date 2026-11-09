@@ -382,4 +382,42 @@ final class gettranslation_test extends base_external {
         $this->assertNull($validated['rephrasings'][1]['options']['toneorstyle']);
         $this->assertEquals('tone|prefer_diplomatic', $validated['options']['toneorstyle']);
     }
+
+    /**
+     * Test get_rephrase execute_parameters validation with correct toneorstyle option.
+     *
+     * @covers \local_deepler\external\get_rephrase::execute_parameters
+     * @return void
+     */
+    public function test_get_rephrase_execute_parameters_with_correct_option(): void {
+        if ($this->is_below_four_one()) {
+            return;
+        }
+
+        $params = [
+            'rephrasings' => [
+                [
+                    'text' => 'This are bad grammar.',
+                    'key' => 'row_1',
+                    'options' => [
+                        'toneorstyle' => 'correct',
+                    ],
+                ],
+            ],
+            'options' => [
+                'target_lang' => 'en-US',
+                'toneorstyle' => 'correct',
+            ],
+            'version' => 'v1.0',
+        ];
+
+        $validated = \core_external\external_api::validate_parameters(
+            get_rephrase::execute_parameters(),
+            $params
+        );
+
+        $this->assertCount(1, $validated['rephrasings']);
+        $this->assertEquals('correct', $validated['rephrasings'][0]['options']['toneorstyle']);
+        $this->assertEquals('correct', $validated['options']['toneorstyle']);
+    }
 }

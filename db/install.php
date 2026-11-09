@@ -32,8 +32,33 @@
  * @return void
  */
 function xmldb_local_deepler_install(): void {
+    global $CFG;
+
     $jsonfile = __DIR__ . '/../additional_conf.json';
     if (file_exists($jsonfile)) {
         set_config('additionalconf', file_get_contents($jsonfile), 'local_deepler');
+    }
+
+    $tourfiles = [
+        __DIR__ . '/../tourguide/activities_tour_export.json',
+        __DIR__ . '/../tourguide/files_tour_export.json',
+    ];
+
+    $usertoursmanager = $CFG->dirroot . '/admin/tool/usertours/classes/manager.php';
+    if (file_exists($usertoursmanager)) {
+        require_once($usertoursmanager);
+    }
+
+    if (class_exists('\\tool_usertours\\manager')) {
+        foreach ($tourfiles as $file) {
+            if (file_exists($file)) {
+                $json = file_get_contents($file);
+                $tour = \tool_usertours\manager::import_tour_from_json($json);
+                if (defined('BEHAT_SITE_RUNNING') || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
+                    $tour->set_enabled(false);
+                    $tour->persist();
+                }
+            }
+        }
     }
 }

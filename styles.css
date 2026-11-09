@@ -19,16 +19,17 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+.local_deepler-bg-secondary-subtle {
+    background-color: var(--mds-bg-feedback-info-light, rgba(0, 129, 150, 0.2));
+    border: 1px solid var(--mds-border-feedback-info, rgba(0, 129, 150, 0.1));
+}
+
 #page-local-deepler-translate .local_deepler__activity {
     background-color: var(--mds-bg-surface-subtle);
     border: var(--mds-stroke-weight-sm, 1px) solid var(--mds-border-subtle);
     border-radius: var(--mds-border-radius-md, 0.5rem);
     padding: var(--mds-spacing-md, 1rem);
     color: var(--mds-text-default);
-}
-#page-local-deepler-translate .local_deepler-bg-secondary-subtle {
-    background-color: var(--mds-bg-feedback-info-light, rgba(0, 129, 150, 0.2));
-    border: 1px solid var(--mds-border-feedback-info, rgba(0, 129, 150, 0.1));
 }
 #page-local-deepler-translate .local_deepler-bg-primary-subtle {
     background-color: var(--mds-bg-feedback-info-subtle, rgba(0, 129, 150, 0.1));

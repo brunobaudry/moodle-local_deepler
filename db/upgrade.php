@@ -90,6 +90,11 @@ function xmldb_local_deepler_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026110500, 'local', 'deepler');
     }
 
+    if ($oldversion < 2026111005) {
+        local_deepler_upgrade_2026110905();
+        upgrade_plugin_savepoint(true, 2026111005, 'local', 'deepler');
+    }
+
     return true;
 }
 
@@ -344,5 +349,48 @@ function local_deepler_upgrade_2026110500(\database_manager $dbman): void {
 
     if (!$dbman->table_exists($table)) {
         $dbman->create_table($table);
+    }
+}
+
+/**
+ * Upgrade step for version 2026110900: import user tour guides into database.
+ *
+ * @return void
+ */
+function local_deepler_upgrade_2026110905(): void {
+    local_deepler_import_tours();
+}
+
+/**
+ * Import bundled user tours from JSON export files.
+ *
+ * @return void
+ */
+function local_deepler_import_tours(): void {
+    global $CFG;
+
+    $tourfiles = [
+        __DIR__ . '/../tourguide/activities_tour_export.json',
+        __DIR__ . '/../tourguide/files_tour_export.json',
+    ];
+
+    $usertoursmanager = $CFG->dirroot . '/admin/tool/usertours/classes/manager.php';
+    if (file_exists($usertoursmanager)) {
+        require_once($usertoursmanager);
+    }
+
+    if (!class_exists('\\tool_usertours\\manager')) {
+        return;
+    }
+
+    foreach ($tourfiles as $jsonfile) {
+        if (file_exists($jsonfile)) {
+            $json = file_get_contents($jsonfile);
+            $tour = \tool_usertours\manager::import_tour_from_json($json);
+            if (defined('BEHAT_SITE_RUNNING') || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
+                $tour->set_enabled(false);
+                $tour->persist();
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ Feature: Test DeepLer glossary interface for admin and teachers/translators
   @new
   Scenario: Admin can access and view the glossary manager in site administration
     Given I log in as "admin"
-    When I navigate to "Plugins > DeepL Translator" in site administration
+    When I navigate to "Plugins > DeepLer Translator" in site administration
     Then I should see "DeepLer glossaries"
     When I click on "DeepLer glossaries" "link"
     Then I should see "DeepLer glossaries"

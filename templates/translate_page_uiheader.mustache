@@ -98,9 +98,19 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div id="local_deepler_uiheader" class="mt-2">
     <div class="container-fluid local_deepler-bg-primary-subtle">
         <div class="row py-3 align-items-center" id="local_deepler__sourcetarget">
-            <div class="col-5 text-end text-right">
+            <div class="col-2 text-end text-right">
+            <button type="button"
+                    id="local_deepler__settings"
+                    class="btn btn-sm btn-secondary"
+                    data-action="global-settings">
+                <i class="fa fa-sliders" aria-hidden="true"></i> {{#str}}seesetting,local_deepler{{/str}}
+            </button>
+            </div>
+            <div class="col-3 text-end text-right">
                 <div class="d-inline-flex align-items-center" id="local_deepler__sourcelang">
-                    <label for="select-source-language" class="mb-0 me-2 mr-2 fw-bold font-weight-bold">{{#str}}sourcelang,local_deepler{{/str}}</label>
+                    <label for="select-source-language" class="mb-0 me-2 mr-2 h4">
+                        {{#str}}sourcelang,local_deepler{{/str}}
+                    </label>
                     <select
                             id="select-source-language"
                             name="select-source-language"
@@ -115,9 +125,11 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
             </div>
             <div class="col-1 text-center"><i class="fa-solid fa-chevron-circle-right" aria-hidden="true"></i>
             </div>
-            <div class="col-3"><h6 id="local_deepler__targetlang" class="text-start text-left">{{#str}}selecttargetlanguage,local_deepler,
-                {{target_lang}}{{/str}}</h6></div>
             <div class="col-3">
+                <div class="d-inline-flex align-items-center" id="local_deepler__targetlang">
+                <label for="select-target-language" class="mb-0 me-2 mr-2 h4">
+                    {{#str}}selecttargetlanguage,local_deepler{{/str}}
+                </label>
                 <select
                         id="select-target-language"
                         name="select-target-language"
@@ -131,6 +143,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
                     {{/targetlangs}}
                 </select>
+                </div>
             </div>
 
         </div>

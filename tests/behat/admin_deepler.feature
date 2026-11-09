@@ -4,8 +4,8 @@ Feature: Feature for local_deepler plugin main admin page
 
   Scenario: Test example scenario
     Given I log in as "admin"
-    When I navigate to "Plugins > DeepL Translator" in site administration
-    Then I should see "DeepL Translator"
+    When I navigate to "Plugins > DeepLer Translator" in site administration
+    Then I should see "DeepLer Translator"
     Then I should see "local_deepler | apikey"
     Then I should see "local_deepler | hideiframesadmin"
     Then I should see "local_deepler | latexescapeadmin"
