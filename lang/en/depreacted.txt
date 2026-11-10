@@ -10,6 +10,7 @@ glossary:id_placeholder, local_deepler
 glossary:upload:suffixerror:body, local_deepler
 glossary:upload:suffixerror:title, local_deepler
 keepselected, local_deepler
+rephraseoptionsinfos, local_deepler
 section:coursesettings, local_deepler
 tokenaddtoken, local_deepler
 tokenchoose, local_deepler

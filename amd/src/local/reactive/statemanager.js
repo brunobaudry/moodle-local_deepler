@@ -53,7 +53,20 @@ export class DeeplerReactive extends Reactive {
      * @param {object} initialData Initial configuration and state.
      */
     init(initialData = {}) {
+        let supportedLangs = initialData.supportedLangs ?? initialData.supportedlangs ?? initialData.config?.supportedlangs ?? '';
+        if (Array.isArray(supportedLangs)) {
+            supportedLangs = supportedLangs.join(', ');
+        }
+        const config = Object.assign({}, initialData.config || {}, {
+            rephraseSymbol: initialData.rephraseSymbol ?? initialData.rephrasesymbol ?? initialData.config?.rephrasesymbol ?? '',
+            canImprove: initialData.canImprove !== undefined ? Boolean(initialData.canImprove) :
+                (initialData.canimprove !== undefined ? Boolean(initialData.canimprove) :
+                (initialData.config?.canimprove !== undefined ? Boolean(initialData.config.canimprove) : true)),
+            supportedLangs: supportedLangs,
+        });
+
         const state = {
+            config: config,
             globalSettings: {
                 sourceLang: initialData.sourceLang || '',
                 targetLang: initialData.targetLang || 'fr',

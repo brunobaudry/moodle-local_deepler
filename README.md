@@ -143,6 +143,7 @@ In addition to text content, DeepLer provides a dedicated **DeepL Files** page f
 - **Activity duplication:** For activities like Resources or Folders, DeepLer duplicates the activity, inserts the translated file(s), translates the title/intro, and places the copy right after the source.
 - **Language restriction:** When the `availability_language` plugin is installed, DeepLer automatically pre-fills access restrictions so learners only see the activity corresponding to their selected language.
   ![](pix/file_restriction.png)
+  ![](pix/file_restriction_front.png)
 
 ### Rephrasing and Text Improvement
 

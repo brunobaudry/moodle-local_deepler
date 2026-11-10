@@ -83,6 +83,8 @@ const getEffectiveDefaults = (reactive) => {
         split_sentences: resolveValue(domSettings.split_sentences, globalSettings.splitSentences, '1'),
         // eslint-disable-next-line camelcase
         preserve_formatting: resolveBoolean(domSettings.preserve_formatting, globalSettings.preserveFormatting, false),
+        // eslint-disable-next-line camelcase
+        glossary_id: resolveValue(domSettings.glossary_id, globalSettings.glossaryId, ''),
         context: resolveValue(domSettings.context, globalSettings.context, ''),
         // eslint-disable-next-line camelcase
         tag_handling: resolveValue(domSettings.tag_handling, globalSettings.tagHandling, 'html'),
@@ -113,8 +115,15 @@ const populateForm = (form, prefix, settings) => {
         return;
     }
 
-    const setRadio = (name, value) => {
+    const setControlValue = (name, value) => {
         if (value !== undefined && value !== null) {
+            const select = form.querySelector(`select[name$="${name}"], select[data-id="local_deepler/${name}"]`) ||
+                (prefix ? form.querySelector(`select#${prefix}${name}`) : null) ||
+                form.querySelector(`select#${name}`);
+            if (select) {
+                select.value = value;
+                return;
+            }
             const radio = form.querySelector(`input[type="radio"][name$="${name}"][value="${value}"]`);
             if (radio) {
                 radio.checked = true;
@@ -140,10 +149,11 @@ const populateForm = (form, prefix, settings) => {
         }
     };
 
-    setRadio('model_type', settings.model_type || settings.modelType);
-    setRadio('formality', settings.formality);
-    setRadio('split_sentences', settings.split_sentences || settings.splitSentences);
+    setControlValue('model_type', settings.model_type || settings.modelType);
+    setControlValue('formality', settings.formality);
+    setControlValue('split_sentences', settings.split_sentences || settings.splitSentences);
     setCheckbox('preserve_formatting', settings.preserve_formatting ?? settings.preserveFormatting);
+    setControlValue('glossary_id', settings.glossary_id || settings.glossaryId);
     setTextarea('local_deepler__context', settings.context);
     const tagHandling = settings.tag_handling || settings.tagHandling;
     setCheckbox('tag_handling', tagHandling ? tagHandling === 'html' : true);
@@ -151,7 +161,7 @@ const populateForm = (form, prefix, settings) => {
     setTextarea('ignore_tags', settings.ignore_tags || settings.ignoreTags);
     setTextarea('non_splitting_tags', settings.non_splitting_tags || settings.nonSplittingTags);
     setTextarea('splitting_tags', settings.splitting_tags || settings.splittingTags);
-    setRadio('toneorstyle', settings.toneorstyle);
+    setControlValue('toneorstyle', settings.toneorstyle);
     setCheckbox('latexeascape', settings.latexeascape ?? settings.escapeLatex);
     setCheckbox('preescape', settings.preescape ?? settings.escapePre);
     setCheckbox('hideiframes', settings.hideiframes ?? settings.hideIframes);
@@ -165,9 +175,15 @@ const populateForm = (form, prefix, settings) => {
  * @returns {object} The collected custom settings.
  */
 const gatherFormValues = (form, prefix = '') => {
-    const getRadio = (name) => {
+    const getControlValue = (name, defaultValue = '') => {
+        const select = form.querySelector(`select[name$="${name}"], select[data-id="local_deepler/${name}"]`) ||
+            (prefix ? form.querySelector(`select#${prefix}${name}`) : null) ||
+            form.querySelector(`select#${name}`);
+        if (select) {
+            return select.value;
+        }
         const checked = form.querySelector(`input[type="radio"][name$="${name}"]:checked`);
-        return checked ? checked.value : null;
+        return checked ? checked.value : defaultValue;
     };
     const getCheckbox = (id) => {
         const cb = (prefix ? form.querySelector(`#${prefix}${id}`) : null) ||
@@ -185,12 +201,14 @@ const gatherFormValues = (form, prefix = '') => {
 
     return {
         // eslint-disable-next-line camelcase
-        model_type: getRadio('model_type') || 'prefer_quality_optimized',
-        formality: getRadio('formality') || 'default',
+        model_type: getControlValue('model_type', 'prefer_quality_optimized'),
+        formality: getControlValue('formality', 'default'),
         // eslint-disable-next-line camelcase
-        split_sentences: getRadio('split_sentences') || '1',
+        split_sentences: getControlValue('split_sentences', '1'),
         // eslint-disable-next-line camelcase
         preserve_formatting: getCheckbox('preserve_formatting'),
+        // eslint-disable-next-line camelcase
+        glossary_id: getControlValue('glossary_id', ''),
         context: getTextarea('local_deepler__context', 'context'),
         // eslint-disable-next-line camelcase
         tag_handling: getCheckbox('tag_handling') ? 'html' : 'xml',
@@ -202,7 +220,7 @@ const gatherFormValues = (form, prefix = '') => {
         non_splitting_tags: getTextarea('non_splitting_tags'),
         // eslint-disable-next-line camelcase
         splitting_tags: getTextarea('splitting_tags'),
-        toneorstyle: getRadio('toneorstyle') || 'default',
+        toneorstyle: getControlValue('toneorstyle', 'default'),
         latexeascape: getCheckbox('latexeascape'),
         preescape: getCheckbox('preescape'),
         hideiframes: getCheckbox('hideiframes'),
@@ -228,11 +246,25 @@ export const openSettingsModal = async(reactive, rowId) => {
         const resetText = await getString('resettodefaults', 'local_deepler');
         const prefix = 'modal_';
 
+        // eslint-disable-next-line max-len
+        const rephraseSymbol = reactive?.state?.config?.rephraseSymbol ?? reactive?.state?.config?.rephrasesymbol ?? '';
+        // eslint-disable-next-line max-len
+        let supportedLangs = reactive?.state?.config?.supportedLangs ?? reactive?.state?.config?.supportedlangs ?? '';
+        if (Array.isArray(supportedLangs)) {
+            supportedLangs = supportedLangs.join(', ');
+        }
+        // eslint-disable-next-line max-len
+        const canImprove = reactive?.state?.config?.canImprove ?? reactive?.state?.config?.canimprove ?? true;
+
+        const globalGlossaryContainer = document.querySelector('#local_deepler__glossarycontext .glossary-selector');
+        const glossaySelectorHtml = globalGlossaryContainer ? globalGlossaryContainer.outerHTML : '';
+
         const formHtml = await Templates.render('local_deepler/settings_form', {
             prefix: prefix,
-            canimprove: true,
-            rephrasesymbol: '',
-            supportedlangs: 'de, en-GB, en-US',
+            glossayselector: glossaySelectorHtml,
+            canimprove: canImprove,
+            rephrasesymbol: rephraseSymbol,
+            supportedlangs: supportedLangs,
             escapelatexbydefault: currentSettings.latexeascape ? 'checked' : '',
             escapeprebydefault: currentSettings.preescape ? 'checked' : '',
             hideiframesdefault: currentSettings.hideiframes ? 'checked' : '',

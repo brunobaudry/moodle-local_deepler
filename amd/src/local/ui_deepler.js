@@ -1681,6 +1681,10 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             });
 
             const reactive = StateManager.getStateManager(cfg.courseid || 'main', {
+                config: cfg,
+                rephraseSymbol: cfg.rephrasesymbol || '',
+                canImprove: Boolean(cfg.canimprove),
+                supportedLangs: Array.isArray(cfg.supportedlangs) ? cfg.supportedlangs.join(', ') : (cfg.supportedlangs || ''),
                 targetLang: cfg.targetlang || 'fr',
                 formality: 'default',
                 tagHandling: 'html',

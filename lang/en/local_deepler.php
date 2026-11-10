@@ -322,6 +322,7 @@ $string['statussuccess'] = 'Succeeded';
 $string['statustosave'] = 'Save this';
 $string['statustotranslate'] = 'Ready to translate';
 $string['statuswait'] = 'Not selected';
+$string['tabtranslate'] = 'Translation';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
 $string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
