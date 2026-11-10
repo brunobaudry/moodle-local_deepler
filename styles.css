@@ -32,8 +32,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     color: var(--mds-text-default);
 }
 #page-local-deepler-translate .local_deepler-bg-primary-subtle {
-    background-color: var(--mds-bg-feedback-info-subtle, rgba(0, 129, 150, 0.1));
-    border: 1px solid var(--mds-border-feedback-info, rgba(0, 129, 150, 0.1));
+    background-color: var(--mds-bg-feedback-info-subtle, #f8f9fa);
+    border: 1px solid var(--mds-border-feedback-info, #e9ecef);
     border-radius: var(--mds-border-radius-md) var(--mds-border-radius-md) 0 0;
     color: var(--mds-text-feedback-info);
 }

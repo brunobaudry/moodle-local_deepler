@@ -62,7 +62,7 @@ $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select
 $string['canttranslatesame'] = 'Both languages are the same:';
 $string['contextdeepl'] = 'Course context ';
 $string['contextdeepl_placeholder'] =
-        'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
+        'Tell the translator (DeepL) about the context, to help it translate in a more contextual way...';
 $string['cookieduration'] = 'Advanced setting storage duration';
 $string['cookieduration_desc'] =
         'The advanced settings are saved (in a cookie) on a per course and language pair. Set duration value in days here.';
@@ -287,7 +287,7 @@ $string['rephraseoptionsinfos'] =
         'The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>. Using "default" as value behaves the same as not sending a tone nor a writing style.';
 $string['rephrasetitle'] = '{$a}Rephrase settings';
 $string['resettodefaults'] = 'Reset to Global Defaults';
-$string['rowsettingstitle'] = 'Translation Settings for Field {$a}';
+$string['rowsettingstitle'] = 'Options for: {$a}';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>

@@ -52,21 +52,21 @@ export class DeeplerReactive extends Reactive {
      *
      * @param {object} initialData Initial configuration and state.
      */
+    // eslint-disable-next-line complexity
     init(initialData = {}) {
-        let supportedLangs = initialData.supportedLangs ?? initialData.supportedlangs ?? initialData.config?.supportedlangs ?? '';
-        if (Array.isArray(supportedLangs)) {
-            supportedLangs = supportedLangs.join(', ');
-        }
-        const config = Object.assign({}, initialData.config || {}, {
+        const rawLangs = initialData.supportedLangs ?? initialData.supportedlangs ?? initialData.config?.supportedlangs ?? '';
+        const supportedLangs = Array.isArray(rawLangs) ? rawLangs.join(', ') : rawLangs;
+
+        const config = {
+            ...initialData.config,
             rephraseSymbol: initialData.rephraseSymbol ?? initialData.rephrasesymbol ?? initialData.config?.rephrasesymbol ?? '',
-            canImprove: initialData.canImprove !== undefined ? Boolean(initialData.canImprove) :
-                (initialData.canimprove !== undefined ? Boolean(initialData.canimprove) :
-                (initialData.config?.canimprove !== undefined ? Boolean(initialData.config.canimprove) : true)),
-            supportedLangs: supportedLangs,
-        });
+            canImprove: Boolean(initialData.canImprove ?? initialData.canimprove ?? initialData.config?.canimprove ?? true),
+            supportedLangs,
+            glossaries: initialData.glossaries || initialData.config?.glossaries || [],
+        };
 
         const state = {
-            config: config,
+            config,
             globalSettings: {
                 sourceLang: initialData.sourceLang || '',
                 targetLang: initialData.targetLang || 'fr',
@@ -74,9 +74,9 @@ export class DeeplerReactive extends Reactive {
                 tagHandling: initialData.tagHandling || 'html',
                 splitSentences: initialData.splitSentences || '1',
                 preserveFormatting: Boolean(initialData.preserveFormatting),
-                escapeLatex: initialData.escapeLatex !== undefined ? Boolean(initialData.escapeLatex) : true,
-                escapePre: initialData.escapePre !== undefined ? Boolean(initialData.escapePre) : true,
-                hideIframes: initialData.hideIframes !== undefined ? Boolean(initialData.hideIframes) : true,
+                escapeLatex: Boolean(initialData.escapeLatex ?? true),
+                escapePre: Boolean(initialData.escapePre ?? true),
+                hideIframes: Boolean(initialData.hideIframes ?? true),
                 glossaryId: initialData.glossaryId || '',
                 modelType: initialData.modelType || 'default',
                 toneorstyle: initialData.toneorstyle || 'default',
@@ -100,7 +100,7 @@ export class DeeplerReactive extends Reactive {
                 isTranslating: false,
                 isSaving: false,
                 progress: 0,
-            }
+            },
         };
 
         this.setInitialState(state);

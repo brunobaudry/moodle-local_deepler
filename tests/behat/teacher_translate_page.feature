@@ -39,10 +39,10 @@ Feature: Check initial state of the course translation page
     When I navigate to "DeepLer Translator" in current page administration
     Then ".local_deepler__row-settings-btn" "css_element" should exist
     When I click on ".local_deepler__row-settings-btn" "css_element"
-    Then I should see "Translation Settings for Field"
+    Then I should see "Options for:"
     And I should see "Reset to Global Defaults"
     When I click on "Reset to Global Defaults" "button"
-    Then "Translation Settings for Field" "dialogue" should not be visible
+    Then "Options for:" "dialogue" should not be visible
 
   Scenario: Row settings modal inherits active global settings and can reset to current global values
     Given I am on the "C1" "course" page
@@ -52,18 +52,18 @@ Feature: Check initial state of the course translation page
     And I set the field "local_deepler__context" to "Global translation context"
     And I click on "Save changes" "button"
     When I click on ".local_deepler__row-settings-btn" "css_element"
-    Then I should see "Translation Settings for Field"
+    Then I should see "Options for:"
     And the "modal_preserve_formatting" checkbox should be checked
     And the field "modal_local_deepler__context" matches value "Global translation context"
     When I set the field "modal_local_deepler__context" to "Row custom context"
     And I click on "Save changes" "button"
-    Then "Translation Settings for Field" "dialogue" should not be visible
+    Then "Options for:" "dialogue" should not be visible
     And ".local_deepler__custom-settings-indicator" "css_element" should be visible
     When I click on ".local_deepler__row-settings-btn" "css_element"
-    Then I should see "Translation Settings for Field"
+    Then I should see "Options for:"
     And the field "modal_local_deepler__context" matches value "Row custom context"
     When I click on "Reset to Global Defaults" "button"
-    Then "Translation Settings for Field" "dialogue" should not be visible
+    Then "Options for:" "dialogue" should not be visible
     And ".local_deepler__custom-settings-indicator" "css_element" should not be visible
 
   Scenario: Dynamic refresh of previousTranslationStatus bullets when selecting target language

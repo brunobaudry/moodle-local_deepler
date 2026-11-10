@@ -228,6 +228,251 @@ const gatherFormValues = (form, prefix = '') => {
 };
 
 /**
+ * Build a user-friendly modal title based on the row's immediate parent title and field name.
+ * Format: PARENT_TITLE > Field Name.
+ *
+ * @param {string} rowId The row identifier.
+ * @returns {Promise<string>} The formatted title.
+ */
+const getRowModalTitle = async(rowId) => {
+    let rowElement = null;
+    if (rowId) {
+        rowElement = document.querySelector(`[data-row-id="${rowId}"]`);
+    }
+
+    if (!rowElement) {
+        return getString('rowsettingstitle', 'local_deepler', rowId);
+    }
+
+    const breadcrumbs = [];
+
+    // 1. Immediate parent container (submodule, module/activity, or section).
+    const parentContainer = rowElement.closest('.section-item, .local_deepler__activity');
+    if (parentContainer) {
+        const parentHeader = parentContainer.querySelector(
+            ':scope > .course-section-header .sectionname, :scope > .sectionname'
+        );
+        if (parentHeader) {
+            const parentText = parentHeader.textContent.trim();
+            if (parentText) {
+                breadcrumbs.push(parentText);
+            }
+        }
+    }
+
+    // 2. Field name.
+    const fieldElement = rowElement.querySelector('.local_deepler__activityfield');
+    const fieldText = fieldElement ? fieldElement.textContent.trim() : '';
+    if (fieldText) {
+        breadcrumbs.push(fieldText);
+    }
+
+    const breadcrumbString = breadcrumbs.join(' > ');
+    if (breadcrumbString) {
+        return getString('rowsettingstitle', 'local_deepler', breadcrumbString);
+    }
+
+    return getString('rowsettingstitle', 'local_deepler', rowId);
+};
+
+const COMPONENT = 'local_deepler';
+const MODAL_PREFIX = 'modal_';
+
+/**
+ * Retrieve row data from reactive state.
+ *
+ * @param {object} reactive The reactive instance.
+ * @param {string} rowId The row identifier.
+ * @returns {object|undefined}
+ */
+const getRow = (reactive, rowId) => {
+    return reactive.state.rows?.get(rowId) ||
+        Array.from(reactive.state.rows?.values() || []).find(r => r.key === rowId || r.id === rowId);
+};
+
+/**
+ * Sanitize language code string.
+ *
+ * @param {string} [lang=''] Language string.
+ * @param {string} [fallback=''] Fallback language code.
+ * @returns {string}
+ */
+const sanitizeLanguage = (lang = '', fallback = '') => {
+    return (lang.replace(/^[®@\s]+/, '') || fallback).toLowerCase().trim();
+};
+
+/**
+ * Determine source and target language pair for a row.
+ *
+ * @param {object} reactive The reactive instance.
+ * @param {object} [row] The row object.
+ * @param {string} rowId The row identifier.
+ * @returns {{cleanSourceLang: string, targetLang: string}}
+ */
+const resolveLanguagePair = (reactive, row, rowId) => {
+    const domSelectValue = rowId
+        ? document.querySelector(`select[data-action="local_deepler/sourceselect"][data-key="${rowId}"]`)?.value
+        : '';
+    const rowSourceLang = row?.sourceLang ||
+        domSelectValue ||
+        reactive?.state?.globalSettings?.sourceLang ||
+        reactive?.state?.config?.sourcelang ||
+        'en';
+    const targetLangRaw = reactive?.state?.globalSettings?.targetLang ||
+        reactive?.state?.config?.targetlang ||
+        '';
+
+    return {
+        cleanSourceLang: sanitizeLanguage(rowSourceLang, 'en'),
+        targetLang: sanitizeLanguage(targetLangRaw, ''),
+    };
+};
+
+/**
+ * Build context object for settings form template.
+ *
+ * @param {object} reactive The reactive instance.
+ * @param {object} currentSettings Merged row settings.
+ * @param {string} prefix Form field prefix.
+ * @returns {object}
+ */
+const buildTemplateContext = (reactive, currentSettings, prefix) => {
+    const config = reactive?.state?.config || {};
+    const rephraseSymbol = config.rephraseSymbol ?? config.rephrasesymbol ?? '';
+    let supportedLangs = config.supportedLangs ?? config.supportedlangs ?? '';
+    if (Array.isArray(supportedLangs)) {
+        supportedLangs = supportedLangs.join(', ');
+    }
+    const canImprove = config.canImprove ?? config.canimprove ?? true;
+    const globalGlossaryContainer = document.querySelector('.glossary-selector');
+    const glossarySelectorHtml = globalGlossaryContainer ? globalGlossaryContainer.outerHTML : '';
+
+    return {
+        prefix,
+        glossayselector: glossarySelectorHtml,
+        canimprove: canImprove,
+        rephrasesymbol: rephraseSymbol,
+        supportedlangs: supportedLangs,
+        escapelatexbydefault: currentSettings.latexeascape ? 'checked' : '',
+        escapeprebydefault: currentSettings.preescape ? 'checked' : '',
+        hideiframesdefault: currentSettings.hideiframes ? 'checked' : '',
+    };
+};
+
+/**
+ * Add a reset button to modal footer.
+ *
+ * @param {object} modal The modal instance.
+ * @param {string} resetText Text for the reset button.
+ */
+const appendResetButton = (modal, resetText) => {
+    const footer = modal.getFooter();
+    if (footer && footer[0]) {
+        const resetBtn = document.createElement('button');
+        resetBtn.type = 'button';
+        resetBtn.className = 'btn btn-outline-danger me-auto';
+        resetBtn.setAttribute('data-action', 'reset');
+        resetBtn.textContent = resetText;
+        footer[0].prepend(resetBtn);
+    }
+};
+
+/**
+ * Filter and populate glossary select options and handle empty state message.
+ *
+ * @param {HTMLElement} bodyElement Modal body DOM element.
+ * @param {string} prefix Form field prefix.
+ * @param {object} reactive The reactive instance.
+ * @param {string} cleanSourceLang Cleaned source language.
+ * @param {string} targetLang Cleaned target language.
+ * @returns {Promise<void>}
+ */
+const populateGlossaryOptions = async(bodyElement, prefix, reactive, cleanSourceLang, targetLang) => {
+    const modalGlossarySelect = bodyElement.querySelector('select[data-id="local_deepler/glossary_id"]') ||
+        bodyElement.querySelector(`#${prefix}glossary`) ||
+        bodyElement.querySelector('#local_deepler__glossary');
+
+    if (!modalGlossarySelect) {
+        return;
+    }
+
+    const allGlossaries = reactive?.state?.config?.glossaries || [];
+    const matchingGlossaries = allGlossaries.filter(g =>
+        (g.sourcelang || '').toLowerCase().trim() === cleanSourceLang &&
+        (g.targetlang || '').toLowerCase().trim() === targetLang
+    );
+
+    modalGlossarySelect.innerHTML = '';
+    const noGlossaryText = await getString('glossary:notselected', COMPONENT);
+    const emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = noGlossaryText;
+    modalGlossarySelect.appendChild(emptyOpt);
+
+    matchingGlossaries.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        modalGlossarySelect.appendChild(opt);
+    });
+
+    modalGlossarySelect.disabled = matchingGlossaries.length === 0;
+
+    const glossaryWrapper = modalGlossarySelect.closest('.glossary-selector') || bodyElement;
+    let emptyMsg = glossaryWrapper.querySelector('em');
+    const linkEntries = glossaryWrapper.querySelector('[data-id="local_deepler/glossary_entriesviewer_page"]');
+
+    if (matchingGlossaries.length === 0) {
+        if (!emptyMsg) {
+            emptyMsg = document.createElement('em');
+            glossaryWrapper.appendChild(emptyMsg);
+        }
+        emptyMsg.textContent = await getString('glossary:listempty', COMPONENT);
+        emptyMsg.style.display = '';
+        if (linkEntries) {
+            linkEntries.style.display = 'none';
+        }
+    } else {
+        if (emptyMsg) {
+            emptyMsg.style.display = 'none';
+        }
+        if (linkEntries) {
+            linkEntries.style.display = '';
+        }
+    }
+};
+
+/**
+ * Register event handlers for modal actions.
+ *
+ * @param {object} modal The modal instance.
+ * @param {HTMLElement} bodyElement Modal body element.
+ * @param {string} prefix Form field prefix.
+ * @param {object} reactive The reactive instance.
+ * @param {string} rowId The row identifier.
+ */
+const bindModalEvents = (modal, bodyElement, prefix, reactive, rowId) => {
+    modal.getRoot().on(ModalEvents.save, (e) => {
+        e.preventDefault();
+        const customSettings = gatherFormValues(bodyElement, prefix);
+        reactive.dispatch('setRowCustomSettings', rowId, customSettings);
+        modal.hide();
+        modal.destroy();
+    });
+
+    modal.getRoot().on('click', '[data-action="reset"]', (e) => {
+        e.preventDefault();
+        reactive.dispatch('resetRowCustomSettings', rowId);
+        modal.hide();
+        modal.destroy();
+    });
+
+    modal.getRoot().on(ModalEvents.hidden, () => {
+        modal.destroy();
+    });
+};
+
+/**
  * Open the settings modal for a specific row.
  *
  * @param {object} reactive The reactive instance.
@@ -236,84 +481,38 @@ const gatherFormValues = (form, prefix = '') => {
  */
 export const openSettingsModal = async(reactive, rowId) => {
     try {
-        const row = reactive.state.rows?.get(rowId) ||
-            Array.from(reactive.state.rows?.values() || []).find(r => r.key === rowId || r.id === rowId);
-
+        const row = getRow(reactive, rowId);
         const defaults = getEffectiveDefaults(reactive);
         const currentSettings = row?.customSettings ? Object.assign({}, defaults, row.customSettings) : defaults;
 
-        const title = await getString('rowsettingstitle', 'local_deepler', rowId);
-        const resetText = await getString('resettodefaults', 'local_deepler');
-        const prefix = 'modal_';
+        const [title, resetText] = await Promise.all([
+            getRowModalTitle(rowId),
+            getString('resettodefaults', COMPONENT),
+        ]);
 
-        // eslint-disable-next-line max-len
-        const rephraseSymbol = reactive?.state?.config?.rephraseSymbol ?? reactive?.state?.config?.rephrasesymbol ?? '';
-        // eslint-disable-next-line max-len
-        let supportedLangs = reactive?.state?.config?.supportedLangs ?? reactive?.state?.config?.supportedlangs ?? '';
-        if (Array.isArray(supportedLangs)) {
-            supportedLangs = supportedLangs.join(', ');
-        }
-        // eslint-disable-next-line max-len
-        const canImprove = reactive?.state?.config?.canImprove ?? reactive?.state?.config?.canimprove ?? true;
-
-        const globalGlossaryContainer = document.querySelector('#local_deepler__glossarycontext .glossary-selector');
-        const glossaySelectorHtml = globalGlossaryContainer ? globalGlossaryContainer.outerHTML : '';
-
-        const formHtml = await Templates.render('local_deepler/settings_form', {
-            prefix: prefix,
-            glossayselector: glossaySelectorHtml,
-            canimprove: canImprove,
-            rephrasesymbol: rephraseSymbol,
-            supportedlangs: supportedLangs,
-            escapelatexbydefault: currentSettings.latexeascape ? 'checked' : '',
-            escapeprebydefault: currentSettings.preescape ? 'checked' : '',
-            hideiframesdefault: currentSettings.hideiframes ? 'checked' : '',
-        });
+        const {cleanSourceLang, targetLang} = resolveLanguagePair(reactive, row, rowId);
+        const templateContext = buildTemplateContext(reactive, currentSettings, MODAL_PREFIX);
+        const formHtml = await Templates.render('local_deepler/settings_form', templateContext);
 
         const modal = await ModalSaveCancel.create({
-            title: title,
+            title,
             body: formHtml,
             large: true,
         });
 
-        const footer = modal.getFooter();
-        if (footer && footer[0]) {
-            const resetBtn = document.createElement('button');
-            resetBtn.type = 'button';
-            resetBtn.className = 'btn btn-outline-danger me-auto';
-            resetBtn.setAttribute('data-action', 'reset');
-            resetBtn.textContent = resetText;
-            footer[0].prepend(resetBtn);
-        }
+        appendResetButton(modal, resetText);
 
         const bodyElement = modal.getBody()[0];
-        populateForm(bodyElement, prefix, currentSettings);
+        await populateGlossaryOptions(bodyElement, MODAL_PREFIX, reactive, cleanSourceLang, targetLang);
+        populateForm(bodyElement, MODAL_PREFIX, currentSettings);
 
-        modal.getRoot().on(ModalEvents.save, (e) => {
-            e.preventDefault();
-            const customSettings = gatherFormValues(bodyElement, prefix);
-            reactive.dispatch('setRowCustomSettings', rowId, customSettings);
-            modal.hide();
-            modal.destroy();
-        });
-
-        modal.getRoot().on('click', '[data-action="reset"]', (e) => {
-            e.preventDefault();
-            reactive.dispatch('resetRowCustomSettings', rowId);
-            modal.hide();
-            modal.destroy();
-        });
-
-        modal.getRoot().on(ModalEvents.hidden, () => {
-            modal.destroy();
-        });
+        bindModalEvents(modal, bodyElement, MODAL_PREFIX, reactive, rowId);
 
         await modal.show();
     } catch (err) {
         Log.error('Error opening settings modal: ' + err.message);
     }
 };
-
 export default class SettingsModal extends BaseComponent {
     /**
      * Open the settings modal for a specific row.

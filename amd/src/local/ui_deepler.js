@@ -331,6 +331,12 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         });
 
         const bodyElement = modal.getBody()[0];
+        updateGlossarySelector(
+            settingsContainer,
+            config.deeplsourcelang || config.sourcelang || 'en',
+            config.targetlang || '',
+            config.glossary_id || ''
+        );
         settingsContainer.classList.remove('d-none');
         bodyElement.appendChild(settingsContainer);
 
@@ -719,15 +725,15 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
 
         // Apply updates in the next animation frame, batching DOM writes.
         requestAnimationFrame(() => {
+            const reactive = StateManager.getStateManager(config.courseid || 'main');
             updates.forEach(({checkbox, shouldCheck}) => {
                 checkbox.checked = shouldCheck;
-                toggleStatus(checkbox.getAttribute('data-key'), shouldCheck);
+                const key = checkbox.getAttribute('data-key');
+                toggleStatus(key, shouldCheck);
+                if (reactive) {
+                    reactive.dispatch('setRowSelection', key, shouldCheck);
+                }
             });
-
-            const reactive = StateManager.getStateManager(config.courseid || 'main');
-            if (reactive) {
-                reactive.dispatch('selectAllRows', checked);
-            }
 
             toggleAutotranslateButton();
             countWordAndChar();
@@ -1005,11 +1011,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         allItems.forEach(item => {
             // Determine which selector this item matches so we can apply the right checkbox state.
             let shouldShow = false;
-            let shouldCheck = false;
             for (const [selector, checked] of Object.entries(selectorMap)) {
                 if (item.matches(selector)) {
                     shouldShow = checked;
-                    shouldCheck = allSelected && checked;
                     break;
                 }
             }
@@ -1020,6 +1024,14 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             // Handle checkbox selection for this item or its children.
             let rowId = item.getAttribute('data-row-id');
 
+            const handleRowSelection = (rId) => {
+                if (!shouldShow) {
+                    toggleChildCheckBoxSelection(rId, false);
+                } else if (allSelected) {
+                    toggleChildCheckBoxSelection(rId, true);
+                }
+            };
+
             if (rowId === null) {
                 // For items without row-id, toggle checkboxes of their child rows.
                 const childs = Utils.domQueryAll(Selectors.statuses.hiddenForStudentRows, '', item);
@@ -1027,12 +1039,12 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                     const childId = child.getAttribute('data-row-id');
                     Log.info("Whitin LooP");
                     Log.debug(childId);
-                    toggleChildCheckBoxSelection(childId, shouldCheck);
+                    handleRowSelection(childId);
                 });
             } else {
                 Log.info("RowId not null");
                 Log.debug(rowId);
-                toggleChildCheckBoxSelection(rowId, shouldCheck);
+                handleRowSelection(rowId);
             }
         });
 
@@ -1052,8 +1064,14 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         Log.debug(Selectors.editors.multiples.checkBoxesWithKey);
         const single = Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, key);
         Log.info(single);
-        single.checked = shouldBeChecked;
-        toggleStatus(key, false);
+        if (single) {
+            single.checked = shouldBeChecked;
+        }
+        toggleStatus(key, shouldBeChecked);
+        const reactive = StateManager.getStateManager(config.courseid || 'main');
+        if (reactive) {
+            reactive.dispatch('setRowSelection', key, shouldBeChecked);
+        }
     };
     /**
      * Displays error message and icon.
@@ -1232,11 +1250,88 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
     };
 
     /**
+     * Updates glossary selector dropdown options according to source and target language.
+     *
+     * @param {Element|Document} container
+     * @param {string} sourceLang
+     * @param {string} targetLang
+     * @param {string} selectedGlossaryId
+     */
+    const updateGlossarySelector = (container, sourceLang, targetLang, selectedGlossaryId = '') => {
+        if (!container) {
+            return;
+        }
+        const select = container.querySelector(Selectors.deepl.glossaryId) || container.querySelector('#local_deepler__glossary');
+        if (!select) {
+            return;
+        }
+
+        const src = (sourceLang || '').toLowerCase().trim();
+        const tgt = (targetLang || '').toLowerCase().trim();
+        const allGlossaries = config.glossaries || [];
+
+        const matchingGlossaries = allGlossaries.filter(g =>
+            g.sourcelang.toLowerCase() === src && g.targetlang.toLowerCase() === tgt
+        );
+
+        select.innerHTML = '';
+        const defaultNotSelected = (langstrings && langstrings.uistrings && langstrings.uistrings.glossarynotselected)
+            ? langstrings.uistrings.glossarynotselected
+            : 'No glossary selected';
+        const emptyOpt = document.createElement('option');
+        emptyOpt.value = '';
+        emptyOpt.textContent = defaultNotSelected;
+        select.appendChild(emptyOpt);
+
+        matchingGlossaries.forEach(g => {
+            const opt = document.createElement('option');
+            opt.value = g.id;
+            opt.textContent = g.name;
+            if (selectedGlossaryId && g.id === selectedGlossaryId) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+
+        if (matchingGlossaries.length > 0) {
+            select.disabled = false;
+        } else {
+            select.disabled = true;
+        }
+
+        // Toggle empty message and entry link
+        const glossaryWrapper = select.closest('.glossary-selector') || container;
+        let emptyMsg = glossaryWrapper.querySelector('em');
+        const linkEntries = glossaryWrapper.querySelector('[data-id="local_deepler/glossary_entriesviewer_page"]');
+
+        if (matchingGlossaries.length === 0) {
+            if (!emptyMsg) {
+                emptyMsg = document.createElement('em');
+                glossaryWrapper.appendChild(emptyMsg);
+            }
+            emptyMsg.textContent = (langstrings && langstrings.uistrings && langstrings.uistrings.glossarylistempty)
+                ? langstrings.uistrings.glossarylistempty
+                : 'There are no glossaries available with this language pair.';
+            emptyMsg.style.display = '';
+            if (linkEntries) {
+                linkEntries.style.display = 'none';
+            }
+        } else {
+            if (emptyMsg) {
+                emptyMsg.style.display = 'none';
+            }
+            if (linkEntries) {
+                linkEntries.style.display = '';
+            }
+        }
+    };
+
+    /**
      * Updates the translation status bullet (#previousTranslationStatus) and checkbox tooltip for all rows.
      */
     const updateAllRowsTranslationStatus = () => {
         const targetLang = Utils.stripRephraseSymbol(config.targetlang || '', config.rephrasesymbol);
-        const rowElements = Utils.domQueryAll('[data-row-id]');
+        const rowElements = Utils.domQueryAll('div[data-row-id]');
 
         rowElements.forEach((rowEl) => {
             const statusAttr = rowEl.getAttribute('data-status');
@@ -1332,8 +1427,19 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         updateTargetLangDropdownRephrase(config.deeplsourcelang || config.sourcelang || 'en');
         updateRowSourceDropdownsRephrase(targetLang);
 
+        // Update global glossary dropdown for new target language.
+        const globalGlossaryContainer = document.querySelector('#local_deepler__glossarycontext');
+        if (globalGlossaryContainer) {
+            updateGlossarySelector(
+                globalGlossaryContainer,
+                config.deeplsourcelang || config.sourcelang || 'en',
+                targetLang,
+                config.glossary_id || ''
+            );
+        }
+
         // Re-initialize Translation temp items for all rows.
-        const rowElements = Utils.domQueryAll('[data-row-id]');
+        const rowElements = Utils.domQueryAll('div[data-row-id]');
         rowElements.forEach((rowEl) => {
             const key = rowEl.getAttribute('data-row-id');
             const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
@@ -1427,8 +1533,19 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         // Update row source dropdowns ® symbols based on target language.
         updateRowSourceDropdownsRephrase(config.targetlang);
 
+        // Update global glossary dropdown for new source language.
+        const globalGlossaryContainer = document.querySelector('#local_deepler__glossarycontext');
+        if (globalGlossaryContainer) {
+            updateGlossarySelector(
+                globalGlossaryContainer,
+                sourceLang,
+                config.targetlang || '',
+                config.glossary_id || ''
+            );
+        }
+
         // Iterate through all translation rows and dynamically re-filter strings.
-        const rowElements = Utils.domQueryAll('[data-row-id]');
+        const rowElements = Utils.domQueryAll('div[data-row-id]');
         rowElements.forEach((rowEl) => {
             const key = rowEl.getAttribute('data-row-id');
             const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
@@ -1653,7 +1770,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      */
     const initReactiveState = (cfg) => {
         try {
-            const rowElements = Utils.domQueryAll('[data-row-id]');
+            const rowElements = Utils.domQueryAll('div[data-row-id]');
             const rows = [];
             rowElements.forEach((el) => {
                 const rowId = el.getAttribute('data-row-id');
@@ -1661,8 +1778,9 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 const sourceEl = Utils.domQuery(Selectors.sourcetexts.keys, rowId);
                 const raw = sourceEl ? sourceEl.getAttribute("data-sourcetext-raw") : "";
                 const originalText = raw ? Utils.stripHTMLTags(Utils.fromBase64(raw)).trim() : "";
-                const checkbox = Utils.domQuery(Selectors.actions.checkBoxes, rowId, el);
-                const isSelected = checkbox ? checkbox.checked : true;
+                const checkbox = Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, rowId, el)
+                    || Utils.domQuery(Selectors.actions.checkBoxes, '', el);
+                const isSelected = checkbox ? checkbox.checked : false;
 
                 rows.push({
                     id: rowId,
@@ -1746,6 +1864,15 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         updateMainSourceDropdownNoRephrase();
         updateTargetLangDropdownRephrase(cfg.deeplsourcelang || cfg.sourcelang || 'en');
         updateRowSourceDropdownsRephrase(cfg.targetlang || '');
+        const globalGlossaryContainer = document.querySelector('#local_deepler__glossarycontext');
+        if (globalGlossaryContainer) {
+            updateGlossarySelector(
+                globalGlossaryContainer,
+                cfg.deeplsourcelang || cfg.sourcelang || 'en',
+                cfg.targetlang || '',
+                cfg.glossary_id || ''
+            );
+        }
         initReactiveState(cfg);
     };
     /**

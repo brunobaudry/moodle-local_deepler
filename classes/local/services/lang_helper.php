@@ -419,6 +419,7 @@ class lang_helper {
         $config->canimprove = $this->canimprove;
         $config->supportedlangs = $this->deeplrephraselangs;
         $config->moodlelangs = array_keys($this->moodlelangs);
+        $config->glossaries = $this->getallglossaries_formatted();
         return $config;
     }
 
@@ -458,6 +459,9 @@ class lang_helper {
         $config->uistrings->nevertranslated = get_string('nevertranslated', 'local_deepler', '{$a}');
         $config->uistrings->neverrephrased = get_string('neverrephrased', 'local_deepler');
         $config->uistrings->uptodate = get_string('uptodate', 'local_deepler');
+        $config->uistrings->glossarynotselected = get_string('glossary:notselected', 'local_deepler');
+        $config->uistrings->glossarylistempty = get_string('glossary:listempty', 'local_deepler');
+        $config->uistrings->glossaryselectplaceholder = get_string('glossary:selectplaceholder', 'local_deepler');
         return json_encode($config);
     }
 
@@ -855,6 +859,39 @@ class lang_helper {
      */
     public function getpublicglossaries() {
         return glossary::getpublicexcepttokenid($this->dbtokenid);
+    }
+
+    /**
+     * Return all available glossaries formatted for JavaScript/UI.
+     *
+     * @return array
+     */
+    public function getallglossaries_formatted(): array {
+        try {
+            $userglossaries = $this->getusersglossaries() ?? [];
+            $poolglossaries = $this->getpoolglossaries($userglossaries) ?? [];
+            $publicglossaries = $this->getpublicglossaries() ?? [];
+            $allglossaries = array_merge($userglossaries, $publicglossaries, $poolglossaries);
+
+            $glossarydata = [];
+            foreach ($allglossaries as $g) {
+                $nameadd = ' (' . get_string('glossary:visibility:private', 'local_deepler') . ')';
+                if ($g->shared === 1) {
+                    $nameadd = ' (' . get_string('glossary:visibility:pool', 'local_deepler') . ')';
+                } else if ($g->shared === 2) {
+                    $nameadd = ' (' . get_string('glossary:visibility:public', 'local_deepler') . ')';
+                }
+                $glossarydata[] = [
+                    'id' => $g->glossaryid,
+                    'name' => $g->name . $nameadd,
+                    'sourcelang' => strtolower($g->sourcelang),
+                    'targetlang' => strtolower($g->targetlang),
+                ];
+            }
+            return $glossarydata;
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     /**

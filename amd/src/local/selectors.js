@@ -60,7 +60,7 @@ define([], ()=>{
             needsupdate: '[data-status="needsupdate"]',
             hidden: '.local_deeplerinvisible',
             hiddenForStudentCheckboxes: '.local_deeplerinvisible input[type="checkbox"]',
-            hiddenForStudentRows: '.local_deeplerinvisible [data-row-id]:not([data-status="local_deepler/disabled"])',
+            hiddenForStudentRows: '.local_deeplerinvisible div[data-row-id]:not([data-status="local_deepler/disabled"])',
             keys: '[data-status-key="<KEY>"',
             successMessages: '[data-status="local_deepler/success-message"][data-key="<KEY>"]',
             prevTransStatus: '[data-row-id="<KEY>"] span#previousTranslationStatus',

@@ -77,13 +77,22 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div class="tab-content" id="{{prefix}}settings_tab_content">
     <div class="tab-pane fade show active" id="{{prefix}}tab_translate" role="tabpanel" aria-labelledby="{{prefix}}tab_translate_btn">
         <!-- TRANSLATE -->
-        <div class="row py-3">
-            <div class="text-end text-right">
+        <div class="row pt-2 pb-1">
+            <div class="col-12 text-end text-right" id="local_deepler__transdoc">
                 <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
-                <a href="https://developers.deepl.com/docs/translate/translate-text-quickstart" id="local_deepler__moresettings">{{#str}}
+                <a href="https://developers.deepl.com/docs/translate/translate-text-quickstart">{{#str}}
                     deeplapidoc,local_deepler{{/str}}</a>
             </div>
-            <div class="col-md-2" id="{{prefix}}local_deepler__modeltype">
+        </div>
+
+        <div class="row py-2">
+            <div class="col-12">
+                {{{glossayselector}}}
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__modeltype">
                 <label class="form-label d-block" for="{{prefix}}model_type">{{#str}}modeltype,local_deepler{{/str}}</label>
                 <select class="form-control custom-select" id="{{prefix}}model_type" data-id="local_deepler/model_type" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/model_type">
                     <option value="prefer_quality_optimized" selected>{{#str}}modeltpreferqualityoptimized,local_deepler{{/str}}</option>
@@ -91,7 +100,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     <option value="latency_optimized">{{#str}}modeltypelatencyoptimized,local_deepler{{/str}}</option>
                 </select>
             </div>
-            <div class="col-md-2" id="{{prefix}}local_deepler__formality">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__formality">
                 <label class="form-label d-block" for="{{prefix}}formality">{{#str}}formality,local_deepler{{/str}}</label>
                 <select class="form-control custom-select" id="{{prefix}}formality" data-id="local_deepler/formality" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/formality">
                     <option value="default" selected>{{#str}}formalitydefault,local_deepler{{/str}}</option>
@@ -101,58 +110,66 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                     <option value="less">{{#str}}formalityless,local_deepler{{/str}}</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <div id="{{prefix}}local_deepler__splitsentences" class="mb-3">
-                    <label class="form-label d-block" for="{{prefix}}split_sentences">{{#str}}splitsentences,local_deepler{{/str}}</label>
-                    <select class="form-control custom-select" id="{{prefix}}split_sentences" data-id="local_deepler/split_sentences" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/split_sentences">
-                        <option value="0">{{#str}}splitsentences0,local_deepler{{/str}}</option>
-                        <option value="1" selected>{{#str}}splitsentences1,local_deepler{{/str}}</option>
-                        <option value="nonewlines">{{#str}}splitsentencesnonewlines,local_deepler{{/str}}</option>
-                    </select>
-                </div>
-                <div id="{{prefix}}local_deepler__preserveformating">
-                    <div class="form-check form-switch custom-control custom-switch">
-                        <input type="checkbox" class="form-check-input custom-control-input" id="{{prefix}}preserve_formatting" data-id="local_deepler/preserve_formatting">
-                        <label class="form-check-label custom-control-label" for="{{prefix}}preserve_formatting">{{#str}}preserveformatting,local_deepler{{/str}}</label>
-                    </div>
+        </div>
+
+        <div class="row py-2 align-items-center">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__splitsentences">
+                <label class="form-label d-block" for="{{prefix}}split_sentences">{{#str}}splitsentences,local_deepler{{/str}}</label>
+                <select class="form-control custom-select" id="{{prefix}}split_sentences" data-id="local_deepler/split_sentences" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/split_sentences">
+                    <option value="0">{{#str}}splitsentences0,local_deepler{{/str}}</option>
+                    <option value="1" selected>{{#str}}splitsentences1,local_deepler{{/str}}</option>
+                    <option value="nonewlines">{{#str}}splitsentencesnonewlines,local_deepler{{/str}}</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3 pt-md-4" id="{{prefix}}local_deepler__preserveformating">
+                <div class="form-check form-switch custom-control custom-switch">
+                    <input type="checkbox" class="form-check-input custom-control-input" id="{{prefix}}preserve_formatting" data-id="local_deepler/preserve_formatting">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}preserve_formatting">{{#str}}preserveformatting,local_deepler{{/str}}</label>
                 </div>
             </div>
-            <div class="col-md-5" id="{{prefix}}local_deepler__glossarycontext">
-                {{{glossayselector}}}
+        </div>
+
+        <div class="row py-2">
+            <div class="col-12" id="{{prefix}}local_deepler__glossarycontext">
                 <label for="{{prefix}}local_deepler__context">{{#str}}contextdeepl,local_deepler{{/str}}</label>
                 <textarea class="form-control" id="{{prefix}}local_deepler__context" data-id="local_deepler/context" rows="3"
                           placeholder="{{#str}}contextdeepl_placeholder,local_deepler{{/str}}"></textarea>
             </div>
         </div>
 
-        <div class="row py-3" id="{{prefix}}local_deepler__tags">
-            <div class="col-md-5" id="{{prefix}}local_deepler__xmlhtml">
+        <div class="row py-2">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__xmlhtml">
                 <div class="d-flex my-switch">
                     <div class="form-text text-1"> {{#str}}taghandling,local_deepler{{/str}}XML&nbsp;</div>
                     <div class="form-check form-switch custom-control custom-switch">
                         <input id="{{prefix}}tag_handling" class="form-check-input custom-control-input" type="checkbox" data-id="local_deepler/tag_handling" checked>
-                        <label class="form-check-label custom-control-label" for="{{prefix}}tag_handling">&nbsp;HTML</label></div>
+                        <label class="form-check-label custom-control-label" for="{{prefix}}tag_handling">&nbsp;HTML</label>
+                    </div>
                 </div>
-
-                <div class="form-check form-switch custom-control custom-switch mt-3" id="{{prefix}}local_deepler__outilinedetection">
+            </div>
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__outilinedetection">
+                <div class="form-check form-switch custom-control custom-switch">
                     <input id="{{prefix}}outline_detection" class="form-check-input custom-control-input" type="checkbox" data-id="local_deepler/outline_detection">
                     <label class="form-check-label custom-control-label" for="{{prefix}}outline_detection">{{#str}}outlinedetection,local_deepler{{/str}}</label>
                 </div>
-                <div class="mt-3" id="{{prefix}}local_deepler__tagsignore">
-                    <label for="{{prefix}}ignore_tags">{{#str}}ignoretags,local_deepler{{/str}}</label>
-                    <textarea class="form-control" id="{{prefix}}ignore_tags" data-id="local_deepler/ignore_tags"
-                              placeholder="{{#str}}ignoretags,local_deepler{{/str}}"></textarea>
-                </div>
-
             </div>
-            <div class="col-md-7 py-3">
-                <div class="col" id="{{prefix}}local_deepler__tagsnosplitting">
-                    <label for="{{prefix}}non_splitting_tags">{{#str}}nonsplittingtags,local_deepler{{/str}}</label>
-                    <textarea class="form-control" id="{{prefix}}non_splitting_tags" data-id="local_deepler/non_splitting_tags"
-                              placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
-                <div class="col" id="{{prefix}}local_deepler__tagssplitting"><label for="{{prefix}}splitting_tags">{{#str}}splittingtags,local_deepler{{/str}}</label>
-                    <textarea class="form-control" id="{{prefix}}splitting_tags" data-id="local_deepler/splitting_tags"
-                              placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea></div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-md-4 mb-3" id="{{prefix}}local_deepler__tagsignore">
+                <label for="{{prefix}}ignore_tags">{{#str}}ignoretags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}ignore_tags" data-id="local_deepler/ignore_tags"
+                          placeholder="{{#str}}ignoretags,local_deepler{{/str}}"></textarea>
+            </div>
+            <div class="col-md-4 mb-3" id="{{prefix}}local_deepler__tagsnosplitting">
+                <label for="{{prefix}}non_splitting_tags">{{#str}}nonsplittingtags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}non_splitting_tags" data-id="local_deepler/non_splitting_tags"
+                          placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea>
+            </div>
+            <div class="col-md-4 mb-3" id="{{prefix}}local_deepler__tagssplitting">
+                <label for="{{prefix}}splitting_tags">{{#str}}splittingtags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}splitting_tags" data-id="local_deepler/splitting_tags"
+                          placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea>
             </div>
         </div>
         <!-- END TRANSLATE -->
@@ -160,9 +177,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     {{#canimprove}}
     <div class="tab-pane fade" id="{{prefix}}tab_rephrase" role="tabpanel" aria-labelledby="{{prefix}}tab_rephrase_btn">
         <!-- REPHRASE -->
-        <div class="text-end text-right">
+        <div class="text-end text-right" id="local_deepler__rephrasedoc">
             <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
-            <a href="https://developers.deepl.com/api-reference/improve-text/request-text-improvement" id="local_deepler__moresettings">{{#str}}
+            <a href="https://developers.deepl.com/api-reference/improve-text/request-text-improvement" >{{#str}}
                 deeplapidoc,local_deepler{{/str}}</a>
         </div>
         <div class="text-end text-right">

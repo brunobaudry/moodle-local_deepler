@@ -244,7 +244,6 @@ define([
     const setFileStatus = (fileId, statusText, badgeClass, detailText = '') => {
         const badge = Utils.domQuery(`[data-status-for="${fileId}"]`);
         if (badge) {
-            // eslint-disable-next-line max-len
             badge.classList.remove(
                 'badge-secondary',
                 'badge-info',
@@ -566,7 +565,12 @@ define([
             body: Templates.render('local_deepler/files_settings_modal', context),
         }).then((modal) => {
             const footer = modal.getFooter();
-            const footerEl = footer instanceof HTMLElement ? footer : (footer && footer[0] ? footer[0] : null);
+            let footerEl;
+            if (footer instanceof HTMLElement) {
+                footerEl = footer;
+            } else {
+                footerEl = footer && footer[0] ? footer[0] : null;
+            }
             if (footerEl) {
                 const resetBtn = document.createElement('button');
                 resetBtn.type = 'button';
@@ -587,7 +591,12 @@ define([
             modal.show();
 
             const root = modal.getRoot();
-            const rootEl = root instanceof HTMLElement ? root : (root && root[0] ? root[0] : null);
+            let rootEl;
+            if (root instanceof HTMLElement) {
+                rootEl = root;
+            } else {
+                rootEl = root && root[0] ? root[0] : null;
+            }
             if (rootEl) {
                 const formalityInput = Utils.domQuery(
                     `[data-id="local_deepler/formality"], #modal_formality_${fileId}`,
@@ -683,7 +692,12 @@ define([
             modal.show();
 
             const body = modal.getBody();
-            const bodyElement = body instanceof HTMLElement ? body : (body && body[0] ? body[0] : null);
+            let bodyElement;
+            if (body instanceof HTMLElement) {
+                bodyElement = body;
+            } else {
+                bodyElement = body && body[0] ? body[0] : null;
+            }
             if (bodyElement) {
                 settingsContainer.classList.remove('d-none');
                 bodyElement.appendChild(settingsContainer);
