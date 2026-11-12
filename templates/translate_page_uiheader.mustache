@@ -98,12 +98,38 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 <div id="local_deepler_uiheader" class="mt-2">
     <div class="container-fluid local_deepler-bg-primary-subtle">
         <div class="row py-3 align-items-center" id="local_deepler__sourcetarget">
-            <div class="col-5 text-end text-right"><h6 id="local_deepler__sourcelang">{{#str}}sourcelang,local_deepler{{/str}}&nbsp;({{deeplsource}})</h6></div>
-            <div class="col-1 text-center"><i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+            <div class="col-2 text-end text-right">
+            <button type="button"
+                    id="local_deepler__settings"
+                    class="btn btn-sm btn-secondary"
+                    data-action="global-settings">
+                <i class="fa fa-sliders" aria-hidden="true"></i> {{#str}}seesetting,local_deepler{{/str}}
+            </button>
             </div>
-            <div class="col-3"><h6 id="local_deepler__targetlang" class="text-start text-left">{{#str}}selecttargetlanguage,local_deepler,
-                {{target_lang}}{{/str}}</h6></div>
+            <div class="col-3 text-end text-right">
+                <div class="d-inline-flex align-items-center" id="local_deepler__sourcelang">
+                    <label for="select-source-language" class="mb-0 me-2 mr-2 h4">
+                        {{#str}}sourcelang,local_deepler{{/str}}
+                    </label>
+                    <select
+                            id="select-source-language"
+                            name="select-source-language"
+                            class="local_deepler__sourceswitcher form-select form-control d-inline-block w-auto"
+                            data-action="local_deepler/source-switcher"
+                    >
+                        {{#sourcelangs}}
+                            <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
+                        {{/sourcelangs}}
+                    </select>
+                </div>
+            </div>
+            <div class="col-1 text-center"><i class="fa-solid fa-chevron-circle-right" aria-hidden="true"></i>
+            </div>
             <div class="col-3">
+                <div class="d-inline-flex align-items-center" id="local_deepler__targetlang">
+                <label for="select-target-language" class="mb-0 me-2 mr-2 h4">
+                    {{#str}}selecttargetlanguage,local_deepler{{/str}}
+                </label>
                 <select
                         id="select-target-language"
                         name="select-target-language"
@@ -117,6 +143,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         <option value="{{ code }}" {{#selected}}selected{{/selected}} {{#disabled}}disabled{{/disabled}}>{{ lang }}</option>
                     {{/targetlangs}}
                 </select>
+                </div>
             </div>
 
         </div>
@@ -232,7 +259,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                         class="btn btn-success"
                         data-action="local_deepler/saveall-btn"
                         disabled>
-                    <i class="fa fa-floppy-o" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
+                    <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> {{#str}}saveall,local_deepler{{/str}}
                 </button>
             </div>
         </div>
@@ -261,7 +288,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     </div>
 
     <div id='local_deepler-scrollspy' class="row p-1 ps-3 pl-3">
-        <span id="local_deepler__tothetop" class="col-1" role="button"><i class="fa fa-home" aria-hidden="true"></i></span>
+        <span id="local_deepler__tothetop" class="col-1" role="button"><i class="fa-solid fa-home" aria-hidden="true"></i></span>
         <span id="local_deepler__breadcrumbs" class="col-11"></span>
     </div>
 </div>

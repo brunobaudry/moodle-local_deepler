@@ -20,10 +20,10 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['./local/selectors', './local/api', './local/customevents', 'core/modal', 'core/log'],
-    function(Selectors, Api, Events, Modal, Log) {
+define(['./local/selectors', './local/api', 'core/modal', 'core/log'],
+    function(Selectors, Api, Modal, Log) {
     let version = '';
-    const initCode = (cfg)=> {
+    const initCode = (cfg) => {
         version = cfg;
         const fileInput = document.getElementById('local_deepler/fileElem');
         const fileNameDisplay = document.getElementById('local_deepler/filename-display');
@@ -40,42 +40,41 @@ define(['./local/selectors', './local/api', './local/customevents', 'core/modal'
             }
         });
     };
-    const registerEventListeners = ()=>{
+    const registerEventListeners = () => {
         const allVisibilitySelect = document.querySelectorAll(Selectors.glossary.visibilityDropdown);
-        allVisibilitySelect.forEach((e)=>{
-        e.addEventListener('change',
-                (evt)=>{
+        allVisibilitySelect.forEach((e) => {
+            e.addEventListener('change',
+                (evt) => {
                     Log.info(evt.target.dataset.glossary, evt.target.value);
-                    Api.updateGlossariesVisibility(evt.target.dataset.glossary, evt.target.value);
+                    Api.updateGlossariesVisibility(evt.target.dataset.glossary, evt.target.value)
+                        .catch((err) => Log.error('Failed to update glossary visibility', err));
                 }
             );
         });
         const allGlossarriesEntry = document.querySelectorAll(Selectors.glossary.entriesviewer);
         Log.info(allGlossarriesEntry);
-        allGlossarriesEntry.forEach((e)=>{
+        allGlossarriesEntry.forEach((e) => {
             e.addEventListener('click',
-                (e)=>{
-                if (e.target.dataset.length !== 0 && e.target.dataset.glossary !== undefined) {
-                    Log.info(e.target.dataset.glossary);
-                    Api.getGlossariesEntries(
-                        e.target.dataset.glossary,
-                        version
-                    );
-                } else if (e.target.parentNode.dataset && e.target.parentNode.dataset.glossary) {
-                    Log.info(e.target.parentNode.dataset.glossary);
-                    Api.getGlossariesEntries(
-                        e.target.parentNode.dataset.glossary,
-                        version
-                    );
-                } else {
-                  Log.error('Cannot not find glossary ID');
+                async(evt) => {
+                    let glossaryId = null;
+                    if (evt.target.dataset && evt.target.dataset.glossary) {
+                        glossaryId = evt.target.dataset.glossary;
+                    } else if (evt.target.parentNode && evt.target.parentNode.dataset && evt.target.parentNode.dataset.glossary) {
+                        glossaryId = evt.target.parentNode.dataset.glossary;
+                    }
+                    if (glossaryId) {
+                        Log.info(glossaryId);
+                        try {
+                            const response = await Api.getGlossariesEntries(glossaryId, version);
+                            showEntriesModal(response);
+                        } catch (err) {
+                            Log.error('Error fetching glossary entries', err);
+                        }
+                    } else {
+                        Log.error('Cannot find glossary ID');
+                    }
                 }
-            }
             );
-        });
-        Events.on(Api.GLOSSARY_ENTRIES_SUCCESS, showEntriesModal);
-        Events.on(Api.GLOSSARY_ENTRIES_FAILED, (e)=>{
-         Log.error(Api.GLOSSARY_ENTRIES_FAILED); Log.error(e);
         });
     };
     const showEntriesModal = (ajaxResponse)=>{

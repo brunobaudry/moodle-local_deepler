@@ -23,7 +23,7 @@ class TextResult
     public $detectedSourceLang;
 
     /**
-     * @var int Number of characters billed for this text.
+     * @var int|null Number of characters billed for this text, or null if the response did not include it.
      */
     public $billedCharacters;
 
@@ -34,18 +34,26 @@ class TextResult
     public $modelTypeUsed;
 
     /**
+     * @var string|null Version of the tag handling algorithm used, or null if the response did not include it.
+     * @see TagHandlingVersion
+     */
+    public $tagHandlingVersion;
+
+    /**
      * @throws DeepLException
      */
     public function __construct(
         string $text,
         string $detectedSourceLang,
-        int $billedCharacters,
-        ?string $modelTypeUsed = null
+        ?int $billedCharacters,
+        ?string $modelTypeUsed = null,
+        ?string $tagHandlingVersion = null
     ) {
         $this->text = $text;
         $this->detectedSourceLang = LanguageCode::standardizeLanguageCode($detectedSourceLang);
         $this->billedCharacters = $billedCharacters;
         $this->modelTypeUsed = $modelTypeUsed;
+        $this->tagHandlingVersion = $tagHandlingVersion;
     }
 
     public function __toString(): string

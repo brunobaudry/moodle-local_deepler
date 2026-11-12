@@ -32,6 +32,9 @@ use advanced_testcase;
 use DeepL\AuthorizationException;
 use DeepL\DeepLClient;
 use DeepL\GlossaryInfo;
+use DeepL\LanguageInclude;
+use DeepL\LanguageResourceName;
+use DeepL\LanguageSupport;
 use DeepL\TooManyRequestsException;
 use DeepL\Usage;
 use ReflectionClass;
@@ -111,6 +114,15 @@ final class langhelper_test extends advanced_testcase {
         $this->assertTrue($options[$symbol . 'en-GB']['selected']);
         $this->assertFalse($options[$symbol . 'en-US']['disabled']);
         $this->assertFalse($options[$symbol . 'en-US']['selected']);
+
+        // Main source language options (allowrephrase = false) must never have rephrase symbols.
+        $mainsources = $this->indexbycode($helper->preparesourcesoptionlangs(true, false));
+        $this->assertArrayHasKey('en', $mainsources);
+        $this->assertArrayNotHasKey($symbol . 'en', $mainsources);
+
+        // Row source language options (allowrephrase = true) must have rephrase symbol when matching target.
+        $rowsources = $this->indexbycode($helper->preparesourcesoptionlangs(false, true));
+        $this->assertArrayHasKey($symbol . 'en', $rowsources);
     }
 
     /**
@@ -265,6 +277,21 @@ final class langhelper_test extends advanced_testcase {
             (object) ['code' => 'ZH-HANS', 'name' => 'Chinese (simplified)'],
             (object) ['code' => 'ZH-HANT', 'name' => 'Chinese (traditional)'],
         ]);
+        $translator->method('getLanguagesForResource')->willReturnCallback(function ($resource, $include = null) {
+            if ($resource === LanguageResourceName::WRITE) {
+                return [
+                    new LanguageSupport('de', 'German', 'stable', true, true, []),
+                    new LanguageSupport('en-GB', 'English (British)', 'stable', true, true, []),
+                    new LanguageSupport('en-US', 'English (American)', 'stable', true, true, []),
+                    new LanguageSupport('es', 'Spanish', 'stable', true, true, []),
+                    new LanguageSupport('fr', 'French', 'stable', true, true, []),
+                    new LanguageSupport('it', 'Italian', 'stable', true, true, []),
+                    new LanguageSupport('pt-BR', 'Portuguese (Brazilian)', 'stable', true, true, []),
+                    new LanguageSupport('pt-PT', 'Portuguese (European)', 'stable', true, true, []),
+                ];
+            }
+            return [];
+        });
         $helper = new lang_helper($translator, 'mockapikey', $moodlelangs, $currentlang, $targetlang);
         $helper->initdeepl($this->user, 'v1.0');
         return $helper;
@@ -504,6 +531,132 @@ final class langhelper_test extends advanced_testcase {
     }
 
     /**
+     * Test cookie initialization for source and target languages.
+     *
+     * @covers \local_deepler\local\services\lang_helper::__construct
+     * @return void
+     */
+    public function test_languages_initialized_from_cookies(): void {
+        $_COOKIE['local_deepler_sourcelang'] = 'fr';
+        $_COOKIE['local_deepler_targetlang'] = 'de';
+
+        $helper = new lang_helper($this->mocktranslator, 'mockapikey');
+
+        $this->assertEquals('fr', $helper->currentlang);
+        $this->assertEquals('de', $helper->targetlang);
+
+        unset($_COOKIE['local_deepler_sourcelang']);
+        unset($_COOKIE['local_deepler_targetlang']);
+    }
+
+    /**
+     * Test dynamic loading of rephrase languages via DeepL API v3.
+     *
+     * @covers \local_deepler\local\services\lang_helper::initdeepl
+     * @covers \local_deepler\local\services\lang_helper::get_deeplrephraselangs
+     * @covers \local_deepler\local\services\lang_helper::isrephrasable
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function test_rephrase_languages_loaded_dynamically(): void {
+        $translator = $this->createMock(DeepLClient::class);
+        $usage = $this->createMock(Usage::class);
+        $usage->method('anyLimitReached')->willReturn(false);
+        $translator->method('getUsage')->willReturn($usage);
+        $translator->method('getSourceLanguages')->willReturn([
+            (object) ['code' => 'EN', 'name' => 'English'],
+            (object) ['code' => 'FR', 'name' => 'French'],
+        ]);
+        $translator->method('getTargetLanguages')->willReturn([
+            (object) ['code' => 'DE', 'name' => 'German'],
+        ]);
+        $translator->method('getLanguagesForResource')->willReturnCallback(function ($resource, $include = null) {
+            if ($resource === LanguageResourceName::WRITE) {
+                return [
+                    new LanguageSupport('en-GB', 'English (British)', 'stable', true, true, []),
+                    new LanguageSupport('fr', 'French', 'stable', true, true, []),
+                ];
+            }
+            return [];
+        });
+
+        $helper = new lang_helper($translator, 'mockapikey', ['en' => 'English', 'fr' => 'French', 'de' => 'German'], 'en', 'de');
+        $helper->initdeepl($this->user, 'v1.0');
+
+        $rephraselangs = $helper->get_deeplrephraselangs();
+        $this->assertEquals(['en-GB', 'fr'], $rephraselangs);
+        $this->assertTrue($helper->isrephrasable('en'));
+        $this->assertTrue($helper->isrephrasable('en-GB'));
+        $this->assertTrue($helper->isrephrasable('fr'));
+        $this->assertFalse($helper->isrephrasable('de'));
+        $this->assertFalse($helper->isrephrasable('es'));
+    }
+
+    /**
+     * Test dynamic loading of beta languages via DeepL API v3 when allowbeta is enabled.
+     *
+     * @covers \local_deepler\local\services\lang_helper::initdeepl
+     * @covers \local_deepler\local\services\lang_helper::preparesourcesoptionlangs
+     * @covers \local_deepler\local\services\lang_helper::preparetargetsoptionlangs
+     * @return void
+     * @throws \DeepL\DeepLException
+     * @throws \dml_exception
+     */
+    public function test_beta_languages_loaded_dynamically(): void {
+        set_config('allowbeta', 1, 'local_deepler');
+
+        $translator = $this->createMock(DeepLClient::class);
+        $usage = $this->createMock(Usage::class);
+        $usage->method('anyLimitReached')->willReturn(false);
+        $translator->method('getUsage')->willReturn($usage);
+        $translator->method('getSourceLanguages')->willReturn([
+            (object) ['code' => 'EN', 'name' => 'English'],
+        ]);
+        $translator->method('getTargetLanguages')->willReturn([
+            (object) ['code' => 'DE', 'name' => 'German'],
+        ]);
+        $translator->method('getLanguagesForResource')->willReturnCallback(function ($resource, $include = null) {
+            if ($resource === LanguageResourceName::WRITE) {
+                return [
+                    new LanguageSupport('en-GB', 'English (British)', 'stable', true, true, []),
+                ];
+            }
+            if (
+                $resource === LanguageResourceName::TRANSLATE_TEXT &&
+                is_array($include) &&
+                in_array(LanguageInclude::BETA, $include, true)
+            ) {
+                return [
+                    new LanguageSupport('eo', 'Esperanto', 'beta', true, true, []),
+                    new LanguageSupport('la', 'Latin', 'beta', true, false, []),
+                    new LanguageSupport('af', 'Afrikaans', 'beta', false, true, []),
+                    new LanguageSupport('en', 'English', 'stable', true, true, []),
+                ];
+            }
+            return [];
+        });
+
+        $moodlelangs = ['en' => 'English', 'de' => 'German', 'eo' => 'Esperanto', 'la' => 'Latin', 'af' => 'Afrikaans'];
+        $helper = new lang_helper($translator, 'mockapikey', $moodlelangs, 'en', 'de');
+        $helper->initdeepl($this->user, 'v1.0');
+
+        $sources = $helper->preparesourcesoptionlangs(true, false);
+        $sourcecodes = array_column($sources, 'code');
+        $this->assertContains('eo', $sourcecodes);
+        $this->assertContains('la', $sourcecodes);
+        $this->assertNotContains('af', $sourcecodes);
+
+        $targets = $helper->preparetargetsoptionlangs(true);
+        $targetcodes = array_column($targets, 'code');
+        $this->assertContains('eo', $targetcodes);
+        $this->assertContains('af', $targetcodes);
+        $this->assertNotContains('la', $targetcodes);
+
+        unset_config('allowbeta', 'local_deepler');
+    }
+
+    /**
      * Set up.
      *
      * @return void
@@ -535,6 +688,21 @@ final class langhelper_test extends advanced_testcase {
             (object) ['code' => 'DE', 'name' => 'German'],
             (object) ['code' => 'ES', 'name' => 'Spanish'],
         ]);
+        $this->mocktranslator->method('getLanguagesForResource')->willReturnCallback(function ($resource, $include = null) {
+            if ($resource === LanguageResourceName::WRITE) {
+                return [
+                    new LanguageSupport('de', 'German', 'stable', true, true, []),
+                    new LanguageSupport('en-GB', 'English (British)', 'stable', true, true, []),
+                    new LanguageSupport('en-US', 'English (American)', 'stable', true, true, []),
+                    new LanguageSupport('es', 'Spanish', 'stable', true, true, []),
+                    new LanguageSupport('fr', 'French', 'stable', true, true, []),
+                    new LanguageSupport('it', 'Italian', 'stable', true, true, []),
+                    new LanguageSupport('pt-BR', 'Portuguese (Brazilian)', 'stable', true, true, []),
+                    new LanguageSupport('pt-PT', 'Portuguese (European)', 'stable', true, true, []),
+                ];
+            }
+            return [];
+        });
 
         $this->langhelper = new lang_helper(
             $this->mocktranslator,

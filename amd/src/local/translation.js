@@ -21,8 +21,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([
-    'core/log', './api', './utils', './selectors', './tokeniser', './customevents'],
-    (Log, Api, Utils, Selectors, Tokeniser, Events) => {
+    'core/log', './api', './utils', './selectors', './tokeniser', './reactive/statemanager'],
+    (Log, Api, Utils, Selectors, Tokeniser, StateManager) => {
         let tempTranslations = {};
         let escapePatterns = {};
         let mainSourceLang = "";
@@ -33,15 +33,6 @@ define([
         let userid = 0;
         let rephrasesymbol = '';
         const deeplSettinRegex = /\[(name="local_deepler|data-id="local_deepler)\/(\w+)"\]/i;
-        const ON_ITEM_TRANSLATED = 'onItemTranslated';
-        // Const ON_ITEM_NOT_TRANSLATED = 'onItemsNotTranslated';
-        const ON_ITEM_SAVED = 'onItemSaved';
-        const ON_ITEM_NOT_SAVED = 'onItemNotSaved';
-        const ON_TRANSLATION_FAILED = 'onTranslationFailed';
-        const ON_TRANSLATION_DONE = 'onTranslationDone';
-        const ON_REPHRASE_FAILED = 'onRephraseFailed';
-        const ON_DB_SAVE_SUCCESS = 'onDbSuccess';
-        const ON_DB_FAILED = 'onDbFailed';
         const trSelectors = [
             Selectors.deepl.tagHandling,
             Selectors.deepl.context,
@@ -72,49 +63,62 @@ define([
             }
         };
         /**
-         * When translation successfully stored in Moodle's DB.
+         * Helper to get active reactive state manager.
          *
-         * @param {object} data
+         * @returns {object|null}
          */
-        const onTrDbSuccess = (data)=>{
-            if (data.length === 0) {
-                Events.emit(ON_DB_FAILED, 'no data returned', '');
-            } else {
-                const errors = data.filter((item) => item.error !== '');
-                data.forEach((item) => {
-                    if (item.error === '') {
-                        // Refreshing the text in the temp obbject in case of new translation without page refresh.
-                        tempTranslations[item.keyid].fieldText = item.text;
-                        Events.emit(ON_ITEM_SAVED, item.keyid, item.text);
-                    } else {
-                        Events.emit(ON_ITEM_NOT_SAVED, item.keyid, item.error);
-                    }
-                });
-                Events.emit(ON_DB_SAVE_SUCCESS, errors);
-            }
+        const getReactive = () => {
+            return StateManager.getStateManager(courseid || 'main');
         };
-        /**
-         * Translation DB failed.
-         * @param {int} status
-         * @param {string} error
-         */
-        const onTrDbFailed = (status, error) =>{
-                Events.emit(ON_DB_FAILED, error, status);
-                Log.trace(status);
-                Log.trace(error);
-            };
+
         /**
          * Save translations to the DB.
-         * @param {array} items
+         *
+         * @param {Array} items
          * @param {object} config
+         * @returns {Promise<Array>}
          */
-        const saveTranslations = (items, config) => {
+        const saveTranslations = async(items, config) => {
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isSaving: true});
+                items.forEach((item) => {
+                    reactive.dispatch('setRowStatus', item.key, 'saving');
+                });
+            }
             const data = items.map(item => prepareDbUpdateItem(item, config.userPrefs === 'textarea'));
             Log.debug(`translation/x/saveTranslations::data`);
             Log.debug(data);
-            Events.on(Api.TR_DB_SUCCESS, onTrDbSuccess);
-            Events.on(Api.TR_DB_FAILED, onTrDbFailed);
-            Api.updateTranslationsInDb(data, userid, courseid);
+            try {
+                const response = await Api.updateTranslationsInDb(data, userid, courseid);
+                if (reactive) {
+                    reactive.dispatch('updateBatchStatus', {isSaving: false});
+                }
+                if (response.length === 1 && response[0].error && response[0].keyid === '') {
+                    throw new Error(response[0].error);
+                }
+                response.forEach((item) => {
+                    if (item.error === '') {
+                        if (tempTranslations[item.keyid]) {
+                            tempTranslations[item.keyid].fieldText = item.text;
+                        }
+                        if (reactive) {
+                            reactive.dispatch('setRowStatus', item.keyid, 'saved');
+                        }
+                    } else {
+                        if (reactive) {
+                            reactive.dispatch('setRowStatus', item.keyid, 'error', item.error);
+                        }
+                    }
+                });
+                return response;
+            } catch (error) {
+                if (reactive) {
+                    reactive.dispatch('updateBatchStatus', {isSaving: false});
+                }
+                Log.error(`translation/saveTranslations::failed`, error);
+                throw error;
+            }
         };
         /**
          * Prepare the data to be saved in the DB.
@@ -126,7 +130,6 @@ define([
         const prepareDbUpdateItem = (item, maineditorIsTextArea) => {
             const key = item.key;
             Log.debug(tempTranslations[key]);
-            // Const textTosave = getupdatedtext(key, maineditorIsTextArea);
             const textTosave = getEditorText(tempTranslations[key].editor, maineditorIsTextArea);
             Log.debug(`translation/x/prepareDbUpdateItem::textTosave`);
             Log.debug(textTosave);
@@ -134,10 +137,9 @@ define([
             Log.debug(mainSourceLang);
             Log.debug(deeplSourceLang);
             Log.debug(moodleTargetToSave);
-            // TextTosave = getEditorText(key, maineditorIsTextArea);
             return {
                 tid: item.tid,
-                text: getEditorText(tempTranslations[key].editor, maineditorIsTextArea),
+                text: textTosave,
                 keyid: key,
                 mainsourcecode: mainSourceLang,
                 sourcecode: tempTranslations[key].sourceLang,
@@ -212,36 +214,109 @@ define([
             };
         };
         /**
+         * Format translation options from custom settings.
+         *
+         * @param {object|null} custom
+         * @returns {object|null}
+         */
+        const formatRowOptions = (custom) => {
+            if (!custom) {
+                return null;
+            }
+            return {
+                context: custom.context || null,
+                // eslint-disable-next-line camelcase
+                tag_handling: custom.tag_handling || null,
+                // eslint-disable-next-line camelcase
+                split_sentences: custom.split_sentences || null,
+                // eslint-disable-next-line camelcase
+                preserve_formatting: custom.preserve_formatting ?? null,
+                formality: custom.formality || null,
+                // eslint-disable-next-line camelcase
+                outline_detection: custom.outline_detection ?? null,
+                // eslint-disable-next-line camelcase
+                non_splitting_tags: custom.non_splitting_tags || null,
+                // eslint-disable-next-line camelcase
+                splitting_tags: custom.splitting_tags || null,
+                // eslint-disable-next-line camelcase
+                ignore_tags: custom.ignore_tags || null,
+                // eslint-disable-next-line camelcase
+                glossary_id: custom.glossary_id || null,
+                // eslint-disable-next-line camelcase
+                model_type: custom.model_type || null,
+                toneorstyle: custom.toneorstyle || null,
+            };
+        };
+
+        /**
+         * Retrieve custom settings for a given row key.
+         *
+         * @param {string} key
+         * @returns {object|null}
+         */
+        const getRowCustomSettings = (key) => {
+            const reactive = getReactive();
+            const rows = reactive?.state?.rows;
+            if (rows) {
+                const row = rows.get(key) || Array.from(rows.values()).find((r) => r.key === key || r.id === key);
+                if (row?.customSettings) {
+                    return row.customSettings;
+                }
+            }
+            return tempTranslations[key]?.customSettings || null;
+        };
+
+        /**
          * Prepare the texts for the external api calls.
          *
          * @param {string} key
          * @returns {{text, source_lang: (string|string|*), key}}
          */
         const prepareTranslation = (key) => {
-            return {
+            const rowCustomSettings = getRowCustomSettings(key);
+            const item = {
                 text: tempTranslations[key].source,
                 // eslint-disable-next-line camelcase
                 source_lang: tempTranslations[key].sourceLang,
-                key: key
+                key: key,
             };
+
+            const options = formatRowOptions(rowCustomSettings);
+            if (options) {
+                item.options = options;
+            }
+
+            return item;
         };
         /**
          * Call the external translation service to translate the selected keys.
          *
-         * @param {array} keys
+         * @param {Array} keys
          * @param {object} config
          * @param {object} settings
-         * @return void
+         * @returns {Promise<Array>}
          */
-        const callTranslations = (keys, config, settings) => {
+        const callTranslations = async(keys, config, settings) => {
             rephrasesymbol = config.rephrasesymbol;
+            const reactive = getReactive();
+            if (reactive) {
+                reactive.dispatch('updateBatchStatus', {isTranslating: true});
+                keys.forEach((key) => {
+                    reactive.dispatch('setRowStatus', key, 'translating');
+                });
+            }
             const translations = [];
             const rephrases = [];
-            // We parse and check if it is a tranlsation or text improvment.
+            // We parse and check if it is a translation or text improvement.
             keys.forEach((key) => {
                 const t = prepareTranslation(key);
-                if (config.canimprove && t.source_lang.includes(rephrasesymbol)) {
+                if (config.canimprove && t.source_lang && t.source_lang.includes(rephrasesymbol)) {
                     delete t.source_lang;
+                    if (t.options) {
+                        t.options = {
+                            toneorstyle: t.options.toneorstyle || null,
+                        };
+                    }
                     Log.debug(`translation/x/callTranslations::t`);
                     Log.debug(t);
                     rephrases.push(t);
@@ -249,82 +324,99 @@ define([
                     translations.push(t);
                 }
             });
-            if (translations.length > 0) {
-                Events.on(Api.DEEPL_SUCCESS, onTranslateSuccess);
-                Events.on(Api.DEEPL_FAILED, onTranslateFailed);
-                 Api.translate(translations, prepareTranslationSettings(settings), Api.APP_VERSION);
-            }
-            if (rephrases.length > 0) {
-                Events.on(Api.DEEPL_RF_SUCCESS, onRephraseSuccess);
-                Events.on(Api.DEEPL_RF_FAILED, onRephaseFailed);
-                Api.rephrase(rephrases, prepareRephraseSettings(settings), Api.APP_VERSION);
+
+            const results = [];
+            try {
+                if (translations.length > 0) {
+                    const response = await Api.translate(
+                        translations,
+                        prepareTranslationSettings(settings),
+                        Api.APP_VERSION
+                    );
+                    onTranslateSuccess(response);
+                    results.push(...response);
+                }
+                if (rephrases.length > 0) {
+                    const response = await Api.rephrase(
+                        rephrases,
+                        prepareRephraseSettings(settings),
+                        Api.APP_VERSION
+                    );
+                    onRephraseSuccess(response);
+                    results.push(...response);
+                }
+                return results;
+            } catch (error) {
+                if (reactive) {
+                    reactive.dispatch('updateBatchStatus', {isTranslating: false});
+                }
+                Log.error(`translation/callTranslations::failed`, error);
+                throw error;
+            } finally {
+                if (reactive) {
+                    reactive.dispatch('updateBatchStatus', {isTranslating: false});
+                }
             }
         };
         /**
-         * When translation went good.
+         * When translation succeeded.
          *
-         * @param {object} response
+         * @param {Array} response
          */
-        const onTranslateSuccess = (response)=>{
+        const onTranslateSuccess = (response) => {
             Log.info(response);
+            const reactive = getReactive();
             const glossaries = [];
             response.forEach((tr) => {
+                let key = tr.key;
                 if (tr.error === '') {
-                    // For now used glossary_id should, be the same for the batch,
+                    // For now used glossary_id should be the same for the batch,
                     // but it would make sense to use a single glossary for each text.
-                    if (glossaries.indexOf(tr.glossary_id) === -1 && tr.glossary_id.trim() !== '') {
+                    if (tr.glossary_id && glossaries.indexOf(tr.glossary_id) === -1 && tr.glossary_id.trim() !== '') {
                         glossaries.push(tr.glossary_id);
                     }
-                    let key = tr.key;
                     let translation = Tokeniser.postprocess(tr.translated_text, tempTranslations[key].tokens);
-                    tempTranslations[key].editor.innerHTML = translation;
+                    if (tempTranslations[key].editor) {
+                        tempTranslations[key].editor.innerHTML = translation;
+                    }
                     tempTranslations[key].translation = translation;
-                    Events.emit(ON_ITEM_TRANSLATED, key);
+                    if (reactive) {
+                        reactive.dispatch('updateRowTranslation', key, translation);
+                    }
                 } else {
-                    Events.emit(ON_TRANSLATION_FAILED, tr.error);
+                    if (reactive && key) {
+                        reactive.dispatch('setRowStatus', key, 'error', tr.error);
+                    }
                 }
             });
             if (glossaries.length > 0) {
-                Api.updateGlossariesUsage(glossaries);
+                Api.updateGlossariesUsage(glossaries).catch((err) => Log.error(err));
             }
-            Events.emit(ON_TRANSLATION_DONE);
         };
         /**
-         * When rephrasing went good.
+         * When rephrasing succeeded.
          *
-         * @param {object} response
+         * @param {Array} response
          */
-        const onRephraseSuccess = (response)=>{
+        const onRephraseSuccess = (response) => {
+            const reactive = getReactive();
             response.forEach((tr) => {
+                let key = tr.key;
                 if (tr.error === '') {
-                    let key = tr.key;
                     let rephrase = Tokeniser.postprocess(tr.text, tempTranslations[key].tokens);
-                    tempTranslations[key].editor.innerHTML = rephrase;
+                    if (tempTranslations[key].editor) {
+                        tempTranslations[key].editor.innerHTML = rephrase;
+                    }
                     tempTranslations[key].translation = rephrase;
-                    Events.emit(ON_ITEM_TRANSLATED, key);
+                    if (reactive) {
+                        reactive.dispatch('updateRowTranslation', key, rephrase);
+                    }
                 } else {
-                    Events.emit(ON_REPHRASE_FAILED, tr.error);
+                    if (reactive && key) {
+                        reactive.dispatch('setRowStatus', key, 'error', tr.error);
+                    }
                 }
             });
-             Events.emit(ON_TRANSLATION_DONE);
-        };
-        /**
-         * When translation failed.
-         *
-         * @param {int} status
-         * @param {string} error
-         */
-        const onTranslateFailed = (status, error)=>{
-            Events.emit(ON_TRANSLATION_FAILED, status, error);
-        };
-        /**
-         * Event handler for when the rephrase fails.
-         *
-         * @param {int} status
-         * @param {string} error
-         */
-        const onRephaseFailed = (status, error)=>{
-            Events.emit(ON_REPHRASE_FAILED, status, error);
         };
         /**
          * Set up the Deepl settings needed for translations.
@@ -415,13 +507,5 @@ define([
             setMainLangs: setMainLangs,
             isTranslatable: isTranslatable,
             translated: translated,
-            ON_ITEM_TRANSLATED: ON_ITEM_TRANSLATED,
-            ON_DB_FAILED: ON_DB_FAILED,
-            ON_ITEM_SAVED: ON_ITEM_SAVED,
-            ON_ITEM_NOT_SAVED: ON_ITEM_NOT_SAVED,
-            ON_TRANSLATION_FAILED: ON_TRANSLATION_FAILED,
-            ON_TRANSLATION_DONE: ON_TRANSLATION_DONE,
-            ON_REPHRASE_FAILED: ON_REPHRASE_FAILED,
-            ON_DB_SAVE_SUCCESS: ON_DB_SAVE_SUCCESS,
-    };
+        };
 });

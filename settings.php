@@ -90,6 +90,14 @@ if ($hassiteconfig) {
         false
     ));
 
+    // Auto-detect source language setting.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_deepler/autodetect_sourcelang',
+        get_string('autodetect_sourcelang', 'local_deepler'),
+        get_string('autodetect_sourcelang_desc', 'local_deepler'),
+        false
+    ));
+
     // Minimum scanned field size.
     $settings->add(new admin_setting_configtext(
         'local_deepler/scannedfieldsize',
@@ -117,6 +125,24 @@ if ($hassiteconfig) {
         703,
         PARAM_INT,
         4
+    ));
+
+    // Enable file translation.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_deepler/filetranslation',
+        get_string('filetranslation', 'local_deepler'),
+        get_string('filetranslation_desc', 'local_deepler'),
+        true
+    ));
+
+    // Maximum file translation size in bytes (default 10 MB).
+    $settings->add(new admin_setting_configtext(
+        'local_deepler/filemaxbytes',
+        get_string('filemaxbytes', 'local_deepler'),
+        get_string('filemaxbytes_desc', 'local_deepler'),
+        10485760,
+        PARAM_INT,
+        10
     ));
 
     // Additional field configuration (JSON).

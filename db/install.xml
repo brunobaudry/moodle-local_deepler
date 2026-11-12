@@ -68,5 +68,35 @@
                 <KEY NAME="course_glossary_idx" TYPE="unique" FIELDS="userid, glossaryid"/>
             </KEYS>
         </TABLE>
+
+        <TABLE NAME="local_deepler_files" COMMENT="Tracks document/file translation jobs and created activities.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course ID"/>
+                <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Source CM ID or 0 for course-level files"/>
+                <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Source stored_file ID"/>
+                <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Content hash of source file"/>
+                <FIELD NAME="sourcelang" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" COMMENT="Source language"/>
+                <FIELD NAME="targetlang" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" COMMENT="Target language"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" COMMENT="queued, translating, done, error"/>
+                <FIELD NAME="documentid" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="DeepL Document ID"/>
+                <FIELD NAME="documentkey" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="DeepL Document Key"/>
+                <FIELD NAME="newcmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Created duplicate CM ID"/>
+                <FIELD NAME="newfileid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Created translated stored_file ID"/>
+                <FIELD NAME="billedcharacters" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Billed characters from DeepL"/>
+                <FIELD NAME="errormessage" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Last error message if failed"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User who requested translation"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="courseid_idx" UNIQUE="false" FIELDS="courseid"/>
+                <INDEX NAME="fileid_idx" UNIQUE="false" FIELDS="fileid"/>
+                <INDEX NAME="fileid_targetlang_idx" UNIQUE="false" FIELDS="fileid, targetlang"/>
+            </INDEXES>
+        </TABLE>
     </TABLES>
 </XMLDB>

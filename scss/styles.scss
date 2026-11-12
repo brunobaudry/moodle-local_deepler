@@ -54,23 +54,27 @@ $warning: $orange !default;
 $danger: $red !default;
 $secondary: $gray-400 !default;
 
+//Common to files translations.
+.local_deepler-bg-secondary-subtle {
+  background-color: var(--mds-bg-feedback-info-light, rgba($info, .2));
+  border: 1px solid var(--mds-border-feedback-info, rgba($info, 0.1));
+}
 #page-local-deepler-translate {
-    .local_deepler-bg-secondary-subtle {
-        background-color: var(--mds-bg-feedback-info-light, rgba($info, .2));
-        border: 1px solid var(--mds-border-feedback-info, rgba($info, 0.1));
+    .local_deepler__activity {
+        background-color: var(--mds-bg-surface-subtle);
+        border: var(--mds-stroke-weight-sm, 1px) solid var(--mds-border-subtle);
+        border-radius: var(--mds-border-radius-md, 0.5rem);
+        padding: var(--mds-spacing-md, 1rem);
+        color: var(--mds-text-default);
     }
 
     .local_deepler-bg-primary-subtle {
-        background-color: var(--mds-bg-feedback-info-subtle, rgba($info, 0.1));
-        border: 1px solid var(--mds-border-feedback-info, rgba($info, 0.1));
+        background-color: var(--mds-bg-feedback-info-subtle, #{$gray-100});
+        border: 1px solid var(--mds-border-feedback-info, #{$gray-200});
         border-radius: var(--mds-border-radius-md) var(--mds-border-radius-md) 0 0 ;
         color: var(--mds-text-feedback-info);
     }
 
-    .editing .activity-item,
-    .editing .activity-item:hover {
-        cursor: default;
-    }
     #local_deepler__additionalsettings {
         border: 2px solid var(--mds-border-feedback-info, #{$gray-300});
         box-shadow: inset 0 2px 2px -4px var(--mds-color-gray-900);
@@ -100,7 +104,6 @@ $secondary: $gray-400 !default;
     #local_deepler__settings {
         position: relative;
         top: -4px;
-        color: var(--mds-text-link-primary-default);
     }
 
     .caret-icons .fa-caret-down {
@@ -273,8 +276,8 @@ $secondary: $gray-400 !default;
     }
 
     [data-status="local_deepler/tosave"] i::before {
-        content: '\f0c7'; /* floppy (save) icon */
-        color: var(--bs-primary, var(--mds-text-feedback-info, #{$blue}));
+        /* color is not set as it is a button managed by the theme*/
+        content: '\f0c7'; /* fa-solid fa-floppy-disk (save) icon */
     }
 
     [data-status="local_deepler/success"] i::before {
@@ -295,5 +298,24 @@ $secondary: $gray-400 !default;
     [data-status="local_deepler/error"] i::before {
         content: '\f1e2'; /* bomb icon */
         color: var(--bs-danger, var(--mds-text-feedback-danger, #{$red}));
+    }
+    [data-key-validator] .btn {
+        cursor: pointer;
+    }
+
+    .local_deepler__row-settings-btn {
+        position: relative;
+
+        .local_deepler__custom-settings-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 0;
+            line-height: 0;
+        }
     }
 }

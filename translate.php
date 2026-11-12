@@ -81,7 +81,6 @@ $PAGE->set_course($course);
 $output = $PAGE->get_renderer('local_deepler');
 // Output header.
 echo $output->header();
-// Course name heading.
 
 // Normalize filter class, workaround to match MDL version from 401 to 501.
 if (!class_exists(LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {
@@ -116,13 +115,12 @@ if (!class_exists(LOCAL_DEEPLER_OUTPUT_MULTILANG_2_TEXT_FILTER)) {
 // Instantiate the normalized class.
 $mlangfilter = new \local_deepler\output\Multilang2TextFilter($context, []);
 
-echo $output->heading($mlangfilter->filter($course->fullname));
+echo $output->heading($mlangfilter->filter(format_string($course->fullname)));
 $version = $plugin->release;
 // Get Language helper.
 $languagepack = new lang_helper();
 try {
-    $initok = $languagepack->initdeepl($USER, $version);
-    if ($initok && $languagepack->iscurrentsupported()) {
+    if ($languagepack->initdeepl($USER, $version)) {
         // Set js data.
         $jsconfig = new stdClass();
         // We get the version from the version dot php file.
@@ -149,7 +147,7 @@ try {
         // Build the page.
         $renderable = new translate_page($coursedata, $mlangfilter, $languagepack, $version, $jsconfig->userPrefs);
         echo $output->render($renderable);
-    } else if ($initok) {
+    } else if (empty($languagepack->preparesourcesoptionlangs())) {
         $renderable = new sourcenotsupported_page(get_string('onomatopoeia', 'local_deepler'));
         echo $output->render($renderable);
     } else {

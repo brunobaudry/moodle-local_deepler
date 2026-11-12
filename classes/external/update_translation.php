@@ -238,15 +238,14 @@ class update_translation extends external_api {
             // Rephrasing, no mlang then no need to manipulate the text: Save rephrassed.
         } else {
             // Translation.
-            if (!$mlanger->has_multilangs()) {
-                $mlanger->wrapmlang('other');
-            } else {
-                if ($data['sourcecode'] !== $data['mainsourcecode']) {
-                    $mlanger->update_or_add_mlang($data['sourcecode'], $data['sourcetext']);
-                }
-            }
-            $mlanger->update_or_add_mlang($data['targetcode'], $data['text']);
-            $data['text'] = $mlanger->get_text();
+            $ismatched = ($data['sourcecode'] === $data['mainsourcecode']);
+            $data['text'] = multilanger::prepare_multilang_save(
+                $fieldtext,
+                $data['text'],
+                $data['sourcecode'],
+                $data['targetcode'],
+                $ismatched
+            );
         }
     }
 }

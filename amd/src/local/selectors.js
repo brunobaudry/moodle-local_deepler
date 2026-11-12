@@ -50,6 +50,8 @@ define([], ()=>{
             removehow: '[name="local_mlangremover/removehow"]:checked', //
             hideiframes: '#local_deepler__hideiframes #hideiframes',
             tothetop: '#local_deepler__tothetop',
+            rowSettingsBtn: '[data-action="row-settings"]',
+            customSettingsIndicator: '[data-indicator-key]',
         },
         statuses: {
             sourceTextWarings: '[data-status="sourceTextWarings"]',
@@ -58,7 +60,7 @@ define([], ()=>{
             needsupdate: '[data-status="needsupdate"]',
             hidden: '.local_deeplerinvisible',
             hiddenForStudentCheckboxes: '.local_deeplerinvisible input[type="checkbox"]',
-            hiddenForStudentRows: '.local_deeplerinvisible [data-row-id]:not([data-status="local_deepler/disabled"])',
+            hiddenForStudentRows: '.local_deeplerinvisible div[data-row-id]:not([data-status="local_deepler/disabled"])',
             keys: '[data-status-key="<KEY>"',
             successMessages: '[data-status="local_deepler/success-message"][data-key="<KEY>"]',
             prevTransStatus: '[data-row-id="<KEY>"] span#previousTranslationStatus',
@@ -129,6 +131,32 @@ define([], ()=>{
             visibilityDropdown: '[data-id="local_deepler/glossary_visibility"]',
             entriesviewer: '[data-id="local_deepler/glossary_entriesviewer"]',
             entriesviewerPage: '[data-id="local_deepler/glossary_entriesviewer_page"]',
+        },
+        files: {
+            container: '#local_deepler_files_container',
+            selectAllBtn: '[data-action="files-select-all"]',
+            translateSelectedBtn: '[data-action="files-translate-selected"]',
+            globalSourceLang: '#local_deepler_global_sourcelang',
+            globalTargetLang: '#local_deepler_global_targetlang',
+            globalMinification: '#local_deepler__additionalsettings [data-id="local_deepler/minification"], ' +
+                '#local_deepler_global_minification',
+            globalFormality: '#local_deepler__additionalsettings [data-id="local_deepler/formality"], ' +
+                'input[name="global_formality"]',
+            globalGlossary: '#local_deepler__additionalsettings [data-id="local_deepler/glossary_id"], ' +
+                '[data-id="local_deepler/glossary_id"]',
+            fileCheckbox: 'input[data-action="select-file"]',
+            fileCheckboxChecked: 'input[data-action="select-file"]:checked',
+            fileSourceSelect: 'select[data-action="file-source-lang"]',
+            targetSelect: 'select[data-action="target-lang"]',
+            rowSettingsBtn: '[data-action="row-settings"]',
+            customSettingsIndicator: '[data-indicator-fileid="<FILEID>"]',
+            statusBadge: '[data-status-for="<FILEID>"]',
+            statusDetail: '[data-detail-for="<FILEID>"]',
+            fileRow: 'tr.file-row[data-fileid="<FILEID>"]',
+            statusCell: '.status-cell[data-fileid="<FILEID>"]',
+            toggleTranslationsBtn: '.toggle-translations-btn',
+            translationsRow: 'tr.file-translations-row[data-translations-for="<FILEID>"]',
+            translationsList: '.translations-list[data-list-for="<FILEID>"]',
         }
     };
 });

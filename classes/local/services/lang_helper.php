@@ -24,7 +24,9 @@ use DeepL\DeepLClient;
 use DeepL\DeepLException;
 use DeepL\Language;
 use DeepL\LanguageCode;
-use DeepL\LanguageResource;
+use DeepL\LanguageInclude;
+use DeepL\LanguageResourceName;
+use DeepL\LanguageSupport;
 use Deepl\Usage;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
@@ -83,13 +85,18 @@ class lang_helper {
     ) {
         $this->deeplsources = [];
         $this->deepltargets = [];
-        $this->deeplrephraselangs = ['de', 'en-GB', 'en-US', 'es', 'fr', 'it', 'pt-BR', 'pt-PT'];
+        $this->deeplrephraselangs = [];
+        $this->betalanguages = [];
         $this->canimprove = false;
         $this->allowbeta = get_config('local_deepler', 'allowbeta') ?? false;
-        // Remove this when DeepL improves its API language list.
-        $this->setbetas();
-        $this->currentlang = $currentlang ?? optional_param('lang', current_language(), PARAM_NOTAGS);
-        $this->targetlang = $targetlang ?? optional_param('target_lang', '', PARAM_NOTAGS);
+        $defaultlang = current_language();
+        $cookielang = isset($_COOKIE['local_deepler_sourcelang']) ?
+            clean_param($_COOKIE['local_deepler_sourcelang'], PARAM_NOTAGS) : null;
+        $fallbacklang = optional_param('lang', $cookielang ?? $defaultlang, PARAM_NOTAGS);
+        $this->currentlang = $currentlang ?? optional_param('sourcelang', $fallbacklang, PARAM_NOTAGS);
+        $cookietargetlang = isset($_COOKIE['local_deepler_targetlang']) ?
+            clean_param($_COOKIE['local_deepler_targetlang'], PARAM_NOTAGS) : null;
+        $this->targetlang = $targetlang ?? optional_param('target_lang', $cookietargetlang ?? '', PARAM_NOTAGS);
         if ($this->targetlang !== '') {
             $this->targetlang = LanguageCode::standardizeLanguageCode($this->targetlang);
         }
@@ -100,96 +107,6 @@ class lang_helper {
         $this->translator = $translator;
     }
 
-    /**
-     * Remove this when DeepL improves its API language list.
-     *
-     * @return void
-     */
-    private function setbetas() {
-        $this->betalanguages = [
-            new Language('Acehnese', 'ACE', null),
-            new Language('Afrikaans', 'AF', null),
-            new Language('Aragonese', 'AN', null),
-            new Language('Assamese', 'AS', null),
-            new Language('Aymara', 'AY', null),
-            new Language('Azerbaijani', 'AZ', null),
-            new Language('Bashkir', 'BA', null),
-            new Language('Belarusian', 'BE', null),
-            new Language('Bhojpuri', 'BHO', null),
-            new Language('Bengali', 'BN', null),
-            new Language('Breton', 'BR', null),
-            new Language('Bosnian', 'BS', null),
-            new Language('Catalan', 'CA', null),
-            new Language('Cebuano', 'CEB', null),
-            new Language('Kurdish (Sorani)', 'CKB', null),
-            new Language('Welsh', 'CY', null),
-            new Language('Esperanto', 'EO', null),
-            new Language('Basque', 'EU', null),
-            new Language('Persian', 'FA', null),
-            new Language('Irish', 'GA', null),
-            new Language('Galician', 'GL', null),
-            new Language('Guarani', 'GN', null),
-            new Language('Konkani', 'GOM', null),
-            new Language('Gujarati', 'GU', null),
-            new Language('Hausa', 'HA', null),
-            new Language('Hindi', 'HI', null),
-            new Language('Croatian', 'HR', null),
-            new Language('Haitian Creole', 'HT', null),
-            new Language('Armenian', 'HY', null),
-            new Language('Igbo', 'IG', null),
-            new Language('Icelandic', 'IS', null),
-            new Language('Javanese', 'JV', null),
-            new Language('Georgian', 'KA', null),
-            new Language('Kazakh', 'KK', null),
-            new Language('Kurdish (Kurmanji)', 'KMR', null),
-            new Language('Kyrgyz', 'KY', null),
-            new Language('Latin', 'LA', null),
-            new Language('Luxembourgish', 'LB', null),
-            new Language('Lombard', 'LMO', null),
-            new Language('Lingala', 'LN', null),
-            new Language('Maithili', 'MAI', null),
-            new Language('Malagasy', 'MG', null),
-            new Language('Maori', 'MI', null),
-            new Language('Macedonian', 'MK', null),
-            new Language('Malayalam', 'ML', null),
-            new Language('Mongolian', 'MN', null),
-            new Language('Marathi', 'MR', null),
-            new Language('Malay', 'MS', null),
-            new Language('Maltese', 'MT', null),
-            new Language('Burmese', 'MY', null),
-            new Language('Nepali', 'NE', null),
-            new Language('Occitan', 'OC', null),
-            new Language('Oromo', 'OM', null),
-            new Language('Punjabi', 'PA', null),
-            new Language('Pangasinan', 'PAG', null),
-            new Language('Kapampangan', 'PAM', null),
-            new Language('Dari', 'PRS', null),
-            new Language('Pashto', 'PS', null),
-            new Language('Quechua', 'QU', null),
-            new Language('Sanskrit', 'SA', null),
-            new Language('Sicilian', 'SCN', null),
-            new Language('Albanian', 'SQ', null),
-            new Language('Serbian', 'SR', null),
-            new Language('Sesotho', 'ST', null),
-            new Language('Sundanese', 'SU', null),
-            new Language('Swahili', 'SW', null),
-            new Language('Tamil', 'TA', null),
-            new Language('Telugu', 'TE', null),
-            new Language('Tajik', 'TG', null),
-            new Language('Turkmen', 'TK', null),
-            new Language('Tagalog', 'TL', null),
-            new Language('Tswana', 'TN', null),
-            new Language('Tsonga', 'TS', null),
-            new Language('Tatar', 'TT', null),
-            new Language('Urdu', 'UR', null),
-            new Language('Uzbek', 'UZ', null),
-            new Language('Wolof', 'WO', null),
-            new Language('Xhosa', 'XH', null),
-            new Language('Yiddish', 'YI', null),
-            new Language('Cantonese', 'YUE', null),
-            new Language('Zulu', 'ZU', null),
-        ];
-    }
 
     /**
      * Init global API key.
@@ -214,10 +131,11 @@ class lang_helper {
      * @param string $version
      * @return bool
      * @throws \DeepL\DeepLException
-     * @throws \dml_exception
+     * @throws \dml_exception|\coding_exception
      */
     public function initdeepl(stdClass $user, string $version): bool {
         $this->user = $user;
+        $gracelyfell = false;
         if (!$this->translator) {
             $this->setdeeplapi();
             $this->inittranslator($version);
@@ -227,14 +145,44 @@ class lang_helper {
             $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
             $this->usage = $this->translator->getUsage();
             $this->canimprove = !$this->keyisfree;
-            $this->deeplsources = $this->translator->getSourceLanguages();
-            $translatelanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_TRANSLATE_TEXT);
-            $tmxlanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_TRANSLATION_MEMORY);
-            $imporvelanguages = $this->translator->getLanguagesForResource(LanguageResource::RESOURCE_WRITE);
-            $this->deepltargets = $this->translator->getTargetLanguages();
+            $this->deeplsources = $this->translator->getSourceLanguages() ?? [];
+            $this->deepltargets = $this->translator->getTargetLanguages() ?? [];
+
+            // Fetch rephrase / write languages dynamically.
+            try {
+                $writelanguages = $this->translator->getLanguagesForResource(LanguageResourceName::WRITE);
+                $this->deeplrephraselangs = array_map(function ($lang) {
+                    return $lang->code;
+                }, $writelanguages);
+            } catch (\Throwable $e) {
+                // Keep default empty or fallback if write languages retrieval fails.
+                $gracelyfell = true;
+            }
+
             if ($this->allowbeta) {
-                $this->deeplsources = array_merge($this->deeplsources, $this->betalanguages);
-                $this->deepltargets = array_merge($this->deepltargets, $this->betalanguages);
+                try {
+                    $alltextlanguages = $this->translator->getLanguagesForResource(
+                        LanguageResourceName::TRANSLATE_TEXT,
+                        [LanguageInclude::BETA]
+                    );
+                    $betas = array_filter($alltextlanguages, function ($lang) {
+                        return $lang->status === 'beta';
+                    });
+                    $this->betalanguages = [];
+                    foreach ($betas as $betalang) {
+                        $langobj = new Language($betalang->name, $betalang->code, null);
+                        $this->betalanguages[] = $langobj;
+                        if ($betalang->usableAsSource) {
+                            $this->deeplsources[] = $langobj;
+                        }
+                        if ($betalang->usableAsTarget) {
+                            $this->deepltargets[] = $langobj;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    // Fallback gracefully if beta languages retrieval fails.
+                    $gracelyfell = true;
+                }
             }
             $this->setcurrentlanguage();
             return true;
@@ -457,14 +405,21 @@ class lang_helper {
      * @return \stdClass
      */
     public function prepareconfig(stdClass &$config): stdClass {
-        $config->usage = $this->usage;
-        $config->limitReached = $config->usage->anyLimitReached();
+        $usage = new stdClass();
+        $usage->character = new stdClass();
+        $usage->character->count = $this->usage->character?->count ?? 0;
+        $usage->character->limit = $this->usage->character?->limit ?? null;
+        $config->usage = $usage;
+        $config->limitReached = $this->usage->anyLimitReached();
         $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;
         $config->isfree = $this->keyisfree;
         $config->rephrasesymbol = self::REPHRASESYMBOL;
         $config->canimprove = $this->canimprove;
+        $config->supportedlangs = $this->deeplrephraselangs;
+        $config->moodlelangs = array_keys($this->moodlelangs);
+        $config->glossaries = $this->getallglossaries_formatted();
         return $config;
     }
 
@@ -480,6 +435,7 @@ class lang_helper {
         $config->statusstrings = new stdClass();
         $config->statusstrings->failed = get_string('statusfailed', 'local_deepler');
         $config->statusstrings->success = get_string('statussuccess', 'local_deepler');
+        $config->statusstrings->saved = get_string('statussaved', 'local_deepler');
         $config->statusstrings->tosave = get_string('statustosave', 'local_deepler');
         $config->statusstrings->totranslate = get_string('statustotranslate', 'local_deepler');
         $config->statusstrings->wait = get_string('statuswait', 'local_deepler');
@@ -494,6 +450,18 @@ class lang_helper {
         $config->uistrings->translatemodalbody = get_string('translate:modal:body', 'local_deepler');
         $config->uistrings->saveallmodalbody = get_string('saveallmodalbody', 'local_deepler');
         $config->uistrings->canttranslatesame = get_string('canttranslatesame', 'local_deepler');
+        $config->uistrings->translatebutton = get_string('translatebutton', 'local_deepler', '{$a}');
+        $config->uistrings->selecttargetlanguage = get_string('selecttargetlanguage', 'local_deepler', '{$a}');
+        $config->uistrings->translateexplain = get_string('translateexplain', 'local_deepler', '{$a}');
+        $config->uistrings->doselecttarget = get_string('doselecttarget', 'local_deepler');
+        $config->uistrings->canttranslate = get_string('canttranslate', 'local_deepler', '{$a}');
+        $config->uistrings->needsupdate = get_string('needsupdate', 'local_deepler');
+        $config->uistrings->nevertranslated = get_string('nevertranslated', 'local_deepler', '{$a}');
+        $config->uistrings->neverrephrased = get_string('neverrephrased', 'local_deepler');
+        $config->uistrings->uptodate = get_string('uptodate', 'local_deepler');
+        $config->uistrings->glossarynotselected = get_string('glossary:notselected', 'local_deepler');
+        $config->uistrings->glossarylistempty = get_string('glossary:listempty', 'local_deepler');
+        $config->uistrings->glossaryselectplaceholder = get_string('glossary:selectplaceholder', 'local_deepler');
         return json_encode($config);
     }
 
@@ -546,10 +514,12 @@ class lang_helper {
     /**
      * Prepare source options.
      *
+     * @param bool $verbose
+     * @param bool $allowrephrase
      * @return array
      */
-    public function preparesourcesoptionlangs(): array {
-        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, false);
+    public function preparesourcesoptionlangs(bool $verbose = false, bool $allowrephrase = true): array {
+        return $this->prepareoptionlangs($this->finddeeplsformoodle($this->deeplsources), true, $verbose, $allowrephrase);
     }
 
     /**
@@ -558,13 +528,19 @@ class lang_helper {
      * @param array $filtereddeepls
      * @param bool $issource
      * @param bool $verbose
+     * @param bool $allowrephrase
      * @return array
      */
-    private function prepareoptionlangs(array $filtereddeepls, bool $issource = true, bool $verbose = true): array {
+    private function prepareoptionlangs(
+        array $filtereddeepls,
+        bool $issource = true,
+        bool $verbose = true,
+        bool $allowrephrase = true
+    ): array {
         $tab = [];
         // Get the list of deepl langs that are supported by this moodle instance.
         foreach ($filtereddeepls as $l) {
-            $tab[] = $this->getoption($issource, $l, $verbose);
+            $tab[] = $this->getoption($issource, $l, $verbose, $allowrephrase);
         }
         return $tab;
     }
@@ -575,9 +551,15 @@ class lang_helper {
      * @param bool $issource
      * @param mixed $l
      * @param bool $isverbose
+     * @param bool $allowrephrase
      * @return array
      */
-    private function getoption(bool $issource, mixed $l, bool $isverbose = true): array {
+    private function getoption(
+        bool $issource,
+        mixed $l,
+        bool $isverbose = true,
+        bool $allowrephrase = true
+    ): array {
         // If the key is free, we can't improve the source lang.
         $code = LanguageCode::standardizeLanguageCode($l->code);
         $same = $issource ? $this->isrephrase($code, '') : $this->isrephrase('', $code);
@@ -593,7 +575,7 @@ class lang_helper {
             $selected = $this->targetlang !== '' && $code === $this->targetlang;
             $disable = ($same && !$langisrephrasable) || ($same && !$this->canimprove);
         }
-        if ($same && $this->canimprove) {
+        if ($allowrephrase && $same && $this->canimprove) {
             $text = self::REPHRASESYMBOL . $text;
             $code = self::REPHRASESYMBOL . $code;
         }
@@ -787,6 +769,15 @@ class lang_helper {
     }
 
     /**
+     * Getter for target langs (alias with correct spelling).
+     *
+     * @return array|\DeepL\Language[]
+     */
+    public function gettargetlanguages(): array {
+        return $this->deepltargets;
+    }
+
+    /**
      * Getter for current lang.
      *
      * @param bool $mainlonly
@@ -871,6 +862,39 @@ class lang_helper {
     }
 
     /**
+     * Return all available glossaries formatted for JavaScript/UI.
+     *
+     * @return array
+     */
+    public function getallglossaries_formatted(): array {
+        try {
+            $userglossaries = $this->getusersglossaries() ?? [];
+            $poolglossaries = $this->getpoolglossaries($userglossaries) ?? [];
+            $publicglossaries = $this->getpublicglossaries() ?? [];
+            $allglossaries = array_merge($userglossaries, $publicglossaries, $poolglossaries);
+
+            $glossarydata = [];
+            foreach ($allglossaries as $g) {
+                $nameadd = ' (' . get_string('glossary:visibility:private', 'local_deepler') . ')';
+                if ($g->shared === 1) {
+                    $nameadd = ' (' . get_string('glossary:visibility:pool', 'local_deepler') . ')';
+                } else if ($g->shared === 2) {
+                    $nameadd = ' (' . get_string('glossary:visibility:public', 'local_deepler') . ')';
+                }
+                $glossarydata[] = [
+                    'id' => $g->glossaryid,
+                    'name' => $g->name . $nameadd,
+                    'sourcelang' => strtolower($g->sourcelang),
+                    'targetlang' => strtolower($g->targetlang),
+                ];
+            }
+            return $glossarydata;
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
      * Get All from DeepL add missing, remove deleted return all.
      *
      *
@@ -927,22 +951,27 @@ class lang_helper {
      * @param int $glossarydbid
      * @param bool $dbonly
      * @return bool|null
-     * @throws \DeepL\DeepLException
      * @throws \dml_exception
      */
     public function deleteglossary(int $glossarydbid, bool $dbonly = false): ?bool {
         $guid = user_glossary::getbyuserandglossary($this->user->id, $glossarydbid);
         $success = $dbonly;
+        $userdelete = true;
         if ($guid) {
             // Public glossaries downloaded from DeepL do not have users.
-            $delete = user_glossary::delete($guid->id);
+            $userdelete = user_glossary::delete($guid->id);
         }
         $glo = glossary::getbyid($glossarydbid);
         if (!$dbonly) {
-            $success = $this->translator->deleteglossary($glo->glossaryid);
+            try {
+                $this->translator->deleteglossary($glo->glossaryid);
+                $success = true;
+            } catch (DeepLException $e) {
+                return false;
+            }
         }
         $deleted = glossary::delete($glossarydbid);
-        return $success && $deleted;
+        return $success && $deleted && $userdelete;
     }
 
     /**

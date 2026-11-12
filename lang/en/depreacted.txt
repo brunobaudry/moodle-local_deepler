@@ -2,3 +2,22 @@
 allowsublangs, local_deepler
 // Deprecated since local_deepler v1.6.5
 show, local_deepler
+// Deprecated since local_deepler v2.0
+deeplprotitle, local_deepler
+deeplprotitle_desc, local_deepler
+glossary:deeplid, local_deepler
+glossary:id_placeholder, local_deepler
+glossary:upload:suffixerror:body, local_deepler
+glossary:upload:suffixerror:title, local_deepler
+keepselected, local_deepler
+rephraseoptionsinfos, local_deepler
+section:coursesettings, local_deepler
+tokenaddtoken, local_deepler
+tokenchoose, local_deepler
+tokendeletetoken, local_deepler
+tokenedittoken, local_deepler
+tokennotokens, local_deepler
+tokentabletitle, local_deepler
+translate:activity, local_deepler
+translate:course, local_deepler
+translate:section, local_deepler

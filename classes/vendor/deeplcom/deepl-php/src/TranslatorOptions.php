@@ -9,10 +9,11 @@ namespace DeepL;
 use Psr\Log\LoggerInterface;
 
 /**
- * Options that can be specified when constructing a Translator.
+ * Options that can be specified when constructing a Translator, DeepLClient or DeepLAdminClient.
  * Please note that using any options from TranslatorOptions::IGNORED_OPTIONS_WITH_CUSTOM_HTTP_CLIENT,
  * such as proxy or timeout, are ignored when using a custom HTTP client.
  * @see Translator::__construct
+ * @see DeepLAdminClient::__construct
  */
 class TranslatorOptions
 {
@@ -41,15 +42,18 @@ class TranslatorOptions
 
     /**
      * Base URL of DeepL API, can be overridden for example for testing purposes. By default, the correct DeepL API URL
-     * is selected based on the user account type (free or paid).
+     * is selected based on the user account type (free or paid). DeepLAdminClient always uses DEFAULT_SERVER_URL by
+     * default.
      * @see DEFAULT_SERVER_URL
      * @see DEFAULT_SERVER_URL_FREE
      */
     public const SERVER_URL = 'server_url';
 
     /**
-     * HTTP headers attached to every HTTP request. By default, no extra headers are used. Note that during Translator
-     * initialization headers for Authorization and User-Agent are added, unless they are overridden in this option.
+     * HTTP headers attached to every HTTP request. By default, no extra headers are used. During client
+     * initialization headers for Authorization and User-Agent are added; a header of the same name in this option
+     * replaces the default one. Header names are compared case-insensitively. Content-Type, Content-Length,
+     * Transfer-Encoding and Host headers in this option are ignored.
      */
     public const HEADERS = 'headers';
 
@@ -60,8 +64,8 @@ class TranslatorOptions
     public const TIMEOUT = 'timeout';
 
     /**
-     * The maximum number of failed attempts that Translator will retry, per request. Note: only errors due to
-     * transient conditions are retried.
+     * The maximum number of failed attempts that the client will retry, per request. Note: only errors due to
+     * transient conditions are retried. Must not be negative.
      * @see DEFAULT_MAX_RETRIES
      */
     public const MAX_RETRIES = 'max_retries';
@@ -79,6 +83,8 @@ class TranslatorOptions
 
     /**
      * The PSR-18 compatible HTTP client used to make HTTP requests, or null to use the default client.
+     * The custom client owns timeouts and proxy: TIMEOUT and PROXY are ignored with it, so the per-attempt timeout
+     * and its extension up to the next retry are not applied. Retries and MAX_RETRIES still apply.
      */
     public const HTTP_CLIENT = 'http_client';
 

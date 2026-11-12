@@ -299,6 +299,80 @@ class multilanger {
     }
 
     /**
+     * Add or update a mlang tag next to a specific source language tag or {mlang other}.
+     *
+     * @param string $targetcode
+     * @param string $targettext
+     * @param string $adjacentcode (e.g. source language or 'other')
+     * @return void
+     */
+    public function update_or_insert_mlang_adjacent(string $targetcode, string $targettext, string $adjacentcode): void {
+        $targetcode = mb_strtolower($targetcode);
+        $adjacentcode = mb_strtolower($adjacentcode);
+
+        if ($this->has_multilangcode($targetcode)) {
+            $this->updatemlang($targetcode, $targettext);
+            return;
+        }
+
+        // Try to find the closing {mlang} tag of the adjacentcode block.
+        $pattern = "/({\s*mlang\s+{$adjacentcode}\s*}.*?{mlang\s*})/si";
+        if (preg_match($pattern, $this->text, $matches, PREG_OFFSET_CAPTURE)) {
+            $matchstr = $matches[0][0];
+            $offset = $matches[0][1];
+            $insertpos = $offset + strlen($matchstr);
+            $newtag = "{mlang $targetcode}$targettext{mlang}";
+            $this->text = substr_replace($this->text, $newtag, $insertpos, 0);
+            return;
+        }
+
+        // Fallback: append next to the last {mlang} if adjacent block not found.
+        $this->addmlang_ifothers($targetcode, $targettext);
+    }
+
+    /**
+     * Static helper to prepare multilang text for saving in accordance with source language revamp rules.
+     *
+     * @param string $originaltext Existing text in database / field.
+     * @param string $translatedtext Translated text to save.
+     * @param string $sourcelang Source language code selected.
+     * @param string $targetlang Target language code.
+     * @param bool $ismatched Whether the source text has an exact matching source tag.
+     * @return string
+     */
+    public static function prepare_multilang_save(
+        string $originaltext,
+        string $translatedtext,
+        string $sourcelang,
+        string $targetlang,
+        bool $ismatched = false
+    ): string {
+        $mlanger = new self($originaltext);
+        $sourcelang = mb_strtolower($sourcelang);
+        $targetlang = mb_strtolower($targetlang);
+
+        if (!$mlanger->has_multilangs()) {
+            // Case A: Source text has NO mlang tags.
+            // Wrap original text in {mlang other} and append {mlang target}.
+            return "{mlang other}{$originaltext}{mlang}{mlang $targetlang}{$translatedtext}{mlang}";
+        }
+
+        // Has mlang tags.
+        if ($ismatched && $mlanger->has_multilangcode($sourcelang)) {
+            // Case B: Matches source mlang tag. Insert or update adjacent to source mlang tag.
+            $mlanger->update_or_insert_mlang_adjacent($targetlang, $translatedtext, $sourcelang);
+        } else if ($mlanger->has_multilangcode('other')) {
+            // Case C: Fallback to {mlang other}. Insert or update adjacent to other tag.
+            $mlanger->update_or_insert_mlang_adjacent($targetlang, $translatedtext, 'other');
+        } else {
+            // No matching source or other tag; update or append.
+            $mlanger->update_or_add_mlang($targetlang, $translatedtext);
+        }
+
+        return $mlanger->get_text();
+    }
+
+    /**
      * Add a mlang tag to the field text.
      * Assuming the text filed already has mlangs but not this code's.
      *

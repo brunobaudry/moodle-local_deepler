@@ -73,26 +73,57 @@ class get_translation extends external_api {
             ];
         }
         $targetlang = $params['options']['target_lang'];
-        unset($params['options']['target_lang']);
-        $glossaryid = $params['options']['glossary_id'];
-        unset($params['options']['glossary_id']);
-        $params['options']['glossary'] = $glossaryid;
-        $ishtml = ($params['options']['tag_handling'] ?? '') === 'html';
+        $globaloptions = $params['options'];
+        unset($globaloptions['target_lang']);
+        $globalglossaryid = $globaloptions['glossary_id'] ?? '';
+        unset($globaloptions['glossary_id']);
+        if (!empty($globalglossaryid)) {
+            $globaloptions['glossary'] = $globalglossaryid;
+        }
+
         $groupedtranslations = [];
         foreach ($params['translations'] as $translation) {
+            $rowoverrides = array_filter($translation['options'] ?? [], static fn($v) => !is_null($v));
+            $effectiveglossaryid = array_key_exists('glossary_id', $rowoverrides)
+                ? (string)$rowoverrides['glossary_id']
+                : (string)$globalglossaryid;
+            unset($rowoverrides['glossary_id']);
+
+            $effectiveoptions = array_merge($globaloptions, $rowoverrides);
+            if (!empty($effectiveglossaryid)) {
+                $effectiveoptions['glossary'] = $effectiveglossaryid;
+            } else {
+                unset($effectiveoptions['glossary']);
+            }
+
+            $ishtml = ($effectiveoptions['tag_handling'] ?? '') === 'html';
             if ($ishtml) {
                 $translation['text'] = self::wrap_html($translation['text']);
             }
-            $groupedtranslations[$translation['source_lang']][] = $translation;
+
+            $groupkey = $translation['source_lang'] . '_' . md5((string)json_encode($effectiveoptions));
+            if (!isset($groupedtranslations[$groupkey])) {
+                $groupedtranslations[$groupkey] = [
+                    'sourcelang' => $translation['source_lang'],
+                    'options' => $effectiveoptions,
+                    'glossary_id' => $effectiveglossaryid,
+                    'translations' => [],
+                ];
+            }
+            $groupedtranslations[$groupkey]['translations'][] = $translation;
         }
+
         $translatedtexts = [];
-        foreach ($groupedtranslations as $sourcelang => $translationsgroup) {
-            $staticparts = [$params['options'], $sourcelang, $targetlang];
-            $chunks = self::chunk_payload($translationsgroup, $staticparts);
+        foreach ($groupedtranslations as $group) {
+            $sourcelang = $group['sourcelang'];
+            $groupoptions = $group['options'];
+            $groupglossaryid = $group['glossary_id'];
+            $staticparts = [$groupoptions, $sourcelang, $targetlang];
+            $chunks = self::chunk_payload($group['translations'], $staticparts);
             foreach ($chunks as $chunk) {
                 $translatedtexts = array_merge(
                     $translatedtexts,
-                    self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $params['options'], $glossaryid)
+                    self::process_chunk($translator, $chunk, $sourcelang, $targetlang, $groupoptions, $groupglossaryid)
                 );
             }
         }
@@ -220,6 +251,69 @@ class get_translation extends external_api {
                             'text' => new external_value(PARAM_RAW, 'text to be translated'),
                             'source_lang' => new external_value(PARAM_ALPHA, 'source language'),
                             'key' => new external_value(PARAM_RAW, 'UI identifier for the text'),
+                            'options' => new external_single_structure(
+                                [
+                                    'context' => new external_value(PARAM_RAW, 'context of the text', VALUE_DEFAULT, null),
+                                    'tag_handling' => new external_value(PARAM_ALPHA, 'html or xml', VALUE_DEFAULT, null),
+                                    'split_sentences' => new external_value(
+                                        PARAM_ALPHANUMEXT,
+                                        '0,1 or nonewlines',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'preserve_formatting' => new external_value(
+                                        PARAM_BOOL,
+                                        'preserve formatting ?',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'formality' => new external_value(
+                                        PARAM_ALPHAEXT,
+                                        'default, less, prefer_more, prefer_less or more',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'outline_detection' => new external_value(
+                                        PARAM_BOOL,
+                                        'XML outline detection',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'non_splitting_tags' => new external_value(
+                                        PARAM_RAW,
+                                        'Non-splitting tags',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'splitting_tags' => new external_value(
+                                        PARAM_RAW,
+                                        'Splitting tags',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'ignore_tags' => new external_value(
+                                        PARAM_RAW,
+                                        'Ignore tags',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'glossary_id' => new external_value(
+                                        PARAM_ALPHANUMEXT,
+                                        'Glossary ID',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'model_type' => new external_value(
+                                        PARAM_ALPHANUMEXT,
+                                        'DeepL model type',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                ],
+                                'Optional row-level option overrides',
+                                VALUE_DEFAULT,
+                                []
+                            ),
                         ]
                     )
                 ),

@@ -19,19 +19,23 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  * @copyright  2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#page-local-deepler-translate .local_deepler-bg-secondary-subtle {
+.local_deepler-bg-secondary-subtle {
     background-color: var(--mds-bg-feedback-info-light, rgba(0, 129, 150, 0.2));
     border: 1px solid var(--mds-border-feedback-info, rgba(0, 129, 150, 0.1));
 }
+
+#page-local-deepler-translate .local_deepler__activity {
+    background-color: var(--mds-bg-surface-subtle);
+    border: var(--mds-stroke-weight-sm, 1px) solid var(--mds-border-subtle);
+    border-radius: var(--mds-border-radius-md, 0.5rem);
+    padding: var(--mds-spacing-md, 1rem);
+    color: var(--mds-text-default);
+}
 #page-local-deepler-translate .local_deepler-bg-primary-subtle {
-    background-color: var(--mds-bg-feedback-info-subtle, rgba(0, 129, 150, 0.1));
-    border: 1px solid var(--mds-border-feedback-info, rgba(0, 129, 150, 0.1));
+    background-color: var(--mds-bg-feedback-info-subtle, #f8f9fa);
+    border: 1px solid var(--mds-border-feedback-info, #e9ecef);
     border-radius: var(--mds-border-radius-md) var(--mds-border-radius-md) 0 0;
     color: var(--mds-text-feedback-info);
-}
-#page-local-deepler-translate .editing .activity-item,
-#page-local-deepler-translate .editing .activity-item:hover {
-    cursor: default;
 }
 #page-local-deepler-translate #local_deepler__additionalsettings {
     border: 2px solid var(--mds-border-feedback-info, #dee2e6);
@@ -58,7 +62,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate #local_deepler__settings {
     position: relative;
     top: -4px;
-    color: var(--mds-text-link-primary-default);
 }
 #page-local-deepler-translate .caret-icons .fa-caret-down {
     display: none;
@@ -195,8 +198,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     color: var(--bs-primary, var(--mds-text-feedback-info, #0f6cbf));
 }
 #page-local-deepler-translate [data-status="local_deepler/tosave"] i::before {
-    content: "\f0c7"; /* floppy (save) icon */
-    color: var(--bs-primary, var(--mds-text-feedback-info, #0f6cbf));
+    /* color is not set as it is a button managed by the theme*/
+    content: "\f0c7"; /* fa-solid fa-floppy-disk (save) icon */
 }
 #page-local-deepler-translate [data-status="local_deepler/success"] i::before {
     content: "\f00c"; /* check icon */
@@ -213,4 +216,21 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 #page-local-deepler-translate [data-status="local_deepler/error"] i::before {
     content: "\f1e2"; /* bomb icon */
     color: var(--bs-danger, var(--mds-text-feedback-danger, #ca3120));
+}
+#page-local-deepler-translate [data-key-validator] .btn {
+    cursor: pointer;
+}
+#page-local-deepler-translate .local_deepler__row-settings-btn {
+    position: relative;
+}
+#page-local-deepler-translate .local_deepler__row-settings-btn .local_deepler__custom-settings-indicator {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    line-height: 0;
 }

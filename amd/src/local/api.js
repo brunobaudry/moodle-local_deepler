@@ -19,99 +19,66 @@
  * @copyright  2025 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils, Events) => {
-    const TR_DB_SUCCESS = 'onDbUpdateSuccess';
-    const GLOSSARY_ENTRIES_SUCCESS = 'onGlossaryEntriesSuccess';
-    const GLOSSARY_ENTRIES_FAILED = 'onGlossaryEntriesFailed';
-    const GLOSSARY_DB_SUCCESS = 'onDbGlossaryUpdateSuccess';
-    const TR_DB_FAILED = 'onDbUpdateFailed';
-    const GLOSSARY_DB_FAILED = 'onDbGlossaryUpdateFailed';
-    const GLOSSARY_DB_ALL_FAILED = 'onDbGlossaryUpdateAllFailed';
-    const DEEPL_SUCCESS = 'onDeeplTrSuccess';
-    const DEEPL_RF_SUCCESS = 'onDeeplRfSuccess';
-    const DEEPL_FAILED = 'onDeeplTrFailed';
-    const DEEPL_RF_FAILED = 'onDeeplRfFailed';
+define(['core/log', 'core/ajax'], (Log, Ajax) => {
     let APP_VERSION = '';
+
     /**
      * Service to update used glossary timestamp.
      *
-     * @param {object} glossaries
+     * @param {Array} glossaries
+     * @returns {Promise<Array>}
      */
-    const updateGlossariesUsage = (glossaries)=>{
-        Ajax.call([
+    const updateGlossariesUsage = (glossaries) => {
+        return Ajax.call([
             {
                 methodname: "local_deepler_update_glossary",
                 args: {'glossaryids': glossaries},
-                done: (response)=>{
-
-                    response.forEach((r)=>{
-                        if (r.sattus === 'error') {
-                            Events.emit(GLOSSARY_DB_FAILED, r);
-                        } else {
-                            Events.emit(GLOSSARY_DB_SUCCESS, r);
-                        }
-                    });
-                },
-                fail: (jqXHR, status, error) => {
-                    Log.error(`api/updateGlossariesUsage/fail::jqXHR`);
-                    Log.error(jqXHR);
-                    Events.emit(GLOSSARY_DB_ALL_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
-                }
             }
-        ]);
+        ])[0];
     };
+
     /**
      * Service to update used glossary visibility.
      *
      * @param {string} glossaryId
      * @param {int} visibility
+     * @returns {Promise<object>}
      */
-    const updateGlossariesVisibility = (glossaryId, visibility)=>{
-        Ajax.call([
+    const updateGlossariesVisibility = (glossaryId, visibility) => {
+        return Ajax.call([
             {
                 methodname: "local_deepler_update_glossary_visibility",
                 args: {'glossaryid': glossaryId, 'shared': visibility},
-                done: (response)=>{
-                    Events.emit(GLOSSARY_DB_SUCCESS, response);
-                },
-                fail: (jqXHR, status, error) => {
-                    Log.error(`api/updateGlossariesVisibility/fail::jqXHR`);
-                    Log.error(jqXHR);
-                    Events.emit(GLOSSARY_DB_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
-                }
             }
-        ]);
+        ])[0];
     };
+
     /**
-     * Service to update used glossary visibility.
+     * Service to get glossary entries.
      *
      * @param {string} glossaryId
      * @param {string} version
+     * @returns {Promise<object>}
      */
-    const getGlossariesEntries = (glossaryId, version)=>{
-        Ajax.call([
+    const getGlossariesEntries = (glossaryId, version) => {
+        return Ajax.call([
             {
                 methodname: "local_deepler_get_glossary_entries",
                 args: {'glossaryid': glossaryId, 'version': version},
-                done: (response)=>{
-                    Events.emit(GLOSSARY_ENTRIES_SUCCESS, response);
-                },
-                fail: (jqXHR, status, error) => {
-                    Log.error(`api/getGlossariesEntries/fail::jqXHR`);
-                    Log.error(jqXHR);
-                    Events.emit(GLOSSARY_ENTRIES_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
-                }
             }
-        ]);
+        ])[0];
     };
+
     /**
+     * Service to update translations in Moodle DB.
      *
-     * @param {object} data
+     * @param {Array} data
      * @param {int} userid
      * @param {int} courseid
+     * @returns {Promise<Array>}
      */
     const updateTranslationsInDb = (data, userid, courseid) => {
-        Ajax.call([
+        return Ajax.call([
             {
                 methodname: "local_deepler_update_translation",
                 args: {
@@ -120,49 +87,31 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
                     courseid: courseid,
                     action: 'update'
                 },
-                done: (response) => {
-                    if (response.length === 1 && response[0].error && response[0].keyid === '') {
-                        Log.warn(`api/updateTranslationsInDb/done::response has errors`);
-                        Events.emit(TR_DB_FAILED, response[0].error);
-                        return;
-                    }
-                    Events.emit(TR_DB_SUCCESS, response);
-                },
-                fail: (jqXHR, status, error) => {
-                    Log.error(`api/updateTranslationsInDb/fail::jqXHR`);
-                    Log.error(jqXHR);
-                     Events.emit(TR_DB_FAILED, jqXHR.debuginfo ?? jqXHR.message ?? jqXHR.errorcode ?? status ?? error);
-                }
-            }]
-        );
+            }
+        ])[0];
     };
+
     /**
      * Parent DeepL external service caller.
      *
      * @param {object} args
      * @param {string} endPoint
-     * @param {string} successEvent
-     * @param {string} failedEvent
+     * @returns {Promise<Array>}
      */
-    const deeplService = (args, endPoint, successEvent, failedEvent)=>{
-        Ajax.call([{
+    const deeplService = (args, endPoint) => {
+        return Ajax.call([{
             methodname: endPoint,
             args: args,
-            done: (response) => {
-                Events.emit(successEvent, response);
-            },
-            fail: (jqXHR, status, error) => {
-                Log.debug(`${endPoint} api/translate/fail::jqXHR`);
-                Log.debug(jqXHR);
-                Events.emit(failedEvent, jqXHR.debuginfo ?? jqXHR.message ?? error ?? jqXHR.errorcode ?? '');
-            }
-        }]);
+        }])[0];
     };
+
     /**
      * Calls Deepl's translation.
-     * @param {object} data
+     *
+     * @param {Array} data
      * @param {object} options
      * @param {string} version
+     * @returns {Promise<Array>}
      */
     const translate = (data, options, version) => {
         const args = {
@@ -170,13 +119,16 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             options: options, // Object with DeepL's settings options including target_lang.
             version: version
         };
-        deeplService(args, 'local_deepler_get_translation', DEEPL_SUCCESS, DEEPL_FAILED);
+        return deeplService(args, 'local_deepler_get_translation');
     };
+
     /**
      * Calls Deepl's rephrase.
-     * @param {object} data
+     *
+     * @param {Array} data
      * @param {object} options
      * @param {string} version
+     * @returns {Promise<Array>}
      */
     const rephrase = (data, options, version) => {
         const args = {
@@ -184,29 +136,105 @@ define(['core/log', 'core/ajax', './utils', './customevents'], (Log, Ajax, Utils
             options: options, // Object with DeepL's settings options including target_lang.
             version: version
         };
-        deeplService(args, 'local_deepler_get_rephrase', DEEPL_RF_SUCCESS, DEEPL_RF_FAILED);
+        return deeplService(args, 'local_deepler_get_rephrase');
     };
+
+    /**
+     * Uploads a document file to DeepL for translation.
+     *
+     * @param {number} fileId
+     * @param {string} sourceLang
+     * @param {string} targetLang
+     * @param {object} options
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const uploadDocument = (fileId, sourceLang, targetLang, options, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_upload_document',
+            args: {
+                fileid: fileId,
+                sourcelang: sourceLang,
+                targetlang: targetLang,
+                options: options || {},
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
+     * Checks status of a document translation job.
+     *
+     * @param {number} jobId
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const getDocumentStatus = (jobId, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_get_document_status',
+            args: {
+                jobid: jobId,
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
+     * Finalizes document translation by creating duplicate activity / saving file.
+     *
+     * @param {number} jobId
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const finalizeDocument = (jobId, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_finalize_document',
+            args: {
+                jobid: jobId,
+                version: version
+            }
+        }])[0];
+    };
+
+    /**
+     * Calls Deepl's source language auto-detection.
+     *
+     * @param {string} text
+     * @param {string} rowId
+     * @param {string} version
+     * @returns {Promise<object>}
+     */
+    const detectSourceLanguage = (text, rowId, version) => {
+        return Ajax.call([{
+            methodname: 'local_deepler_detect_source_language',
+            args: {
+                text: text,
+                // eslint-disable-next-line camelcase
+                row_id: rowId,
+                version: version
+            }
+        }])[0];
+    };
+
     /**
      * Api to be used by the other modules.
      */
     return {
-        APP_VERSION: APP_VERSION,
-        GLOSSARY_ENTRIES_SUCCESS: GLOSSARY_ENTRIES_SUCCESS,
-        GLOSSARY_ENTRIES_FAILED: GLOSSARY_ENTRIES_FAILED,
-        GLOSSARY_DB_SUCCESS: GLOSSARY_DB_SUCCESS,
-        GLOSSARY_DB_FAILED: GLOSSARY_DB_FAILED,
-        GLOSSARY_DB_ALL_FAILED: GLOSSARY_DB_ALL_FAILED,
-        TR_DB_SUCCESS: TR_DB_SUCCESS,
-        TR_DB_FAILED: TR_DB_FAILED,
-        DEEPL_SUCCESS: DEEPL_SUCCESS,
-        DEEPL_RF_SUCCESS: DEEPL_RF_SUCCESS,
-        DEEPL_FAILED: DEEPL_FAILED,
-        DEEPL_RF_FAILED: DEEPL_RF_FAILED,
+        get APP_VERSION() {
+            return APP_VERSION;
+        },
+        set APP_VERSION(val) {
+            APP_VERSION = val;
+        },
         getGlossariesEntries: getGlossariesEntries,
         updateGlossariesUsage: updateGlossariesUsage,
         updateGlossariesVisibility: updateGlossariesVisibility,
         updateTranslationsInDb: updateTranslationsInDb,
         translate: translate,
-        rephrase: rephrase
+        rephrase: rephrase,
+        uploadDocument: uploadDocument,
+        getDocumentStatus: getDocumentStatus,
+        finalizeDocument: finalizeDocument,
+        detectSourceLanguage: detectSourceLanguage
     };
 });

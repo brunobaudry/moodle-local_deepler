@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['additionalconf'] = 'Additional field configuration (JSON)';
 $string['additionalconf_desc'] = 'Define extra database tables and fields available for translation, in JSON format.
 Changes take effect immediately for all users without server filesystem access.
-Leave empty to fall back to the bundled <code>additional_conf.json</code> file. See detailed documentation under <a href="https://github.com/brunobaudry/moodle-local_deepler/tree/dev?tab=readme-ov-file#additional-field-configuration-json">Additional field configuration (JSON)</a>';
+Leave empty to fall back to the bundled <code>additional_conf.json</code> file. See detailed documentation under <a href="https://github.com/brunobaudry/moodle-local_deepler#additional-field-configuration-advanced-json" traget="_blank">Additional field configuration (JSON)</a>';
 $string['additionalconf_err_plugnotfound'] = 'Plugin not found : "{$a}"';
 $string['additionalconf_err_tablenotfound'] = '{$a->plugin}:: Table not found : "{$a->name}"';
 $string['additionalconf_parseerror'] = 'Invalid JSON syntax line {$a->line} : {$a->message}';
@@ -44,13 +44,15 @@ $string['allowbeta'] = 'Allow beta languages.';
 $string['allowbeta_desc'] = 'Tick this if you want to use what DeepL used to call "beta languages"
 (marked with a star in their [supported languages](https://developers.deepl.com/docs/getting-started/supported-languages) page).
 Those languages are not listed as available languages by
-[DeepL API](https://developers.deepl.com/api-reference/languages/retrieve-supported-languages).';
+[DeepL API](https://developers.deepl.com/api-reference/languages/retrieve-resources).';
 $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
         'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.
         This has no effect if the API key isn\'t set or no are additional tokens are mapped to users\' attributes.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
+$string['autodetect_sourcelang'] = 'Auto-detect source language';
+$string['autodetect_sourcelang_desc'] = 'Automatically detect the source language of content falling back to {mlang other} by sending a short text excerpt to DeepL. Note: This consumes character quota.';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
 Check with your Moodle admin.';
 $string['breadcrumblength'] = 'Max length of breadcrumb\'s sub';
@@ -58,18 +60,20 @@ $string['breadcrumblength_desc'] =
         'Set it to limit the size of the breadcrumb\'s subs. Set it to zero should you want no limiting.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
 $string['canttranslatesame'] = 'Both languages are the same:';
-$string['contextdeepl'] = 'Course context ';
+$string['contextdeepl'] = 'Course context (Carefully read <a href="https://developers.deepl.com/docs/learning-how-tos/examples-and-guides/how-to-use-context-parameter" traget="_blank">How to Use</a>)';
 $string['contextdeepl_placeholder'] =
-        'Tell the translator (DeepL) about the context, to help it translate in a more contextual way... (experimental)';
+        'Tell the translator (DeepL) about the context, to help it translate in a more contextual way...';
 $string['cookieduration'] = 'Advanced setting storage duration';
 $string['cookieduration_desc'] =
         'The advanced settings are saved (in a cookie) on a per course and language pair. Set duration value in days here.';
+$string['correcttext'] = 'Correct grammar and spelling';
+$string['customsettings'] = 'Custom translation settings';
+$string['customsettingsactive'] = 'Custom settings active for this field';
 $string['deeplapidoc'] = 'see detail on deepl\'s documentation';
 $string['deeplapidoctitle'] = 'DeepL\'s API settings';
 $string['deeplapiexception'] = 'DeepL\'s API returned an error';
 $string['deepler:edittranslations'] = 'Edit course translations in DeepL Translator';
-$string['deeplprotitle'] = 'Use DeepL Pro?';
-$string['deeplprotitle_desc'] = 'If enabled use DeepL Pro else the free version of DeepL API.';
+$string['deepler:translatefiles'] = 'Translate files in DeepL Translator';
 $string['doselecttarget'] = 'Please select a target language.';
 $string['editbutton'] = 'Edit source in place';
 $string['errordbpartial'] = '{$a} of the fields NOT saved in the database. Check manually in place';
@@ -78,6 +82,51 @@ $string['errortoolong'] = '(could be that the text is too long for the field... 
 $string['fieldmaxlengtha'] = '{$a} characters';
 $string['fieldmaxlengthb'] = '(max {$a})';
 $string['fieldnottranslatable'] = 'Not translatable (set in "Additional field configuration" in admin)';
+$string['filemaxbytes'] = 'Maximum file size for translation (bytes)';
+$string['filemaxbytes_desc'] = 'The maximum file size in bytes allowed to be sent to DeepL for document translation (default: 10485760 = 10 MB).';
+$string['files:activityname'] = 'Activity';
+$string['files:billedchars'] = 'Billed chars: {$a}';
+$string['files:billingminimum'] = 'DeepL applies a minimum billing of 50,000 characters for this file type.';
+$string['files:billingminimumbadge'] = '50k char min';
+$string['files:billingminimuminfo'] = 'Note: DeepL document translation applies a minimum billing threshold (50,000 characters) for certain file types (e.g. PDF, DOCX, PPTX, XLSX).';
+$string['files:courselevel'] = 'Course level files';
+$string['files:customsettings'] = 'Custom settings';
+$string['files:done'] = 'Done';
+$string['files:downloading'] = 'Downloading';
+$string['files:duplicating'] = 'Duplicating';
+$string['files:empty'] = 'No translatable files found in this course.';
+$string['files:error'] = 'Error';
+$string['files:existingtranslation'] = 'Already translated to: {$a}';
+$string['files:filename'] = 'File name';
+$string['files:filesize'] = 'Size';
+$string['files:globalsourcelang'] = 'Global source language';
+$string['files:globaltargetlang'] = 'Global target language';
+$string['files:justnow'] = 'Just now';
+$string['files:menu'] = 'DeepLer Files';
+$string['files:minification'] = 'Enable document minification';
+$string['files:minification_desc'] = 'Reduces document size if supported by DeepL';
+$string['files:missingavailabilitywarning'] = 'Language restriction plugin (availability_language) is not installed or enabled. The duplicate was created without language restriction.';
+$string['files:notranslations'] = 'No translations yet';
+$string['files:openactivity'] = 'Open duplicate';
+$string['files:queued'] = 'Queued';
+$string['files:reason_extension'] = 'Unsupported file format ({$a})';
+$string['files:reason_filesize'] = 'File exceeds maximum size limit ({$a})';
+$string['files:retry'] = 'Retry';
+$string['files:selectall'] = 'Select all';
+$string['files:selecttargets'] = 'Target language';
+$string['files:settingsmodal_title'] = 'File translation settings';
+$string['files:sourcelang'] = 'Source';
+$string['files:status'] = 'Status';
+$string['files:title'] = 'Deepler file translation';
+$string['files:translateselected'] = 'Translate selected';
+$string['files:translating'] = 'Translating';
+$string['files:translations'] = 'Translations ({$a})';
+$string['files:unknown'] = 'Unknown';
+$string['files:unsupported'] = 'Unsupported';
+$string['files:uploading'] = 'Uploading';
+$string['files:viewfile'] = 'View file';
+$string['filetranslation'] = 'Enable file translation';
+$string['filetranslation_desc'] = 'Allow users with the translatefiles capability to translate uploaded course documents and files with DeepL.';
 $string['filters'] = 'Filters';
 $string['formality'] = 'Formality';
 $string['formalitydefault'] = 'default';
@@ -87,7 +136,6 @@ $string['formalitypreferless'] = 'prefer less';
 $string['formalityprefermore'] = 'prefer more';
 $string['glossary:actions'] = 'Actions';
 $string['glossary:deepl:link'] = 'DeepL API documentation';
-$string['glossary:deeplid'] = 'UUID';
 $string['glossary:delete:deeplissue:body'] = 'Could not delete the glossary: {$a}';
 $string['glossary:delete:deeplissue:title'] = 'DeepL issue';
 $string['glossary:delete:failed:body'] = 'Failed to delete the glossary: {$a}';
@@ -99,7 +147,6 @@ $string['glossary:delete:invalidsesskey:title'] = 'Invalid session key';
 $string['glossary:delete:success:body'] = '{$a} has been removed!';
 $string['glossary:delete:success:title'] = 'Deletion successful';
 $string['glossary:id'] = 'Glossary id';
-$string['glossary:id_placeholder'] = 'Glossary id should you have one...';
 $string['glossary:lastused'] = 'Last time it was used';
 $string['glossary:listempty'] =
         'There are no glossaries available with for language pair. Go to "DeepLer glossaries" in your user preferences to upload some.';
@@ -192,8 +239,6 @@ $string['glossary:upload:sourcenotsupported:body'] = '{$a} is not a supported so
 $string['glossary:upload:sourcenotsupported:title'] = 'DeepL: not supported source language';
 $string['glossary:upload:success:body'] = '{$a} has been uploaded!';
 $string['glossary:upload:success:title'] = 'Upload successful';
-$string['glossary:upload:suffixerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
-$string['glossary:upload:suffixerror:title'] = 'Incorrect suffix';
 $string['glossary:upload:targetnotsupported:body'] = '{$a} is not a supported target language';
 $string['glossary:upload:targetnotsupported:title'] = 'DeepL: not supported target language';
 $string['glossary:upload:unknownerror:body'] = 'Failed to upload the glossary because: {$a}, please check the instructions.';
@@ -207,7 +252,6 @@ $string['hideiframesadmin'] = 'Select this if you want rendering embed iframes b
 $string['hideiframesadmin_desc'] =
         'Sometimes iframes can overlap the user interface, or alter the browser\'s performances.';
 $string['ignoretags'] = 'Tags to ignore';
-$string['keepselected'] = 'Keep selected';
 $string['latexeascape'] = 'Escape LaTeX (do not send $$LaTeXFormulas$$ to translation)';
 $string['latexescapeadmin'] = 'Default value Escape LaTeX
 (in the courses translation page "Advanced Settings")';
@@ -230,7 +274,7 @@ $string['notsupportedsource'] = 'The source language you are in is not supported
 $string['onomatopoeia'] = 'Ouch !!!';
 $string['othersettingstitle'] = 'Other settings';
 $string['outlinedetection'] = 'XML Outline detection';
-$string['pluginname'] = 'DeepL Translator';
+$string['pluginname'] = 'DeepLer Translator';
 $string['pluginversion'] = 'Current version';
 $string['preescape'] = 'Escape PRE html tag ';
 $string['preescapeadmin'] = 'Escape PRE html tag ';
@@ -242,27 +286,30 @@ $string['rephraseinfos'] =
 $string['rephraseoptionsinfos'] =
         'The options for tone or writing style only  supported for <strong>de</strong>, <strong>en-GB</strong>, <strong>en-US</strong>. Using "default" as value behaves the same as not sending a tone nor a writing style.';
 $string['rephrasetitle'] = '{$a}Rephrase settings';
+$string['resettodefaults'] = 'Reset to Global Defaults';
+$string['rowsettingstitle'] = 'Options for: {$a}';
 $string['saveall'] = 'Save&nbsp;all';
 $string['saveallexplain'] = 'Batch save to database all selected translations.';
 $string['saveallmodalbody'] = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Saving...</span>\n</div>
 <p>Please wait ...<br/>When all fields are saved in the database,<br/>I will automatically close</p>
 <p>If you are impatient, and want to close this window,
-<br/>make sure all selected translation\'s statuses are <i class="fa fa-database" aria-hidden="true"></i></p>';
+<br/>make sure all selected translation\'s statuses are <i class="fa-solid fa-database" aria-hidden="true"></i></p>';
 $string['saveallmodaltitle'] = 'Saving translations to the database';
 $string['scannedfieldsize'] = 'Minimum textfield size';
 $string['scannedfieldsize_desc'] = 'Small text field are often limited in the database. The text content grows quite fast
  (plus the mlang tags) at each translation steps.
  After translation, if the text is too big, the DB will through an error. Size this here based on your main language properties and
  the number on languages your Moodle supports';
-$string['section:coursesettings'] = 'Course settings';
 $string['section:select:label'] = 'Select sections';
 $string['sectionall'] = 'ALL SECTIONS';
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
-$string['selecttargetlanguage'] = 'Target language <em>{mlang {$a}}</em>';
+$string['selecttargetlanguage'] = 'Target';
 $string['showhiddenforstudents'] = 'Show "{$a}"';
-$string['sourcelang'] =
-        'Source lang <em>{mlang other} </em>';
+$string['sourcelang'] = 'Source';
+$string['sourceselect_detected_diff'] = 'Detected source language ({$a}) differs from selected default.';
+$string['sourceselect_disabled_hint'] = 'Source language matches existing multilang tag.';
+$string['sourceselect_label'] = 'Source language';
 $string['specialsourcetext'] = 'Use a different source than "{$a}"';
 $string['splitsentences'] = 'Split sentences?';
 $string['splitsentences0'] = 'no splitting at all';
@@ -275,18 +322,15 @@ $string['statussuccess'] = 'Succeeded';
 $string['statustosave'] = 'Save this';
 $string['statustotranslate'] = 'Ready to translate';
 $string['statuswait'] = 'Not selected';
+$string['tabtranslate'] = 'Translation';
 $string['taghandling'] = 'Handle tags as : ';
 $string['tagsplaceholder'] = 'List all tags (separate tag with comma &quot;,&quot;)';
 $string['targetcompatibleexplain'] = 'Chose a target language to save in the {mlang xx}.';
 $string['tokenactions'] = 'Actions';
 $string['tokenadd'] = 'Add token map';
-$string['tokenaddtoken'] = 'Add Token';
 $string['tokenadminpagedescription'] =
         'Select a user attribute, give it a filter (you can use *,% or _ wildcards) and match that to a token.';
 $string['tokenattribute'] = 'User Attribute';
-$string['tokenchoose'] = 'Select an attribute';
-$string['tokendeletetoken'] = 'Delete Token';
-$string['tokenedittoken'] = 'Edit Token';
 $string['tokenerror_invaliduuid'] = 'Invalid token format';
 $string['tokenerror_noattribute'] = 'You must select an attribute to filter.';
 $string['tokenerror_nofilter'] = 'You must ad a value to filter.';
@@ -296,9 +340,7 @@ $string['tokengototokenmanager'] = 'Manage DeepL\'s tokens';
 $string['tokenmanager'] = 'DeepLer Token manager';
 $string['tokenmanager_desc'] =
         'Here you can map your DeepL api keys to user\'s attributes in order to create pools of translators. This can be useful should you need to measure and control consumption for each API key.';
-$string['tokennotokens'] = 'No tokens found.';
 $string['tokensettings'] = 'API Token Settings';
-$string['tokentabletitle'] = 'Token table';
 $string['tokentoken'] = 'Token';
 $string['tokentokenmanager_addnew'] = 'Add a new token filter';
 $string['tokentokenmanager_mappings'] = 'Token table';
@@ -316,7 +358,7 @@ This feature currently only works for target languages <em>DE</em> (<strong>Germ
 (<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese),
 <em>JA</em> (Japanese), and <em>RU</em> (Russian).
 Learn more about the plain\/polite feature for Japanese <a
-href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese">here</a>.
+href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese" traget="_blank">here</a>.
 Setting this parameter with a target language that does not support formality will fail, unless one of the&nbsp;
 <em>prefer_...</em> options are used. Possible options are:</p>
 <ul><li><em>default</em> (default)</li>
@@ -416,26 +458,30 @@ $string['tour_advancedsettings18selection'] =
 $string['tour_advancedsettings18selectiontitle'] =
         'Selection checkbox';
 $string['tour_advancedsettings19editsource'] =
-        '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa fa-pencil"> </i>
+        '<p><span class="p-1 btn btn-sm btn-outline-info"><i class="fa-solid fa-pencil"> </i>
 </span> Clicking on the pencil will jump to the editor in the Moodle course.</p>
 <p>Should you have revisions of the source, or want to make any change, as you cannot change the source from here.</p>';
 $string['tour_advancedsettings19editsourcetitle'] =
         'Edit source in place.';
 $string['tour_advancedsettings20togglemultilang'] =
         '<p>When translations {mlang} tags are present, this button appears.</p>
-<p><i class="fa fa-language"></i></p>
+<p><i class="fa-solid fa-language"></i></p>
 <p>Click on it to toggle the content and see what was already translated. If the current selected source language is found in the
 MLANG tags then this is displayed in red to alert you that the tag will be overriden.</p>';
 $string['tour_advancedsettings20togglemultilangtitle'] =
         'Toggle mutlilang content.';
+$string['tour_advancedsettings21rowsettings'] =
+    'You can set a distinct options for each field.';
+$string['tour_advancedsettings21rowsettingstitle'] =
+    'Field individual settings';
 $string['tour_advancedsettings21secondsource'] =
         'You can choose a secondary source for specific content. <br/>If there is yet no OTHER lang tag, it will save the source in its language plus OTHER.';
 $string['tour_advancedsettings21secondsourcetitle'] =
         'Secondary source language.';
 $string['tour_advancedsettings22process'] =
-        '<p>When a text content is not selected and no translation was requested. <i class="fa fa-ellipsis-h"></i> is shown.</p>
-<p><i class="fa fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to DeepL.</p>
-<p><i class="fa fa-floppy-o"></i> will display after the text was fed back in the adjacent text editor.<br />
+        '<p>When a text content is not selected and no translation was requested. <i class="fa-solid fa-ellipsis-h"></i> is shown.</p>
+<p><i class="fa-solid fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to DeepL.</p>
+<p><i class="fa-solid fa-floppy-o"></i> will display after the text was fed back in the adjacent text editor.<br />
 You can review the translated content, make some changes then press the icon to actually save it in the database. <br /><br />
 <em>Note</em> that you can also save to the database in batch by clicking on the save all floating button below. <br />
 Should you want to save all tranlsated text but leave some to review later, you can uncheck it on the left so that it will be skiped when saving all.</p>
@@ -449,8 +495,33 @@ $string['tour_advancedsettings23saveall'] =
 <p>If there are some translations that you do not want save in the batch, just unselect them before clicking "save all"</p>';
 $string['tour_advancedsettings23savealltitle'] =
         'Save all translations to database.';
+$string['tour_files00'] = '<p>Welcome to the <strong>Course Files Translation</strong> tool.</p><p>This page allows you to translate files attached to course resources (such as Folder and Resource activities) directly with DeepL while preserving format and creating translated variants.</p>';
+$string['tour_files00title'] = 'Course Files Translation';
+$string['tour_files01billing'] = '<p>DeepL charges a <strong>minimum character count per document</strong> (e.g. 50,000 characters for API translation).</p><p>Keep this in mind when translating smaller documents to optimize your API usage and costs.</p>';
+$string['tour_files01billingtitle'] = 'Billing & minimum characters notice';
+$string['tour_files02globalsettings'] = '<p>Configure global translation settings and source/target languages for this page.</p><p>You can also access the glossary manager, formality settings, and advanced options.</p>';
+$string['tour_files02globalsettingstitle'] = 'Global settings & options';
+$string['tour_files03globalsource'] = '<p>Select the <strong>source language</strong> of the original documents.</p><p>You can choose automatic detection or specify the language manually.</p>';
+$string['tour_files03globalsourcetitle'] = 'Source language';
+$string['tour_files04globaltarget'] = '<p>Select the <strong>target language</strong> into which you want your files translated.</p>';
+$string['tour_files04globaltargettitle'] = 'Target language';
+$string['tour_files05selectall'] = '<p>Toggle this checkbox to select or deselect all translatable files across all sections.</p>';
+$string['tour_files05selectalltitle'] = 'Select all files';
+$string['tour_files06translate'] = '<p>Click here to start translating all selected files to the chosen target language.</p><p>Progress indicators will appear for each document being processed.</p>';
+$string['tour_files06translatestitle'] = 'Translate selected files';
+$string['tour_files07sections'] = '<p>Course content is grouped by course sections and activities. Expand or collapse sections to view attached files and their details.</p>';
+$string['tour_files07sectionstitle'] = 'Course sections & activities';
+$string['tour_files08rowselect'] = '<p>Use individual checkboxes to include or exclude specific files from batch translation.</p>';
+$string['tour_files08rowselecttitle'] = 'File selection';
+$string['tour_files09rowsettings'] = '<p>Click the gear icon to customize translation options (such as custom glossary, formality, or source language) specifically for this file.</p>';
+$string['tour_files09rowsettingstitle'] = 'File custom settings';
+$string['tour_files10status'] = '<p>Shows the current translation status for the selected target language: not translated, in progress, succeeded, or failed.</p>';
+$string['tour_files10statustitle'] = 'File translation status';
+$string['translate:activity'] = 'Translate activity';
+$string['translate:course'] = 'Translate course';
 $string['translate:modal:body'] = 'It might take a little while, if you have a lot of content.';
 $string['translate:modal:title'] = 'Called DeepL';
+$string['translate:section'] = 'Translate section';
 $string['translatebutton'] = 'Translate &rarr; {$a}';
 $string['translateexplain'] = 'Translate all selected rows to {$a}';
 $string['translationdisabled'] = 'Translation is disabled because this is used as a link in database';

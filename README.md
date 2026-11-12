@@ -20,6 +20,7 @@
 - [Course Translation Features](#course-translation-features)
   - [Interface & Content Filters](#interface--content-filters)
   - [Status Indicators](#status-indicators)
+  - [Document and File Translation](#document-and-file-translation)
   - [Rephrasing and Text Improvement](#rephrasing-and-text-improvement)
   - [Image and Media Previews](#image-and-media-previews)
   - [Formulas and Technical Formatting](#formulas-and-technical-formatting)
@@ -59,6 +60,8 @@ To use DeepLer, your Moodle environment requires:
 - A **DeepL API Account**:
   - **DeepL API Free** or **DeepL API Pro** for multi-language translations.
   - **DeepL API Pro** for text improvement and rephrasing in the same language.
+- Optional **[availability_language](https://marketplace.moodle.com/plugins/availability_language)** to automatically create language restricted file or folder resources when 
+  translating documents. *moodle version >5.2*
 
 ---
 
@@ -75,17 +78,27 @@ To use DeepLer, your Moodle environment requires:
 
 ## Quick Start: Translating a Course
 
-### 1. Open the Translator
-Navigate to the course you wish to translate, open the course **Actions menu** (gear icon or course navigation), and select **DeepL Translator**.
+### 1. Open the Translator from the setting
+#### From the course, a section or a module settings
 
-![](pix/launch.png)
+Navigate to the course you wish to translate, open the course **Actions menu** (gear icon or course navigation), and select **DeepLer Translator** or **DeepLer Files**.
+When you are in edit mode
+
+![](pix/launch_section.png)
 
 ### 2. Choose Source and Target Languages
-- **Source Language:** Automatically reflects your current Moodle language. Set this to the language the course was originally written in.
+- **Source Language:** Automatically reflects your current Moodle language. Set this to the language the course was originally written in. But you can change it.
 - **Target Language:** Select the language you want to translate your course into from the dropdown menu.
 
-![](pix/source_lang.png)
-![](pix/target_lang.png)
+![](pix/source_target.png)
+
+#### MultilangV2 tag storing behaviour when source and target lang are selected
+
+##### Field have no MLANG tags
+The original content will be wrapped around *{mlang other}* the translation wrapped around *{mlang xx}*.
+
+##### Field have mlang tags
+If there is an tag for the source language that will be used as the source, else the fallback language will be used as source. The translation wrapped around *{mlang xx}*.
 
 ### 3. Select Content & Translate
 - Use the filters to choose whether to view the whole course, a specific section, or an individual activity.
@@ -126,6 +139,18 @@ Every row displays a color-coded status dot so you can quickly monitor translati
 - 🔴 **Red (Not Translated):** The text has no translation in the selected target language.
 - 🟢 **Green (Up to Date):** The text has already been translated and the original source has not changed.
 - 🟠 **Orange (Needs Update):** The text was previously translated, but the original source content has since been edited in Moodle.
+
+### Document and File Translation
+![](pix/file_general.png)
+In addition to text content, DeepLer provides a dedicated **DeepL Files** page for translating binary and document files attached to course activities or course overview files:
+- **Supported formats:** `docx`, `pptx`, `xlsx`, `pdf`, `htm/html`, `txt`, `xlf/xliff`, `srt` but also images `jpeg` and `png`.
+  * DeepL bill's a default 50K characters for certain file types (https://developers.deepl.com/docs/best-practices/document-translations#billing-minimums) the interface will 
+    inform  the translator
+    ![](pix/file_detail.png)
+- **Activity duplication:** For activities like Resources or Folders, DeepLer duplicates the activity, inserts the translated file(s), translates the title/intro, and places the copy right after the source.
+- **Language restriction:** When the `availability_language` plugin is installed, DeepLer automatically pre-fills access restrictions so learners only see the activity corresponding to their selected language.
+  ![](pix/file_restriction.png)
+  ![](pix/file_restriction_front.png)
 
 ### Rephrasing and Text Improvement
 
@@ -210,10 +235,22 @@ Navigate to **Site Administration → Plugins → Local plugins → DeepL Transl
 
 ### Main Settings & API Keys
 
-- **DeepL API Key:** Enter your DeepL Free or Pro authentication key.
-- **Allow Fallback Key:** When enabled, all translators can use the main system key unless they are assigned a specific token.
+- **DeepL API Key:** Enter your main DeepL Free or Pro authentication key.
+- **Allow Fallback Key:** When enabled, all translators can use the main system key unless they are assigned a specific token ( see [Token 
+  Manager](#token-manager-multi-user-api-keys) ).
 - **Default LaTeX / PRE Escaping:** Enable or disable automatic formula protection by default.
 - **Minimum Textfield & DB Limits:** Sets safety thresholds to prevent database character overflow on short text fields.
+- **Auto-detect source language:** Automatically detect and select, at row level, the source language of content falling back to {mlang other} by sending a short text excerpt to 
+  DeepL. **Note: This consumes character quota**.
+- **Minimum textfield size:** To be able to find all translatable fields in DB, the plugin scans all DB text fields. Because translating will increase the fields content (often 
+  doubling it) a minimumis defined. You can change it to your needs.  
+- **Max length of breadcrumb's sub:** Self explanatory.
+- **Advanced setting storage duration:** The plugin stores the translation settings in the cookie. Set the number of days you whish to maintain these values if unused.
+- **Enable file translation:** Allow users with the translatefiles capability to translate uploaded course documents and files with DeepL.
+- **Maximum file size for translation (bytes):** By default it set to the max of Free plans.   
+  checkout [DeepL's chart](https://developers.deepl.com/docs/resources/usage-limits#maximum-upload-limits-per-document-format) 
+- **Additional field configuration (JSON):** Simple Json format definition to add outstanding databases field to scan. Usefull for 3rd party plugins that the plugin did not 
+  automatically find. See [Additional Field Configuration (Advanced JSON)](#additional-field-configuration-advanced-json)
 
 ![](pix/admin.png)
 
@@ -230,11 +267,21 @@ To control costs or allocate API usage across different departments, administrat
 
 ### User Capabilities & Permissions
 
-DeepLer provides the capability:
+Assign this capability to teacher roles, course creators, or a dedicated **Translator** role to grant access to the translation interface.
+
+Read more on [Roles and permissions](https://docs.moodle.org/503/en/Roles_and_permissions) if you are not famiiliar with the concept.
+
+DeepLer plugin defines 2 capabilities that admins need to add to roles or individuals:
 ```text
 local/deepler:edittranslations
+local/deepler:translatefiles
 ```
-Assign this capability to teacher roles, course creators, or a dedicated **Translator** role to grant access to the translation interface.
+**local/deepler:edittranslations**
+This will grant access the course translation and private or team glossary management.
+
+**local/deepler:translatefiles**
+This will grant access the files translation.
+
 
 ### Additional Field Configuration (Advanced JSON)
 
@@ -265,18 +312,21 @@ If your site uses **custom 3rd-party plugins or unique question types**, adminis
 ## Tips & Best Practices for Course Creators
 
 - **Establish Source Language First:** Always write your original course materials in your primary language before starting the translation process.
+- **Use the "context" setting the proper way:** See [How to Use the Context Parameter Effectively](https://developers.deepl.com/docs/learning-how-tos/examples-and-guides/how-to-use-context-parameter)
 - **Review High-Stakes Assessments:** While DeepL provides high-accuracy translations, always have an educator review translated quiz questions and answer options for pedagogical nuances.
-- **Take Advantage of User Tours:** Administrators can enable Moodle User Tours (`tourguide/tour_export.json`) to provide new translators with an interactive, on-screen walkthrough.
+- **Take Advantage of User Tours:** The on screen tutorials are automaticaly installed (`tourguide/activities_tour_export.json` and `tourguide/files_tour_export.json`). 
+  Administrators can 
+  enable/disable them in Appearance > Tour guides.
 - **Monitor Character Limits:** When translating concise titles or short field labels, keep an eye on database length warnings to avoid text truncation.
 
 ---
 
 ## Compatibility
 
-- **Moodle Versions:** Moodle 4.1 through 5.2+
-- **PHP Support:** PHP 8.1 to 8.4
+- **Moodle Versions:** Moodle 4.5 through 5.3
+- **PHP Support:** PHP 8.2 to 8.4
 - **Text Editors:** Fully compatible with **TinyMCE** (Moodle default) and standard textarea editors.
-- **Themes:** Fully tested with **Boost**, **Classic**, and child themes.
+- **Themes:** Fully tested with **Boost** (dark mode included), **Classic**, and child themes.
 
 ---
 
@@ -288,6 +338,11 @@ We welcome feedback, bug reports, and community contributions!
 - **Contribution Guidelines:** See [CONTRIBUTING.md](CONTRIBUTING.md) for pull request guidelines and coding standards.
 - **Automated Testing:** PHPUnit and Behat test suites are configured for continuous integration. For local testing with your API key, copy `.env-dist` to `.env` and configure `DEEPL_API_TOKEN`.
 
+### Composer
+After a lib update :
+```
+composer install --no-dev --optimize-autoloader
+```
 ---
 
 *DeepLer is an open-source Moodle plugin distributed under the GNU General Public License (GPL-3.0).*

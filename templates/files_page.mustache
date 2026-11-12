@@ -1,0 +1,171 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_deepler/files_page
+
+    Template for Deepler file translation main page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * courseid
+    * coursename
+    * hasfiles
+    * sourcelangs
+    * targetlangs
+    * str_selectall
+    * str_translateselected
+    * str_empty
+    * glossariesjson
+    * sections
+
+    Example context (json):
+    {
+        "courseid": 2,
+        "coursename": "Introduction to Physics",
+        "hasfiles": true,
+        "sourcelangs": [
+            {
+                "code": "EN",
+                "name": "English",
+                "selected": true
+            }
+        ],
+        "targetlangs": [
+            {
+                "code": "DE",
+                "name": "German",
+                "selected": true
+            }
+        ],
+        "str_selectall": "Select all",
+        "str_translateselected": "Translate selected",
+        "str_empty": "No translatable files found in this course.",
+        "glossariesjson": "[]",
+        "sections": []
+    }
+}}
+<div class="local_deepler-files-container" id="local_deepler_files_container" data-courseid="{{courseid}}" data-glossaries="{{glossariesjson}}">
+    <!-- Billing minimum notice -->
+    <div class="alert alert-info d-flex align-items-center py-2 px-3 mb-3 small" role="alert">
+        <i class="fa-solid fa-circle-info text-info me-2 fs-5" aria-hidden="true"></i>
+        <div>
+            {{#str}} files:billingminimuminfo, local_deepler {{/str}}
+            <a href="https://developers.deepl.com/docs/best-practices/document-translations#billing-minimums" target="_blank" class="alert-link ms-1">
+                {{#str}}deeplapidoc,local_deepler{{/str}}
+            </a>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-4 gap-2 local_deepler-bg-secondary-subtle">
+
+        {{#hasfiles}}
+
+            <div class="text-end text-right mb-2">
+                <input
+                        class="form-check-input local_deepler__select-all"
+                        type="checkbox"
+                        aria-label="{{#str}}selectall,local_deepler{{/str}}"
+                        title="{{#str}}selectall,local_deepler{{/str}}"
+                        name="select-all"
+                        id="select-all"
+                        data-action="files-select-all">
+                <label class="form-check-label" for="select-all">
+                    {{str_selectall}}
+                </label>
+            </div>
+
+            <!-- Advanced setting btn -->
+            <div class="text-end text-right mb-2">
+                <button type="button"
+                        id="local_deepler__settings"
+                        class="btn btn-sm btn-outline-secondary"
+                        data-action="global-settings"
+                        aria-controls="local_deepler__additionalsettings">
+                    <i class="fa fa-sliders" aria-hidden="true"></i> {{#str}}seesetting,local_deepler{{/str}}
+                </button>
+            </div>
+            <!-- Global Source Language -->
+            <div class="d-inline-flex align-items-center me-2">
+                <label for="local_deepler_global_sourcelang" class="me-1 mb-0 small text-muted font-weight-bold">
+                    {{#str}} files:globalsourcelang, local_deepler {{/str}}:
+                </label>
+                <select id="local_deepler_global_sourcelang" class="form-control form-control-sm custom-select custom-select-sm" data-action="global-sourcelang">
+                    {{#sourcelangs}}
+                        <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                    {{/sourcelangs}}
+                </select>
+            </div>
+
+            <!-- Global Target Language -->
+            <div class="d-inline-flex align-items-center me-2">
+                <label for="local_deepler_global_targetlang" class="me-1 mb-0 small text-muted font-weight-bold">
+                    {{#str}} files:globaltargetlang, local_deepler {{/str}}:
+                </label>
+                <select id="local_deepler_global_targetlang" class="form-control form-control-sm custom-select custom-select-sm" data-action="global-targetlang">
+                    {{#targetlangs}}
+                        <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                    {{/targetlangs}}
+                </select>
+            </div>
+            <div class="text-end text-right mb-2">
+                <button type="button" class="btn btn-sm btn-primary" data-action="files-translate-selected" disabled>
+                    <i class="fa-solid fa-language mr-1"></i> {{str_translateselected}}
+                </button>
+            </div>
+
+
+        {{/hasfiles}}
+    </div>
+
+    {{#hasfiles}}
+
+    <!-- Global Additional Settings Panel -->
+    <div class="container-fluid card p-3 mb-4 local_deepler-bg-secondary-subtle bg-light d-none" id="local_deepler__additionalsettings">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h5 class="mb-0">{{#str}}deeplapidoctitle,local_deepler{{/str}}</h5>
+            <div>
+                <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
+                <a href="https://developers.deepl.com/api-reference/document/upload-and-translate-a-document" target="_blank" class="small">
+                    {{#str}}deeplapidoc,local_deepler{{/str}}
+                </a>
+            </div>
+        </div>
+
+        {{> local_deepler/files_settings_modal }}
+    </div>
+
+    {{/hasfiles}}
+
+    {{^hasfiles}}
+    <div class="alert alert-info" role="alert">
+        {{str_empty}}
+    </div>
+    {{/hasfiles}}
+
+    {{#hasfiles}}
+
+    <div class="files-sections">
+        {{#sections}}
+            {{> local_deepler/files_section }}
+        {{/sections}}
+    </div>
+    {{/hasfiles}}
+</div>

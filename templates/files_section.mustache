@@ -1,0 +1,231 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_deepler/files_section
+
+    Template for a section block in Deepler files page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * sectionid
+    * sectionname
+    * rows
+
+    Example context (json):
+    {
+        "sectionid": 1,
+        "sectionname": "General Topic",
+        "rows": [
+            {
+                "fileid": 101,
+                "cmid": 42,
+                "supported": true,
+                "hastranslations": true,
+                "translationscount": 1,
+                "str_translations": "Translations (1)",
+                "filename": "document.pdf",
+                "fileurl": "https://example.com/file.php/42/document.pdf",
+                "activityicon": "<i class=\"fa fa-file-pdf\"></i>",
+                "activityname": "Lecture Slides",
+                "fileicon": "<i class=\"fa fa-file-pdf\"></i>",
+                "filesize": "1.2 MB",
+                "sourcelangs": [
+                    {
+                        "code": "EN",
+                        "name": "English",
+                        "selected": true
+                    }
+                ],
+                "targetlangs": [
+                    {
+                        "code": "DE",
+                        "name": "German",
+                        "selected": true
+                    }
+                ],
+                "reason": "",
+                "hascompletedduplicate": false,
+                "translations": [
+                    {
+                        "targetlang": "DE",
+                        "filename": "document_de.pdf",
+                        "timecreated": "10 Nov 2026, 14:30",
+                        "newcmurl": "https://example.com/mod/resource/view.php?id=124",
+                        "str_billedchars": "1,250 chars",
+                        "statusbadge": "badge-success",
+                        "statusstr": "Done"
+                    }
+                ]
+            }
+        ]
+    }
+}}
+<div class="card mb-4 files-section-card shadow-sm" data-sectionid="{{sectionid}}">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+        <h5 class="mb-0 font-weight-bold">{{sectionname}}</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="thead-light">
+                    <tr>
+                        <th style="width: 70px;" class="text-center">#</th>
+                        <th>{{#str}} files:activityname, local_deepler {{/str}}</th>
+                        <th>{{#str}} files:filename, local_deepler {{/str}}</th>
+                        <th style="width: 80px;">{{#str}} files:filesize, local_deepler {{/str}}</th>
+                        <th style="width: 140px;">{{#str}} files:sourcelang, local_deepler {{/str}}</th>
+                        <th style="width: 170px;">{{#str}} files:selecttargets, local_deepler {{/str}}</th>
+                        <th style="width: 50px;" class="text-center" title="{{#str}} customsettings, local_deepler {{/str}}">
+                            <i class="fa fa-sliders text-muted" aria-hidden="true"></i>
+                        </th>
+                        <th style="width: 200px;">{{#str}} files:status, local_deepler {{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#rows}}
+                        <tr class="file-row {{^supported}}table-secondary text-muted{{/supported}}" data-fileid="{{fileid}}" data-cmid="{{cmid}}">
+                            <td class="text-center align-middle">
+                                <div class="d-inline-flex align-items-center">
+                                    {{#supported}}
+                                        <button type="button"
+                                                class="btn btn-xs btn-link text-decoration-none p-0 me-1 toggle-translations-btn {{^hastranslations}}text-muted disabled{{/hastranslations}}"
+                                                data-toggle="collapse" data-bs-toggle="collapse"
+                                                data-target="#file_translations_{{fileid}}" data-bs-target="#file_translations_{{fileid}}"
+                                                aria-expanded="false"
+                                                aria-controls="file_translations_{{fileid}}"
+                                                title="{{str_translations}}">
+                                            <i class="fa fa-chevron-right toggle-icon"></i>
+                                        </button>
+                                        <input type="checkbox" class="file-select-checkbox" data-action="select-file" data-fileid="{{fileid}}" aria-label="{{filename}}">
+                                    {{/supported}}
+                                    {{^supported}}
+                                        <span class="p-0 me-1 text-muted"><i class="fa fa-minus"></i></span>
+                                        <input type="checkbox" disabled aria-label="{{filename}}">
+                                    {{/supported}}
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                {{{activityicon}}}
+                                <span class="font-weight-500">{{activityname}}</span>
+                            </td>
+                            <td class="align-middle">
+                                {{{fileicon}}}
+                                <a href="{{fileurl}}" target="_blank" class="{{^supported}}text-muted{{/supported}} font-weight-bold" title="{{filename}}">
+                                    {{filename}}
+                                </a>
+                                {{#hasbillingminimum}}
+                                    <span class="badge badge-warning bg-warning text-dark ms-1"
+                                          title="{{#str}} files:billingminimum, local_deepler {{/str}}"
+                                          data-toggle="tooltip" data-bs-toggle="tooltip">
+                                        <i class="fa fa-info-circle me-1" aria-hidden="true"></i>{{#str}} files:billingminimumbadge, local_deepler {{/str}}
+                                    </span>
+                                {{/hasbillingminimum}}
+                                {{#hastranslations}}
+                                    <span class="badge badge-info bg-info text-white ms-1" style="cursor: pointer;"
+                                          data-toggle="collapse" data-bs-toggle="collapse"
+                                          data-target="#file_translations_{{fileid}}" data-bs-target="#file_translations_{{fileid}}">
+                                        {{translationscount}} <i class="fa fa-language"></i>
+                                    </span>
+                                {{/hastranslations}}
+                            </td>
+                            <td class="align-middle font-italic small text-muted">
+                                {{filesize}}
+                            </td>
+                            <td class="align-middle">
+                                {{#supported}}
+                                    <select class="form-control form-control-sm custom-select custom-select-sm file-source-select" data-action="file-source-lang" data-fileid="{{fileid}}">
+                                        {{#sourcelangs}}
+                                            <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                                        {{/sourcelangs}}
+                                    </select>
+                                {{/supported}}
+                                {{^supported}}
+                                    <span class="badge badge-light border text-muted">-</span>
+                                {{/supported}}
+                            </td>
+                            <td class="align-middle">
+                                {{#supported}}
+                                    <select class="form-control form-control-sm custom-select custom-select-sm file-target-select target-lang-select" data-action="target-lang" data-fileid="{{fileid}}">
+                                        {{#targetlangs}}
+                                            <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                                        {{/targetlangs}}
+                                    </select>
+                                {{/supported}}
+                                {{^supported}}
+                                    <span class="small text-danger">{{reason}}</span>
+                                {{/supported}}
+                            </td>
+                            <td class="text-center align-middle">
+                                {{#supported}}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary local_deepler__row-settings-btn position-relative"
+                                            data-action="row-settings"
+                                            data-fileid="{{fileid}}"
+                                            data-filename="{{filename}}"
+                                            title="{{#str}} customsettings, local_deepler {{/str}}"
+                                            aria-label="{{#str}} customsettings, local_deepler {{/str}}">
+                                        <i class="fa fa-sliders" aria-hidden="true"></i>
+                                        <span class="badge badge-pill badge-primary bg-primary d-none local_deepler__custom-settings-indicator position-absolute top-0 start-100 translate-middle" data-indicator-fileid="{{fileid}}">•</span>
+                                    </button>
+                                {{/supported}}
+                            </td>
+                            <td class="align-middle status-cell" data-fileid="{{fileid}}">
+                                <span class="badge badge-secondary status-badge" data-status-for="{{fileid}}">
+                                    {{#str}} files:queued, local_deepler {{/str}}
+                                </span>
+                                <span class="status-detail small d-block text-muted mt-1" data-detail-for="{{fileid}}"></span>
+
+                                {{#hascompletedduplicate}}
+                                    {{> local_deepler/files_open_duplicate_link }}
+                                {{/hascompletedduplicate}}
+                            </td>
+                        </tr>
+
+                        <!-- Collapsible translation sub-table under this source file -->
+                        <tr class="file-translations-row bg-light collapse" id="file_translations_{{fileid}}" data-translations-for="{{fileid}}">
+                            <td colspan="8" class="p-3 border-top-0">
+                                <div class="card card-body bg-white border-left border-primary shadow-sm py-2 px-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0 text-primary font-weight-bold">
+                                            <i class="fa fa-folder-open me-1"></i> {{str_translations}}
+                                        </h6>
+                                    </div>
+
+                                    <div class="translations-list" data-list-for="{{fileid}}">
+                                        {{#translations}}
+                                            {{> local_deepler/files_translation_item }}
+                                        {{/translations}}
+                                        {{^translations}}
+                                            <p class="text-muted small mb-0 no-translations-msg">
+                                                {{#str}} files:notranslations, local_deepler {{/str}}
+                                            </p>
+                                        {{/translations}}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {{/rows}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

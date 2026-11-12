@@ -46,6 +46,7 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
     private static string $nextId = 'a';
 
     private AmpClientState $multi;
+    private Canary $countCanary;
     private ?array $options;
     private \Closure $onProgress;
 
@@ -105,7 +106,8 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
             return new Coroutine(self::generateResponse($request, $multi, $id, $info, $headers, $canceller, $options, $onProgress, $handle, $logger, $pause));
         });
 
-        $info['pause_handler'] = static function (float $duration) use (&$throttleWatcher, &$pauseDeferred, &$pause) {
+        $pauseExpiry = &$this->pauseExpiry;
+        $info['pause_handler'] = static function (float $duration) use (&$throttleWatcher, &$pauseDeferred, &$pause, &$pauseExpiry) {
             if (null !== $throttleWatcher) {
                 Loop::cancel($throttleWatcher);
             }
@@ -113,10 +115,12 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
             $pause = $pauseDeferred->promise();
 
             if ($duration <= 0) {
+                $pauseExpiry = min($pauseExpiry, hrtime(true) / 1E9);
                 $deferred = $pauseDeferred;
                 $pauseDeferred = new Deferred();
                 $deferred->resolve();
             } else {
+                $pauseExpiry = hrtime(true) / 1E9 + $duration;
                 $throttleWatcher = Loop::delay(ceil(1000 * $duration), static function () use (&$pauseDeferred) {
                     $deferred = $pauseDeferred;
                     $pauseDeferred = new Deferred();
@@ -128,6 +132,14 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
         $multi->lastTimeout = null;
         $multi->openHandles[$id] = $id;
         ++$multi->responseCount;
+        // Decorators can call __destruct() before PHP does, so the count is decremented when the response is freed
+        $this->countCanary = new Canary(static function () use ($multi) {
+            // Clear the DNS cache when all requests completed
+            if (0 >= --$multi->responseCount) {
+                $multi->responseCount = 0;
+                $multi->dnsCache = [];
+            }
+        });
 
         $this->canary = new Canary(static function () use ($canceller, $multi, $id) {
             $canceller->cancel();
@@ -152,15 +164,7 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
 
     public function __destruct()
     {
-        try {
-            $this->doDestruct();
-        } finally {
-            // Clear the DNS cache when all requests completed
-            if (0 >= --$this->multi->responseCount) {
-                $this->multi->responseCount = 0;
-                $this->multi->dnsCache = [];
-            }
-        }
+        $this->doDestruct();
     }
 
     private static function schedule(self $response, array &$runningResponses): void
@@ -350,10 +354,9 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
                 $request->addHeader($name, $value);
             }
 
-            if ($request->getUri()->getAuthority() !== $originRequest->getUri()->getAuthority()) {
+            if ($request->getUri()->getScheme() !== $originRequest->getUri()->getScheme() || $request->getUri()->getAuthority() !== $originRequest->getUri()->getAuthority()) {
                 $request->removeHeader('authorization');
                 $request->removeHeader('cookie');
-                $request->removeHeader('proxy-authorization');
                 $request->removeHeader('host');
             }
 

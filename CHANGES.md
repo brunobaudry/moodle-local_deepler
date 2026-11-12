@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.0 - 2026-11-12]
+### Added
+- Document and file translation via DeepL Document API (`docx`, `pptx`, `xlsx`, `pdf`, `htm/html`, `txt`, `jpeg`, `png`...).
+- Dedicated "Deepler: Files" page listing translatable course files grouped by section and activity.
+- Automatic activity duplication with translated files, translated activity names/intros, and language access restrictions (`availability_language`).
+- Course-level file translation support with language suffix storage.
+- New capability `local/deepler:translatefiles` and admin configuration settings for file translation toggle and maximum file size.
+- Launch links from activities.
+- Field level translation settings.
+- Text correction ( keeping the writer's style )
+- Automatic tour guide installation for both translator and files pages.
+
+
+### Changed
+- Source target selection and mlang storing behaviour see "MultilangV2 tag storing behaviour when source and target lang are selected" in the README
+- Advanced settings layout improved.
+- Using DeepL API's V3 languages detection (allowing Dynamic language listing).
+
+## [1.9.9.9]
+### Added
+- Improved adherence to MDS 
+- Navigation deep links to translate specific course sections, activities, and resources
+
 ## [1.9.9.8]
 ### Added
 - 5.3 compatibilty preparing for dark mode

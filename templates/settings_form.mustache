@@ -1,0 +1,272 @@
+{{!
+This file is part of Moodle - http://moodle.org/
+
+Moodle is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moodle is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}{{!
+    @template local_deepler/settings_form
+
+    Form fields for translation and rephrasing settings (used in page header and per-row modal).
+    Supports a prefix parameter for scoping input IDs, labels, and radio names.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * prefix
+    * canimprove
+    * rephrasesymbol
+    * supportedlangs
+    * escapelatexbydefault
+    * escapeprebydefault
+    * hideiframesdefault
+
+    Example context (json):
+    {
+        "prefix": "modal_",
+        "canimprove": true,
+        "rephrasesymbol": "®",
+        "supportedlangs": "de, en-GB, en-US",
+        "escapelatexbydefault": "checked",
+        "escapeprebydefault": "checked",
+        "hideiframesdefault": "checked"
+    }
+}}
+<ul class="nav nav-tabs mb-3" id="{{prefix}}settings_tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="{{prefix}}tab_translate_btn"
+                data-bs-toggle="tab"
+                data-bs-target="#{{prefix}}tab_translate"
+                data-toggle="tab"
+                data-target="#{{prefix}}tab_translate"
+                type="button" role="tab"
+                aria-controls="{{prefix}}tab_translate"
+                aria-selected="true">
+            {{#str}}tabtranslate,local_deepler{{/str}}
+        </button>
+    </li>
+    {{#canimprove}}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="{{prefix}}tab_rephrase_btn" data-bs-toggle="tab" data-bs-target="#{{prefix}}tab_rephrase" data-toggle="tab"
+                data-target="#{{prefix}}tab_rephrase" type="button" role="tab" aria-controls="{{prefix}}tab_rephrase" aria-selected="false">
+            {{#str}}rephrasetitle,local_deepler,{{rephrasesymbol}}{{/str}}
+        </button>
+    </li>
+    {{/canimprove}}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="{{prefix}}tab_other_btn" data-bs-toggle="tab" data-bs-target="#{{prefix}}tab_other" data-toggle="tab" data-target="#{{prefix}}tab_other"
+                type="button" role="tab" aria-controls="{{prefix}}tab_other" aria-selected="false">
+            {{#str}}othersettingstitle,local_deepler{{/str}}
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="{{prefix}}settings_tab_content">
+    <div class="tab-pane fade show active" id="{{prefix}}tab_translate" role="tabpanel" aria-labelledby="{{prefix}}tab_translate_btn">
+        <!-- TRANSLATE -->
+        <div class="row pt-2 pb-1">
+            <div class="col-12 text-end text-right" id="local_deepler__transdoc">
+                <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
+                <a href="https://developers.deepl.com/docs/translate/translate-text-quickstart">{{#str}}
+                    deeplapidoc,local_deepler{{/str}}</a>
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-12">
+                {{{glossayselector}}}
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__modeltype">
+                <label class="form-label d-block" for="{{prefix}}model_type">{{#str}}modeltype,local_deepler{{/str}}</label>
+                <select class="form-control custom-select" id="{{prefix}}model_type" data-id="local_deepler/model_type" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/model_type">
+                    <option value="prefer_quality_optimized" selected>{{#str}}modeltpreferqualityoptimized,local_deepler{{/str}}</option>
+                    <option value="quality_optimized">{{#str}}modeltypequalityoptimized,local_deepler{{/str}}</option>
+                    <option value="latency_optimized">{{#str}}modeltypelatencyoptimized,local_deepler{{/str}}</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__formality">
+                <label class="form-label d-block" for="{{prefix}}formality">{{#str}}formality,local_deepler{{/str}}</label>
+                <select class="form-control custom-select" id="{{prefix}}formality" data-id="local_deepler/formality" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/formality">
+                    <option value="default" selected>{{#str}}formalitydefault,local_deepler{{/str}}</option>
+                    <option value="prefer_more">{{#str}}formalityprefermore,local_deepler{{/str}}</option>
+                    <option value="prefer_less">{{#str}}formalitypreferless,local_deepler{{/str}}</option>
+                    <option value="more">{{#str}}formalitymore,local_deepler{{/str}}</option>
+                    <option value="less">{{#str}}formalityless,local_deepler{{/str}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row py-2 align-items-center">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__splitsentences">
+                <label class="form-label d-block" for="{{prefix}}split_sentences">{{#str}}splitsentences,local_deepler{{/str}}</label>
+                <select class="form-control custom-select" id="{{prefix}}split_sentences" data-id="local_deepler/split_sentences" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/split_sentences">
+                    <option value="0">{{#str}}splitsentences0,local_deepler{{/str}}</option>
+                    <option value="1" selected>{{#str}}splitsentences1,local_deepler{{/str}}</option>
+                    <option value="nonewlines">{{#str}}splitsentencesnonewlines,local_deepler{{/str}}</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3 pt-md-4" id="{{prefix}}local_deepler__preserveformating">
+                <div class="form-check form-switch custom-control custom-switch">
+                    <input type="checkbox" class="form-check-input custom-control-input" id="{{prefix}}preserve_formatting" data-id="local_deepler/preserve_formatting">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}preserve_formatting">{{#str}}preserveformatting,local_deepler{{/str}}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-12" id="{{prefix}}local_deepler__glossarycontext">
+                <label for="{{prefix}}local_deepler__context">{{#str}}contextdeepl,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}local_deepler__context" data-id="local_deepler/context" rows="3"
+                          placeholder="{{#str}}contextdeepl_placeholder,local_deepler{{/str}}"></textarea>
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__xmlhtml">
+                <div class="d-flex my-switch">
+                    <div class="form-text text-1"> {{#str}}taghandling,local_deepler{{/str}}XML&nbsp;</div>
+                    <div class="form-check form-switch custom-control custom-switch">
+                        <input id="{{prefix}}tag_handling" class="form-check-input custom-control-input" type="checkbox" data-id="local_deepler/tag_handling" checked>
+                        <label class="form-check-label custom-control-label" for="{{prefix}}tag_handling">&nbsp;HTML</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3" id="{{prefix}}local_deepler__outilinedetection">
+                <div class="form-check form-switch custom-control custom-switch">
+                    <input id="{{prefix}}outline_detection" class="form-check-input custom-control-input" type="checkbox" data-id="local_deepler/outline_detection">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}outline_detection">{{#str}}outlinedetection,local_deepler{{/str}}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-md-4 mb-3" id="{{prefix}}local_deepler__tagsignore">
+                <label for="{{prefix}}ignore_tags">{{#str}}ignoretags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}ignore_tags" data-id="local_deepler/ignore_tags"
+                          placeholder="{{#str}}ignoretags,local_deepler{{/str}}"></textarea>
+            </div>
+            <div class="col-md-4 mb-3" id="{{prefix}}local_deepler__tagsnosplitting">
+                <label for="{{prefix}}non_splitting_tags">{{#str}}nonsplittingtags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}non_splitting_tags" data-id="local_deepler/non_splitting_tags"
+                          placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea>
+            </div>
+            <div class="col-md-4 mb-3" id="{{prefix}}local_deepler__tagssplitting">
+                <label for="{{prefix}}splitting_tags">{{#str}}splittingtags,local_deepler{{/str}}</label>
+                <textarea class="form-control" id="{{prefix}}splitting_tags" data-id="local_deepler/splitting_tags"
+                          placeholder="{{#str}}tagsplaceholder,local_deepler{{/str}}"></textarea>
+            </div>
+        </div>
+        <!-- END TRANSLATE -->
+    </div>
+    {{#canimprove}}
+    <div class="tab-pane fade" id="{{prefix}}tab_rephrase" role="tabpanel" aria-labelledby="{{prefix}}tab_rephrase_btn">
+        <!-- REPHRASE -->
+        <div class="text-end text-right" id="local_deepler__rephrasedoc">
+            <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
+            <a href="https://developers.deepl.com/api-reference/improve-text/request-text-improvement" >{{#str}}
+                deeplapidoc,local_deepler{{/str}}</a>
+        </div>
+        <div class="text-end text-right">
+            <p>{{#str}}rephraseinfos,local_deepler, {{supportedlangs}}{{/str}}</p>
+        </div>
+        <div class="row py-3">
+            <div class="col-md-7" id="{{prefix}}local_deepler__toneorstyle">
+                {{#str}}toneorstyle,local_deepler{{/str}}
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="default" id="{{prefix}}toneorstyle0" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}toneorstyle0">{{#str}}formalitydefault  ,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="correct" id="{{prefix}}writingstylecorrect" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}writingstylecorrect">{{#str}}correcttext,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="writing_style|prefer_simple" id="{{prefix}}writingstyle9" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}writingstyle9">{{#str}}writingstylesimple  ,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="writing_style|prefer_business" id="{{prefix}}writingstyle7" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}writingstyle7">{{#str}}writingstylebusiness  ,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" checked="checked" value="writing_style|prefer_academic" id="{{prefix}}writingstyle5" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}writingstyle5">{{#str}}writingstyleacademic  ,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="writing_style|prefer_casual" id="{{prefix}}writingstyle6" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}writingstyle6">{{#str}}writingstylecasual  ,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="tone|prefer_enthusiastic" id="{{prefix}}tone6" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}tone6">{{#str}}toneenthusiastic,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="tone|prefer_friendly" id="{{prefix}}tone7" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}tone7">{{#str}}tonefriendly,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="tone|prefer_confident" id="{{prefix}}tone8" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}tone8">{{#str}}toneconfident,local_deepler{{/str}}</label>
+                </div>
+                <div class="form-check custom-control custom-radio">
+                    <input type="radio" value="tone|prefer_diplomatic" id="{{prefix}}tone9" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
+                           data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
+                    <label class="form-check-label custom-control-label" for="{{prefix}}tone9">{{#str}}tonediplomatic,local_deepler{{/str}}</label>
+                </div>
+            </div>
+        </div>
+        <!-- END REPHRASE -->
+    </div>
+    {{/canimprove}}
+    <div class="tab-pane fade" id="{{prefix}}tab_other" role="tabpanel" aria-labelledby="{{prefix}}tab_other_btn">
+        <!-- OTHER -->
+        <div class="row pb-3" id="{{prefix}}local_deepler__nondeepl">
+            <div class="col-12" id="{{prefix}}local_deepler__othersettings">
+                <div id="{{prefix}}local_deepler__latexeascape">
+                    <div class="mt-1 form-check form-switch custom-control custom-switch">
+                        <input type="checkbox" class="form-check-input custom-control-input" id="{{prefix}}latexeascape" data-id="local_deepler/latexeascape" {{escapelatexbydefault}}>
+                        <label class="form-check-label custom-control-label" for="{{prefix}}latexeascape">{{#str}}latexeascape,local_deepler{{/str}}</label>
+                    </div>
+                </div>
+                <div id="{{prefix}}local_deepler__preescape">
+                    <div class="mt-1 form-check form-switch custom-control custom-switch">
+                        <input type="checkbox" class="form-check-input custom-control-input" id="{{prefix}}preescape" data-id="local_deepler/preescape" {{escapeprebydefault}}>
+                        <label class="form-check-label custom-control-label" for="{{prefix}}preescape">{{#str}}preescape,local_deepler{{/str}}</label>
+                    </div>
+                </div>
+                <div id="{{prefix}}local_deepler__hideiframes">
+                    <div class="mt-1 form-check form-switch custom-control custom-switch">
+                        <input type="checkbox" class="form-check-input custom-control-input" id="{{prefix}}hideiframes" data-id="local_deepler/hideiframes" {{hideiframesdefault}}>
+                        <label class="form-check-label custom-control-label" for="{{prefix}}hideiframes">{{#str}}hideiframes,local_deepler{{/str}}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END OTHER -->
+    </div>
+</div>

@@ -29,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 const LOCAL_DEEPLER_EDITTRANSLATIONS = 'local/deepler:edittranslations';
 require_once(__DIR__ . '/classes/vendor/autoload.php');
 
+use local_deepler\local\services\navigation_helper;
+
 /**
  * Add Translate Course to the course settings menu.
  *
@@ -39,24 +41,18 @@ require_once(__DIR__ . '/classes/vendor/autoload.php');
  * @package local_deepler
  */
 function local_deepler_extend_navigation_course(mixed $navigation, mixed $course): void {
-    // Do not show in menu if no capability.
-    if (!has_capability(LOCAL_DEEPLER_EDITTRANSLATIONS, context_course::instance($course->id))) {
-        return;
-    }
-    // Get current language.
-    $lang = current_language();
+    navigation_helper::extend_navigation_course($navigation, $course);
+}
 
-    // Build a moodle url.
-    $url = new moodle_url("/local/deepler/translate.php?courseid=$course->id&lang=$lang");
-
-    // Get title of translate page for navigation menu.
-    $title = get_string('pluginname', 'local_deepler');
-
-    // Navigation node.
-    $translatecontent = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, $title, 'translate');
-    // Do not show in menu if no capability.
-    $navigation->add_node($translatecontent);
-    $navigation->showinflatnavigation = true; // Ensure it shows in the flat navigation.
+/**
+ * Extends settings navigation for activities, resources, and sections.
+ *
+ * @param \settings_navigation $settingsnav
+ * @param \context $context
+ * @return void
+ */
+function local_deepler_extend_settings_navigation(\settings_navigation $settingsnav, \context $context): void {
+    navigation_helper::extend_settings_navigation($settingsnav, $context);
 }
 
 /**
