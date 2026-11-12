@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['additionalconf'] = 'Additional field configuration (JSON)';
 $string['additionalconf_desc'] = 'Define extra database tables and fields available for translation, in JSON format.
 Changes take effect immediately for all users without server filesystem access.
-Leave empty to fall back to the bundled <code>additional_conf.json</code> file. See detailed documentation under <a href="https://github.com/brunobaudry/moodle-local_deepler/tree/dev?tab=readme-ov-file#additional-field-configuration-json">Additional field configuration (JSON)</a>';
+Leave empty to fall back to the bundled <code>additional_conf.json</code> file. See detailed documentation under <a href="https://github.com/brunobaudry/moodle-local_deepler#additional-field-configuration-advanced-json" traget="_blank">Additional field configuration (JSON)</a>';
 $string['additionalconf_err_plugnotfound'] = 'Plugin not found : "{$a}"';
 $string['additionalconf_err_tablenotfound'] = '{$a->plugin}:: Table not found : "{$a->name}"';
 $string['additionalconf_parseerror'] = 'Invalid JSON syntax line {$a->line} : {$a->message}';
@@ -44,7 +44,7 @@ $string['allowbeta'] = 'Allow beta languages.';
 $string['allowbeta_desc'] = 'Tick this if you want to use what DeepL used to call "beta languages"
 (marked with a star in their [supported languages](https://developers.deepl.com/docs/getting-started/supported-languages) page).
 Those languages are not listed as available languages by
-[DeepL API](https://developers.deepl.com/api-reference/languages/retrieve-supported-languages).';
+[DeepL API](https://developers.deepl.com/api-reference/languages/retrieve-resources).';
 $string['allowfallbackkey'] = 'Allow fallback key.';
 $string['allowfallbackkey_desc'] =
         'Tick this if you want to allow users with no matching attributes to the mapped tokens, to use a default one.
@@ -60,7 +60,7 @@ $string['breadcrumblength_desc'] =
         'Set it to limit the size of the breadcrumb\'s subs. Set it to zero should you want no limiting.';
 $string['canttranslate'] = 'Cannot translate \'{$a}\' to \'{$a}\', please select a different target language';
 $string['canttranslatesame'] = 'Both languages are the same:';
-$string['contextdeepl'] = 'Course context ';
+$string['contextdeepl'] = 'Course context (Carefully read <a href="https://developers.deepl.com/docs/learning-how-tos/examples-and-guides/how-to-use-context-parameter" traget="_blank">How to Use</a>)';
 $string['contextdeepl_placeholder'] =
         'Tell the translator (DeepL) about the context, to help it translate in a more contextual way...';
 $string['cookieduration'] = 'Advanced setting storage duration';
@@ -358,7 +358,7 @@ This feature currently only works for target languages <em>DE</em> (<strong>Germ
 (<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese),
 <em>JA</em> (Japanese), and <em>RU</em> (Russian).
 Learn more about the plain\/polite feature for Japanese <a
-href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese">here</a>.
+href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese" traget="_blank">here</a>.
 Setting this parameter with a target language that does not support formality will fail, unless one of the&nbsp;
 <em>prefer_...</em> options are used. Possible options are:</p>
 <ul><li><em>default</em> (default)</li>

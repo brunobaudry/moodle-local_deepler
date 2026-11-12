@@ -16,13 +16,24 @@ on:
         required: false
         type: string
       release_notes:
-        description: 'Release notes to be submitted. If not set, they are taken from the GitHub Release belonging to the tag or, failing that, from the changelog file of the plugin.'
+        description: 'Release notes to be submitted.'
         required: false
         type: string
     secrets:
       MOODLE_MARKETPLACE_TOKEN:
         description: 'API token generated at https://marketplace.moodle.com/account/security'
         required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release to Moodle Marketplace (e.g. v2.0.0)'
+        required: true
+        default: 'v2.0.0'
+        type: string
+      release_notes:
+        description: 'Optional custom release notes (leave blank to extract from GitHub release / CHANGES.md)'
+        required: false
+        type: string
 
 defaults:
   run:
