@@ -131,26 +131,14 @@ WHERE qs.quizid = ?", ['quizid' => $this->quiz->instance]);
         int $categoryid,
         bool $includesubs
     ): array {
-        global $DB;
+        global $CFG, $DB;
 
         $categoryids = [$categoryid];
 
         if ($includesubs) {
-            $category = $DB->get_record(
-                'question_categories',
-                ['id' => $categoryid],
-                'id,path',
-                MUST_EXIST
-            );
-
-            $subcategories = $DB->get_fieldset_select(
-                'question_categories',
-                'id',
-                $DB->sql_like('path', ':path'),
-                ['path' => $category->path . '/%']
-            );
-
-            $categoryids = array_merge($categoryids, $subcategories);
+            // The question_categories table has a parent field, use core to walk the category tree (same context) recursively.
+            require_once($CFG->libdir . '/questionlib.php');
+            $categoryids = array_values(array_map('intval', question_categorylist($categoryid)));
         }
 
         [$catsql, $params] = $DB->get_in_or_equal(

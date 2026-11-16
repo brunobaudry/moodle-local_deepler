@@ -20,6 +20,8 @@
             <INDEXES>
                 <INDEX NAME="t_id_index" UNIQUE="false" FIELDS="t_id" COMMENT="Translation id index"/>
                 <INDEX NAME="t_lang_index" UNIQUE="false" FIELDS="t_lang" COMMENT="Translation language index"/>
+                <INDEX NAME="id_table_idx" UNIQUE="false" FIELDS="t_id, t_table" COMMENT="Composite id and table index"/>
+                <INDEX NAME="table_field_idx" UNIQUE="false" FIELDS="t_table, t_field" COMMENT="Composite field and table index"/>
             </INDEXES>
         </TABLE>
         <TABLE NAME="local_deepler_tokens" COMMENT="API tokens">

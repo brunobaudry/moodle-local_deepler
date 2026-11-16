@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.1]
+### Fixed 
+- quizzes questions subcategories was searching for 'path' while there are non parent id is enough.
+
+### Added
+- DB composites indexes in Deepler table.
+- Observer: event attributes nullable checks.
+
 ## [v2.0.0 - 2026-11-12]
 ### Added
 - Document and file translation via DeepL Document API (`docx`, `pptx`, `xlsx`, `pdf`, `htm/html`, `txt`, `jpeg`, `png`...).

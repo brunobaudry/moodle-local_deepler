@@ -94,9 +94,15 @@ function xmldb_local_deepler_upgrade($oldversion): bool {
         local_deepler_upgrade_2026110905();
         upgrade_plugin_savepoint(true, 2026111005, 'local', 'deepler');
     }
+    if ($oldversion < 2026111600) {
+        local_deepler_upgrade_2026111600($dbman);
+        upgrade_plugin_savepoint(true, 2026111600, 'local', 'deepler');
+    }
 
     return true;
 }
+
+
 
 /**
  * Upgrade step for version 2022050100: create main local_deepler table.
@@ -362,6 +368,36 @@ function local_deepler_upgrade_2026110905(): void {
 }
 
 /**
+
+ * Add composite indexes to avoid lock contention and query timeouts during concurrent updates.
+ *
+ * @param \database_manager $dbman
+ * @return void
+ * @throws \ddl_change_structure_exception
+ * @throws \ddl_exception
+ * @throws \ddl_table_missing_exception
+ */
+function local_deepler_upgrade_2026111600(\database_manager $dbman) {
+    $table = new xmldb_table('local_deepler');
+    $index = new xmldb_index(
+        'id_table_idx',
+        XMLDB_INDEX_NOTUNIQUE,
+        ['t_id', 't_table']
+    );
+    $index2 = new xmldb_index(
+        'table_field_idx',
+        XMLDB_INDEX_NOTUNIQUE,
+        ['t_table', 't_field']
+    );
+    if (!$dbman->index_exists($table, $index)) {
+        $dbman->add_index($table, $index);
+    }
+    if (!$dbman->index_exists($table, $index2)) {
+        $dbman->add_index($table, $index2);
+    }
+}
+/**
+
  * Import bundled user tours from JSON export files.
  *
  * @return void

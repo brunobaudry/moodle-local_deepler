@@ -57,10 +57,18 @@ class observer {
      */
     public static function course_module_updated(course_module_updated $event): void {
         global $DB;
+        if (empty($event->other)) {
+            return;
+        }
+        $instanceid = $event->other['instanceid'] ?? 0;
+        $modulename = $event->other['modulename'] ?? '';
+        if (!$instanceid || $modulename === '') {
+            return;
+        }
         // Get matching records for module which infos are in the other object.
         $records = $DB->get_recordset(
             'local_deepler',
-            ['t_id' => $event->other['instanceid'], 't_table' => $event->other['modulename']],
+            ['t_id' => $instanceid, 't_table' => $modulename],
             '',
             '*'
         );
@@ -100,6 +108,9 @@ class observer {
     private static function updatedb(base $event): void {
         global $DB;
 
+        if (empty($event->objectid) || empty($event->objecttable)) {
+            return;
+        }
         // Get matching records.
         $records = $DB->get_recordset(
             'local_deepler',
