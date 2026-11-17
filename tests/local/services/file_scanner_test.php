@@ -163,6 +163,29 @@ final class file_scanner_test extends advanced_testcase {
             'filename' => 'brief.txt',
         ], 'Text brief content');
 
+        // 5. Label module (Text and media activity) with embedded file in editor (intro).
+        $label = $generator->create_module('label', ['course' => $course->id, 'name' => 'Text and Media Section']);
+        $cmlabel = get_coursemodule_from_instance('label', $label->id, $course->id);
+        $contextlabel = context_module::instance($cmlabel->id);
+        $fs->create_file_from_string([
+            'contextid' => $contextlabel->id,
+            'component' => 'mod_label',
+            'filearea' => 'intro',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'embedded_doc.pdf',
+        ], 'Embedded PDF content in Text and Media');
+
+        // 6. Course section summary file.
+        $fs->create_file_from_string([
+            'contextid' => $coursecontext->id,
+            'component' => 'course',
+            'filearea' => 'section',
+            'itemid' => 1,
+            'filepath' => '/',
+            'filename' => 'section_summary.pdf',
+        ], 'Section summary PDF');
+
         // Add a mock existing job in local_deepler_files.
         $DB->insert_record('local_deepler_files', [
             'courseid' => $course->id,
@@ -190,6 +213,8 @@ final class file_scanner_test extends advanced_testcase {
         $this->assertContains('guide.pptx', $filenames);
         $this->assertContains('data.zip', $filenames);
         $this->assertContains('brief.txt', $filenames);
+        $this->assertContains('embedded_doc.pdf', $filenames);
+        $this->assertContains('section_summary.pdf', $filenames);
 
         // Check the coursefile has jobs attached.
         $foundcoursefile = null;
@@ -260,5 +285,54 @@ final class file_scanner_test extends advanced_testcase {
         $filesafter = $scanner->get_course_files();
         $filenamesafter = array_map(fn($f) => $f->file->get_filename(), $filesafter);
         $this->assertNotContains('handout_fr.docx', $filenamesafter);
+
+        // 6. Test translated file in same area with newfileid = 0 is excluded and auto-repaired.
+        $translatedsyllabus = $fs->create_file_from_string([
+            'contextid' => $coursecontext->id,
+            'component' => 'course',
+            'filearea' => 'overviewfiles',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'syllabus_fr.pdf',
+        ], 'Translated PDF syllabus content');
+
+        $jobid = $DB->insert_record('local_deepler_files', [
+            'courseid' => $course->id,
+            'cmid' => 0,
+            'fileid' => $coursefile->get_id(),
+            'contenthash' => $coursefile->get_contenthash(),
+            'sourcelang' => 'en',
+            'targetlang' => 'fr',
+            'status' => 'done',
+            'newcmid' => 0,
+            'newfileid' => 0, // Unset / 0 newfileid.
+            'billedcharacters' => 120,
+            'userid' => 2,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        $filesafterrepair = $scanner->get_course_files();
+        $filenamesafterrepair = array_map(fn($f) => $f->file->get_filename(), $filesafterrepair);
+        $this->assertNotContains('syllabus_fr.pdf', $filenamesafterrepair);
+
+        // Check that newfileid was repaired in DB.
+        $updatedjob = $DB->get_record('local_deepler_files', ['id' => $jobid]);
+        $this->assertEquals($translatedsyllabus->get_id(), $updatedjob->newfileid);
+
+        // 7. Test standalone translated copy (with _de suffix) matching base file without job record is also excluded.
+        $fs->create_file_from_string([
+            'contextid' => $contextlabel->id,
+            'component' => 'mod_label',
+            'filearea' => 'intro',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'embedded_doc_de.pdf',
+        ], 'German embedded PDF content');
+
+        $filesfinal = $scanner->get_course_files();
+        $filenamesfinal = array_map(fn($f) => $f->file->get_filename(), $filesfinal);
+        $this->assertNotContains('embedded_doc_de.pdf', $filenamesfinal);
+        $this->assertContains('embedded_doc.pdf', $filenamesfinal);
     }
 }

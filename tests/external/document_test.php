@@ -230,4 +230,127 @@ final class document_test extends base_external {
         $this->assertEquals('FR', $row['translations'][0]['targetlang']);
         $this->assertEquals('done', $row['translations'][0]['status']);
     }
+
+    /**
+     * Test get_file_url method for various file components and areas.
+     */
+    public function test_get_file_url(): void {
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $coursecontext = context_course::instance($course->id);
+
+        $forum = $generator->create_module('forum', ['course' => $course->id, 'name' => 'Test Forum']);
+        $cmforum = get_coursemodule_from_instance('forum', $forum->id, $course->id);
+        $contextforum = context_module::instance($cmforum->id);
+
+        $resource = $generator->create_module('resource', ['course' => $course->id, 'name' => 'Test Resource']);
+        $cmresource = get_coursemodule_from_instance('resource', $resource->id, $course->id);
+        $contextresource = context_module::instance($cmresource->id);
+
+        $fs = get_file_storage();
+
+        // 1. Module intro file - URL must NOT contain itemid (0).
+        $introfile = $fs->create_file_from_string([
+            'contextid' => $contextforum->id,
+            'component' => 'mod_forum',
+            'filearea' => 'intro',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'forum_intro.pdf',
+        ], 'Intro PDF');
+
+        $introurl = files_page::get_file_url($introfile, (int)$course->id);
+        $this->assertStringContainsString("/pluginfile.php/{$contextforum->id}/mod_forum/intro/forum_intro.pdf", $introurl);
+        $this->assertStringNotContainsString('/intro/0/', $introurl);
+
+        // 2. Course summary file - URL must NOT contain itemid (0).
+        $summaryfile = $fs->create_file_from_string([
+            'contextid' => $coursecontext->id,
+            'component' => 'course',
+            'filearea' => 'summary',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'syllabus.pdf',
+        ], 'Summary PDF');
+
+        $summaryurl = files_page::get_file_url($summaryfile, (int)$course->id);
+        $this->assertStringContainsString("/pluginfile.php/{$coursecontext->id}/course/summary/syllabus.pdf", $summaryurl);
+        $this->assertStringNotContainsString('/summary/0/', $summaryurl);
+
+        // 3. Mod resource content file - URL MUST contain itemid/revision (0).
+        $contentfile = $fs->create_file_from_string([
+            'contextid' => $contextresource->id,
+            'component' => 'mod_resource',
+            'filearea' => 'content',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'slides.pptx',
+        ], 'Slides PPTX');
+
+        $contenturl = files_page::get_file_url($contentfile, (int)$course->id);
+        $this->assertStringContainsString("/pluginfile.php/{$contextresource->id}/mod_resource/content/0/slides.pptx", $contenturl);
+    }
+
+    /**
+     * Test finalize_document for non-resource/non-folder modules does not duplicate activity.
+     */
+    public function test_finalize_document_non_resource_module(): void {
+        global $DB;
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        $label = $generator->create_module('label', ['course' => $course->id, 'name' => 'Text and Media Section']);
+        $cmlabel = get_coursemodule_from_instance('label', $label->id, $course->id);
+        $contextlabel = context_module::instance($cmlabel->id);
+
+        $fs = get_file_storage();
+        $file = $fs->create_file_from_string([
+            'contextid' => $contextlabel->id,
+            'component' => 'mod_label',
+            'filearea' => 'intro',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'embedded.pdf',
+        ], 'Original PDF');
+
+        // Create completed job record.
+        $jobid = $DB->insert_record('local_deepler_files', [
+            'courseid' => $course->id,
+            'cmid' => $cmlabel->id,
+            'fileid' => $file->get_id(),
+            'contenthash' => $file->get_contenthash(),
+            'sourcelang' => 'en',
+            'targetlang' => 'fr',
+            'status' => 'done',
+            'documentid' => 'doc_label_1',
+            'documentkey' => 'key_label_1',
+            'newcmid' => 0,
+            'newfileid' => 0,
+            'billedcharacters' => 100,
+            'userid' => 2,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+
+        // When already marked done with newfileid:
+        $storedtranslated = $fs->create_file_from_string([
+            'contextid' => $contextlabel->id,
+            'component' => 'mod_label',
+            'filearea' => 'intro',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'embedded_fr.pdf',
+        ], 'Translated French PDF');
+
+        $DB->set_field('local_deepler_files', 'newfileid', $storedtranslated->get_id(), ['id' => $jobid]);
+
+        $res = finalize_document::execute($jobid, 'v1.10.0');
+        $this->assertEquals('done', $res['status']);
+        $this->assertEquals(0, $res['newcmid']);
+        $this->assertEquals('', $res['newcmurl']);
+        $this->assertNotEmpty($res['newfileurl']);
+        $this->assertStringContainsString('embedded_fr.pdf', $res['newfileurl']);
+    }
 }

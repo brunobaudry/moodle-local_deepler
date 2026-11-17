@@ -27,6 +27,7 @@ use DeepL\DeepLException;
 use DeepL\DocumentHandle;
 use local_deepler\local\services\activity_duplicator;
 use local_deepler\local\services\document_translator;
+use local_deepler\output\files_page;
 use moodle_exception;
 use moodle_url;
 use stdClass;
@@ -70,6 +71,7 @@ class finalize_document extends external_api {
             'status' => new external_value(PARAM_TEXT, 'Final status (done, error)'),
             'newcmid' => new external_value(PARAM_INT, 'Created course module ID (0 for course files)', VALUE_DEFAULT, 0),
             'newcmurl' => new external_value(PARAM_TEXT, 'URL to the duplicated activity or file', VALUE_DEFAULT, ''),
+            'newfileurl' => new external_value(PARAM_TEXT, 'URL to preview the translated file', VALUE_DEFAULT, ''),
             'newname' => new external_value(PARAM_TEXT, 'Translated name', VALUE_DEFAULT, ''),
             'filename' => new external_value(PARAM_TEXT, 'Translated filename', VALUE_DEFAULT, ''),
             'restricted' => new external_value(PARAM_BOOL, 'Whether language restriction was applied', VALUE_DEFAULT, false),
@@ -144,6 +146,7 @@ class finalize_document extends external_api {
             'status' => 'done',
             'newcmid' => $result['newcmid'],
             'newcmurl' => $result['newcmurl'],
+            'newfileurl' => $result['newfileurl'] ?? '',
             'newname' => $result['newname'],
             'filename' => $result['filename'],
             'restricted' => $result['restricted'],
@@ -165,6 +168,7 @@ class finalize_document extends external_api {
             'status' => 'error',
             'newcmid' => 0,
             'newcmurl' => '',
+            'newfileurl' => '',
             'newname' => '',
             'filename' => '',
             'restricted' => false,
@@ -190,7 +194,8 @@ class finalize_document extends external_api {
      * @return array
      */
     private static function build_completed_job_response(stdClass $job): array {
-        $url = '';
+        $cmurl = '';
+        $fileurl = '';
         $name = '';
         $filename = '';
 
@@ -199,22 +204,18 @@ class finalize_document extends external_api {
             $newcm = $modinfo->cms[$job->newcmid] ?? null;
             if ($newcm) {
                 $name = $newcm->name;
-                $url = (new moodle_url('/mod/' . $newcm->modname . '/view.php', ['id' => $newcm->id]))->out(false);
+                $cmurl = (new moodle_url('/mod/' . $newcm->modname . '/view.php', ['id' => $newcm->id]))->out(false);
             }
-        } else if ($job->newfileid > 0) {
+        }
+        if ($job->newfileid > 0) {
             $fs = get_file_storage();
             $newfile = $fs->get_file_by_id($job->newfileid);
             if ($newfile) {
-                $name = $newfile->get_filename();
+                if ($name === '') {
+                    $name = $newfile->get_filename();
+                }
                 $filename = $newfile->get_filename();
-                $url = moodle_url::make_pluginfile_url(
-                    $newfile->get_contextid(),
-                    $newfile->get_component(),
-                    $newfile->get_filearea(),
-                    $newfile->get_itemid(),
-                    $newfile->get_filepath(),
-                    $newfile->get_filename()
-                )->out(false);
+                $fileurl = files_page::get_file_url($newfile, (int)$job->courseid);
             }
         }
 
@@ -222,7 +223,8 @@ class finalize_document extends external_api {
             'jobid' => (int)$job->id,
             'status' => 'done',
             'newcmid' => (int)$job->newcmid,
-            'newcmurl' => $url,
+            'newcmurl' => $cmurl,
+            'newfileurl' => $fileurl,
             'newname' => $name,
             'filename' => $filename,
             'restricted' => true,
@@ -297,19 +299,13 @@ class finalize_document extends external_api {
         activity_duplicator $duplicator
     ): array {
         $newstoredfile = $duplicator->store_course_file($originalfile, $temppath, $job->targetlang);
-        $newcmurl = moodle_url::make_pluginfile_url(
-            $newstoredfile->get_contextid(),
-            $newstoredfile->get_component(),
-            $newstoredfile->get_filearea(),
-            $newstoredfile->get_itemid(),
-            $newstoredfile->get_filepath(),
-            $newstoredfile->get_filename()
-        )->out(false);
+        $newfileurl = files_page::get_file_url($newstoredfile, (int)$job->courseid);
 
         return [
             'newcmid' => 0,
             'newfileid' => (int)$newstoredfile->get_id(),
-            'newcmurl' => $newcmurl,
+            'newcmurl' => '',
+            'newfileurl' => $newfileurl,
             'newname' => $newstoredfile->get_filename(),
             'filename' => $newstoredfile->get_filename(),
             'restricted' => false,
@@ -338,6 +334,11 @@ class finalize_document extends external_api {
         $cm = $modinfo->cms[$job->cmid] ?? null;
         if (!$cm) {
             throw new moodle_exception('Course module ' . $job->cmid . ' not found.');
+        }
+
+        // Only duplicate activity for 'resource' and 'folder' modules.
+        if ($cm->modname !== 'resource' && $cm->modname !== 'folder') {
+            return self::duplicate_course_resource($job, $originalfile, $temppath, $duplicator);
         }
 
         $existingfolderjob = $DB->get_record_select(
@@ -369,6 +370,7 @@ class finalize_document extends external_api {
             'newcmid' => (int)$newcminfo->id,
             'newfileid' => (int)$newstoredfile->get_id(),
             'newcmurl' => (new moodle_url('/mod/' . $newcminfo->modname . '/view.php', ['id' => $newcminfo->id]))->out(false),
+            'newfileurl' => files_page::get_file_url($newstoredfile, (int)$job->courseid),
             'newname' => $newcminfo->name,
             'filename' => $newstoredfile->get_filename(),
             'restricted' => $restricted,
@@ -421,6 +423,7 @@ class finalize_document extends external_api {
             'newcmid' => $newcmid,
             'newfileid' => (int)$newstoredfile->get_id(),
             'newcmurl' => (new moodle_url('/mod/folder/view.php', ['id' => $newcmid]))->out(false),
+            'newfileurl' => files_page::get_file_url($newstoredfile, (int)$job->courseid),
             'newname' => $newname,
             'filename' => $newstoredfile->get_filename(),
             'restricted' => true,

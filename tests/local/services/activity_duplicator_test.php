@@ -177,4 +177,59 @@ final class activity_duplicator_test extends advanced_testcase {
         $this->assertEquals('French Syllabus Content', $stored->get_content());
         $this->assertEquals($coursecontext->id, $stored->get_contextid());
     }
+
+    /**
+     * Test duplicating a text and media (label) activity with embedded file in editor.
+     */
+    public function test_duplicate_label_with_embedded_file(): void {
+        global $DB;
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['fullname' => 'Label Embedded Test Course']);
+
+        // Create label activity with embedded link to PDF.
+        $introhtml = '<p>Check out our document: <a href="@@PLUGINFILE@@/511_Constanze_Hofmann.pdf">511_Constanze_Hofmann.pdf</a></p>';
+        $label = $generator->create_module('label', [
+            'course' => $course->id,
+            'name' => 'Text and Media Document',
+            'intro' => $introhtml,
+        ]);
+        $cmlabel = get_coursemodule_from_instance('label', $label->id, $course->id);
+        $contextlabel = context_module::instance($cmlabel->id);
+
+        $fs = get_file_storage();
+        $originalfile = $fs->create_file_from_string([
+            'contextid' => $contextlabel->id,
+            'component' => 'mod_label',
+            'filearea' => 'intro',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => '511_Constanze_Hofmann.pdf',
+        ], 'Original PDF bytes');
+
+        $tempdir = make_request_directory();
+        $temppath = $tempdir . '/translated.pdf';
+        file_put_contents($temppath, 'Translated French PDF bytes');
+
+        $duplicator = new activity_duplicator('v1.10.0');
+        $modinfo = get_fast_modinfo($course);
+        $cm = $modinfo->cms[$cmlabel->id];
+
+        [$newcm, $newstoredfile] = $duplicator->duplicate_with_file(
+            $cm,
+            $temppath,
+            $originalfile,
+            'fr',
+            'en',
+            'Text and Media Document (FR)'
+        );
+
+        $this->assertNotEmpty($newcm);
+        $this->assertEquals('511_Constanze_Hofmann_fr.pdf', $newstoredfile->get_filename());
+        $this->assertEquals('Translated French PDF bytes', $newstoredfile->get_content());
+
+        // Check duplicated label instance intro has updated file link.
+        $duplicatedlabel = $DB->get_record('label', ['id' => $newcm->instance]);
+        $this->assertStringContainsString('511_Constanze_Hofmann_fr.pdf', $duplicatedlabel->intro);
+        $this->assertStringNotContainsString('511_Constanze_Hofmann.pdf</a>', $duplicatedlabel->intro);
+    }
 }

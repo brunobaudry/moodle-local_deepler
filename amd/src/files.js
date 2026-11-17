@@ -339,6 +339,7 @@ define([
             filename: finalRes.filename || '',
             timecreated: strings.justnow || 'Just now',
             newcmurl: finalRes.newcmurl || '',
+            newfileurl: finalRes.newfileurl || '',
             statusbadge: 'badge-success',
             statusstr: strings.done,
             // eslint-disable-next-line camelcase
@@ -409,7 +410,7 @@ define([
             setFileStatus(fileId, strings.done, 'badge-success');
 
             // Render link to duplicated cm if available
-            if (finalRes.newcmurl) {
+            if (finalRes.newcmid > 0 && finalRes.newcmurl) {
                 const statusCell = Utils.domQuery(`td.status-cell[data-fileid="${fileId}"]`);
                 if (statusCell && !Utils.domQuery('.open-duplicate-link', '', statusCell)) {
                     Templates.render('local_deepler/files_open_duplicate_link', {newcmurl: finalRes.newcmurl})

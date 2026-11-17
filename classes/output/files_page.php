@@ -16,6 +16,7 @@
 
 namespace local_deepler\output;
 
+use Aws\RAM\Exception\RAMException;
 use local_deepler\local\data\multilanger;
 use local_deepler\local\services\file_scanner;
 use local_deepler\local\services\lang_helper;
@@ -208,6 +209,57 @@ class files_page implements renderable, templatable {
     }
 
     /**
+     * Get preview/download URL for a stored file.
+     *
+     * @param \stored_file $file
+     * @param int $courseid
+     * @return string
+     */
+    public static function get_file_url(\stored_file $file, int $courseid): string {
+        $component = $file->get_component();
+        $filearea = $file->get_filearea();
+
+        if ($component === 'course' && $filearea === 'legacy') {
+            return moodle_url::make_legacyfile_url($courseid, $file->get_filepath() . $file->get_filename())->out(false);
+        }
+
+        // For course summary and overviewfiles, Moodle pluginfile handler does not expect itemid in URL.
+        if ($component === 'course' && ($filearea === 'summary' || $filearea === 'overviewfiles')) {
+            return moodle_url::make_pluginfile_url(
+                $file->get_contextid(),
+                $component,
+                $filearea,
+                null,
+                $file->get_filepath(),
+                $file->get_filename()
+            )->out(false);
+        }
+
+        // For module intro files (across any activity module), Moodle core pluginfile handler does not expect itemid in URL.
+        if ($filearea === 'intro') {
+            return moodle_url::make_pluginfile_url(
+                $file->get_contextid(),
+                $component,
+                $filearea,
+                null,
+                $file->get_filepath(),
+                $file->get_filename()
+            )->out(false);
+        }
+
+        // For other areas (e.g. mod_resource/content, mod_folder/content, mod_page/content, mod_assign/introattachment)
+        // itemid (or revision 0) is expected by the pluginfile handler.
+        return moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $component,
+            $filearea,
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out(false);
+    }
+
+    /**
      * Format a single translation job data for template.
      *
      * @param stdClass $job
@@ -218,6 +270,7 @@ class files_page implements renderable, templatable {
     private function format_translation_job(stdClass $job, string $rawfilename, ?string $modname): array {
         $jobcmurl = '';
         $jobfilename = '';
+        $newfileurl = '';
         $iscompletedduplicate = false;
 
         if ($job->newcmid > 0) {
@@ -232,6 +285,7 @@ class files_page implements renderable, templatable {
             $newfile = $fs->get_file_by_id($job->newfileid);
             if ($newfile) {
                 $jobfilename = $newfile->get_filename();
+                $newfileurl = self::get_file_url($newfile, (int)$this->course->id);
             }
         }
         if ($jobfilename === '') {
@@ -257,6 +311,7 @@ class files_page implements renderable, templatable {
             'statusbadge' => $statusbadge,
             'newcmid' => (int)$job->newcmid,
             'newcmurl' => $jobcmurl,
+            'newfileurl' => $newfileurl,
             'billedchars' => (int)$job->billedcharacters,
             'str_billedchars' => get_string('files:billedchars', 'local_deepler', (int)$job->billedcharacters),
             'timecreated' => userdate($job->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
@@ -323,14 +378,7 @@ class files_page implements renderable, templatable {
     ): array {
         $file = $tfile->file;
         $cm = $tfile->cm;
-        $fileurl = moodle_url::make_pluginfile_url(
-            $file->get_contextid(),
-            $file->get_component(),
-            $file->get_filearea(),
-            $file->get_itemid(),
-            $file->get_filepath(),
-            $file->get_filename()
-        )->out(false);
+        $fileurl = self::get_file_url($file, (int)$this->course->id);
 
         $icon = $output->pix_icon(file_file_icon($file), $file->get_filename(), 'moodle', ['class' => 'icon']);
         $rawactivityname = $cm ? $cm->name : get_string('files:courselevel', 'local_deepler');
@@ -409,6 +457,9 @@ class files_page implements renderable, templatable {
     ): array {
         $sections = [];
         foreach ($this->files as $tfile) {
+            if (!$tfile->supported) {
+                continue;
+            }
             $secid = $tfile->sectionid;
             if (!isset($sections[$secid])) {
                 $secname = $tfile->sectionname ?: get_string('files:courselevel', 'local_deepler');

@@ -34,8 +34,10 @@ class file_scanner {
     /** @var array Supported file extensions by DeepL Document API. */
     public const SUPPORTED_EXTENSIONS = [
         'docx',
+        'doc',
         'pptx',
         'xlsx',
+        'xlsm',
         'pdf',
         'htm',
         'html',
@@ -48,6 +50,8 @@ class file_scanner {
         'jpeg',
         'jpg',
         'png',
+        'idml',
+        'mif',
     ];
 
     /** @var array File extensions subject to DeepL 50,000 characters billing minimum. */
@@ -156,6 +160,7 @@ class file_scanner {
         $jobsbyfile = [];
         $translatedfileids = [];
         $translatedcmids = [];
+        $fs = get_file_storage();
 
         foreach ($jobsrecords as $job) {
             $jobsbyfile[$job->fileid][] = $job;
@@ -164,6 +169,60 @@ class file_scanner {
             }
             if ($job->newcmid > 0) {
                 $translatedcmids[$job->newcmid] = true;
+                // Add all files belonging to the duplicated course module to translatedfileids.
+                $dupcontext = context_module::instance($job->newcmid, IGNORE_MISSING);
+                if ($dupcontext) {
+                    $dupfiles = $fs->get_area_files($dupcontext->id, false, false, false, 'id ASC');
+                    foreach ($dupfiles as $df) {
+                        if (!$df->is_directory() && $df->get_filename() !== '.') {
+                            $translatedfileids[$df->get_id()] = true;
+                        }
+                    }
+                }
+            }
+
+            // Also check if a translated file exists for this job in case newfileid was 0 or became out of sync.
+            if ($job->fileid > 0) {
+                $sourcefile = $fs->get_file_by_id($job->fileid);
+                if ($sourcefile && !$sourcefile->is_directory() && $sourcefile->get_filename() !== '.') {
+                    $expectedtargetname = activity_duplicator::get_translated_filename($sourcefile->get_filename(), $job->targetlang);
+
+                    // Check in original context / area.
+                    $targetfile = $fs->get_file(
+                        $sourcefile->get_contextid(),
+                        $sourcefile->get_component(),
+                        $sourcefile->get_filearea(),
+                        $sourcefile->get_itemid(),
+                        $sourcefile->get_filepath(),
+                        $expectedtargetname
+                    );
+                    if ($targetfile) {
+                        $translatedfileids[$targetfile->get_id()] = true;
+                        if (empty($job->newfileid) && $job->status === 'done') {
+                            $job->newfileid = (int)$targetfile->get_id();
+                            $DB->set_field('local_deepler_files', 'newfileid', $targetfile->get_id(), ['id' => $job->id]);
+                        }
+                    }
+
+                    // Check in duplicated cm context if newcmid was set.
+                    if ($job->newcmid > 0 && !empty($dupcontext)) {
+                        $dupfile = $fs->get_file(
+                            $dupcontext->id,
+                            $sourcefile->get_component(),
+                            $sourcefile->get_filearea(),
+                            $sourcefile->get_itemid(),
+                            $sourcefile->get_filepath(),
+                            $expectedtargetname
+                        );
+                        if ($dupfile) {
+                            $translatedfileids[$dupfile->get_id()] = true;
+                            if (empty($job->newfileid) && $job->status === 'done') {
+                                $job->newfileid = (int)$dupfile->get_id();
+                                $DB->set_field('local_deepler_files', 'newfileid', $dupfile->get_id(), ['id' => $job->id]);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -171,68 +230,82 @@ class file_scanner {
     }
 
     /**
-     * Scan course-level files in summary, overviewfiles, legacy areas.
+     * Check if a stored file is a translated copy of another file in the same context and area.
+     *
+     * @param stored_file $file
+     * @return bool
+     */
+    private function is_translated_copy_file(stored_file $file): bool {
+        $filename = $file->get_filename();
+        // Look for pattern basename_LANG.ext (e.g. handout_fr.docx, image_zh_cn.png).
+        if (preg_match('/^(.+)_[a-zA-Z]{2,3}(?:_[a-zA-Z]{2,4})?\.([a-zA-Z0-9]+)$/', $filename, $matches)) {
+            $basefilename = $matches[1] . '.' . $matches[2];
+            $fs = get_file_storage();
+            $basefile = $fs->get_file(
+                $file->get_contextid(),
+                $file->get_component(),
+                $file->get_filearea(),
+                $file->get_itemid(),
+                $file->get_filepath(),
+                $basefilename
+            );
+            if ($basefile && !$basefile->is_directory() && $basefile->get_filename() !== '.') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Scan course-level files in summary, overviewfiles, legacy, and section areas.
      *
      * @param array $jobsbyfile
      * @param array $translatedfileids
      * @return translatable_file[]
      */
     private function scan_course_level_files(array $jobsbyfile, array $translatedfileids): array {
+        global $DB;
         $fs = get_file_storage();
         $coursecontext = context_course::instance($this->course->id);
-        $courseareas = ['summary', 'overviewfiles', 'legacy'];
         $results = [];
 
-        foreach ($courseareas as $area) {
-            $files = $fs->get_area_files($coursecontext->id, 'course', $area, 0, 'filename', false);
-            foreach ($files as $file) {
-                if ($file->is_directory() || $file->get_filename() === '.') {
-                    continue;
-                }
-                if (isset($translatedfileids[$file->get_id()])) {
-                    continue;
-                }
+        $filerecords = $DB->get_records_select(
+            'files',
+            'contextid = :contextid AND filename != :dot AND filesize > 0 AND component = :component AND filearea NOT IN (\'draft\', \'backup\', \'automated\')',
+            ['contextid' => $coursecontext->id, 'dot' => '.', 'component' => 'course'],
+            'itemid ASC, filename ASC'
+        );
 
-                $supported = self::is_supported($file, $this->maxbytes);
-                $reason = self::get_unsupported_reason($file, $this->maxbytes);
-                $filejobs = $jobsbyfile[$file->get_id()] ?? [];
-                $hasbillingmin = self::has_billing_minimum($file);
-
-                $results[] = new translatable_file(
-                    $file,
-                    null,
-                    'course',
-                    $area,
-                    $supported,
-                    $reason,
-                    $filejobs,
-                    0,
-                    0,
-                    get_string('files:courselevel', 'local_deepler'),
-                    $hasbillingmin
-                );
+        foreach ($filerecords as $filerecord) {
+            $file = $fs->get_file_instance($filerecord);
+            if (!$file || $file->is_directory() || $file->get_filename() === '.') {
+                continue;
             }
+            if (isset($translatedfileids[$file->get_id()]) || $this->is_translated_copy_file($file)) {
+                continue;
+            }
+
+            $supported = self::is_supported($file, $this->maxbytes);
+            $reason = self::get_unsupported_reason($file, $this->maxbytes);
+            $filejobs = $jobsbyfile[$file->get_id()] ?? [];
+            $hasbillingmin = self::has_billing_minimum($file);
+
+            $results[] = new translatable_file(
+                $file,
+                null,
+                $file->get_component(),
+                $file->get_filearea(),
+                $supported,
+                $reason,
+                $filejobs,
+                0,
+                0,
+                get_string('files:courselevel', 'local_deepler'),
+                $hasbillingmin
+            );
         }
 
         return $results;
-    }
-
-    /**
-     * Get module file areas to inspect based on module name.
-     *
-     * @param string $modname
-     * @return array
-     */
-    private function get_module_areas(string $modname): array {
-        $areas = [];
-        if ($modname === 'resource' || $modname === 'folder') {
-            $areas[] = ['component' => 'mod_' . $modname, 'filearea' => 'content'];
-        }
-        $areas[] = ['component' => 'mod_' . $modname, 'filearea' => 'intro'];
-        if ($modname === 'assign') {
-            $areas[] = ['component' => 'mod_assign', 'filearea' => 'introattachment'];
-        }
-        return $areas;
     }
 
     /**
@@ -254,42 +327,51 @@ class file_scanner {
         array $jobsbyfile,
         array $translatedfileids
     ): array {
+        global $DB;
         $fs = get_file_storage();
         $context = context_module::instance($cm->id);
-        $areas = $this->get_module_areas($cm->modname);
         $results = [];
         $seenfileids = [];
 
-        foreach ($areas as $area) {
-            $files = $fs->get_area_files($context->id, $area['component'], $area['filearea'], false, 'filename', false);
-            foreach ($files as $file) {
-                if ($file->is_directory() || $file->get_filename() === '.') {
-                    continue;
-                }
-                if (isset($seenfileids[$file->get_id()]) || isset($translatedfileids[$file->get_id()])) {
-                    continue;
-                }
-                $seenfileids[$file->get_id()] = true;
+        $filerecords = $DB->get_records_select(
+            'files',
+            'contextid = :contextid AND filename != :dot AND filesize > 0 AND filearea NOT IN (\'draft\', \'backup\', \'automated\')',
+            ['contextid' => $context->id, 'dot' => '.'],
+            'itemid ASC, filename ASC'
+        );
 
-                $supported = self::is_supported($file, $this->maxbytes);
-                $reason = self::get_unsupported_reason($file, $this->maxbytes);
-                $filejobs = $jobsbyfile[$file->get_id()] ?? [];
-                $hasbillingmin = self::has_billing_minimum($file);
-
-                $results[] = new translatable_file(
-                    $file,
-                    $cm,
-                    $area['component'],
-                    $area['filearea'],
-                    $supported,
-                    $reason,
-                    $filejobs,
-                    $sectionid,
-                    $sectionnum,
-                    $sectionname,
-                    $hasbillingmin
-                );
+        foreach ($filerecords as $filerecord) {
+            $file = $fs->get_file_instance($filerecord);
+            if (!$file || $file->is_directory() || $file->get_filename() === '.') {
+                continue;
             }
+            if (
+                isset($seenfileids[$file->get_id()]) ||
+                isset($translatedfileids[$file->get_id()]) ||
+                $this->is_translated_copy_file($file)
+            ) {
+                continue;
+            }
+            $seenfileids[$file->get_id()] = true;
+
+            $supported = self::is_supported($file, $this->maxbytes);
+            $reason = self::get_unsupported_reason($file, $this->maxbytes);
+            $filejobs = $jobsbyfile[$file->get_id()] ?? [];
+            $hasbillingmin = self::has_billing_minimum($file);
+
+            $results[] = new translatable_file(
+                $file,
+                $cm,
+                $file->get_component(),
+                $file->get_filearea(),
+                $supported,
+                $reason,
+                $filejobs,
+                $sectionid,
+                $sectionnum,
+                $sectionname,
+                $hasbillingmin
+            );
         }
 
         return $results;

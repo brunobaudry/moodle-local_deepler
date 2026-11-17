@@ -99,7 +99,7 @@ class activity_duplicator {
      * @param string $targetlang Target language code.
      * @return string
      */
-    public function get_translated_filename(string $filename, string $targetlang): string {
+    public static function get_translated_filename(string $filename, string $targetlang): string {
         $pathinfo = pathinfo($filename);
         $basename = $pathinfo['filename'] ?? 'file';
         $ext = !empty($pathinfo['extension']) ? ('.' . $pathinfo['extension']) : '';
@@ -190,6 +190,12 @@ class activity_duplicator {
             $translatedintro = $this->translate_text($instance->intro, $sourcelang, $targetlang, true);
             if (!empty($translatedintro)) {
                 $instance->intro = $translatedintro;
+            }
+        }
+        if (isset($instance->content) && !empty($instance->content) && is_string($instance->content)) {
+            $translatedcontent = $this->translate_text($instance->content, $sourcelang, $targetlang, true);
+            if (!empty($translatedcontent)) {
+                $instance->content = $translatedcontent;
             }
         }
         $DB->update_record($modname, $instance);
@@ -298,10 +304,60 @@ class activity_duplicator {
         $newcontext = context_module::instance($newcminfo->id);
         $newstoredfile = $this->replace_module_file($newcontext->id, $original, $translatedpath, $targetlang);
 
+        $this->update_embedded_file_references(
+            $newcminfo,
+            $original->get_filename(),
+            $newstoredfile->get_filename()
+        );
+
         $restricted = $this->apply_language_restriction($newcminfo->id, $targetlang, (int)$course->id);
         $warning = $restricted ? '' : get_string('files:missingavailabilitywarning', 'local_deepler');
 
         return [$newcminfo, $newstoredfile, $restricted, $warning];
+    }
+
+    /**
+     * Update embedded file references in module instance text fields (e.g. editor contents).
+     *
+     * @param cm_info $cminfo
+     * @param string $oldfilename
+     * @param string $newfilename
+     * @return void
+     */
+    private function update_embedded_file_references(
+        cm_info $cminfo,
+        string $oldfilename,
+        string $newfilename
+    ): void {
+        global $DB;
+
+        $modname = $cminfo->modname;
+        $instance = $DB->get_record($modname, ['id' => $cminfo->instance]);
+        if (!$instance) {
+            return;
+        }
+
+        $oldnameencoded = rawurlencode($oldfilename);
+        $newnameencoded = rawurlencode($newfilename);
+
+        $changed = false;
+        foreach (['intro', 'content', 'activity', 'page'] as $field) {
+            if (isset($instance->$field) && is_string($instance->$field) && !empty($instance->$field)) {
+                $newtext = str_replace(
+                    [$oldnameencoded, $oldfilename],
+                    [$newnameencoded, $newfilename],
+                    $instance->$field
+                );
+                if ($newtext !== $instance->$field) {
+                    $instance->$field = $newtext;
+                    $changed = true;
+                }
+            }
+        }
+
+        if ($changed) {
+            $DB->update_record($modname, $instance);
+        }
     }
 
     /**
@@ -368,7 +424,7 @@ class activity_duplicator {
                     'id' => strtolower($targetlang),
                 ],
             ],
-            'showc' => [true],
+            'showc' => [false],
         ]);
 
         $DB->set_field('course_modules', 'availability', $json, ['id' => $cmid]);

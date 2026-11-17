@@ -109,6 +109,16 @@ class upload_document extends external_api {
             return [$courseid, $cmid, ''];
         }
 
+        if ($context->contextlevel == CONTEXT_BLOCK) {
+            $coursecontext = $context->get_course_context(false);
+            if ($coursecontext) {
+                $courseid = $coursecontext->instanceid;
+                self::validate_context($coursecontext);
+                require_capability('local/deepler:translatefiles', $coursecontext);
+                return [$courseid, $cmid, ''];
+            }
+        }
+
         return [$courseid, $cmid, 'Invalid file context for course translation.'];
     }
 
