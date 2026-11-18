@@ -76,3 +76,9 @@ Feature: Check initial state of the course translation page
     And the "select-all" "checkbox" should be enabled
     When I click on "select-all" "checkbox"
     Then the "local_deepler-translate-header-translatebutton" "button" should be enabled
+
+@accessibility
+  Scenario: Translate page meets accessibility standards
+    Given I am on the "C1" "course" page
+    When I navigate to "DeepLer Translator" in current page administration
+    Then the page should meet accessibility standards
