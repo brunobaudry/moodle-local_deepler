@@ -187,7 +187,7 @@ final class activity_duplicator_test extends advanced_testcase {
         $course = $generator->create_course(['fullname' => 'Label Embedded Test Course']);
 
         // Create label activity with embedded link to PDF.
-        $introhtml = '<p>Check out our document: <a href="@@PLUGINFILE@@/511_Constanze_Hofmann.pdf">511_Constanze_Hofmann.pdf</a></p>';
+        $introhtml = '<p>Check out doc: <a href="@@PLUGINFILE@@/511_Constanze_Hofmann.pdf">511_Constanze_Hofmann.pdf</a></p>';
         $label = $generator->create_module('label', [
             'course' => $course->id,
             'name' => 'Text and Media Document',

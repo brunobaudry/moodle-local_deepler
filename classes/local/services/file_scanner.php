@@ -185,7 +185,10 @@ class file_scanner {
             if ($job->fileid > 0) {
                 $sourcefile = $fs->get_file_by_id($job->fileid);
                 if ($sourcefile && !$sourcefile->is_directory() && $sourcefile->get_filename() !== '.') {
-                    $expectedtargetname = activity_duplicator::get_translated_filename($sourcefile->get_filename(), $job->targetlang);
+                    $expectedtargetname = activity_duplicator::get_translated_filename(
+                        $sourcefile->get_filename(),
+                        $job->targetlang
+                    );
 
                     // Check in original context / area.
                     $targetfile = $fs->get_file(
@@ -268,10 +271,11 @@ class file_scanner {
         $fs = get_file_storage();
         $coursecontext = context_course::instance($this->course->id);
         $results = [];
-
+        $select = 'contextid = :contextid AND filename != :dot AND filesize > 0 ';
+        $select .= 'AND component = :component AND filearea NOT IN (\'draft\', \'backup\', \'automated\')';
         $filerecords = $DB->get_records_select(
             'files',
-            'contextid = :contextid AND filename != :dot AND filesize > 0 AND component = :component AND filearea NOT IN (\'draft\', \'backup\', \'automated\')',
+            $select,
             ['contextid' => $coursecontext->id, 'dot' => '.', 'component' => 'course'],
             'itemid ASC, filename ASC'
         );
@@ -332,10 +336,11 @@ class file_scanner {
         $context = context_module::instance($cm->id);
         $results = [];
         $seenfileids = [];
-
+        $select = 'contextid = :contextid AND filename != :dot AND filesize > 0 ';
+        $select .= 'AND filearea NOT IN (\'draft\', \'backup\', \'automated\')';
         $filerecords = $DB->get_records_select(
             'files',
-            'contextid = :contextid AND filename != :dot AND filesize > 0 AND filearea NOT IN (\'draft\', \'backup\', \'automated\')',
+            $select,
             ['contextid' => $context->id, 'dot' => '.'],
             'itemid ASC, filename ASC'
         );

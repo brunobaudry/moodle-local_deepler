@@ -334,7 +334,7 @@ final class document_test extends base_external {
             'timemodified' => time(),
         ]);
 
-        // When already marked done with newfileid:
+        // When already marked done with newfileid.
         $storedtranslated = $fs->create_file_from_string([
             'contextid' => $contextlabel->id,
             'component' => 'mod_label',
