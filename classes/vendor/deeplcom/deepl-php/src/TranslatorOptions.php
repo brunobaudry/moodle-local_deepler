@@ -9,10 +9,11 @@ namespace DeepL;
 use Psr\Log\LoggerInterface;
 
 /**
- * Options that can be specified when constructing a Translator, DeepLClient or DeepLAdminClient.
+ * Options that can be specified when constructing a DeepLClient or DeepLAdminClient.
  * Please note that using any options from TranslatorOptions::IGNORED_OPTIONS_WITH_CUSTOM_HTTP_CLIENT,
  * such as proxy or timeout, are ignored when using a custom HTTP client.
- * @see Translator::__construct
+ * An option key that is not one of the constants below makes the constructor throw an \InvalidArgumentException.
+ * @see DeepLClient::__construct
  * @see DeepLAdminClient::__construct
  */
 class TranslatorOptions
@@ -43,7 +44,9 @@ class TranslatorOptions
     /**
      * Base URL of DeepL API, can be overridden for example for testing purposes. By default, the correct DeepL API URL
      * is selected based on the user account type (free or paid). DeepLAdminClient always uses DEFAULT_SERVER_URL by
-     * default.
+     * default. Must be an absolute http or https URL with a host, such as 'https://api.deepl.com' or
+     * 'http://localhost:3000/base'; a port and a path are allowed and a trailing slash is removed. Any other value
+     * throws an \InvalidArgumentException when the client is constructed.
      * @see DEFAULT_SERVER_URL
      * @see DEFAULT_SERVER_URL_FREE
      */
@@ -71,7 +74,9 @@ class TranslatorOptions
     public const MAX_RETRIES = 'max_retries';
 
     /**
-     * Proxy server URL, for example 'https://user:pass@10.10.1.10:3128'.
+     * Proxy server URL, for example 'https://user:pass@10.10.1.10:3128': a host with an http, https, socks4,
+     * socks4a, socks5 or socks5h scheme, or a host[:port] without a scheme, used as http. Any other value throws
+     * an \InvalidArgumentException when the client is constructed.
      */
     public const PROXY = 'proxy';
 
@@ -111,7 +116,24 @@ class TranslatorOptions
     public const APP_INFO = 'app_info';
 
     /**
-     * Validates the options array passed to the Translator object.
+     * Throws if the options array passed to the client constructor contains an option key that is not one of the
+     * constants of this class.
+     * @internal Not part of the public API; may change without notice. The DeepLClient and DeepLAdminClient
+     * constructors call it.
+     * @throws \InvalidArgumentException For an unknown option key.
+     */
+    public static function checkOptionKeys(array $options): void
+    {
+        foreach (array_keys($options) as $option_key) {
+            if (!array_key_exists($option_key, TranslatorOptions::OPTIONS_KEYS)) {
+                throw new \InvalidArgumentException("Unknown client option: $option_key");
+            }
+        }
+    }
+
+    /**
+     * Validates the options array passed to the client constructor, logging a warning for options that are ignored
+     * with a custom HTTP client.
      */
     public static function isValid(array $options): bool
     {
@@ -122,15 +144,7 @@ class TranslatorOptions
                 $is_valid &= !TranslatorOptions::isIgnoredHttpOptionSet($ignored_option, $options, $maybe_logger);
             }
         }
-        foreach ($options as $option_key => $option_value) {
-            if (!array_key_exists($option_key, TranslatorOptions::OPTIONS_KEYS)) {
-                if ($maybe_logger !== null) {
-                    $maybe_logger->warning("Option $option_key is not recognized and thus ignored.");
-                }
-                $is_valid = false;
-            }
-        }
-        return $is_valid;
+        return (bool)$is_valid;
     }
 
     private static function isIgnoredHttpOptionSet(
@@ -138,7 +152,7 @@ class TranslatorOptions
         array $options,
         ?LoggerInterface $maybe_logger
     ): bool {
-        if (array_key_exists($keyToCheck, $options)) {
+        if (isset($options[$keyToCheck])) {
             if ($maybe_logger !== null) {
                 $maybe_logger->warning("Option $keyToCheck is ignored as a custom HTTP client is used.");
             }

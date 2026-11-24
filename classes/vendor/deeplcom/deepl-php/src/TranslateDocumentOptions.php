@@ -8,8 +8,8 @@ namespace DeepL;
 
 /**
  * Options that can be specified when translating documents.
- * @see Translator::translateDocument()
- * @see Translator::translateDocumentUpload()
+ * @see DeepLClient::translateDocument()
+ * @see DeepLClient::translateDocumentUpload()
  */
 final class TranslateDocumentOptions
 {
@@ -39,8 +39,9 @@ final class TranslateDocumentOptions
 
     /** Maximum time in seconds (float) that translateDocument() waits for the translation to complete after the
      *  upload. When it expires, translateDocument() throws a DocumentTranslationException carrying the document
-     *  handle, so the translation can be resumed. If unspecified, it waits without limit. Not sent to the API.
-     *  Also accepted by Translator::translateDocumentWaitUntilDone().
+     *  handle, so the translation can be resumed. If unspecified, it waits without limit. Zero or negative: the
+     *  status is requested once and the wait times out if the translation is not done. Not sent to the API.
+     *  Also accepted by DeepLClient::translateDocumentWaitUntilDone(), which accepts no other option.
      */
     public const TIMEOUT = 'timeout';
 
@@ -54,22 +55,11 @@ final class TranslateDocumentOptions
      */
     public const ENABLE_WATERMARK = 'enable_watermark';
 
-    /** Set to `true` in order to use Document Minification for translation, if available.
-     *  @deprecated The DeepL API accepts larger documents, see
-     *  https://developers.deepl.com/docs/resources/usage-limits. Will be removed in the next major version.
-     */
-    public const ENABLE_DOCUMENT_MINIFICATION = 'enable_document_minification';
-
     /** Set to string containing a style rule ID to use the style rule for translation.
      *  Can also be set to a StyleRuleInfo as returned by getAllStyleRules.
      *  @see \DeepL\DeepLClient::getAllStyleRules()
      */
     public const STYLE_RULE = 'style_rule';
-
-    /** Set to string containing a style rule ID, or a StyleRuleInfo.
-     *  @deprecated Use STYLE_RULE instead; STYLE_ID will be removed in the next major version.
-     */
-    public const STYLE_ID = 'style_id';
 
     /** Set to string containing a style profile ID to use the style profile for translation: its
      *  glossaries, style rule lists and translation memories through one ID.
@@ -84,11 +74,6 @@ final class TranslateDocumentOptions
      */
     public const TRANSLATION_MEMORY = 'translation_memory';
 
-    /** Set to string containing a translation memory ID, or a TranslationMemoryInfo.
-     *  @deprecated Use TRANSLATION_MEMORY instead; TRANSLATION_MEMORY_ID will be removed in the next major version.
-     */
-    public const TRANSLATION_MEMORY_ID = 'translation_memory_id';
-
     /** Set to an integer between 0 and 100 to control the minimum matching percentage
      *  for translation memory matches. Requires TRANSLATION_MEMORY. We recommend a minimum threshold of 75%.
      */
@@ -97,7 +82,8 @@ final class TranslateDocumentOptions
     /** Dictionary of extra parameters to pass in the body of the HTTP request.
      * Can be used to access beta features, override built-in parameters, or for testing purposes.
      * Keys in this array will be added to the request body and can override existing keys.
-     * Values must be of string type.
+     * The request is a multipart form: booleans are sent as "true"/"false", arrays and objects as their JSON
+     * encoding, and other values as strings. A null value removes the field, including one set by the library.
      */
     public const EXTRA_BODY_PARAMETERS = 'extra_body_parameters';
 }

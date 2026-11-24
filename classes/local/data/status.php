@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data;
+
 /**
  * Class status for storing the translation status in the DB.
  *

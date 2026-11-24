@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\services;
+
 defined('MOODLE_INTERNAL') || die();
 
 use context_user;
@@ -26,7 +27,6 @@ use DeepL\Language;
 use DeepL\LanguageCode;
 use DeepL\LanguageInclude;
 use DeepL\LanguageResourceName;
-use DeepL\LanguageSupport;
 use Deepl\Usage;
 use local_deepler\local\data\glossary;
 use local_deepler\local\data\user_glossary;
@@ -142,7 +142,7 @@ class lang_helper {
         }
 
         try {
-            $this->keyisfree = DeepLClient::isAuthKeyFreeAccount($this->apikey);
+            $this->keyisfree = DeepLClient::isFreeAccountAuthKey($this->apikey);
             $this->usage = $this->translator->getUsage();
             $this->canimprove = !$this->keyisfree;
             $this->deeplsources = $this->translator->getSourceLanguages() ?? [];
@@ -410,7 +410,7 @@ class lang_helper {
         $usage->character->count = $this->usage->character?->count ?? 0;
         $usage->character->limit = $this->usage->character?->limit ?? null;
         $config->usage = $usage;
-        $config->limitReached = $this->usage->anyLimitReached();
+        $config->limitReached = $this->usage->anyCharacterLimitReached();
         $config->targetlang = $this->targetlang;
         $config->currentlang = $this->currentlang;
         $config->deeplsourcelang = $this->deeplsourcelang;

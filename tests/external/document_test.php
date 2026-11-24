@@ -26,6 +26,7 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use local_deepler\local\services\file_scanner;
 use local_deepler\local\services\lang_helper;
+use local_deepler\local\services\utils;
 use local_deepler\output\files_page;
 
 /**
@@ -39,6 +40,7 @@ use local_deepler\output\files_page;
  * @covers     \local_deepler\external\get_document_status
  * @covers     \local_deepler\external\finalize_document
  * @covers     \local_deepler\output\files_page
+ * @covers     \local_deepler\local\services\utils
  */
 final class document_test extends base_external {
     /**
@@ -190,7 +192,7 @@ final class document_test extends base_external {
 
         $mockclient = $this->createMock(\DeepL\DeepLClient::class);
         $mockusage = $this->createMock(\DeepL\Usage::class);
-        $mockusage->method('anyLimitReached')->willReturn(false);
+        $mockusage->method('anyCharacterLimitReached')->willReturn(false);
         $mockclient->method('getUsage')->willReturn($mockusage);
         $mockclient->method('getSourceLanguages')->willReturn([
             (object) ['code' => 'EN', 'name' => 'English'],
@@ -260,7 +262,7 @@ final class document_test extends base_external {
             'filename' => 'forum_intro.pdf',
         ], 'Intro PDF');
 
-        $introurl = files_page::get_file_url($introfile, (int)$course->id);
+        $introurl = utils::get_file_url($introfile, (int)$course->id);
         $this->assertStringContainsString("/pluginfile.php/{$contextforum->id}/mod_forum/intro/forum_intro.pdf", $introurl);
         $this->assertStringNotContainsString('/intro/0/', $introurl);
 
@@ -274,7 +276,7 @@ final class document_test extends base_external {
             'filename' => 'syllabus.pdf',
         ], 'Summary PDF');
 
-        $summaryurl = files_page::get_file_url($summaryfile, (int)$course->id);
+        $summaryurl = utils::get_file_url($summaryfile, (int)$course->id);
         $this->assertStringContainsString("/pluginfile.php/{$coursecontext->id}/course/summary/syllabus.pdf", $summaryurl);
         $this->assertStringNotContainsString('/summary/0/', $summaryurl);
 
@@ -288,7 +290,7 @@ final class document_test extends base_external {
             'filename' => 'slides.pptx',
         ], 'Slides PPTX');
 
-        $contenturl = files_page::get_file_url($contentfile, (int)$course->id);
+        $contenturl = utils::get_file_url($contentfile, (int)$course->id);
         $this->assertStringContainsString("/pluginfile.php/{$contextresource->id}/mod_resource/content/0/slides.pptx", $contenturl);
     }
 

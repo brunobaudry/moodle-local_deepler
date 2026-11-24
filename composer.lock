@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "081eafff045d2f3f184d9f9ff9816226",
+    "content-hash": "c1ed15b7efc41522a3393e911a1149a8",
     "packages": [
         {
             "name": "composer/pcre",
@@ -84,28 +84,28 @@
         },
         {
             "name": "deeplcom/deepl-php",
-            "version": "v1.21.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DeepL/deepl-php.git",
-                "reference": "119bcdf81a20ba1d2dc0f91fe3b373cb21fe68d6"
+                "reference": "54441ecb0c7942bf3700275667609be136784656"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DeepL/deepl-php/zipball/119bcdf81a20ba1d2dc0f91fe3b373cb21fe68d6",
-                "reference": "119bcdf81a20ba1d2dc0f91fe3b373cb21fe68d6",
+                "url": "https://api.github.com/repos/DeepL/deepl-php/zipball/54441ecb0c7942bf3700275667609be136784656",
+                "reference": "54441ecb0c7942bf3700275667609be136784656",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "ext-json": "*",
                 "ext-mbstring": "*",
-                "php": ">=7.3.0",
+                "php": ">=8.0",
                 "php-http/discovery": "^1.18",
                 "php-http/multipart-stream-builder": "^1.3",
                 "psr/http-client": "^1.0",
-                "psr/http-client-implementation": "*",
-                "psr/http-factory-implementation": "*",
+                "psr/http-client-implementation": "^1.0",
+                "psr/http-factory-implementation": "^1.0",
                 "psr/log": "^1.1 || ^2.0 || ^3.0"
             },
             "require-dev": {
@@ -141,9 +141,9 @@
             ],
             "support": {
                 "issues": "https://github.com/DeepL/deepl-php/issues",
-                "source": "https://github.com/DeepL/deepl-php/tree/v1.21.0"
+                "source": "https://github.com/DeepL/deepl-php/tree/v2.0.0"
             },
-            "time": "2026-11-02T11:35:00+00:00"
+            "time": "2026-11-24T12:09:02+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -606,16 +606,16 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.30.7",
+            "version": "1.30.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "f5dd9c1f084d336ea63cf53099533e061a9c157a"
+                "reference": "8046fafd702b3a5b92f6e2adcee9c30d6426ea65"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/f5dd9c1f084d336ea63cf53099533e061a9c157a",
-                "reference": "f5dd9c1f084d336ea63cf53099533e061a9c157a",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/8046fafd702b3a5b92f6e2adcee9c30d6426ea65",
+                "reference": "8046fafd702b3a5b92f6e2adcee9c30d6426ea65",
                 "shasum": ""
             },
             "require": {
@@ -708,9 +708,9 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.7"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.9"
             },
-            "time": "2026-09-17T03:56:23+00:00"
+            "time": "2026-11-22T15:50:25+00:00"
         },
         {
             "name": "psr/container",

@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\local\data\subs;
+
 defined('MOODLE_INTERNAL') || die();
 
 use local_deepler\local\data\field;

@@ -27,7 +27,7 @@ use DeepL\DeepLException;
 use DeepL\DocumentHandle;
 use local_deepler\local\services\activity_duplicator;
 use local_deepler\local\services\document_translator;
-use local_deepler\output\files_page;
+use local_deepler\local\services\utils;
 use moodle_exception;
 use moodle_url;
 use stdClass;
@@ -215,7 +215,7 @@ class finalize_document extends external_api {
                     $name = $newfile->get_filename();
                 }
                 $filename = $newfile->get_filename();
-                $fileurl = files_page::get_file_url($newfile, (int)$job->courseid);
+                $fileurl = utils::get_file_url($newfile, (int)$job->courseid);
             }
         }
 
@@ -299,7 +299,7 @@ class finalize_document extends external_api {
         activity_duplicator $duplicator
     ): array {
         $newstoredfile = $duplicator->store_course_file($originalfile, $temppath, $job->targetlang);
-        $newfileurl = files_page::get_file_url($newstoredfile, (int)$job->courseid);
+        $newfileurl = utils::get_file_url($newstoredfile, (int)$job->courseid);
 
         return [
             'newcmid' => 0,
@@ -370,7 +370,7 @@ class finalize_document extends external_api {
             'newcmid' => (int)$newcminfo->id,
             'newfileid' => (int)$newstoredfile->get_id(),
             'newcmurl' => (new moodle_url('/mod/' . $newcminfo->modname . '/view.php', ['id' => $newcminfo->id]))->out(false),
-            'newfileurl' => files_page::get_file_url($newstoredfile, (int)$job->courseid),
+            'newfileurl' => utils::get_file_url($newstoredfile, (int)$job->courseid),
             'newname' => $newcminfo->name,
             'filename' => $newstoredfile->get_filename(),
             'restricted' => $restricted,
@@ -423,7 +423,7 @@ class finalize_document extends external_api {
             'newcmid' => $newcmid,
             'newfileid' => (int)$newstoredfile->get_id(),
             'newcmurl' => (new moodle_url('/mod/folder/view.php', ['id' => $newcmid]))->out(false),
-            'newfileurl' => files_page::get_file_url($newstoredfile, (int)$job->courseid),
+            'newfileurl' => utils::get_file_url($newstoredfile, (int)$job->courseid),
             'newname' => $newname,
             'filename' => $newstoredfile->get_filename(),
             'restricted' => true,

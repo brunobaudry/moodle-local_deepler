@@ -43,15 +43,11 @@ class HttpClientWrapper
     private $curlHandle;
 
     /**
-     * @var bool True if the last cURL request failed before it was sent: a refused connection, a DNS
-     * failure, or a timeout before the connection was established.
+     * @var bool True if the last cURL request failed before any request byte was written
+     * (CURLINFO_PRETRANSFER_TIME is 0): while resolving, connecting, setting up the proxy tunnel or in
+     * the TLS handshake.
      */
     private $lastCurlErrorUnsent = false;
-
-    /**
-     * @var bool True if the last cURL request failed because the response body was cut off mid-read.
-     */
-    private $lastCurlErrorBodyCutOff = false;
 
     /** CURLE_HTTP2_STREAM, which PHP does not define: an HTTP/2 stream was reset, for example mid-body. */
     private const CURLE_HTTP2_STREAM = 92;
@@ -65,8 +61,9 @@ class HttpClientWrapper
     public const OPTION_JSON = 'json';
     public const OPTION_RAW_BODY = 'raw_body';
     /**
-     * Retry only failures that show the request was not processed: HTTP 429, refused connections, DNS
-     * failures and timeouts before the connection was established. For requests that are unsafe to repeat.
+     * Retry only failures that show the request was not processed: HTTP 429 and failures while
+     * connecting, before any request byte was written (DNS, refused connection, proxy tunnel, TLS
+     * handshake). For requests that are unsafe to repeat.
      */
     public const OPTION_RETRY_ONLY_UNPROCESSED = 'retry_only_unprocessed';
 
@@ -90,15 +87,6 @@ class HttpClientWrapper
         $this->streamClient = new Psr18Client();
         $this->streamFactory = Psr17FactoryDiscovery::findStreamFactory();
         $this->curlHandle = $customHttpClient === null ? \curl_init() : null;
-    }
-
-    public function __destruct()
-    {
-        if ($this->customHttpClient === null) {
-            if (PHP_VERSION_ID < 80000) {
-                \curl_close($this->curlHandle);
-            }
-        }
     }
 
     /**
@@ -177,11 +165,25 @@ class HttpClientWrapper
         }
 
         if ($exception !== null) {
+            if ($onlyUnprocessed) {
+                // Repeating a request that may have been processed may create a duplicate.
+                $exception->shouldRetry = $exception->shouldRetry
+                    && ($this->isUnsentRequestError($exception) || $this->isBodyCutOffError($exception));
+            }
             throw $exception;
         } else {
             list($statusCode, $content) = $response;
             $this->logInfo("DeepL API response $method $url $statusCode");
             $this->logDebug("Response details: $content");
+            if ($onlyUnprocessed && $statusCode >= 500) {
+                // The request may have been processed: repeating it may create a duplicate.
+                try {
+                    ClientUtils::checkStatusCode($response);
+                } catch (DeepLException $error) {
+                    $error->shouldRetry = false;
+                    throw $error;
+                }
+            }
             return $response;
         }
     }
@@ -407,6 +409,10 @@ class HttpClientWrapper
         } elseif (!is_null($rawBody)) {
             // The Content-Type of a raw body is specified by the caller
             $curlOptions[\CURLOPT_POSTFIELDS] = $rawBody;
+        } elseif ($method === 'POST') {
+            // Without POSTFIELDS cURL streams a chunked body; the empty header line drops the form Content-Type.
+            $curlOptions[\CURLOPT_POSTFIELDS] = '';
+            $curlOptions[\CURLOPT_HTTPHEADER][] = 'Content-Type:';
         }
 
         if ($outFile) {
@@ -430,7 +436,6 @@ class HttpClientWrapper
         curl_setopt_array($this->curlHandle, $curlOptions);
 
         $this->lastCurlErrorUnsent = false;
-        $this->lastCurlErrorBodyCutOff = false;
         $result = curl_exec($this->curlHandle);
         if ($result !== false) {
             $statusCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
@@ -451,25 +456,31 @@ class HttpClientWrapper
                 case \CURLE_SEND_ERROR: // includes broken pipes
                 case \CURLE_RECV_ERROR: // includes connection resets
                 case \CURLE_COULDNT_RESOLVE_HOST:
+                case \CURLE_COULDNT_RESOLVE_PROXY:
                     $shouldRetry = true;
+                    break;
+                case \CURLE_SSL_CONNECT_ERROR:
+                    // A socket failure (e.g. a reset) during the TLS handshake, not a TLS error.
+                    $shouldRetry = (int)curl_getinfo($this->curlHandle, CURLINFO_OS_ERRNO) !== 0;
                     break;
                 case \CURLE_PARTIAL_FILE: // body shorter than Content-Length, or a chunked body ended early
                 case self::CURLE_HTTP2_STREAM: // HTTP/2 stream reset, for example mid-body
-                    // Not retried and reported with shouldRetry false until the next major: the request was
-                    // processed, and a streamed body may already be partly written to the output file.
-                    $shouldRetry = false;
-                    $this->lastCurlErrorBodyCutOff = true;
+                    // A reset after the request was sent: retried unless the request must not be sent twice.
+                    // The output file is reopened for each attempt, so a streamed retry starts empty.
+                    $shouldRetry = true;
                     break;
                 default:
                     $shouldRetry = false;
                     break;
             }
-            $this->lastCurlErrorUnsent = in_array(
-                $errorCode,
-                [\CURLE_COULDNT_CONNECT, \CURLE_COULDNT_RESOLVE_HOST],
-                true
-            ) || ($errorCode === \CURLE_OPERATION_TIMEDOUT
-                && (float)curl_getinfo($this->curlHandle, CURLINFO_CONNECT_TIME) == 0.0);
+            $connectCode = (int)curl_getinfo($this->curlHandle, CURLINFO_HTTP_CONNECTCODE);
+            if ($connectCode !== 0 && ($connectCode < 200 || $connectCode > 299)) {
+                // An error answer of the proxy to CONNECT, 407 included, is final.
+                $shouldRetry = false;
+            }
+            // libcurl sets PRETRANSFER_TIME once it has handed the request to the connection: 0 means
+            // the failure came while connecting (DNS, TCP, proxy tunnel, TLS), before any request byte.
+            $this->lastCurlErrorUnsent = (float)curl_getinfo($this->curlHandle, CURLINFO_PRETRANSFER_TIME) == 0.0;
             throw new ConnectionException($errorMessage, $errorCode, null, $shouldRetry);
         }
     }
@@ -486,9 +497,6 @@ class HttpClientWrapper
     private function shouldRetry(?array $response, ?ConnectionException $exception, bool $onlyUnprocessed): bool
     {
         if ($exception !== null) {
-            if ($this->customHttpClient === null && $this->lastCurlErrorBodyCutOff) {
-                return false;
-            }
             return $exception->shouldRetry && (!$onlyUnprocessed || $this->isUnsentRequestError($exception));
         }
         list($statusCode, ) = $response;
@@ -498,13 +506,22 @@ class HttpClientWrapper
     }
 
     /**
-     * Returns true if the connection error happened before the request was sent: a refused connection,
-     * a DNS failure, or a timeout before the connection was established. Only cURL tells this; errors of
-     * a custom HTTP client are treated as possibly sent.
+     * Returns true if the connection error happened before any request byte was written. Only cURL
+     * tells this; errors of a custom HTTP client are treated as possibly sent.
      */
     private function isUnsentRequestError(ConnectionException $exception): bool
     {
         return $this->customHttpClient === null && $this->lastCurlErrorUnsent;
+    }
+
+    /**
+     * Returns true if cURL received a response whose body was cut off mid-read (cURL errors 18 and 92). It is
+     * reported as retryable for every request, including those that are not retried automatically.
+     */
+    private function isBodyCutOffError(ConnectionException $exception): bool
+    {
+        return $this->customHttpClient === null
+            && in_array($exception->getCode(), [\CURLE_PARTIAL_FILE, self::CURLE_HTTP2_STREAM], true);
     }
 
     public function logDebug(string $message): void

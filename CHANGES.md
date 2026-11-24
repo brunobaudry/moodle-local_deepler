@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.3]
+### Changed
+- Bumped DeepL-php to v2.0
+- Bumped PhpSpreasheet to 1.30.9 (EOS)
+- Pluginfile URL resolution has a single home in `local\services\utils`:
+- New `utils::pluginfile_url_itemid()` is the one rule for whether a pluginfile URL includes the itemid.
+- `utils::resolve_pluginfiles()` is now a single rewrite based on `get_context_info()`.
+- `utils::get_context_info()` takes a fourth parameter, `$column`, and always returns `context`, `contextid`, `component`, `filearea` and `itemid`. 
+- Question data also gets `questionid` and `previewcontextid`.
+
+### Added
+- Question files embedded in translatable fields are now served:
+- File-area maps in `utils`:
+  - `MODULE_SUBTABLE_FILEAREAS`: book chapters, forum posts, glossary entries, lesson pages and answers, quiz feedback.
+  - `MODULE_MAINTABLE_FILEAREAS`: `assign.activity` → `activityattachment`.
+  - `QUESTION_ROW_FILEAREAS`: `question`, `question_answers`, `question_hints`, `qtype_match_subquestions`, `qtype_kprime_rows`, `qtype_mtf_rows`, `qtype_formulas_answers`.
+  - `QUESTION_COMBINED_FEEDBACKS`.
+  - `MODULE_SUBTABLE_ITEMID_COLUMNS`, for sub-tables whose files are stored per parent record (`wiki_pages` → `subwikiid`).
+
+### Fixed
+- Wiki page images: `wiki_pages.cachedcontent` is now looked up in `mod_wiki/attachments` with the subwiki id as itemid.
+- Module intro images: URLs no longer contain `/intro/0/`, which core read as a folder and answered with a 404.
+- Course section images: the file area is now `section`, not the column name `summary`, and the URL keeps the section id.
+- Main activity records (e.g. `mod_page` content) used the cmid as itemid. They now use 0, which is how core stores them.
+- Module sub-tables: the component was built from the table name (e.g. `mod_book_chapters`). It now comes from the course module (e.g. `mod_book`), with the right file area per 
+  table.
+- Questions: the context was the quiz cmid passed as a context id, and the component was `qtype_question`. Files are now looked up in the question bank category context.
+- Combined feedback (`correctfeedback`, `partiallycorrectfeedback`, `incorrectfeedback`) is looked up under component `question` with the question id as itemid, which is where core saves it.
+- Per-row question areas use the right file area and the row id: `qtype_match/subquestion`, kprime and mtf `optiontext` and `feedbacktext`, and the formulas part areas.
+- `assign.activity` files are looked up in `activityattachment`.
+- Workshop instructions and conclusion URLs no longer carry an itemid that `workshop_pluginfile()` does not expect.
+
 ## [v2.0.2]
 ### Fixed
 - Files translation

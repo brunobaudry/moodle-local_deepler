@@ -70,101 +70,329 @@ class utils {
     /**
      * Unified file URL resolver with context-aware processing.
      *
+     * Rewrites @@PLUGINFILE@@ placeholders in the field text to real pluginfile URLs.
+     *
      * @param \local_deepler\local\data\field $field
      * @return string Processed text with valid URLs
-     * @throws \dml_exception
      */
     public static function resolve_pluginfiles(field $field): string {
+        global $CFG;
         $text = $field->get_displaytext();
-        try {
-            $contextinfo = self::get_context_info($field->get_table(), $field->get_id(), $field->get_cmid());
-            $fs = get_file_storage();
-            $filearea = $field->get_tablefield();
-            // Get first valid file for metadata.
-            $files = $fs->get_area_files(
-                $contextinfo['contextid'],
-                $contextinfo['component'],
-                $contextinfo['filearea'] ?? $filearea,
-                $contextinfo['itemid'],
-                'id',
-                false
-            );
 
-            if ($files) {
-                $firstfile = reset($files);
-                return file_rewrite_pluginfile_urls(
+        try {
+            $info = self::get_context_info($field->get_table(), $field->get_id(), $field->get_cmid(), $field->get_tablefield());
+            $itemid = self::pluginfile_url_itemid($info['component'], $info['filearea'], $info['itemid']);
+            if (isset($info['questionid'])) {
+                // Question files are only served outside an attempt through a preview URL,
+                // see local_deepler_question_preview_pluginfile().
+                require_once($CFG->libdir . '/questionlib.php');
+                return question_rewrite_question_preview_urls(
                     $text,
-                    'pluginfile.php',
-                    $firstfile->get_contextid(),
-                    $firstfile->get_component(),
-                    $firstfile->get_filearea(),
-                    $firstfile->get_itemid()
-                );
-            } else {
-                // Fallback to context-based rewrite.
-                if ($filearea === 'intro') {
-                    $contextinfo['itemid'] = null;
-                }
-                return file_rewrite_pluginfile_urls(
-                    $text,
-                    'pluginfile.php',
-                    $contextinfo['contextid'],
-                    $contextinfo['component'],
-                    $contextinfo['filearea'] ?? $filearea,
-                    $contextinfo['itemid']
+                    $info['questionid'],
+                    $info['contextid'],
+                    $info['component'],
+                    $info['filearea'],
+                    $itemid,
+                    $info['previewcontextid'],
+                    'local_deepler'
                 );
             }
+            return file_rewrite_pluginfile_urls(
+                $text,
+                'pluginfile.php',
+                $info['contextid'],
+                $info['component'],
+                $info['filearea'],
+                $itemid
+            );
         } catch (Exception $e) {
             return $text; // Fail gracefully.
         }
     }
 
     /**
-     * Context resolution optimized for Moodle's hierarchy.
+     * Get preview/download URL for a stored file.
+     *
+     * @param \stored_file $file
+     * @param int $courseid
+     * @return string
+     */
+    public static function get_file_url(\stored_file $file, int $courseid): string {
+        $component = $file->get_component();
+        $filearea = $file->get_filearea();
+
+        if ($component === 'course' && $filearea === 'legacy') {
+            return moodle_url::make_legacyfile_url($courseid, $file->get_filepath() . $file->get_filename())->out(false);
+        }
+
+        return moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $component,
+            $filearea,
+            self::pluginfile_url_itemid($component, $filearea, (int) $file->get_itemid()),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out(false);
+    }
+
+    /**
+     * File areas of module sub-tables, keyed by table then column.
+     * Their itemid is the row id, unless MODULE_SUBTABLE_ITEMID_COLUMNS names another column of the row.
+     */
+    const MODULE_SUBTABLE_FILEAREAS = [
+        'book_chapters' => ['content' => 'chapter'],
+        'forum_posts' => ['message' => 'post'],
+        'glossary_entries' => ['definition' => 'entry'],
+        'lesson_pages' => ['contents' => 'page_contents'],
+        'lesson_answers' => ['answer' => 'page_answers', 'response' => 'page_responses'],
+        'quiz_feedback' => ['feedbacktext' => 'feedback'],
+        'wiki_pages' => ['cachedcontent' => 'attachments'],
+    ];
+
+    /**
+     * Module sub-tables whose files are stored per parent record: table => column holding the itemid.
+     */
+    const MODULE_SUBTABLE_ITEMID_COLUMNS = [
+        'wiki_pages' => 'subwikiid',
+    ];
+
+    /**
+     * File areas of main activity record columns whose name differs from the column, keyed by module then column.
+     * Their itemid is 0.
+     */
+    const MODULE_MAINTABLE_FILEAREAS = [
+        'assign' => ['activity' => 'activityattachment'],
+    ];
+
+    /**
+     * Question related tables whose files are stored per row, keyed by table then column.
+     * Values are [component, filearea]; the itemid is the row id.
+     */
+    const QUESTION_ROW_FILEAREAS = [
+        'question' => [
+            'questiontext' => ['question', 'questiontext'],
+            'generalfeedback' => ['question', 'generalfeedback'],
+        ],
+        'question_answers' => [
+            'answer' => ['question', 'answer'],
+            'feedback' => ['question', 'answerfeedback'],
+        ],
+        'question_hints' => ['hint' => ['question', 'hint']],
+        'qtype_match_subquestions' => ['questiontext' => ['qtype_match', 'subquestion']],
+        'qtype_kprime_rows' => [
+            'optiontext' => ['qtype_kprime', 'optiontext'],
+            'optionfeedback' => ['qtype_kprime', 'feedbacktext'],
+        ],
+        'qtype_mtf_rows' => [
+            'optiontext' => ['qtype_mtf', 'optiontext'],
+            'optionfeedback' => ['qtype_mtf', 'feedbacktext'],
+        ],
+        'qtype_formulas_answers' => [
+            'subqtext' => ['qtype_formulas', 'answersubqtext'],
+            'feedback' => ['qtype_formulas', 'answerfeedback'],
+            'partcorrectfb' => ['qtype_formulas', 'partcorrectfb'],
+            'partpartiallycorrectfb' => ['qtype_formulas', 'partpartiallycorrectfb'],
+            'partincorrectfb' => ['qtype_formulas', 'partincorrectfb'],
+        ],
+    ];
+
+    /**
+     * Combined feedback columns, saved by core_question_type::save_combined_feedback_helper()
+     * in component 'question', filearea = column, itemid = question id, whatever the qtype table.
+     */
+    const QUESTION_COMBINED_FEEDBACKS = ['correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'];
+
+    /**
+     * Resolve where the files embedded in a translatable field are stored.
+     *
+     * @param string $table Table of the record.
+     * @param int $itemid Record id.
+     * @param int $cmid Course module id (0 for course and sections).
+     * @param string $column Column holding the text, used to derive the file area.
+     * Question data also gets 'questionid' and 'previewcontextid' (the course context) for preview URLs.
+     *
+     * @return array{context: \core\context, contextid: int, component: string, filearea: string, itemid: int}
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function get_context_info(string $table, int $itemid, int $cmid = 0, string $column = ''): array {
+        global $DB;
+
+        if ($table === 'course') {
+            return self::make_context_info(context_course::instance($itemid), 'course', $column, 0);
+        }
+        if ($table === 'course_sections') {
+            $courseid = (int) $DB->get_field('course_sections', 'course', ['id' => $itemid], MUST_EXIST);
+            return self::make_context_info(context_course::instance($courseid), 'course', 'section', $itemid);
+        }
+        if ($table === 'question' || str_starts_with($table, 'question_') || str_starts_with($table, 'qtype_')) {
+            $info = self::get_question_context_info($table, $itemid, $column);
+            $previewcontext = $cmid ? context_module::instance($cmid)->get_course_context() : $info['context'];
+            $info['previewcontextid'] = (int) $previewcontext->id;
+            return $info;
+        }
+
+        // Activity modules: the component comes from the course module, not from the table name.
+        $cm = get_coursemodule_from_id('', $cmid, 0, false, MUST_EXIST);
+        $context = context_module::instance($cmid);
+        $component = 'mod_' . $cm->modname;
+        if (isset(self::MODULE_SUBTABLE_FILEAREAS[$table][$column])) {
+            if (isset(self::MODULE_SUBTABLE_ITEMID_COLUMNS[$table])) {
+                $itemcolumn = self::MODULE_SUBTABLE_ITEMID_COLUMNS[$table];
+                $itemid = (int) $DB->get_field($table, $itemcolumn, ['id' => $itemid], MUST_EXIST);
+            }
+            return self::make_context_info($context, $component, self::MODULE_SUBTABLE_FILEAREAS[$table][$column], $itemid);
+        }
+        if ($table === $cm->modname) {
+            // Main activity record (intro, page content, ...): files are stored with itemid 0.
+            $filearea = self::MODULE_MAINTABLE_FILEAREAS[$table][$column] ?? $column;
+            return self::make_context_info($context, $component, $filearea, 0);
+        }
+        // Other sub-tables: Moodle's usual convention is filearea = column and itemid = row id.
+        return self::make_context_info($context, $component, $column, $itemid);
+    }
+
+    /**
+     * Resolve the file storage of a question related record.
+     *
+     * Question files live in the context of the question bank category, not in the quiz context.
+     * See QUESTION_ROW_FILEAREAS and QUESTION_COMBINED_FEEDBACKS; other qtype columns use the qtype component
+     * with the question id as itemid.
      *
      * @param string $table
      * @param int $itemid
-     * @param int $cmid
+     * @param string $column
      * @return array
      * @throws \dml_exception
      */
-    public static function get_context_info(string $table, int $itemid, int $cmid = 0): array {
+    private static function get_question_context_info(string $table, int $itemid, string $column): array {
         global $DB;
-        switch ($table) {
-            case 'course':
-                $context = context_course::instance($itemid);
-                return [
-                    'context' => $context,
-                    'contextid' => $context->id,
-                    'component' => 'course',
-                    'itemid' => null,
-                ];
 
-            case 'course_sections':
-                $courseid = $DB->get_field('course_sections', 'course', ['id' => $itemid]);
-                return [
-                    'context' => context_course::instance($courseid),
-                    'contextid' => context_course::instance($courseid)->id,
-                    'component' => 'course',
-                    'filearea' => 'section',
-                    'itemid' => $itemid,
-                ];
-            case 'question':
-                return [
-                    'context' => context_module::instance($cmid),
-                    'contextid' => $cmid,
-                    'component' => 'qtype_' . $table,
-                    'itemid' => $itemid,
-                ];
-            default: // Activity modules.
-                $context = context_module::instance($cmid);
-                return [
-                    'context' => $context,
-                    'contextid' => $context->id,
-                    'component' => 'mod_' . $table,
-                    'itemid' => $cmid,
-                ];
+        if ($table === 'question') {
+            $questionid = $itemid;
+        } else {
+            $row = $DB->get_record($table, ['id' => $itemid], '*', MUST_EXIST);
+            $questionid = (int) ($row->questionid ?? $row->question ?? 0);
         }
+        $question = self::get_question_bank_record($questionid);
+        $context = context::instance_by_id($question->contextid);
+
+        if (isset(self::QUESTION_ROW_FILEAREAS[$table][$column])) {
+            [$component, $filearea] = self::QUESTION_ROW_FILEAREAS[$table][$column];
+            $info = self::make_context_info($context, $component, $filearea, $itemid);
+        } else if (in_array($column, self::QUESTION_COMBINED_FEEDBACKS, true)) {
+            $info = self::make_context_info($context, 'question', $column, $questionid);
+        } else {
+            // Other qtype specific columns (e.g. qtype_essay graderinfo): qtype component, itemid is the question id.
+            $info = self::make_context_info($context, 'qtype_' . $question->qtype, $column, $questionid);
+        }
+        $info['questionid'] = $questionid;
+        return $info;
+    }
+
+    /**
+     * Fetch a question's type and the context of its question bank category.
+     *
+     * @param int $questionid
+     * @return \stdClass with qtype and contextid
+     * @throws \dml_exception
+     */
+    private static function get_question_bank_record(int $questionid): \stdClass {
+        global $DB;
+        $sql = 'SELECT q.qtype, qc.contextid
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                 WHERE q.id = :questionid';
+        return $DB->get_record_sql($sql, ['questionid' => $questionid], MUST_EXIST);
+    }
+
+    /**
+     * Access checks and lookup for a question file requested through a local_deepler preview URL.
+     *
+     * The user must be able to translate in the preview (course) context and to view the question,
+     * and the file must belong to that question's context and to the 'question' or the question's qtype component.
+     *
+     * @param \core\context $previewcontext Context given in the preview URL.
+     * @param int $questionid Question given in the preview URL.
+     * @param \core\context $filecontext
+     * @param string $filecomponent
+     * @param string $filearea
+     * @param array $args itemid followed by the file path parts and the file name.
+     * @return \stored_file|null The file, or null if it does not exist or does not belong to the question.
+     * @throws \required_capability_exception|\moodle_exception When the user is not allowed.
+     */
+    public static function get_question_preview_file(
+        context $previewcontext,
+        int $questionid,
+        context $filecontext,
+        string $filecomponent,
+        string $filearea,
+        array $args
+    ): ?\stored_file {
+        global $CFG;
+        require_once($CFG->libdir . '/questionlib.php');
+
+        require_capability('local/deepler:edittranslations', $previewcontext);
+        question_require_capability_on($questionid, 'view');
+
+        $question = self::get_question_bank_record($questionid);
+        if ((int) $question->contextid !== (int) $filecontext->id) {
+            return null;
+        }
+        if ($filecomponent !== 'question' && $filecomponent !== 'qtype_' . $question->qtype) {
+            return null;
+        }
+        $fullpath = '/' . $filecontext->id . '/' . $filecomponent . '/' . $filearea . '/' . implode('/', $args);
+        $file = get_file_storage()->get_file_by_hash(sha1($fullpath));
+        if (!$file || $file->is_directory()) {
+            return null;
+        }
+        return $file;
+    }
+
+    /**
+     * Build the array returned by {@see get_context_info()}.
+     *
+     * @param \core\context $context
+     * @param string $component
+     * @param string $filearea
+     * @param int $itemid
+     * @return array
+     */
+    private static function make_context_info(context $context, string $component, string $filearea, int $itemid): array {
+        return [
+            'context' => $context,
+            'contextid' => (int) $context->id,
+            'component' => $component,
+            'filearea' => $filearea,
+            'itemid' => $itemid,
+        ];
+    }
+
+    /**
+     * Returns the itemid to put in a pluginfile URL, or null if the pluginfile handler expects none.
+     *
+     * Module intro files, course summary/overviewfiles and workshop instructions/conclusion are served
+     * without itemid in the URL. Other areas (e.g. course/section, mod_resource/content, mod_page/content) expect it.
+     *
+     * @param string $component
+     * @param string $filearea
+     * @param int|null $itemid
+     * @return int|null
+     */
+    public static function pluginfile_url_itemid(string $component, string $filearea, ?int $itemid): ?int {
+        if ($filearea === 'intro') {
+            return null;
+        }
+        if ($component === 'course' && in_array($filearea, ['summary', 'overviewfiles'], true)) {
+            return null;
+        }
+        if ($component === 'mod_workshop' && in_array($filearea, ['instructauthors', 'instructreviewers', 'conclusion'], true)) {
+            return null;
+        }
+        return $itemid;
     }
 
     /**

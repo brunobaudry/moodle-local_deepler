@@ -7,14 +7,13 @@
 namespace DeepL;
 
 /**
- * @deprecated Internal; will be removed from the public API in the next major version. Use
- * GlossaryEntries::fromTsv(), GlossaryEntries::fromEntries() (validates the entries) and
- * GlossaryEntries::convertToTsv().
+ * @internal Not part of the public API; may change without notice. Use GlossaryEntries::fromTsv(),
+ * GlossaryEntries::fromEntries() and GlossaryEntries::convertToTsv().
  */
 class GlossaryUtils
 {
     /**
-     * @throws DeepLException
+     * @throws \InvalidArgumentException
      */
     public static function fromTsv(string $tsv): array
     {
@@ -28,21 +27,23 @@ class GlossaryUtils
             }
             $terms = explode("\t", $lineTrimmed, 3);
             if (count($terms) < 2) {
-                throw new DeepLException("Entry on line $lineNumber does not contain separator: $line");
+                throw new \InvalidArgumentException("Entry on line $lineNumber does not contain separator: $line");
             } elseif (count($terms) > 2) {
-                throw new DeepLException("Entry on line $lineNumber contains more than one term separator: $line");
+                throw new \InvalidArgumentException(
+                    "Entry on line $lineNumber contains more than one term separator: $line"
+                );
             }
             $source = $terms[0];
             $target = $terms[1];
             self::validateGlossaryTerm($source);
             self::validateGlossaryTerm($target);
             if (array_key_exists($source, $entries)) {
-                throw new DeepLException("Entry on line $lineNumber duplicates source term \"$source\"");
+                throw new \InvalidArgumentException("Entry on line $lineNumber duplicates source term \"$source\"");
             }
             $entries[$source] = $target;
         }
         if (count($entries) == 0) {
-            throw new DeepLException('Input contains no entries');
+            throw new \InvalidArgumentException('Input contains no entries');
         }
         return $entries;
     }
@@ -56,12 +57,12 @@ class GlossaryUtils
     }
 
     /**
-     * @throws DeepLException
+     * @throws \InvalidArgumentException
      */
     public static function validateEntries(array $entries)
     {
         if (count($entries) == 0) {
-            throw new DeepLException('Input contains no entries');
+            throw new \InvalidArgumentException('Input contains no entries');
         }
         foreach ($entries as $source => $target) {
             self::validateGlossaryTerm($source);
@@ -70,13 +71,13 @@ class GlossaryUtils
     }
 
     /**
-     * @throws DeepLException
+     * @throws \InvalidArgumentException
      */
     public static function validateGlossaryTerm(string $term)
     {
         $termTrimmed = trim($term);
         if (strlen($termTrimmed) == 0) {
-            throw new DeepLException("Term \"$term\" contains no non-whitespace characters");
+            throw new \InvalidArgumentException("Term \"$term\" contains no non-whitespace characters");
         }
         foreach (mb_str_split($termTrimmed, 1, 'utf-8') as $ch) {
             $ord = mb_ord($ch);
@@ -86,7 +87,7 @@ class GlossaryUtils
                 $ord == 0x2028 || $ord == 0x2029 // Unicode newlines
             ) {
                 $hex = dechex($ord);
-                throw new DeepLException("Term \"$term\" contains invalid characters: '$ch' (0x$hex)");
+                throw new \InvalidArgumentException("Term \"$term\" contains invalid characters: '$ch' (0x$hex)");
             }
         }
     }

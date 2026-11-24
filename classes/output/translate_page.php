@@ -26,7 +26,6 @@ use renderer_base;
 use stdClass;
 use templatable;
 
-
 /**
  * Translate Page Output.
  *

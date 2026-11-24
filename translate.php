@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/Output_API
  */
+
 /**
  * @todo MDL-0 check images tag handling in deepl.
  */

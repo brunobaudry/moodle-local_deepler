@@ -25,6 +25,7 @@
  */
 
 namespace local_deepler;
+
 use core\event\base;
 use core\event\course_module_updated;
 

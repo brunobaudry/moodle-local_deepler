@@ -24,6 +24,7 @@
  */
 
 namespace local_deepler;
+
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/local/deepler/classes/observer.php');

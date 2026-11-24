@@ -25,7 +25,6 @@ use local_deepler\local\services\lang_helper;
 use ReflectionClass;
 use renderer_base;
 
-
 /**
  * Unit tests for the translate_page class.
  *

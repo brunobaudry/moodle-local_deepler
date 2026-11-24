@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @see        https://docs.moodle.org/dev/String_API
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['additionalconf'] = 'Additional field configuration (JSON)';

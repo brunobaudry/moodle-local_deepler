@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_deepler\external;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/base_external.php');

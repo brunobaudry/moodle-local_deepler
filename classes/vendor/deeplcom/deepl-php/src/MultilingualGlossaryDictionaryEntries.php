@@ -17,25 +17,31 @@ class MultilingualGlossaryDictionaryEntries
     /** @var string Language code of the target terms in the dictionary. */
     public $targetLang;
 
-    /** @var array Associative array storing the dictionary entries as source-target entry pairs. */
+    /** @var GlossaryEntries The dictionary entries as source-target entry pairs, see GlossaryEntries::getEntries(). */
     public $entries;
 
     /**
      * @param string $sourceLang
      * @param string $targetLang
-     * @param array $entries Source-target entry pairs. Both terms are trimmed of surrounding whitespace, then
-     *  validated: they must not be empty or contain control characters.
-     * @throws DeepLException If the entries are empty or a term is invalid.
+     * @param array|GlossaryEntries $entries Source-target entry pairs, as an associative array or GlossaryEntries.
+     *  Both terms are trimmed of surrounding whitespace, then validated: they must not be empty or contain
+     *  control characters.
+     * @throws \InvalidArgumentException If a language code is empty, the entries are empty or a term is invalid.
      */
-    public function __construct(string $sourceLang, string $targetLang, array $entries)
+    public function __construct(string $sourceLang, string $targetLang, $entries)
     {
+        ClientUtils::checkLanguageCode($sourceLang, 'sourceLang');
+        ClientUtils::checkLanguageCode($targetLang, 'targetLang');
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
-        $this->entries = self::trimAndValidate($entries);
+        if ($entries instanceof GlossaryEntries) {
+            $entries = $entries->getEntries();
+        }
+        $this->entries = GlossaryEntries::fromEntries(self::trimAndValidate($entries));
     }
 
     /**
-     * @throws DeepLException If the entries are empty or a term is invalid.
+     * @throws \InvalidArgumentException If the entries are empty or a term is invalid.
      */
     private static function trimAndValidate(array $entries): array
     {
@@ -46,7 +52,7 @@ class MultilingualGlossaryDictionaryEntries
             GlossaryUtils::validateGlossaryTerm($source);
             GlossaryUtils::validateGlossaryTerm($target);
             if (array_key_exists($source, $trimmed)) {
-                throw new DeepLException("Entries duplicate source term \"$source\"");
+                throw new \InvalidArgumentException("Entries duplicate source term \"$source\"");
             }
             $trimmed[$source] = $target;
         }
@@ -106,28 +112,46 @@ class MultilingualGlossaryDictionaryEntries
             $result = (new \ReflectionClass(self::class))->newInstanceWithoutConstructor();
             $result->sourceLang = (string)$object['source_lang'];
             $result->targetLang = (string)$object['target_lang'];
-            $result->entries = $entries;
+            $result->entries = self::unvalidatedGlossaryEntries($entries);
             return $result;
         });
     }
 
     /**
+     * Wraps entries returned by the API, which may be empty, without the validation of GlossaryEntries::fromEntries().
+     */
+    private static function unvalidatedGlossaryEntries(array $entries): GlossaryEntries
+    {
+        $create = \Closure::bind(static function (array $entries): GlossaryEntries {
+            return new GlossaryEntries($entries);
+        }, null, GlossaryEntries::class);
+        return $create($entries);
+    }
+
+    /**
      * Returns the dictionary as sent to the API. The entries are trimmed and validated again, as they may have
-     * been changed after construction or come from the API.
-     * @throws DeepLException If the entries are empty or a term is invalid.
+     * been changed after construction or come from the API. The language codes are checked again too.
+     * @throws \InvalidArgumentException If a language code is empty, the entries are empty or a term is invalid.
      */
     public function toObject(): array
     {
+        ClientUtils::checkLanguageCode($this->sourceLang, 'sourceLang');
+        ClientUtils::checkLanguageCode($this->targetLang, 'targetLang');
         return [
             "source_lang" => $this->sourceLang,
             "target_lang" => $this->targetLang,
-            "entries" => GlossaryUtils::convertToTsv(self::trimAndValidate((array)$this->entries)),
+            "entries" => GlossaryUtils::convertToTsv(self::trimAndValidate($this->entryArray())),
             "entries_format" => "tsv",
         ];
     }
 
     public function convertToTsv(): string
     {
-        return GlossaryUtils::convertToTsv($this->entries);
+        return GlossaryUtils::convertToTsv($this->entryArray());
+    }
+
+    private function entryArray(): array
+    {
+        return $this->entries instanceof GlossaryEntries ? $this->entries->getEntries() : (array)$this->entries;
     }
 }

@@ -26,17 +26,20 @@ class DeepLAdminClient
      * Construct a DeepLAdminClient using your admin API key.
      * This does not connect to the API, and returns immediately.
      * @param string $adminKey Admin API key as found in your DeepL account.
-     * @param array $options Additional options controlling client behaviour, see TranslatorOptions. The
-     * server URL defaults to TranslatorOptions::DEFAULT_SERVER_URL for all admin keys.
-     * @throws DeepLException If the admin key is empty.
+     * @param array|null $options Additional options controlling client behaviour, see TranslatorOptions. The
+     * server URL defaults to TranslatorOptions::DEFAULT_SERVER_URL for all admin keys. null is the same as no options.
+     * @throws \InvalidArgumentException If the admin key is empty or an option is invalid, including an unknown
+     * option key.
      * @see TranslatorOptions for a list of available request options.
      */
-    public function __construct(string $adminKey, array $options = [])
+    public function __construct(string $adminKey, ?array $options = null)
     {
+        $options = $options ?? [];
         if (trim($adminKey) === '') {
-            throw new DeepLException('adminKey must be a non-empty string');
+            throw new \InvalidArgumentException('adminKey must be a non-empty string');
         }
-        // Validation is currently only logging warnings
+        TranslatorOptions::checkOptionKeys($options);
+        // Logs a warning for options that are ignored with a custom HTTP client
         $_ = TranslatorOptions::isValid($options);
 
         $serverUrl = ClientUtils::resolveServerUrl($options, TranslatorOptions::DEFAULT_SERVER_URL);
@@ -55,7 +58,8 @@ class DeepLAdminClient
      * @param string|null $groupBy Group the usage by key or by key and day, see AdminUsageGroupBy. The value
      * is sent to the API as given.
      * @return AdminUsageReport
-     * @throws DeepLException If a date is invalid, or if the request fails.
+     * @throws \InvalidArgumentException If a date is invalid, checked before any request is sent.
+     * @throws DeepLException If the request fails.
      */
     public function getUsageAnalytics($startDate, $endDate, ?string $groupBy = null): AdminUsageReport
     {
@@ -83,7 +87,8 @@ class DeepLAdminClient
      * CustomTagUsageAggregateBy. The value is sent to the API as given.
      * @param int|null $page Page number to retrieve.
      * @return CustomTagUsageReport
-     * @throws DeepLException If a date is invalid, or if the request fails.
+     * @throws \InvalidArgumentException If a date is invalid, checked before any request is sent.
+     * @throws DeepLException If the request fails.
      */
     public function getCustomTagUsageAnalytics(
         $startDate,
@@ -109,13 +114,17 @@ class DeepLAdminClient
      * Creates a developer key in the organization. To avoid creating duplicate keys, the request is only
      * retried if it was not processed: after HTTP 429, or a connection failure before the request was sent.
      * With a custom HTTP client, only HTTP 429 is retried.
-     * @param array $options Request options, see CreateDeveloperKeyOptions: LABEL and EXTRA_BODY_PARAMETERS.
+     * A failed request throws an exception whose shouldRetry is true only for these failures and for a
+     * response body cut off mid-read.
+     * @param array|null $options Request options, see CreateDeveloperKeyOptions: LABEL and EXTRA_BODY_PARAMETERS.
+     *     null is the same as no options.
      * @return DeveloperKey The created key.
      * @throws DeepLException
      * @see CreateDeveloperKeyOptions
      */
-    public function createDeveloperKey(array $options = []): DeveloperKey
+    public function createDeveloperKey(?array $options = null): DeveloperKey
     {
+        $options = $options ?? [];
         self::checkOptions($options, [CreateDeveloperKeyOptions::LABEL]);
         $params = [];
         if (isset($options[CreateDeveloperKeyOptions::LABEL])) {
@@ -152,12 +161,14 @@ class DeepLAdminClient
     /**
      * Deactivates a developer key. Deactivation is permanent.
      * @param string|DeveloperKey $key Key ID or DeveloperKey to deactivate.
-     * @param array $options Request options, see DeveloperKeyOptions: only EXTRA_BODY_PARAMETERS.
+     * @param array|null $options Request options, see DeveloperKeyOptions: only EXTRA_BODY_PARAMETERS.
+     *     null is the same as no options.
      * @return DeveloperKey The deactivated key.
      * @throws DeepLException
      */
-    public function deactivateDeveloperKey($key, array $options = []): DeveloperKey
+    public function deactivateDeveloperKey($key, ?array $options = null): DeveloperKey
     {
+        $options = $options ?? [];
         self::checkOptions($options, []);
         return $this->sendDeveloperKeyRequest(
             'PUT',
@@ -171,12 +182,14 @@ class DeepLAdminClient
      * Changes the label of a developer key.
      * @param string|DeveloperKey $key Key ID or DeveloperKey to rename.
      * @param string $label New label for the key.
-     * @param array $options Request options, see DeveloperKeyOptions: only EXTRA_BODY_PARAMETERS.
+     * @param array|null $options Request options, see DeveloperKeyOptions: only EXTRA_BODY_PARAMETERS.
+     *     null is the same as no options.
      * @return DeveloperKey The renamed key.
      * @throws DeepLException
      */
-    public function renameDeveloperKey($key, string $label, array $options = []): DeveloperKey
+    public function renameDeveloperKey($key, string $label, ?array $options = null): DeveloperKey
     {
+        $options = $options ?? [];
         self::checkOptions($options, []);
         $keyId = self::keyId($key);
         return $this->sendDeveloperKeyRequest(
@@ -191,16 +204,31 @@ class DeepLAdminClient
      * Changes the monthly usage limits of a developer key. Only the limits given in $limits are changed;
      * omitted limits keep their current value. A limit of null means unlimited and 0 blocks that usage.
      * @param string|DeveloperKey $key Key ID or DeveloperKey to modify.
-     * @param array $limits Usage limits to change, keyed by the DeveloperKeyUsageLimitsOptions constants. Each
-     * value is an int or null. The limits are sent to the API as given.
-     * @param array $options Request options, see DeveloperKeyOptions: only EXTRA_BODY_PARAMETERS.
+     * @param array $limits Usage limits to change, keyed by the DeveloperKeyUsageLimitsOptions constants; any
+     * other key throws \InvalidArgumentException before the request. Each value is an int or null. The limits are
+     * sent to the API as given. Send other fields with DeveloperKeyOptions::EXTRA_BODY_PARAMETERS.
+     * @param array|null $options Request options, see DeveloperKeyOptions: only EXTRA_BODY_PARAMETERS.
+     *     null is the same as no options.
      * @return DeveloperKey The modified key.
-     * @throws DeepLException
+     * @throws \InvalidArgumentException If a key of $limits or $options is unknown or the key ID is empty, checked
+     * before any request is sent.
+     * @throws DeepLException If the request fails.
      * @see DeveloperKeyUsageLimitsOptions
      */
-    public function setDeveloperKeyUsageLimits($key, array $limits, array $options = []): DeveloperKey
+    public function setDeveloperKeyUsageLimits($key, array $limits, ?array $options = null): DeveloperKey
     {
+        $options = $options ?? [];
         self::checkOptions($options, []);
+        $knownLimits = [
+            DeveloperKeyUsageLimitsOptions::CHARACTERS,
+            DeveloperKeyUsageLimitsOptions::SPEECH_TO_TEXT_MILLISECONDS,
+            DeveloperKeyUsageLimitsOptions::SPEECH_TO_SPEECH_MILLISECONDS,
+        ];
+        foreach (array_keys($limits) as $limitKey) {
+            if (!in_array($limitKey, $knownLimits, true)) {
+                throw new \InvalidArgumentException("Unknown developer key usage limit: $limitKey");
+            }
+        }
         $keyId = self::keyId($key);
         return $this->sendDeveloperKeyRequest(
             'PUT',
@@ -225,7 +253,7 @@ class DeepLAdminClient
         foreach ($options[DeveloperKeyOptions::EXTRA_BODY_PARAMETERS] ?? [] as $key => $value) {
             $params[$key] = $value;
         }
-        $requestOptions[HttpClientWrapper::OPTION_JSON] = json_encode((object)$params);
+        $requestOptions[HttpClientWrapper::OPTION_JSON] = ClientUtils::encodeJson((object)$params);
         $content = $this->sendRequest($method, $url, $requestOptions);
         return self::parse($content, function (array $json): DeveloperKey {
             if (!self::hasKeyId($json)) {
@@ -237,14 +265,14 @@ class DeepLAdminClient
 
     /**
      * @param string[] $allowed Option keys the method accepts besides EXTRA_BODY_PARAMETERS.
-     * @throws DeepLException If an option key is unknown to the method.
+     * @throws \InvalidArgumentException If an option key is unknown to the method.
      */
     private static function checkOptions(array $options, array $allowed): void
     {
         $allowed[] = DeveloperKeyOptions::EXTRA_BODY_PARAMETERS;
         foreach (array_keys($options) as $key) {
             if (!in_array($key, $allowed, true)) {
-                throw new DeepLException("Unknown developer key option: $key");
+                throw new \InvalidArgumentException("Unknown developer key option: $key");
             }
         }
     }
@@ -302,7 +330,7 @@ class DeepLAdminClient
     {
         $keyId = $key instanceof DeveloperKey ? $key->keyId : $key;
         if (!is_string($keyId) || $keyId === '') {
-            throw new DeepLException('key must be a non-empty key ID or a DeveloperKey');
+            throw new \InvalidArgumentException('key must be a non-empty key ID or a DeveloperKey');
         }
         return $keyId;
     }
@@ -329,24 +357,19 @@ class DeepLAdminClient
 
     /**
      * @param DateTimeInterface|string $date
-     * @throws DeepLException
+     * @throws \InvalidArgumentException If a date string is not a YYYY-MM-DD date.
      */
     private static function formatDate($date, string $name): string
     {
         if ($date instanceof DateTimeInterface) {
             return (new DateTime('@' . $date->getTimestamp()))->format('Y-m-d');
         }
-        if (is_string($date)) {
-            $parsed = self::parseDate($date);
-            if ($parsed !== false && $parsed->format('Y-m-d') === $date) {
-                return $date;
-            }
-            $actual = "\"$date\"";
-        } else {
-            $actual = gettype($date);
+        $parsed = self::parseDate($date);
+        if ($parsed !== false && $parsed->format('Y-m-d') === $date) {
+            return $date;
         }
-        throw new DeepLException(
-            "$name must be a DateTimeInterface or a date string in the format YYYY-MM-DD, got $actual"
+        throw new \InvalidArgumentException(
+            "$name must be a DateTimeInterface or a date string in the format YYYY-MM-DD, got \"$date\""
         );
     }
 }

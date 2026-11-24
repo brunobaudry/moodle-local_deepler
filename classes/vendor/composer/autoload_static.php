@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
+class ComposerStaticInitc1ed15b7efc41522a3393e911a1149a8
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -201,11 +201,13 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'DeepL\\AuthorizationException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/AuthorizationException.php',
         'DeepL\\BackoffTimer' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/BackoffTimer.php',
         'DeepL\\ClientUtils' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/ClientUtils.php',
-        'DeepL\\ConfiguredRules' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/ConfiguredRules.php',
         'DeepL\\ConnectionException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/ConnectionException.php',
         'DeepL\\CorrectTextOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CorrectTextOptions.php',
         'DeepL\\CreateDeveloperKeyOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CreateDeveloperKeyOptions.php',
         'DeepL\\CreateStyleProfileOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CreateStyleProfileOptions.php',
+        'DeepL\\CreateStyleRuleCustomInstructionOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CreateStyleRuleCustomInstructionOptions.php',
+        'DeepL\\CreateStyleRuleOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CreateStyleRuleOptions.php',
+        'DeepL\\CreateTranslationMemoryImportOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CreateTranslationMemoryImportOptions.php',
         'DeepL\\CustomInstruction' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CustomInstruction.php',
         'DeepL\\CustomTagUsage' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CustomTagUsage.php',
         'DeepL\\CustomTagUsageAggregateBy' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/CustomTagUsageAggregateBy.php',
@@ -219,10 +221,7 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'DeepL\\DeveloperKeyOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DeveloperKeyOptions.php',
         'DeepL\\DeveloperKeyUsageLimits' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DeveloperKeyUsageLimits.php',
         'DeepL\\DeveloperKeyUsageLimitsOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DeveloperKeyUsageLimitsOptions.php',
-        'DeepL\\DocumentDeminificationException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentDeminificationException.php',
         'DeepL\\DocumentHandle' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentHandle.php',
-        'DeepL\\DocumentMinificationException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentMinificationException.php',
-        'DeepL\\DocumentMinifier' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentMinifier.php',
         'DeepL\\DocumentNotReadyException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentNotReadyException.php',
         'DeepL\\DocumentStatus' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentStatus.php',
         'DeepL\\DocumentStatusCode' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/DocumentStatusCode.php',
@@ -232,9 +231,9 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'DeepL\\GlossaryEntries' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/GlossaryEntries.php',
         'DeepL\\GlossaryInfo' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/GlossaryInfo.php',
         'DeepL\\GlossaryLanguagePair' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/GlossaryLanguagePair.php',
-        'DeepL\\GlossaryNotFoundException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/GlossaryNotFoundException.php',
         'DeepL\\GlossaryUtils' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/GlossaryUtils.php',
         'DeepL\\HttpClientWrapper' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/HttpClientWrapper.php',
+        'DeepL\\ImportTranslationMemoryOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/ImportTranslationMemoryOptions.php',
         'DeepL\\InvalidContentException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/InvalidContentException.php',
         'DeepL\\KeyUsage' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/KeyUsage.php',
         'DeepL\\Language' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/Language.php',
@@ -272,18 +271,22 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'DeepL\\TranslationMemoryImport' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryImport.php',
         'DeepL\\TranslationMemoryInfo' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryInfo.php',
         'DeepL\\TranslationMemoryJob' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryJob.php',
+        'DeepL\\TranslationMemoryJobException' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryJobException.php',
         'DeepL\\TranslationMemoryJobResult' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryJobResult.php',
         'DeepL\\TranslationMemoryJobStatus' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryJobStatus.php',
         'DeepL\\TranslationMemorySegment' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemorySegment.php',
         'DeepL\\TranslationMemorySegments' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemorySegments.php',
         'DeepL\\TranslationMemorySegmentsOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemorySegmentsOptions.php',
         'DeepL\\TranslationMemoryTargetSegment' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslationMemoryTargetSegment.php',
-        'DeepL\\Translator' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/Translator.php',
         'DeepL\\TranslatorOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/TranslatorOptions.php',
         'DeepL\\UpdateStyleProfileOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/UpdateStyleProfileOptions.php',
+        'DeepL\\UpdateStyleRuleConfiguredRulesOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/UpdateStyleRuleConfiguredRulesOptions.php',
+        'DeepL\\UpdateStyleRuleCustomInstructionOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/UpdateStyleRuleCustomInstructionOptions.php',
+        'DeepL\\UpdateStyleRuleNameOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/UpdateStyleRuleNameOptions.php',
         'DeepL\\Usage' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/Usage.php',
         'DeepL\\UsageDetail' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/UsageDetail.php',
         'DeepL\\UsageProduct' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/UsageProduct.php',
+        'DeepL\\WaitOptions' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/WaitOptions.php',
         'DeepL\\WritingStyle' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/WritingStyle.php',
         'DeepL\\WritingTone' => __DIR__ . '/..' . '/deeplcom/deepl-php/src/WritingTone.php',
         'HTMLPurifier' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.php',
@@ -923,6 +926,7 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'PhpOffice\\PhpSpreadsheet\\Shared\\OLERead' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/OLERead.php',
         'PhpOffice\\PhpSpreadsheet\\Shared\\OLE\\ChainedBlockStream' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/OLE/ChainedBlockStream.php',
         'PhpOffice\\PhpSpreadsheet\\Shared\\OLE\\PPS' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/OLE/PPS.php',
+        'PhpOffice\\PhpSpreadsheet\\Shared\\OLE\\PPSTreeNode' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/OLE/PPSTreeNode.php',
         'PhpOffice\\PhpSpreadsheet\\Shared\\OLE\\PPS\\File' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/OLE/PPS/File.php',
         'PhpOffice\\PhpSpreadsheet\\Shared\\OLE\\PPS\\Root' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/OLE/PPS/Root.php',
         'PhpOffice\\PhpSpreadsheet\\Shared\\PasswordHasher' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/PasswordHasher.php',
@@ -1283,12 +1287,16 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'ZipStream\\Zs\\ExtendedInformationExtraField' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/Zs/ExtendedInformationExtraField.php',
         'local_deepler\\editor\\MoodleQuickForm_cteditor' => __DIR__ . '/../../..' . '/classes/editor/MoodleQuickForm_cteditor.php',
         'local_deepler\\external\\deeplapi_trait' => __DIR__ . '/../../..' . '/classes/external/deeplapi_trait.php',
+        'local_deepler\\external\\detect_source_language' => __DIR__ . '/../../..' . '/classes/external/detect_source_language.php',
+        'local_deepler\\external\\finalize_document' => __DIR__ . '/../../..' . '/classes/external/finalize_document.php',
+        'local_deepler\\external\\get_document_status' => __DIR__ . '/../../..' . '/classes/external/get_document_status.php',
         'local_deepler\\external\\get_glossary_entries' => __DIR__ . '/../../..' . '/classes/external/get_glossary_entries.php',
         'local_deepler\\external\\get_rephrase' => __DIR__ . '/../../..' . '/classes/external/get_rephrase.php',
         'local_deepler\\external\\get_translation' => __DIR__ . '/../../..' . '/classes/external/get_translation.php',
         'local_deepler\\external\\update_glossary' => __DIR__ . '/../../..' . '/classes/external/update_glossary.php',
         'local_deepler\\external\\update_glossary_visibility' => __DIR__ . '/../../..' . '/classes/external/update_glossary_visibility.php',
         'local_deepler\\external\\update_translation' => __DIR__ . '/../../..' . '/classes/external/update_translation.php',
+        'local_deepler\\external\\upload_document' => __DIR__ . '/../../..' . '/classes/external/upload_document.php',
         'local_deepler\\hook\\navigation_hook_callbacks' => __DIR__ . '/../../..' . '/classes/hook/navigation_hook_callbacks.php',
         'local_deepler\\lib\\admin_setting_deeplapikey_configtext' => __DIR__ . '/../../..' . '/classes/lib/admin_setting_deeplapikey_configtext.php',
         'local_deepler\\lib\\admin_setting_deepler_configjson' => __DIR__ . '/../../..' . '/classes/lib/admin_setting_deepler_configjson.php',
@@ -1321,9 +1329,13 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'local_deepler\\local\\data\\subs\\quiz' => __DIR__ . '/../../..' . '/classes/local/data/subs/quiz.php',
         'local_deepler\\local\\data\\subs\\subbase' => __DIR__ . '/../../..' . '/classes/local/data/subs/subbase.php',
         'local_deepler\\local\\data\\subs\\wiki' => __DIR__ . '/../../..' . '/classes/local/data/subs/wiki.php',
+        'local_deepler\\local\\data\\translatable_file' => __DIR__ . '/../../..' . '/classes/local/data/translatable_file.php',
         'local_deepler\\local\\data\\user_glossary' => __DIR__ . '/../../..' . '/classes/local/data/user_glossary.php',
+        'local_deepler\\local\\services\\activity_duplicator' => __DIR__ . '/../../..' . '/classes/local/services/activity_duplicator.php',
         'local_deepler\\local\\services\\database_updater' => __DIR__ . '/../../..' . '/classes/local/services/database_updater.php',
+        'local_deepler\\local\\services\\document_translator' => __DIR__ . '/../../..' . '/classes/local/services/document_translator.php',
         'local_deepler\\local\\services\\field_extractor' => __DIR__ . '/../../..' . '/classes/local/services/field_extractor.php',
+        'local_deepler\\local\\services\\file_scanner' => __DIR__ . '/../../..' . '/classes/local/services/file_scanner.php',
         'local_deepler\\local\\services\\lang_helper' => __DIR__ . '/../../..' . '/classes/local/services/lang_helper.php',
         'local_deepler\\local\\services\\navigation_helper' => __DIR__ . '/../../..' . '/classes/local/services/navigation_helper.php',
         'local_deepler\\local\\services\\security_checker' => __DIR__ . '/../../..' . '/classes/local/services/security_checker.php',
@@ -1334,9 +1346,12 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
         'local_deepler\\output\\child_data' => __DIR__ . '/../../..' . '/classes/output/child_data.php',
         'local_deepler\\output\\coursesettings_data' => __DIR__ . '/../../..' . '/classes/output/coursesettings_data.php',
         'local_deepler\\output\\deeplerform' => __DIR__ . '/../../..' . '/classes/output/deeplerform.php',
+        'local_deepler\\output\\files_page' => __DIR__ . '/../../..' . '/classes/output/files_page.php',
+        'local_deepler\\output\\files_renderer' => __DIR__ . '/../../..' . '/classes/output/files_renderer.php',
         'local_deepler\\output\\glossary_renderer' => __DIR__ . '/../../..' . '/classes/output/glossary_renderer.php',
         'local_deepler\\output\\module_data' => __DIR__ . '/../../..' . '/classes/output/module_data.php',
         'local_deepler\\output\\nodeepl_page' => __DIR__ . '/../../..' . '/classes/output/nodeepl_page.php',
+        'local_deepler\\output\\renderer' => __DIR__ . '/../../..' . '/classes/output/renderer.php',
         'local_deepler\\output\\row_data' => __DIR__ . '/../../..' . '/classes/output/row_data.php',
         'local_deepler\\output\\section_data' => __DIR__ . '/../../..' . '/classes/output/section_data.php',
         'local_deepler\\output\\sourcenotsupported_page' => __DIR__ . '/../../..' . '/classes/output/sourcenotsupported_page.php',
@@ -1351,10 +1366,10 @@ class ComposerStaticInit5df194360da56d4bd13dca0d705d4002
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5df194360da56d4bd13dca0d705d4002::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5df194360da56d4bd13dca0d705d4002::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit5df194360da56d4bd13dca0d705d4002::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit5df194360da56d4bd13dca0d705d4002::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc1ed15b7efc41522a3393e911a1149a8::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc1ed15b7efc41522a3393e911a1149a8::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc1ed15b7efc41522a3393e911a1149a8::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitc1ed15b7efc41522a3393e911a1149a8::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -265,18 +265,20 @@ class upload_document extends external_api {
         }
 
         // Check usage quota limit.
+        // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
             $usage = $client->getUsage();
-            if ($usage && $usage->anyLimitReached()) {
+            if ($usage && $usage->anyCharacterLimitReached()) {
                 return [
                     'jobid' => 0,
                     'status' => 'error',
                     'error' => 'DeepL API usage limit reached for this month.',
                 ];
             }
-        } catch (\Throwable $e) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+        } catch (\Throwable $e) {
             // Ignore usage check exceptions if quota check fails.
         }
+        // phpcs:enable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 
         $translator = new document_translator($client);
         $deeploptions = self::prepare_deepl_options($params['options']);

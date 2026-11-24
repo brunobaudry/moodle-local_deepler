@@ -22,6 +22,7 @@
  * @copyright    2024 Bruno Baudry <bruno.baudry@bfh.ch>
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 /**
  * Factored test string.
@@ -90,40 +91,42 @@ function local_deepler_extend_navigation_user_settings($navigation, $user, $user
 /**
  * File handling.
  *
- * @param object $course
- * @param object $cm
+ * Called by file_pluginfile(), which passes a null $cm (and a null $course for the system context).
+ *
+ * @param stdClass|null $course
+ * @param stdClass|null $cm
  * @param \core\context $context
- * @param object $filearea
+ * @param string $filearea
  * @param array $args
  * @param bool $forcedownload
  * @param array $options
- * @return bool
+ * @return bool false if the file is not served
  * @throws \coding_exception
  */
 function local_deepler_pluginfile(
-    object $course,
-    object $cm,
+    $course,
+    $cm,
     \core\context $context,
-    object $filearea,
+    string $filearea,
     array $args,
     bool $forcedownload,
-    array $options
+    array $options = []
 ): bool {
-    debugging($cm);
     // Context validation.
     if ($context->contextlevel != CONTEXT_BLOCK && $context->contextlevel != CONTEXT_SYSTEM) {
         return false;
     }
     // File area whitelist.
     $validareas = ['custom_docs', 'user_uploads'];
-    if (!in_array($filearea, $validareas)) {
+    if (!in_array($filearea, $validareas, true)) {
         return false;
     }
-    // Security checks.
-    if (!has_capability(LOCAL_DEEPLER_EDITTRANSLATIONS, context_course::instance($course->id))) {
+    // Security checks, in the context the file belongs to.
+    require_login($course, false, $cm);
+    if (!has_capability(LOCAL_DEEPLER_EDITTRANSLATIONS, $context)) {
         return false;
     }
-    $itemid = array_shift($args);
+    $itemid = (int) array_shift($args);
     $filename = array_pop($args);
     $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
 
@@ -134,6 +137,49 @@ function local_deepler_pluginfile(
 
     send_stored_file($file, 86400, 0, $forcedownload, $options);
     return true;
+}
+
+/**
+ * Serve question files embedded in translatable fields, outside any question attempt.
+ *
+ * Called by question_pluginfile() for URLs built with question_rewrite_question_preview_urls()
+ * by \local_deepler\local\services\utils::resolve_pluginfiles().
+ *
+ * @param \core\context $previewcontext Context the question is shown in (the course).
+ * @param int $questionid
+ * @param \core\context $filecontext
+ * @param string $filecomponent
+ * @param string $filearea
+ * @param array $args
+ * @param bool $forcedownload
+ * @param array $options
+ * @return void Does not return: serves the file or sends a not found.
+ */
+function local_deepler_question_preview_pluginfile(
+    $previewcontext,
+    $questionid,
+    $filecontext,
+    $filecomponent,
+    $filearea,
+    $args,
+    $forcedownload,
+    $options = []
+): void {
+    [$context, $course, $cm] = get_context_info_array($previewcontext->id);
+    require_login($course, false, $cm);
+
+    $file = \local_deepler\local\services\utils::get_question_preview_file(
+        $previewcontext,
+        (int) $questionid,
+        $filecontext,
+        (string) $filecomponent,
+        (string) $filearea,
+        $args
+    );
+    if (!$file) {
+        send_file_not_found();
+    }
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
 /**

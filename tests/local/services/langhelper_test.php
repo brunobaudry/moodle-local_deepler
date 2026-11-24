@@ -25,6 +25,7 @@
  */
 
 namespace local_deepler\local\services;
+
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../../classes/vendor/autoload.php');
 
@@ -249,7 +250,7 @@ final class langhelper_test extends advanced_testcase {
     private function makedeeplvariantshelper(array $moodlelangs, string $currentlang, string $targetlang): lang_helper {
         $translator = $this->createMock(DeepLClient::class);
         $usage = $this->createMock(Usage::class);
-        $usage->method('anyLimitReached')->willReturn(false);
+        $usage->method('anyCharacterLimitReached')->willReturn(false);
         $translator->method('getUsage')->willReturn($usage);
         // Sources have no regional variant at all.
         $translator->method('getSourceLanguages')->willReturn([
@@ -562,7 +563,7 @@ final class langhelper_test extends advanced_testcase {
     public function test_rephrase_languages_loaded_dynamically(): void {
         $translator = $this->createMock(DeepLClient::class);
         $usage = $this->createMock(Usage::class);
-        $usage->method('anyLimitReached')->willReturn(false);
+        $usage->method('anyCharacterLimitReached')->willReturn(false);
         $translator->method('getUsage')->willReturn($usage);
         $translator->method('getSourceLanguages')->willReturn([
             (object) ['code' => 'EN', 'name' => 'English'],
@@ -608,7 +609,7 @@ final class langhelper_test extends advanced_testcase {
 
         $translator = $this->createMock(DeepLClient::class);
         $usage = $this->createMock(Usage::class);
-        $usage->method('anyLimitReached')->willReturn(false);
+        $usage->method('anyCharacterLimitReached')->willReturn(false);
         $translator->method('getUsage')->willReturn($usage);
         $translator->method('getSourceLanguages')->willReturn([
             (object) ['code' => 'EN', 'name' => 'English'],
@@ -677,7 +678,7 @@ final class langhelper_test extends advanced_testcase {
         $this->mocktranslator = $this->createMock(DeepLClient::class);
 
         $mockusage = $this->createMock(Usage::class);
-        $mockusage->method('anyLimitReached')->willReturn(false);
+        $mockusage->method('anyCharacterLimitReached')->willReturn(false);
 
         $this->mocktranslator->method('getUsage')->willReturn($mockusage);
         $this->mocktranslator->method('getSourceLanguages')->willReturn([

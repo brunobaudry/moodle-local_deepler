@@ -13,19 +13,37 @@ namespace DeepL;
 class ClientUtils
 {
     /**
-     * Returns the server URL from the given options, or the default if unspecified.
-     * @throws DeepLException
+     * Returns the server URL from the given options, or the default if unspecified, without a trailing slash.
+     * @throws \InvalidArgumentException If the server URL is not an absolute http or https URL with a host.
      */
     public static function resolveServerUrl(array $options, string $defaultServerUrl): string
     {
         $serverUrl = $options[TranslatorOptions::SERVER_URL] ?? $defaultServerUrl;
-        if (!is_string($serverUrl) || strlen($serverUrl) == 0) {
-            throw new DeepLException('If specified, ' .
-                TranslatorOptions::SERVER_URL . ' option must be a non-empty string.');
-        } elseif (substr($serverUrl, -1) === "/") { // Remove trailing slash if present
+        $parts = is_string($serverUrl) ? parse_url($serverUrl) : false;
+        $isUsable = is_array($parts) && ($parts['host'] ?? '') !== ''
+            && in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true);
+        if (!$isUsable) {
+            throw new \InvalidArgumentException('If specified, ' . TranslatorOptions::SERVER_URL .
+                ' option must be an absolute http or https URL with a host.');
+        }
+        if (substr($serverUrl, -1) === "/") { // Remove trailing slash if present
             $serverUrl = substr($serverUrl, 0, strlen($serverUrl) - 1);
         }
         return $serverUrl;
+    }
+
+    /**
+     * Returns the JSON encoding of a request body.
+     * @param mixed $value
+     * @throws \InvalidArgumentException If the value cannot be JSON-encoded, for example invalid UTF-8 or INF/NAN.
+     */
+    public static function encodeJson($value): string
+    {
+        try {
+            return json_encode($value, \JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new \InvalidArgumentException('Failed to JSON-encode the request body: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     /**
@@ -71,6 +89,17 @@ class ClientUtils
     }
 
     /**
+     * @param mixed $lang
+     * @throws \InvalidArgumentException If $lang is an empty string.
+     */
+    public static function checkLanguageCode($lang, string $name): void
+    {
+        if ($lang === '') {
+            throw new \InvalidArgumentException("$name must be a non-empty string");
+        }
+    }
+
+    /**
      * Returns the value of the header with the given name, compared case-insensitively, or null if absent.
      */
     public static function findHeader(array $headers, string $name): ?string
@@ -101,14 +130,21 @@ class ClientUtils
 
     /**
      * Creates an HttpClientWrapper using the transport settings in the options.
-     * @throws DeepLException If max_retries is negative.
+     * @throws \InvalidArgumentException If max_retries is negative or cURL cannot use the proxy.
      */
     public static function createHttpClient(string $serverUrl, array $headers, array $options): HttpClientWrapper
     {
         $maxRetries = $options[TranslatorOptions::MAX_RETRIES] ?? TranslatorOptions::DEFAULT_MAX_RETRIES;
         if ($maxRetries < 0) {
-            throw new DeepLException(
+            throw new \InvalidArgumentException(
                 'If specified, ' . TranslatorOptions::MAX_RETRIES . ' option must not be negative.'
+            );
+        }
+        $proxy = $options[TranslatorOptions::PROXY] ?? null;
+        if ($proxy !== null && !self::isUsableProxy($proxy)) {
+            throw new \InvalidArgumentException(
+                'If specified, ' . TranslatorOptions::PROXY . ' option must be a proxy URL with a host and an ' .
+                'http, https, socks4, socks4a, socks5 or socks5h scheme, or a host[:port] used as http.'
             );
         }
         return new HttpClientWrapper(
@@ -117,20 +153,34 @@ class ClientUtils
             $options[TranslatorOptions::TIMEOUT] ?? TranslatorOptions::DEFAULT_TIMEOUT,
             $maxRetries,
             $options[TranslatorOptions::LOGGER] ?? null,
-            $options[TranslatorOptions::PROXY] ?? null,
+            $proxy,
             $options[TranslatorOptions::HTTP_CLIENT] ?? null
         );
+    }
+
+    private const PROXY_SCHEMES = ['http', 'https', 'socks4', 'socks4a', 'socks5', 'socks5h'];
+
+    /**
+     * True if cURL can use the proxy: a URL with a host and a scheme cURL supports, or, as cURL accepts,
+     * a host[:port] without a scheme, which cURL uses as http.
+     * @param mixed $proxy
+     */
+    private static function isUsableProxy($proxy): bool
+    {
+        if (!is_string($proxy) || $proxy === '' || preg_match('/\s/', $proxy)) {
+            return false;
+        }
+        $parts = parse_url(strpos($proxy, '://') === false ? "http://$proxy" : $proxy);
+        return $parts !== false && ($parts['host'] ?? '') !== ''
+            && in_array(strtolower($parts['scheme'] ?? ''), self::PROXY_SCHEMES, true);
     }
 
     /**
      * Checks the HTTP status code, and in case of failure, throws an exception with diagnostic information.
      * @throws DeepLException
      */
-    public static function checkStatusCode(
-        array $response,
-        bool $inDocumentDownload = false,
-        bool $usingGlossary = false
-    ): void {
+    public static function checkStatusCode(array $response, bool $inDocumentDownload = false): void
+    {
         list($statusCode, $content) = $response;
 
         if (200 <= $statusCode && $statusCode < 300) {
@@ -152,7 +202,7 @@ class ClientUtils
         }
 
         throw self::withStatus(
-            self::exceptionForStatus($statusCode, $message, $content, $inDocumentDownload, $usingGlossary),
+            self::exceptionForStatus($statusCode, $message, $content, $inDocumentDownload),
             $statusCode
         );
     }
@@ -174,8 +224,7 @@ class ClientUtils
         int $statusCode,
         string $message,
         $content,
-        bool $inDocumentDownload,
-        bool $usingGlossary
+        bool $inDocumentDownload
     ): DeepLException {
         switch ($statusCode) {
             case 401:
@@ -184,9 +233,6 @@ class ClientUtils
             case 456:
                 return new QuotaExceededException("Quota for this billing period has been exceeded$message");
             case 404:
-                if ($usingGlossary) {
-                    return new GlossaryNotFoundException("Glossary not found$message");
-                }
                 return new NotFoundException("Not found$message");
             case 400:
                 return new DeepLException("Bad request$message");
@@ -208,7 +254,7 @@ class ClientUtils
 
     private static function constructUserAgentString(bool $sendPlatformInfo, ?AppInfo $appInfo): string
     {
-        $libraryVersion = Translator::VERSION;
+        $libraryVersion = DeepLClient::VERSION;
         $libraryInfoStr = "deepl-php/$libraryVersion";
         try {
             if ($sendPlatformInfo) {
