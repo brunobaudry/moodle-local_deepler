@@ -181,7 +181,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     background: var(--bs-teal, var(--mds-bg-feedback-success-default, #20c997));
     color: var(--mds-text-feedback-success, #fff);
     font-size: 0.6rem;
-    text-transform: uppercase;
     padding: 0.25rem 1rem;
     margin-top: 2rem;
     top: 12px;

@@ -107,7 +107,8 @@
                                 <div class="d-inline-flex align-items-center">
                                     {{#supported}}
                                         <button type="button"
-                                                class="btn btn-xs btn-link text-decoration-none p-0 me-1 toggle-translations-btn {{^hastranslations}}text-muted disabled{{/hastranslations}}"
+                                                class="btn btn-xs btn-link text-decoration-none me-2 toggle-translations-btn {{^hastranslations}}text-muted
+                                                disabled{{/hastranslations}}"
                                                 data-toggle="collapse" data-bs-toggle="collapse"
                                                 data-target="#file_translations_{{fileid}}" data-bs-target="#file_translations_{{fileid}}"
                                                 aria-expanded="false"
@@ -115,7 +116,7 @@
                                                 title="{{str_translations}}">
                                             <i class="fa fa-chevron-right toggle-icon"></i>
                                         </button>
-                                        <input type="checkbox" class="file-select-checkbox" data-action="select-file" data-fileid="{{fileid}}" aria-label="{{filename}}">
+                                        <input type="checkbox" class="file-select-checkbox me-2" data-action="select-file" data-fileid="{{fileid}}" aria-label="{{filename}}">
                                     {{/supported}}
                                     {{^supported}}
                                         <span class="p-0 me-1 text-muted"><i class="fa fa-minus"></i></span>
@@ -152,7 +153,12 @@
                             </td>
                             <td class="align-middle">
                                 {{#supported}}
-                                    <select class="form-control form-control-sm custom-select custom-select-sm file-source-select" data-action="file-source-lang" data-fileid="{{fileid}}">
+                                    <label for="file-source-lang-{{fileid}}">{{#str}} files:sourcelang, local_deepler {{/str}}</label>
+                                    <select class="form-control form-control-sm custom-select custom-select-sm file-source-select"
+                                            id="file-source-lang-{{fileid}}"
+                                            data-action="file-source-lang"
+                                            data-fileid="{{fileid}}"
+                                    >
                                         {{#sourcelangs}}
                                             <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
                                         {{/sourcelangs}}
@@ -164,7 +170,8 @@
                             </td>
                             <td class="align-middle">
                                 {{#supported}}
-                                    <select class="form-control form-control-sm custom-select custom-select-sm file-target-select target-lang-select" data-action="target-lang" data-fileid="{{fileid}}">
+                                    <label for="target-lang-{{fileid}}">{{#str}} files:selecttargets, local_deepler {{/str}}</label>
+                                    <select id="target-lang-{{fileid}}" class="form-control form-control-sm custom-select custom-select-sm file-target-select target-lang-select" data-action="target-lang" data-fileid="{{fileid}}">
                                         {{#targetlangs}}
                                             <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
                                         {{/targetlangs}}

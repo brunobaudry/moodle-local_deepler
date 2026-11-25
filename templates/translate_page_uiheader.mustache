@@ -92,7 +92,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     ],
     "wordcount": 4,
     "charcount": 20,
-    "charcountspaces": 25
+    "charcountspaces": 25,
+    "showhiddenforstudents": "Show Hidden from students"
   }
 }}
 <div id="local_deepler_uiheader" class="mt-2">
@@ -171,10 +172,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
 
                 <div class="form-check form-switch custom-control custom-switch me-3 mr-3">
-                    <input id="show-hidden" checked="checked" type="checkbox"
-                           class="form-check-input custom-control-input local_deepler__show-hidden"
-                           data-action="local_deepler/show-hidden">
                     <label class="form-check-label custom-control-label" for="show-hidden">{{showhiddenforstudents}}</label>
+                    <input id="show-hidden" checked="checked" type="checkbox" class="form-check-input custom-control-input local_deepler__show-hidden" data-action="local_deepler/show-hidden">
                 </div>
 
             </div>

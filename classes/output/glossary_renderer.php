@@ -72,7 +72,7 @@ class glossary_renderer extends plugin_renderer_base {
      * View entries link renderer.
      *
      * @param object $glo
-     * @return \action_icon|string
+     * @return string
      * @throws \coding_exception
      */
     private function generateentrieslink(object $glo) {

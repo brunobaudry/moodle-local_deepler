@@ -19,7 +19,6 @@ namespace local_deepler\local\services;
 use context_course;
 use context_module;
 use core\context;
-use core\output\action_icon;
 use core_plugin_manager;
 use Exception;
 use filter_multilang2;
@@ -498,43 +497,29 @@ class utils {
     }
 
     /**
-     * Wrapper Alternative for v > 405.
+     * Render an action icon using $OUTPUT->action_icon.
      *
-     * @param mixed $url
+     * @param string|moodle_url $url
      * @param string $iconname
      * @param string $tooltip
      * @param string $component
      * @param array $attributes
-     * @return \action_icon|string
-     * @throws \core\exception\moodle_exception
+     * @return string HTML fragment
      */
     public static function local_deepler_get_action_icon(
-        mixed $url,
+        string|moodle_url $url,
         string $iconname,
-        string $tooltip = '',
+        string $tooltip,
         string $component = 'core',
         array $attributes = []
-    ) {
+    ): string {
         global $OUTPUT;
 
-        // Ensure $url is a moodle_url object.
         if (is_string($url)) {
             $url = new moodle_url($url);
         }
 
-        // Check if the action_icon class exists (Moodle >= 4.0.5).
-        if (class_exists('\core\output\action_icon')) {
-            $icon = new \pix_icon($iconname, $tooltip, $component, $attributes);
-            return new \action_icon($url, $icon);
-        } else {
-            // Fallback for older Moodle versions.
-            $iconhtml = html_writer::empty_tag('img', array_merge([
-                'src' => $OUTPUT->image_url($iconname, $component),
-                'alt' => $tooltip,
-                'class' => 'icon',
-            ], $attributes));
-
-            return html_writer::link($url->out(false), $iconhtml, ['title' => $tooltip]);
-        }
+        $icon = new \pix_icon($iconname, $tooltip, $component);
+        return $OUTPUT->action_icon($url, $icon, null, $attributes);
     }
 }

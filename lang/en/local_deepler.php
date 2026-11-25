@@ -89,7 +89,7 @@ $string['files:activityname'] = 'Activity';
 $string['files:billedchars'] = 'Billed chars: {$a}';
 $string['files:billingminimum'] = 'DeepL applies a minimum billing of 50,000 characters for this file type.';
 $string['files:billingminimumbadge'] = '50k char min';
-$string['files:billingminimuminfo'] = 'Note: DeepL document translation applies a minimum billing threshold (50,000 characters) for certain file types (e.g. PDF, DOCX, PPTX, XLSX).';
+$string['files:billingminimuminfo'] = 'Note: DeepL document translation applies a minimum billing threshold (50,000 characters) for certain file types (e.g. pdf, docx, pptx, xlsx).';
 $string['files:courselevel'] = 'Course level files';
 $string['files:customsettings'] = 'Custom settings';
 $string['files:done'] = 'Done';
@@ -352,14 +352,13 @@ $string['toneenthusiastic'] = 'Enthusiastic tone';
 $string['tonefriendly'] = 'Friendly tone';
 $string['toneorstyle'] = 'Changes the tone or writing style of your improvements:';
 $string['tour_advancedsettings00'] =
-        'Click here to see how you can fine tune the DeepL’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
+        'Click the advanced settings button to see how you can fine tune the DeepL’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
 $string['tour_advancedsettings00title'] = 'DeepL’s advanced settings';
 $string['tour_advancedsettings01formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
 This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em>
 (<strong>Italian</strong>), <em>ES</em> (Spanish), <em>NL</em> (Dutch), <em>PL</em> (Polish), <em>PT-BR</em> and <em>PT-PT</em> (Portuguese),
 <em>JA</em> (Japanese), and <em>RU</em> (Russian).
-Learn more about the plain\/polite feature for Japanese <a
-href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese" traget="_blank">here</a>.
+Learn more about the plain\/polite feature for Japanese <a href="https://support.deepl.com/hc/en-us/articles/6306700061852-About-the-plain-polite-feature-in-Japanese" traget="_blank" aria-label="About formality: plain and polite tones in Japanese">About formality</a>.
 Setting this parameter with a target language that does not support formality will fail, unless one of the&nbsp;
 <em>prefer_...</em> options are used. Possible options are:</p>
 <ul><li><em>default</em> (default)</li>
