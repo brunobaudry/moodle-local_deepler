@@ -95,8 +95,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="helpModalLabel">{{glossaryhelpmodaltitle}}</h5>
-                <button type="button" class="btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
+                <h4 class="modal-title" id="helpModalLabel">{{glossaryhelpmodaltitle}}</h4>
+                <button type="button" class="btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="{{#str}} closebuttontitle , core{{/str}}"></button>
             </div>
 
             <div class="modal-body">
@@ -110,7 +110,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
                 <div class="p-2 ">
                     <a href="https://developers.deepl.com/api-reference/glossaries"
-                    target="_blank">{{{glossarydeepllink}}}</a>
+                    target="_blank">{{{glossarydeepllink}}} {{#str}} ariatargetblank, local_deepler {{/str}}</a>
                 </div>
             </div>
             <div class="modal-footer">

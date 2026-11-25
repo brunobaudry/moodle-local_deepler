@@ -187,7 +187,8 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div class="row py-3">
             <div class="col-md-7" id="{{prefix}}local_deepler__toneorstyle">
-                {{#str}}toneorstyle,local_deepler{{/str}}
+                <fieldset>
+                <legend class="h6">{{#str}}toneorstyle,local_deepler{{/str}}</legend>
                 <div class="form-check custom-control custom-radio">
                     <input type="radio" value="default" id="{{prefix}}toneorstyle0" name="{{#prefix}}{{prefix}}_{{/prefix}}local_deepler/toneorstyle"
                            data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
@@ -238,6 +239,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
                            data-id="local_deepler/toneorstyle" class="form-check-input custom-control-input">
                     <label class="form-check-label custom-control-label" for="{{prefix}}tone9">{{#str}}tonediplomatic,local_deepler{{/str}}</label>
                 </div>
+                </fieldset>
             </div>
         </div>
         <!-- END REPHRASE -->

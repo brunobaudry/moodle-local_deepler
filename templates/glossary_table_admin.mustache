@@ -41,9 +41,9 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
     Example context (json):
     {
-    "settingsurl":"url",
+    "settingsurl":"http://test.com",
     "backtosettings":"title",
-    "tokensettingsurl":"url",
+    "tokensettingsurl":"http://test.org",
     "tokensettings":"title",
     "glossaries": [
         {
@@ -63,15 +63,18 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     }
 }}
 <table class="generaltable">
+    <caption>
+        {{#str}}glossary:manage:title, local_deepler{{/str}}
+    </caption>
     <thead>
     <tr>
-        <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:visibility, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:pool, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:actions, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:name, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:visibility, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:pool, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:actions, local_deepler{{/str}}</th>
     </tr>
     </thead>
     <tbody>

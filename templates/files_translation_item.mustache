@@ -45,30 +45,31 @@
         "statusstr": "Completed"
     }
 }}
-<div class="translation-item d-flex justify-content-between align-items-center border-bottom py-2">
-    <div class="d-flex align-items-center flex-wrap gap-2">
-        <span class="badge badge-primary bg-primary text-white px-2 py-1">{{targetlang}}</span>
-        {{#filename}}
-            <span class="font-weight-bold fw-bold">{{filename}}</span>
-        {{/filename}}
-        <span class="small text-muted">{{timecreated}}</span>
+<tr class="translation-item bg-light">
+    <td></td>
+    <td class="align-middle">
         {{#newcmurl}}
-            <a href="{{newcmurl}}" target="_blank" class="btn btn-xs btn-outline-success py-0 px-2 small">
-                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> {{#str}} files:openactivity, local_deepler {{/str}}
+            <a href="{{newcmurl}}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-outline-success py-0 px-2 small">
+                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                {{#str}} files:openactivity, local_deepler {{/str}} {{#str}} ariatargetblank, local_deepler {{/str}}
             </a>
         {{/newcmurl}}
         {{^newcmurl}}
             {{#newfileurl}}
-                <a href="{{newfileurl}}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 small">
-                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> {{#str}} preview, core {{/str}}
+                <a href="{{newfileurl}}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-outline-primary py-0 px-2 small">
+                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                    {{#str}} preview, core {{/str}} {{#str}} ariatargetblank, local_deepler {{/str}}
                 </a>
             {{/newfileurl}}
         {{/newcmurl}}
-    </div>
-    <div class="d-flex align-items-center">
-        {{#str_billedchars}}
-            <span class="small text-muted me-2">{{str_billedchars}}</span>
-        {{/str_billedchars}}
+    </td>
+    <td class="align-middle"><span class="font-weight-bold fw-bold">{{filename}}</span></td>
+    <td class="align-middle small text-muted">{{str_billedchars}}</td>
+    <td></td>
+    <td class="align-middle"><span class="badge badge-primary bg-primary text-white">{{targetlang}}</span></td>
+    <td></td>
+    <td class="align-middle">
         <span class="badge {{statusbadge}} px-2">{{statusstr}}</span>
-    </div>
-</div>
+        <span class="small text-muted d-block">{{timecreated}}</span>
+    </td>
+</tr>

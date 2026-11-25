@@ -138,14 +138,21 @@ $secondary: $gray-400 !default;
         .local_deeplervisible > [data-action="local_deepler__hiddenfromstudents"] {
             display: none;
         }
-        .badge-danger{
-            color: var(--mds-bg-feedback-danger-default);
+        // Status badges: always declare background and text as a pair so the
+        // contrast stays >= 4.5:1 (WCAG AA) whatever the theme provides.
+        // The --mds-bg-feedback-*-default tokens are not overridden in dark mode,
+        // so fixed foreground colours are safe in both colour schemes.
+        .badge-danger {
+            background-color: var(--mds-bg-feedback-danger-default, #{$danger}); // #ca3120
+            color: #{$white}; // 5.29:1
         }
-        .badge-success{
-             color: var(--mds-bg-feedback-success-default);
+        .badge-success {
+            background-color: var(--mds-bg-feedback-success-default, #{$success}); // #357a32
+            color: #{$white}; // 5.27:1
         }
-        .badge-warn{
-            color: var(--mds-bg-feedback-warning-default);
+        .badge-warn {
+            background-color: var(--mds-bg-feedback-warning-default, #{$warning}); // #f0ad4e
+            color: #{$gray-900}; // 8.32:1
         }
     }
 

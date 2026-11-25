@@ -37,7 +37,7 @@ $string['additionalconf_schema_fields'] = 'Invalid structure: "fields" in table 
 $string['additionalconf_schema_plugin'] = 'Invalid structure: "{$a}" must map to an object of table definitions.';
 $string['additionalconf_schema_root'] = 'Invalid structure: the top-level value must be a JSON object.';
 $string['additionalconf_schema_table'] = 'Invalid structure: table "{$a}" must be an object.';
-$string['additionalconf_warning'] = '<u>{$a} yielded some issues:</u>';
+$string['additionalconf_warning'] = '<em>{$a} yielded some issues:</em>';
 $string['additionalconf_warning_unknown_field_table'] = '{$a->plugin}:: {$a->fields} do not exists in table definition <strong>{$a->name}</strong>';
 $string['additionalconf_warning_unknown_table_atributes'] = '{$a->plugin}:: There should only be <strong>{$a->fields}</strong> under the field definition <strong>{$a->name}</strong>, you gave : <em>{$a->unknown}</em>';
 $string['additionalconf_warning_unknown_table_keys'] = '{$a->plugin}:: There should only be <strong>{$a->fields}</strong> under the table definition <strong>{$a->name}</strong>, you gave : <em>{$a->unknown}</em>';
@@ -52,8 +52,10 @@ $string['allowfallbackkey_desc'] =
         This has no effect if the API key isn\'t set or no are additional tokens are mapped to users\' attributes.';
 $string['apikeytitle'] = 'API Key for DeepL Translate';
 $string['apikeytitle_desc'] = 'Copy your API key from DeepL to use machine translation.';
+$string['ariatargetblank'] = '(opens in new tab)';
 $string['autodetect_sourcelang'] = 'Auto-detect source language';
 $string['autodetect_sourcelang_desc'] = 'Automatically detect the source language of content falling back to {mlang other} by sending a short text excerpt to DeepL. Note: This consumes character quota.';
+$string['backtothetop'] = 'Back to the top';
 $string['badsettings'] = 'The DeepL setting seems to be incomplete, probably missing the API key.
 Check with your Moodle admin.';
 $string['breadcrumblength'] = 'Max length of breadcrumb\'s sub';
@@ -118,6 +120,7 @@ $string['files:selecttargets'] = 'Target language';
 $string['files:settingsmodal_title'] = 'File translation settings';
 $string['files:sourcelang'] = 'Source';
 $string['files:status'] = 'Status';
+$string['files:tablecaption'] = 'Found files for {$a}';
 $string['files:title'] = 'Deepler file translation';
 $string['files:translateselected'] = 'Translate selected';
 $string['files:translating'] = 'Translating';
@@ -269,7 +272,7 @@ $string['needsupdate'] = 'Needs update';
 $string['neverrephrased'] = 'This text was never improved';
 $string['nevertranslated'] = 'No \'{$a}\' translation yet';
 $string['nodeeplpapi'] =
-        ':-( Cannot connect to DeepL API. <br/>Check with your admin. Looks like there is a network issue.';
+        '<abbr title="sadly">:-(</abbr> Cannot connect to DeepL API. <br/>Check with your admin. Looks like there is a network issue.';
 $string['nonsplittingtags'] = 'Non splitting tags';
 $string['notsupportedsource'] = 'The source language you are in is not supported by DeepL.';
 $string['onomatopoeia'] = 'Ouch !!!';
@@ -305,6 +308,7 @@ $string['section:select:label'] = 'Select sections';
 $string['sectionall'] = 'ALL SECTIONS';
 $string['seesetting'] = 'Advanced settings';
 $string['selectall'] = 'All';
+$string['selectindividualfield'] = 'Select this field';
 $string['selecttargetlanguage'] = 'Target';
 $string['showhiddenforstudents'] = 'Show "{$a}"';
 $string['sourcelang'] = 'Source';
@@ -352,7 +356,7 @@ $string['toneenthusiastic'] = 'Enthusiastic tone';
 $string['tonefriendly'] = 'Friendly tone';
 $string['toneorstyle'] = 'Changes the tone or writing style of your improvements:';
 $string['tour_advancedsettings00'] =
-        'Click the advanced settings button to see how you can fine tune the DeepL’s behaviour.<br/><br/>Click now to get a guided tour of the features.';
+        'Click the advanced settings button to see how you can fine tune the DeepL’s behaviour.<br/>Click now to get a guided tour of the features.';
 $string['tour_advancedsettings00title'] = 'DeepL’s advanced settings';
 $string['tour_advancedsettings01formality'] = '<p>Sets whether the translated text should lean towards formal or informal language.
 This feature currently only works for target languages <em>DE</em> (<strong>German</strong>), <em>FR</em> (<strong>French</strong>), <em>IT</em>
@@ -377,7 +381,7 @@ even if it would usually correct some aspects.</p>
 <ul><li>Punctuation at the beginning and end of the sentence</li><li>Upper/lower case at the beginning of the sentence</li></ul>';
 $string['tour_advancedsettings03formatingtitle'] = 'Manage formating';
 $string['tour_advancedsettings04glossary'] = '<p>Specify the glossary to use for the translation.</p>
-<p><em>(Glossaries have to be uploaded via the DeepL API. This is not available yet with this plugin. See with your IT).</em></p>';
+<p>(Glossaries have to be uploaded via the DeepL API. This is <em>not available</em> yet with this plugin. See with your IT).</p>';
 $string['tour_advancedsettings04glossarytitle'] = 'Glossary';
 $string['tour_advancedsettings05context'] = '<p>This additional context can potentially improve translation quality when translating short,
 low-context source texts.</p><p>The <em>context</em> parameter is an <strong>alpha feature</strong>.</p>
@@ -396,12 +400,11 @@ and selecting the tags that should be considered structure tags. This will split
 $string['tour_advancedsettings07outlinetitle'] = 'How outline is detected in XML';
 $string['tour_advancedsettings08skiptag'] = '<p>Comma-separated list of XML or HTML tags that indicate text not to be translated.</p>
 <p>To ensure that elements in the original text are not altered in translation (e.g. trademarks or product names).</p>
-<p>Expl: adding "x" in the list :</p><p>Request:<em> Please open the page &lt;x&gt;Settings&lt;/x&gt; to configure your system.</em></p>
-<p>Response:<em>Bitte öffnen Sie die Seite &lt;x&gt;Settings&lt;/x&gt; um Ihr System zu konfigurieren.</em></p>
+<p>Expl: adding "x" in the list :</p><p>Request:Please open the page &lt;x&gt;Settings&lt;/x&gt; to <em>configure your system.</em></p>
+<p>Response:Bitte öffnen Sie die Seite &lt;x&gt;Settings&lt;/x&gt; um Ihr <em>System zu konfigurieren.</em></p>
 <p>In HTML you can also use the <code><strong>translate="no"</strong></code> attribute :</p>
 <p><code>  &lt;body&gt;</code><br /><code>    &lt;h1&gt;My First Heading&lt;/h1&gt;</code><br /><code>    &lt;p
-<strong>translate="no"</strong>&gt;This will not be translated.&lt;/p&gt;</code><br /><code>  &lt;/body&gt;</code></p>
-<p></p>';
+<strong>translate="no"</strong>&gt;This will not be translated.&lt;/p&gt;</code><br /><code>  &lt;/body&gt;</code></p>';
 $string['tour_advancedsettings08skiptagtitle'] =
         'Skip translating certain tags’ content.';
 $string['tour_advancedsettings09splittag'] = '<p>Comma-separated list of XML or HTML tags which never split sentences.</p>';
@@ -423,10 +426,9 @@ $string['tour_advancedsettings12targetlang'] = '<p>The target language is the on
 $string['tour_advancedsettings12targetlangtitle'] =
         'Target language';
 $string['tour_advancedsettings13filters'] = '<p>These filter show/hide the textual content found in the course.</p>
-<p><strong>Up to date:<br /></strong></p>
-<p>These are the content that are already translated and that no change were made in the source.</p>
+<p><strong>Up to date:</strong><br />These are the content that are already translated and that no change were made in the source.</p>
 <p>They will appear with the <span class="badge badge-pill badge-success"> </span> indicator. </p>
-<p><strong>Needs update:<br /></strong></p>
+<p><strong>Needs update:</strong><br />
 <p>These are the textual contents that were never translated or that were modified after being translated.</p>
 <p>They appear with the <span class="badge badge-pill badge-danger"> </span> indicator when they were never translated. </p>
 <p>They appear with the <span class="badge badge-pill badge-warning"> </span>
@@ -482,7 +484,7 @@ $string['tour_advancedsettings22process'] =
         '<p>When a text content is not selected and no translation was requested. <i class="fa-solid fa-ellipsis-h"></i> is shown.</p>
 <p><i class="fa-solid fa-hourglass-start"></i> is displayed when you selected it and it is waiting for you to press the "Translate" button to send it to DeepL.</p>
 <p><i class="fa-solid fa-floppy-o"></i> will display after the text was fed back in the adjacent text editor.<br />
-You can review the translated content, make some changes then press the icon to actually save it in the database. <br /><br />
+You can review the translated content, make some changes then press the icon to actually save it in the database. <br /></p><p>
 <em>Note</em> that you can also save to the database in batch by clicking on the save all floating button below. <br />
 Should you want to save all tranlsated text but leave some to review later, you can uncheck it on the left so that it will be skiped when saving all.</p>
 <p>Once a text is saved this icon will display <i class="fa-solid fa-database"></i></p>';
@@ -507,7 +509,7 @@ $string['tour_files04globaltarget'] = '<p>Select the <strong>target language</st
 $string['tour_files04globaltargettitle'] = 'Target language';
 $string['tour_files05selectall'] = '<p>Toggle this checkbox to select or deselect all translatable files across all sections.</p>';
 $string['tour_files05selectalltitle'] = 'Select all files';
-$string['tour_files06translate'] = '<p>Click here to start translating all selected files to the chosen target language.</p><p>Progress indicators will appear for each document being processed.</p>';
+$string['tour_files06translate'] = '<p>Click this to start translating all selected files to the chosen target language.</p><p>Progress indicators will appear for each document being processed.</p>';
 $string['tour_files06translatestitle'] = 'Translate selected files';
 $string['tour_files07sections'] = '<p>Course content is grouped by course sections and activities. Expand or collapse sections to view attached files and their details.</p>';
 $string['tour_files07sectionstitle'] = 'Course sections & activities';

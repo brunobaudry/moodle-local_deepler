@@ -49,12 +49,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 <h4>{{title}}</h4>
 <table class="generaltable">
+    <caption class="visually-hidden">
+        {{#str}}glossary:manage:title, local_deepler{{/str}}
+    </caption>
     <thead>
+
     <tr>
-        <th>{{#str}}glossary:name, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
-        <th>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:name, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:sourcelang, local_deepler{{/str}} &gt; {{#str}}glossary:targetlang, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:nbentries, local_deepler{{/str}}</th>
+        <th scope='col'>{{#str}}glossary:lastused, local_deepler{{/str}}</th>
     </tr>
     </thead>
     <tbody>

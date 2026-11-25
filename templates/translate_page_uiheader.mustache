@@ -194,7 +194,6 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
             </div>
             {{#hasmodulelist}}
-<!--                <div class="col-2 h3 text-center text-secondary align-bottom"><br><i class="fa fa-chevron-circle-right  align-bottom" aria-hidden="true"></i></div>-->
                 <div class="form-check form-switch custom-control custom-switch col-5 pt-0">
                     <label for="select-module" class="form-label">{{#str}}module:select:label, local_deepler{{/str}}</label>
                     <select
@@ -219,23 +218,22 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
         <div class="col-1 px-5">
             <div class="form-check" id="local_deepler-translate-header-select-all">
+                <label class="form-check-label" for="select-all">
+                    {{#str}}selectall,local_deepler{{/str}}
+                </label>
                 <input
                         class="form-check-input local_deepler__select-all"
                         data-action="local_deepler/select-all"
                         type="checkbox"
-                        aria-label="{{#str}}selectall,local_deepler{{/str}}"
-                        title="{{#str}}selectall,local_deepler{{/str}}"
                         name="select-all"
                         id="select-all"
                         disabled>
-                <label class="form-check-label" for="select-all">
-                    {{#str}}selectall,local_deepler{{/str}}
-                </label>
+
             </div>
         </div>
 
         <div class="col-7">
-            <div id="local_deepler-translate-header-usage" class="p-1 text-center fs-6">
+            <div id="local_deepler-translate-header-usage" class="p-1 fs-6">
                 {{#str}}wordcountsentence,local_deepler{{/str}}
             </div>
         </div>
@@ -264,30 +262,26 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
         </div>
 
         <div class="col-1">
-            {{^hidecompatible}}
-                <select style='display:inherit' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
-                        class="local_deepler__tartgetcompatible form-select form-control"
-                        data-action="local_deepler/tartgetcompatible-switcher">
-                    {{#compatiblelangs}}
-                        <option value="{{.}}">{{.}}</option>
-                    {{/compatiblelangs}}
-                </select>
-            {{/hidecompatible}}
+            <label id="local_deepler/tartgetcompatible-switcher_label" class="sr-only" for="local_deepler/tartgetcompatible-switcher">
+                {{#str}}targetcompatibleexplain,local_deepler{{/str}}
+            </label>
+            <select
+                    aria-labelledby="local_deepler/tartgetcompatible-switcher_label"
+                    class="local_deepler__tartgetcompatible form-select form-control{{#hidecompatible}} d-none{{/hidecompatible}}"
+                    data-action="local_deepler/tartgetcompatible-switcher"
+                    id="local_deepler/tartgetcompatible-switcher">
 
-            {{#hidecompatible}}
-                <select style='display:none' title='{{#str}}targetcompatibleexplain,local_deepler{{/str}}'
-                        class="local_deepler__tartgetcompatible form-select form-control"
-                        data-action="local_deepler/tartgetcompatible-switcher">
-                    {{#compatiblelangs}}
-                        <option value="{{.}}">{{.}}</option>
-                    {{/compatiblelangs}}
-                </select>
-            {{/hidecompatible}}
+                {{#compatiblelangs}}
+                    <option value="{{.}}">{{.}}</option>
+                {{/compatiblelangs}}
+
+            </select>
         </div>
     </div>
 
     <div id='local_deepler-scrollspy' class="row p-1 ps-3 pl-3">
-        <span id="local_deepler__tothetop" class="col-1" role="button"><i class="fa-solid fa-home" aria-hidden="true"></i></span>
+        <span id="local_deepler__tothetop" class="col-1" role="button" aria-label="{{#str}}backtothetop, local_deepler{{/str}}"><i class="fa-solid fa-home"
+        aria-hidden="true"></i></span>
         <span id="local_deepler__breadcrumbs" class="col-11"></span>
     </div>
 </div>

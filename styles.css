@@ -90,13 +90,16 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
     display: none;
 }
 #page-local-deepler-translate .local_deepler__form .badge-danger {
-    color: var(--mds-bg-feedback-danger-default);
+    background-color: var(--mds-bg-feedback-danger-default, #ca3120);
+    color: #fff;
 }
 #page-local-deepler-translate .local_deepler__form .badge-success {
-    color: var(--mds-bg-feedback-success-default);
+    background-color: var(--mds-bg-feedback-success-default, #357a32);
+    color: #fff;
 }
 #page-local-deepler-translate .local_deepler__form .badge-warn {
-    color: var(--mds-bg-feedback-warning-default);
+    background-color: var(--mds-bg-feedback-warning-default, #f0ad4e);
+    color: #1d2125;
 }
 #page-local-deepler-translate .course_sections__name,
 #page-local-deepler-translate .course__fullname {

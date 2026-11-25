@@ -129,7 +129,9 @@
             <span id="previousTranslationStatus"
                   title="{{titlestring}}"
                   class="badge badge-pill rounded-pill {{buttonclass}}">&nbsp;&nbsp;</span>
-            <input title="{{titlestring}}"
+            <label id="label_ck_{{key}}" for="ck_{{key}}" lass="sr-only">{{#str}}selectindividualfield, local_deepler{{/str}}</label>
+            <input id="ck_{{key}}"
+                   aria-labelledby="label_ck_{{key}}"
                    type="checkbox"
                    data-key="{{key}}"
                    class="mx-2"
@@ -152,8 +154,10 @@
               class="mx-1 p-2 btn btn-sm btn-outline-{{badgeclass}} {{multilangdisabled}}">
                     <i class="fa-solid fa-language" aria-hidden="true"></i>
         </span>
-        <select class="form-select w-auto d-inline-block"
-                title="{{selecttitle}}"
+            <label id="label_{{key}}" for="source_{{key}}" class="sr-only">{{#str}}sourceselect_label, local_deepler{{/str}}</label>
+        <select id="source_{{key}}"
+                aria-labelledby="label_{{key}}"
+                class="form-select w-auto d-inline-block"
                 data-key="{{key}}"
                 data-action="local_deepler/sourceselect">
             {{#sourceoptions}}

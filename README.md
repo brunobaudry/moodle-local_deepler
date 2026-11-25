@@ -6,6 +6,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=brunobaudry_moodle-local_deepler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=brunobaudry_moodle-local_deepler)
 [![License GPL-3.0](https://img.shields.io/github/license/brunobaudry/moodle-local_deepler?color=lightgrey)](https://github.com/brunobaudry/moodle-local_deepler/blob/main/LICENSE)
+[![Brickfield accessibility checks](https://img.shields.io/badge/accessibility-A-brightgreen)](https://pluginchecker.blabs.ie/plugins/local_deepler/reviews/local-deepler-2026-11-26-72)
 
 **DeepLer** makes translating and improving entire Moodle courses fast, simple, and central. Instead of opening every section, quiz, and activity one by one to manually add translation tags, DeepLer allows course creators, teachers, and administrators to view, translate, review, and save all course content from a **single, unified page** using the **DeepL Translation API**.
 

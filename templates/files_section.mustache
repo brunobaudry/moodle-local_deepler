@@ -86,22 +86,26 @@
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
+                <caption>{{#str}} files:tablecaption, local_deepler, {{sectionname}} {{/str}}</caption>
                 <thead class="thead-light">
                     <tr>
-                        <th style="width: 70px;" class="text-center">#</th>
-                        <th>{{#str}} files:activityname, local_deepler {{/str}}</th>
-                        <th>{{#str}} files:filename, local_deepler {{/str}}</th>
-                        <th style="width: 80px;">{{#str}} files:filesize, local_deepler {{/str}}</th>
-                        <th style="width: 140px;">{{#str}} files:sourcelang, local_deepler {{/str}}</th>
-                        <th style="width: 170px;">{{#str}} files:selecttargets, local_deepler {{/str}}</th>
-                        <th style="width: 50px;" class="text-center" title="{{#str}} customsettings, local_deepler {{/str}}">
+                        <th style="width: 70px;" class="text-center" scope='col'>#</th>
+                        <th scope='col'>{{#str}} files:activityname, local_deepler {{/str}}</th>
+                        <th scope='col'>{{#str}} files:filename, local_deepler {{/str}}</th>
+                        <th style="width: 80px;" scope='col'>{{#str}} files:filesize, local_deepler {{/str}}</th>
+                        <th style="width: 140px;" scope='col'>{{#str}} files:sourcelang, local_deepler {{/str}}</th>
+                        <th style="width: 170px;" scope='col'>{{#str}} files:selecttargets, local_deepler {{/str}}</th>
+                        <th style="width: 50px;" class="text-center" title="{{#str}} customsettings, local_deepler {{/str}}" scope='col'>
+                            <span class="visually-hidden">
+                                {{#str}}customsettings, local_deepler{{/str}}
+                            </span>
                             <i class="fa fa-sliders text-muted" aria-hidden="true"></i>
                         </th>
-                        <th style="width: 200px;">{{#str}} files:status, local_deepler {{/str}}</th>
+                        <th style="width: 200px;" scope='col'>{{#str}} files:status, local_deepler {{/str}}</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {{#rows}}
+                {{#rows}}
+                    <tbody>
                         <tr class="file-row {{^supported}}table-secondary text-muted{{/supported}}" data-fileid="{{fileid}}" data-cmid="{{cmid}}">
                             <td class="text-center align-middle">
                                 <div class="d-inline-flex align-items-center">
@@ -109,8 +113,6 @@
                                         <button type="button"
                                                 class="btn btn-xs btn-link text-decoration-none me-2 toggle-translations-btn {{^hastranslations}}text-muted
                                                 disabled{{/hastranslations}}"
-                                                data-toggle="collapse" data-bs-toggle="collapse"
-                                                data-target="#file_translations_{{fileid}}" data-bs-target="#file_translations_{{fileid}}"
                                                 aria-expanded="false"
                                                 aria-controls="file_translations_{{fileid}}"
                                                 title="{{str_translations}}">
@@ -130,8 +132,8 @@
                             </td>
                             <td class="align-middle">
                                 {{{fileicon}}}
-                                <a href="{{fileurl}}" target="_blank" class="{{^supported}}text-muted{{/supported}} font-weight-bold" title="{{filename}}">
-                                    {{filename}}
+                                <a href="{{fileurl}}" target="_blank" class="{{^supported}}text-muted{{/supported}} font-weight-bold" title="{{filename}}" rel="noopener noreferrer">
+                                    {{filename}} {{#str}}ariatargetblank, local_deepler{{/str}}
                                 </a>
                                 {{#hasbillingminimum}}
                                     <span class="badge badge-warning bg-warning text-dark ms-1"
@@ -141,9 +143,7 @@
                                     </span>
                                 {{/hasbillingminimum}}
                                 {{#hastranslations}}
-                                    <span class="badge badge-info bg-info text-white ms-1" style="cursor: pointer;"
-                                          data-toggle="collapse" data-bs-toggle="collapse"
-                                          data-target="#file_translations_{{fileid}}" data-bs-target="#file_translations_{{fileid}}">
+                                    <span class="badge badge-info bg-info text-white ms-1">
                                         {{translationscount}} <i class="fa fa-language"></i>
                                     </span>
                                 {{/hastranslations}}
@@ -207,31 +207,13 @@
                             </td>
                         </tr>
 
-                        <!-- Collapsible translation sub-table under this source file -->
-                        <tr class="file-translations-row bg-light collapse" id="file_translations_{{fileid}}" data-translations-for="{{fileid}}">
-                            <td colspan="8" class="p-3 border-top-0">
-                                <div class="card card-body bg-white border-left border-primary shadow-sm py-2 px-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="mb-0 text-primary font-weight-bold">
-                                            <i class="fa fa-folder-open me-1"></i> {{str_translations}}
-                                        </h6>
-                                    </div>
-
-                                    <div class="translations-list" data-list-for="{{fileid}}">
-                                        {{#translations}}
-                                            {{> local_deepler/files_translation_item }}
-                                        {{/translations}}
-                                        {{^translations}}
-                                            <p class="text-muted small mb-0 no-translations-msg">
-                                                {{#str}} files:notranslations, local_deepler {{/str}}
-                                            </p>
-                                        {{/translations}}
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    {{/rows}}
-                </tbody>
+                    </tbody>
+                    <tbody id="file_translations_{{fileid}}" data-list-for="{{fileid}}" hidden>
+                        {{#translations}}
+                            {{> local_deepler/files_translation_item }}
+                        {{/translations}}
+                    </tbody>
+                {{/rows}}
             </table>
         </div>
     </div>

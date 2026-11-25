@@ -69,8 +69,8 @@
         <i class="fa-solid fa-circle-info text-info me-2 fs-5" aria-hidden="true"></i>
         <div>
             {{#str}} files:billingminimuminfo, local_deepler {{/str}}
-            <a href="https://developers.deepl.com/docs/best-practices/document-translations#billing-minimums" target="_blank" class="alert-link ms-1">
-                {{#str}}deeplapidoc,local_deepler{{/str}}
+            <a href="https://developers.deepl.com/docs/best-practices/document-translations#billing-minimums" target="_blank" class="alert-link ms-1" rel="noopener noreferrer">
+                {{#str}}deeplapidoc,local_deepler{{/str}} {{#str}}ariatargetblank,local_deepler{{/str}}
             </a>
         </div>
     </div>
@@ -79,17 +79,13 @@
         {{#hasfiles}}
 
             <div class="text-end text-right mb-2">
+                <label class="form-check-label" for="select-all">{{str_selectall}}</label>
                 <input
+                        id="select-all"
                         class="form-check-input local_deepler__select-all"
                         type="checkbox"
-                        aria-label="{{#str}}selectall,local_deepler{{/str}}"
-                        title="{{#str}}selectall,local_deepler{{/str}}"
                         name="select-all"
-                        id="select-all"
                         data-action="files-select-all">
-                <label class="form-check-label" for="select-all">
-                    {{str_selectall}}
-                </label>
             </div>
 
             <!-- Advanced setting btn -->
@@ -143,8 +139,8 @@
             <h5 class="mb-0">{{#str}}deeplapidoctitle,local_deepler{{/str}}</h5>
             <div>
                 <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
-                <a href="https://developers.deepl.com/api-reference/document/upload-and-translate-a-document" target="_blank" class="small">
-                    {{#str}}deeplapidoc,local_deepler{{/str}}
+                <a href="https://developers.deepl.com/api-reference/document/upload-and-translate-a-document" target="_blank" class="small" rel="noopener noreferrer">
+                    {{#str}}deeplapidoc,local_deepler{{/str}} {{#str}}ariatargetblank,local_deepler{{/str}}
                 </a>
             </div>
         </div>

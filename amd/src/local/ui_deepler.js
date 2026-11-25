@@ -152,8 +152,8 @@ const cachedSelectors = {
             table.className = 'generaltable';
             // Create the header.
             const thead = document.createElement('thead');
-            thead.innerHTML = `<tr><th>${ajaxResponse.source.toUpperCase()}</th>
-                <th>${ajaxResponse.target.toUpperCase()}</th></tr>`;
+            thead.innerHTML = `<tr><th scope="col">${ajaxResponse.source.toUpperCase()}</th>
+                <th scope="col">${ajaxResponse.target.toUpperCase()}</th></tr>`;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');

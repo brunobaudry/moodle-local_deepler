@@ -315,24 +315,15 @@ define([
      * @param {number} fileId
      * @param {string} targetLang
      * @param {object} finalRes
+     * @param {number} billedCharacters
      */
-    const addTranslationToAccordion = (fileId, targetLang, finalRes) => {
-        const translationsRow = Utils.domQuery(`#file_translations_${fileId}`);
-        if (!translationsRow) {
+    const addTranslationToAccordion = (fileId, targetLang, finalRes, billedCharacters) => {
+        const list = Utils.domQuery(`#file_translations_${fileId}`);
+        if (!list) {
             return;
         }
-        const list = Utils.domQuery(`[data-list-for="${fileId}"]`, '', translationsRow);
-        if (list) {
-            const noTranslationsMsg = Utils.domQuery('.no-translations-msg', '', list);
-            if (noTranslationsMsg) {
-                noTranslationsMsg.remove();
-            }
-        }
 
-        let billedStr = '';
-        if (finalRes.billedcharacters) {
-            billedStr = (strings.billedchars || 'Billed chars: {$a}').replace('{$a}', finalRes.billedcharacters);
-        }
+        const billedStr = (strings.billedchars || 'Billed chars: {$a}').replace('{$a}', billedCharacters);
 
         const context = {
             targetlang: targetLang.toUpperCase(),
@@ -346,14 +337,12 @@ define([
             str_billedchars: billedStr
         };
 
-        if (list) {
-            Templates.render('local_deepler/files_translation_item', context)
-                .then((html, js) => {
-                    Templates.prependNodeContents(list, html, js);
-                    return null;
-                })
-                .catch(Notification.exception);
-        }
+        Templates.renderForPromise('local_deepler/files_translation_item', context)
+            .then(({html, js}) => {
+                Templates.prependNodeContents(list, html, js);
+                return null;
+            })
+            .catch(Notification.exception);
 
         // Update translation count badge and toggle button.
         const row = Utils.domQuery(`tr.file-row[data-fileid="${fileId}"]`);
@@ -361,6 +350,7 @@ define([
             const toggleBtn = Utils.domQuery('.toggle-translations-btn', '', row);
             if (toggleBtn) {
                 toggleBtn.classList.remove('disabled', 'text-muted');
+                toggleBtn.setAttribute('aria-expanded', 'true');
                 const toggleIcon = Utils.domQuery('.toggle-icon', '', toggleBtn);
                 if (toggleIcon) {
                     toggleIcon.classList.remove('fa-chevron-right');
@@ -370,7 +360,7 @@ define([
         }
 
         // Automatically show the accordion row so user sees result.
-        translationsRow.classList.add('show', 'collapse');
+        list.hidden = false;
     };
 
     /**
@@ -397,7 +387,7 @@ define([
 
             // 2. Poll status
             setFileStatus(fileId, strings.translating, 'badge-warning');
-            await pollStatus(jobId, fileId);
+            const statusRes = await pollStatus(jobId, fileId);
 
             // 3. Finalize
             setFileStatus(fileId, strings.duplicating, 'badge-primary');
@@ -423,7 +413,7 @@ define([
             }
 
             // Add translation item to accordion
-            addTranslationToAccordion(fileId, targetLang, finalRes);
+            addTranslationToAccordion(fileId, targetLang, finalRes, statusRes.billedcharacters);
 
             if (finalRes.warning) {
                 Notification.addNotification({
@@ -793,23 +783,19 @@ define([
                 return;
             }
 
-            // 7. Toggle translations accordion icon rotation
+            // 7. Toggle translation rows.
             const toggleTranslationsBtn = e.target.closest(Selectors.files.toggleTranslationsBtn);
             if (toggleTranslationsBtn) {
                 const icon = Utils.domQuery('.toggle-icon', '', toggleTranslationsBtn);
-                const targetId = toggleTranslationsBtn.dataset.target || toggleTranslationsBtn.dataset.bsTarget;
-                const targetEl = targetId ? Utils.domQuery(targetId) : null;
-                setTimeout(() => {
-                    if (targetEl && targetEl.classList.contains('show')) {
-                        if (icon) {
-                            icon.classList.remove('fa-chevron-right');
-                            icon.classList.add('fa-chevron-down');
-                        }
-                    } else if (icon) {
-                        icon.classList.remove('fa-chevron-down');
-                        icon.classList.add('fa-chevron-right');
+                const target = document.getElementById(toggleTranslationsBtn.getAttribute('aria-controls'));
+                if (target && !toggleTranslationsBtn.classList.contains('disabled')) {
+                    target.hidden = !target.hidden;
+                    toggleTranslationsBtn.setAttribute('aria-expanded', String(!target.hidden));
+                    if (icon) {
+                        icon.classList.toggle('fa-chevron-right', target.hidden);
+                        icon.classList.toggle('fa-chevron-down', !target.hidden);
                     }
-                }, 350);
+                }
             }
         });
 
