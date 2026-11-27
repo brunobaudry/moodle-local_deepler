@@ -13,9 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `utils::pluginfile_url_itemid()` is the one rule for whether a pluginfile URL includes the itemid.
 - `utils::resolve_pluginfiles()` is now a single rewrite based on `get_context_info()`.
 - `utils::get_context_info()` takes a fourth parameter, `$column`, and always returns `context`, `contextid`, `component`, `filearea` and `itemid`. 
-- Question data also gets `questionid` and `previewcontextid`.
+- Question data also gets `questionid` and `previewcontextid`. 
+- removed duplicated link to open duplicated files.
+
 
 ### Added
+- Deepler File menu entry in activities
 - Question files embedded in translatable fields are now served:
 - File-area maps in `utils`:
   - `MODULE_SUBTABLE_FILEAREAS`: book chapters, forum posts, glossary entries, lesson pages and answers, quiz feedback.
@@ -25,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `MODULE_SUBTABLE_ITEMID_COLUMNS`, for sub-tables whose files are stored per parent record (`wiki_pages` → `subwikiid`).
 
 ### Fixed
+- bug with multilanguer for rephrase and when translating a rephrased text.
 - Wiki page images: `wiki_pages.cachedcontent` is now looked up in `mod_wiki/attachments` with the subwiki id as itemid.
 - Module intro images: URLs no longer contain `/intro/0/`, which core read as a folder and answered with a 404.
 - Course section images: the file area is now `section`, not the column name `summary`, and the URL keeps the section id.
