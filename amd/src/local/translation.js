@@ -99,6 +99,8 @@ define([
                 }
                 response.forEach((item) => {
                     if (item.error === '') {
+                        // Expose the language the text was saved for, so the UI can refresh the source column.
+                        item.sourcelang = Utils.stripRephraseSymbol(tempTranslations[item.keyid]?.sourceLang || '', rephrasesymbol);
                         if (tempTranslations[item.keyid]) {
                             tempTranslations[item.keyid].fieldText = item.text;
                         }
@@ -321,6 +323,13 @@ define([
                     Log.debug(t);
                     rephrases.push(t);
                 } else {
+                    // Tone/style is a rephrase-only option, get_translation rejects it as an unexpected key.
+                    if (t.options) {
+                        delete t.options.toneorstyle;
+                    }
+                    // Source_lang is validated as PARAM_ALPHA, never send the rephrase symbol to translations.
+                    // eslint-disable-next-line camelcase
+                    t.source_lang = Utils.stripRephraseSymbol(t.source_lang, rephrasesymbol);
                     translations.push(t);
                 }
             });

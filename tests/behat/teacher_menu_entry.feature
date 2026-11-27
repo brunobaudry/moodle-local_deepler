@@ -22,7 +22,8 @@ Feature: Check course 'MORE' menu entry with DeepLer Translator
     And I log in as "teacher1"
 
   Scenario: Teacher can see the plugin entry in the course 'MORE' menu
-    Given I am on the "C1" "course" page
+    Given the DeepL API key is configured from environment
+    And I am on the "C1" "course" page
     Then I should see "Course 1"
     And I navigate to "DeepLer Translator" in current page administration
     Then I should see "DeepLer Translator"

@@ -45,6 +45,11 @@ class upload_document extends external_api {
     use deeplapi_trait;
 
     /**
+     * Capability constant.
+     */
+    const LOCAL_DEEPLER_TRANSLATEFILES = 'local/deepler:translatefiles';
+
+    /**
      * Parameter description for upload_document.
      *
      * @return external_function_parameters
@@ -95,7 +100,7 @@ class upload_document extends external_api {
         if ($context->contextlevel == CONTEXT_COURSE) {
             $courseid = $context->instanceid;
             self::validate_context($context);
-            require_capability('local/deepler:translatefiles', $context);
+            require_capability(self::LOCAL_DEEPLER_TRANSLATEFILES, $context);
             return [$courseid, $cmid, ''];
         }
 
@@ -105,7 +110,7 @@ class upload_document extends external_api {
             $courseid = (int)$cm->course;
             $coursecontext = context_course::instance($courseid);
             self::validate_context($coursecontext);
-            require_capability('local/deepler:translatefiles', $coursecontext);
+            require_capability(self::LOCAL_DEEPLER_TRANSLATEFILES, $coursecontext);
             return [$courseid, $cmid, ''];
         }
 
@@ -114,7 +119,7 @@ class upload_document extends external_api {
             if ($coursecontext) {
                 $courseid = $coursecontext->instanceid;
                 self::validate_context($coursecontext);
-                require_capability('local/deepler:translatefiles', $coursecontext);
+                require_capability(self::LOCAL_DEEPLER_TRANSLATEFILES, $coursecontext);
                 return [$courseid, $cmid, ''];
             }
         }

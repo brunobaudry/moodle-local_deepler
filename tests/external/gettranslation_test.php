@@ -244,6 +244,33 @@ final class gettranslation_test extends base_external {
     }
 
     /**
+     * The legacy billing option is not passed to the DeepL client.
+     *
+     * @covers \local_deepler\external\get_translation::process_chunk
+     * @return void
+     */
+    public function test_process_chunk_removes_legacy_billing_option(): void {
+        foreach ([true, false] as $billingoption) {
+            $translator = $this->createMock(DeepLClient::class);
+            $translator->expects($this->once())
+                ->method('translateText')
+                ->with(['Hello'], 'EN', 'DE', ['formality' => 'more'])
+                ->willReturn([new TextResult('Hallo', 'EN', 5)]);
+
+            $result = self::callprotectedstaticmethod(get_translation::class, 'process_chunk', [
+                $translator,
+                [['text' => 'Hello', 'key' => 'row_1']],
+                'EN',
+                'DE',
+                ['formality' => 'more', 'show_billed_characters' => $billingoption],
+                '',
+            ]);
+            $this->assertSame('Hallo', $result[0]['translated_text']);
+            $this->assertSame('', $result[0]['error']);
+        }
+    }
+
+    /**
      * A failing chunk is retried text by text, so only the malformed text reports an error.
      *
      * @covers \local_deepler\external\get_translation::process_chunk
@@ -304,6 +331,8 @@ final class gettranslation_test extends base_external {
                         'ignore_tags' => 'code',
                         'glossary_id' => 'glossary-123',
                         'model_type' => 'prefer_quality_optimized',
+                        // Sent by the row settings modal, rephrase only, must be accepted and ignored.
+                        'toneorstyle' => 'default',
                     ],
                 ],
                 [
@@ -339,6 +368,7 @@ final class gettranslation_test extends base_external {
         $this->assertEquals('more', $validated['translations'][0]['options']['formality']);
         $this->assertEquals('glossary-123', $validated['translations'][0]['options']['glossary_id']);
         $this->assertNull($validated['translations'][1]['options']['formality']);
+        $this->assertEquals('default', $validated['translations'][0]['options']['toneorstyle']);
     }
 
     /**

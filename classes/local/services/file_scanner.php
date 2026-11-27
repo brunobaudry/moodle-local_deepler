@@ -160,76 +160,102 @@ class file_scanner {
         $jobsbyfile = [];
         $translatedfileids = [];
         $translatedcmids = [];
-        $fs = get_file_storage();
 
         foreach ($jobsrecords as $job) {
             $jobsbyfile[$job->fileid][] = $job;
             if ($job->newfileid > 0) {
                 $translatedfileids[$job->newfileid] = true;
             }
+            $dupcontext = null;
             if ($job->newcmid > 0) {
                 $translatedcmids[$job->newcmid] = true;
-                // Add all files belonging to the duplicated course module to translatedfileids.
-                $dupcontext = context_module::instance($job->newcmid, IGNORE_MISSING);
-                if ($dupcontext) {
-                    $dupfiles = $fs->get_area_files($dupcontext->id, false, false, false, 'id ASC');
-                    foreach ($dupfiles as $df) {
-                        if (!$df->is_directory() && $df->get_filename() !== '.') {
-                            $translatedfileids[$df->get_id()] = true;
-                        }
-                    }
-                }
+                $dupcontext = $this->collect_duplicate_files($job->newcmid, $translatedfileids);
             }
-
-            // Also check if a translated file exists for this job in case newfileid was 0 or became out of sync.
-            if ($job->fileid > 0) {
-                $sourcefile = $fs->get_file_by_id($job->fileid);
-                if ($sourcefile && !$sourcefile->is_directory() && $sourcefile->get_filename() !== '.') {
-                    $expectedtargetname = activity_duplicator::get_translated_filename(
-                        $sourcefile->get_filename(),
-                        $job->targetlang
-                    );
-
-                    // Check in original context / area.
-                    $targetfile = $fs->get_file(
-                        $sourcefile->get_contextid(),
-                        $sourcefile->get_component(),
-                        $sourcefile->get_filearea(),
-                        $sourcefile->get_itemid(),
-                        $sourcefile->get_filepath(),
-                        $expectedtargetname
-                    );
-                    if ($targetfile) {
-                        $translatedfileids[$targetfile->get_id()] = true;
-                        if (empty($job->newfileid) && $job->status === 'done') {
-                            $job->newfileid = (int)$targetfile->get_id();
-                            $DB->set_field('local_deepler_files', 'newfileid', $targetfile->get_id(), ['id' => $job->id]);
-                        }
-                    }
-
-                    // Check in duplicated cm context if newcmid was set.
-                    if ($job->newcmid > 0 && !empty($dupcontext)) {
-                        $dupfile = $fs->get_file(
-                            $dupcontext->id,
-                            $sourcefile->get_component(),
-                            $sourcefile->get_filearea(),
-                            $sourcefile->get_itemid(),
-                            $sourcefile->get_filepath(),
-                            $expectedtargetname
-                        );
-                        if ($dupfile) {
-                            $translatedfileids[$dupfile->get_id()] = true;
-                            if (empty($job->newfileid) && $job->status === 'done') {
-                                $job->newfileid = (int)$dupfile->get_id();
-                                $DB->set_field('local_deepler_files', 'newfileid', $dupfile->get_id(), ['id' => $job->id]);
-                            }
-                        }
-                    }
-                }
-            }
+            $this->collect_job_target_files($job, $dupcontext, $translatedfileids);
         }
 
         return [$jobsbyfile, $translatedfileids, $translatedcmids];
+    }
+
+    /**
+     * Collect files in a duplicated module and return its context if it exists.
+     *
+     * @param int $cmid Duplicated course module ID.
+     * @param array $translatedfileids Translated file ID set, updated in place.
+     * @return context_module|null
+     */
+    private function collect_duplicate_files(int $cmid, array &$translatedfileids): ?context_module {
+        $context = context_module::instance($cmid, IGNORE_MISSING);
+        if (!$context) {
+            return null;
+        }
+
+        $dupfiles = get_file_storage()->get_area_files($context->id, false, false, false, 'id ASC');
+        foreach ($dupfiles as $file) {
+            if (!$file->is_directory() && $file->get_filename() !== '.') {
+                $translatedfileids[$file->get_id()] = true;
+            }
+        }
+        return $context;
+    }
+
+    /**
+     * Find translated targets for a job in the source and duplicate contexts.
+     *
+     * @param stdClass $job Translation job, updated when a missing file ID is recovered.
+     * @param context_module|null $dupcontext Duplicated module context, if available.
+     * @param array $translatedfileids Translated file ID set, updated in place.
+     */
+    private function collect_job_target_files(stdClass $job, ?context_module $dupcontext, array &$translatedfileids): void {
+        if ($job->fileid <= 0) {
+            return;
+        }
+        $sourcefile = get_file_storage()->get_file_by_id($job->fileid);
+        if (!$sourcefile || $sourcefile->is_directory() || $sourcefile->get_filename() === '.') {
+            return;
+        }
+
+        $targetname = activity_duplicator::get_translated_filename($sourcefile->get_filename(), $job->targetlang);
+        $this->collect_target_file($job, $sourcefile, $sourcefile->get_contextid(), $targetname, $translatedfileids);
+        if ($dupcontext) {
+            $this->collect_target_file($job, $sourcefile, $dupcontext->id, $targetname, $translatedfileids);
+        }
+    }
+
+    /**
+     * Collect a translated target and restore the job's missing file ID when appropriate.
+     *
+     * @param stdClass $job Translation job.
+     * @param stored_file $sourcefile Original file.
+     * @param int $contextid Context to search.
+     * @param string $targetname Expected translated filename.
+     * @param array $translatedfileids Translated file ID set, updated in place.
+     */
+    private function collect_target_file(
+        stdClass $job,
+        stored_file $sourcefile,
+        int $contextid,
+        string $targetname,
+        array &$translatedfileids
+    ): void {
+        global $DB;
+
+        $targetfile = get_file_storage()->get_file(
+            $contextid,
+            $sourcefile->get_component(),
+            $sourcefile->get_filearea(),
+            $sourcefile->get_itemid(),
+            $sourcefile->get_filepath(),
+            $targetname
+        );
+        if (!$targetfile) {
+            return;
+        }
+        $translatedfileids[$targetfile->get_id()] = true;
+        if (empty($job->newfileid) && $job->status === 'done') {
+            $job->newfileid = (int)$targetfile->get_id();
+            $DB->set_field('local_deepler_files', 'newfileid', $targetfile->get_id(), ['id' => $job->id]);
+        }
     }
 
     /**

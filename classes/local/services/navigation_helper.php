@@ -38,6 +38,11 @@ class navigation_helper {
     public const CAPABILITY_EDITTRANSLATIONS = 'local/deepler:edittranslations';
 
     /**
+     * Files capability constant.
+     */
+    public const CAPABILITY_TRANSLATEFILES = 'local/deepler:translatefiles';
+
+    /**
      * Check if the current user has capability to edit translations in the given context.
      *
      * @param context $context
@@ -45,6 +50,17 @@ class navigation_helper {
      */
     public static function can_translate_context(context $context): bool {
         return has_capability(self::CAPABILITY_EDITTRANSLATIONS, $context);
+    }
+
+    /**
+     * Check if the current user has capability to translate files in the given context and feature is enabled.
+     *
+     * @param context $context
+     * @return bool
+     */
+    public static function can_translate_files_context(context $context): bool {
+        return (bool) get_config('local_deepler', 'filetranslation') &&
+            has_capability(self::CAPABILITY_TRANSLATEFILES, $context);
     }
 
     /**
@@ -77,6 +93,16 @@ class navigation_helper {
     }
 
     /**
+     * Builds the files URL for course.
+     *
+     * @param int $courseid
+     * @return moodle_url
+     */
+    public static function get_files_url(int $courseid): moodle_url {
+        return new moodle_url('/local/deepler/files.php', ['courseid' => $courseid]);
+    }
+
+    /**
      * Extend settings navigation for activity / module context.
      *
      * @param settings_navigation $settingsnav
@@ -92,6 +118,32 @@ class navigation_helper {
             navigation_node::TYPE_SETTING,
             $title,
             'deepler_activity_translate'
+        );
+
+        $modulesettings = $settingsnav->find('modulesettings', navigation_node::TYPE_SETTING);
+        if ($modulesettings) {
+            $modulesettings->add_node($node);
+        } else {
+            $settingsnav->add_node($node);
+        }
+    }
+
+    /**
+     * Extend settings navigation for activity / module context (files).
+     *
+     * @param settings_navigation $settingsnav
+     * @param \cm_info|\stdClass $cm
+     * @return void
+     */
+    private static function extend_activity_files_settings_nav(settings_navigation $settingsnav, $cm): void {
+        $url = self::get_files_url((int)$cm->course);
+        $title = get_string('files:menu', 'local_deepler');
+        $node = navigation_node::create(
+            $title,
+            $url,
+            navigation_node::TYPE_SETTING,
+            $title,
+            'deepler_activity_files'
         );
 
         $modulesettings = $settingsnav->find('modulesettings', navigation_node::TYPE_SETTING);
@@ -139,6 +191,40 @@ class navigation_helper {
     }
 
     /**
+     * Extend settings navigation for course / section context (files).
+     *
+     * @param settings_navigation $settingsnav
+     * @param int $courseid
+     * @return void
+     */
+    private static function extend_course_section_files_settings_nav(
+        settings_navigation $settingsnav,
+        int $courseid
+    ): void {
+        $courseadmin = $settingsnav->find('courseadmin', navigation_node::TYPE_COURSE);
+        $url = self::get_files_url($courseid);
+        $existingnode = $courseadmin ? $courseadmin->get('deepler_files') : null;
+
+        if ($existingnode) {
+            $existingnode->action = $url;
+        } else if (!$settingsnav->find('deepler_section_files', navigation_node::TYPE_SETTING)) {
+            $title = get_string('files:menu', 'local_deepler');
+            $node = navigation_node::create(
+                $title,
+                $url,
+                navigation_node::TYPE_SETTING,
+                $title,
+                'deepler_section_files'
+            );
+            if ($courseadmin) {
+                $courseadmin->add_node($node);
+            } else {
+                $settingsnav->add_node($node);
+            }
+        }
+    }
+
+    /**
      * Extends settings navigation for activity/resource and section pages.
      *
      * @param settings_navigation $settingsnav
@@ -148,7 +234,10 @@ class navigation_helper {
     public static function extend_settings_navigation(settings_navigation $settingsnav, context $context): void {
         global $PAGE;
 
-        if (!self::can_translate_context($context)) {
+        $cantranslate = self::can_translate_context($context);
+        $cantranslatefiles = self::can_translate_files_context($context);
+
+        if (!$cantranslate && !$cantranslatefiles) {
             return;
         }
 
@@ -156,7 +245,12 @@ class navigation_helper {
         if ($context->contextlevel === CONTEXT_MODULE) {
             $cm = $PAGE->cm ?? null;
             if ($cm) {
-                self::extend_activity_settings_nav($settingsnav, $cm);
+                if ($cantranslate) {
+                    self::extend_activity_settings_nav($settingsnav, $cm);
+                }
+                if ($cantranslatefiles) {
+                    self::extend_activity_files_settings_nav($settingsnav, $cm);
+                }
             }
             return;
         }
@@ -165,7 +259,12 @@ class navigation_helper {
         if ($context->contextlevel === CONTEXT_COURSE && $PAGE->course && $PAGE->course->id > SITEID) {
             $sectionid = self::detect_current_section_id();
             if ($sectionid > 0) {
-                self::extend_course_section_settings_nav($settingsnav, (int)$PAGE->course->id, $sectionid);
+                if ($cantranslate) {
+                    self::extend_course_section_settings_nav($settingsnav, (int)$PAGE->course->id, $sectionid);
+                }
+                if ($cantranslatefiles) {
+                    self::extend_course_section_files_settings_nav($settingsnav, (int)$PAGE->course->id);
+                }
             }
         }
     }
@@ -190,6 +289,35 @@ class navigation_helper {
                 navigation_node::TYPE_CUSTOM,
                 $title,
                 'deepler_activity_translate'
+            );
+            $secondaryview->add_node($node);
+        }
+    }
+
+    /**
+     * Extend secondary navigation inside an activity module (files).
+     *
+     * @param \navigation_node $secondaryview
+     * @param \cm_info|\stdClass $cm
+     * @param string $title
+     * @return void
+     */
+    private static function extend_activity_files_secondary_nav(
+        \navigation_node $secondaryview,
+        $cm,
+        string $title
+    ): void {
+        $url = self::get_files_url((int)$cm->course);
+        $hasnode = $secondaryview->get('deepler_activity_files')
+            || $secondaryview->find('deepler_activity_files', navigation_node::TYPE_SETTING)
+            || $secondaryview->find('deepler_activity_files', navigation_node::TYPE_CUSTOM);
+        if (!$hasnode) {
+            $node = navigation_node::create(
+                $title,
+                $url,
+                navigation_node::TYPE_CUSTOM,
+                $title,
+                'deepler_activity_files'
             );
             $secondaryview->add_node($node);
         }
@@ -230,6 +358,38 @@ class navigation_helper {
     }
 
     /**
+     * Extend secondary navigation on a section view page (files).
+     *
+     * @param \navigation_node $secondaryview
+     * @param int $courseid
+     * @param string $title
+     * @return void
+     */
+    private static function extend_section_files_secondary_nav(
+        \navigation_node $secondaryview,
+        int $courseid,
+        string $title
+    ): void {
+        $url = self::get_files_url($courseid);
+        $hasnode = $secondaryview->get('deepler_files')
+            || $secondaryview->get('deepler_section_files')
+            || $secondaryview->find('deepler_section_files', navigation_node::TYPE_SETTING)
+            || $secondaryview->find('deepler_section_files', navigation_node::TYPE_CUSTOM)
+            || $secondaryview->find('deepler_files', navigation_node::TYPE_SETTING)
+            || $secondaryview->find('deepler_files', navigation_node::TYPE_CUSTOM);
+        if (!$hasnode) {
+            $node = navigation_node::create(
+                $title,
+                $url,
+                navigation_node::TYPE_CUSTOM,
+                $title,
+                'deepler_section_files'
+            );
+            $secondaryview->add_node($node);
+        }
+    }
+
+    /**
      * Extends secondary navigation via modern secondary_extend hook.
      *
      * @param secondary_extend $hook
@@ -239,16 +399,29 @@ class navigation_helper {
         global $PAGE;
 
         $context = $PAGE->context ?? null;
-        if (!$context || !self::can_translate_context($context)) {
+        if (!$context) {
+            return;
+        }
+
+        $cantranslate = self::can_translate_context($context);
+        $cantranslatefiles = self::can_translate_files_context($context);
+
+        if (!$cantranslate && !$cantranslatefiles) {
             return;
         }
 
         $secondaryview = $hook->get_secondaryview();
         $title = get_string('pluginname', 'local_deepler');
+        $filestitle = get_string('files:menu', 'local_deepler');
 
         // 1. Inside an activity / resource.
         if ($context->contextlevel === CONTEXT_MODULE && $PAGE->cm) {
-            self::extend_activity_secondary_nav($secondaryview, $PAGE->cm, $title);
+            if ($cantranslate) {
+                self::extend_activity_secondary_nav($secondaryview, $PAGE->cm, $title);
+            }
+            if ($cantranslatefiles) {
+                self::extend_activity_files_secondary_nav($secondaryview, $PAGE->cm, $filestitle);
+            }
             return;
         }
 
@@ -256,7 +429,12 @@ class navigation_helper {
         if ($context->contextlevel === CONTEXT_COURSE && $PAGE->course && $PAGE->course->id > SITEID) {
             $sectionid = self::detect_current_section_id();
             if ($sectionid > 0) {
-                self::extend_section_secondary_nav($secondaryview, (int)$PAGE->course->id, $sectionid, $title);
+                if ($cantranslate) {
+                    self::extend_section_secondary_nav($secondaryview, (int)$PAGE->course->id, $sectionid, $title);
+                }
+                if ($cantranslatefiles) {
+                    self::extend_section_files_secondary_nav($secondaryview, (int)$PAGE->course->id, $filestitle);
+                }
             }
         }
     }
@@ -348,8 +526,8 @@ class navigation_helper {
         }
 
         // Add Deepler: Files link if enabled and user has capability.
-        if (get_config('local_deepler', 'filetranslation') && has_capability('local/deepler:translatefiles', $context)) {
-            $filesurl = new moodle_url('/local/deepler/files.php', ['courseid' => (int)$course->id]);
+        if (self::can_translate_files_context($context)) {
+            $filesurl = self::get_files_url((int)$course->id);
             $filestitle = get_string('files:menu', 'local_deepler');
             $filesnode = navigation_node::create(
                 $filestitle,

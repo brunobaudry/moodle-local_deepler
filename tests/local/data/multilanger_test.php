@@ -160,4 +160,21 @@ final class multilanger_test extends advanced_testcase {
         $expected = '{mlang en}Hello{mlang}{mlang fr}Bonjour{mlang}{mlang de}Hallo{mlang}';
         $this->assertEquals($expected, $result);
     }
+
+    /**
+     * Rephrasing replaces the matching mlang block, and falls back to the given code when the source text is not found.
+     *
+     * @covers \local_deepler\local\data\multilanger::replacemlang
+     */
+    public function test_replacemlang(): void {
+        $mlanger = new multilanger('{mlang en}Hello you{mlang}{mlang fr}Salut{mlang}');
+        $mlanger->replacemlang('en', 'Hello you', 'Hello there');
+        $this->assertEquals('{mlang en}Hello there{mlang}{mlang fr}Salut{mlang}', $mlanger->get_text());
+
+        // Source text edited meanwhile: still saved under the given source code, no broken empty code tag.
+        $mlanger = new multilanger('{mlang en}Hello you{mlang}{mlang fr}Salut{mlang}');
+        $mlanger->replacemlang('en', 'Stale text', 'Hello there');
+        $this->assertEquals('{mlang en}Hello there{mlang}{mlang fr}Salut{mlang}', $mlanger->get_text());
+        $this->assertStringNotContainsString('{mlang }', $mlanger->get_text());
+    }
 }

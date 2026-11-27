@@ -13,7 +13,7 @@ show_help() {
   echo
   echo "Options:"
   echo "  TEST_FILTER        Optional. Run only tests matching the given filter."
-  echo "  --deprecations     Optional. Show deprecation warnings during test execution."
+  echo "  --deprecations     Show deprecation and skipped-test details when supported."
   echo "  --help             Show this help message and exit."
   echo
   echo "Environment:"
@@ -39,10 +39,10 @@ moodle_require_layout || exit 1
 moodle_print_layout
 
 test_filter=""
-show_deprecations=""
+show_deprecations=false
 for arg in "$@"; do
   if [[ "$arg" == "--deprecations" ]]; then
-    show_deprecations="--display-deprecations"
+    show_deprecations=true
   else
     test_filter="$arg"
   fi
@@ -98,7 +98,14 @@ phpunit_bin=$(moodle_vendor_bin phpunit) || {
 }
 
 phpunit_cmd=("$phpunit_bin" --colors --testsuite "$testsuite")
-[[ -n "$show_deprecations" ]] && phpunit_cmd+=("$show_deprecations")
+if [[ "$show_deprecations" == true ]]; then
+    phpunit_help=$("$phpunit_bin" --help) || exit $?
+    for option in --display-deprecations --display-phpunit-deprecations --display-skipped; do
+        if [[ "$phpunit_help" == *"$option"* ]]; then
+            phpunit_cmd+=("$option")
+        fi
+    done
+fi
 [[ -n "$test_filter" ]] && phpunit_cmd+=(--filter "$test_filter")
 
 # Run the tests, showing output live while keeping a copy to inspect.

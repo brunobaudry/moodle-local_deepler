@@ -122,6 +122,7 @@ $string['files:sourcelang'] = 'Source';
 $string['files:status'] = 'Status';
 $string['files:tablecaption'] = 'Found files for {$a}';
 $string['files:title'] = 'Deepler file translation';
+$string['files:translated'] = 'Translated files';
 $string['files:translateselected'] = 'Translate selected';
 $string['files:translating'] = 'Translating';
 $string['files:translations'] = 'Translations ({$a})';

@@ -584,7 +584,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             const errors = response.filter((item) => item.error !== '');
             response.forEach((item) => {
                 if (item.error === '') {
-                    onSuccessMessageItem(item.keyid, item.text);
+                    onSuccessMessageItem(item.keyid, item.text, item.sourcelang);
                 } else {
                     onErrorMessageItem(item.keyid, item.error);
                 }
@@ -611,7 +611,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 if (item && item.error !== '') {
                     onErrorMessageItem(key, item.error);
                 } else if (item) {
-                    onSuccessMessageItem(key, item.text);
+                    onSuccessMessageItem(key, item.text, item.sourcelang);
                 }
             } catch (error) {
                 onErrorMessageItem(key, error.message || error);
@@ -636,6 +636,26 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         };
     };
     /**
+     * Filter a raw (multilang) field text for a source language and render it in the row's source column.
+     *
+     * @param {HTMLElement} sourceContainer The [data-sourcetext-key] element.
+     * @param {string} rawUnfiltered Raw DB text, may contain {mlang} tags.
+     * @param {string} sourceLang Source language code (rephrase symbol is ignored).
+     * @returns {object} Result of Utils.extractMultilangSource.
+     */
+    const renderRowSource = (sourceContainer, rawUnfiltered, sourceLang) => {
+        const lang = Utils.stripRephraseSymbol(sourceLang, config.rephrasesymbol);
+        const mlangResult = Utils.extractMultilangSource(rawUnfiltered, lang);
+        sourceContainer.setAttribute('data-sourcetext-raw', Utils.toBase64(mlangResult.filteredText));
+        const preEl = sourceContainer.querySelector('pre');
+        if (preEl) {
+            preEl.textContent = mlangResult.filteredText;
+        } else {
+            sourceContainer.innerHTML = mlangResult.filteredText;
+        }
+        return mlangResult;
+    };
+    /**
      * Listener for individual source change.
      *
      * @param {event} e
@@ -653,19 +673,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         }
 
         const rawUnfilteredBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
-        const rawUnfiltered = Utils.fromBase64(rawUnfilteredBase64);
-        const mlangResult = Utils.extractMultilangSource(rawUnfiltered, selectedSourceLang);
-
-        // Update data-sourcetext-raw with base64 encoded filtered text.
-        sourceContainer.setAttribute('data-sourcetext-raw', Utils.toBase64(mlangResult.filteredText));
-
-        // Update displayed text in DOM.
-        const preEl = sourceContainer.querySelector('pre');
-        if (preEl) {
-            preEl.textContent = mlangResult.filteredText;
-        } else {
-            sourceContainer.innerHTML = mlangResult.filteredText;
-        }
+        const mlangResult = renderRowSource(sourceContainer, Utils.fromBase64(rawUnfilteredBase64), selectedSourceLang);
 
         // Re-initialize Translation temp item with updated source text.
         const editor = findEditor(key);
@@ -962,7 +970,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
                 }
                 break;
             case Selectors.statuses.totranslate :
-                if (checked && Translation.translated[key]) {
+                if (checked && Translation.translated(key)) {
                     setIconStatus(key, Selectors.statuses.tosave, true);
                 } else {
                     setIconStatus(key, Selectors.statuses.wait);
@@ -1111,18 +1119,45 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
      * Displays success message and icon.
      *
      * @param {String} key
-     * @param {string} savedText
+     * @param {string} savedText Full field text as saved in the DB.
+     * @param {string} savedSourceLang Source language the text was translated/rephrased from.
      */
-    const onSuccessMessageItem = (key, savedText) => {
+    const onSuccessMessageItem = (key, savedText, savedSourceLang = '') => {
         Utils.domQuery(Selectors.editors.multiples.editorsWithKey, key)
             .classList.add("local_deepler__success");
         // Add saved indicator.
         setIconStatus(key, Selectors.statuses.success);
-        // Replace text in the multilang textarea.
+        const sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
+        // Replace text in the multilang textarea (escaped display renders the raw text, as the template does).
         const multilangTextarea = Utils.domQuery(Selectors.editors.multiples.textAreas, key);
-        multilangTextarea.innerHTML = savedText;
-        // Deselect the checkbox.
+        if (sourceContainer && sourceContainer.querySelector('pre')) {
+            multilangTextarea.textContent = savedText;
+        } else {
+            multilangTextarea.innerHTML = savedText;
+        }
+        // Refresh the source column from the saved text: a rephrase replaces the source language text itself.
+        if (sourceContainer) {
+            sourceContainer.setAttribute('data-filedtext-raw', Utils.toBase64(savedText));
+            const rowSourceSelect = Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key);
+            const sourceLang = savedSourceLang
+                || (rowSourceSelect && rowSourceSelect.value)
+                || config.deeplsourcelang || config.sourcelang || '';
+            const mlangResult = renderRowSource(sourceContainer, savedText, sourceLang);
+            const reactive = StateManager.getStateManager(config.courseid || 'main');
+            if (reactive) {
+                const counts = getCount(key);
+                reactive.dispatch('updateRowOriginalText', key,
+                    Utils.stripHTMLTags(mlangResult.filteredText).trim(), counts.wordCount || 0, counts.charNumWithSpace || 0);
+            }
+        }
+        // Deselect the checkbox, also in the reactive state, else the row component re-checks it on next row update.
         Utils.domQuery(Selectors.editors.multiples.checkBoxesWithKey, key).checked = false;
+        const reactiveState = StateManager.getStateManager(config.courseid || 'main');
+        if (reactiveState) {
+            reactiveState.dispatch('setRowSelection', key, false);
+        }
+        toggleAutotranslateButton();
+        countWordAndChar();
         // Remove success message after a few seconds.
         setTimeout(() => {
             let multilangPill = Utils.domQuery(Selectors.statuses.multilang, key);
@@ -1130,10 +1165,6 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
             if (prevTransStatus) {
                 prevTransStatus.className = "badge badge-pill rounded-pill badge-success";
                 prevTransStatus.setAttribute('title', langstrings.uistrings.uptodate || "Up to date");
-            }
-            let sourceContainer = Utils.domQuery(Selectors.sourcetexts.keys, key);
-            if (sourceContainer) {
-                sourceContainer.setAttribute('data-filedtext-raw', Utils.toBase64(savedText));
             }
             let rowEl = Utils.domQuery(`[data-row-id="${key}"]`);
             if (rowEl) {
@@ -1550,19 +1581,7 @@ if (!glossaryDetailViewr && document.querySelector(Selectors.glossary.entriesvie
         }
 
         const rawUnfilteredBase64 = sourceContainer.getAttribute('data-filedtext-raw') || '';
-        const rawUnfiltered = Utils.fromBase64(rawUnfilteredBase64);
-        const mlangResult = Utils.extractMultilangSource(rawUnfiltered, sourceLang);
-
-        // Update data-sourcetext-raw with base64 encoded filtered text.
-        sourceContainer.setAttribute('data-sourcetext-raw', Utils.toBase64(mlangResult.filteredText));
-
-        // Update visible DOM text.
-        const preEl = sourceContainer.querySelector('pre');
-        if (preEl) {
-            preEl.textContent = mlangResult.filteredText;
-        } else {
-            sourceContainer.innerHTML = mlangResult.filteredText;
-        }
+        const mlangResult = renderRowSource(sourceContainer, Utils.fromBase64(rawUnfilteredBase64), sourceLang);
 
         // Update row source selection dropdown.
         const rowSourceSelect = Utils.domQuery(Selectors.sourcetexts.sourcelangdd, key);

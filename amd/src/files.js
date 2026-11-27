@@ -399,19 +399,6 @@ define([
             // 4. Done
             setFileStatus(fileId, strings.done, 'badge-success');
 
-            // Render link to duplicated cm if available
-            if (finalRes.newcmid > 0 && finalRes.newcmurl) {
-                const statusCell = Utils.domQuery(`td.status-cell[data-fileid="${fileId}"]`);
-                if (statusCell && !Utils.domQuery('.open-duplicate-link', '', statusCell)) {
-                    Templates.render('local_deepler/files_open_duplicate_link', {newcmurl: finalRes.newcmurl})
-                        .then((html, js) => {
-                            Templates.appendNodeContents(statusCell, html, js);
-                            return null;
-                        })
-                        .catch(Notification.exception);
-                }
-            }
-
             // Add translation item to accordion
             addTranslationToAccordion(fileId, targetLang, finalRes, statusRes.billedcharacters);
 

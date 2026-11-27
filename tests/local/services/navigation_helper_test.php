@@ -73,6 +73,17 @@ final class navigation_helper_test extends advanced_testcase {
     }
 
     /**
+     * Test get_files_url URL construction.
+     *
+     * @covers \local_deepler\local\services\navigation_helper::get_files_url
+     */
+    public function test_get_files_url(): void {
+        $filesurl = navigation_helper::get_files_url(2);
+        $this->assertStringContainsString('/local/deepler/files.php', $filesurl->get_path());
+        $this->assertEquals(2, $filesurl->get_param('courseid'));
+    }
+
+    /**
      * Test capability check.
      *
      * @covers \local_deepler\local\services\navigation_helper::can_translate_context
@@ -99,6 +110,39 @@ final class navigation_helper_test extends advanced_testcase {
     }
 
     /**
+     * Test files capability check.
+     *
+     * @covers \local_deepler\local\services\navigation_helper::can_translate_files_context
+     */
+    public function test_can_translate_files_context(): void {
+        global $DB;
+
+        set_config('filetranslation', 1, 'local_deepler');
+
+        $course = $this->getDataGenerator()->create_course();
+        $context = context_course::instance($course->id);
+
+        $manager = $this->getDataGenerator()->create_user();
+        $student = $this->getDataGenerator()->create_user();
+
+        $managerrole = $DB->get_record('role', ['shortname' => 'manager']);
+        role_assign($managerrole->id, $manager->id, $context->id);
+
+        // Manager should have capability when enabled.
+        $this->setUser($manager);
+        $this->assertTrue(navigation_helper::can_translate_files_context($context));
+
+        // When disabled via config.
+        set_config('filetranslation', 0, 'local_deepler');
+        $this->assertFalse(navigation_helper::can_translate_files_context($context));
+
+        // Student should not have capability.
+        set_config('filetranslation', 1, 'local_deepler');
+        $this->setUser($student);
+        $this->assertFalse(navigation_helper::can_translate_files_context($context));
+    }
+
+    /**
      * Test extend_settings_navigation for activity/module.
      *
      * @covers \local_deepler\local\services\navigation_helper::extend_settings_navigation
@@ -108,6 +152,7 @@ final class navigation_helper_test extends advanced_testcase {
         global $PAGE, $CFG, $DB;
 
         require_once($CFG->dirroot . '/local/deepler/lib.php');
+        set_config('filetranslation', 1, 'local_deepler');
 
         $course = $this->getDataGenerator()->create_course();
         $page = $this->getDataGenerator()->create_module('page', ['course' => $course->id]);
@@ -136,6 +181,13 @@ final class navigation_helper_test extends advanced_testcase {
         $this->assertEquals($cm->section, $node->action->get_param('section_id'));
         $this->assertEquals($cm->id, $node->action->get_param('activity_id'));
 
+        $filesnode = $settingsnav->find('deepler_activity_files', navigation_node::TYPE_SETTING);
+        $this->assertNotNull($filesnode);
+        $this->assertNotFalse($filesnode);
+        $this->assertInstanceOf(navigation_node::class, $filesnode);
+        $this->assertStringContainsString('/local/deepler/files.php', $filesnode->action->get_path());
+        $this->assertEquals($course->id, $filesnode->action->get_param('courseid'));
+
         // Test without capability (student).
         $student = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
@@ -144,6 +196,7 @@ final class navigation_helper_test extends advanced_testcase {
         $settingsnavstudent = new settings_navigation($PAGE);
         $settingsnavstudent->initialise();
         $this->assertFalse($settingsnavstudent->find('deepler_activity_translate', navigation_node::TYPE_SETTING));
+        $this->assertFalse($settingsnavstudent->find('deepler_activity_files', navigation_node::TYPE_SETTING));
     }
 
     /**
@@ -155,6 +208,7 @@ final class navigation_helper_test extends advanced_testcase {
     public function test_extend_secondary_navigation_section(): void {
         global $PAGE;
 
+        set_config('filetranslation', 1, 'local_deepler');
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course(['numsections' => 2]);
@@ -169,6 +223,7 @@ final class navigation_helper_test extends advanced_testcase {
         $this->assertEquals(CONTEXT_COURSE, $PAGE->context->contextlevel);
         $this->assertEquals($course->id, $PAGE->course->id);
         $this->assertTrue(navigation_helper::can_translate_context($PAGE->context));
+        $this->assertTrue(navigation_helper::can_translate_files_context($PAGE->context));
         $this->assertEquals($section->id, navigation_helper::detect_current_section_id());
 
         $secondaryview = new secondary($PAGE);
@@ -176,7 +231,7 @@ final class navigation_helper_test extends advanced_testcase {
 
         navigation_helper::extend_secondary_navigation($hook);
 
-        $this->assertEquals(1, $secondaryview->children->count());
+        $this->assertEquals(2, $secondaryview->children->count());
         $node = $secondaryview->find('deepler_section_translate', navigation_node::TYPE_CUSTOM);
         $this->assertNotNull($node);
         $this->assertNotFalse($node);
@@ -184,10 +239,17 @@ final class navigation_helper_test extends advanced_testcase {
         $this->assertStringContainsString('/local/deepler/translate.php', $node->action->get_path());
         $this->assertEquals($course->id, $node->action->get_param('courseid'));
         $this->assertEquals($section->id, $node->action->get_param('section_id'));
+
+        $filesnode = $secondaryview->find('deepler_section_files', navigation_node::TYPE_CUSTOM);
+        $this->assertNotNull($filesnode);
+        $this->assertNotFalse($filesnode);
+        $this->assertInstanceOf(navigation_node::class, $filesnode);
+        $this->assertStringContainsString('/local/deepler/files.php', $filesnode->action->get_path());
+        $this->assertEquals($course->id, $filesnode->action->get_param('courseid'));
     }
 
     /**
-     * Test that secondary navigation has only one translate link when settingsnav is also populated.
+     * Test that secondary navigation has only one translate and files link when settingsnav is also populated.
      *
      * @covers \local_deepler\local\services\navigation_helper::extend_secondary_navigation
      * @covers \local_deepler\local\services\navigation_helper::extend_settings_navigation
@@ -196,6 +258,7 @@ final class navigation_helper_test extends advanced_testcase {
         global $PAGE, $CFG;
         require_once($CFG->dirroot . '/local/deepler/lib.php');
 
+        set_config('filetranslation', 1, 'local_deepler');
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course(['numsections' => 2]);
@@ -209,14 +272,19 @@ final class navigation_helper_test extends advanced_testcase {
         $secondaryview = new secondary($PAGE);
         $secondaryview->initialise();
 
-        // Count how many deepler/translate nodes exist in secondary navigation.
+        // Count how many deepler/translate and files nodes exist in secondary navigation.
         $count = 0;
+        $filescount = 0;
         foreach ($secondaryview->children as $child) {
             if ($child->key === 'deepler_section_translate' || $child->key === 'translate') {
                 $count++;
             }
+            if ($child->key === 'deepler_section_files' || $child->key === 'deepler_files') {
+                $filescount++;
+            }
         }
         $this->assertEquals(1, $count);
+        $this->assertEquals(1, $filescount);
     }
 
     /**
@@ -230,6 +298,7 @@ final class navigation_helper_test extends advanced_testcase {
         global $PAGE, $CFG;
 
         require_once($CFG->dirroot . '/local/deepler/lib.php');
+        set_config('filetranslation', 1, 'local_deepler');
 
         $this->setAdminUser();
 
@@ -254,6 +323,14 @@ final class navigation_helper_test extends advanced_testcase {
         $this->assertStringContainsString('/local/deepler/translate.php', $node->action->get_path());
         $this->assertEquals($course->id, $node->action->get_param('courseid'));
         $this->assertEquals($section->id, $node->action->get_param('section_id'));
+
+        $filesnode = $settingsnav->find('deepler_files', navigation_node::TYPE_CUSTOM)
+            ?: $settingsnav->find('deepler_section_files', navigation_node::TYPE_SETTING);
+        $this->assertNotNull($filesnode);
+        $this->assertNotFalse($filesnode);
+        $this->assertInstanceOf(navigation_node::class, $filesnode);
+        $this->assertStringContainsString('/local/deepler/files.php', $filesnode->action->get_path());
+        $this->assertEquals($course->id, $filesnode->action->get_param('courseid'));
     }
 
     /**
@@ -265,6 +342,7 @@ final class navigation_helper_test extends advanced_testcase {
     public function test_extend_navigation_course(): void {
         global $PAGE, $CFG, $DB;
         require_once($CFG->dirroot . '/local/deepler/lib.php');
+        set_config('filetranslation', 1, 'local_deepler');
 
         $course = $this->getDataGenerator()->create_course(['numsections' => 2]);
         $modinfo = get_fast_modinfo($course);
@@ -291,6 +369,13 @@ final class navigation_helper_test extends advanced_testcase {
         $this->assertEquals($course->id, $node->action->get_param('courseid'));
         $this->assertNull($node->action->get_param('section_id'));
 
+        $filesnode = $nav->find('deepler_files', navigation_node::TYPE_CUSTOM);
+        $this->assertNotNull($filesnode);
+        $this->assertNotFalse($filesnode);
+        $this->assertInstanceOf(navigation_node::class, $filesnode);
+        $this->assertStringContainsString('/local/deepler/files.php', $filesnode->action->get_path());
+        $this->assertEquals($course->id, $filesnode->action->get_param('courseid'));
+
         // 2. On section edit page.
         $PAGE->set_url('/course/editsection.php', ['id' => $section->id]);
         $navsection = new navigation_node('root');
@@ -300,5 +385,9 @@ final class navigation_helper_test extends advanced_testcase {
         $this->assertNotNull($nodesection);
         $this->assertEquals($course->id, $nodesection->action->get_param('courseid'));
         $this->assertEquals($section->id, $nodesection->action->get_param('section_id'));
+
+        $filesnodesection = $navsection->find('deepler_files', navigation_node::TYPE_CUSTOM);
+        $this->assertNotNull($filesnodesection);
+        $this->assertEquals($course->id, $filesnodesection->action->get_param('courseid'));
     }
 }

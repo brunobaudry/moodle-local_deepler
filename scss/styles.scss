@@ -261,7 +261,7 @@ $secondary: $gray-400 !default;
 
     [data-status="local_deepler/success-message"] {
         background: var(--bs-teal, var(--mds-bg-feedback-success-default, #{$teal}));
-        color: var(--mds-text-feedback-success, #{$white});
+        color: var(--mds-text-feedback-success, #{$black});
         font-size: 0.6rem;
         padding: 0.25rem 1rem;
         margin-top: 2rem;

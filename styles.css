@@ -182,7 +182,7 @@ along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }
 #page-local-deepler-translate [data-status="local_deepler/success-message"] {
     background: var(--bs-teal, var(--mds-bg-feedback-success-default, #20c997));
-    color: var(--mds-text-feedback-success, #fff);
+    color: var(--mds-text-feedback-success, #000);
     font-size: 0.6rem;
     padding: 0.25rem 1rem;
     margin-top: 2rem;

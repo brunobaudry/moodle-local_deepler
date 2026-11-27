@@ -250,7 +250,7 @@ class multilanger {
             }
         }
         // If source text not found, could be that someone edited it in the mean time, we still save it with the source code.
-        $sourcecode = $sourcecode === '' ? $sourcecode : $realsource;
+        $sourcecode = $realsource === '' ? $sourcecode : $realsource;
         $this->update_or_add_mlang($sourcecode, $text);
     }
 

@@ -88,6 +88,8 @@ class get_translation extends external_api {
                 ? (string)$rowoverrides['glossary_id']
                 : (string)$globalglossaryid;
             unset($rowoverrides['glossary_id']);
+            // Tone/style only applies to rephrasing.
+            unset($rowoverrides['toneorstyle']);
 
             $effectiveoptions = array_merge($globaloptions, $rowoverrides);
             if (!empty($effectiveglossaryid)) {
@@ -150,6 +152,8 @@ class get_translation extends external_api {
         string $glossaryid
     ): array {
 
+        // DeepL's PHP client requests billed characters itself and rejects this legacy option.
+        unset($options['show_billed_characters']);
         $ishtml = ($options['tag_handling'] ?? '') === 'html';
         $texts = array_map(function ($t) {
             return $t['text'];
@@ -306,6 +310,12 @@ class get_translation extends external_api {
                                     'model_type' => new external_value(
                                         PARAM_ALPHANUMEXT,
                                         'DeepL model type',
+                                        VALUE_DEFAULT,
+                                        null
+                                    ),
+                                    'toneorstyle' => new external_value(
+                                        PARAM_RAW,
+                                        'Rephrase only tone or style, ignored for translations',
                                         VALUE_DEFAULT,
                                         null
                                     ),

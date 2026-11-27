@@ -109,21 +109,25 @@
                         <tr class="file-row {{^supported}}table-secondary text-muted{{/supported}}" data-fileid="{{fileid}}" data-cmid="{{cmid}}">
                             <td class="text-center align-middle">
                                 <div class="d-inline-flex align-items-center">
-                                    {{#supported}}
-                                        <button type="button"
-                                                class="btn btn-xs btn-link text-decoration-none me-2 toggle-translations-btn {{^hastranslations}}text-muted
-                                                disabled{{/hastranslations}}"
-                                                aria-expanded="false"
-                                                aria-controls="file_translations_{{fileid}}"
-                                                title="{{str_translations}}">
-                                            <i class="fa fa-chevron-right toggle-icon"></i>
-                                        </button>
-                                        <input type="checkbox" class="file-select-checkbox me-2" data-action="select-file" data-fileid="{{fileid}}" aria-label="{{filename}}">
-                                    {{/supported}}
-                                    {{^supported}}
-                                        <span class="p-0 me-1 text-muted"><i class="fa fa-minus"></i></span>
-                                        <input type="checkbox" disabled aria-label="{{filename}}">
-                                    {{/supported}}
+
+                                        {{#supported}}
+                                            {{#hascompletedduplicate}}
+                                            <button type="button"
+                                                    class="btn btn-xs btn-link text-decoration-none me-2 toggle-translations-btn {{^hastranslations}}text-muted
+                                                    disabled{{/hastranslations}}"
+                                                    aria-expanded="false"
+                                                    aria-controls="file_translations_{{fileid}}"
+                                                    title="{{str_translations}}">
+                                                <i class="fa fa-chevron-right toggle-icon"></i>
+                                            </button>
+                                            {{/hascompletedduplicate}}
+                                            <input type="checkbox" class="file-select-checkbox me-2" data-action="select-file" data-fileid="{{fileid}}" aria-label="{{filename}}">
+                                        {{/supported}}
+                                        {{^supported}}
+                                            <span class="p-0 me-1 text-muted"><i class="fa fa-minus"></i></span>
+                                            <input type="checkbox" disabled aria-label="{{filename}}">
+                                        {{/supported}}
+
                                 </div>
                             </td>
                             <td class="align-middle">
@@ -200,10 +204,6 @@
                                     {{#str}} files:queued, local_deepler {{/str}}
                                 </span>
                                 <span class="status-detail small d-block text-muted mt-1" data-detail-for="{{fileid}}"></span>
-
-                                {{#hascompletedduplicate}}
-                                    {{> local_deepler/files_open_duplicate_link }}
-                                {{/hascompletedduplicate}}
                             </td>
                         </tr>
 

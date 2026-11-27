@@ -33,9 +33,11 @@
     * str_billedchars
     * statusbadge
     * statusstr
+    * validationtable (example only, wraps the row for standalone validation)
 
     Example context (json):
     {
+        "validationtable": true,
         "targetlang": "DE",
         "filename": "document_de.pdf",
         "timecreated": "10 Nov 2026, 14:30",
@@ -45,6 +47,9 @@
         "statusstr": "Completed"
     }
 }}
+{{#validationtable}}<table>
+    <caption>{{#str}}files:translated, local_deepler{{/str}}</caption>
+<tbody>{{/validationtable}}
 <tr class="translation-item bg-light">
     <td></td>
     <td class="align-middle">
@@ -73,3 +78,4 @@
         <span class="small text-muted d-block">{{timecreated}}</span>
     </td>
 </tr>
+{{#validationtable}}</tbody></table>{{/validationtable}}
